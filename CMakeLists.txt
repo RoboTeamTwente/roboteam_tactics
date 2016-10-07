@@ -8,7 +8,11 @@ find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roscpp
   std_msgs
+  actionlib_msgs
+  actionlib
 )
+
+set(CMAKE_CXX_FLAGS "--std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -115,29 +119,16 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
-## Declare a C++ library
-# add_library(roboteam_tactics
-#   src/${PROJECT_NAME}/roboteam_tactics.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(roboteam_tactics ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
-# add_executable(roboteam_tactics_node src/roboteam_tactics_node.cpp)
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(roboteam_tactics_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(roboteam_tactics_node
-#   ${catkin_LIBRARIES}
-# )
+add_executable(brain
+	src/main.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(brain ${catkin_LIBRARIES})
 
 #############
 ## Install ##
