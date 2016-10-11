@@ -14,6 +14,7 @@ void Aggregator::putMsg(int robotID, const roboteam_msgs::SteeringGoal& goal) {
     // TODO: Maybe first aggregate the messages, and send them all out after the *entire* tree has traversed?
     // So instead of sending messages throughout the calculation of the trees, only send the messages after
     // the trees have been visited?
+    printf("Sending new action! \n");
     client->sendGoal(goal);
 }
 
