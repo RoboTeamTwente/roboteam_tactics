@@ -23,7 +23,7 @@ actionlib::SimpleActionClient<roboteam_msgs::SteeringAction>* Aggregator::getCli
 
     clients[robotID] = std::unique_ptr<actionlib::SimpleActionClient<roboteam_msgs::SteeringAction>>(
             new actionlib::SimpleActionClient<roboteam_msgs::SteeringAction>("steering")
-            );
+        );
     return clients[robotID].get();
 }
 

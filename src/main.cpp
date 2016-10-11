@@ -11,6 +11,10 @@
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Aggregator.h"
 
+#include "roboteam_tactics/Skill.h"
+
+namespace rtt {
+
 void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
     LastWorld::set(*msg);
     std::cout << "Received a world.\n";
@@ -23,7 +27,6 @@ void run_ai_cycle() {
 Aggregator aggregator;
 
 int main(int argc, char **argv) {
-
     ros::init(argc, argv, "tactics");
 
     ros::NodeHandle n;
@@ -35,4 +38,10 @@ int main(int argc, char **argv) {
 
         run_ai_cycle();
     }
+}
+
+}
+
+int main(int argc, char **argv) {
+    return rtt::main(argc, argv);
 }
