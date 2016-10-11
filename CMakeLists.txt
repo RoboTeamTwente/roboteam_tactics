@@ -6,6 +6,7 @@ project(roboteam_tactics)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
+  roboteam_utils
   roscpp
   std_msgs
   actionlib_msgs
@@ -129,6 +130,14 @@ add_executable(brain
 )
 add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(brain ${catkin_LIBRARIES})
+
+add_executable(TestSkill
+	src/TestSkill.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(TestSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(TestSkill ${catkin_LIBRARIES})
 
 #############
 ## Install ##
