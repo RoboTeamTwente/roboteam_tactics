@@ -2,6 +2,8 @@
 
 #include "roboteam_msgs/World.h"
 
+namespace rtt {
+
 class LastWorld {
     public:
     static roboteam_msgs::World get();
@@ -10,3 +12,5 @@ class LastWorld {
     private:
     static roboteam_msgs::World lastWorld;
 } ;
+
+}

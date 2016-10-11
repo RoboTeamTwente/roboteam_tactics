@@ -2,6 +2,8 @@
 
 #include "roboteam_tactics/LastWorld.h"
 
+namespace rtt {
+
 roboteam_msgs::World LastWorld::lastWorld;
 
 void LastWorld::set(roboteam_msgs::World world) {
@@ -12,3 +14,4 @@ roboteam_msgs::World LastWorld::get() {
     return LastWorld::lastWorld;
 }
 
+}

@@ -130,6 +130,11 @@ add_executable(brain
 add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(brain ${catkin_LIBRARIES})
 
+add_executable(converter
+	src/treegen/converter.cpp
+	src/treegen/BTBuilder.cpp
+)
+
 #############
 ## Install ##
 #############

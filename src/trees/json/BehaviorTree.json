@@ -1,11 +1,5 @@
-#include "BTBuilder.h"
-#include "json.hpp"
-#include <iostream>
-
-int main(int argc, char** argv) {
-    BTBuilder builder;
-    std::cout << builder.build(R"###({
-    "title": "A Behavior Tree",
+{
+    "title": "BehaviorTree",
     "description": "",
     "root": "87bf7cd5-56a3-4baf-a6c1-6993a9385ec3",
     "display": {
@@ -163,6 +157,4 @@ int main(int argc, char** argv) {
             "category": "action"
         }
     ]
-}
-)###"_json);
 }

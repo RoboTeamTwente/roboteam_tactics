@@ -11,7 +11,7 @@
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Aggregator.h"
 
-#include "roboteam_tactics/Skill.h"
+#include "roboteam_tactics/Parts.h"
 
 namespace rtt {
 

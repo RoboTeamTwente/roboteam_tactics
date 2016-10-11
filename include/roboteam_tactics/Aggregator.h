@@ -7,6 +7,8 @@
 
 #include "roboteam_msgs/SteeringAction.h"
 
+namespace rtt {
+
 class Aggregator {
     public:
         actionlib::SimpleActionClient<roboteam_msgs::SteeringAction>* getClient(int i);
@@ -16,4 +18,6 @@ class Aggregator {
     private:
         std::unordered_map<int, std::unique_ptr<actionlib::SimpleActionClient<roboteam_msgs::SteeringAction>>> clients;
 } ;
+
+}
 

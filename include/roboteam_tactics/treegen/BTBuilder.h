@@ -3,6 +3,8 @@
 #include <map>
 #include <sstream>
 
+namespace rtt {
+
 enum NodeType { SEQUENCE, SELECTOR, DECORATOR, LEAF };
 
 class BTBuilder {
@@ -27,4 +29,6 @@ private:
 
     NodeType determine_type(nlohmann::json);
 };
+
+}
 

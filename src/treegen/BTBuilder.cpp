@@ -6,6 +6,8 @@
 #define INDENT "    "
 #define DINDENT "        "
 
+namespace rtt {
+
 BTBuilder::BTBuilder() {}
 BTBuilder::~BTBuilder() {}
 
@@ -26,7 +28,7 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
-    out << INDENT << "bt::BehaviorTree build_tree() {" << std::endl; 
+    out << INDENT << "bt::BehaviorTree make_" << json["title"].get<std::string>() << "() {" << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto& bb = tree.GetBlackboard();" << std::endl;
 
@@ -122,4 +124,6 @@ NodeType BTBuilder::determine_type(nlohmann::json json) {
         return DECORATOR;
     }
     return LEAF;
+}
+
 }

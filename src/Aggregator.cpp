@@ -6,6 +6,8 @@
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_tactics/Aggregator.h"
 
+namespace rtt {
+
 void Aggregator::putMsg(int robotID, const roboteam_msgs::SteeringGoal& goal) {
     auto client = getClient(robotID);
 
@@ -31,4 +33,6 @@ actionlib::SimpleClientGoalState Aggregator::getState(int robotID) {
     auto client = getClient(robotID);
 
     return client->getState();
+}
+
 }
