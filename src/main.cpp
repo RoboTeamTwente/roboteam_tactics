@@ -38,6 +38,8 @@ int main(int argc, char **argv) {
 
         run_ai_cycle();
     }
+    
+    return 0;
 }
 
 }

@@ -14,6 +14,12 @@ BTBuilder::~BTBuilder() {}
 std::string BTBuilder::build(nlohmann::json json) {
     std::stack<std::string> stack;
     stack.push(json["root"]);
+
+    int ctr = 0;
+    for (auto& element : json["nodes"]) {
+        element["title"] = element["title"].get<std::string>() + "_" + std::to_string(ctr++);
+    }
+    
     while (!stack.empty()) {
         std::string id = stack.top();
         stack.pop();
@@ -30,13 +36,13 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "bt::BehaviorTree make_" << json["title"].get<std::string>() << "() {" << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
-    out << DINDENT << "auto& bb = tree.GetBlackboard();" << std::endl;
+    out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
 
     nlohmann::json root = nodes[json["root"]];
     defines(root);
     build_structure(root);
 
-    out << DINDENT << "tree.SetRoot(" << root["title"] << ");" << std::endl;
+    out << DINDENT << "tree.SetRoot(" << root["title"].get<std::string>() << ");" << std::endl;
     out << DINDENT << "return tree;" << std::endl;
     out << INDENT << "}" << std::endl;
 
@@ -87,7 +93,6 @@ void BTBuilder::defines(nlohmann::json json) {
         defines(nodes[json["child"]]);
         break; }
     case LEAF:
-
         define_nod(json["title"], json["name"]);
         break;
     }
