@@ -1,19 +1,56 @@
 #!/usr/bin/env bash
 
-> allfuncs.cpp
-> allfuncs.h
+# Usage:
+#
+# Command: ./convert.sh
+# Generates the files alltrees.h and alltrees.cpp, containing
+# functions that construct all the behavior trees in the JSON folder.
 
-printf "namespace rtt {\n" >> allfuncs.cpp
-printf "namespace rtt {\n" >> allfuncs.h
+# Destination files
+treeSource="alltrees.cpp"
+treeHeader="alltrees.h"
 
+# Preamble of the source file
+sourcePreamble="
+#include \"roboteam_tactics/allskills.h\"
+#include \"roboteam_tactics/allconditions.h\"
+#include \"roboteam_tactics/alltactics.h\"
+#include \"roboteam_tactics/bt.hpp\"
+"
+
+# Preamble of header file
+headerPreamble="
+#pragma once
+#include \"roboteam_tactics/bt.hpp\"
+"
+
+# Make sure destination files are empty
+> $treeSource
+> $treeHeader
+
+# Append the preambles
+printf "$sourcePreamble" >> $treeSource
+printf "$headerPreamble" >> $treeHeader
+
+# Append namespace specifiers
+printf "namespace rtt {\n" >> $treeSource
+printf "namespace rtt {\n" >> $treeHeader
+
+# Generate declarations and implementations for the behavior trees
+# And append them to the sourc and header files
 for filepath in ./json/*.json; do
+    cat $filepath | ../treegen/converter impl >> $treeSource
+    printf "\n" >> $treeSource
 
-    cat $filepath | ~/catkin_ws/devel/lib/roboteam_tactics/converter impl >> allfuncs.cpp
-    printf "\n" >> allfuncs.cpp
-
-	printf "\t" >> allfuncs.h
-	cat $filepath | ~/catkin_ws/devel/lib/roboteam_tactics/converter decl >> allfuncs.h
+    printf "\t" >> $treeHeader
+    cat $filepath | ../treegen/converter decl >> $treeHeader
 done
 
-printf "}" >> allfuncs.cpp
-printf "}" >> allfuncs.h
+# Closing brackets :D
+printf "}" >> $treeSource
+printf "}" >> $treeHeader
+
+# Copy the header files to place catkin can find it and
+# delete it here.
+cp alltrees.h ../../include/roboteam_tactics/alltrees.h
+rm alltrees.h
