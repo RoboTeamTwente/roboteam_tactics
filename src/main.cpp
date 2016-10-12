@@ -21,12 +21,13 @@ void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
     std::cout << "Received a world.\n";
 }
 
-bt::BehaviorTree strategy = make_BasicStrategy();
+Aggregator aggregator;
+bt::BehaviorTree strategy = make_BasicStrategy(aggregator);
 int ai_count = 0;
 
 void run_ai_cycle() {
     // If there is no tactic, pick one, or:
-    if (!pickedTactic || false) { // Check somehow if the tactic is still applicable
+    if (!pickedTactic || (ai_count % 8 == 0)) { // Check somehow if the tactic is still applicable
         strategy.Update();
 
         // Let tactic distribute roles
@@ -40,9 +41,9 @@ void run_ai_cycle() {
     if (++ai_count == 100) {
         ros::shutdown();
     }
-}
 
-Aggregator aggregator;
+    std::cout << "Finished an AI cycle\n";
+}
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "tactics");

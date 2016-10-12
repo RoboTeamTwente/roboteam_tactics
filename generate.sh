@@ -5,24 +5,31 @@
 # Command: ./generate.sh
 # Should compile json converter if needed, and generate c++ source and header files.
 #
+# DEPRECATED (but can be turned on if needed)
 # Command: ./generate.sh force
 # Force compilation of the json converter, and generate c++ source and header files.
 
-(
-	# Go to src/treefen
-	cd src/treegen
-	# If the converter executable is not there OR there are more than 0 command line arguments
-	if [ ! -f converter ] || [ "$#" -gt 0 ] ; then
-		# Compile the converter
-		g++ BTBuilder.cpp converter.cpp -std=c++11 -o converter -I ../../include
-	fi
-)
+# $1 - the include file
+# $2 - the include pattern
+# $3 - what to call the set variable
+function makeIncludeList {
+    printf "#pragma once\n" > $1
+    for f in $2; do
+        printf "#include \"$f\"\n" >> $1
+    done
 
-(
-	# Run the convert script
-	cd src/trees
-	./convert.sh
-)
+    setFile=$(basename "$1" .h)
+    setFile+="_set.h"
+
+    printf "#include <set>\n" > $setFile
+    printf "const std::set<std::string> $3 = {\n" >> $setFile
+    for f in $2; do
+        hName=$(basename "$f" .h)
+        printf "    \"$hName\",\n" >> $setFile
+    done
+    printf "    \"element to accept the last comma\"\n" >> $setFile
+    printf "};\n" >> $setFile
+}
 
 (
 	cd include/roboteam_tactics
@@ -30,19 +37,25 @@
 	# in case of an empty directory
 	shopt -s nullglob
 
-	# For each include in various categories, generate an include file that includes them all
-	printf "#pragma once\n" > allconditions.h
-	for f in conditions/*.h; do
-	    printf "#include \"$f\"\n" >> allconditions.h
-	done
+	makeIncludeList allconditions.h "conditions/*.h" CONDITIONS
 
-	printf "#pragma once\n" > allskills.h
-	for f in skills/*.h; do
-	    printf "#include \"$f\"\n" >> allskills.h
-	done
+	makeIncludeList allskills.h "skills/*.h" SKILLS
 
-	printf "#pragma once\n" > alltactics.h
-	for f in tactics/*.h; do
-	    printf "#include \"$f\"\n" >> alltactics.h
-	done
+	makeIncludeList alltactics.h "tactics/*.h" TACTICS
+)
+
+(
+	# Go to src/treegen
+	cd src/treegen
+	# If the converter executable is not there OR there are more than 0 command line arguments
+	# if [ ! -f converter ] || [ "$#" -gt 0 ] ; then
+		# Compile the converter
+		g++ BTBuilder.cpp converter.cpp -std=c++11 -o converter -I ../../include
+	# fi
+)
+
+(
+	# Run the convert script
+	cd src/trees
+	./convert.sh
 )

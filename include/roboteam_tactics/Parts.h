@@ -15,7 +15,7 @@ class Skill : public bt::Leaf {
     virtual ~Skill() {}
     
     Aggregator& aggregator;
-    bt::Blackboard::Ptr privateBlackboard = std::make_shared<bt::Blackboard>();
+    bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
 } ;
 
 class Condition : public bt::Leaf {

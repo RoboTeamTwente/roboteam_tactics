@@ -22,6 +22,7 @@ sourcePreamble="
 headerPreamble="
 #pragma once
 #include \"roboteam_tactics/bt.hpp\"
+#include \"roboteam_tactics/Aggregator.h\"
 "
 
 # Make sure destination files are empty

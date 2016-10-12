@@ -3,6 +3,9 @@
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
+#include "roboteam_tactics/allconditions_set.h"
+#include "roboteam_tactics/allskills_set.h"
+#include "roboteam_tactics/alltactics_set.h"
 
 #define INDENT "    "
 #define DINDENT "        "
@@ -37,7 +40,7 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
-    out << INDENT << "bt::BehaviorTree make_" << json["title"].get<std::string>() << "() {" << std::endl; 
+    out << INDENT << "bt::BehaviorTree make_" << json["title"].get<std::string>() << "(Aggregator& agg) {" << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
 
@@ -61,10 +64,19 @@ void BTBuilder::define_sel(std::string name) {
 }
 
 void BTBuilder::define_dec(std::string name, std::string type) {
-    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
+    if (type == "Repeat") {
+        out << DINDENT << "auto " << name << " = std::make_shared<bt::Repeater>();" << std::endl;
+    } else {
+        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
+    }
 }
 void BTBuilder::define_nod(std::string name, std::string type) {
-    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
+    // If it's a skill we need to pass the aggregator
+    if (SKILLS.find(type) != SKILLS.end()) {
+        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(agg, bb);" << std::endl;
+    } else {
+        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
+    }
 }
 
 void BTBuilder::add_to_composite(std::string comp, std::string child) {
@@ -108,7 +120,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_string()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard.SetString(\""
+                    << "->private_blackboard->SetString(\""
                     << property.first
                     << "\", \""
                     << property.second.get<std::string>()
@@ -118,7 +130,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_number()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard.SetDouble(\""
+                    << "->private_blackboard->SetDouble(\""
                     << property.first
                     << "\", "
                     << property.second.get<double>()
@@ -128,7 +140,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_boolean()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard.SetBool(\""
+                    << "->private_blackboard->SetBool(\""
                     << property.first
                     << "\", "
                     << (property.second.get<bool>() ? "true" : "false")
