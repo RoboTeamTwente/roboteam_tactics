@@ -66,8 +66,8 @@ public:
 				return Status::Success;
 			}
 			else {
-				double rotPconstant=2;
-        		double maxrotv=0.4;
+				double rotPconstant=1; // for more speed, upping this constant is not the answer because the robot will cut its rotation short, instead implement a target veloctiy besides a target position
+        		double maxrotv=1;
 				double requiredrotchange=rotDiff*rotPconstant;
 				
 				if(requiredrotchange>maxrotv){

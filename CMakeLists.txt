@@ -59,6 +59,14 @@ add_executable(AimSkill
 add_dependencies(AimSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(AimSkill ${catkin_LIBRARIES})
 
+add_executable(KickSkill
+	src/KickSkill.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(KickSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(KickSkill ${catkin_LIBRARIES})
+
 
 catkin_add_gtest(tactics_test
     test/main.cpp 
