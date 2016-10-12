@@ -125,13 +125,13 @@ void BTBuilder::defines(nlohmann::json jsonData) {
                     << ");\n";
             }
 
-            if (property.second.is_number()) {
+            if (property.second.is_boolean()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
                     << "->private_blackboard.SetBool(\""
                     << property.first
                     << "\", "
-                    << property.second.get<bool>()
+                    << (property.second.get<bool>() ? "true" : "false")
                     << ");\n";
             }
         }
