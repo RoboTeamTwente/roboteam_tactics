@@ -144,6 +144,15 @@ add_executable(converter
 	src/treegen/BTBuilder.cpp
 )
 
+add_executable(AimSkill
+	src/AimSkill.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(AimSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(AimSkill ${catkin_LIBRARIES})
+
+
 #############
 ## Install ##
 #############
