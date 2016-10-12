@@ -49,6 +49,9 @@ class Tactic : public bt::Leaf {
             : Leaf(blackboard)
             {}
     virtual ~Tactic() {}
+
+    virtual distribute_roles() {}
+    virtual update_roles() {}
 } ;
 
 class Strategy : public bt::BehaviorTree {
