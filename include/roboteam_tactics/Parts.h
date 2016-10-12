@@ -15,6 +15,7 @@ class Skill : public bt::Leaf {
     virtual ~Skill() {}
     
     Aggregator& aggregator;
+    bt::Blackboard::Ptr privateBlackboard = std::make_shared<bt::Blackboard>();
 } ;
 
 class Condition : public bt::Leaf {
@@ -26,6 +27,7 @@ class Condition : public bt::Leaf {
     virtual ~Condition() {}
     
     bt::Blackboard::Ptr blackboard;
+    bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
 } ;
 
 class Role : public bt::BehaviorTree {
@@ -50,8 +52,8 @@ class Tactic : public bt::Leaf {
             {}
     virtual ~Tactic() {}
 
-    virtual distribute_roles() {}
-    virtual update_roles() {}
+    virtual void distribute_roles() {}
+    virtual bt::Node::Status update_roles() {}
 } ;
 
 class Strategy : public bt::BehaviorTree {

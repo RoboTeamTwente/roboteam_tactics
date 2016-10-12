@@ -1,0 +1,108 @@
+{
+  "id": "3d56089b-f952-4ba9-8b72-ea637bddc052",
+  "title": "BasicRole",
+  "description": "",
+  "root": "66ed7a84-c3f3-40e5-86c8-1b729d148c01",
+  "properties": {},
+  "nodes": {
+    "66ed7a84-c3f3-40e5-86c8-1b729d148c01": {
+      "id": "66ed7a84-c3f3-40e5-86c8-1b729d148c01",
+      "name": "Repeat",
+      "title": "Repeat",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -336,
+        "y": 0
+      },
+      "child": "fd290f7c-0abf-4267-89dc-96b0d316aa94"
+    },
+    "fd290f7c-0abf-4267-89dc-96b0d316aa94": {
+      "id": "fd290f7c-0abf-4267-89dc-96b0d316aa94",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -168,
+        "y": 0
+      },
+      "children": [
+        "38a35697-d204-4660-86fc-3f9d1d6a9bda",
+        "92e2ce91-a323-4255-8926-ccf8bc42e726"
+      ]
+    },
+    "38a35697-d204-4660-86fc-3f9d1d6a9bda": {
+      "id": "38a35697-d204-4660-86fc-3f9d1d6a9bda",
+      "name": "GoToXY",
+      "title": "GoToXY",
+      "description": "",
+      "properties": {
+        "x": 1,
+        "y": 1
+      },
+      "display": {
+        "x": 36,
+        "y": -96
+      }
+    },
+    "92e2ce91-a323-4255-8926-ccf8bc42e726": {
+      "id": "92e2ce91-a323-4255-8926-ccf8bc42e726",
+      "name": "GoToXY",
+      "title": "GoToXY",
+      "description": "",
+      "properties": {
+        "x": -1,
+        "y": 1
+      },
+      "display": {
+        "x": 36,
+        "y": 84
+      }
+    }
+  },
+  "display": {
+    "camera_x": 1320.5,
+    "camera_y": 501,
+    "camera_z": 1.75,
+    "x": -540,
+    "y": 0
+  },
+  "custom_nodes": [
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToXY",
+      "category": "action",
+      "title": "GoToXY",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}

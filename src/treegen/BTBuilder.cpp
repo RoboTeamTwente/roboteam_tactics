@@ -1,10 +1,13 @@
 #include <stack>
+#include <unordered_map>
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
 
 #define INDENT "    "
 #define DINDENT "        "
+
+using json = nlohmann::json;
 
 namespace rtt {
 
@@ -72,29 +75,66 @@ void BTBuilder::set_decorator_child(std::string decorator, std::string child) {
     out << DINDENT << decorator << "->SetChild(" << child << ");" << std::endl;
 }
 
-void BTBuilder::defines(nlohmann::json json) {
-    NodeType type = determine_type(json);
+void BTBuilder::defines(nlohmann::json jsonData) {
+    NodeType type = determine_type(jsonData);
+
     switch (type) {
     case SELECTOR:
-        define_sel(json["title"]);
-        for (auto child : json["children"]) {
+        define_sel(jsonData["title"]);
+        for (auto child : jsonData["children"]) {
             defines(nodes[child]);
         }
         break;
     case SEQUENCE:
-        define_seq(json["title"]);
-        for (auto child : json["children"]) {
+        define_seq(jsonData["title"]);
+        for (auto child : jsonData["children"]) {
             defines(nodes[child]);
         }
         break;
     case DECORATOR: {
-        define_dec(json["title"], json["name"]);
-        auto child = json["child"];
-        defines(nodes[json["child"]]);
+        define_dec(jsonData["title"], jsonData["name"]);
+        auto child = jsonData["child"];
+        defines(nodes[jsonData["child"]]);
         break; }
     case LEAF:
-        define_nod(json["title"], json["name"]);
+        define_nod(jsonData["title"], jsonData["name"]);
         break;
+    }
+
+    // Add properties to private blackboard if needed
+    std::unordered_map<std::string, json> properties = jsonData["properties"];
+    if (properties.size() > 0) {
+        for (auto property : properties) {
+            if (property.second.is_string()) {
+                out << DINDENT
+                    << jsonData["title"].get<std::string>()
+                    << "->private_blackboard.SetString(\""
+                    << property.first
+                    << "\", \""
+                    << property.second.get<std::string>()
+                    << "\");\n";
+            }
+
+            if (property.second.is_number()) {
+                out << DINDENT
+                    << jsonData["title"].get<std::string>()
+                    << "->private_blackboard.SetDouble(\""
+                    << property.first
+                    << "\", "
+                    << property.second.get<double>()
+                    << ");\n";
+            }
+
+            if (property.second.is_number()) {
+                out << DINDENT
+                    << jsonData["title"].get<std::string>()
+                    << "->private_blackboard.SetBool(\""
+                    << property.first
+                    << "\", "
+                    << property.second.get<bool>()
+                    << ");\n";
+            }
+        }
     }
 }
 
