@@ -11,8 +11,7 @@
 
 namespace rtt {
 
-GoToPos::GoToPos() : Skill{aggregator} {	
-}
+GoToPos::GoToPos(bt::Blackboard::Ptr blackboard) : Skill(blackboard) {}
 
 void GoToPos::Initialize(ros::NodeHandle nh, int robotIDInput) {
 	n = nh;

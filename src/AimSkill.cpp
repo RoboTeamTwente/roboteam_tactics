@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "actionlib/server/simple_action_server.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 
 #include "roboteam_msgs/World.h"
@@ -18,9 +17,7 @@ class AimSkill : public Skill {
 private:
 	roboteam_msgs::SteeringGoal prevgoal;
 public:
-	AimSkill(Aggregator& aggregator) : 
-			Skill{aggregator} {
-	}
+	AimSkill() {}
 	
 	double cleanAngle(double angle){
 		if (angle < M_PI){
@@ -88,7 +85,8 @@ public:
 				
 				if(goal.x != prevgoal.x or goal.y != prevgoal.y or goal.orientation != prevgoal.orientation){
 					prevgoal=goal;
-					aggregator.putMsg(0,goal);
+                    // TODO: Make it work without this
+					// aggregator.putMsg(0,goal);
 				}
 				return Status::Running;
 			}
@@ -106,7 +104,9 @@ public:
 			if(goal.x != prevgoal.x or goal.y != prevgoal.y or goal.orientation != prevgoal.orientation){
 				ROS_INFO("drive to");
 				prevgoal=goal;
-				aggregator.putMsg(0,goal);
+
+                // TODO: Make it work without this
+				// aggregator.putMsg(0,goal);
 			}
 			return Status::Running;
 		}	
@@ -129,8 +129,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
 
-	rtt::Aggregator aggregator;
-	rtt::AimSkill aimSkill(aggregator);
+	// rtt::Aggregator aggregator;
+	rtt::AimSkill aimSkill;
 	while (ros::ok()) {
 		ros::spinOnce();
 		if(aimSkill.Update() != bt::Node::Status::Running){break;}

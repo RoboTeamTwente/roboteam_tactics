@@ -13,7 +13,7 @@ namespace rtt {
 
 class GoToPos : public Skill {
 public:
-    GoToPos();
+    GoToPos(bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize(ros::NodeHandle nh, int robotIDInput);
     void UpdateArgs(double xGoalInput, double yGoalInput, double wGoalInput);
 	Status Update();

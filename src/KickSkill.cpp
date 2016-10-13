@@ -1,7 +1,6 @@
 #include "ros/ros.h"
 #include "actionlib/server/simple_action_server.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 
 #include "roboteam_msgs/World.h"
@@ -18,8 +17,7 @@ class KickSkill : public Skill {
 private:
 	roboteam_msgs::SteeringGoal prevgoal;
 public:
-	KickSkill(Aggregator& aggregator) : 
-			Skill{aggregator} {
+	KickSkill() {
 	}
 	
 	double cleanAngle(double angle){
@@ -67,7 +65,7 @@ public:
 				
 				//if(goal.x != prevgoal.x or goal.y != prevgoal.y or goal.orientation != prevgoal.orientation){
 				//	prevgoal=goal;
-					aggregator.putMsg(0,goal);
+					// aggregator.putMsg(0,goal);
 				//}
 				return Status::Success;
 			}
@@ -96,8 +94,8 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
 
-	rtt::Aggregator aggregator;
-	rtt::KickSkill kickSkill(aggregator);
+	// rtt::Aggregator aggregator;
+	rtt::KickSkill kickSkill;
 	while (ros::ok()) {
 		ros::spinOnce();
 		if(kickSkill.Update() != bt::Node::Status::Running){break;}

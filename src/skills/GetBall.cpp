@@ -27,12 +27,11 @@ private:
 	GoToPos goToPos;
 public:
 
-	TestSkill(ros::NodeHandle nh) : 
-			Skill{aggregator} {	
-				n = nh;
-				goToPos.Initialize(n, 0);
-				pubTestSkill = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-				ROS_INFO("TestSkill constructor");
+	TestSkill(ros::NodeHandle nh) {	
+        n = nh;
+        goToPos.Initialize(n, 0);
+        pubTestSkill = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        ROS_INFO("TestSkill constructor");
 	}
 
 	Status Update (){

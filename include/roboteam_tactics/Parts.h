@@ -8,9 +8,8 @@ namespace rtt {
 class Skill : public bt::Leaf {
     public:
 
-    Skill(Aggregator& aggregator, bt::Blackboard::Ptr blackboard = nullptr)
+    Skill(bt::Blackboard::Ptr blackboard = nullptr)
             : Leaf(blackboard)
-            , aggregator{aggregator}
             {}
     virtual ~Skill() {}
 
@@ -18,7 +17,6 @@ class Skill : public bt::Leaf {
         return Status::Invalid;
     }
     
-    Aggregator& aggregator;
     bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
 } ;
 

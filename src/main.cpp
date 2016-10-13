@@ -21,8 +21,7 @@ void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
     std::cout << "Received a world.\n";
 }
 
-Aggregator aggregator;
-bt::BehaviorTree strategy = make_BasicStrategy(aggregator);
+bt::BehaviorTree strategy = make_BasicStrategy();
 int ai_count = 0;
 
 void run_ai_cycle() {
