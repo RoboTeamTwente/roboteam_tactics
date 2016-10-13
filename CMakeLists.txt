@@ -47,6 +47,7 @@ target_link_libraries(brain ${catkin_LIBRARIES})
 
 add_executable(TestSkill
 	src/TestSkill.cpp
+    src/GoToPos.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
@@ -68,6 +69,23 @@ add_executable(KickSkill
 )
 add_dependencies(KickSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkill ${catkin_LIBRARIES})
+
+add_executable(GoToPosTest
+	src/GoToPosTest.cpp
+    src/GoToPos.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(GoToPosTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(GoToPosTest ${catkin_LIBRARIES})
+
+#add_executable(GoToPos
+#	src/GoToPos.cpp
+#    src/Aggregator.cpp
+#    src/LastWorld.cpp
+#)
+#add_dependencies(GoToPos ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(GoToPos ${catkin_LIBRARIES})
 
 
 catkin_add_gtest(tactics_test
