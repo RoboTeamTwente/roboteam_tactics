@@ -134,6 +134,16 @@ add_executable(KickSkill
 add_dependencies(KickSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkill ${catkin_LIBRARIES})
 
+
+add_executable(RotpointTest
+	src/skills/tests/RotpointTest.cpp
+	src/skills/RotpointSkill.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(RotpointTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RotpointTest ${catkin_LIBRARIES})
+
 add_executable(GoToPosTest
 	src/skills/tests/GoToPosTest.cpp
     src/skills/GoToPos.cpp
