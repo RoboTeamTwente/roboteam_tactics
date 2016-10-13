@@ -1,23 +1,28 @@
 #include "ros/ros.h"
 
+#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_msgs/World.h"
 
 bool success;
 
-void msgCallBackTestSkill(const roboteam_msgs::WorldConstPtr& world, rtt::TestSkill* testSkill) {
+void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall* getBall) {
 	rtt::LastWorld::set(*world);
-	if (testSkill->Update() == bt::Node::Status::Success) {
+	if (getBall->Update() == bt::Node::Status::Success) {
 		success = true;
 	}
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "TestSkill");
+	ros::init(argc, argv, "GetBall");
 	ros::NodeHandle n;
-	rtt::TestSkill testSkill(n);
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackTestSkill, _1, &testSkill));
-	// ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBackTestSkill);
-	// <roboteam_msgs::World>
+	rtt::GetBall getBall(n);
+	
+	int robotID = 0;
+
+	getBall.UpdateArgs(robotID);
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall));
 
 	while (ros::ok()) {
 		ros::spinOnce();
