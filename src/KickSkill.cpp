@@ -17,8 +17,8 @@ class KickSkill : public Skill {
 private:
 	roboteam_msgs::SteeringGoal prevgoal;
 public:
-	KickSkill() {
-	}
+	KickSkill(ros::NodeHandle n, bt::Blackboard::Ptr blackboard = nullptr)
+            : Skill(n, blackboard) { }
 	
 	double cleanAngle(double angle){
 		if (angle < M_PI){
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
 
 	// rtt::Aggregator aggregator;
-	rtt::KickSkill kickSkill;
+	rtt::KickSkill kickSkill(n);
 	while (ros::ok()) {
 		ros::spinOnce();
 		if(kickSkill.Update() != bt::Node::Status::Running){break;}

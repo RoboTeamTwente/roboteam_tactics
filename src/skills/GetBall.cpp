@@ -17,9 +17,10 @@
 
 namespace rtt {
 
-	GetBall::GetBall(ros::NodeHandle nh) {
-        n = nh;
-        goToPos.Initialize(n, 0);
+	GetBall::GetBall(ros::NodeHandle n, bt::Blackboard::Ptr blackboard)
+            : Skill(n, blackboard)
+            , goToPos(n, blackboard) {
+        goToPos.Initialize(0);
         pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
         ROS_INFO("GetBall constructor");
 	}

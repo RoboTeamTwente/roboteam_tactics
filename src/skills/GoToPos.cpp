@@ -11,15 +11,15 @@
 
 namespace rtt {
 
-GoToPos::GoToPos(bt::Blackboard::Ptr blackboard) : Skill(blackboard) {}
+GoToPos::GoToPos(ros::NodeHandle n, bt::Blackboard::Ptr blackboard)
+        : Skill(n, blackboard) {}
 
-void GoToPos::Initialize(ros::NodeHandle nh, int robotIDInput) {
-	n = nh;
+void GoToPos::Initialize(int robotIDInput) {
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 	robotID = robotIDInput;
 }
 
-void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput){
+void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput) {
 	xGoal = xGoalInput;
 	yGoal = yGoalInput;
 	wGoal = wGoalInput;
@@ -80,7 +80,6 @@ bt::Node::Status GoToPos::Update (){
     
     prevWorld = world;
     if (posError.length() < 0.01) {
-
     	// Stop the robot and send one final command
     	roboteam_msgs::RobotCommand command;
         command.id = robotID;

@@ -21,7 +21,7 @@ void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
     std::cout << "Received a world.\n";
 }
 
-bt::BehaviorTree strategy = make_BasicStrategy();
+bt::BehaviorTree strategy;
 int ai_count = 0;
 
 void run_ai_cycle() {
@@ -48,6 +48,8 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "tactics");
 
     ros::NodeHandle n;
+
+    strategy = make_BasicStrategy(n);
 
     ros::Subscriber sub = n.subscribe("world_state", 1, world_state_callback);
 

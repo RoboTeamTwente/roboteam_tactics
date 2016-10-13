@@ -40,7 +40,10 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
-    out << INDENT << "bt::BehaviorTree make_" << json["title"].get<std::string>() << "() {" << std::endl; 
+    out << INDENT << "bt::BehaviorTree make_"
+        << json["title"].get<std::string>()
+        << "(ros::NodeHandle n) {" 
+        << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
 
@@ -71,12 +74,12 @@ void BTBuilder::define_dec(std::string name, std::string type) {
     }
 }
 void BTBuilder::define_nod(std::string name, std::string type) {
-    // If it's a skill we need to pass the aggregator
-    // if (SKILLS.find(type) != SKILLS.end()) {
-        // out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
-    // } else {
+    // If it's a skill we need to pass the node handle
+    if (SKILLS.find(type) != SKILLS.end()) {
+        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(n, bb);" << std::endl;
+    } else {
         out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
-    // }
+    }
 }
 
 void BTBuilder::add_to_composite(std::string comp, std::string child) {

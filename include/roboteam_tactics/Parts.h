@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ros/ros.h"
+
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/Aggregator.h"
 
@@ -8,8 +10,9 @@ namespace rtt {
 class Skill : public bt::Leaf {
     public:
 
-    Skill(bt::Blackboard::Ptr blackboard = nullptr)
+    Skill(ros::NodeHandle n, bt::Blackboard::Ptr blackboard = nullptr)
             : Leaf(blackboard)
+            , n{n}
             {}
     virtual ~Skill() {}
 
@@ -18,6 +21,7 @@ class Skill : public bt::Leaf {
     }
     
     bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
+    ros::NodeHandle n;
 } ;
 
 class Condition : public bt::Leaf {
