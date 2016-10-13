@@ -40,8 +40,6 @@ function makeIncludeList {
 	# in case of an empty directory
 	shopt -s nullglob
 
-    mkdir generated
-
 	makeIncludeList allconditions.h "conditions/*.h" CONDITIONS generated
 
 	makeIncludeList allskills.h "skills/*.h" SKILLS generated
