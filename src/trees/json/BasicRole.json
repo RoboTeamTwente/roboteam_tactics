@@ -22,12 +22,11 @@
     },
     "38a35697-d204-4660-86fc-3f9d1d6a9bda": {
       "id": "38a35697-d204-4660-86fc-3f9d1d6a9bda",
-      "name": "GoToXY",
-      "title": "GoToXY",
+      "name": "GoToPos",
+      "title": "GoToPos_second",
       "description": "",
       "properties": {
-        "x": 1,
-        "y": 1
+
       },
       "display": {
         "x": 36,
@@ -36,12 +35,11 @@
     },
     "92e2ce91-a323-4255-8926-ccf8bc42e726": {
       "id": "92e2ce91-a323-4255-8926-ccf8bc42e726",
-      "name": "GoToXY",
-      "title": "GoToXY",
+      "name": "GoToPos",
+      "title": "GoToPos_first",
       "description": "",
       "properties": {
-        "x": -1,
-        "y": 1
+
       },
       "display": {
         "x": 36,
@@ -91,16 +89,16 @@
       "properties": {}
     },
     {
-      "name": "GoToXY",
-      "category": "action",
-      "title": "GoToXY",
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
       "description": null,
       "properties": {}
     },
     {
-      "name": "Repeat",
-      "category": "decorator",
-      "title": "Repeat",
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
       "description": null,
       "properties": {}
     }
