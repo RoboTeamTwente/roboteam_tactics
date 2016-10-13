@@ -109,14 +109,14 @@ file(GLOB GENERATED_FILES
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_FILES})
 # End of hooks
 
-add_executable(TestSkill
-	src/TestSkill.cpp
-    src/GoToPos.cpp
-    src/Aggregator.cpp
-    src/LastWorld.cpp
-)
-add_dependencies(TestSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(TestSkill ${catkin_LIBRARIES})
+#add_executable(GetBall
+#	src/skills/GetBall.cpp
+#    src/skills/GoToPos.cpp
+#    src/Aggregator.cpp
+#    src/LastWorld.cpp
+#)
+#add_dependencies(GetBall ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(GetBall ${catkin_LIBRARIES})
 
 add_executable(AimSkill
 	src/AimSkill.cpp
@@ -135,21 +135,13 @@ add_dependencies(KickSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 target_link_libraries(KickSkill ${catkin_LIBRARIES})
 
 add_executable(GoToPosTest
-	src/GoToPosTest.cpp
-    src/GoToPos.cpp
+	src/skills/tests/GoToPosTest.cpp
+    src/skills/GoToPos.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
 add_dependencies(GoToPosTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(GoToPosTest ${catkin_LIBRARIES})
-
-#add_executable(GoToPos
-#	src/GoToPos.cpp
-#    src/Aggregator.cpp
-#    src/LastWorld.cpp
-#)
-#add_dependencies(GoToPos ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(GoToPos ${catkin_LIBRARIES})
 
 
 catkin_add_gtest(tactics_test
