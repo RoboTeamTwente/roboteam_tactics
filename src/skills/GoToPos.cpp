@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/GoToPos.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
