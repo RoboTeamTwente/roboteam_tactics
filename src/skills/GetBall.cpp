@@ -5,6 +5,7 @@
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/GetBall.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -16,32 +17,25 @@
 
 namespace rtt {
 
-class TestSkill : public Skill {
-
-private: 
-	roboteam_utils::Vector2 prevTargetPos;
-	double prevTargetAngle;
-	roboteam_msgs::RobotCommand prevCommand;
-	ros::NodeHandle n;
-	ros::Publisher pubTestSkill;
-	GoToPos goToPos;
-public:
-
-	TestSkill(ros::NodeHandle nh) {	
+	GetBall::GetBall(ros::NodeHandle nh) {
         n = nh;
         goToPos.Initialize(n, 0);
-        pubTestSkill = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-        ROS_INFO("TestSkill constructor");
+        pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        ROS_INFO("GetBall constructor");
 	}
 
-	Status Update (){
+	void GetBall::UpdateArgs(int robotIDInput) {
+		robotID = robotIDInput;
+	}
+
+	bt::Node::Status GetBall::Update (){
 		// ROS_INFO("update");
 		roboteam_msgs::World world = LastWorld::get();
 		while (world.robots_yellow.size() == 0) {
 			return Status::Running;
 		}
 		roboteam_msgs::WorldBall ball = world.ball;
-		roboteam_msgs::WorldRobot robot = world.robots_yellow.at(0);
+		roboteam_msgs::WorldRobot robot = world.robots_yellow.at(robotID);
 
 		roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 		roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
@@ -64,7 +58,7 @@ public:
 			command.y_vel = 0.0;
 			command.w_vel = 0.0;
 			command.dribbler = true;
-			pubTestSkill.publish(command);
+			pubGetBall.publish(command);
 			ros::spinOnce();
 			return Status::Success;
 		} else {
@@ -78,35 +72,7 @@ public:
 			prevTargetAngle = targetAngle;
 			return Status::Running;
 		}
-	}
+	// }
 };
 
 } // rtt
-
-// bool success;
-
-// void msgCallBackTestSkill(const roboteam_msgs::WorldConstPtr& world, rtt::TestSkill* testSkill) {
-// 	rtt::LastWorld::set(*world);
-// 	if (testSkill->Update() == bt::Node::Status::Success) {
-// 		success = true;
-// 	}
-// }
-
-// int main(int argc, char **argv) {
-// 	ros::init(argc, argv, "TestSkill");
-// 	ros::NodeHandle n;
-// 	rtt::TestSkill testSkill(n);
-// 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackTestSkill, _1, &testSkill));
-// 	// ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBackTestSkill);
-// 	// <roboteam_msgs::World>
-
-// 	while (ros::ok()) {
-// 		ros::spinOnce();
-// 		if (success) {
-// 			break;
-// 		}
-// 	}
-// 	ROS_INFO("Skill completed");
-
-// 	return 0;
-// }
