@@ -67,6 +67,14 @@ add_executable(KickSkill
 add_dependencies(KickSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkill ${catkin_LIBRARIES})
 
+add_executable(RotpointSkill
+	src/RotpointSkill.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(RotpointSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RotpointSkill ${catkin_LIBRARIES})
+
 
 catkin_add_gtest(tactics_test
     test/main.cpp 
