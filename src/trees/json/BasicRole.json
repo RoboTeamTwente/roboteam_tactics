@@ -2,21 +2,9 @@
   "id": "3d56089b-f952-4ba9-8b72-ea637bddc052",
   "title": "BasicRole",
   "description": "",
-  "root": "66ed7a84-c3f3-40e5-86c8-1b729d148c01",
+  "root": "3428e814-652a-40ba-a44d-db9a7918d12f",
   "properties": {},
   "nodes": {
-    "66ed7a84-c3f3-40e5-86c8-1b729d148c01": {
-      "id": "66ed7a84-c3f3-40e5-86c8-1b729d148c01",
-      "name": "Repeat",
-      "title": "Repeat",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": -336,
-        "y": 0
-      },
-      "child": "fd290f7c-0abf-4267-89dc-96b0d316aa94"
-    },
     "fd290f7c-0abf-4267-89dc-96b0d316aa94": {
       "id": "fd290f7c-0abf-4267-89dc-96b0d316aa94",
       "name": "Sequence",
@@ -59,11 +47,23 @@
         "x": 36,
         "y": 84
       }
+    },
+    "3428e814-652a-40ba-a44d-db9a7918d12f": {
+      "id": "3428e814-652a-40ba-a44d-db9a7918d12f",
+      "name": "Repeat",
+      "title": "Repeat",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -348,
+        "y": 0
+      },
+      "child": "fd290f7c-0abf-4267-89dc-96b0d316aa94"
     }
   },
   "display": {
-    "camera_x": 1320.5,
-    "camera_y": 501,
+    "camera_x": 1273.5,
+    "camera_y": 524,
     "camera_z": 1.75,
     "x": -540,
     "y": 0

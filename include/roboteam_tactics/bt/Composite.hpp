@@ -16,7 +16,7 @@ public:
     
 protected:
     Nodes children;
-    int index = 0;
+    size_t index = 0;
 };
 
 }

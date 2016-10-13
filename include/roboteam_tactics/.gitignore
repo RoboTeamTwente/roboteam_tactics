@@ -2,3 +2,7 @@ alltrees.h
 allskills.h
 allconditions.h
 alltactics.h
+
+allskills_set.h
+allconditions_set.h
+alltactics_set.h

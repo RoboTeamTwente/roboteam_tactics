@@ -13,9 +13,13 @@ class Skill : public bt::Leaf {
             , aggregator{aggregator}
             {}
     virtual ~Skill() {}
+
+    virtual Status Update() {
+        return Status::Invalid;
+    }
     
     Aggregator& aggregator;
-    bt::Blackboard::Ptr privateBlackboard = std::make_shared<bt::Blackboard>();
+    bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
 } ;
 
 class Condition : public bt::Leaf {
@@ -25,6 +29,10 @@ class Condition : public bt::Leaf {
             : Leaf(blackboard)
             {}
     virtual ~Condition() {}
+
+    virtual Status Update() {
+        return Status::Invalid;
+    }
     
     bt::Blackboard::Ptr blackboard;
     bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
@@ -41,6 +49,10 @@ class Role : public bt::BehaviorTree {
     }
     virtual ~Role() {}
 
+    virtual Status Update() {
+        return Status::Invalid;
+    }
+
     Aggregator& aggregator;
     int robotId;
 } ;
@@ -53,7 +65,9 @@ class Tactic : public bt::Leaf {
     virtual ~Tactic() {}
 
     virtual void distribute_roles() {}
-    virtual bt::Node::Status update_roles() {}
+    virtual bt::Node::Status update_roles() {
+        return bt::Node::Status::Invalid;
+    }
 } ;
 
 class Strategy : public bt::BehaviorTree {
@@ -61,6 +75,9 @@ class Strategy : public bt::BehaviorTree {
     Strategy() {}
     virtual ~Strategy() {}
 
+    virtual Status Update() {
+        return Status::Invalid;
+    }
 } ;
 
 }

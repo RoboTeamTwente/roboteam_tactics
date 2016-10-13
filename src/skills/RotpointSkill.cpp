@@ -3,6 +3,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/skills/RotpointSkill.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -15,22 +16,12 @@
 	
 namespace rtt {
 
-class RotpointSkill : public Skill {
 
-private:
-	int prevworldseq;
-	bool firstworld=true;
-	int robotID;
-	double targetAngle;
-	double rotw;
 	
-public:
-	ros::Publisher pub;
-	RotpointSkill(Aggregator& aggregator) : 
-			Skill{aggregator} {
+	RotpointSkill::RotpointSkill(bt::Blackboard::Ptr blackboard):Skill(aggregator,blackboard){
 	}
 	
-	double cleanAngle(double angle){
+	double RotpointSkill::cleanAngle(double angle){
 		if (angle < M_PI){
 			return fmod(angle-M_PI, (2*M_PI))+M_PI;
 		}
@@ -44,7 +35,7 @@ public:
 	}
 	
 	
-	roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
+	roboteam_utils::Vector2 RotpointSkill::worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
         roboteam_utils::Vector2 robotRequiredv;
         
         robotRequiredv.x=requiredv.x*cos(-rotation)-requiredv.y*sin(-rotation);
@@ -53,14 +44,14 @@ public:
 		return robotRequiredv;
     }
     
-    void inputArgs(ros::Publisher pub, int robotID, double targetAngle, double w){
+    void RotpointSkill::updateArgs(ros::Publisher pub, int robotID, double targetAngle, double w){
     	this->pub=pub;
     	this->robotID=robotID;
     	this->targetAngle=targetAngle;
     	this->rotw=w;
     }
     
-	Status Update (){
+	bt::Node::Status RotpointSkill::Update (){
 		roboteam_msgs::World world = LastWorld::get();		
 		roboteam_msgs::WorldBall ball = world.ball;
 
@@ -178,33 +169,7 @@ public:
 		
 		
 	}
-};
 
 } // rtt
 
-void msgCallBack(const roboteam_msgs::World world) {
-	rtt::LastWorld::set(world);
-	
-}
 
-int main(int argc, char **argv) {
-	ros::init(argc, argv, "RotpointSkill");
-	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
-
-	rtt::Aggregator aggregator;
-	rtt::RotpointSkill rotpointSkill(aggregator);
-	ros::Publisher pub=n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-	// TODO: advertising on publisher is slow	
-
-	while(pub.getNumSubscribers() < 1){sleep(0.1);}
-
-	rotpointSkill.inputArgs(pub,0,2.1,2.0);
-	while (ros::ok()) {
-		ros::spinOnce();
-		if(rotpointSkill.Update() != bt::Node::Status::Running){} // break; breaks the code if only one message is sent
-		
-	}
-	ROS_INFO("Skill completed");
-	return 0;
-}
