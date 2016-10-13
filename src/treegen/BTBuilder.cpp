@@ -3,9 +3,9 @@
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
-#include "roboteam_tactics/allconditions_set.h"
-#include "roboteam_tactics/allskills_set.h"
-#include "roboteam_tactics/alltactics_set.h"
+#include "roboteam_tactics/generated/allconditions_set.h"
+#include "roboteam_tactics/generated/allskills_set.h"
+#include "roboteam_tactics/generated/alltactics_set.h"
 
 #define INDENT "    "
 #define DINDENT "        "
