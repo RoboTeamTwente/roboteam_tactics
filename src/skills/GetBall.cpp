@@ -17,18 +17,6 @@
 
 namespace rtt {
 
-// class GetBall : public Skill {
-
-// private: 
-// 	roboteam_utils::Vector2 prevTargetPos;
-// 	double prevTargetAngle;
-// 	roboteam_msgs::RobotCommand prevCommand;
-// 	ros::NodeHandle n;
-// 	ros::Publisher pubGetBall;
-// 	GoToPos goToPos;
-// 	int robotID;
-// public:
-
 	GetBall::GetBall(ros::NodeHandle nh) : 
 			Skill{aggregator} {	
 				n = nh;
@@ -58,12 +46,6 @@ namespace rtt {
 		roboteam_utils::Vector2 targetPos = ballPos - posDiffNorm.scale(0.09);
 		double targetAngle = posDiff.angle();
 
-		// roboteam_msgs::SteeringGoal goal;
-		// goal.x = targetPos.x;
-		// goal.y = targetPos.y;
-		// goal.orientation = targetAngle;
-		// ROS_INFO_STREAM(posDiff.length());
-
 		if (posDiff.length() < 0.105) {
 			ROS_INFO("Target position reached, starting dribbler...");
 			roboteam_msgs::RobotCommand command;
@@ -89,31 +71,3 @@ namespace rtt {
 };
 
 } // rtt
-
-// bool success;
-
-// void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall* GetBall) {
-// 	rtt::LastWorld::set(*world);
-// 	if (GetBall->Update() == bt::Node::Status::Success) {
-// 		success = true;
-// 	}
-// }
-
-// int main(int argc, char **argv) {
-// 	ros::init(argc, argv, "GetBall");
-// 	ros::NodeHandle n;
-// 	rtt::GetBall GetBall(n);
-// 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &GetBall));
-// 	// ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBackGetBall);
-// 	// <roboteam_msgs::World>
-
-// 	while (ros::ok()) {
-// 		ros::spinOnce();
-// 		if (success) {
-// 			break;
-// 		}
-// 	}
-// 	ROS_INFO("Skill completed");
-
-// 	return 0;
-// }

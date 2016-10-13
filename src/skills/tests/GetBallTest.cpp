@@ -15,7 +15,7 @@ void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall*
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "GetBall");
+	ros::init(argc, argv, "GetBallTest");
 	ros::NodeHandle n;
 	rtt::GetBall getBall(n);
 	
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-	ROS_INFO("Skill completed");
+	ROS_INFO("GetBall Test completed");
 
 	return 0;
 }
