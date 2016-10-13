@@ -57,7 +57,9 @@ bt::Node::Status KickSkill::Update() {
 			ROS_INFO("Kicking the ball");
 			roboteam_msgs::RobotCommand command;
 			command.dribbler = false;
+			command.kicker = true;
 			command.kicker_forced = true;
+			command.kicker_vel = 2;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
 			command.w_vel = 0.0;
