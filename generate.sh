@@ -9,6 +9,8 @@
 # Command: ./generate.sh force
 # Force compilation of the json converter, and generate c++ source and header files.
 
+echo "*** Converting & generating c++ source files ***"
+
 # $1 - the include file
 # $2 - the include pattern
 # $3 - what to call the set variable
@@ -50,7 +52,8 @@ function makeIncludeList {
 	# If the converter executable is not there OR there are more than 0 command line arguments
 	# if [ ! -f converter ] || [ "$#" -gt 0 ] ; then
 		# Compile the converter
-		g++ BTBuilder.cpp converter.cpp -std=c++11 -o converter -I ../../include
+		# g++ BTBuilder.cpp converter.cpp -std=c++11 -o converter -I ../../include
+        make
 	# fi
 )
 

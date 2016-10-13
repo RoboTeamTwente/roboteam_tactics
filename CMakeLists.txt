@@ -33,7 +33,7 @@ MESSAGE(${TACTICS_SKILLS_SOURCES})
 MESSAGE(${TACTICS_TACTICS_SOURCES})
 
 add_executable(brain
-	src/main.cpp
+    src/main.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
     src/PickedTactic.cpp
@@ -42,8 +42,40 @@ add_executable(brain
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
 )
-add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json)
 target_link_libraries(brain ${catkin_LIBRARIES})
+
+#### Stupid stuff to get the json files to be converted ####
+# Custom target will always cause its dependencies to be evaluated and is
+# run by default
+add_custom_target(dummy_target ALL
+    DEPENDS
+        generate_json
+    )
+
+# custom_output will always be rebuilt because it depends on always_rebuild
+add_custom_command(
+    OUTPUT generate_json
+    COMMAND ${PROJECT_SOURCE_DIR}/generate.sh
+    DEPENDS
+        always_rebuild
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+
+# Dummy output which is never actually produced. Anything that depends on
+# this will always be rebuilt.
+add_custom_command(
+    OUTPUT always_rebuild
+    COMMAND cmake -E echo
+    )
+#### End of stupid stuff ####
+
+#add_custom_command(
+    #OUTPUT 
+    #PRE_BUILD
+    #COMMAND ./generate.sh
+    #WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    #)
 
 add_executable(TestSkill
 	src/TestSkill.cpp
