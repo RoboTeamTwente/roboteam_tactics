@@ -10,7 +10,12 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
 )
 
-set(CMAKE_CXX_FLAGS "--std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "\
+--std=c++11 ${CMAKE_CXX_FLAGS} \
+-Wall \
+-Wno-unused-function \
+-Wsign-compare \
+")
 
 catkin_package(
 #  INCLUDE_DIRS include
