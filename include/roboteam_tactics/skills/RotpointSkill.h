@@ -1,8 +1,10 @@
 #pragma once
+#include <cstdint>
+
 #include "ros/ros.h"
+
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
@@ -22,7 +24,7 @@ public:
     void updateArgs(ros::Publisher pub, int robotID, double targetAngle, double w);
     Status Update();
 private:
-	int prevworldseq;
+	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
 	double targetAngle;

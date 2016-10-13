@@ -72,94 +72,94 @@ namespace rtt {
 		roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 		roboteam_utils::Vector2 posDiff = ballPos-robotPos;
 		
-		
+		double rotDiff=-targetAngle+robot.w;
+		rotDiff=cleanAngle(rotDiff);
+				
 		if (posDiff.length() < 0.105) { // got ball
-			//if (posDiff.angle() < 0.05 and posDiff.angle() > -0.05){ // correct orientation
+			if (rotDiff < 0.05 and rotDiff > -0.05){ // correct orientation
+				ROS_INFO("finished");
+				return Status::Success;
+			}
 			
 			
-				// initially assume facing towards center and rotate around ball
-				roboteam_utils::Vector2 center;
-				center.x=ballPos.x;
-				center.y=ballPos.y;
-				// TODO: this will break in real world because exact distance to ball is not known
-				double radius=0.102; 
+			
+			// initially assume facing towards center and rotate around ball
+			roboteam_utils::Vector2 center;
+			center.x=ballPos.x;
+			center.y=ballPos.y;
+			// TODO: this will break in real world because exact distance to ball is not known
+			double radius=0.102; 
+	
+			// velocity in towards and away from ball
+			double Pconstant=3;
+			double maxv=0.4;
+			double scalefactor=(1 - radius/posDiff.length());
+			roboteam_utils::Vector2 requiredv=posDiff.scale(scalefactor)*Pconstant;
+			
+			roboteam_utils::Vector2 robotrequiredv=worldToRobotFrame(requiredv, robot.w);
+							
+			if(robotrequiredv.x > maxv){
+				robotrequiredv.x=robotrequiredv.x/requiredv.length()*maxv;
+			}
+			
+			// velocity around ball
+			Pconstant=2;
+			
+			
+			double requiredrotv=rotDiff*Pconstant;
+			if(requiredrotv > rotw){
+				requiredrotv=rotw;
+			}
+			
+			robotrequiredv.y=requiredrotv*radius;
+			if(robotrequiredv.y > maxv){
+				robotrequiredv.y=robotrequiredv.y/requiredv.length()*maxv;
+			}
+			
+			
+			// rotation controller
+			double rotPconstant=6;
+			double maxrotv=3.0;
+			double estimateddelay=1;
+			
+			
+			double requiredrot=posDiff.angle()-estimateddelay*robotrequiredv.y;
+			double currentrot=robot.w;
+			
+			double rotdiff=cleanAngle(requiredrot-currentrot);
+		   	        
+			if (rotdiff > M_PI){rotdiff=M_PI-rotdiff;}
+			
+			requiredrotv=rotdiff*rotPconstant;
+			
+			if(requiredrotv>maxrotv){
+				requiredrotv=maxrotv;
+			}
+			else if(requiredrotv<-maxrotv){
+				requiredrotv=-maxrotv;
+			}
+			
+					
+			// send command
+			roboteam_msgs::RobotCommand cmd;
+			cmd.id = robotID;
+			cmd.active = true;
+			cmd.x_vel = robotrequiredv.x;
+			cmd.y_vel = robotrequiredv.y;
+			cmd.w_vel = requiredrotv;
+	
+			cmd.dribbler=true;
+			cmd.kicker=false;
+			cmd.kicker_vel=0.0;
+			cmd.kicker_forced=false;
+			cmd.chipper=false;
+			cmd.chipper_vel=0.0;
+			cmd.chipper_forced=false;
 		
-				// velocity in towards and away from ball
-				double Pconstant=3;
-				double maxv=0.4;
-				double scalefactor=(1 - radius/posDiff.length());
-				roboteam_utils::Vector2 requiredv=posDiff.scale(scalefactor)*Pconstant;
-				
-				roboteam_utils::Vector2 robotrequiredv=worldToRobotFrame(requiredv, robot.w);
-								
-				if(robotrequiredv.x > maxv){
-					robotrequiredv.x=robotrequiredv.x/requiredv.length()*maxv;
-				}
-				
-				// velocity around ball
-				Pconstant=2;
-				
-				double rotDiff=-targetAngle+robot.w;
-				rotDiff=cleanAngle(rotDiff);
-				double requiredrotv=rotDiff*Pconstant;
-				if(requiredrotv > rotw){
-					requiredrotv=rotw;
-				}
-				
-				robotrequiredv.y=requiredrotv*radius;
-				if(robotrequiredv.y > maxv){
-					robotrequiredv.y=robotrequiredv.y/requiredv.length()*maxv;
-				}
-				
-				
-				// rotation controller
-				double rotPconstant=6;
-				double maxrotv=3.0;
-				double estimateddelay=1;
-				
-				
-				double requiredrot=posDiff.angle()-estimateddelay*robotrequiredv.y;
-				double currentrot=robot.w;
-				
-				double rotdiff=cleanAngle(requiredrot-currentrot);
-			   	        
-				if (rotdiff > M_PI){rotdiff=M_PI-rotdiff;}
-				
-				requiredrotv=rotdiff*rotPconstant;
-				
-				if(requiredrotv>maxrotv){
-					requiredrotv=maxrotv;
-				}
-				else if(requiredrotv<-maxrotv){
-					requiredrotv=-maxrotv;
-				}
-				
-						
-				// send command
-				roboteam_msgs::RobotCommand cmd;
-				cmd.id = robotID;
-				cmd.active = true;
-				cmd.x_vel = robotrequiredv.x;
-				cmd.y_vel = robotrequiredv.y;
-				cmd.w_vel = requiredrotv;
-		
-				cmd.dribbler=true;
-				cmd.kicker=false;
-				cmd.kicker_vel=0.0;
-				cmd.kicker_forced=false;
-				cmd.chipper=false;
-				cmd.chipper_vel=0.0;
-				cmd.chipper_forced=false;
+			pub.publish(cmd);
 			
-				pub.publish(cmd);
-				
 
-				return Status::Running;
-			/*}
-			else {
-				ROS_INFO("not faceing ball");
-				return Status::Failure;
-			}*/
+			return Status::Running;
 		}
 		else {
 			//ROS_INFO("not close to ball");
