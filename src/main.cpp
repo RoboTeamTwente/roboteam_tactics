@@ -8,7 +8,7 @@
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/SteeringAction.h"
-#include "roboteam_tactics/alltrees.h"
+#include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"

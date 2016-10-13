@@ -36,6 +36,9 @@ public:
 	}
 	
 	Status Update (){
+        //////////////////////////////////////
+        // ****** UNUSED VARIABLE!!!! ***** //
+        //////////////////////////////////////lol
 		double kickfoce=1;
 		
 		roboteam_msgs::World world = LastWorld::get();

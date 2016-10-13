@@ -6,15 +6,20 @@
 # Generates the files alltrees.h and alltrees.cpp, containing
 # functions that construct all the behavior trees in the JSON folder.
 
+echo "Generating c++ from json using allconditions.h et al."
+
+# Go to the tree dir
+cd src/trees
+
 # Destination files
 treeSource="alltrees.cpp"
 treeHeader="alltrees.h"
 
 # Preamble of the source file
 sourcePreamble="
-#include \"roboteam_tactics/allskills.h\"
-#include \"roboteam_tactics/allconditions.h\"
-#include \"roboteam_tactics/alltactics.h\"
+#include \"roboteam_tactics/generated/allskills.h\"
+#include \"roboteam_tactics/generated/allconditions.h\"
+#include \"roboteam_tactics/generated/alltactics.h\"
 #include \"roboteam_tactics/bt.hpp\"
 "
 
@@ -60,5 +65,5 @@ printf "}" >> $treeHeader
 
 # Copy the header files to place catkin can find it and
 # delete it here.
-cp alltrees.h ../../include/roboteam_tactics/alltrees.h
+cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
 rm alltrees.h
