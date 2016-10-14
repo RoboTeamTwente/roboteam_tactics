@@ -19,15 +19,6 @@ GoToPos::GoToPos(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackb
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
-void GoToPos::Initialize(int robotIDInput) {
-	// robotID = robotIDInput;
-}
-
-void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput) {
-    // xGoal = xGoalInput;
-	// yGoal = yGoalInput;
-	// wGoal = wGoalInput;
-}
 
 bt::Node::Status GoToPos::Update (){
 	roboteam_msgs::World world = LastWorld::get();
@@ -37,9 +28,6 @@ bt::Node::Status GoToPos::Update (){
     double wGoal = GetDouble("wGoal");
     int robotID = blackboard->GetInt("ROBOT_ID");
 
-    // std::cout << "I am: " << getPrefixedId("test") << "\n";
-    // std::cout << "Going to: " << xGoal << " " << yGoal << "\n";
-	
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
 	if (world.robots_yellow.size() == 0) {
