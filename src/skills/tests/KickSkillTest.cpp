@@ -22,11 +22,11 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "KickSkillTest");
 	ros::NodeHandle n;
 
-	rtt::KickSkill kickSkill;
+	rtt::KickSkill kickSkill(n);
 
 	int robotID = 0;
 
-	kickSkill.Initialize(n, robotID);
+	kickSkill.Initialize(robotID);
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackKickSkill, _1, &kickSkill));
 
 	while (ros::ok()) {

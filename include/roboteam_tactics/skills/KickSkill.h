@@ -8,8 +8,8 @@ namespace rtt {
 
 class KickSkill : public Skill {
 public:
-	KickSkill();
-	void Initialize(ros::NodeHandle nh, int robotIDInput);
+	KickSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	void Initialize(int robotIDInput);
 	double cleanAngle(double angle);
 	Status Update();
 private:

@@ -1,3 +1,5 @@
+#include <string>
+
 #include "ros/ros.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
@@ -12,25 +14,29 @@
 
 namespace rtt {
 
-GoToPos::GoToPos() : Skill{aggregator} {	
-}
-
-void GoToPos::Initialize(ros::NodeHandle nh, int robotIDInput) {
-	n = nh;
+GoToPos::GoToPos(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard) {
+        
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-	robotID = robotIDInput;
 }
 
-void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput, bool endPointInput){
-	xGoal = xGoalInput;
-	yGoal = yGoalInput;
-	wGoal = wGoalInput;
-    endPoint = endPointInput;
-}
+// void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput, bool endPointInput){
+// 	xGoal = xGoalInput;
+// 	yGoal = yGoalInput;
+// 	wGoal = wGoalInput;
+//     endPoint = endPointInput;
+// }
+
 
 bt::Node::Status GoToPos::Update (){
 	roboteam_msgs::World world = LastWorld::get();
-	
+
+    double xGoal = GetDouble("xGoal");
+    double yGoal = GetDouble("yGoal");
+    double wGoal = GetDouble("wGoal");
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    bool endPoint = GetDouble("endPoint");
+
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
 	if (world.robots_yellow.size() == 0) {
@@ -89,6 +95,7 @@ bt::Node::Status GoToPos::Update (){
     roboteam_utils::Vector2 posError = goalPos - robotPos;
     
     prevWorld = world;
+    
     if (posError.length() < 0.05) {
         if (endPoint) {
             if (posError.length() < 0.01) {

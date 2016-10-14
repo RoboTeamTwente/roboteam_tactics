@@ -1,50 +1,89 @@
 #pragma once
 
+#include "ros/ros.h"
+
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/Aggregator.h"
 
 namespace rtt {
 
-class Skill : public bt::Leaf {
+class Leaf : public bt::Leaf {
     public:
+    Leaf(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr)
+            : bt::Leaf(blackboard)
+            , name{name}
+            {}
+    virtual ~Leaf() {}
 
-    Skill(Aggregator& aggregator, bt::Blackboard::Ptr blackboard = nullptr)
-            : Leaf(blackboard)
-            , aggregator{aggregator}
+    virtual Status Update() {
+        return Status::Invalid;
+    }
+
+    bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
+    const std::string name;
+
+    // Proxies that prefix an id for lookups in the global table.
+    void SetBool(std::string key, bool value) { blackboard->SetBool(getPrefixedId(key), value); }
+    bool GetBool(std::string key) { return blackboard->GetBool(getPrefixedId(key)); }
+    bool HasBool(std::string key) const { return blackboard->HasBool(getPrefixedId(key)); }
+
+    void SetInt(std::string key, int value)  { blackboard->SetInt(getPrefixedId(key), value); }
+    int GetInt(std::string key) { return blackboard->GetInt(getPrefixedId(key)); }
+    bool HasInt(std::string key) const  { return blackboard->HasInt(getPrefixedId(key)); }
+
+    void SetFloat(std::string key, float value)  { blackboard->SetFloat(getPrefixedId(key), value); }
+    float GetFloat(std::string key) { return blackboard->GetFloat(getPrefixedId(key)); }
+    bool HasFloat(std::string key) const  { return blackboard->HasFloat(getPrefixedId(key)); }
+
+    void SetDouble(std::string key, double value)  { blackboard->SetDouble(getPrefixedId(key), value); }
+    double GetDouble(std::string key) { return blackboard->GetDouble(getPrefixedId(key)); }
+    bool HasDouble(std::string key) const  { return blackboard->HasDouble(getPrefixedId(key)); }
+
+    void SetString(std::string key, std::string value)  { blackboard->SetString(getPrefixedId(key), value); }
+    std::string GetString(std::string key) { return blackboard->GetString(getPrefixedId(key)); }
+    bool HasString(std::string key) const  { return blackboard->HasString(getPrefixedId(key)); }
+    
+    std::string getPrefixedId(std::string id) const {
+        if (name.empty()) {
+            return id;
+        }
+
+        return name + "_" + id;
+    }
+} ;
+
+class Skill : public Leaf {
+public:
+
+    Skill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard = nullptr)
+            : Leaf(name, blackboard)
+            , n{n}
             {}
     virtual ~Skill() {}
 
     virtual Status Update() {
         return Status::Invalid;
     }
-    
-    Aggregator& aggregator;
-    bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
+
+    ros::NodeHandle n;
 } ;
 
-class Condition : public bt::Leaf {
+class Condition : public Leaf {
 	public:
-
-	Condition(bt::Blackboard::Ptr blackboard = nullptr)
-            : Leaf(blackboard)
+	Condition(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr)
+            : Leaf(name, blackboard)
             {}
     virtual ~Condition() {}
 
     virtual Status Update() {
         return Status::Invalid;
     }
-    
-    bt::Blackboard::Ptr blackboard;
-    bt::Blackboard::Ptr private_blackboard = std::make_shared<bt::Blackboard>();
 } ;
 
 class Role : public bt::BehaviorTree {
     public:
 
-    Role (Aggregator& aggregator, int robotId, bt::Blackboard::Ptr blackboard = nullptr)
-            : aggregator{aggregator}
-            , robotId{robotId}
-            {
+    Role (int robotId, bt::Blackboard::Ptr blackboard = nullptr) {
         SetSharedBlackboard(blackboard);
     }
     virtual ~Role() {}
@@ -52,9 +91,6 @@ class Role : public bt::BehaviorTree {
     virtual Status Update() {
         return Status::Invalid;
     }
-
-    Aggregator& aggregator;
-    int robotId;
 } ;
 
 class Tactic : public bt::Leaf {

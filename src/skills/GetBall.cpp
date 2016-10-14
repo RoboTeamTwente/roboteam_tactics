@@ -17,12 +17,11 @@
 
 namespace rtt {
 
-	GetBall::GetBall(ros::NodeHandle nh) : 
-			Skill{aggregator} {	
-				n = nh;
-				goToPos.Initialize(n, 0);
-				pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-				ROS_INFO("GetBall constructor");
+	GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+            : Skill(n, name, blackboard)
+            , goToPos(n, "", private_bb) {
+        pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        ROS_INFO("GetBall constructor");
 	}
 
 	void GetBall::UpdateArgs(int robotIDInput) {
@@ -57,8 +56,12 @@ namespace rtt {
 			ros::spinOnce();
 			return Status::Success;
 		} else {
-			if (fabs(prevTargetPos.x-targetPos.x) > 0.005 || fabs(prevTargetPos.y-targetPos.y) > 0.005 || fabs(prevTargetAngle-targetAngle) > 0.005) {
-				goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle, true);
+			// if (fabs(prevTargetPos.x-targetPos.x) > 0.005 || fabs(prevTargetPos.y-targetPos.y) > 0.005 || fabs(prevTargetAngle-targetAngle) > 0.005) {
+			// 	goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle, true);
+			if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
+                private_bb->SetDouble("xGoal", targetPos.x);
+                private_bb->SetDouble("yGoal", targetPos.y);
+                private_bb->SetDouble("wGoal", targetAngle);
 				// ROS_INFO_STREAM(goal);
 			}
 			goToPos.Update();
