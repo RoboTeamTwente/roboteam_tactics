@@ -9,8 +9,6 @@
 # Command: ./generate.sh force
 # Force compilation of the json converter, and generate c++ source and header files.
 
-echo "*** Generating c++ header leaf files ***"
-
 # $1 - the include file
 # $2 - the include pattern
 # $3 - what to call the set variable
