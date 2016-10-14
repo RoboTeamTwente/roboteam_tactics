@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 set(CMAKE_CXX_FLAGS "\
---std=c++11 ${CMAKE_CXX_FLAGS} \
+--std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
@@ -163,6 +163,13 @@ add_executable(KickSkillTest
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
+
+catkin_add_gtest(VerificationTest
+    test/main.cpp
+    test/VerificationTest.cpp
+)
+target_link_libraries(VerificationTest ${catkin_LIBRARIES})
+
 add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
 

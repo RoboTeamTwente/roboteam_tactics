@@ -20,8 +20,9 @@ public:
 	
     RotpointSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     double cleanAngle(double angle);
+    void stoprobot(ros::Publisher pub, int RobotID);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
-    void updateArgs(ros::Publisher pub, int robotID, double targetAngle, double w);
+    void updateArgs(ros::Publisher pub, int robotID, double targetAngle, double w, roboteam_utils::Vector2 center, double radius);
     Status Update();
 private:
 	uint32_t prevworldseq;
@@ -30,6 +31,8 @@ private:
 	double targetAngle;
 	double rotw;
 	ros::Publisher pub;
+	roboteam_utils::Vector2 center;
+   	double radius=radius;
 	
 } ;
 
