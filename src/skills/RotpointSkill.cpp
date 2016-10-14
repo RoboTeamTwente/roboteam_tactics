@@ -15,11 +15,9 @@
 
 	
 namespace rtt {
-
-
 	
-	RotpointSkill::RotpointSkill(bt::Blackboard::Ptr blackboard):Skill(aggregator,blackboard){
-	}
+	RotpointSkill::RotpointSkill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+            : Skill(n, name, blackboard) {}
 	
 	double RotpointSkill::cleanAngle(double angle){
 		if (angle < M_PI){

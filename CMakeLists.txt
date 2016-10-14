@@ -74,6 +74,7 @@ add_custom_command(
         always_rebuild
         converter
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating C++ from JSON files"
     )
 
 # This extra custom target is needed to use it in brain
@@ -88,6 +89,7 @@ add_custom_command(
     DEPENDS
         always_rebuild
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
     )
 
 # Dummy output which is never actually produced. Anything that depends on

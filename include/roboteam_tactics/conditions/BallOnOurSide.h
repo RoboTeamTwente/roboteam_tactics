@@ -8,7 +8,7 @@ namespace rtt {
 
 class BallOnOurSide : public Condition {
     public:
-    BallOnOurSide(bt::Blackboard::Ptr blackboard = nullptr);
+    BallOnOurSide(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     
     Status Update();
 

@@ -6,8 +6,6 @@
 # Generates the files alltrees.h and alltrees.cpp, containing
 # functions that construct all the behavior trees in the JSON folder.
 
-echo "Generating c++ from json using allconditions.h et al."
-
 # Go to the tree dir
 cd src/trees
 
