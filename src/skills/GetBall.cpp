@@ -57,8 +57,8 @@ namespace rtt {
 			ros::spinOnce();
 			return Status::Success;
 		} else {
-			if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
-				goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle);
+			if (fabs(prevTargetPos.x-targetPos.x) > 0.005 || fabs(prevTargetPos.y-targetPos.y) > 0.005 || fabs(prevTargetAngle-targetAngle) > 0.005) {
+				goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle, true);
 				// ROS_INFO_STREAM(goal);
 			}
 			goToPos.Update();

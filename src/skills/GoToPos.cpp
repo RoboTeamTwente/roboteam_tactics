@@ -2,6 +2,7 @@
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/GoToPos.h"
+#include <vector>
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -20,10 +21,11 @@ void GoToPos::Initialize(ros::NodeHandle nh, int robotIDInput) {
 	robotID = robotIDInput;
 }
 
-void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput){
+void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput, bool endPointInput){
 	xGoal = xGoalInput;
 	yGoal = yGoalInput;
 	wGoal = wGoalInput;
+    endPoint = endPointInput;
 }
 
 bt::Node::Status GoToPos::Update (){
@@ -36,31 +38,36 @@ bt::Node::Status GoToPos::Update (){
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldBall ball = world.ball;
+	// roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = world.robots_yellow.at(robotID);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double wCurrent = robot.w;
 
-	// Proportional position controller
-	roboteam_utils::Vector2 requiredSpeed;
+    // Proportional position controller
+    roboteam_utils::Vector2 requiredSpeed;
     double pGain=3.0;
     double maxSpeed=1.0;
-	requiredSpeed.x=(xGoal-robotPos.x)*pGain;
-	requiredSpeed.y=(yGoal-robotPos.y)*pGain;
-	if (requiredSpeed.length() > maxSpeed){
-		requiredSpeed.x=requiredSpeed.x/requiredSpeed.length()*maxSpeed;
-		requiredSpeed.y=requiredSpeed.y/requiredSpeed.length()*maxSpeed;
-	}
+    requiredSpeed.x=(xGoal-robotPos.x)*pGain;
+    requiredSpeed.y=(yGoal-robotPos.y)*pGain;
+    if (requiredSpeed.length() > maxSpeed){
+        requiredSpeed.x=requiredSpeed.x/requiredSpeed.length()*maxSpeed;
+        requiredSpeed.y=requiredSpeed.y/requiredSpeed.length()*maxSpeed;
+    } else {
+        if (!endPoint) {
+            requiredSpeed.x=requiredSpeed.x/requiredSpeed.length()*maxSpeed;
+            requiredSpeed.y=requiredSpeed.y/requiredSpeed.length()*maxSpeed;
+        }
+    }
 
-	// Proportional rotation controller
-	double requiredRotSpeed;
+    // Proportional rotation controller
+    double requiredRotSpeed;
     double pGainRot=3.0;
     double maxRotSpeed=3.0;
     double rotError=wGoal-wCurrent;
     if (rotError > M_PI){rotError=M_PI-rotError;}
     requiredRotSpeed=rotError*pGainRot;
     if (fabs(requiredRotSpeed) > maxRotSpeed) {
-    	requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
+        requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
     }
 
     // Rotate from robot frame to world frame
@@ -75,25 +82,35 @@ bt::Node::Status GoToPos::Update (){
     command.y_vel = robotFrameRequiredSpeed.y;
     command.w_vel = requiredRotSpeed;
 
+    // ROS_INFO_STREAM(command.x_vel << command.y_vel);
+
     // If finished, return success, otherwise keep sending commands
     roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 posError = goalPos - robotPos;
     
     prevWorld = world;
-    if (posError.length() < 0.01) {
-
-    	// Stop the robot and send one final command
-    	roboteam_msgs::RobotCommand command;
-        command.id = robotID;
-        command.x_vel = 0.0;
-        command.y_vel = 0.0;
-        command.w_vel = 0.0;
-        pub.publish(command);
-        ros::spinOnce();
-    	return Status::Success;
+    if (posError.length() < 0.05) {
+        if (endPoint) {
+            if (posError.length() < 0.01) {
+                // Stop the robot and send one final command
+                roboteam_msgs::RobotCommand command;
+                command.id = robotID;
+                command.x_vel = 0.0;
+                command.y_vel = 0.0;
+                command.w_vel = 0.0;
+                pub.publish(command);
+                ros::spinOnce();
+                return Status::Success;
+            } else {
+                pub.publish(command);
+                return Status::Running;
+            }
+        } else {
+            return Status::Success;
+        }
     } else {
-    	pub.publish(command);
-    	return Status::Running;
+        pub.publish(command);
+        return Status::Running;
     }
 };
 
