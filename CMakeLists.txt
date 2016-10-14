@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 set(CMAKE_CXX_FLAGS "\
---std=c++11 ${CMAKE_CXX_FLAGS} \
+--std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
@@ -74,6 +74,7 @@ add_custom_command(
         always_rebuild
         converter
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating C++ from JSON files"
     )
 
 # This extra custom target is needed to use it in brain
@@ -88,6 +89,7 @@ add_custom_command(
     DEPENDS
         always_rebuild
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
     )
 
 # Dummy output which is never actually produced. Anything that depends on
@@ -161,6 +163,22 @@ add_executable(KickSkillTest
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
+
+catkin_add_gtest(VerificationTest
+    test/main.cpp
+    test/VerificationTest.cpp
+)
+target_link_libraries(VerificationTest ${catkin_LIBRARIES})
+
+catkin_add_gtest(ConditionsTest
+    test/main.cpp
+    test/ConditionsTest.cpp
+
+    src/conditions/IHaveBall.cpp
+    src/LastWorld.cpp
+)
+target_link_libraries(ConditionsTest ${catkin_LIBRARIES})
+
 add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
 

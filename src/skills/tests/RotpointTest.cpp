@@ -29,7 +29,9 @@ int main(int argc, char **argv) {
 	ROS_INFO("waiting for connection");
 	while(pub.getNumSubscribers() < 1){sleep(0.1);}
 	ROS_INFO("connected");
-	rotpointSkill.updateArgs(pub,0,0,2.0);
+	roboteam_utils::Vector2 rotaround=roboteam_utils::Vector2(0.5,0);
+	
+	rotpointSkill.updateArgs(pub,0,0.5*M_PI,3.0,rotaround,0.1);
 	while (ros::ok()) {
 		ros::spinOnce();
 		if(rotpointSkill.Update() != bt::Node::Status::Running){break;} // break; breaks the code if only one message is sent
