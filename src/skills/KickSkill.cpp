@@ -12,11 +12,10 @@
 
 namespace rtt {
 
-KickSkill::KickSkill() : Skill{aggregator} {
-}
+KickSkill::KickSkill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard) { }
 
-void KickSkill::Initialize(ros::NodeHandle nh, int robotIDInput) {
-	n = nh;
+void KickSkill::Initialize(int robotIDInput) {
 	pubKickSkill = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 	robotID = robotIDInput;
 }

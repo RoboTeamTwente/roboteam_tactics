@@ -18,7 +18,7 @@ namespace rtt {
 class RotpointSkill : public Skill {
 public:
 	
-    RotpointSkill(bt::Blackboard::Ptr blackboard = nullptr);
+    RotpointSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     double cleanAngle(double angle);
     void stoprobot(ros::Publisher pub, int RobotID);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);

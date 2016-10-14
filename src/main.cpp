@@ -18,11 +18,9 @@ namespace rtt {
 
 void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
     LastWorld::set(*msg);
-    std::cout << "Received a world.\n";
 }
 
-Aggregator aggregator;
-bt::BehaviorTree strategy = make_BasicStrategy(aggregator);
+bt::BehaviorTree strategy;
 int ai_count = 0;
 
 void run_ai_cycle() {
@@ -50,12 +48,22 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle n;
 
+    auto role = make_BasicRole(n);
+
+    auto bb = role.GetBlackboard();
+    bb->SetInt("ROBOT_ID", 0);
+
+    bb->SetDouble("GoToPos_first_xGoal", 1);
+    bb->SetDouble("GoToPos_first_yGoal", 0);
+    bb->SetDouble("GoToPos_second_xGoal", -1);
+    bb->SetDouble("GoToPos_second_yGoal", 0);
+
     ros::Subscriber sub = n.subscribe("world_state", 1, world_state_callback);
 
     while(ros::ok()) {
         ros::spinOnce();
 
-        run_ai_cycle();
+        role.Update();
     }
     
     return 0;
