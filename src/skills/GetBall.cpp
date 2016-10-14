@@ -17,9 +17,9 @@
 
 namespace rtt {
 
-	GetBall::GetBall(ros::NodeHandle n, bt::Blackboard::Ptr blackboard)
-            : Skill(n, blackboard)
-            , goToPos(n, blackboard) {
+	GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+            : Skill(n, name, blackboard)
+            , goToPos(n, "", private_bb) {
         goToPos.Initialize(0);
         pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
         ROS_INFO("GetBall constructor");
@@ -45,12 +45,6 @@ namespace rtt {
 		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
 		roboteam_utils::Vector2 targetPos = ballPos - posDiffNorm.scale(0.09);
 		double targetAngle = posDiff.angle();
-
-		// roboteam_msgs::SteeringGoal goal;
-		// goal.x = targetPos.x;
-		// goal.y = targetPos.y;
-		// goal.orientation = targetAngle;
-		// ROS_INFO_STREAM(posDiff.length());
 
 		if (posDiff.length() < 0.105) {
 			ROS_INFO("Target position reached, starting dribbler...");

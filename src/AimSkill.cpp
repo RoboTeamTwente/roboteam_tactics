@@ -17,8 +17,8 @@ class AimSkill : public Skill {
 private:
 	roboteam_msgs::SteeringGoal prevgoal;
 public:
-	AimSkill(ros::NodeHandle n, bt::Blackboard::Ptr blackboard = nullptr)
-            : Skill(n, blackboard) {}
+	AimSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr)
+            : Skill(n, name, blackboard) {}
 	
 	double cleanAngle(double angle){
 		if (angle < M_PI){

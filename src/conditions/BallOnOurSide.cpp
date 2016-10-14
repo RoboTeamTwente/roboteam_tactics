@@ -2,8 +2,8 @@
 
 namespace rtt {
 
-BallOnOurSide::BallOnOurSide(bt::Blackboard::Ptr blackboard)
-        : Condition(blackboard) {}
+BallOnOurSide::BallOnOurSide(std::string name, bt::Blackboard::Ptr blackboard)
+        : Condition(name, blackboard) {}
 
 bt::Node::Status BallOnOurSide::Update() {
     count++;

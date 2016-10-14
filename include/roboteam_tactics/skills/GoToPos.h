@@ -14,7 +14,7 @@ namespace rtt {
 
 class GoToPos : public Skill {
 public:
-    GoToPos(ros::NodeHandle n, bt::Blackboard::Ptr blackboard = nullptr);
+    GoToPos(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize(int robotIDInput);
     void UpdateArgs(double xGoalInput, double yGoalInput, double wGoalInput);
 	Status Update();
@@ -22,10 +22,10 @@ private:
 	roboteam_msgs::World prevWorld;
     ros::NodeHandle n;
 	ros::Publisher pub;
-	double xGoal;
-	double yGoal;
-	double wGoal;
-	int robotID;
+	// double xGoal;
+	// double yGoal;
+	// double wGoal;
+	// int robotID;
 	
 } ;
 

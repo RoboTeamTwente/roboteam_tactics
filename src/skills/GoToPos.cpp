@@ -1,3 +1,5 @@
+#include <string>
+
 #include "ros/ros.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
@@ -11,22 +13,32 @@
 
 namespace rtt {
 
-GoToPos::GoToPos(ros::NodeHandle n, bt::Blackboard::Ptr blackboard)
-        : Skill(n, blackboard) {}
+GoToPos::GoToPos(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard) {
+        
+	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+}
 
 void GoToPos::Initialize(int robotIDInput) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-	robotID = robotIDInput;
+	// robotID = robotIDInput;
 }
 
 void GoToPos::UpdateArgs (double xGoalInput, double yGoalInput, double wGoalInput) {
-	xGoal = xGoalInput;
-	yGoal = yGoalInput;
-	wGoal = wGoalInput;
+    // xGoal = xGoalInput;
+	// yGoal = yGoalInput;
+	// wGoal = wGoalInput;
 }
 
 bt::Node::Status GoToPos::Update (){
 	roboteam_msgs::World world = LastWorld::get();
+
+    double xGoal = GetDouble("xGoal");
+    double yGoal = GetDouble("yGoal");
+    double wGoal = GetDouble("wGoal");
+    int robotID = blackboard->GetInt("ROBOT_ID");
+
+    // std::cout << "I am: " << getPrefixedId("test") << "\n";
+    // std::cout << "Going to: " << xGoal << " " << yGoal << "\n";
 	
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update

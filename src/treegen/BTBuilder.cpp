@@ -23,7 +23,10 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     int ctr = 0;
     for (auto& element : json["nodes"]) {
-        element["title"] = element["title"].get<std::string>() + "_" + std::to_string(ctr++);
+        if (SKILLS.find(element["name"]) == SKILLS.end()
+                && CONDITIONS.find(element["name"]) == CONDITIONS.end()) {
+            element["title"] = element["title"].get<std::string>() + "_" + std::to_string(ctr++);
+        }
     }
     
     while (!stack.empty()) {
@@ -76,7 +79,25 @@ void BTBuilder::define_dec(std::string name, std::string type) {
 void BTBuilder::define_nod(std::string name, std::string type) {
     // If it's a skill we need to pass the node handle
     if (SKILLS.find(type) != SKILLS.end()) {
-        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(n, bb);" << std::endl;
+        out << DINDENT
+            << "auto "
+            << name 
+            << " = std::make_shared<"
+            << type 
+            << ">(n, \""
+            << name
+            << "\", bb);"
+            << std::endl;
+    } else if (CONDITIONS.find(type) != CONDITIONS.end()) {
+        out << DINDENT
+            << "auto "
+            << name 
+            << " = std::make_shared<"
+            << type 
+            << ">(\""
+            << name
+            << "\", bb);"
+            << std::endl;
     } else {
         out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
     }
