@@ -170,6 +170,15 @@ catkin_add_gtest(VerificationTest
 )
 target_link_libraries(VerificationTest ${catkin_LIBRARIES})
 
+catkin_add_gtest(ConditionsTest
+    test/main.cpp
+    test/ConditionsTest.cpp
+
+    src/conditions/IHaveBall.cpp
+    src/LastWorld.cpp
+)
+target_link_libraries(ConditionsTest ${catkin_LIBRARIES})
+
 add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
 

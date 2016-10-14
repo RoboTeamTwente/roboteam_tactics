@@ -4,10 +4,10 @@
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/Aggregator.h"
+#include "roboteam_msgs/World.h"
 #include <map>
 #include <type_traits>
-
-#include <stdio.h>
+#include <vector>
 
 namespace rtt {
     
@@ -107,6 +107,14 @@ class Leaf : public bt::Leaf {
 
         return name + "_" + id;
     }
+    
+    protected:
+    template<typename Impl>
+    void assert_valid(bt::Blackboard::Ptr bb, std::string name = "") const {
+        if (!validate_blackboard<Impl>(bb, name)) {
+            throw std::invalid_argument("Blackboard verification failed.");
+        }
+    }
 } ;
 
 class Skill : public Leaf {
@@ -135,6 +143,14 @@ class Condition : public Leaf {
     virtual Status Update() {
         return Status::Invalid;
     }
+    
+    virtual std::vector<roboteam_msgs::World> success_states() {
+        return std::vector<roboteam_msgs::World>();
+    }
+    
+    virtual std::vector<roboteam_msgs::World> fail_states() {
+        return std::vector<roboteam_msgs::World>();
+    }    
 } ;
 
 class Role : public bt::BehaviorTree {
