@@ -29,7 +29,7 @@ namespace rtt {
 	}
 
 	bt::Node::Status GetBall::Update (){
-		// ROS_INFO("update");
+		
 		roboteam_msgs::World world = LastWorld::get();
 		while (world.robots_yellow.size() == 0) {
 			return Status::Running;
@@ -56,16 +56,12 @@ namespace rtt {
 			ros::spinOnce();
 			return Status::Success;
 		} else {
-			// if (fabs(prevTargetPos.x-targetPos.x) > 0.005 || fabs(prevTargetPos.y-targetPos.y) > 0.005 || fabs(prevTargetAngle-targetAngle) > 0.005) {
-			// 	goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle, true);
 			if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
                 private_bb->SetDouble("xGoal", targetPos.x);
                 private_bb->SetDouble("yGoal", targetPos.y);
                 private_bb->SetDouble("wGoal", targetAngle);
-				// ROS_INFO_STREAM(goal);
 			}
 			goToPos.Update();
-			// oldGoal = goal;
 			prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);
 			prevTargetAngle = targetAngle;
 			return Status::Running;

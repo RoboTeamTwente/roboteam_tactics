@@ -35,7 +35,7 @@ bt::Node::Status GoToPos::Update (){
     double yGoal = GetDouble("yGoal");
     double wGoal = GetDouble("wGoal");
     int robotID = blackboard->GetInt("ROBOT_ID");
-    bool endPoint = GetDouble("endPoint");
+    bool endPoint = GetBool("endPoint");
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update

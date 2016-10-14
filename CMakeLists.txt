@@ -164,6 +164,16 @@ add_executable(KickSkillTest
 add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
 
+add_executable(FollowPathTest
+    src/skills/tests/FollowPathTest.cpp
+    src/skills/FollowPath.cpp
+    src/skills/GoToPos.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(FollowPathTest ${catkin_LIBRARIES})
+
 catkin_add_gtest(tactics_test
     test/main.cpp 
 	test/SimpleTest.cpp
