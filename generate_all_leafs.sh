@@ -43,6 +43,51 @@ function makeIncludeList {
 	makeIncludeList allskills.h "skills/*.h" SKILLS generated
 
 	makeIncludeList alltactics.h "tactics/*.h" TACTICS generated
+
+
+    # 
+    # Make skill factory
+    #
+
+    factoryFile="allskills_factory.h"
+    # Clear the factory file
+    > generated/$factoryFile
+
+    # Preamble
+    printf "#pragma once
+#include <iostream>
+#include <memory>
+    
+#include \"ros/ros.h\"
+
+#include \"roboteam_tactics/bt.hpp\"
+#include \"roboteam_tactics/allskills.h\"
+
+namespace rtt {
+
+/**
+ * WARNING! ONLY USE FOR UNIT TESTS! REALLY!
+ */
+std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) {
+    if (false) {
+        // Dummy condition
+    } " >> generated/$factoryFile
+
+    for f in skills/*.h; do
+        skillName=$(basename "$f" .h) 
+        printf "else if (name == \"$skillName\") {
+        return std::make_shared<$skillName>(n, name, bb);
+    } " >> generated/$factoryFile
+    done
+
+    # Postamble
+    printf "else {
+        std::cout << \"Error: Skill with name \" << name << \" not found.\\\\n\";
+        exit(1)
+    }
+
+} // rtt
+" >> generated/$factoryFile
 )
 
 #(
