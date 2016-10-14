@@ -18,14 +18,15 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBackGoToPos);
 
-	double xGoal = 1;
-	double yGoal = -1;
-	double wGoal = 2;
-	int robotID = 0;
 	ROS_INFO("Setup done");
-	rtt::GoToPos goToPos(n);
-	goToPos.Initialize(robotID);
-	goToPos.UpdateArgs(xGoal, yGoal, wGoal);
+
+    auto bb = std::make_shared<bt::Blackboard>();
+    bb->SetDouble("xGoal", 1);
+    bb->SetDouble("yGoal", -1);
+    bb->SetDouble("wGoal", 2);
+    bb->SetInt("ROBOT_ID", 0);
+
+	rtt::GoToPos goToPos(n, "", bb);
 
 	while (ros::ok()) {
 		ros::spinOnce();
