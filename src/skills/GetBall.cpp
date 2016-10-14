@@ -56,6 +56,8 @@ namespace rtt {
 			ros::spinOnce();
 			return Status::Success;
 		} else {
+			// if (fabs(prevTargetPos.x-targetPos.x) > 0.005 || fabs(prevTargetPos.y-targetPos.y) > 0.005 || fabs(prevTargetAngle-targetAngle) > 0.005) {
+			// 	goToPos.UpdateArgs(targetPos.x, targetPos.y, targetAngle, true);
 			if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
                 private_bb->SetDouble("xGoal", targetPos.x);
                 private_bb->SetDouble("yGoal", targetPos.y);

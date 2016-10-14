@@ -9,30 +9,45 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_utils/Vector2.h"
 
-void msgCallBackGoToPos(const roboteam_msgs::World world) {
-	rtt::LastWorld::set(world);
-}
+bool success;
 
+void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world, rtt::GoToPos* goToPos) {
+	rtt::LastWorld::set(*world);
+	if (goToPos->Update() == bt::Node::Status::Success) {
+		success = true;
+	}
+}
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "GoToPosTest");
 	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBackGoToPos);
 
-	ROS_INFO("Setup done");
+	// double xGoal = 1;
+	// double yGoal = -1;
+	// double wGoal = 2;
+	// int robotID = 0;
+	// bool endPoint = false;
+	// rtt::GoToPos goToPos;
+	// goToPos.Initialize(n, robotID);
+	// goToPos.UpdateArgs(xGoal, yGoal, wGoal, endPoint);
+
+	
 
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetDouble("xGoal", 1);
     bb->SetDouble("yGoal", -1);
     bb->SetDouble("wGoal", 2);
     bb->SetInt("ROBOT_ID", 0);
+    bb->SetBool("endPoint", true);
 
 	rtt::GoToPos goToPos(n, "", bb);
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1, &goToPos));
 
 	while (ros::ok()) {
 		ros::spinOnce();
-		if (goToPos.Update() == bt::Node::Status::Success) {
+		if (success) {
 			break;
 		}
 	}
+	ROS_INFO("GoToPos Test completed!");
 	return 0;
 }
