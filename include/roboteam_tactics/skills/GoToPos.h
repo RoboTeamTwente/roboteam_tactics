@@ -15,12 +15,13 @@ namespace rtt {
 
 class GoToPos : public Skill {
 public:
-    GoToPos(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	GoToPos(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
 private:
 	roboteam_msgs::World prevWorld;
     ros::NodeHandle n;
 	ros::Publisher pub;
+
 } ;
 
 } // rtt

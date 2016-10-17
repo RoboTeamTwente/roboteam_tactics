@@ -26,7 +26,7 @@
     "29ba5024-17fe-422b-9bcc-e439d9718491": {
       "id": "29ba5024-17fe-422b-9bcc-e439d9718491",
       "name": "GetBall",
-      "title": "GetBall",
+      "title": "GetBall_A",
       "description": "",
       "properties": {},
       "display": {
@@ -36,8 +36,8 @@
     },
     "109018cc-410b-40f1-973c-c3331bef8b7c": {
       "id": "109018cc-410b-40f1-973c-c3331bef8b7c",
-      "name": "RotpointSkill",
-      "title": "RotateAroundPoint",
+      "name": "RotateAroundPoint",
+      "title": "RotateAroundPoint_A",
       "description": "",
       "properties": {},
       "display": {
@@ -47,8 +47,8 @@
     },
     "781fab8c-3c58-4066-8635-1ca0cc702ec6": {
       "id": "781fab8c-3c58-4066-8635-1ca0cc702ec6",
-      "name": "KickSkill",
-      "title": "Kick",
+      "name": "Kick",
+      "title": "Kick_A",
       "description": "",
       "properties": {},
       "display": {
@@ -73,19 +73,18 @@
       "properties": {}
     },
     {
-      "name": "RotpointSkill",
+      "name": "RotateAroundPoint",
       "category": "action",
-      "title": "RotpointSkill",
+      "title": "RotateAroundPoint_A",
       "description": null,
       "properties": {}
     },
     {
-      "name": "KickSkill",
+      "name": "Kick",
       "category": "action",
-      "title": "KickSkill",
+      "title": "Kick",
       "description": null,
       "properties": {}
     }
   ]
 }
-

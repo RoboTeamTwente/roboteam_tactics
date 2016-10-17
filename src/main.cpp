@@ -13,6 +13,7 @@
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/PickedTactic.h"
+#include "roboteam_utils/Vector2.h"
 
 namespace rtt {
 
@@ -53,14 +54,21 @@ int main(int argc, char **argv) {
     auto bb = role.GetBlackboard();
     bb->SetInt("ROBOT_ID", 0);
 
-    bb->SetDouble("RotateAroundPoint_", 1);
-    bb->SetDouble("GoToPos_first_yGoal", 0);
-    bb->SetDouble("GoToPos_second_xGoal", -1);
-    bb->SetDouble("GoToPos_second_yGoal", 0);
-
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", 3.0);
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", 0.0);
+    bb->SetDouble("RotateAroundPoint_A_w",3.0);
+    // double radius = 0.09;
+    bb->SetDouble("RotateAroundPoint_A_radius", 0.09);
     ros::Subscriber sub = n.subscribe("world_state", 1, world_state_callback);
 
     while(ros::ok()) {
+        roboteam_msgs::World world = rtt::LastWorld::get();
+        roboteam_msgs::WorldBall ball = world.ball;
+        // roboteam_msgs::WorldRobot robot = world.robots_yellow.at(0);
+        roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+        bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
+        bb->SetDouble("RotateAroundPoint_A_centery", center.y);
+
         ros::spinOnce();
 
         role.Update();
