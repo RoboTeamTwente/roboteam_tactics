@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle n;
 
-    auto role = make_BasicRole(n);
+    bt::BehaviorTree role = make_CoolRole(n);
 
     auto bb = role.GetBlackboard();
     bb->SetInt("ROBOT_ID", 0);
