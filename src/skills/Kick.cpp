@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/KickSkill.h"
+#include "roboteam_tactics/skills/Kick.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -12,15 +12,12 @@
 
 namespace rtt {
 
-KickSkill::KickSkill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) { }
-
-void KickSkill::Initialize(int robotIDInput) {
-	pubKickSkill = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-	robotID = robotIDInput;
+Kick::Kick(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard) {
+        	pubKick = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
-double KickSkill::cleanAngle(double angle){
+double Kick::cleanAngle(double angle){
 	if (angle < M_PI){
 		return fmod(angle-M_PI, (2*M_PI))+M_PI;
 	}
@@ -32,8 +29,10 @@ double KickSkill::cleanAngle(double angle){
 	}
 }
 
-bt::Node::Status KickSkill::Update() {
+bt::Node::Status Kick::Update() {
 	roboteam_msgs::World world = LastWorld::get();
+    int robotID = blackboard->GetInt("ROBOT_ID");
+
 	roboteam_msgs::WorldBall ball = world.ball;
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
@@ -63,7 +62,7 @@ bt::Node::Status KickSkill::Update() {
 			command.y_vel = 0.0;
 			command.w_vel = 0.0;
 
-			pubKickSkill.publish(command);
+			pubKick.publish(command);
 			return Status::Success;
 		}
 		else {

@@ -6,15 +6,15 @@
 
 namespace rtt {
 
-class KickSkill : public Skill {
+class Kick : public Skill {
 public:
-	KickSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	Kick(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize(int robotIDInput);
 	double cleanAngle(double angle);
 	Status Update();
 private:
 	ros::NodeHandle n;
-	ros::Publisher pubKickSkill;
+	ros::Publisher pubKick;
 	int robotID;
 };
 

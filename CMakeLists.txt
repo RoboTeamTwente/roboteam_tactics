@@ -157,9 +157,9 @@ add_executable(GetBallTest
 add_dependencies(GetBallTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(GetBallTest ${catkin_LIBRARIES})
 
-add_executable(KickSkillTest
-    src/skills/tests/KickSkillTest.cpp
-    src/skills/KickSkill.cpp
+add_executable(KickTest
+    src/skills/tests/KickTest.cpp
+    src/skills/Kick.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
@@ -179,8 +179,8 @@ catkin_add_gtest(ConditionsTest
 )
 target_link_libraries(ConditionsTest ${catkin_LIBRARIES})
 
-add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
+add_dependencies(KickTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(KickTest ${catkin_LIBRARIES})
 
 add_executable(FollowPathTest
     src/skills/tests/FollowPathTest.cpp

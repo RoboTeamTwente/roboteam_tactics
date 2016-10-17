@@ -24,13 +24,11 @@ namespace rtt {
         ROS_INFO("GetBall constructor");
 	}
 
-	void GetBall::UpdateArgs(int robotIDInput) {
-		robotID = robotIDInput;
-	}
-
 	bt::Node::Status GetBall::Update (){
 		
 		roboteam_msgs::World world = LastWorld::get();
+		int robotID = blackboard->GetInt("ROBOT_ID");
+		
 		while (world.robots_yellow.size() == 0) {
 			return Status::Running;
 		}
@@ -60,6 +58,7 @@ namespace rtt {
                 private_bb->SetDouble("xGoal", targetPos.x);
                 private_bb->SetDouble("yGoal", targetPos.y);
                 private_bb->SetDouble("wGoal", targetAngle);
+                private_bb->SetBool("endPoint", true);
 			}
 			goToPos.Update();
 			prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);

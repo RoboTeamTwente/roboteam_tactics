@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/KickSkill.h"
+#include "roboteam_tactics/skills/Kick.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -11,23 +11,23 @@
 
 bool finished;
 
-void msgCallBackKickSkill(const roboteam_msgs::WorldConstPtr& world, rtt::KickSkill* kickSkill) {
+void msgCallBackKick(const roboteam_msgs::WorldConstPtr& world, rtt::Kick* Kick) {
 	rtt::LastWorld::set(*world);
-	if (kickSkill->Update() != bt::Node::Status::Running) {
+	if (Kick->Update() != bt::Node::Status::Running) {
 		finished = true;
 	}
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "KickSkillTest");
+	ros::init(argc, argv, "KickTest");
 	ros::NodeHandle n;
 
-	rtt::KickSkill kickSkill(n);
+	auto bb = std::make_shared<bt::Blackboard>();
+	bb->SetInt("ROBOT_ID", 0);
 
-	int robotID = 0;
+	rtt::Kick Kick(n, "", bb);
 
-	kickSkill.Initialize(robotID);
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackKickSkill, _1, &kickSkill));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackKick, _1, &Kick));
 
 	while (ros::ok()) {
 		ros::spinOnce();
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-	ROS_INFO("KickSkill Test completed!");
+	ROS_INFO("Kick Test completed!");
 
 	return 0;
 }

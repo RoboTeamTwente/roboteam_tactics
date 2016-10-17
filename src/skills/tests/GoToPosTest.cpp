@@ -20,18 +20,7 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world, rtt::GoToPos*
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "GoToPosTest");
 	ros::NodeHandle n;
-
-	// double xGoal = 1;
-	// double yGoal = -1;
-	// double wGoal = 2;
-	// int robotID = 0;
-	// bool endPoint = false;
-	// rtt::GoToPos goToPos;
-	// goToPos.Initialize(n, robotID);
-	// goToPos.UpdateArgs(xGoal, yGoal, wGoal, endPoint);
-
 	
-
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetDouble("xGoal", 1);
     bb->SetDouble("yGoal", -1);

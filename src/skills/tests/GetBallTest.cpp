@@ -17,11 +17,11 @@ void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall*
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "GetBallTest");
 	ros::NodeHandle n;
-	rtt::GetBall getBall(n);
-	
-	int robotID = 0;
 
-	getBall.UpdateArgs(robotID);
+	auto bb = std::make_shared<bt::Blackboard>();
+	bb->SetInt("ROBOT_ID", 0);
+	rtt::GetBall getBall(n, "", bb);
+	
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall));
 
 	while (ros::ok()) {
