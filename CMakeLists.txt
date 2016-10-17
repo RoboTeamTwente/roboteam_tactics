@@ -129,14 +129,14 @@ add_dependencies(AimSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_
 target_link_libraries(AimSkill ${catkin_LIBRARIES})
 
 
-add_executable(RotpointTest
-	src/skills/tests/RotpointTest.cpp
-	src/skills/RotpointSkill.cpp
+add_executable(RotateAroundPoint
+	src/skills/tests/RotateAroundPointTest.cpp
+	src/skills/RotateAroundPoint.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
-add_dependencies(RotpointTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(RotpointTest ${catkin_LIBRARIES})
+add_dependencies(RotateAroundPoint ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RotateAroundPoint ${catkin_LIBRARIES})
 
 add_executable(GoToPosTest
 	src/skills/tests/GoToPosTest.cpp
