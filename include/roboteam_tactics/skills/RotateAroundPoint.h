@@ -19,12 +19,14 @@ class RotateAroundPoint : public Skill {
 public:
 	
     RotateAroundPoint(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    Status Update();   
+     
     double cleanAngle(double angle);
-    void stoprobot(ros::Publisher pub, int RobotID);
+    void stoprobot(int RobotID);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
     void computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
-    void updateArgs(ros::Publisher pub, int robotID, roboteam_utils::Vector2 faceTowardsPos, double w, roboteam_utils::Vector2 center, double radius);
-    Status Update();
+
+   
 private:
 	uint32_t prevworldseq;
 	bool firstworld=true;

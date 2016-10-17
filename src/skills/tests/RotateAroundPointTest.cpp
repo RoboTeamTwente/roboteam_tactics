@@ -22,8 +22,7 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "RotateAroundPoint");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
-
-	rtt::RotateAroundPoint rotateAroundPoint(n);
+	
 	ros::Publisher pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 	// TODO: advertising on publisher is slow	
 	ROS_INFO("waiting for connection");
@@ -33,7 +32,24 @@ int main(int argc, char **argv) {
 
 	roboteam_utils::Vector2 rotaround=roboteam_utils::Vector2(0.5,0);
 	roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(-3.0, 4.5);
-	rotateAroundPoint.updateArgs(pub,0,faceTowardsPos,3.0,rotaround,0.1);
+	//rotateAroundPoint.updateArgs(pub,0,faceTowardsPos,3.0,rotaround,0.1);
+	
+	auto bb = std::make_shared<bt::Blackboard>();
+    bb->SetDouble("faceTowardsPosx", faceTowardsPos.x);
+    bb->SetDouble("faceTowardsPosy", faceTowardsPos.y);
+    bb->SetDouble("centerx", rotaround.x);
+    bb->SetDouble("centery", rotaround.y);
+    bb->SetDouble("radius",0.1);
+    bb->SetDouble("w",3.0);
+    bb->SetInt("ROBOT_ID", 0);
+    
+
+    bool rotaroundball=private_bb->getBool("aroundball");
+    ROS_INFO("go around ball: %b",rotaroundball);
+    
+	rtt::RotateAroundPoint rotateAroundPoint(n, "", bb);
+	
+	
 	while (ros::ok()) {
 		ros::spinOnce();
 		if(rotateAroundPoint.Update() != bt::Node::Status::Running){break;} // break; breaks the code if only one message is sent

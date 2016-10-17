@@ -16,7 +16,10 @@
 namespace rtt {
 	
 RotateAroundPoint::RotateAroundPoint(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {}
+        : Skill(n, name, blackboard) {
+	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        
+}
 
 double RotateAroundPoint::cleanAngle(double angle){
 	if (angle < M_PI){
@@ -37,23 +40,13 @@ roboteam_utils::Vector2 RotateAroundPoint::worldToRobotFrame(roboteam_utils::Vec
 	return robotRequiredv;
 }
 
-void RotateAroundPoint::updateArgs(ros::Publisher pub, int robotID, roboteam_utils::Vector2 faceTowardsPos, double w, roboteam_utils::Vector2 center, double radius){
-	this->pub=pub;
-	this->robotID=robotID;
-	// this->targetAngle=targetAngle;
-	this->faceTowardsPos=faceTowardsPos;
-	this->rotw=w;
-	this->center=center;
-	this->radius=radius;
-}
-
 void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
 	targetAngle = faceTowardsPos.angle();
 	ROS_INFO_STREAM(targetAngle);
 }
 
-void RotateAroundPoint::stoprobot(ros::Publisher pub, int robotID) {
+void RotateAroundPoint::stoprobot(int robotID) {
 
 	roboteam_msgs::RobotCommand cmd;
 	cmd.id = robotID;
@@ -74,6 +67,14 @@ void RotateAroundPoint::stoprobot(ros::Publisher pub, int robotID) {
 }
 
 bt::Node::Status RotateAroundPoint::Update (){
+	roboteam_utils::Vector2 faceTowardsPosx(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
+    double rotw = GetDouble("w");
+    roboteam_utils::Vector2 center(GetDouble("centerx"),GetDouble("centery"));
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    double radius = GetDouble("radius");
+
+
+
 	roboteam_msgs::World world = LastWorld::get();
 	if (world.robots_yellow.size() == 0){
 		return Status::Running;
@@ -172,20 +173,20 @@ bt::Node::Status RotateAroundPoint::Update (){
 			else { // final position reached
 				// TODO: maybe instead call position controller
 				
-				stoprobot(pub,robotID);
+				stoprobot(robotID);
 				ROS_INFO("finished");
 				return Status::Success;
 			}
 		}
 		else { // wrong orientation 
 			ROS_INFO("not oriented enough toward center");
-			stoprobot(pub,robotID);
+			stoprobot(robotID);
 			return Status::Failure;
 		}
 	}
 	else {
 		ROS_INFO("not close enough to turn circle (center+radius)");
-		stoprobot(pub,robotID);
+		stoprobot(robotID);
 		return Status::Failure;
 	}
 }
