@@ -1,0 +1,91 @@
+
+
+{
+  "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
+  "title": "CoolTree",
+  "description": "",
+  "root": "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3",
+  "properties": {},
+  "nodes": {
+    "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3": {
+      "id": "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -120,
+        "y": 12
+      },
+      "children": [
+        "29ba5024-17fe-422b-9bcc-e439d9718491",
+        "109018cc-410b-40f1-973c-c3331bef8b7c",
+        "781fab8c-3c58-4066-8635-1ca0cc702ec6"
+      ]
+    },
+    "29ba5024-17fe-422b-9bcc-e439d9718491": {
+      "id": "29ba5024-17fe-422b-9bcc-e439d9718491",
+      "name": "GetBall",
+      "title": "GetBall",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 48,
+        "y": -60
+      }
+    },
+    "109018cc-410b-40f1-973c-c3331bef8b7c": {
+      "id": "109018cc-410b-40f1-973c-c3331bef8b7c",
+      "name": "RotpointSkill",
+      "title": "RotateAroundPoint",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 60,
+        "y": 12
+      }
+    },
+    "781fab8c-3c58-4066-8635-1ca0cc702ec6": {
+      "id": "781fab8c-3c58-4066-8635-1ca0cc702ec6",
+      "name": "KickSkill",
+      "title": "Kick",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 36,
+        "y": 84
+      }
+    }
+  },
+  "display": {
+    "camera_x": 650.5,
+    "camera_y": 335.5,
+    "camera_z": 1,
+    "x": -240,
+    "y": 12
+  },
+  "custom_nodes": [
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotpointSkill",
+      "category": "action",
+      "title": "RotpointSkill",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "KickSkill",
+      "category": "action",
+      "title": "KickSkill",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+

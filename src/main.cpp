@@ -48,12 +48,12 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle n;
 
-    auto role = make_BasicRole(n);
+    auto role = make_CoolTree(n);
 
     auto bb = role.GetBlackboard();
     bb->SetInt("ROBOT_ID", 0);
 
-    bb->SetDouble("GoToPos_first_xGoal", 1);
+    bb->SetDouble("RotateAroundPoint_", 1);
     bb->SetDouble("GoToPos_first_yGoal", 0);
     bb->SetDouble("GoToPos_second_xGoal", -1);
     bb->SetDouble("GoToPos_second_yGoal", 0);

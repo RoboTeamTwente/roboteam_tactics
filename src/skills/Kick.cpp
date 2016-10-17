@@ -57,12 +57,13 @@ bt::Node::Status Kick::Update() {
 			command.dribbler = false;
 			command.kicker = true;
 			command.kicker_forced = true;
-			command.kicker_vel = 2;
+			command.kicker_vel = 4;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
 			command.w_vel = 0.0;
 
 			pubKick.publish(command);
+			ros::spinOnce();
 			return Status::Success;
 		}
 		else {

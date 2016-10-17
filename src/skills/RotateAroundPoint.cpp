@@ -49,7 +49,7 @@ void RotateAroundPoint::updateArgs(ros::Publisher pub, int robotID, roboteam_uti
 
 void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
-	targetAngle = faceTowardsPos.angle();
+	targetAngle = differenceVector.angle();
 	ROS_INFO_STREAM(targetAngle);
 }
 

@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
 
 	roboteam_utils::Vector2 rotaround=roboteam_utils::Vector2(0.5,0);
-	roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(-3.0, 4.5);
+	roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(3.0, 0);
 	rotateAroundPoint.updateArgs(pub,0,faceTowardsPos,3.0,rotaround,0.1);
 	while (ros::ok()) {
 		ros::spinOnce();
