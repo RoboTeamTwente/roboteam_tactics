@@ -49,7 +49,8 @@ void RotateAroundPoint::updateArgs(ros::Publisher pub, int robotID, roboteam_uti
 
 void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
-	targetAngle = differenceVector.angle();
+	targetAngle = faceTowardsPos.angle();
+	ROS_INFO_STREAM(targetAngle);
 }
 
 void RotateAroundPoint::stoprobot(ros::Publisher pub, int robotID) {
@@ -94,6 +95,8 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
 	roboteam_utils::Vector2 targetPos=targetVector+center;
+
+	computeAngle(robotPos, faceTowardsPos);
 	
 	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.w);
 	
@@ -143,8 +146,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 			double requiredrotv=reqRobotrotDiff*rotPconstant+estimateddelay*-robotrequiredv.y;
 			
-			ROS_INFO_STREAM(reqRobotrotDiff);
-			if (requiredv.x > 0.01 or requiredv.y > 0.01 or requiredrotv > 0.1){ // robot not finished yet
+			if (fabs(worldrotDiff) > 0.01) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;
