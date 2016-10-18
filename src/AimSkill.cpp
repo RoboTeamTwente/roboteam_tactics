@@ -41,10 +41,11 @@ public:
 		roboteam_msgs::World world = LastWorld::get();
 		roboteam_msgs::WorldBall ball = world.ball;
 		
-		if (world.robots_yellow.size() == 0){
+		if (world.us.size() == 0){
 			return Status::Running;
 		}
-		roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
+        // TODO: Even though you checked the size here, you should still use std::vector::at()!
+		roboteam_msgs::WorldRobot robot = world.us[0];
 	
 		roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 		roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);

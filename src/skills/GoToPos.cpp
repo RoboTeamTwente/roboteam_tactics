@@ -31,13 +31,13 @@ bt::Node::Status GoToPos::Update (){
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
-	if (world.robots_yellow.size() == 0) {
+	if (world.us.size() == 0) {
 		ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
 	// roboteam_msgs::WorldBall ball = world.ball;
-	roboteam_msgs::WorldRobot robot = world.robots_yellow.at(robotID);
+	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double wCurrent = robot.w;
 

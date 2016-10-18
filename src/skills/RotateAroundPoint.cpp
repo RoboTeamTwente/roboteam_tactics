@@ -70,14 +70,16 @@ void RotateAroundPoint::stoprobot(int robotID) {
 bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
+    // TODO: You should use at() here instead of []! And check the bounds as well!
+    // What if us contains no robots?
+	roboteam_msgs::WorldRobot robot = world.us[0];
 	roboteam_utils::Vector2 faceTowardsPosx(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
     double rotw = GetDouble("w");
     roboteam_utils::Vector2 center(GetDouble("centerx"),GetDouble("centery"));
     int robotID = blackboard->GetInt("ROBOT_ID");
     double radius = GetDouble("radius");
 	
-	if (world.robots_yellow.size() == 0){
+	if (world.us.size() == 0){
 		return Status::Running;
 	}
 	if (world.header.seq==prevworldseq and !firstworld){
