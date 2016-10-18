@@ -4,7 +4,8 @@
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
-
+#include <cstring>
+#include <iostream>
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
@@ -67,14 +68,7 @@ void RotateAroundPoint::stoprobot(int robotID) {
 }
 
 bt::Node::Status RotateAroundPoint::Update (){
-	roboteam_utils::Vector2 faceTowardsPosx(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
-    double rotw = GetDouble("w");
-    roboteam_utils::Vector2 center(GetDouble("centerx"),GetDouble("centery"));
-    int robotID = blackboard->GetInt("ROBOT_ID");
-    double radius = GetDouble("radius");
-
-
-
+	// get world
 	roboteam_msgs::World world = LastWorld::get();
 	if (world.robots_yellow.size() == 0){
 		return Status::Running;
@@ -89,8 +83,30 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 	roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
-	center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	radius = 0.09;
+	
+	// settings
+	
+	
+	
+	roboteam_utils::Vector2 faceTowardsPos(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
+    double rotw = GetDouble("w");
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    //double radius = GetDouble("radius");
+		
+   	if(private_bb->GetString("center")=="ball"){
+		center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+		radius = 0.09;
+   			
+   	} else if(private_bb->GetString("center")=="point"){ROS_INFO("yo");
+		std::cout << private_bb->GetString("centerx");
+		center = roboteam_utils::Vector2(std::stod(private_bb->GetString("centerx")),std::stod(private_bb->GetString("centery")));
+		radius = std::stod(private_bb->GetString("radius"));
+   	
+   	}
+    
+    
+	
+	// calculations
 
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;

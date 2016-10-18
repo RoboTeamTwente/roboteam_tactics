@@ -44,8 +44,6 @@ int main(int argc, char **argv) {
     bb->SetInt("ROBOT_ID", 0);
     
 
-    bool rotaroundball=private_bb->getBool("aroundball");
-    ROS_INFO("go around ball: %b",rotaroundball);
     
 	rtt::RotateAroundPoint rotateAroundPoint(n, "", bb);
 	
