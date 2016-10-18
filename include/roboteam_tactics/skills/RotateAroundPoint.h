@@ -15,20 +15,24 @@ namespace rtt {
 
 
 
-class RotpointSkill : public Skill {
+class RotateAroundPoint : public Skill {
 public:
 	
-    RotpointSkill(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    RotateAroundPoint(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    Status Update();   
+     
     double cleanAngle(double angle);
-    void stoprobot(ros::Publisher pub, int RobotID);
+    void stoprobot(int RobotID);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
-    void updateArgs(ros::Publisher pub, int robotID, double targetAngle, double w, roboteam_utils::Vector2 center, double radius);
-    Status Update();
+    void computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
+
+   
 private:
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
 	double targetAngle;
+	roboteam_utils::Vector2 faceTowardsPos;
 	double rotw;
 	ros::Publisher pub;
 	roboteam_utils::Vector2 center;

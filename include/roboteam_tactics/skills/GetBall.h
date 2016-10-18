@@ -16,7 +16,6 @@ namespace rtt {
 class GetBall : public Skill {
 public:
     GetBall(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-    void UpdateArgs(int robotIDInput);
 	Status Update();
 private:
 	roboteam_utils::Vector2 prevTargetPos;

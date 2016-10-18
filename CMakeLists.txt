@@ -137,14 +137,14 @@ add_dependencies(AimSkill ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_
 target_link_libraries(AimSkill ${catkin_LIBRARIES})
 
 
-add_executable(RotpointTest
-	src/skills/tests/RotpointTest.cpp
-	src/skills/RotpointSkill.cpp
+add_executable(RotateAroundPoint
+	src/skills/tests/RotateAroundPointTest.cpp
+	src/skills/RotateAroundPoint.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
-add_dependencies(RotpointTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(RotpointTest ${catkin_LIBRARIES})
+add_dependencies(RotateAroundPoint ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RotateAroundPoint ${catkin_LIBRARIES})
 
 add_executable(GoToPosTest
 	src/skills/tests/GoToPosTest.cpp
@@ -165,9 +165,9 @@ add_executable(GetBallTest
 add_dependencies(GetBallTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(GetBallTest ${catkin_LIBRARIES})
 
-add_executable(KickSkillTest
-    src/skills/tests/KickSkillTest.cpp
-    src/skills/KickSkill.cpp
+add_executable(KickTest
+    src/skills/tests/KickTest.cpp
+    src/skills/Kick.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
@@ -178,8 +178,27 @@ catkin_add_gtest(VerificationTest
 )
 target_link_libraries(VerificationTest ${catkin_LIBRARIES})
 
-add_dependencies(KickSkillTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(KickSkillTest ${catkin_LIBRARIES})
+catkin_add_gtest(ConditionsTest
+    test/main.cpp
+    test/ConditionsTest.cpp
+
+    src/conditions/IHaveBall.cpp
+    src/LastWorld.cpp
+)
+target_link_libraries(ConditionsTest ${catkin_LIBRARIES})
+
+add_dependencies(KickTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(KickTest ${catkin_LIBRARIES})
+
+add_executable(FollowPathTest
+    src/skills/tests/FollowPathTest.cpp
+    src/skills/FollowPath.cpp
+    src/skills/GoToPos.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(FollowPathTest ${catkin_LIBRARIES})
 
 catkin_add_gtest(tactics_test
     test/main.cpp 
