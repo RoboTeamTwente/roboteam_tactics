@@ -2,4 +2,4 @@
 *.swp
 *~
 
-all_custom_nodes.json
+generate_all_custom_nodes.json
