@@ -15,15 +15,16 @@ class IHaveBall : public Condition {
 
 public:
     IHaveBall(std::string name, bt::Blackboard::Ptr blackboard = nullptr);  
-    Status Update();
+    Status Update() override;
     
     static VerificationMap required_params() {
         VerificationMap params;
         params["me"] = BBArgumentType::Int;
         return params;
     }
-    std::vector<roboteam_msgs::World> success_states();
-    std::vector<roboteam_msgs::World> fail_states();
+    
+    std::vector<roboteam_msgs::World> success_states() override;
+    std::vector<roboteam_msgs::World> fail_states() override;
 private:
     int me;
     boost::optional<roboteam_msgs::WorldRobot> find_bot_pos(const roboteam_msgs::World&) const;

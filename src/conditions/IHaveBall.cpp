@@ -6,7 +6,7 @@
 namespace rtt {
 
 IHaveBall::IHaveBall(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
-    assert_valid<IHaveBall>(blackboard, name);
+    assert_valid<IHaveBall>(name);
     me = GetInt("me");
 }
 

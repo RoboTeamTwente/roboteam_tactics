@@ -26,7 +26,7 @@ typedef std::map<std::string, BBArgumentType> VerificationMap;
  * See the documentation of rtt::Leaf::validate_blackboard for the requirements.
  */
 template<typename L>
-class CanVerify {
+class CanVerify final {
     private:
     /** 
      * Helper to check whether a type and value match. 
@@ -52,12 +52,12 @@ class CanVerify {
 
     /** @deprecated CanVerify cannot be initialized */
     CanVerify() { throw new std::logic_error("CanVerify cannot be initialized."); } 
-    public:    
+    public:
     
     /**
      * This selects one of the overloaded test() functions and checks the
      * return type. It is important to notice that the test function is not actually
-     * called, and no instance of struct Check is created. Both of those things are
+     * called, and no instance of struct ValueHasType is created. Both of those things are
      * impossible.
      */
     static constexpr bool can_it = decltype(test<L>(nullptr))::value;
@@ -171,8 +171,8 @@ class Leaf : public bt::Leaf {
      * for details.
      */
     template<typename Impl>
-    void assert_valid(bt::Blackboard::Ptr bb, std::string name = "") const {
-        if (!validate_blackboard<Impl>(bb, name)) {
+    void assert_valid(std::string name = "") const {
+        if (!validate_blackboard<Impl>(blackboard, name)) {
             throw std::invalid_argument("Blackboard verification failed.");
         }
     }
