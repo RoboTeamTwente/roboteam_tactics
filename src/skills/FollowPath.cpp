@@ -16,9 +16,9 @@ namespace rtt {
 FollowPath::FollowPath(ros::NodeHandle nh, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(nh, name, blackboard) { 
 		// state = "computePath";
-        	n = nh;
-        	state = 1;
-        	client = n.serviceClient<roboteam_msgs::navsim>("navsim");
+        n = nh;
+        state = 1;
+        client = n.serviceClient<roboteam_msgs::navsim>("navsim");
 }
 
 std::vector<roboteam_msgs::Point> FollowPath::ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos) {
@@ -76,11 +76,11 @@ bt::Node::Status FollowPath::Update () {
     double wGoal = GetDouble("wGoal");
     int robotID = blackboard->GetInt("ROBOT_ID");
 
-	while (world.robots_yellow.size() == 0) {
+	while (world.us.size() == 0) {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.robots_yellow.at(robotID);
+	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
 

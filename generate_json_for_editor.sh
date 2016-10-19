@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# TODO: Make sure it does built-in nodes as well. E.g. Repeat,
+# and others that may come.
+
 # Joins an array of strings in argument $2 with the sep character
 # in arg $1. No clue how it works.
 function join_by { local IFS="$1"; shift; echo "$*"; }
