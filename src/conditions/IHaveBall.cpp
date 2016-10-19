@@ -18,7 +18,7 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
         if (bot.id == (unsigned int) me)
             return boost::optional<roboteam_msgs::WorldRobot>(bot);
     }
-    for (const auto& bot : world.us) {
+    for (const auto& bot : world.them) {
         if (bot.id == (unsigned int) me)
             return boost::optional<roboteam_msgs::WorldRobot>(bot);
     }
