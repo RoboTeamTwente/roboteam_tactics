@@ -18,6 +18,7 @@ namespace rtt {
 	
 RotateAroundPoint::RotateAroundPoint(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
+
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
         
 }
@@ -43,7 +44,7 @@ roboteam_utils::Vector2 RotateAroundPoint::worldToRobotFrame(roboteam_utils::Vec
 
 void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
-	targetAngle = faceTowardsPos.angle();
+	targetAngle = differenceVector.angle();
 	ROS_INFO_STREAM(targetAngle);
 }
 
@@ -68,8 +69,10 @@ void RotateAroundPoint::stoprobot(int robotID) {
 }
 
 bt::Node::Status RotateAroundPoint::Update (){
+
 	// get world
 	roboteam_msgs::World world = LastWorld::get();
+
 	if (world.robots_yellow.size() == 0){
 		return Status::Running;
 	}
@@ -102,6 +105,9 @@ bt::Node::Status RotateAroundPoint::Update (){
 		center = roboteam_utils::Vector2(std::stod(private_bb->GetString("centerx")),std::stod(private_bb->GetString("centery")));
 		radius = std::stod(private_bb->GetString("radius"));
    	
+   	}
+   	else {
+   		ROS_INFO("ERR no center specified in blackboard");
    	}
     
     

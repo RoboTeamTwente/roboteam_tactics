@@ -29,30 +29,41 @@ int main(int argc, char **argv) {
 	while(pub.getNumSubscribers() < 1){sleep(0.1);}
 	ROS_INFO("connected");
 
-
-	roboteam_utils::Vector2 rotaround=roboteam_utils::Vector2(0.5,0);
-	roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(-3.0, 4.5);
-	//rotateAroundPoint.updateArgs(pub,0,faceTowardsPos,3.0,rotaround,0.1);
+	roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(3.0, 0);
 	
+	roboteam_msgs::World world = rtt::LastWorld::get();
+	roboteam_msgs::WorldBall ball = world.ball;
+	roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
+	roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+	int radius = 0.09;
+
 	auto bb = std::make_shared<bt::Blackboard>();
     bb->SetDouble("faceTowardsPosx", faceTowardsPos.x);
     bb->SetDouble("faceTowardsPosy", faceTowardsPos.y);
-    bb->SetDouble("centerx", rotaround.x);
-    bb->SetDouble("centery", rotaround.y);
-    bb->SetDouble("radius",0.1);
+    bb->SetDouble("centerx", center.x);
+    bb->SetDouble("centery", center.y);
+    bb->SetDouble("radius", radius);
     bb->SetDouble("w",3.0);
     bb->SetInt("ROBOT_ID", 0);
     
 
-    
 	rtt::RotateAroundPoint rotateAroundPoint(n, "", bb);
 	
-	
 	while (ros::ok()) {
+
+		roboteam_msgs::World world = rtt::LastWorld::get();
+		roboteam_msgs::WorldBall ball = world.ball;
+		roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
+		roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+		bb->SetDouble("centerx", center.x);
+	    bb->SetDouble("centery", center.y);
+	    bb->SetDouble("radius", radius);
+
 		ros::spinOnce();
 		if(rotateAroundPoint.Update() != bt::Node::Status::Running){break;} // break; breaks the code if only one message is sent
 		
 	}
+
 	ROS_INFO("Skill completed");
 	return 0;
 }
