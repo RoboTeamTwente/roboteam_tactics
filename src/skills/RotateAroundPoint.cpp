@@ -120,8 +120,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 	roboteam_utils::Vector2 faceTowardsPos(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
 	
-	ROS_INFO("facetw x:%f, y:%f",faceTowardsPos.x,faceTowardsPos.y);
-	
     double rotw = GetDouble("w");
     int robotID = blackboard->GetInt("ROBOT_ID");
     //double radius = GetDouble("radius");
@@ -150,7 +148,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 targetPos=targetVector+center;
 
 	targetAngle=computeAngle(robotPos, faceTowardsPos);
-	ROS_INFO("ta: %f",targetAngle);
+
 	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.angle);
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle);
 	worldrotDiff=cleanAngle(worldrotDiff);
@@ -195,7 +193,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 			double requiredrotv=reqRobotrotDiff*rotPconstant+estimateddelay*-robotrequiredv.y;
 			
-			ROS_INFO("robotrequiredv x:%f, y:%f",robotrequiredv.x,robotrequiredv.y);
 			// check for max
 			if(robotrequiredv.length() > maxv){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
