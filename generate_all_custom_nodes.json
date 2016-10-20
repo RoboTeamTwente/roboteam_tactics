@@ -1,0 +1,45 @@
+[
+    {
+        "name": "GetBall",
+        "category": "action",
+        "title": "GetBall",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "GoToPos",
+        "category": "action",
+        "title": "GoToPos",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "KickSkill",
+        "category": "action",
+        "title": "KickSkill",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "RotpointSkill",
+        "category": "action",
+        "title": "RotpointSkill",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "BallOnOurSide",
+        "category": "condition",
+        "title": "BallOnOurSide",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "BasicAttackTactic",
+        "category": "action",
+        "title": "BasicAttackTactic",
+        "description": null,
+        "properties": {}
+    },    {
+        "name": "BasicDefenseTactic",
+        "category": "action",
+        "title": "BasicDefenseTactic",
+        "description": null,
+        "properties": {}
+    }
+]
