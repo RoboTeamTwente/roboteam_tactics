@@ -101,10 +101,10 @@ How to use:
         
         
         // Uncomment to see the arguments
-        std::cout << "\n[Arg]\n";
-        std::cout << "Type: " << argType << "\n";
-        std::cout << "Name: " << name << "\n";
-        std::cout << "Value: " << rest << "\n";
+        // std::cout << "\n[Arg]\n";
+        // std::cout << "Type: " << argType << "\n";
+        // std::cout << "Name: " << name << "\n";
+        // std::cout << "Value: " << rest << "\n";
 
         if (argType == "string") {
             bb->SetString(name, rest);
