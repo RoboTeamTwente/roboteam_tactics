@@ -27,18 +27,20 @@ std::string BTBuilder::build(nlohmann::json json) {
     // a unique name by appending a number at the end
     int ctr = 0;
     for (auto& element : json["nodes"]) {
+        std::string title = element["title"];
+
         if (SKILLS.find(element["name"]) == SKILLS.end()
                 && CONDITIONS.find(element["name"]) == CONDITIONS.end()) {
             // Get title and append ctr
-            std::string title = element["title"];
             title += "_" + std::to_string(ctr++);
             // Replace spaces with _
-            std::transform(title.begin(), title.end(), title.begin(), [](char ch) {
-                return ch == ' ' ? '_' : ch;
-            });
-            // Put it back
-            element["title"] = title;
         }
+
+        std::transform(title.begin(), title.end(), title.begin(), [](char ch) {
+            return ch == ' ' ? '_' : ch;
+        });
+        // Put it back
+        element["title"] = title;
     }
     
     while (!stack.empty()) {

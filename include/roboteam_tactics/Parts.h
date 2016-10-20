@@ -130,7 +130,6 @@ class Leaf : public bt::Leaf {
         return Status::Invalid;
     }
 
-    bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
     const std::string name;
 
     // Proxies that prefix an id for lookups in the global table.
