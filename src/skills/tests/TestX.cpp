@@ -63,6 +63,7 @@ How to use:
         auto name = nameSplit.at(0);
         auto rest = nameSplit.at(1);
         
+        
         // Aggregate all the splitted = into one string
         // This happens if you try to set a value that contains multiple equals
         // (Then you only want to split on the first)

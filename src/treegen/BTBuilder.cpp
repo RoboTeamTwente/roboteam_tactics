@@ -177,7 +177,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_string()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard->SetString(\""
+                    << "->private_bb->SetString(\""
                     << property.first
                     << "\", \""
                     << property.second.get<std::string>()
@@ -187,7 +187,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_number()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard->SetDouble(\""
+                    << "->private_bb->SetDouble(\""
                     << property.first
                     << "\", "
                     << property.second.get<double>()
@@ -197,7 +197,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_boolean()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_blackboard->SetBool(\""
+                    << "->private_bb->SetBool(\""
                     << property.first
                     << "\", "
                     << (property.second.get<bool>() ? "true" : "false")

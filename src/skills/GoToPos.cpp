@@ -39,7 +39,7 @@ bt::Node::Status GoToPos::Update (){
 	// roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	double wCurrent = robot.w;
+	double wCurrent = robot.angle;
 
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
