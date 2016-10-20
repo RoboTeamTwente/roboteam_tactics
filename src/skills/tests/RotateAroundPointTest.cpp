@@ -35,10 +35,8 @@ void msgCallBackRotateAroundPoint(const roboteam_msgs::WorldConstPtr& world, rtt
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "RotateAroundPoint");
 	ros::NodeHandle n;
-	// ros::Subscriber sub = n.subscribe("world_state", 1000, msgCallBack);
 	
 	ros::Publisher pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-	// TODO: advertising on publisher is slow	
 	ROS_INFO("waiting for connection");
 	while(pub.getNumSubscribers() < 1){sleep(0.1);}
 	ROS_INFO("connected");
@@ -47,9 +45,6 @@ int main(int argc, char **argv) {
 	
 	roboteam_msgs::World world = rtt::LastWorld::get();
 	roboteam_msgs::WorldBall ball = world.ball;
-
-	// roboteam_msgs::WorldRobot robot = world.us.at(0);
-
 	roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 	int radius = 0.09;
 
@@ -67,14 +62,6 @@ int main(int argc, char **argv) {
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackRotateAroundPoint, _1, &rotateAroundPoint, bb));
 	
 	while (ros::ok()) {
-
-		// roboteam_msgs::World world = rtt::LastWorld::get();
-		// roboteam_msgs::WorldBall ball = world.ball;
-		// roboteam_msgs::WorldRobot robot = world.us[0];
-		// roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-		// bb->SetDouble("centerx", center.x);
-	 //    bb->SetDouble("centery", center.y);
-	 //    bb->SetDouble("radius", radius);
 
 		ros::spinOnce();
 		if (success) {
