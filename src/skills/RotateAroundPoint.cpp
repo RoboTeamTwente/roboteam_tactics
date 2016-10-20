@@ -54,7 +54,7 @@ void RotateAroundPoint::stoprobot(int robotID) {
 	cmd.active = true;
 	cmd.x_vel = 0.0;
 	cmd.y_vel = 0.0;
-	cmd.w_vel = 0.0;
+	cmd.w = 0.0;
 
 	cmd.dribbler=true;
 	cmd.kicker=false;
@@ -111,7 +111,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	}
 	roboteam_msgs::WorldRobot robot = world.us.at(0);
 	
-	roboteam_msgs::WorldBall ball = world.ball;
+	// roboteam_msgs::WorldBall ball = world.ball;
 	
 	// settings
 	roboteam_utils::Vector2 faceTowardsPos(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
@@ -203,7 +203,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.active = true;
 				cmd.x_vel = robotrequiredv.x;
 				cmd.y_vel = robotrequiredv.y;
-				cmd.w_vel = requiredrotv;
+				cmd.w = requiredrotv;
 
 				cmd.dribbler=true;
 				cmd.kicker=false;
@@ -212,7 +212,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.chipper=false;
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
-				// ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w_vel);
+				// ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
 				pub.publish(cmd);
 	
 				return Status::Running;

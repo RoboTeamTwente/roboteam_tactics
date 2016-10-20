@@ -47,19 +47,19 @@ namespace rtt {
 			roboteam_msgs::RobotCommand command;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
-			command.w_vel = 0.0;
+			command.w = 0.0;
 			command.dribbler = true;
 			pubGetBall.publish(command);
 			ros::spinOnce();
 			ROS_INFO("GetBall skill completed.");
 			return Status::Success;
 		} else {
-			if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
-                private_bb->SetDouble("xGoal", targetPos.x);
-                private_bb->SetDouble("yGoal", targetPos.y);
-                private_bb->SetDouble("wGoal", targetAngle);
-                private_bb->SetBool("endPoint", true);
-			}
+			// if (fabs(prevTargetPos.x-targetPos.x) > 0.03 || fabs(prevTargetPos.y-targetPos.y) > 0.03 || fabs(prevTargetAngle-targetAngle) > 0.03) {
+            private_bb->SetDouble("xGoal", targetPos.x);
+            private_bb->SetDouble("yGoal", targetPos.y);
+            private_bb->SetDouble("angleGoal", targetAngle);
+            private_bb->SetBool("endPoint", true);
+			// }
 			goToPos.Update();
 			prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);
 			prevTargetAngle = targetAngle;
