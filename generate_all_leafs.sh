@@ -47,6 +47,8 @@ function makeIncludeList {
 
     # 
     # Make skill factory
+    # TODO: Factor this out in something generic...? Only if needed
+    # for conditions & tactics too.
     #
 
     factoryFile="allskills_factory.h"
@@ -61,30 +63,31 @@ function makeIncludeList {
 #include \"ros/ros.h\"
 
 #include \"roboteam_tactics/bt.hpp\"
-#include \"roboteam_tactics/allskills.h\"
+#include \"roboteam_tactics/generated/allskills.h\"
 
 namespace rtt {
 
 /**
  * WARNING! ONLY USE FOR UNIT TESTS! REALLY!
  */
-std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) {
+std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
     if (false) {
         // Dummy condition
     } " >> generated/$factoryFile
 
     for f in skills/*.h; do
         skillName=$(basename "$f" .h) 
-        printf "else if (name == \"$skillName\") {
+        printf "else if (className == \"$skillName\") {
         return std::make_shared<$skillName>(n, name, bb);
     } " >> generated/$factoryFile
     done
 
     # Postamble
     printf "else {
-        std::cout << \"Error: Skill with name \" << name << \" not found.\\\\n\";
-        exit(1)
+        std::cout << \"Error: Skill with name \" << className << \" not found.\\\\n\";
+        exit(1);
     }
+}
 
 } // rtt
 " >> generated/$factoryFile

@@ -37,12 +37,13 @@ bt::Node::Status Kick::Update() {
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
-	if (world.robots_yellow.size() == 0) {
+	if (world.us.size() == 0) {
 		ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.robots_yellow[robotID];
+    // TODO: Even though you checked the size here, you should still use std::vector::at()!
+	roboteam_msgs::WorldRobot robot = world.us[robotID];
 	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 posDiff = ballPos-robotPos;		

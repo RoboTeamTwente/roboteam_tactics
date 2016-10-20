@@ -53,6 +53,14 @@ add_executable(converter
     )
 add_dependencies(converter generate_leafs_t)
 
+add_executable(TestX
+    src/skills/tests/TestX.cpp
+    src/LastWorld.cpp
+    ${TACTICS_SKILLS_SOURCES}
+    )
+add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
+target_link_libraries(TestX ${catkin_LIBRARIES})
+
 ############################################################
 #### Stupid stuff to get the json files to be converted ####
 ############################################################

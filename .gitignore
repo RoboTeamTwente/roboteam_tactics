@@ -1,3 +1,5 @@
 # Vim temporaries
 *.swp
 *~
+
+generate_all_custom_nodes.json

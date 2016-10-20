@@ -4,7 +4,8 @@
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
-
+#include <cstring>
+#include <iostream>
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
@@ -41,10 +42,9 @@ roboteam_utils::Vector2 RotateAroundPoint::worldToRobotFrame(roboteam_utils::Vec
 	return robotRequiredv;
 }
 
-void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
+double RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
-	targetAngle = differenceVector.angle();
-	ROS_INFO_STREAM(targetAngle);
+	return differenceVector.angle();
 }
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -68,16 +68,39 @@ void RotateAroundPoint::stoprobot(int robotID) {
 }
 
 bt::Node::Status RotateAroundPoint::Update (){
+	//**************************************//
+	// NEEDS BLACKBOARD ARGUMENTS: 			//
+	
+	// string:center="ball"					//
+	// double:faceTowardsPosx=				//
+	// double:faceTowardsPosy=				//
+	// double:w= (rotation speed (pick 3)	//
+	
+	// -- or --
+	
+	// string:center="point"				//
+	// double:centerx=
+	// double:centery=
+	// double:radius=
+	// double:faceTowardsPosx=				//
+	// double:faceTowardsPosy=				//
+	// double:w= (rotation speed (pick 2))	//
+	
+	
+	//**************************************//
+	
+	
+	
+	
+	// get world
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
-	roboteam_utils::Vector2 faceTowardsPosx(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
-    double rotw = GetDouble("w");
-    roboteam_utils::Vector2 center(GetDouble("centerx"),GetDouble("centery"));
-    int robotID = blackboard->GetInt("ROBOT_ID");
-    double radius = GetDouble("radius");
+
+    // TODO: You should use at() here instead of []! And check the bounds as well!
+    // What if us contains no robots?
 	
-	if (world.robots_yellow.size() == 0){
+	if (world.us.size() == 0){
+
 		return Status::Running;
 	}
 	if (world.header.seq==prevworldseq and !firstworld){
@@ -87,35 +110,62 @@ bt::Node::Status RotateAroundPoint::Update (){
 		firstworld=false;
 		prevworldseq=world.header.seq;
 	}
+	roboteam_msgs::WorldRobot robot = world.us.at(0);
+	
+	roboteam_msgs::WorldBall ball = world.ball;
+	
+	// settings
+	
+	
+	
+	roboteam_utils::Vector2 faceTowardsPos(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
+	
+    double rotw = GetDouble("w");
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    //double radius = GetDouble("radius");
+		
+   	if(GetString("center")=="ball"){
+		center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+		radius = 0.1;
+   			
+   	} else if(GetString("center")=="point"){ROS_INFO("yo");
+		std::cout << private_bb->GetString("centerx");
+		center = roboteam_utils::Vector2(GetDouble("centerx"),GetDouble("centery"));
+		radius = GetDouble("radius");
+   	
+   	}
+   	else {
+   		ROS_INFO("ERR no center specified in blackboard");
+   	}
+    
+    
+	
+	// calculations
 
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
 	roboteam_utils::Vector2 targetPos=targetVector+center;
 
-	computeAngle(robotPos, faceTowardsPos);
-	
-	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.w);
-	
-	double worldrotDiff=(robotPos-center).angle()-(targetAngle-M_PI);
+	targetAngle=computeAngle(robotPos, faceTowardsPos);
+
+	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.angle);
+	double worldrotDiff=(robotPos-center).angle()-(targetAngle);
 	worldrotDiff=cleanAngle(worldrotDiff);
 	
 	if (worldposDiff.length() < 1.5*radius) { // close enough
 		if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
+			roboteam_utils::Vector2 robotrequiredv;
+			
 			// velocity in towards and away from ball (x)
 			double Pconstant=3.0;
 			double maxv=5.0;
 			double scalefactor=(1 - radius/worldposDiff.length());
-			roboteam_utils::Vector2 requiredv=worldposDiff.scale(scalefactor)*Pconstant;
-	
-			roboteam_utils::Vector2 robotrequiredv=worldToRobotFrame(requiredv, robot.w);
+			double radiusDiff=worldToRobotFrame(worldposDiff.scale(scalefactor), robot.angle).x;
+			robotrequiredv.x=radiusDiff*Pconstant;
 					
-			if(robotrequiredv.x > maxv){
-				robotrequiredv.x=robotrequiredv.x/requiredv.length()*maxv;
-			}
-	
 			// velocity around ball (y)
-			Pconstant=20;
+			Pconstant=10;
 	
 			double reqWorldrotV=worldrotDiff*Pconstant;
 			if(reqWorldrotV > rotw){
@@ -126,16 +176,16 @@ bt::Node::Status RotateAroundPoint::Update (){
 			}
 
 			robotrequiredv.y=reqWorldrotV*radius;
-			if(robotrequiredv.y > maxv){
-				robotrequiredv.y=robotrequiredv.y/robotrequiredv.length()*maxv;
-			}
-	
+			
+			
+			
+			
 			// rotation controller (w)
 			double rotPconstant=10;
 			double estimateddelay=10;
 
 			double reqRobotrot=worldposDiff.angle();
-			double robotrot=robot.w;
+			double robotrot=robot.angle;
 	
 			double reqRobotrotDiff=cleanAngle(reqRobotrot-robotrot);
 		   	        
@@ -143,7 +193,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 			double requiredrotv=reqRobotrotDiff*rotPconstant+estimateddelay*-robotrequiredv.y;
 			
-			if (fabs(worldrotDiff) > 0.01) { // robot not finished yet
+			// check for max
+			if(robotrequiredv.length() > maxv){
+				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
+			}
+			
+			
+			
+			if (fabs(worldrotDiff) > 0.01 or fabs(radiusDiff) > 0.1 or fabs(reqRobotrotDiff) > 0.1) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;
