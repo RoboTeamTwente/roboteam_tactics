@@ -15,6 +15,7 @@ namespace rtt {
 Kick::Kick(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
         	pubKick = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        	ROS_INFO("Kicking the ball");
 }
 
 double Kick::cleanAngle(double angle){
@@ -52,7 +53,6 @@ bt::Node::Status Kick::Update() {
 
 	if (posDiff.length() < 0.105) { // ball is close
 		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
-			ROS_INFO("Kicking the ball");
 			roboteam_msgs::RobotCommand command;
 			command.dribbler = false;
 			command.kicker = true;
@@ -64,6 +64,7 @@ bt::Node::Status Kick::Update() {
 
 			pubKick.publish(command);
 			ros::spinOnce();
+			ROS_INFO("Kick skill done");
 			return Status::Success;
 		}
 		else {

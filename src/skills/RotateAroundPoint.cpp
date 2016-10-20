@@ -19,6 +19,7 @@ RotateAroundPoint::RotateAroundPoint(ros::NodeHandle n, std::string name, bt::Bl
         : Skill(n, name, blackboard) {
 
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+	ROS_INFO("Rotating around point");
         
 }
 
@@ -41,10 +42,10 @@ roboteam_utils::Vector2 RotateAroundPoint::worldToRobotFrame(roboteam_utils::Vec
 	return robotRequiredv;
 }
 
-void RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
+double RotateAroundPoint::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
 	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
-	targetAngle = differenceVector.angle();
-	ROS_INFO_STREAM(targetAngle);
+	double targetAngle = differenceVector.angle();
+	return targetAngle;
 }
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -71,7 +72,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 
 	roboteam_msgs::WorldRobot robot = world.robots_yellow[0];
-	roboteam_utils::Vector2 faceTowardsPosx(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
+	roboteam_utils::Vector2 faceTowardsPos(GetDouble("faceTowardsPosx"),GetDouble("faceTowardsPosy"));
     double rotw = GetDouble("w");
     roboteam_utils::Vector2 center(GetDouble("centerx"),GetDouble("centery"));
     int robotID = blackboard->GetInt("ROBOT_ID");
@@ -89,11 +90,10 @@ bt::Node::Status RotateAroundPoint::Update (){
 	}
 
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	double targetAngle = computeAngle(robotPos, faceTowardsPos);
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
-	roboteam_utils::Vector2 targetPos=targetVector+center;
-
-	computeAngle(robotPos, faceTowardsPos);
+	roboteam_utils::Vector2 targetPos= targetVector + center;
 	
 	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.w);
 	
@@ -160,7 +160,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.chipper=false;
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
-				ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w_vel);
+				// ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w_vel);
 				pub.publish(cmd);
 	
 				return Status::Running;
@@ -170,7 +170,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				// TODO: maybe instead call position controller
 				
 				stoprobot(robotID);
-				ROS_INFO("finished");
+				ROS_INFO("Rotation completed");
 				return Status::Success;
 			}
 		}

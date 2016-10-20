@@ -20,18 +20,17 @@ public:
 	
     RotateAroundPoint(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update();   
-     
     double cleanAngle(double angle);
     void stoprobot(int RobotID);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
-    void computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
+    double computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
 
    
 private:
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
-	double targetAngle;
+	// double targetAngle;
 	roboteam_utils::Vector2 faceTowardsPos;
 	double rotw;
 	ros::Publisher pub;
