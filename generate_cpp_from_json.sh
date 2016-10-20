@@ -43,18 +43,13 @@ printf "namespace rtt {\n" >> $treeHeader
 # Generate declarations and implementations for the behavior trees
 # And append them to the sourc and header files
 for filepath in ./json/*.json; do
+    # Generate implementations
     cat $filepath | rosrun roboteam_tactics converter impl >> $treeSource
     printf "\n" >> $treeSource
 
+    # Generated header declarations
     printf "\t" >> $treeHeader
     cat $filepath | rosrun roboteam_tactics converter decl >> $treeHeader
-
-    # Before cmake integration
-    #cat $filepath | ../treegen/converter impl >> $treeSource
-    #printf "\n" >> $treeSource
-
-    #printf "\t" >> $treeHeader
-    #cat $filepath | ../treegen/converter decl >> $treeHeader
 done
 
 # Closing brackets :D
