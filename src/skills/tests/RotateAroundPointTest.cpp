@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 	roboteam_msgs::World world = rtt::LastWorld::get();
 	roboteam_msgs::WorldBall ball = world.ball;
 
-	roboteam_msgs::WorldRobot robot = world.us[0];
+	// roboteam_msgs::WorldRobot robot = world.us.at(0);
 
 	roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 	int radius = 0.09;

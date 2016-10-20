@@ -49,7 +49,7 @@ bt::Node::Status Kick::Update() {
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 posDiff = ballPos-robotPos;		
 
-	double rotDiff = posDiff.angle() - robot.w;
+	double rotDiff = posDiff.angle() - robot.angle;
 	rotDiff = cleanAngle(rotDiff);
 
 	if (posDiff.length() < 0.105) { // ball is close

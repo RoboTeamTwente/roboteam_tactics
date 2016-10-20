@@ -1,0 +1,99 @@
+
+
+{
+  "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
+  "title": "CoolTree",
+  "description": "",
+  "root": "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3",
+  "properties": {},
+  "nodes": {
+    "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3": {
+      "id": "f9ec07ea-11b1-4b69-9c38-8e89f2b496d3",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -120,
+        "y": 12
+      },
+      "children": [
+        "9d5c2aac-858e-4cdf-8852-2e9c05da272c",
+        "34256e70-af26-4122-9435-e80137429dbf",
+        "781fab8c-3c58-4066-8635-1ca0cc702ec6"
+      ]
+    },
+    "781fab8c-3c58-4066-8635-1ca0cc702ec6": {
+      "id": "781fab8c-3c58-4066-8635-1ca0cc702ec6",
+      "name": "Kick",
+      "title": "Kick_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 48,
+        "y": 120
+      }
+    },
+    "34256e70-af26-4122-9435-e80137429dbf": {
+      "id": "34256e70-af26-4122-9435-e80137429dbf",
+      "name": "RotateAroundPoint",
+      "title": "RotateAroundPoint_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 360,
+        "y": -36
+      }
+    },
+    "9d5c2aac-858e-4cdf-8852-2e9c05da272c": {
+      "id": "9d5c2aac-858e-4cdf-8852-2e9c05da272c",
+      "name": "GetBall",
+      "title": "GetBall_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 336,
+        "y": -108
+      }
+    }
+  },
+  "display": {
+    "camera_x": 539.0650000000023,
+    "camera_y": 335.5,
+    "camera_z": 1,
+    "x": -240,
+    "y": 12
+  },
+  "custom_nodes": [
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_A",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+
+

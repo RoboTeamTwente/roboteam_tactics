@@ -96,7 +96,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 
     // TODO: You should use at() here instead of []! And check the bounds as well!
-    // What if us contains no robots?
+    // What if us contains no robots? SEGFAULT!!!!!!! boooo
 	
 	if (world.us.size() == 0){
 
@@ -120,20 +120,24 @@ bt::Node::Status RotateAroundPoint::Update (){
     int robotID = blackboard->GetInt("ROBOT_ID");
     //double radius = GetDouble("radius");
 		
-   	if(GetString("center")=="ball"){
-		center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-		radius = 0.1;
+  //  	if(GetString("center")=="ball"){
+  //  		ROS_INFO("yoyo");
+		// center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+		// radius = 0.1;
    			
-   	} else if(GetString("center")=="point"){ROS_INFO("yo");
-		std::cout << private_bb->GetString("centerx");
-		center = roboteam_utils::Vector2(GetDouble("centerx"),GetDouble("centery"));
-		radius = GetDouble("radius");
+  //  	} else if(GetString("center")=="point"){
+  //  		ROS_INFO("yo");
+		// std::cout << private_bb->GetString("centerx");
+		// center = roboteam_utils::Vector2(GetDouble("centerx"),GetDouble("centery"));
+		// radius = GetDouble("radius");
    	
-   	}
-   	else {
-   		ROS_INFO("ERR no center specified in blackboard");
-   	}
-  
+  //  	}
+  //  	else {
+  //  		ROS_INFO("ERR no center specified in blackboard");
+  //  	}
+
+   	center = roboteam_utils::Vector2(GetDouble("centerx"),GetDouble("centery"));
+  	radius = GetDouble("radius");
 	
 	// calculations
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
@@ -142,7 +146,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
 	roboteam_utils::Vector2 targetPos= targetVector + center;
 	
-	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.w);
+	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.angle);
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle-M_PI);
 
 	worldrotDiff=cleanAngle(worldrotDiff);
