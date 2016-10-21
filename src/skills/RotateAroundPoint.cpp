@@ -54,7 +54,7 @@ void RotateAroundPoint::stoprobot(int robotID) {
 	cmd.active = true;
 	cmd.x_vel = 0.0;
 	cmd.y_vel = 0.0;
-	cmd.w_vel = 0.0;
+	cmd.w = 0.0;
 
 	cmd.dribbler=true;
 	cmd.kicker=false;
@@ -178,14 +178,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 	    
 	
 	// vector calculations
-
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	double targetAngle=computeAngle(robotPos, faceTowardsPos);
+
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
 	roboteam_utils::Vector2 targetPos=targetVector+center;
 
-	targetAngle=computeAngle(robotPos, faceTowardsPos);
-
+	
 	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.angle);
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
@@ -251,7 +251,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.active = true;
 				cmd.x_vel = robotrequiredv.x;
 				cmd.y_vel = robotrequiredv.y;
-				cmd.w_vel = requiredrotv;
+				cmd.w = requiredrotv;
 
 				cmd.dribbler=true;
 				cmd.kicker=false;
@@ -260,7 +260,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.chipper=false;
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
-				ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w_vel);
+				ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
 				pub.publish(cmd);
 	
 				return Status::Running;

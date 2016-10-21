@@ -205,3 +205,15 @@ catkin_add_gtest(tactics_test
 	test/SimpleTest.cpp
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
+
+add_executable(RoleNode
+    src/RoleNode.cpp
+    )
+add_dependencies(RoleNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RoleNode ${catkin_LIBRARIES})
+
+add_executable(StrategyNode
+    src/StrategyNode.cpp
+    )
+add_dependencies(StrategyNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(StrategyNode ${catkin_LIBRARIES})

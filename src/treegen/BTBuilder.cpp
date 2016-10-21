@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <stack>
+#include <string>
 #include <unordered_map>
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
@@ -21,12 +23,24 @@ std::string BTBuilder::build(nlohmann::json json) {
     std::stack<std::string> stack;
     stack.push(json["root"]);
 
+    // Give all nodes who are not a skill nor condition
+    // a unique name by appending a number at the end
     int ctr = 0;
     for (auto& element : json["nodes"]) {
+        std::string title = element["title"];
+
         if (SKILLS.find(element["name"]) == SKILLS.end()
                 && CONDITIONS.find(element["name"]) == CONDITIONS.end()) {
-            element["title"] = element["title"].get<std::string>() + "_" + std::to_string(ctr++);
+            // Get title and append ctr
+            title += "_" + std::to_string(ctr++);
+            // Replace spaces with _
         }
+
+        std::transform(title.begin(), title.end(), title.begin(), [](char ch) {
+            return ch == ' ' ? '_' : ch;
+        });
+        // Put it back
+        element["title"] = title;
     }
     
     while (!stack.empty()) {
@@ -62,7 +76,17 @@ std::string BTBuilder::build(nlohmann::json json) {
 }
 
 void BTBuilder::define_seq(std::string name) {
-    out << DINDENT << "auto " << name << " = std::make_shared<bt::Sequence>();" << std::endl;
+    std::string memSeqName = "MemSequence";
+    std::string type = "bt::Sequence";
+    if (name.compare(0, memSeqName.length(), memSeqName) == 0) {
+        // It's a mem sequence
+        type = "bt::MemSequence";
+    } else {
+        // It's a regular sequence
+        type = "bt::Sequence";
+    }
+
+    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">();\n";
 }
 
 void BTBuilder::define_sel(std::string name) {
@@ -70,12 +94,23 @@ void BTBuilder::define_sel(std::string name) {
 }
 
 void BTBuilder::define_dec(std::string name, std::string type) {
+    std::string params = "";
+
     if (type == "Repeat") {
-        out << DINDENT << "auto " << name << " = std::make_shared<bt::Repeater>();" << std::endl;
+        type = "bt::Repeater";
+    } else if (type == "RepeatUntilFailure") {
+        type = "bt::UntilFail";
+    } else if (type == "RepeatUntilSuccess") {
+        type = "bt::UntilSuccess";
+    } else if (type == "Inverter") {
+        type = "bt::Inverter";
     } else {
-        out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(bb);" << std::endl;
+        params = "bb";
     }
+
+    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(" << params << ");\n";
 }
+
 void BTBuilder::define_nod(std::string name, std::string type) {
     // If it's a skill we need to pass the node handle
     if (SKILLS.find(type) != SKILLS.end()) {
@@ -197,6 +232,7 @@ void BTBuilder::build_structure(nlohmann::json root) {
 
 NodeType BTBuilder::determine_type(nlohmann::json json) {
     std::string name = json["name"];
+
     if (name == "Priority" || name == "MemPriority") {
         return SELECTOR;
     } else if (name == "Sequence" || name == "MemSequence") {
@@ -204,6 +240,7 @@ NodeType BTBuilder::determine_type(nlohmann::json json) {
     } else if (json.find("child") != json.end()) {
         return DECORATOR;
     }
+
     return LEAF;
 }
 

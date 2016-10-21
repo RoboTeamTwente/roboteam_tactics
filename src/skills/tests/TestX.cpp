@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "ros/ros.h"
 
 #include "roboteam_tactics/generated/allskills_factory.h"
@@ -15,6 +17,10 @@ std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
+}
+
+bool is_digits(const std::string &str) {
+    return std::all_of(str.begin(), str.end(), ::isdigit); 
 }
             
 void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
@@ -57,12 +63,13 @@ How to use:
     std::cout << "Test class: " << testClass << "\n";
 
     for (size_t i = 1; i < arguments.size(); i++) {
-        auto typeSplit = split(arguments.at(i), ':');
-        auto argType = typeSplit.at(0);
-        auto nameSplit = split(typeSplit.at(1), '=');
+        std::vector<std::string> typeSplit;
+        
+        auto arg = arguments.at(i);
+        
+        auto nameSplit = split(arg, '=');
         auto name = nameSplit.at(0);
         auto rest = nameSplit.at(1);
-        
         
         // Aggregate all the splitted = into one string
         // This happens if you try to set a value that contains multiple equals
@@ -71,6 +78,28 @@ How to use:
             rest += nameSplit.at(i);
         }
 
+        std::string argType;
+        if (name.find(":") != std::string::npos) {
+            // Name contains type - lets take it out
+            auto typeSplit = split(name, ':');
+            argType = typeSplit.at(0);
+            name = typeSplit.at(1);
+        } else {
+            // Derive type
+            if (rest == "true") {
+                argType = "bool";
+            } else if (rest == "false") {
+                argType = "bool";
+            } else if (rest.find(".") != std::string::npos) {
+                argType = "double";
+            } else if (is_digits(rest)) {
+                argType = "int";
+            } else {
+                argType = "string";
+            }
+        }
+        
+        
         // Uncomment to see the arguments
         // std::cout << "\n[Arg]\n";
         // std::cout << "Type: " << argType << "\n";
