@@ -99,7 +99,7 @@ void BTBuilder::define_dec(std::string name, std::string type) {
     if (type == "Repeat") {
         type = "bt::Repeater";
     } else if (type == "RepeatUntilFailure") {
-        type = "bt::UntilFailure";
+        type = "bt::UntilFail";
     } else if (type == "RepeatUntilSuccess") {
         type = "bt::UntilSuccess";
     } else if (type == "Inverter") {

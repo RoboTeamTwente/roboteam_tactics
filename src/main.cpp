@@ -17,64 +17,77 @@
 
 namespace rtt {
 
-void world_state_callback(const roboteam_msgs::World::ConstPtr& msg) {
-    LastWorld::set(*msg);
+bool success;
+bool failure;
+
+void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree, bt::Blackboard::Ptr bb) {
+    rtt::LastWorld::set(*world);
+
+    roboteam_msgs::World getworld = rtt::LastWorld::get();
+    roboteam_msgs::WorldBall ball = getworld.ball;
+    roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+    bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
+    bb->SetDouble("RotateAroundPoint_A_centery", center.y);
+
+    bt::Node::Status status = tree->Update();
+    if (status == bt::Node::Status::Success) {
+        success = true;
+    }
+    if (status == bt::Node::Status::Failure) {
+        failure = true;
+    }
 }
 
-bt::BehaviorTree strategy;
-int ai_count = 0;
+// bt::BehaviorTree strategy;
+// int ai_count = 0;
 
-void run_ai_cycle() {
-    // If there is no tactic, pick one, or:
-    if (!pickedTactic || (ai_count % 8 == 0)) { // Check somehow if the tactic is still applicable
-        strategy.Update();
+// void run_ai_cycle() {
+//     // If there is no tactic, pick one, or:
+//     if (!pickedTactic || (ai_count % 8 == 0)) { // Check somehow if the tactic is still applicable
+//         strategy.Update();
 
-        // Let tactic distribute roles
-        pickedTactic->distribute_roles();
-    }
+//         // Let tactic distribute roles
+//         pickedTactic->distribute_roles();
+//     }
 
-    // Let the roles update s.t. the robots start moving
-    pickedTactic->update_roles();
+//     // Let the roles update s.t. the robots start moving
+//     pickedTactic->update_roles();
 
-    // Stop after 100 iterations
-    if (++ai_count == 100) {
-        ros::shutdown();
-    }
+//     // Stop after 100 iterations
+//     if (++ai_count == 100) {
+//         ros::shutdown();
+//     }
 
-    std::cout << "Finished an AI cycle\n";
-}
+//     std::cout << "Finished an AI cycle\n";
+// }
 
 int main(int argc, char **argv) {
+    
     ros::init(argc, argv, "tactics");
-
     ros::NodeHandle n;
 
-    // auto role = make_BasicRole(n);
-    auto role = make_testparams(n);
-
+    auto role = make_CoolTree(n);
     auto bb = role.GetBlackboard();
-    bb->SetInt("ROBOT_ID", 0);
 
+    bb->SetInt("ROBOT_ID", 0);
     bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", 3.0);
     bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", 0.0);
     bb->SetDouble("RotateAroundPoint_A_w",3.0);
-    // double radius = 0.09;
     bb->SetDouble("RotateAroundPoint_A_radius", 0.09);
-    ros::Subscriber sub = n.subscribe("world_state", 1, world_state_callback);
+
+    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb));
 
     while(ros::ok()) {
-        roboteam_msgs::World world = rtt::LastWorld::get();
-        roboteam_msgs::WorldBall ball = world.ball;
-        // roboteam_msgs::WorldRobot robot = world.robots_yellow.at(0);
-        roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-        bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
-        bb->SetDouble("RotateAroundPoint_A_centery", center.y);
-
         ros::spinOnce();
-
-        role.Update();
+        if (success) {
+            ROS_INFO("finished");
+            break;
+        }
+        if (failure) {
+            ROS_INFO("failed :(");
+            break;
+        }
     }
-    
     return 0;
 }
 
