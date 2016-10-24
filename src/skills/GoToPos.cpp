@@ -25,7 +25,7 @@ bt::Node::Status GoToPos::Update (){
 
     double xGoal = GetDouble("xGoal");
     double yGoal = GetDouble("yGoal");
-    double wGoal = GetDouble("wGoal");
+    double wGoal = GetDouble("angleGoal");
     int robotID = blackboard->GetInt("ROBOT_ID");
     bool endPoint = GetBool("endPoint");
 
@@ -78,7 +78,7 @@ bt::Node::Status GoToPos::Update (){
     command.id = robotID;
     command.x_vel = robotFrameRequiredSpeed.x;
     command.y_vel = robotFrameRequiredSpeed.y;
-    command.w_vel = requiredRotSpeed;
+    command.w = requiredRotSpeed;
 
     // ROS_INFO_STREAM(command.x_vel << command.y_vel);
 
@@ -96,7 +96,7 @@ bt::Node::Status GoToPos::Update (){
                 command.id = robotID;
                 command.x_vel = 0.0;
                 command.y_vel = 0.0;
-                command.w_vel = 0.0;
+                command.w = 0.0;
                 pub.publish(command);
                 ros::spinOnce();
                 return Status::Success;

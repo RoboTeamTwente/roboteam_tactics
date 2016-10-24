@@ -18,6 +18,8 @@ public:
 
             if (status == Status::Success) {
                 return Status::Success;
+            } else if (status == Status::Running) {
+                return Status::Running;
             }
         }
     }

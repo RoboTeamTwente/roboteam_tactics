@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "Blackboard.hpp"
+
 namespace bt
 {
 
@@ -45,6 +47,8 @@ public:
     void Reset() { status = Status::Invalid; }
 
     using Ptr = std::shared_ptr<Node>;
+
+    bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
 
 protected:
     Status status = Status::Invalid;
