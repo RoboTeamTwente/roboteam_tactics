@@ -204,7 +204,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			double radiusDiff=(worldposDiff.length()-radius);
 			double radiusReq=radiusDiff*radiusPconstant;
 			
-			ROS_INFO("radiusDiff:%f",radiusDiff);
+			//ROS_INFO("radiusDiff:%f",radiusDiff);
 			
 			double turnDiff=worldrotDiff;
 			double turnReq=turnDiff*turnPconstant;
@@ -219,10 +219,17 @@ bt::Node::Status RotateAroundPoint::Update (){
 			turnReq*=radius;
 			
 			roboteam_utils::Vector2 localreq(radiusReq, turnReq);
-			ROS_INFO("localreq x:%f, y:%f, angle:%f",localreq.x,localreq.y,worldrottoballdiff);
+			//ROS_INFO("localreq x:%f, y:%f, angle:%f",localreq.x,localreq.y,worldrottoballdiff);
 			
 			robotrequiredv=worldToRobotFrame(localreq, worldrottoballdiff);
-			ROS_INFO("robotreq x:%f, y:%f",robotrequiredv.x,robotrequiredv.y);
+			//ROS_INFO("robotreq x:%f, y:%f",robotrequiredv.x,robotrequiredv.y);
+			
+			//ROS_INFO("extrav x:%f, y:%f",GetDouble("extravx"),GetDouble("extravy"));
+			
+			roboteam_utils::Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
+			robotrequiredv=robotrequiredv+extrav;
+			
+			
 			if(robotrequiredv.length() > maxv){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
 			}
@@ -239,11 +246,9 @@ bt::Node::Status RotateAroundPoint::Update (){
 			double requiredrotv=reqRobotrotDiff*rotPconstant;
 			if(requiredrotv > maxrot){requiredrotv=maxrot;}
 			if(requiredrotv < -maxrot){requiredrotv=-maxrot;}
+
 			
-			
-			
-			
-			if (fabs(worldrotDiff) > 0.01 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
+			//if (fabs(worldrotDiff) > 0.01 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;
@@ -260,19 +265,19 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.chipper=false;
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
-				ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
+				//ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
 				pub.publish(cmd);
 	
 				return Status::Running;
 				
-			} 
+			/*} 
 			else { // final position reached
 				// TODO: maybe instead call position controller
 				
 				stoprobot(robotID);
 				ROS_INFO("finished");
 				return Status::Success;
-			}
+			}*/
 		}
 		else { // wrong orientation 
 			ROS_INFO("not oriented enough toward center");
