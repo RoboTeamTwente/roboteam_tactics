@@ -172,6 +172,13 @@ add_executable(KickTest
     src/LastWorld.cpp
 )
 
+add_executable(IcptTest
+    src/conditions/CanInterceptBall.cpp
+    src/LastWorld.cpp
+)
+target_link_libraries(IcptTest ${catkin_LIBRARIES})
+target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
+
 catkin_add_gtest(VerificationTest
     test/main.cpp
     test/VerificationTest.cpp
