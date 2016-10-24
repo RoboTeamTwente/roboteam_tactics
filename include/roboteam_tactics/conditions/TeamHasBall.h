@@ -8,7 +8,7 @@ class TeamHasBall : public Condition {
 public:
     static VerificationMap required_params() {
         VerificationMap params;
-        params["blue_team"] = BBArgumentType::Bool;
+        params["our_team"] = BBArgumentType::Bool;
         return params;
     }
     
@@ -16,7 +16,7 @@ public:
     Status Update() override;
     
 private:
-    bool blue_team;
+    bool our_team;
 };
 
 }

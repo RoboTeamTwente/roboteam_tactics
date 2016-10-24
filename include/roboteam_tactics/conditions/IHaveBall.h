@@ -23,8 +23,8 @@ public:
         return params;
     }
     
-    std::vector<roboteam_msgs::World> success_states() override;
-    std::vector<roboteam_msgs::World> fail_states() override;
+    std::vector<roboteam_msgs::World> success_states() const override;
+    std::vector<roboteam_msgs::World> fail_states() const override;
 private:
     int me;
     boost::optional<roboteam_msgs::WorldRobot> find_bot_pos(const roboteam_msgs::World&) const;

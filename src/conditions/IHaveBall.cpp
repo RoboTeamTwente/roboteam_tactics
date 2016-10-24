@@ -10,9 +10,6 @@ IHaveBall::IHaveBall(std::string name, bt::Blackboard::Ptr blackboard) : Conditi
     me = GetInt("me");
 }
 
-// TODO: Earlier blue was used here instead of yellow. (at lines 17/21)
-// Did the original author mean to use yellow? Or should I have entered them
-// instead of us?
 boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const roboteam_msgs::World& world) const {
     for (const auto& bot : world.us) {
         if (bot.id == (unsigned int) me)
@@ -47,7 +44,7 @@ bt::Node::Status IHaveBall::Update() {
     return Status::Success;
 }
 
-std::vector<roboteam_msgs::World> IHaveBall::success_states() {
+std::vector<roboteam_msgs::World> IHaveBall::success_states() const {
     roboteam_msgs::World succ1, succ2;
     succ1.us.push_back(roboteam_msgs::WorldRobot());
     succ1.us[0].w = M_PI_2l; //90 deg
@@ -65,7 +62,7 @@ std::vector<roboteam_msgs::World> IHaveBall::success_states() {
     return vec;
 }
 
-std::vector<roboteam_msgs::World> IHaveBall::fail_states() {
+std::vector<roboteam_msgs::World> IHaveBall::fail_states() const {
     roboteam_msgs::World succ1, succ2;
     succ1.us.push_back(roboteam_msgs::WorldRobot());
     succ1.us[0].w = M_PI_2l; //90 deg

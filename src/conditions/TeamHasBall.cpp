@@ -8,11 +8,11 @@ namespace rtt {
 
 TeamHasBall::TeamHasBall(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
     assert_valid<TeamHasBall>(name);
-    blue_team = GetBool("blue_team");
+    our_team = GetBool("our_team");
 }
 
 bt::Node::Status TeamHasBall::Update() {
-    const auto bots = blue_team ? LastWorld::get().robots_blue : LastWorld::get().robots_yellow;
+    const auto bots = our_team ? LastWorld::get().us : LastWorld::get().them;
     bt::Blackboard tmp(*blackboard); //copy
     bt::Blackboard::Ptr tmp_ptr = std::make_shared<bt::Blackboard>(tmp);
     std::string tmp_name = "tmp_ihb";
