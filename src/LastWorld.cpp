@@ -6,6 +6,7 @@
 namespace rtt {
 
 roboteam_msgs::World LastWorld::lastWorld;
+bool LastWorld::blue;
 
 
 void LastWorld::set(roboteam_msgs::World world) {
@@ -23,6 +24,14 @@ roboteam_msgs::Vector2f LastWorld::PredictBallPos(double t) {
 
 roboteam_msgs::World LastWorld::get() {
     return LastWorld::lastWorld;
+}
+
+bool LastWorld::we_are_blue() {
+    return LastWorld::blue;
+}
+
+void LastWorld::set_we_are_blue(bool b) {
+    LastWorld::blue = b;
 }
 
 }

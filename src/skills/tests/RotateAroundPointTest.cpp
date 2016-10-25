@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
 	auto bb = std::make_shared<bt::Blackboard>();
     bb->SetDouble("faceTowardsPosx", 0.15);
     bb->SetDouble("faceTowardsPosy", 0.0);
+    bb->SetString("center", "ball");
     bb->SetDouble("centerx", center.x);
     bb->SetDouble("centery", center.y);
     bb->SetDouble("radius", radius);

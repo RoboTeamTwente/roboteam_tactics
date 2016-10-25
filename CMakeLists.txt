@@ -174,6 +174,13 @@ add_executable(KickTest
     src/LastWorld.cpp
 )
 
+add_executable(IcptTest
+    src/conditions/CanInterceptBall.cpp
+    src/LastWorld.cpp
+)
+target_link_libraries(IcptTest ${catkin_LIBRARIES})
+target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
+
 catkin_add_gtest(VerificationTest
     test/main.cpp
     test/VerificationTest.cpp
@@ -207,3 +214,15 @@ catkin_add_gtest(tactics_test
 	test/SimpleTest.cpp
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
+
+add_executable(RoleNode
+    src/RoleNode.cpp
+    )
+add_dependencies(RoleNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(RoleNode ${catkin_LIBRARIES})
+
+add_executable(StrategyNode
+    src/StrategyNode.cpp
+    )
+add_dependencies(StrategyNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(StrategyNode ${catkin_LIBRARIES})

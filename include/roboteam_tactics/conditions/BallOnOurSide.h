@@ -10,7 +10,7 @@ class BallOnOurSide : public Condition {
     public:
     BallOnOurSide(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     
-    Status Update();
+    Status Update() override;
 
     private:
     int count = 0;

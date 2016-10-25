@@ -45,7 +45,7 @@ class Condition : public Leaf {
      * @brief Returns a set of world states in which this Condition should succeed.
      * For use in testing. See test/ConditionsTest.cpp
      */
-    virtual std::vector<roboteam_msgs::World> success_states() {
+    virtual std::vector<roboteam_msgs::World> success_states() const {
         return std::vector<roboteam_msgs::World>();
     }
     
@@ -53,7 +53,7 @@ class Condition : public Leaf {
      * @brief Returns a set of world states in which this Condition should fail.
      * For use in testing. See test/ConditionsTest.cpp
      */
-    virtual std::vector<roboteam_msgs::World> fail_states() {
+    virtual std::vector<roboteam_msgs::World> fail_states() const {
         return std::vector<roboteam_msgs::World>();
     }    
 } ;

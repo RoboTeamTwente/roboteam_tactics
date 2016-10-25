@@ -32,8 +32,9 @@ double Kick::cleanAngle(double angle){
 
 bt::Node::Status Kick::Update() {
 	roboteam_msgs::World world = LastWorld::get();
-    int robotID = blackboard->GetInt("ROBOT_ID");
 
+    int robotID = blackboard->GetInt("ROBOT_ID");
+	ROS_INFO_STREAM("name: " << name << " " << robotID);
 	roboteam_msgs::WorldBall ball = world.ball;
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
@@ -55,6 +56,7 @@ bt::Node::Status Kick::Update() {
 	if (posDiff.length() < 0.105) { // ball is close
 		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
 			roboteam_msgs::RobotCommand command;
+			command.id = robotID;
 			command.dribbler = false;
 			command.kicker = true;
 			command.kicker_forced = true;

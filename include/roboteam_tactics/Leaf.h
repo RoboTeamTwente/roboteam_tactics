@@ -112,8 +112,8 @@ class Leaf : public bt::Leaf {
      * for details.
      */
     template<typename Impl>
-    void assert_valid(bt::Blackboard::Ptr bb, std::string name = "") const {
-        if (!validate_blackboard<Impl>(bb, name)) {
+    void assert_valid(std::string name = "") const {
+        if (!validate_blackboard<Impl>(blackboard, name)) {
             throw std::invalid_argument("Blackboard verification failed.");
         }
     }
