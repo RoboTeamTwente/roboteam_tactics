@@ -35,8 +35,8 @@ file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 
 # To signify that the file is generated s.t. cmake won't throw
 # an error if it can't find the file in the config step.
-set_source_files_properties(src/trees/alltrees.cpp
-                            PROPERTIES GENERATED TRUE)
+#set_source_files_properties(src/trees/alltrees.cpp
+#                            PROPERTIES GENERATED TRUE)
 
 add_executable(brain
     src/main.cpp
