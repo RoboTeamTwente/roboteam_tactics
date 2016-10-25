@@ -1,0 +1,120 @@
+
+
+{
+  "id": "e17eb865-d4ea-41db-85f3-aa445ad39d93",
+  "title": "1_2_Tree_2",
+  "description": "",
+  "root": "eb1b7846-3e5d-4e7f-8a6f-f3bc018a8714",
+  "properties": {},
+  "nodes": {
+    "eb1b7846-3e5d-4e7f-8a6f-f3bc018a8714": {
+      "id": "eb1b7846-3e5d-4e7f-8a6f-f3bc018a8714",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -144,
+        "y": 36
+      },
+      "children": [
+        "ea0860b4-f8a9-48c5-8664-72afc970ec9b",
+        "904c9845-7285-47bc-9199-6bf5fb2c51fb"
+      ]
+    },
+    "8b762c40-f6f2-4691-94bf-8a88fcabd663": {
+      "id": "8b762c40-f6f2-4691-94bf-8a88fcabd663",
+      "name": "GetBall",
+      "title": "GetBall_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 240,
+        "y": -168
+      }
+    },
+    "4333c49c-864c-4d33-a860-c4ae87d91da5": {
+      "id": "4333c49c-864c-4d33-a860-c4ae87d91da5",
+      "name": "RotateAroundPoint",
+      "title": "RotateAroundPoint_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 264,
+        "y": -108
+      }
+    },
+    "904c9845-7285-47bc-9199-6bf5fb2c51fb": {
+      "id": "904c9845-7285-47bc-9199-6bf5fb2c51fb",
+      "name": "Kick",
+      "title": "Kick_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 24,
+        "y": 96
+      }
+    },
+    "ea0860b4-f8a9-48c5-8664-72afc970ec9b": {
+      "id": "ea0860b4-f8a9-48c5-8664-72afc970ec9b",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": 12,
+        "y": -48
+      },
+      "child": "70e90f31-f165-4d0d-8390-084308b3630a"
+    },
+    "70e90f31-f165-4d0d-8390-084308b3630a": {
+      "id": "70e90f31-f165-4d0d-8390-084308b3630a",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 108,
+        "y": -120
+      },
+      "children": [
+        "8b762c40-f6f2-4691-94bf-8a88fcabd663",
+        "4333c49c-864c-4d33-a860-c4ae87d91da5"
+      ]
+    }
+  },
+  "display": {
+    "camera_x": 650.5,
+    "camera_y": 336.5,
+    "camera_z": 1,
+    "x": -300,
+    "y": 36
+  },
+  "custom_nodes": [
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_B",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+
+

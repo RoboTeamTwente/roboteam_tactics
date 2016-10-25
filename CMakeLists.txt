@@ -56,6 +56,7 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
@@ -159,6 +160,7 @@ add_executable(GetBallTest
     src/skills/tests/GetBallTest.cpp
     src/skills/GetBall.cpp
     src/skills/GoToPos.cpp
+    src/conditions/IHaveBall.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )

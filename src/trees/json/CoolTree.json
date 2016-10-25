@@ -4,7 +4,7 @@
   "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
   "title": "CoolTree",
   "description": "",
-  "root": "44755d95-b8bf-42a9-9d57-f3e8acc63290",
+  "root": "67960319-d95f-432d-bbaf-7904c01c9245",
   "properties": {},
   "nodes": {
     "781fab8c-3c58-4066-8635-1ca0cc702ec6": {
@@ -55,20 +55,6 @@
         "y": -48
       }
     },
-    "44755d95-b8bf-42a9-9d57-f3e8acc63290": {
-      "id": "44755d95-b8bf-42a9-9d57-f3e8acc63290",
-      "name": "RepeatUntilFailure",
-      "title": "Repeat Until Failure",
-      "description": "",
-      "properties": {
-        "maxLoop": -1
-      },
-      "display": {
-        "x": -72,
-        "y": 12
-      },
-      "child": "67960319-d95f-432d-bbaf-7904c01c9245"
-    },
     "3a1f28e8-70a3-49ca-bad9-6e248128f86b": {
       "id": "3a1f28e8-70a3-49ca-bad9-6e248128f86b",
       "name": "RepeatUntilSuccess",
@@ -100,10 +86,10 @@
     }
   },
   "display": {
-    "camera_x": 539.1700000006094,
+    "camera_x": 56.175000000604996,
     "camera_y": 335.5,
     "camera_z": 1,
-    "x": -240,
+    "x": -36,
     "y": 12
   },
   "custom_nodes": [

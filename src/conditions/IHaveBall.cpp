@@ -37,10 +37,12 @@ bt::Node::Status IHaveBall::Update() {
     
     double dx = ball.x - bot->pos.x;
     double dy = ball.y - bot->pos.y;
-    double dist2 = dx*dx + dy*dy;
+    double dist2 = sqrt(dx*dx + dy*dy);
     double angle = atan2(dy, dx);
+    // printf("%f", dist2);
+    // printf("\n");
     
-    if (dist2 > 0.1 || fabs(angle - bot->w) > 0.01) {
+    if (dist2 > 0.102 || fabs(angle - bot->angle) > 0.01) {
         return Status::Failure;
     }
     

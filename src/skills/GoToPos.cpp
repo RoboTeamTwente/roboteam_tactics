@@ -19,7 +19,6 @@ GoToPos::GoToPos(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackb
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
-
 bt::Node::Status GoToPos::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -28,6 +27,7 @@ bt::Node::Status GoToPos::Update (){
     double wGoal = GetDouble("angleGoal");
     int robotID = blackboard->GetInt("ROBOT_ID");
     bool endPoint = GetBool("endPoint");
+    bool dribbler = GetBool("dribbler");
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
@@ -88,15 +88,27 @@ bt::Node::Status GoToPos::Update (){
     
     prevWorld = world;
     
+    if (dribbler) {
+        command.dribbler = true;
+    } else {
+        command.dribbler = false;
+    }
+    
     if (posError.length() < 0.05) {
+    //     if (dribbler) {
+    //         command.dribbler = true;
+    //     } else {
+    //         command.dribbler = false;
+    //     }
         if (endPoint) {
-            if (posError.length() < 0.01) {
+            if (posError.length() < 0.001 && rotError < 0.01) {
                 // Stop the robot and send one final command
-                roboteam_msgs::RobotCommand command;
+                
                 command.id = robotID;
                 command.x_vel = 0.0;
                 command.y_vel = 0.0;
                 command.w = 0.0;
+                
                 pub.publish(command);
                 ros::spinOnce();
                 return Status::Success;
@@ -108,6 +120,7 @@ bt::Node::Status GoToPos::Update (){
             return Status::Success;
         }
     } else {
+    //     command.dribbler = false;
         pub.publish(command);
         return Status::Running;
     }

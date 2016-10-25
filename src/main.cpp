@@ -28,7 +28,10 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
     bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
     bb->SetDouble("RotateAroundPoint_A_centery", center.y);
+    // bb2->SetDouble("RotateAroundPoint_A_centerx", center.x);
+    // bb2->SetDouble("RotateAroundPoint_A_centery", center.y);
 
+    // tree->Update();
     bt::Node::Status status = tree->Update();
     if (status == bt::Node::Status::Success) {
         success = true;
@@ -38,42 +41,35 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     }
 }
 
-// bt::BehaviorTree strategy;
-// int ai_count = 0;
-
-// void run_ai_cycle() {
-//     // If there is no tactic, pick one, or:
-//     if (!pickedTactic || (ai_count % 8 == 0)) { // Check somehow if the tactic is still applicable
-//         strategy.Update();
-
-//         // Let tactic distribute roles
-//         pickedTactic->distribute_roles();
-//     }
-
-//     // Let the roles update s.t. the robots start moving
-//     pickedTactic->update_roles();
-
-//     // Stop after 100 iterations
-//     if (++ai_count == 100) {
-//         ros::shutdown();
-//     }
-
-//     std::cout << "Finished an AI cycle\n";
-// }
-
 int main(int argc, char **argv) {
     
     ros::init(argc, argv, "tactics");
     ros::NodeHandle n;
 
+    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(0.0, 0.1);
+
     auto role = make_CoolTree(n);
     auto bb = role.GetBlackboard();
 
+    // auto role2 = make_1_2_Tree_1(n);
+    // auto bb2 = role2.GetBlackboard();
+
     bb->SetInt("ROBOT_ID", 0);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", 3.0);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", 0.0);
+    bb->SetBool("GetBall_A_intercept", false);
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", passTo.y);
     bb->SetDouble("RotateAroundPoint_A_w",3.0);
     bb->SetDouble("RotateAroundPoint_A_radius", 0.09);
+
+    // bb2->SetInt("ROBOT_ID", 2);
+    // bb2->SetBool("GetBall_A_intercept", true);
+    // bb2->SetDouble("GetBall_A_getBallAtX", passTo.x);
+    // bb2->SetDouble("GetBall_A_getBallAtY", passTo.y);
+    // bb2->SetDouble("GetBall_A_getBallAtTime", 5.0);
+    // bb2->SetDouble("RotateAroundPoint_A_faceTowardsPosx", 3.0);
+    // bb2->SetDouble("RotateAroundPoint_A_faceTowardsPosy", 0.0);
+    // bb2->SetDouble("RotateAroundPoint_A_w",5.0);
+    // bb2->SetDouble("RotateAroundPoint_A_radius", 0.09);
 
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb));
 
