@@ -183,6 +183,7 @@ add_executable(IcptTest
     src/conditions/CanInterceptBall.cpp
     src/LastWorld.cpp
 )
+add_dependencies(IcptTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(IcptTest ${catkin_LIBRARIES})
 target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
