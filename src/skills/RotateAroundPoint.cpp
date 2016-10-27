@@ -185,8 +185,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
 	roboteam_utils::Vector2 targetPos=targetVector+center;
 
-	
+	// ------------------------------ //
+	//
+	// OH NO, unused variable!!!! 
 	double worldrottoballdiff=cleanAngle(worldposDiff.angle()-robot.angle);
+	// aaaaaaaaah, sooo many warnings
+	//
+	// ------------------------------ //
+
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
 	

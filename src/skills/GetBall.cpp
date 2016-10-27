@@ -64,6 +64,7 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 	if (iHaveBall.Update() != Status::Success) {
 		hasBall = whichRobotHasBall();
 	}
+	// ROS_INFO_STREAM(hasBall);
 
 	if (hasBall == -1) { // no robot has the ball
 		// Predict intercept pos from ball velocity
@@ -75,6 +76,8 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		roboteam_utils::Vector2 ballTrajectory = ballPosThen - ballPosNow;
 		roboteam_utils::Vector2 ballToCenter = getBallAtPos - ballPosNow;
 
+		// ROS_INFO_STREAM("no robot has the ball, ");
+
 		double ballTrajectoryMagn = ballTrajectory.length();
 		ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
 		double projectionOnBallTrajectory = ballToCenter.dot(ballTrajectory);
@@ -84,9 +87,10 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 			interceptPos = closestPoint;
 			interceptAngle = (ballPosNow-ballPosThen).angle();
 		} else {
-			interceptPos.x = 101.0;
-			interceptPos.y = 101.0;
-			interceptAngle = 0.0;
+			interceptPos.x = getBallAtX;
+			interceptPos.y = getBallAtY;
+			// ROS_INFO_STREAM("set targetAngle: " << (ballPosNow - getBallAtPos).angle());
+			interceptAngle = (ballPosNow - getBallAtPos).angle();
 		}
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
@@ -103,6 +107,8 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 			hasBall -= 6;
 			otherRobot = world.them.at(hasBall);
 		}
+
+		// ROS_INFO_STREAM("robot " << hasBall << " has the ball!");
 
 		roboteam_utils::Vector2 otherRobotLooksAt = roboteam_utils::Vector2(1, 0);
 		otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
@@ -224,6 +230,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
+        // ROS_INFO_STREAM("go to angle: " << targetAngle);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("endPoint", true);
         

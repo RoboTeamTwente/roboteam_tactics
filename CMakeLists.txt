@@ -51,6 +51,32 @@ add_executable(brain
 add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
 target_link_libraries(brain ${catkin_LIBRARIES})
 
+add_executable(KickAtGoal
+    src/role_tests/KickAtGoal.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    src/trees/alltrees.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
+)
+add_dependencies(KickAtGoal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
+target_link_libraries(KickAtGoal ${catkin_LIBRARIES})
+
+add_executable(Keeper
+    src/role_tests/Keeper.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    src/trees/alltrees.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
+)
+add_dependencies(Keeper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
+target_link_libraries(Keeper ${catkin_LIBRARIES})
+
 # Executable that can convert behavior3 json to C++ functions
 add_executable(converter
     src/treegen/BTBuilder.cpp

@@ -44,7 +44,7 @@ bt::Node::Status GoToPos::Update (){
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
     double pGain=3.0;
-    double maxSpeed=1.0;
+    double maxSpeed=2.0;
     requiredSpeed.x=(xGoal-robotPos.x)*pGain;
     requiredSpeed.y=(yGoal-robotPos.y)*pGain;
     if (requiredSpeed.length() > maxSpeed){
@@ -59,10 +59,13 @@ bt::Node::Status GoToPos::Update (){
 
     // Proportional rotation controller
     double requiredRotSpeed;
-    double pGainRot=3.0;
+    double pGainRot=6.0;
     double maxRotSpeed=3.0;
     double rotError=wGoal-wCurrent;
-    if (rotError > M_PI){rotError=M_PI-rotError;}
+
+    if (rotError < M_PI) {rotError += 2*M_PI;}
+    if (rotError > M_PI) {rotError -= 2*M_PI;}
+
     requiredRotSpeed=rotError*pGainRot;
     if (fabs(requiredRotSpeed) > maxRotSpeed) {
         requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
@@ -101,7 +104,7 @@ bt::Node::Status GoToPos::Update (){
     //         command.dribbler = false;
     //     }
         if (endPoint) {
-            if (posError.length() < 0.001 && rotError < 0.01) {
+            if (posError.length() < 0.001 && fabs(rotError) < 0.01) {
                 // Stop the robot and send one final command
                 
                 command.id = robotID;
