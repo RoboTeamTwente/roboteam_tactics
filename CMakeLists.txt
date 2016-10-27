@@ -109,7 +109,7 @@ target_link_libraries(TestX ${catkin_LIBRARIES})
 add_custom_target(generate_json_t DEPENDS generate_json)
 add_custom_command(
     OUTPUT generate_json
-    COMMAND ${PROJECT_SOURCE_DIR}/generate_cpp_from_json.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
         always_rebuild
         converter
@@ -125,7 +125,7 @@ add_custom_command(
 add_custom_target(generate_leafs_t DEPENDS generate_leafs)
 add_custom_command(
     OUTPUT generate_leafs
-    COMMAND ${PROJECT_SOURCE_DIR}/generate_all_leafs.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
     DEPENDS
         always_rebuild
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -250,11 +250,19 @@ target_link_libraries(tactics_test ${catkin_LIBRARIES})
 add_executable(RoleNode
     src/RoleNode.cpp
     )
-add_dependencies(RoleNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(RoleNode
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    generate_json_t
+    )
 target_link_libraries(RoleNode ${catkin_LIBRARIES})
 
 add_executable(StrategyNode
     src/StrategyNode.cpp
     )
-add_dependencies(StrategyNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(StrategyNode
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    generate_json_t
+    )
 target_link_libraries(StrategyNode ${catkin_LIBRARIES})

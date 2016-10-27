@@ -5,6 +5,21 @@
 #include "ros/ros.h"
 #include "std_msgs/Empty.h"
 
+#include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_tactics/generated/alltrees_factory.h"
+
+ros::Publisher roleNodeDiscoveryPublisher;
+
+void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
+    std::string name = ros::this_node::getName();
+    
+    if (name != msg->node_id) {
+        return;
+    }
+
+    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << "\n";
+}
+
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
@@ -15,23 +30,12 @@ int main(int argc, char *argv[]) {
 
     ros::Rate fps60(60);
     
-    ros::Publisher pub = n.advertise<std_msgs::Empty>("role_node_discovery", 1);    
-
-    {
-        std::cout << "Waiting for a strategy node...\n";
-
-        while (ros::ok() && pub.getNumSubscribers() == 0) {
-            ros::spinOnce();
-            fps60.sleep();
-        }
-
-        std::cout << "Found one! Sending discovery message...\n";
-
-        std_msgs::Empty empty;
-        pub.publish(empty);
-
-        std::cout << "Discovery message sent. Waint for instructions at 60 fps\n";
-    }
+    // For receiving trees
+    ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
+        "role_directive",
+        1000,
+        &roleDirectiveCallback
+        );
 
     while (ros::ok()) {
         ros::spinOnce();
