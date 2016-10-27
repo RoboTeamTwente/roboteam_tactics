@@ -132,35 +132,10 @@ bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n);
 }
 " >> $factoryHeader
 
-# Set & list
-# TODO: Looks a mighty lot like code from generate_all_leafs.sh
-#       Maybe factor this out somehow?
-allJson=./json/*.json
-setFile="alltrees_set.h"
+# Make set & lists for all json trees
+make_aggregate_container "set" "./json/*.json" "alltrees_set" "alltrees_set.h" "rtt"
 
-printf "#include <set>
-#include <string>
-" > $setFile
-printf "const std::set<std::string> alltrees_set = {\n" >> $setFile
-for f in $allJson; do
-    hName=$(basename "$f" .h)
-    printf "    \"$hName\",\n" >> $setFile
-done
-printf "    \"element to accept the last comma\"\n" >> $setFile
-printf "};\n" >> $setFile
-
-listFile="alltrees_list.h"
-
-printf "#include <vector>
-#include <string>
-" > $listFile
-printf "const std::vector<std::string> alltrees_list = {\n" >> $listFile
-for f in $allJson; do
-    hName=$(basename "$f" .h)
-    printf "    \"$hName\",\n" >> $listFile
-done
-printf "    \"element to accept the last comma\"\n" >> $listFile
-printf "};\n" >> $listFile
+make_aggregate_container "vector" "./json/*.json" "alltrees_list" "alltrees_list.h" "rtt"
 
 # Copy the header files to place catkin can find it and
 # delete it here.
@@ -169,9 +144,6 @@ function saveHeader {
     cp $1 ../../include/roboteam_tactics/generated/$1
     rm $1
 }
-
-#cp alltrees_factory.h ../../include/roboteam_tactics/generated/alltrees_factory.h
-#rm alltrees_factory.h
 
 saveHeader alltrees_factory.h
 saveHeader alltrees_list.h
