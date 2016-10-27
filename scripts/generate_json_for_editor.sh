@@ -10,10 +10,6 @@ source $DIR/shared.sh
 # Asserts that the script is being ran in tactics root
 assert_tactics_root
 
-# Joins an array of strings in argument $2 with the sep character
-# in arg $1. No clue how it works.
-function join_by { local IFS="$1"; shift; echo "$*"; }
-
 dstFile="./all_custom_nodes.json"
 
 > $dstFile

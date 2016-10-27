@@ -78,8 +78,8 @@ int main(int argc, char *argv[]) {
                 std::uniform_int_distribution<uint32_t> uint_dist(0, workerNodes.size() - 1);
                 std::string recipient = workerNodes.at(uint_dist(rng));
 
-                uint_dist = std::uniform_int_distribution<uint32_t>(0, alltrees_list.size() - 1);
-                std::string tree = alltrees_list.at(uint_dist(rng));
+                uint_dist = std::uniform_int_distribution<uint32_t>(0, rtt::alltrees_list.size() - 1);
+                std::string tree = rtt::alltrees_list.at(uint_dist(rng));
 
                 std::cout << "Making node " << recipient << " do " << tree << "\n";
 

@@ -20,35 +20,9 @@ function makeIncludeList {
         printf "#include \"roboteam_tactics/$f\"\n" >> $4/$1
     done
 
-    setFile=$(basename "$1" .h)
-    setFile+="_set.h"
-
-    printf "#include <set>
-#include <string>
-" > $4/$setFile
-    printf "const std::set<std::string> ${3}_set = {\n" >> $4/$setFile
-    for f in $2; do
-        hName=$(basename "$f" .h)
-        printf "    \"$hName\",\n" >> $4/$setFile
-    done
-    printf "    \"element to accept the last comma\"\n" >> $4/$setFile
-    printf "};\n" >> $4/$setFile
-
-    listFile=$(basename "$1" .h)
-    listFile+="_list.h"
-
-    printf "#include <vector>
-#include <string>
-" > $4/$listFile
-    printf "const std::vector<std::string> ${3}_list = {\n" >> $4/$listFile
-    for f in $2; do
-        hName=$(basename "$f" .h)
-        printf "    \"$hName\",\n" >> $4/$listFile
-    done
-    printf "    \"element to accept the last comma\"\n" >> $4/$listFile
-    printf "};\n" >> $4/$listFile
-
-
+    baseFilename="$(basename "$1" .h)"
+    make_aggregate_container "set" "$2" "${baseFilename}_set" "$4/${baseFilename}_set.h" "rtt"
+    make_aggregate_container "vector" "$2" "${baseFilename}_list" "$4/${baseFilename}_list.h" "rtt"
 }
 
 (
@@ -85,7 +59,7 @@ function makeIncludeList {
 
 namespace rtt {
 
-std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
+static std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
     if (false) {
         // Dummy condition
     } " >> generated/$factoryFile
