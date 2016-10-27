@@ -14,8 +14,7 @@
  * Gets all the nodes subscribed to topic topic, relative
  * to the current node.
  */
-std::vector<std::string> getNodesSubscribedTo(std::string topic)
-{
+std::vector<std::string> getNodesSubscribedTo(std::string topic) {
     // Adapted from ros::master::getNodes()
     // Do the xmlrpc request to master
     XmlRpc::XmlRpcValue args, result, payload;
