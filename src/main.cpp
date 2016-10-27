@@ -6,8 +6,9 @@
 #include "ros/ros.h"
 #include "actionlib/client/simple_action_client.h"
 
-#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/SteeringAction.h"
+#include "roboteam_msgs/World.h"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
@@ -48,6 +49,10 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     }
 }
 
+void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
+    rtt::LastWorld::set_field(geom->field);
+}
+
 int main(int argc, char **argv) {
     
     ros::init(argc, argv, "tactics");
@@ -80,7 +85,8 @@ int main(int argc, char **argv) {
     bb2->SetDouble("RotateAroundPoint_A_w",3.0);
     bb2->SetDouble("RotateAroundPoint_A_radius", 0.09);
 
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
+    ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
+    ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
 
     while(ros::ok()) {
         ros::spinOnce();

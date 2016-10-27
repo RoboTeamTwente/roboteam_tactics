@@ -1,0 +1,91 @@
+#include <string>
+
+#include "ros/ros.h"
+#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/Parts.h"
+#include "roboteam_tactics/skills/AimAt.h"
+
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/WorldBall.h"
+#include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_utils/Vector2.h"
+
+namespace rtt {
+
+AimAt::AimAt(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard)
+        , rotateAroundPoint(n, "", private_bb) {
+	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+}
+
+bt::Node::Status AimAt::Update (){
+	roboteam_msgs::World world = LastWorld::get();
+
+	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
+	// is called before the first world state update
+	if (world.us.size() == 0) {
+		ROS_INFO("No information about the world state :(");
+		return Status::Running;
+	}
+
+	// roboteam_msgs::WorldBall ball = world.ball;
+	//roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	//roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	
+	
+	std::string destination=private_bb->GetString("At");
+	
+	roboteam_utils::Vector2 passTo;
+	
+	if (destination=="robot"){
+
+		int AtRobotID= int(private_bb->GetDouble("AtRobot") + 0.5);
+		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
+		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
+	
+	}
+	else if(destination=="theirgoal"){
+		// assume yellow always scores left (x negative), blue always scores right (x positive)
+		std::string ourcolor;
+		n.getParam("our_color",  ourcolor);
+		if(ourcolor == "yellow"){
+			passTo=roboteam_utils::Vector2(-4.0,0.0);
+		}
+		else if(ourcolor == "blue"){
+			passTo=roboteam_utils::Vector2(4.0,0.0);
+		}
+		else {
+			ROS_ERROR("Could not determine goal side");
+		}
+	}
+	else if(destination=="ourgoal"){
+		// assume yellow always scores left (x negative), blue always scores right (x positive)
+		std::string ourcolor;
+		n.getParam("our_color", ourcolor);
+		if(ourcolor == "yellow"){
+			passTo=roboteam_utils::Vector2(4.0,0.0);
+		}
+		else if(ourcolor == "blue"){
+			passTo=roboteam_utils::Vector2(-4.0,0.0);
+		}
+		else {
+			ROS_ERROR("Could not determine goal side");
+		}
+	}
+	
+	ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);
+	
+	
+    private_bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+    private_bb->SetString("center", "ball");
+    private_bb->SetDouble("faceTowardsPosx", passTo.x);
+    private_bb->SetDouble("faceTowardsPosy", passTo.y);
+    private_bb->SetDouble("w",3.0);
+    private_bb->SetDouble("radius", 0.1);
+
+	
+	return rotateAroundPoint.Update();
+};
+
+} // rtt

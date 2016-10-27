@@ -2,7 +2,6 @@
 #include "actionlib/server/simple_action_server.h"
 #include "actionlib/client/simple_action_client.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/skills/Dribble.h"
 

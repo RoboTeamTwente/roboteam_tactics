@@ -26,9 +26,8 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     roboteam_msgs::World getworld = rtt::LastWorld::get();
     roboteam_msgs::WorldBall ball = getworld.ball;
     roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-    bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
-    bb->SetDouble("RotateAroundPoint_A_centery", center.y);
 
+   
     bt::Node::Status status = tree->Update();
     if (status == bt::Node::Status::Success) {
         success = true;
@@ -48,13 +47,10 @@ int main(int argc, char **argv) {
     auto role = make_CoolTree(n);
     auto bb = role.GetBlackboard();
 
-    bb->SetInt("ROBOT_ID", 1);
-    bb->SetString("RotateAroundPoint_A_center", "ball");
+    bb->SetInt("ROBOT_ID", 0);
     bb->SetBool("GetBall_A_intercept", false);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", passTo.y);
-    bb->SetDouble("RotateAroundPoint_A_w",3.0);
-    bb->SetDouble("RotateAroundPoint_A_radius", 0.09);
+    
+    // params for aimAt are set in tree
 
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb));
 
