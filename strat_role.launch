@@ -1,0 +1,5 @@
+<launch>
+  <node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
+  <node name="role1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+  <node name="role2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+</launch>

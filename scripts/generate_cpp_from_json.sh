@@ -6,6 +6,13 @@
 # Generates the files alltrees.h and alltrees.cpp, containing
 # functions that construct all the behavior trees in the JSON folder.
 
+# Get the shared code
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/shared.sh
+
+# Asserts that the script is being ran in tactics root
+assert_tactics_root
+
 # Go to the tree dir
 cd src/trees
 
@@ -125,7 +132,47 @@ bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n);
 }
 " >> $factoryHeader
 
+# Set & list
+# TODO: Looks a mighty lot like code from generate_all_leafs.sh
+#       Maybe factor this out somehow?
+allJson=./json/*.json
+setFile="alltrees_set.h"
+
+printf "#include <set>
+#include <string>
+" > $setFile
+printf "const std::set<std::string> alltrees_set = {\n" >> $setFile
+for f in $allJson; do
+    hName=$(basename "$f" .h)
+    printf "    \"$hName\",\n" >> $setFile
+done
+printf "    \"element to accept the last comma\"\n" >> $setFile
+printf "};\n" >> $setFile
+
+listFile="alltrees_list.h"
+
+printf "#include <vector>
+#include <string>
+" > $listFile
+printf "const std::vector<std::string> alltrees_list = {\n" >> $listFile
+for f in $allJson; do
+    hName=$(basename "$f" .h)
+    printf "    \"$hName\",\n" >> $listFile
+done
+printf "    \"element to accept the last comma\"\n" >> $listFile
+printf "};\n" >> $listFile
+
 # Copy the header files to place catkin can find it and
 # delete it here.
-cp alltrees_factory.h ../../include/roboteam_tactics/generated/alltrees_factory.h
-rm alltrees_factory.h
+# $1 - the header file
+function saveHeader {
+    cp $1 ../../include/roboteam_tactics/generated/$1
+    rm $1
+}
+
+#cp alltrees_factory.h ../../include/roboteam_tactics/generated/alltrees_factory.h
+#rm alltrees_factory.h
+
+saveHeader alltrees_factory.h
+saveHeader alltrees_list.h
+saveHeader alltrees_set.h
