@@ -33,6 +33,11 @@ file(GLOB TACTICS_CONDITIONS_SOURCES "src/conditions/*.cpp")
 file(GLOB TACTICS_SKILLS_SOURCES "src/skills/*.cpp")
 file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 
+# To signify that the file is generated s.t. cmake won't throw
+# an error if it can't find the file in the config step.
+#set_source_files_properties(src/trees/alltrees.cpp
+#                            PROPERTIES GENERATED TRUE)
+
 add_executable(brain
     src/main.cpp
     src/Aggregator.cpp
@@ -178,6 +183,7 @@ add_executable(IcptTest
     src/conditions/CanInterceptBall.cpp
     src/LastWorld.cpp
 )
+add_dependencies(IcptTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(IcptTest ${catkin_LIBRARIES})
 target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
