@@ -100,33 +100,39 @@ bt::Node::Status Dribble::Update() {
 	double worldrottoballdiff=cleanAngle(goalposDiff.angle()-robot.angle+M_PI);
 	
 	if(goalposDiff.length() > 0.02){
-		if (worldrottoballdiff < 0.5 and worldrottoballdiff > -0.5){ // oriented towards goal behind ball		
+	
+		bool startdriving=false;
+		if (worldrottoballdiff < 0.2 and worldrottoballdiff > -0.2){ // oriented towards goal behind ball	
+			startdriving=true;
+		}
+		
+		if(worldrottoballdiff > 0.5 or worldrottoballdiff < -0.5){
+			startdriving=false;
+		}
+		
+		
+		
+		if(startdriving){
 			roboteam_utils::Vector2 facetowardsPos=goalPos*2-ballPos;
-			ROS_INFO("facetowardsPos x:%f, y:%f",facetowardsPos.x,facetowardsPos.y);
 			ROS_INFO("behind ball");
+			
 			private_bb->SetInt("ROBOT_ID", robotID);
 			private_bb->SetString("center", "point");
 			private_bb->SetDouble("centerx", goalPos.x);
 			private_bb->SetDouble("centery", goalPos.y);
 			private_bb->SetDouble("radius", goalposDiff.length()+0.1);
-			// TODO
 			private_bb->SetDouble("faceTowardsPosx", facetowardsPos.x);
 			private_bb->SetDouble("faceTowardsPosy", facetowardsPos.y);
-			private_bb->SetDouble("w", 2.0);
+			private_bb->SetDouble("w", 3.0);
 		
 			double maxv=1.5;
 			// the higher worldrotDiff, the lower maxv
-			/*
-				worldrotDiff > 0.2
-		
-		
-			*/
 		
 			if(fabs(worldrotDiff) > 0.1){
 				maxv=maxv*0.1/(fabs(worldrotDiff));
 			}
 		
-			double vPconstant=1;
+			double vPconstant=2;
 		
 			roboteam_utils::Vector2 vtogoal=goalposDiff*-vPconstant;
 		
@@ -143,7 +149,7 @@ bt::Node::Status Dribble::Update() {
 		
 		}
 		else { // first rotate around ball
-			//ROS_INFO("not behind ball");
+			ROS_INFO("not behind ball");
 			private_bb->SetInt("ROBOT_ID", robotID);
 			private_bb->SetString("center", "point");
 			private_bb->SetDouble("centerx", ballPos.x);
@@ -151,7 +157,7 @@ bt::Node::Status Dribble::Update() {
 			private_bb->SetDouble("radius", 0.1);
 			private_bb->SetDouble("faceTowardsPosx", goalPos.x);
 			private_bb->SetDouble("faceTowardsPosy", goalPos.y);
-			private_bb->SetDouble("w", 2.0);
+			private_bb->SetDouble("w", 3.0);
 		}
 		rotateAroundPoint.Update();
 	

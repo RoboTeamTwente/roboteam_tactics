@@ -191,20 +191,29 @@ bt::Node::Status RotateAroundPoint::Update (){
 	worldrotDiff=cleanAngle(worldrotDiff);
 	
 	if (worldposDiff.length() < 1.5*radius) { // close enough
-		if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
+		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
+		if(true){
+			roboteam_utils::Vector2 radiusdirection=center-robotPos;
+			radiusdirection=radiusdirection.normalize();
+			roboteam_utils::Vector2 turndirection(radiusdirection.y, -radiusdirection.x); // perpendicular;
+			turndirection=turndirection.normalize();
+			
+			
 			roboteam_utils::Vector2 robotrequiredv;
 			roboteam_utils::Vector2 worldrequiredv;
 			
 			// velocity in towards and away from ball (x) and around ball (y)
 			double radiusPconstant=10;
-			double turnPconstant=10;
+			double turnPconstant=5;
 			double maxv=5.0;
-			double maxrot=1.0;
-		
+			double maxrot=4.0;
+
+			
 			double radiusDiff=(worldposDiff.length()-radius);
 			double radiusReq=radiusDiff*radiusPconstant;
 			
-			//ROS_INFO("radiusDiff:%f",radiusDiff);
+			radiusdirection=radiusdirection.scale(radiusReq);
+			
 			
 			double turnDiff=worldrotDiff;
 			double turnReq=turnDiff*turnPconstant;
@@ -217,19 +226,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 			}
 			
 			turnReq*=radius;
+
+			turndirection=turndirection.scale(-turnReq);
 			
-			roboteam_utils::Vector2 localreq(radiusReq, turnReq);
-			//ROS_INFO("localreq x:%f, y:%f, angle:%f",localreq.x,localreq.y,worldrottoballdiff);
-			
-			robotrequiredv=worldToRobotFrame(localreq, worldrottoballdiff);
-			//ROS_INFO("robotreq x:%f, y:%f",robotrequiredv.x,robotrequiredv.y);
-			
-			//ROS_INFO("extrav x:%f, y:%f",GetDouble("extravx"),GetDouble("extravy"));
-			
+			robotrequiredv=worldToRobotFrame(radiusdirection+turndirection, robot.angle);
+					
 			roboteam_utils::Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;
-			
-			
+				
 			if(robotrequiredv.length() > maxv){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
 			}
@@ -248,7 +252,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			if(requiredrotv < -maxrot){requiredrotv=-maxrot;}
 
 			
-			if (fabs(worldrotDiff) > 0.01 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
+			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > 0.005 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;
@@ -257,12 +261,16 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.x_vel = robotrequiredv.x;
 				cmd.y_vel = robotrequiredv.y;
 				cmd.w = requiredrotv;
-
+				//cmd.w=0.0;
+				
 				cmd.dribbler=true;
 				cmd.kicker=false;
 				cmd.kicker_vel=0.0;
 				cmd.kicker_forced=false;
 				cmd.chipper=false;
+				if(extrav.x>0.01 or extrav.y>0.01){
+					cmd.kicker_vel=0.01;
+				}
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
 				//ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
