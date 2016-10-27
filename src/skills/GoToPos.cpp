@@ -44,7 +44,7 @@ bt::Node::Status GoToPos::Update (){
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
     double pGain=3.0;
-    double maxSpeed=2.0;
+    double maxSpeed=1.0;
     requiredSpeed.x=(xGoal-robotPos.x)*pGain;
     requiredSpeed.y=(yGoal-robotPos.y)*pGain;
     if (requiredSpeed.length() > maxSpeed){
@@ -120,6 +120,7 @@ bt::Node::Status GoToPos::Update (){
                 return Status::Running;
             }
         } else {
+            ROS_INFO_STREAM("reached target point");
             return Status::Success;
         }
     } else {

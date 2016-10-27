@@ -241,6 +241,17 @@ add_executable(FollowPathTest
 add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(FollowPathTest ${catkin_LIBRARIES})
 
+add_executable(AvoidRobotsTest
+    src/skills/tests/AvoidRobotsTest.cpp
+    src/skills/AvoidRobots.cpp
+    src/skills/GoToPos.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(AvoidRobotsTest ${catkin_LIBRARIES})
+
+
 catkin_add_gtest(tactics_test
     test/main.cpp 
 	test/SimpleTest.cpp
