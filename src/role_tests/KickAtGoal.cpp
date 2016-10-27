@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "KickAtGoalTactic");
     ros::NodeHandle n;
 
-    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(3.0, 0.0);
+    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(3.0, 0.1);
 
     auto role = make_CoolTree(n);
     auto bb = role.GetBlackboard();

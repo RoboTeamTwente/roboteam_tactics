@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
     bb2->SetInt("ROBOT_ID", 2);
     bb2->SetBool("GetBall_A_intercept", true);
-    bb2->SetDouble("GetBall_A_getBallAtX", 2.75);
+    bb2->SetDouble("GetBall_A_getBallAtX", 2.9);
     bb2->SetDouble("GetBall_A_getBallAtY", 0.0);
     bb2->SetDouble("GetBall_A_getBallAtTime", 5.0);
     bb2->SetString("RotateAroundPoint_A_center", "ball");
