@@ -40,7 +40,6 @@ file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 
 add_executable(brain
     src/main.cpp
-    src/Aggregator.cpp
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
@@ -270,6 +269,12 @@ target_link_libraries(RoleNode ${catkin_LIBRARIES})
 
 add_executable(StrategyNode
     src/StrategyNode.cpp
+    src/trees/alltrees.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
 add_dependencies(StrategyNode
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
