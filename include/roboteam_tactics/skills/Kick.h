@@ -12,6 +12,12 @@ public:
 	void Initialize(int robotIDInput);
 	double cleanAngle(double angle);
 	Status Update();
+    
+    static VerificationMap required_params() {
+        VerificationMap params;
+        params["ROBOT_ID"] = BBArgumentType::Int;
+        return params;
+    }
 private:
 	ros::NodeHandle n;
 	ros::Publisher pubKick;

@@ -24,6 +24,7 @@ public:
         params["yGoal"] = BBArgumentType::Double;
         params["angleGoal"] = BBArgumentType::Double;
         params["ROBOT_ID"] = BBArgumentType::Int;
+        params["dribbler"] = BBArgumentType::Bool;
         params["endPoint"] = BBArgumentType::Bool;
         return params;
     }

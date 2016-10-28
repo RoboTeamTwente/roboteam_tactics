@@ -17,6 +17,15 @@ class AvoidRobots : public Skill {
 public:
 	AvoidRobots(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
+    
+    static VerificationMap required_params() {
+        VerificationMap params;
+        params["ROBOT_ID"] = BBArgumentType::Int;
+        params["targetX"] = BBArgumentType::Double;
+        params["targetY"] = BBArgumentType::Double;
+        return params;
+    }
+    
 private:
     ros::NodeHandle n;
 	ros::Publisher pub;

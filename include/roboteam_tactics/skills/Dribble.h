@@ -18,6 +18,14 @@ public:
 	double cleanAngle(double angle);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
     
+    static VerificationMap required_params() {
+        VerificationMap params;
+        params["ROBOT_ID"] = BBArgumentType::Int;
+        params["goalx"] = BBArgumentType::Double;
+        params["goaly"] = BBArgumentType::Double;
+        return params;
+    }
+    
 private:
 	ros::NodeHandle n;
 	ros::Publisher pubDribble;
