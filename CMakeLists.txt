@@ -189,7 +189,7 @@ target_link_libraries(GoToPosTest ${catkin_LIBRARIES})
 add_executable(GetBallTest
     src/skills/tests/GetBallTest.cpp
     src/skills/GetBall.cpp
-    src/skills/GoToPos.cpp
+    src/skills/AvoidRobots.cpp
     src/conditions/IHaveBall.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
@@ -244,6 +244,7 @@ add_executable(AvoidRobotsTest
     src/skills/tests/AvoidRobotsTest.cpp
     src/skills/AvoidRobots.cpp
     src/skills/GoToPos.cpp
+    src/conditions/CanSeePoint.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )

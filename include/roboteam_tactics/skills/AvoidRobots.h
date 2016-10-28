@@ -20,7 +20,7 @@ public:
 private:
     ros::NodeHandle n;
 	ros::Publisher pub;
-	
+	// roboteam_utils::Vector2 prevDirection;
 
 } ;
 

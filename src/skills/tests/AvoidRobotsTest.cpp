@@ -47,8 +47,9 @@ int main(int argc, char **argv) {
 
 	auto bb1 = std::make_shared<bt::Blackboard>();
 	bb1->SetInt("ROBOT_ID", 0);
-	bb1->SetDouble("targetX", 0.0);
-	bb1->SetDouble("targetY", 0.0);
+	bb1->SetDouble("xGoal", 2.0);
+	bb1->SetDouble("yGoal", 2.0);
+	bb1->SetDouble("angleGoal", 2.0);
 	// auto bb2 = std::make_shared<bt::Blackboard>();
 	// bb2->SetInt("ROBOT_ID", 1);
 	// bb2->SetDouble("targetX", 1.0);

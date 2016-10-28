@@ -4,6 +4,7 @@
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/conditions/CanSeePoint.h"
 #include <vector>
 
 #include "roboteam_msgs/World.h"
@@ -21,93 +22,34 @@ AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Pt
 
 bt::Node::Status AvoidRobots::Update (){
 	roboteam_msgs::World world = LastWorld::get();
-
-    // ROS_INFO_STREAM("us: " << world.us.size() << " them: " << world.them.size());
     if (world.us.size() == 0) {
         ROS_INFO("No information about the world state :(");
         return Status::Running;
     }
 
-    size_t robotID = blackboard->GetInt("ROBOT_ID");
-    double targetX = GetDouble("targetX");
-    double targetY = GetDouble("targetY");
-    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(targetX, targetY);
+    double xGoal = GetDouble("xGoal");
+    double yGoal = GetDouble("yGoal");
+    double angleGoal = GetDouble("angleGoal");
+    uint robotID = blackboard->GetInt("ROBOT_ID");
+    bool dribbler = GetBool("dribbler");
 
+    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us[robotID].pos.x, world.us[robotID].pos.y);
     roboteam_utils::Vector2 myVel = roboteam_utils::Vector2(world.us[robotID].vel.x, world.us[robotID].vel.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
 
-    // ROS_INFO_STREAM("myVel x: " << myVel.x << " myVel y: " << myVel.y);
+    auto bb2 = std::make_shared<bt::Blackboard>();
+    bb2->SetInt("me", robotID);
+    bb2->SetDouble("x_coor", xGoal);
+    bb2->SetDouble("y_coor", yGoal);
 
-    std::vector<roboteam_utils::Vector2> positionsOtherRobots;
-    
-    // double lookingDistance = myVel.length();
-    double lookingDistance = 1.0;
-    if (lookingDistance > posError.length()) {
-        lookingDistance = posError.length();
-    }
-
-    // ROS_INFO_STREAM(lookingDistance);
-
-    for (size_t i = 0; i < world.us.size(); i++) {
-        if (i != robotID) {
-            roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.us[i].pos.x, world.us[i].pos.y);
-            // ROS_INFO_STREAM("dist to robot " << i << " of our team: " << (pos-myPos).x << " " << (pos-myPos).y);
-            roboteam_utils::Vector2 posDiff = pos-myPos;
-            if (posDiff.length() < lookingDistance) {
-                positionsOtherRobots.push_back(pos-myPos);
-            }
-            
-        }
-    }
-    for (size_t i = 0; i < world.them.size(); i++) {
-        roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.them[i].pos.x, world.them[i].pos.y);
-        // ROS_INFO_STREAM("dist to robot " << i << " of their team: " << (pos-myPos).x << " " << (pos-myPos).y);
-        roboteam_utils::Vector2 posDiff = pos-myPos;
-            if (posDiff.length() < lookingDistance) {
-                positionsOtherRobots.push_back(pos-myPos);
-            }
-    }
-
-    double forceXMagn = 0.0;
-    double forceYMagn = 0.0;
-
-    if (positionsOtherRobots.size() > 0) {
-        for (size_t i = 0; i < positionsOtherRobots.size(); i++) {
-            double magnVector = positionsOtherRobots.at(i).length();
-            roboteam_utils::Vector2 directionVector = positionsOtherRobots[i].scale(1/magnVector);
-            double dot = directionVector.dot(myVel);
-            double factor;
-            // ROS_INFO_STREAM("id: " << i << " dot: " << dot);
-            if (fabs(dot) < 0.1) {dot = dot / dot * 0.1;}
-            if (dot > 0) {
-                factor = 0.3 + dot*2;
-            } else {
-                factor = 0.3;
-            }
-
-            // ROS_INFO_STREAM("id: " << i << " factor: " << factor);
-            double forceMagn = factor/(magnVector*magnVector);
-            forceXMagn -= forceMagn*directionVector.x;
-            forceYMagn -= forceMagn*directionVector.y;
-        }
-    forceXMagn /= positionsOtherRobots.size();
-    forceYMagn /= positionsOtherRobots.size();
-    }
-
-    if (posError.length() > 2) {
-        posError = posError.scale(2/posError.length());
-    }
-
-    forceXMagn += posError.x*2;
-    forceYMagn += posError.y*2;
 
     // Proportional rotation controller
     double requiredRotSpeed;
     double pGainRot = 6.0;
     double maxRotSpeed = 3.0;
     double angle = world.us.at(robotID).angle;
-    double rotError = 0.0 - angle;
+    double rotError = angleGoal - angle;
 
     if (rotError < M_PI) {rotError += 2*M_PI;}
     if (rotError > M_PI) {rotError -= 2*M_PI;}
@@ -116,26 +58,133 @@ bt::Node::Status AvoidRobots::Update (){
     if (fabs(requiredRotSpeed) > maxRotSpeed) {
         requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
     }
+    
+
+    // If you can see the end point, just go towards it
+    CanSeePoint canSeePoint("", bb2);
+    if (canSeePoint.Update() == Status::Success) {
+        roboteam_utils::Vector2 forceVector = posError;
+        if (posError.length() > 0.2) {
+            forceVector = forceVector.scale(1/forceVector.length() * 1.0);
+        }
+
+        // Rotate from robot frame to world frame
+        roboteam_utils::Vector2 requiredSpeed;  
+        requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
+        requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
+
+
+        // Fill and send command
+        roboteam_msgs::RobotCommand command;
+        command.id = robotID;
+        command.x_vel = requiredSpeed.x;
+        command.y_vel = requiredSpeed.y;
+        command.w = requiredRotSpeed;
+        if (dribbler) {command.dribbler = true;}
+        pub.publish(command);
+
+        return Status::Running;
+    }
+    
+    double lookingDistance = 1.5;
+    if (lookingDistance > posError.length()) {
+        lookingDistance = posError.length();
+    }
+
+
+    // Make a vector contaning the differences between other robots' positions and ours (if this 
+    // distance is smaller than lookingDistance)
+    std::vector<roboteam_utils::Vector2> positionDiffOtherRobots;
+    for (size_t i = 0; i < world.us.size(); i++) {
+        if (i != robotID) {
+            roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.us[i].pos.x, world.us[i].pos.y);
+            roboteam_utils::Vector2 posDiff = pos-myPos;
+            posDiff = posDiff.scale((posDiff.length()-0.15)/posDiff.length());
+            if (posDiff.length() < lookingDistance) {
+                positionDiffOtherRobots.push_back(posDiff);
+            }   
+        }
+    }
+    for (size_t i = 0; i < world.them.size(); i++) {
+        roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.them[i].pos.x, world.them[i].pos.y);
+        roboteam_utils::Vector2 posDiff = pos-myPos;
+        posDiff = posDiff.scale((posDiff.length()-0.15)/posDiff.length());
+        if (posDiff.length() < lookingDistance) {
+            positionDiffOtherRobots.push_back(posDiff);
+        }
+    }
+
+
+    // For each distance, compute a force the other robot exerts on our robot that is inversely
+    // proportional to the square of the distance (just like gravity, but then repulsive instead
+    // of attractive)
+    double forceXMagn = 0.0;
+    double forceYMagn = 0.0;
+    if (positionDiffOtherRobots.size() > 0) {
+        for (size_t i = 0; i < positionDiffOtherRobots.size(); i++) {
+            double magnVector = positionDiffOtherRobots.at(i).length();
+            roboteam_utils::Vector2 directionVector = positionDiffOtherRobots[i].scale(1/magnVector);
+            double dot = directionVector.dot(posError.scale(1/posError.length()));
+            // double factor = fabs(dot);
+            // factor = -factor + 1;
+
+            double factor;
+            if (dot > 0) {
+                factor = dot*2;
+            } else {
+                factor = 0;
+            }
+
+            // factor = fabs(dot2);
+
+            double forceMagn = factor/(magnVector*magnVector);
+            forceXMagn -= forceMagn*directionVector.x;
+            forceYMagn -= forceMagn*directionVector.y;
+        }
+    forceXMagn /= positionDiffOtherRobots.size();
+    forceYMagn /= positionDiffOtherRobots.size();
+    }
 
     roboteam_utils::Vector2 forceVector = roboteam_utils::Vector2(forceXMagn, forceYMagn);
-    roboteam_utils::Vector2 forceVectorUnit = forceVector.scale(1/forceVector.length());
+    roboteam_utils::Vector2 loodrechteVector = posError.rotate(0.5*M_PI);
+    double dot = forceVector.dot(loodrechteVector);
+    roboteam_utils::Vector2 effectiveVector = loodrechteVector.scale(1/loodrechteVector.length() * dot);
 
     if (posError.length() > 0.3) {
-        forceVector = forceVector.scale(1/forceVector.length() * 1);
+        posError = posError.scale(1/posError.length());
+    }
+    if (effectiveVector.length() > 8.0) {
+        effectiveVector = effectiveVector.scale(1/effectiveVector.length() * 8.0);
+    }
+    // ROS_INFO_STREAM("effectiveVector.x: " << effectiveVector.x << " effectiveVector.y: " << effectiveVector.y);
+
+    // Add another force that is an attractive force towards the target position
+    // forceXMagn += posError.x*8;
+    // forceYMagn += posError.y*8;
+    effectiveVector.x += posError.x*8;
+    effectiveVector.y += posError.y*8;
+
+    // roboteam_utils::Vector2 forceVector = roboteam_utils::Vector2(forceXMagn, forceYMagn);
+    forceVector = effectiveVector;
+
+    roboteam_utils::Vector2 forceVectorUnit = forceVector.scale(1/forceVector.length());
+    if (posError.length() > 0.2) {
+        forceVector = forceVector.scale(1/forceVector.length() * 1.0);
     }
 
     // Rotate from robot frame to world frame
     roboteam_utils::Vector2 requiredSpeed;  
-    
-    requiredSpeed.x=forceXMagn*cos(angle)-forceYMagn*sin(angle);
-    requiredSpeed.y=forceXMagn*sin(angle)+forceYMagn*cos(angle);
-    // ROS_INFO_STREAM("X force: " << forceXMagn << ", Y force: " << forceYMagn);
+    requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
+    requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
+
+    // Fill and send command
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-    command.x_vel = forceVector.x;
-    command.y_vel = forceVector.y;
+    command.x_vel = requiredSpeed.x;
+    command.y_vel = requiredSpeed.y;
     command.w = requiredRotSpeed;
+    if (dribbler) {command.dribbler = true;}
     pub.publish(command);
 
     return Status::Running;
