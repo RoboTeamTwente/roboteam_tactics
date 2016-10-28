@@ -26,6 +26,15 @@ class GetBall : public Skill {
 public:
     GetBall(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
+    
+    static VerificationMap required_params() {
+        VerificationMap params;
+        params["ROBOT_ID"] = BBArgumentType::Int;
+        params["getBallAtX"] = BBArgumentType::Double;
+        params["getBallAtY"] = BBArgumentType::Double;
+        params["getBallAtTime"] = BBArgumentType::Double;
+        return params;
+    }
 private:
 	InterceptPose GetInterceptPos(double getBallAtX, double getBallAtY, double getBallAtTime);
 	// std::vector<roboteam_utils::Vector2> CircleIntersections(roboteam_utils::Vector2 center, double radius, roboteam_utils::Vector2 startLine, roboteam_utils::Vector2 endLine);

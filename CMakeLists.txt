@@ -86,6 +86,7 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
+    src/skills/Dribble.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     )
