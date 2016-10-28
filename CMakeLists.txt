@@ -33,9 +33,13 @@ file(GLOB TACTICS_CONDITIONS_SOURCES "src/conditions/*.cpp")
 file(GLOB TACTICS_SKILLS_SOURCES "src/skills/*.cpp")
 file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 
+# To signify that the file is generated s.t. cmake won't throw
+# an error if it can't find the file in the config step.
+#set_source_files_properties(src/trees/alltrees.cpp
+#                            PROPERTIES GENERATED TRUE)
+
 add_executable(brain
     src/main.cpp
-    src/Aggregator.cpp
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
@@ -45,6 +49,32 @@ add_executable(brain
 )
 add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
 target_link_libraries(brain ${catkin_LIBRARIES})
+
+add_executable(KickAtGoal
+    src/role_tests/KickAtGoal.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    src/trees/alltrees.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
+)
+add_dependencies(KickAtGoal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
+target_link_libraries(KickAtGoal ${catkin_LIBRARIES})
+
+add_executable(Keeper
+    src/role_tests/Keeper.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    src/trees/alltrees.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
+)
+add_dependencies(Keeper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
+target_link_libraries(Keeper ${catkin_LIBRARIES})
 
 # Executable that can convert behavior3 json to C++ functions
 add_executable(converter
@@ -57,6 +87,7 @@ add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
     src/skills/Dribble.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
@@ -78,7 +109,7 @@ target_link_libraries(TestX ${catkin_LIBRARIES})
 add_custom_target(generate_json_t DEPENDS generate_json)
 add_custom_command(
     OUTPUT generate_json
-    COMMAND ${PROJECT_SOURCE_DIR}/generate_cpp_from_json.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
         always_rebuild
         converter
@@ -94,7 +125,7 @@ add_custom_command(
 add_custom_target(generate_leafs_t DEPENDS generate_leafs)
 add_custom_command(
     OUTPUT generate_leafs
-    COMMAND ${PROJECT_SOURCE_DIR}/generate_all_leafs.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
     DEPENDS
         always_rebuild
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -160,6 +191,7 @@ add_executable(GetBallTest
     src/skills/tests/GetBallTest.cpp
     src/skills/GetBall.cpp
     src/skills/GoToPos.cpp
+    src/conditions/IHaveBall.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
@@ -177,6 +209,7 @@ add_executable(IcptTest
     src/conditions/CanInterceptBall.cpp
     src/LastWorld.cpp
 )
+add_dependencies(IcptTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(IcptTest ${catkin_LIBRARIES})
 target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
@@ -208,6 +241,17 @@ add_executable(FollowPathTest
 add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(FollowPathTest ${catkin_LIBRARIES})
 
+add_executable(AvoidRobotsTest
+    src/skills/tests/AvoidRobotsTest.cpp
+    src/skills/AvoidRobots.cpp
+    src/skills/GoToPos.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(AvoidRobotsTest ${catkin_LIBRARIES})
+
+
 catkin_add_gtest(tactics_test
     test/main.cpp 
 	test/SimpleTest.cpp
@@ -217,11 +261,25 @@ target_link_libraries(tactics_test ${catkin_LIBRARIES})
 add_executable(RoleNode
     src/RoleNode.cpp
     )
-add_dependencies(RoleNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(RoleNode
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    generate_json_t
+    )
 target_link_libraries(RoleNode ${catkin_LIBRARIES})
 
 add_executable(StrategyNode
     src/StrategyNode.cpp
+    src/trees/alltrees.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
-add_dependencies(StrategyNode ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(StrategyNode
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    generate_json_t
+    )
 target_link_libraries(StrategyNode ${catkin_LIBRARIES})

@@ -1,0 +1,92 @@
+
+
+{
+  "id": "92586d8e-5bdb-4d60-832c-cb5496c7d3c6",
+  "title": "1_2_Tree_1",
+  "description": "",
+  "root": "e866d28c-979f-4eb4-94ae-4da95bf2d1d1",
+  "properties": {},
+  "nodes": {
+    "e866d28c-979f-4eb4-94ae-4da95bf2d1d1": {
+      "id": "e866d28c-979f-4eb4-94ae-4da95bf2d1d1",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 84,
+        "y": 0
+      },
+      "children": [
+        "a2e9e25c-81d7-4e6c-9264-210bb316898b",
+        "5515ff0b-1203-426e-8379-c989907fdcc2",
+        "e916a16b-b70e-4ae7-817f-e2bb1a91ac68"
+      ]
+    },
+    "a2e9e25c-81d7-4e6c-9264-210bb316898b": {
+      "id": "a2e9e25c-81d7-4e6c-9264-210bb316898b",
+      "name": "GetBall",
+      "title": "GetBall_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 264,
+        "y": -72
+      }
+    },
+    "5515ff0b-1203-426e-8379-c989907fdcc2": {
+      "id": "5515ff0b-1203-426e-8379-c989907fdcc2",
+      "name": "RotateAroundPoint",
+      "title": "RotateAroundPoint_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 276,
+        "y": -12
+      }
+    },
+    "e916a16b-b70e-4ae7-817f-e2bb1a91ac68": {
+      "id": "e916a16b-b70e-4ae7-817f-e2bb1a91ac68",
+      "name": "Kick",
+      "title": "Kick_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 264,
+        "y": 48
+      }
+    }
+  },
+  "display": {
+    "camera_x": 394.9100000000035,
+    "camera_y": 336.5,
+    "camera_z": 1,
+    "x": 0,
+    "y": 0
+  },
+  "custom_nodes": [
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_A",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+
+

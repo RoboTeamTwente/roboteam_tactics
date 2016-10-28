@@ -29,8 +29,8 @@ std::string BTBuilder::build(nlohmann::json json) {
     for (auto& element : json["nodes"]) {
         std::string title = element["title"];
 
-        if (SKILLS.find(element["name"]) == SKILLS.end()
-                && CONDITIONS.find(element["name"]) == CONDITIONS.end()) {
+        if (allskills_set.find(element["name"]) == allskills_set.end()
+                && allconditions_set.find(element["name"]) == allconditions_set.end()) {
             // Get title and append ctr
             title += "_" + std::to_string(ctr++);
             // Replace spaces with _
@@ -113,7 +113,7 @@ void BTBuilder::define_dec(std::string name, std::string type) {
 
 void BTBuilder::define_nod(std::string name, std::string type) {
     // If it's a skill we need to pass the node handle
-    if (SKILLS.find(type) != SKILLS.end()) {
+    if (allskills_set.find(type) != allskills_set.end()) {
         out << DINDENT
             << "auto "
             << name 
@@ -123,7 +123,7 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             << name
             << "\", bb);"
             << std::endl;
-    } else if (CONDITIONS.find(type) != CONDITIONS.end()) {
+    } else if (allconditions_set.find(type) != allconditions_set.end()) {
         out << DINDENT
             << "auto "
             << name 

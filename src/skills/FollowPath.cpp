@@ -55,12 +55,12 @@ void FollowPath::CallGoToPos(roboteam_msgs::Point point, double wGoal, int robot
     bb->SetDouble("yGoal", point.y);
     bb->SetDouble("wGoal", wGoal);
     bb->SetInt("ROBOT_ID", robotID);
+
     if (points.size() > 1) {
     	bb->SetBool("endPoint", false);
     } else {
     	bb->SetBool("endPoint", true);
     }
-
     if (goToPos != nullptr) {
     	delete goToPos;
     }
@@ -103,7 +103,9 @@ bt::Node::Status FollowPath::Update () {
 		if (goToPos->Update() == bt::Node::Status::Success) {
 			if (points.size() > 1) {
 				points.erase(points.begin());
-				ROS_INFO("Moving towards the next position target...");
+				// ROS_INFO("Moving towards the next position target...");
+
+				ROS_INFO_STREAM("X: " << points[0].x << ", Y: " << points[0].y);
 				state = 2;
 				return Status::Running;
 			} else {

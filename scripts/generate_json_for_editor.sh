@@ -3,9 +3,12 @@
 # TODO: Make sure it does built-in nodes as well. E.g. Repeat,
 # and others that may come.
 
-# Joins an array of strings in argument $2 with the sep character
-# in arg $1. No clue how it works.
-function join_by { local IFS="$1"; shift; echo "$*"; }
+# Get the shared code
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/shared.sh
+
+# Asserts that the script is being ran in tactics root
+assert_tactics_root
 
 dstFile="./all_custom_nodes.json"
 

@@ -6,6 +6,13 @@
 # Generates the files alltrees.h and alltrees.cpp, containing
 # functions that construct all the behavior trees in the JSON folder.
 
+# Get the shared code
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/shared.sh
+
+# Asserts that the script is being ran in tactics root
+assert_tactics_root
+
 # Go to the tree dir
 cd src/trees
 
@@ -125,7 +132,19 @@ bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n);
 }
 " >> $factoryHeader
 
+# Make set & lists for all json trees
+make_aggregate_container "set" "./json/*.json" "alltrees_set" "alltrees_set.h" "rtt"
+
+make_aggregate_container "vector" "./json/*.json" "alltrees_list" "alltrees_list.h" "rtt"
+
 # Copy the header files to place catkin can find it and
 # delete it here.
-cp alltrees_factory.h ../../include/roboteam_tactics/generated/alltrees_factory.h
-rm alltrees_factory.h
+# $1 - the header file
+function saveHeader {
+    cp $1 ../../include/roboteam_tactics/generated/$1
+    rm $1
+}
+
+saveHeader alltrees_factory.h
+saveHeader alltrees_list.h
+saveHeader alltrees_set.h

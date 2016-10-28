@@ -2,12 +2,13 @@
 
 # Usage:
 #
-# Command: ./generate.sh
-# Should compile json converter if needed, and generate c++ source and header files.
-#
-# DEPRECATED (but can be turned on if needed)
-# Command: ./generate.sh force
-# Force compilation of the json converter, and generate c++ source and header files.
+# Execute with current working directory equal to roboteam_tactics root! 
+
+# Get the shared code
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/shared.sh
+
+assert_tactics_root
 
 # $1 - the include file
 # $2 - the include pattern
@@ -19,17 +20,9 @@ function makeIncludeList {
         printf "#include \"roboteam_tactics/$f\"\n" >> $4/$1
     done
 
-    setFile=$(basename "$1" .h)
-    setFile+="_set.h"
-
-    printf "#include <set>\n" > $4/$setFile
-    printf "const std::set<std::string> $3 = {\n" >> $4/$setFile
-    for f in $2; do
-        hName=$(basename "$f" .h)
-        printf "    \"$hName\",\n" >> $4/$setFile
-    done
-    printf "    \"element to accept the last comma\"\n" >> $4/$setFile
-    printf "};\n" >> $4/$setFile
+    baseFilename="$(basename "$1" .h)"
+    make_aggregate_container "set" "$2" "${baseFilename}_set" "$4/${baseFilename}_set.h" "rtt"
+    make_aggregate_container "vector" "$2" "${baseFilename}_list" "$4/${baseFilename}_list.h" "rtt"
 }
 
 (
@@ -43,7 +36,6 @@ function makeIncludeList {
 	makeIncludeList allskills.h "skills/*.h" SKILLS generated
 
 	makeIncludeList alltactics.h "tactics/*.h" TACTICS generated
-
 
     # 
     # Make skill factory
@@ -67,10 +59,7 @@ function makeIncludeList {
 
 namespace rtt {
 
-/**
- * WARNING! ONLY USE FOR UNIT TESTS! REALLY!
- */
-std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
+static std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
     if (false) {
         // Dummy condition
     } " >> generated/$factoryFile
@@ -92,20 +81,3 @@ std::shared_ptr<Leaf> make_skill(ros::NodeHandle n, std::string className, std::
 } // rtt
 " >> generated/$factoryFile
 )
-
-#(
-	## Go to src/treegen
-	#cd src/treegen
-	## If the converter executable is not there OR there are more than 0 command line arguments
-	## if [ ! -f converter ] || [ "$#" -gt 0 ] ; then
-		## Compile the converter
-		## g++ BTBuilder.cpp converter.cpp -std=c++11 -o converter -I ../../include
-        #make
-	## fi
-#)
-
-#(
-	## Run the convert script
-	#cd src/trees
-	#./convert.sh
-#)

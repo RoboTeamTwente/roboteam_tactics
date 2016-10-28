@@ -4,8 +4,10 @@
   "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
   "title": "CoolTree",
   "description": "",
-  "root": "44755d95-b8bf-42a9-9d57-f3e8acc63290",
-  "properties": {},
+  "root": "67960319-d95f-432d-bbaf-7904c01c9245",
+  "properties": {
+    "ROBOT_ID": 0
+  },
   "nodes": {
     "781fab8c-3c58-4066-8635-1ca0cc702ec6": {
       "id": "781fab8c-3c58-4066-8635-1ca0cc702ec6",
@@ -25,8 +27,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 84,
-        "y": 12
+        "x": 12,
+        "y": -60
       },
       "children": [
         "3a1f28e8-70a3-49ca-bad9-6e248128f86b",
@@ -40,34 +42,9 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 588,
+        "x": 576,
         "y": -132
       }
-    },
-    "a4451e3f-8830-47fe-8e0c-6915baf713f6": {
-      "id": "a4451e3f-8830-47fe-8e0c-6915baf713f6",
-      "name": "RotateAroundPoint",
-      "title": "RotateAroundPoint_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 540,
-        "y": -48
-      }
-    },
-    "44755d95-b8bf-42a9-9d57-f3e8acc63290": {
-      "id": "44755d95-b8bf-42a9-9d57-f3e8acc63290",
-      "name": "RepeatUntilFailure",
-      "title": "Repeat Until Failure",
-      "description": "",
-      "properties": {
-        "maxLoop": -1
-      },
-      "display": {
-        "x": -72,
-        "y": 12
-      },
-      "child": "67960319-d95f-432d-bbaf-7904c01c9245"
     },
     "3a1f28e8-70a3-49ca-bad9-6e248128f86b": {
       "id": "3a1f28e8-70a3-49ca-bad9-6e248128f86b",
@@ -95,18 +72,75 @@
       },
       "children": [
         "5b8c3edd-a0e6-4aa4-a31d-b34ead2a91a1",
-        "a4451e3f-8830-47fe-8e0c-6915baf713f6"
+        "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099"
       ]
+    },
+    "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099": {
+      "id": "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099",
+      "name": "AimAt",
+      "title": "AimAt_A",
+      "description": "",
+      "properties": {
+        "ROBOT_ID": 0,
+        "At": "theirgoal",
+        "AtRobot": 1
+      },
+      "display": {
+        "x": 576,
+        "y": -60
+      }
     }
   },
   "display": {
-    "camera_x": 539.1700000006094,
-    "camera_y": 335.5,
+    "camera_x": 568.175000000605,
+    "camera_y": 447.5,
     "camera_z": 1,
-    "x": -240,
-    "y": 12
+    "x": -120,
+    "y": -48
   },
   "custom_nodes": [
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall",
+      "description": null,
+      "properties": {}
+    },
     {
       "name": "RotateAroundPoint",
       "category": "action",
@@ -122,16 +156,16 @@
       "properties": {}
     },
     {
-      "name": "GetBall",
+      "name": "Kick",
       "category": "action",
-      "title": "GetBall_A",
+      "title": "Kick_A",
       "description": null,
       "properties": {}
     },
     {
-      "name": "Kick",
+      "name": "AimAt",
       "category": "action",
-      "title": "Kick_A",
+      "title": "AimAt",
       "description": null,
       "properties": {}
     }

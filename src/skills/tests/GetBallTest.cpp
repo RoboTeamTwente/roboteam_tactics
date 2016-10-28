@@ -7,9 +7,9 @@
 
 bool success;
 
-void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall* getBall) {
+void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall* getBall_B) {
 	rtt::LastWorld::set(*world);
-	if (getBall->Update() == bt::Node::Status::Success) {
+	if (getBall_B->Update() == bt::Node::Status::Success) {
 		success = true;
 	}
 }
@@ -19,10 +19,15 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
-	bb->SetInt("ROBOT_ID", 0);
-	rtt::GetBall getBall(n, "", bb);
+	bb->SetInt("ROBOT_ID", 1);
+	bb->SetBool("intercept", true);
+	bb->SetDouble("getBallAtX", 0.0);
+	bb->SetDouble("getBallAtY", 0.0);
+	bb->SetDouble("getBallAtTime", 5.0);
+
+	rtt::GetBall getBall_B(n, "", bb);
 	
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall_B));
 
 	while (ros::ok()) {
 		ros::spinOnce();

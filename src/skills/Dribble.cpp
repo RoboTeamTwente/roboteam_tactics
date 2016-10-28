@@ -2,7 +2,6 @@
 #include "actionlib/server/simple_action_server.h"
 #include "actionlib/client/simple_action_client.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/skills/Dribble.h"
 
@@ -92,50 +91,73 @@ bt::Node::Status Dribble::Update() {
 					GetDouble("goaly")
 				);
 				
-	roboteam_utils::Vector2 posDiff = ballPos-goalPos;	
+	roboteam_utils::Vector2 goalposDiff = ballPos-goalPos;
+	//roboteam_utils::Vector2 ballposDiff = robotPos-ballPos;	
 	double targetAngle=computeAngle(robotPos, goalPos);
 	double worldrotDiff=(robotPos-ballPos).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
+	double worldrottoballdiff=cleanAngle(goalposDiff.angle()-robot.angle+M_PI);
 	
+	if(goalposDiff.length() > 0.02){
 	
-	if(posDiff.length() > 0.02){
-	
-		private_bb->SetInt("ROBOT_ID", robotID);
-		private_bb->SetString("center", "point");
-		private_bb->SetDouble("centerx", ball.pos.x);
-		private_bb->SetDouble("centery", ball.pos.y);
-		private_bb->SetDouble("radius", 0.1);
-		private_bb->SetDouble("faceTowardsPosx", goalPos.x);
-		private_bb->SetDouble("faceTowardsPosy", goalPos.y);
-		private_bb->SetDouble("w", 2.5);
-		
-		double maxv=1.5;
-		// the higher worldrotDiff, the lower maxv
-		/*
-			worldrotDiff > 0.2
-		
-		
-		*/
-		
-		if(fabs(worldrotDiff) > 0.1){
-			maxv=maxv*0.1/(fabs(worldrotDiff));
+		bool startdriving=false;
+		if (worldrottoballdiff < 0.2 and worldrottoballdiff > -0.2){ // oriented towards goal behind ball	
+			startdriving=true;
 		}
 		
-		double vPconstant=2;
-		
-		roboteam_utils::Vector2 vtogoal=posDiff*-vPconstant;
-		
-		
-		
-		if(vtogoal.length() > maxv){
-			vtogoal=vtogoal/vtogoal.length()*maxv;
+		if(worldrottoballdiff > 0.5 or worldrottoballdiff < -0.5){
+			startdriving=false;
 		}
 		
-		roboteam_utils::Vector2 robotvtogoal=worldToRobotFrame(vtogoal, robot.angle);
 		
-		private_bb->SetDouble("extravx",robotvtogoal.x);
-		private_bb->SetDouble("extravy",robotvtogoal.y);
 		
+		if(startdriving){
+			roboteam_utils::Vector2 facetowardsPos=goalPos*2-ballPos;
+			ROS_INFO("behind ball");
+			
+			private_bb->SetInt("ROBOT_ID", robotID);
+			private_bb->SetString("center", "point");
+			private_bb->SetDouble("centerx", goalPos.x);
+			private_bb->SetDouble("centery", goalPos.y);
+			private_bb->SetDouble("radius", goalposDiff.length()+0.1);
+			private_bb->SetDouble("faceTowardsPosx", facetowardsPos.x);
+			private_bb->SetDouble("faceTowardsPosy", facetowardsPos.y);
+			private_bb->SetDouble("w", 3.0);
+		
+			double maxv=1.5;
+			// the higher worldrotDiff, the lower maxv
+		
+			if(fabs(worldrotDiff) > 0.1){
+				maxv=maxv*0.1/(fabs(worldrotDiff));
+			}
+		
+			double vPconstant=2;
+		
+			roboteam_utils::Vector2 vtogoal=goalposDiff*-vPconstant;
+		
+		
+		
+			if(vtogoal.length() > maxv){
+				vtogoal=vtogoal/vtogoal.length()*maxv;
+			}
+		
+			roboteam_utils::Vector2 robotvtogoal=worldToRobotFrame(vtogoal, robot.angle);
+		
+			private_bb->SetDouble("extravx",robotvtogoal.x);
+			private_bb->SetDouble("extravy",robotvtogoal.y);
+		
+		}
+		else { // first rotate around ball
+			ROS_INFO("not behind ball");
+			private_bb->SetInt("ROBOT_ID", robotID);
+			private_bb->SetString("center", "point");
+			private_bb->SetDouble("centerx", ballPos.x);
+			private_bb->SetDouble("centery", ballPos.y);
+			private_bb->SetDouble("radius", 0.1);
+			private_bb->SetDouble("faceTowardsPosx", goalPos.x);
+			private_bb->SetDouble("faceTowardsPosy", goalPos.y);
+			private_bb->SetDouble("w", 3.0);
+		}
 		rotateAroundPoint.Update();
 	
 		return Status::Running;

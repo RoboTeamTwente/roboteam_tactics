@@ -1,0 +1,117 @@
+{
+    "id": "fd851f63-bb94-4194-8e9f-38299be13849",
+    "title": "SideSideStrategy",
+    "description": "",
+    "root": "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69",
+    "properties": {},
+    "nodes": {
+        "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69": {
+            "id": "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69",
+            "name": "Repeat",
+            "title": "Repeat",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": -372,
+                "y": -72
+            },
+            "child": "8f8d9f68-81a1-4668-8632-0fddb5500e94"
+        },
+        "b96b86ba-a29e-45fd-8049-685b1c0e8c75": {
+            "id": "b96b86ba-a29e-45fd-8049-685b1c0e8c75",
+            "name": "GoToLeftTactic",
+            "title": "GoToLeftTactic",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": -120,
+                "y": -156
+            }
+        },
+        "00fa99ab-01af-4355-86b4-9aae586430b0": {
+            "id": "00fa99ab-01af-4355-86b4-9aae586430b0",
+            "name": "GoToRightTactic",
+            "title": "GoToRightTactic",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": -120,
+                "y": 12
+            }
+        },
+        "8f8d9f68-81a1-4668-8632-0fddb5500e94": {
+            "id": "8f8d9f68-81a1-4668-8632-0fddb5500e94",
+            "name": "Sequence",
+            "title": "Sequence",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": -264,
+                "y": -72
+            },
+            "children": [
+                "b96b86ba-a29e-45fd-8049-685b1c0e8c75",
+                "00fa99ab-01af-4355-86b4-9aae586430b0"
+            ]
+        }
+    },
+    "display": {
+        "camera_x": 927.5,
+        "camera_y": 495,
+        "camera_z": 1,
+        "x": -504,
+        "y": -72
+    },
+    "custom_nodes": [
+        {
+            "name": "BallOnOurSide",
+            "category": "condition",
+            "title": "BallOnOurSide",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "BasicAttackTactic",
+            "category": "action",
+            "title": "BasicAttackTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "BasicDefenseTactic",
+            "category": "action",
+            "title": "BasicDefenseTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "Repeat",
+            "category": "decorator",
+            "title": "Repeat",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToPos",
+            "category": "action",
+            "title": "GoToPos",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToLeftTactic",
+            "category": "action",
+            "title": "GoToLeftTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToRightTactic",
+            "category": "action",
+            "title": "GoToRightTactic",
+            "description": null,
+            "properties": {}
+        }
+    ]
+}
+
