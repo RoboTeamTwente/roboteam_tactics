@@ -37,7 +37,7 @@ std::vector<roboteam_msgs::Vector2f> FollowPath::ComputePath(roboteam_utils::Vec
         // printf("%s\n", describe_flags(result).c_str());
         if (~result & RESULT_FAIL) {
             // A path was found, so set it.
-            points = srv.response.path;
+            // points = srv.response.path;
         } else {
         	ROS_INFO("No path found :(");
         }

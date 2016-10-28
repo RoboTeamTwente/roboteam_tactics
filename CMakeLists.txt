@@ -192,6 +192,7 @@ add_executable(GetBallTest
     src/skills/GetBall.cpp
     src/skills/AvoidRobots.cpp
     src/conditions/IHaveBall.cpp
+    src/conditions/CanSeePoint.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
