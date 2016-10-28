@@ -17,7 +17,7 @@ FollowPath::FollowPath(ros::NodeHandle nh, std::string name, bt::Blackboard::Ptr
         : Skill(nh, name, blackboard) { 
 		// state = "computePath";
         n = nh;
-        state = 1;
+        state = COMPUTE;
         client = n.serviceClient<roboteam_msgs::navsim>("navsim");
 }
 
@@ -84,17 +84,16 @@ bt::Node::Status FollowPath::Update () {
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
 
-	if (state == 1) {
+    switch (state) {
+	case COMPUTE:
 		points = ComputePath(robotPos, goalPos);
-		state = 2;
-	}
-
-	if (state == 2) {
+		state = GOTO;
+        break;
+	case GOTO:
 		CallGoToPos(points[0], wGoal, robotID);
-		state = 3;
-	}
-
-	if (state == 3) {
+		state = CHECK;
+        break;
+	case CHECK:
 		if (goToPos == nullptr) {
 			ROS_INFO("Oh no! Null Pointer :(");
 			return Status::Invalid;
@@ -106,7 +105,7 @@ bt::Node::Status FollowPath::Update () {
 				// ROS_INFO("Moving towards the next position target...");
 
 				ROS_INFO_STREAM("X: " << points[0].x << ", Y: " << points[0].y);
-				state = 2;
+				state = GOTO;
 				return Status::Running;
 			} else {
 				ROS_INFO("Reached the last position target! Shutting down...");
@@ -120,7 +119,11 @@ bt::Node::Status FollowPath::Update () {
 				return Status::Failure;
 			}
 		}
-	}
+        break;
+    default:
+        ROS_ERROR("Incomplete case statement for FollowPath::state in FollowPath::update!");
+        return Status::Invalid;
+    }
 
 	ROS_INFO("You shouldn't be here...");
 	return Status::Invalid;

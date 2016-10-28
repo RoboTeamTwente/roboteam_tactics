@@ -20,6 +20,9 @@ public:
     void CallGoToPos(roboteam_msgs::Point point, double wGoal, int robotID);
 	Status Update();
 private:
+
+    enum FPState { COMPUTE, GOTO, CHECK };
+
 	ros::NodeHandle n;
 	ros::Publisher pub;
 	ros::ServiceClient client;
@@ -27,7 +30,7 @@ private:
 
 	GoToPos* goToPos;
 	int robotID;
-	int state; // 1: compute path, 2: go to a position along the path, 3: check if done, or move to next position
+	FPState state; // 1: compute path, 2: go to a position along the path, 3: check if done, or move to next position
 } ;
 
 } // rtt
