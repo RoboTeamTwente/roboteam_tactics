@@ -14,16 +14,16 @@
 namespace rtt {
 
 FollowPath::FollowPath(ros::NodeHandle nh, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(nh, name, blackboard) { 
+        : Skill(nh, name, blackboard) {
 		// state = "computePath";
         n = nh;
         state = COMPUTE;
         client = n.serviceClient<roboteam_msgs::navsim>("navsim");
 }
 
-std::vector<roboteam_msgs::Point> FollowPath::ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos) {
+std::vector<roboteam_msgs::Vector2f> FollowPath::ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos) {
 	char result = RESULT_VELOCITY_DISREGARD;
-	
+
     // We need to calculate a new path, so contact NavSim
     roboteam_msgs::navsim srv;
     srv.request.start.x = robotPos.x;
@@ -45,11 +45,11 @@ std::vector<roboteam_msgs::Point> FollowPath::ComputePath(roboteam_utils::Vector
         ROS_INFO("roboteam_nav call failed :(");
         // result |= RESULT_FAIL | RESULT_FAIL_UNKOWN;
     }
-    
+
 	return points;
 }
 
-void FollowPath::CallGoToPos(roboteam_msgs::Point point, double wGoal, int robotID) {
+void FollowPath::CallGoToPos(roboteam_msgs::Vector2f point, double wGoal, int robotID) {
 	auto bb = std::make_shared<bt::Blackboard>();
     bb->SetDouble("xGoal", point.x);
     bb->SetDouble("yGoal", point.y);
