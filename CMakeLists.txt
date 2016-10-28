@@ -56,6 +56,7 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
+    src/skills/Dribble.cpp
     ${TACTICS_SKILLS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
