@@ -49,6 +49,8 @@ int main(int argc, char **argv) {
 
     bb->SetInt("ROBOT_ID", 0);
     bb->SetBool("GetBall_A_intercept", false);
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);
+    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", passTo.y);
     
     // params for aimAt are set in tree
 

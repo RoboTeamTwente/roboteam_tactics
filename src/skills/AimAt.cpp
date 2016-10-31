@@ -24,23 +24,26 @@ bt::Node::Status AimAt::Update (){
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
 	// is called before the first world state update
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	std::string destination = GetString("At");
+	// std::string destination=private_bb->GetString("At");
+	// ROS_INFO_STREAM("destination1: " << destination);
+	// printf("%s\n", destination1.c_str());
+
 	if (world.us.size() == 0) {
 		ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
 	// roboteam_msgs::WorldBall ball = world.ball;
-	//roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	// roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	//roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	
-	
-	std::string destination=private_bb->GetString("At");
 	
 	roboteam_utils::Vector2 passTo;
 	
 	if (destination=="robot"){
 
-		int AtRobotID= int(private_bb->GetDouble("AtRobot") + 0.5);
+		int AtRobotID= GetInt("AtRobot");
 		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
 		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
 	
@@ -50,10 +53,10 @@ bt::Node::Status AimAt::Update (){
 		std::string ourcolor;
 		n.getParam("our_color",  ourcolor);
 		if(ourcolor == "yellow"){
-			passTo=roboteam_utils::Vector2(-4.0,0.0);
+			passTo=roboteam_utils::Vector2(-3.0,0.0);
 		}
 		else if(ourcolor == "blue"){
-			passTo=roboteam_utils::Vector2(4.0,0.0);
+			passTo=roboteam_utils::Vector2(3.0,0.0);
 		}
 		else {
 			ROS_ERROR("Could not determine goal side");
@@ -64,20 +67,18 @@ bt::Node::Status AimAt::Update (){
 		std::string ourcolor;
 		n.getParam("our_color", ourcolor);
 		if(ourcolor == "yellow"){
-			passTo=roboteam_utils::Vector2(4.0,0.0);
+			passTo=roboteam_utils::Vector2(3.0,0.0);
 		}
 		else if(ourcolor == "blue"){
-			passTo=roboteam_utils::Vector2(-4.0,0.0);
+			passTo=roboteam_utils::Vector2(-3.0,0.0);
 		}
 		else {
 			ROS_ERROR("Could not determine goal side");
 		}
 	}
 	
-	ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);
-	
-	
-    private_bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+	// ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);
+    private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetString("center", "ball");
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
     private_bb->SetDouble("faceTowardsPosy", passTo.y);

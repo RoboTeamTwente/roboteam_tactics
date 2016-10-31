@@ -21,6 +21,14 @@ AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Pt
 }
 
 bt::Node::Status AvoidRobots::Update (){
+
+    // Set control gains
+    double maxSpeed = 1.5;
+    double attractiveForce = 10.0;
+    double attractiveForceWhenClose = 4.0;
+    double repulsiveForce = 1.0;
+
+
 	roboteam_msgs::World world = LastWorld::get();
     if (world.us.size() == 0) {
         ROS_INFO("No information about the world state :(");
@@ -63,9 +71,9 @@ bt::Node::Status AvoidRobots::Update (){
     // If you can see the end point, just go towards it
     CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
-        roboteam_utils::Vector2 forceVector = posError;
-        if (posError.length() > 0.2) {
-            forceVector = forceVector.scale(1/forceVector.length() * 1.0);
+        roboteam_utils::Vector2 forceVector = posError*attractiveForceWhenClose;
+        if (posError.length() > 0.3) {
+            forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
         }
 
         // Rotate from robot frame to world frame
@@ -125,17 +133,13 @@ bt::Node::Status AvoidRobots::Update (){
             double magnVector = positionDiffOtherRobots.at(i).length();
             roboteam_utils::Vector2 directionVector = positionDiffOtherRobots[i].scale(1/magnVector);
             double dot = directionVector.dot(posError.scale(1/posError.length()));
-            // double factor = fabs(dot);
-            // factor = -factor + 1;
-
+           
             double factor;
             if (dot > 0) {
-                factor = dot*2;
+                factor = dot*2*repulsiveForce;
             } else {
                 factor = 0;
             }
-
-            // factor = fabs(dot2);
 
             double forceMagn = factor/(magnVector*magnVector);
             forceXMagn -= forceMagn*directionVector.x;
@@ -156,20 +160,15 @@ bt::Node::Status AvoidRobots::Update (){
     if (effectiveVector.length() > 8.0) {
         effectiveVector = effectiveVector.scale(1/effectiveVector.length() * 8.0);
     }
-    // ROS_INFO_STREAM("effectiveVector.x: " << effectiveVector.x << " effectiveVector.y: " << effectiveVector.y);
 
     // Add another force that is an attractive force towards the target position
-    // forceXMagn += posError.x*8;
-    // forceYMagn += posError.y*8;
-    effectiveVector.x += posError.x*8;
-    effectiveVector.y += posError.y*8;
-
-    // roboteam_utils::Vector2 forceVector = roboteam_utils::Vector2(forceXMagn, forceYMagn);
+    effectiveVector.x += posError.x*attractiveForce;
+    effectiveVector.y += posError.y*attractiveForce;
     forceVector = effectiveVector;
 
     roboteam_utils::Vector2 forceVectorUnit = forceVector.scale(1/forceVector.length());
     if (posError.length() > 0.2) {
-        forceVector = forceVector.scale(1/forceVector.length() * 1.0);
+        forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
     }
 
     // Rotate from robot frame to world frame
