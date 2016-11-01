@@ -30,27 +30,25 @@ void GoToSideTactic::Initialize() {
     auto workers = getNodesSubscribedTo("/role_directive");
     int i = 0;
     for (auto worker : workers) {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", i);
+
+        if (left) {
+            bb.SetDouble("AvoidRobots_X_xGoal", 3);
+        } else {
+            bb.SetDouble("AvoidRobots_X_xGoal", -3);
+        }
+
+        bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5);
+
+        // Create message
         roboteam_msgs::RoleDirective wd;
         wd.node_id = worker;
         wd.tree = "GoToPosTree";
+        wd.blackboard = bb.toMsg();
 
-        roboteam_msgs::Int32Entry ie;
-        ie.name = "ROBOT_ID";
-        ie.value = i;
-        wd.blackboard.ints.push_back(ie);
-    
-        roboteam_msgs::Float64Entry fe;
-        fe.name = "AvoidRobots_X_xGoal";
-
-        if (left) fe.value = 3;
-        else fe.value = -3;
-
-        wd.blackboard.doubles.push_back(fe);
-
-        fe.name = "AvoidRobots_X_yGoal";
-        fe.value = (double) i * 0.5;
-        wd.blackboard.doubles.push_back(fe);
-
+        // Send to rolenode
         directivePub.publish(wd);
         i++;
     }
