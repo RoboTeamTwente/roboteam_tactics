@@ -27,6 +27,7 @@ bt::Node::Status AvoidRobots::Update (){
     double attractiveForce = 10.0;
     double attractiveForceWhenClose = 4.0;
     double repulsiveForce = 1.0;
+    double priorityForce = 1.0;
 
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -40,10 +41,11 @@ bt::Node::Status AvoidRobots::Update (){
     double angleGoal = GetDouble("angleGoal");
     uint robotID = blackboard->GetInt("ROBOT_ID");
     bool dribbler = GetBool("dribbler");
+    // bool priority = GetBool("priority");
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
-    roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us[robotID].pos.x, world.us[robotID].pos.y);
-    roboteam_utils::Vector2 myVel = roboteam_utils::Vector2(world.us[robotID].vel.x, world.us[robotID].vel.y);
+    roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
+    roboteam_utils::Vector2 myVel = roboteam_utils::Vector2(world.us.at(robotID).vel.x, world.us.at(robotID).vel.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
 
     auto bb2 = std::make_shared<bt::Blackboard>();
@@ -105,16 +107,39 @@ bt::Node::Status AvoidRobots::Update (){
     std::vector<roboteam_utils::Vector2> positionDiffOtherRobots;
     for (size_t i = 0; i < world.us.size(); i++) {
         if (i != robotID) {
-            roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.us[i].pos.x, world.us[i].pos.y);
-            roboteam_utils::Vector2 posDiff = pos-myPos;
-            posDiff = posDiff.scale((posDiff.length()-0.15)/posDiff.length());
-            if (posDiff.length() < lookingDistance) {
-                positionDiffOtherRobots.push_back(posDiff);
-            }   
+            // if (!priority) {
+                roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
+                roboteam_utils::Vector2 posDiff = pos-myPos;
+                posDiff = posDiff.scale((posDiff.length()-0.15)/posDiff.length());
+                if (posDiff.length() < lookingDistance) {
+                    positionDiffOtherRobots.push_back(posDiff);
+                }   
+                // roboteam_utils::Vector2 vel = roboteam_utils::Vector2(world.us.at(i).vel.x, world.us.at(i).vel.y);
+                // if (posDiff.length() < 0.4 && vel.length() > 0.05 && fabs(vel.angle() + posDiff.angle()) < 1.5) {
+                //     roboteam_utils::Vector2 force = posDiff.scale(1/priorityForce);
+                //     if ((vel.angle() + posDiff.angle()) > 0) {
+                //         force = vel.rotate(-0.5*M_PI)*force.dot(vel.rotate(-0.5*M_PI));
+                //     }
+                //     if ((vel.angle() + posDiff.angle()) < 0) {
+                //         force = vel.rotate(0.5*M_PI)*force.dot(vel.rotate(0.5*M_PI));
+                //     }
+                //     positionDiffOtherRobots.push_back(force);
+                // }
+                // if (posDiff.length() < 1.0 && vel.length() > 0.05 && fabs(vel.angle() + posDiff.angle()) < 0.2) {
+                //     roboteam_utils::Vector2 force = posDiff.scale(1/priorityForce);
+                //     if ((vel.angle() + posDiff.angle()) > 0) {
+                //         force = vel.rotate(-0.5*M_PI)*force.dot(vel.rotate(-0.5*M_PI));
+                //     }
+                //     if ((vel.angle() + posDiff.angle()) < 0) {
+                //         force = vel.rotate(0.5*M_PI)*force.dot(vel.rotate(0.5*M_PI));
+                //     }
+                //     positionDiffOtherRobots.push_back(force);
+                // }  
+            // }
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
-        roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.them[i].pos.x, world.them[i].pos.y);
+        roboteam_utils::Vector2 pos = roboteam_utils::Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
         roboteam_utils::Vector2 posDiff = pos-myPos;
         posDiff = posDiff.scale((posDiff.length()-0.15)/posDiff.length());
         if (posDiff.length() < lookingDistance) {
@@ -131,7 +156,7 @@ bt::Node::Status AvoidRobots::Update (){
     if (positionDiffOtherRobots.size() > 0) {
         for (size_t i = 0; i < positionDiffOtherRobots.size(); i++) {
             double magnVector = positionDiffOtherRobots.at(i).length();
-            roboteam_utils::Vector2 directionVector = positionDiffOtherRobots[i].scale(1/magnVector);
+            roboteam_utils::Vector2 directionVector = positionDiffOtherRobots.at(i).scale(1/magnVector);
             double dot = directionVector.dot(posError.scale(1/posError.length()));
            
             double factor;
