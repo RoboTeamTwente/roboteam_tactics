@@ -6,11 +6,14 @@ from math import pi, atan2, degrees, sqrt, sin, cos, tan
 #x_range = np.linspace(-10, 10, 500)
 #y_range = np.linspace(-10, 10, 500)
 
+bot_base_vx = 0.0
+bot_base_vy = 0.0
+
 bot_x = 3.0
 bot_y = 3.0
 bot_r = 0.0
-bot_vx = 0.7
-bot_vy = -0.3
+bot_vx = bot_base_vx
+bot_vy = bot_base_vy
 bot_v = sqrt(bot_vx*bot_vx + bot_vy*bot_vy)
 
 ball_x = 6.0
@@ -18,8 +21,8 @@ ball_y = 6.0
 ball_vx = -0.25
 ball_vy = 0.25
 
-accel_b = 1.134
-accel_a = 0.86
+accel_b = 0.67
+accel_a = 0.43
 
 fig, ax = plt.subplots()
 
@@ -35,17 +38,45 @@ def frange(x, y, jump):
     x += jump
 
 def accel(angle):
-    x = (accel_a * accel_b) / sqrt(accel_b**2 + (accel_a**2) * (tan(angle)**2))
-    y = sqrt(1-(x/accel_a)**2) * accel_b
-    return x/2, y/2
+    a = accel_a #accel_a * cos(bot_r) - accel_b * sin(bot_r)
+    b = accel_b #accel_a * sin(bot_r) + accel_b * cos(bot_r)
+    #x = (a * b) / sqrt(b**2 + (a**2) * (tan(angle)**2))
+    #y = sqrt(1-(x/a)**2) * b
+    #x = a * cos(angle)
+    #y = b * sin(angle)
+    x = a * cos(angle) * cos(bot_r) - b * sin(angle) * sin(bot_r)
+    y = a * cos(angle) * sin(bot_r) + b * sin(angle) * cos(bot_r)
+    #rx = x * cos(angle-bot_r) - y * sin(angle-bot_r)
+    #ry = x * sin(angle-bot_r) + y * cos(angle-bot_r)
+    #rx = x * cos(bot_r) - y * sin(bot_r)
+    #ry = x * sin(bot_r) + y * cos(bot_r)
+    print '%f: %f,%f' % (angle, x, y)
+    return x,y
 
 def bot_range(t, angle, fix_accel=False):
     ax, ay = accel(angle) if not fix_accel else (.55, .55)
-    x = bot_vx * t * cos(angle) - ax * t * t
-    y = bot_vy * t * sin(angle) - ay * t * t
-    return bot_x + x * cos(angle), bot_y + y * sin(angle)
+    #rx = ax * cos(bot_r) - ay * sin(bot_r)
+    #ry = ax * sin(bot_r) + ay * cos(bot_r)
+    #x = bot_x + bot_vx * t * cos(angle) + (ax/2) * t * t
+    #y = bot_y + bot_vy * t * sin(angle) + (ay/2) * t * t
+    x = bot_vx * t + (ax/2) * t * t
+    y = bot_vy * t + (ay/2) * t * t
+    rx = bot_x + x #x * cos(angle) - y * sin(angle)
+    ry = bot_y + y #x * sin(angle) + y * cos(angle)
+    return rx, ry
+
+last_t = 0.0
+
+def update_rot(rot):
+    global bot_r, bot_vx, bot_vy
+    bot_r = rot
+    #bot_vx = bot_base_vx * cos(rot) + bot_base_vy * sin(rot)
+    #bot_vy = -bot_base_vx * sin(rot) + bot_base_vy * cos(rot)
+    update(last_t)
 
 def update(t):
+    global last_t
+    last_t = t
     ax.cla()
     ball = ball_pos(t)
     
@@ -65,18 +96,23 @@ def update(t):
     ys = []
     fxs = []
     fys = []
-    for theta in frange(0,2*pi,pi/32):
+    for theta in frange(0,2*pi,pi/64):
         x, y = bot_range(t, theta)
-        fx, fy = bot_range(t, theta, True)
+        fx, fy = accel(theta)
         #print '%f/%f: (%f,%f)' % (t, theta, x, y)
+        #xs.append((x-bot_x) * cos(bot_r) - (y-bot_y) * sin(bot_r) + bot_x)
+        #ys.append((x-bot_x) * sin(bot_r) + (y-bot_y) * cos(bot_r) + bot_y)
+        #fxs.append((fx-bot_x) * cos(bot_r) - (fy-bot_y) * sin(bot_r) + bot_x)
+        #fys.append((fx-bot_x) * sin(bot_r) + (fy-bot_y) * cos(bot_r) + bot_y)
         xs.append(x)
         ys.append(y)
-        fxs.append(fx)
-        fys.append(fy)
+        fxs.append(fx+bot_x)
+        fys.append(fy+bot_y)
+
     ax.plot(xs, ys, 'b')
     ax.plot(fxs, fys, 'g')
 
-    print atan2(ball[1] - bot_y, ball[0] - bot_x)
+   # print atan2(ball[1] - bot_y, ball[0] - bot_x)
 
 #bot_data = ([], [])
 #for t in frange(0, 10, 0.1):
@@ -93,7 +129,10 @@ def update(t):
 #plt.plot(bot_data[0], bot_data[1], 'r')
 #plt.plot(ball_data[0], ball_data[1], 'b')
 
-slider = Slider(plt.axes([0, 0, 0.5, 0.05]), 'Time', 0, 10)
+slider = Slider(plt.axes([0, 0, 0.5, 0.05]), 'Time', 0, 5)
 slider.on_changed(update)
+
+rslider = Slider(plt.axes([0.5, 0, 0.5, 0.05]), 'Rotation', 0, 2*pi)
+rslider.on_changed(update_rot)
 
 plt.show()

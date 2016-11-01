@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
-	bb->SetInt("ROBOT_ID", 0);
+	bb->SetInt("ROBOT_ID", 1);
 
 	rtt::Kick Kick(n, "", bb);
 

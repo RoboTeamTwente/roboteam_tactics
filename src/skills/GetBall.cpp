@@ -4,7 +4,8 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
-#include "roboteam_tactics/skills/GoToPos.h"
+// #include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 
@@ -23,7 +24,8 @@ namespace rtt {
 
 GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
-        , goToPos(n, "", private_bb) {
+        // , goToPos(n, "", private_bb)
+        , avoidRobots(n, "", private_bb) {
     pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
     ROS_INFO("Getting ball");
     hasBall = whichRobotHasBall();
@@ -232,9 +234,10 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         // ROS_INFO_STREAM("go to angle: " << targetAngle);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("endPoint", true);
+        // private_bb->SetBool("endPoint", true);
         
-		goToPos.Update();
+        avoidRobots.Update();
+		// goToPos.Update();
 		prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);
 		prevTargetAngle = targetAngle;
 		return Status::Running;

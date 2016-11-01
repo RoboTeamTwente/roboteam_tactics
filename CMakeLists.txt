@@ -40,10 +40,10 @@ file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 
 add_executable(brain
     src/main.cpp
-    src/Aggregator.cpp
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -57,6 +57,7 @@ add_executable(KickAtGoal
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -70,6 +71,7 @@ add_executable(Keeper
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -100,8 +102,10 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
 target_link_libraries(TestX ${catkin_LIBRARIES})
@@ -203,8 +207,9 @@ target_link_libraries(GoToPosTest ${catkin_LIBRARIES})
 add_executable(GetBallTest
     src/skills/tests/GetBallTest.cpp
     src/skills/GetBall.cpp
-    src/skills/GoToPos.cpp
+    src/skills/AvoidRobots.cpp
     src/conditions/IHaveBall.cpp
+    src/conditions/CanSeePoint.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
 )
@@ -254,6 +259,18 @@ add_executable(FollowPathTest
 add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(FollowPathTest ${catkin_LIBRARIES})
 
+add_executable(AvoidRobotsTest
+    src/skills/tests/AvoidRobotsTest.cpp
+    src/skills/AvoidRobots.cpp
+    src/skills/GoToPos.cpp
+    src/conditions/CanSeePoint.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(AvoidRobotsTest ${catkin_LIBRARIES})
+
+
 catkin_add_gtest(tactics_test
     test/main.cpp 
 	test/SimpleTest.cpp
@@ -272,6 +289,13 @@ target_link_libraries(RoleNode ${catkin_LIBRARIES})
 
 add_executable(StrategyNode
     src/StrategyNode.cpp
+    src/trees/alltrees.cpp
+    src/LastWorld.cpp
+    src/PickedTactic.cpp
+    src/utils.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
 add_dependencies(StrategyNode
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

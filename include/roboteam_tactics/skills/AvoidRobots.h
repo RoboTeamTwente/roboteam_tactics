@@ -13,25 +13,23 @@
 
 namespace rtt {
 
-class GoToPos : public Skill {
+class AvoidRobots : public Skill {
 public:
-	GoToPos(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	AvoidRobots(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     
     static VerificationMap required_params() {
         VerificationMap params;
-        params["xGoal"] = BBArgumentType::Double;
-        params["yGoal"] = BBArgumentType::Double;
-        params["angleGoal"] = BBArgumentType::Double;
         params["ROBOT_ID"] = BBArgumentType::Int;
-        params["dribbler"] = BBArgumentType::Bool;
-        params["endPoint"] = BBArgumentType::Bool;
+        params["targetX"] = BBArgumentType::Double;
+        params["targetY"] = BBArgumentType::Double;
         return params;
     }
+    
 private:
-	roboteam_msgs::World prevWorld;
     ros::NodeHandle n;
 	ros::Publisher pub;
+	// roboteam_utils::Vector2 prevDirection;
 
 } ;
 

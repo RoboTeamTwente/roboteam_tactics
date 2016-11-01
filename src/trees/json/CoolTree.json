@@ -1,5 +1,3 @@
-
-
 {
   "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
   "title": "CoolTree",
@@ -72,27 +70,23 @@
       },
       "children": [
         "5b8c3edd-a0e6-4aa4-a31d-b34ead2a91a1",
-        "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099"
+        "2810d80a-d411-4672-807a-f35b02888773"
       ]
     },
-    "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099": {
-      "id": "45e1b2ba-3f1e-41fd-8bb5-20b9ef6ac099",
+    "2810d80a-d411-4672-807a-f35b02888773": {
+      "id": "2810d80a-d411-4672-807a-f35b02888773",
       "name": "AimAt",
       "title": "AimAt_A",
       "description": "",
-      "properties": {
-        "ROBOT_ID": 0,
-        "At": "theirgoal",
-        "AtRobot": 1
-      },
+      "properties": {},
       "display": {
         "x": 576,
-        "y": -60
+        "y": -72
       }
     }
   },
   "display": {
-    "camera_x": 568.175000000605,
+    "camera_x": 338.69000000059714,
     "camera_y": 447.5,
     "camera_z": 1,
     "x": -120,
@@ -165,11 +159,9 @@
     {
       "name": "AimAt",
       "category": "action",
-      "title": "AimAt",
+      "title": "AimAt_A",
       "description": null,
       "properties": {}
     }
   ]
 }
-
-
