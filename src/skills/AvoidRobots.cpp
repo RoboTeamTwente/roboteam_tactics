@@ -27,7 +27,6 @@ bt::Node::Status AvoidRobots::Update (){
     double attractiveForce = 10.0;
     double attractiveForceWhenClose = 4.0;
     double repulsiveForce = 1.0;
-    double priorityForce = 1.0;
 
 
 	roboteam_msgs::World world = LastWorld::get();
