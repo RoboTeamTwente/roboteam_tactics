@@ -2,6 +2,7 @@
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/verifier.h"
+#include "ros/ros.h"
 
 namespace rtt {
 
@@ -21,43 +22,51 @@ class Leaf : public bt::Leaf {
      * @return Whether or not the given Blackboard satisfies the requirements of the Leaf specified as the template parameter.
      */
     template<typename Impl>
-    static constexpr bool validate_blackboard(typename std::enable_if<CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard, 
+    static bool validate_blackboard(typename std::enable_if<CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard, 
                                               std::string name = "") {
         if (blackboard == nullptr) return false;
         VerificationMap required = Impl::required_params();
+        bool valid = true;
         for (const auto& pair : required) {
-            bool valid = true; // need initialized value due to constexpr
             std::string key = name.empty() ? pair.first : name + "_" + pair.first;
+            bool this_valid = true;
             switch (pair.second) {
                 case BBArgumentType::Int:
-                    valid = blackboard->HasInt(key);
+                    this_valid = blackboard->HasInt(key);
                     break;
                 case BBArgumentType::Float:
-                    valid = blackboard->HasFloat(key);
+                    this_valid = blackboard->HasFloat(key);
                     break;
                 case BBArgumentType::Double:
-                    valid = blackboard->HasDouble(key);
+                    this_valid = blackboard->HasDouble(key);
                     break;
                 case BBArgumentType::Bool:
-                    valid = blackboard->HasBool(key);
+                    this_valid = blackboard->HasBool(key);
                     break;
                 case BBArgumentType::String:
-                    valid = blackboard->HasString(key);
+                    this_valid = blackboard->HasString(key);
                     break;
                 default:
                 throw std::logic_error("Incomplete switch statement in rtt::Leaf::validate_blackboard.");
             }
-            if (!valid) return false;
+            if (!this_valid) {
+                ROS_ERROR("Blackboard verification error: no %s in blackboard \"%s\"", key.c_str(), name.c_str());
+                valid = false;
+            }
         }
-        return true;
+        return valid;
     }
     
     /**
      * @brief Overload for Leafs which do not provide a required_params() function. This only performs a null check on the Blackboard.
      */
     template<typename Impl>
-    static constexpr bool validate_blackboard(typename std::enable_if<!CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard,
+    static bool validate_blackboard(typename std::enable_if<!CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard,
                                               std::string name = "") {
+        
+        if (blackboard == nullptr) {
+            ROS_ERROR("Blackboard verification error: blackboard is null");
+        }
         return blackboard != nullptr;
     }
     
