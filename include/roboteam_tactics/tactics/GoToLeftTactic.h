@@ -9,6 +9,8 @@ class GoToLeftTactic : public Tactic {
     public:
     GoToLeftTactic(bt::Blackboard::Ptr blackboard = nullptr);
 
+    void Initialize();
+
     Status Update();
 } ;
 

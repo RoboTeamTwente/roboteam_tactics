@@ -43,6 +43,7 @@ add_executable(brain
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -56,6 +57,7 @@ add_executable(KickAtGoal
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -69,6 +71,7 @@ add_executable(Keeper
     src/LastWorld.cpp
     src/PickedTactic.cpp
     src/trees/alltrees.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -86,9 +89,10 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
-    src/skills/Dribble.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
 target_link_libraries(TestX ${catkin_LIBRARIES})
@@ -275,6 +279,7 @@ add_executable(StrategyNode
     src/trees/alltrees.cpp
     src/LastWorld.cpp
     src/PickedTactic.cpp
+    src/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
