@@ -2,17 +2,17 @@
     "id": "ea65ee8d-b790-4e3d-8e13-910d1755f3f5",
     "title": "GoToPosTree",
     "description": "",
-    "root": "559b2700-8b5c-4198-962e-7001bf91bee5",
+    "root": "e6926a85-ac1a-4afc-8e3f-729c7c6a83c8",
     "properties": {},
     "nodes": {
-        "559b2700-8b5c-4198-962e-7001bf91bee5": {
-            "id": "559b2700-8b5c-4198-962e-7001bf91bee5",
-            "name": "GoToPos",
-            "title": "GoToPos_X",
+        "e6926a85-ac1a-4afc-8e3f-729c7c6a83c8": {
+            "id": "e6926a85-ac1a-4afc-8e3f-729c7c6a83c8",
+            "name": "AvoidRobots",
+            "title": "AvoidRobots_X",
             "description": "",
             "properties": {},
             "display": {
-                "x": 12,
+                "x": -12,
                 "y": 12
             }
         }
@@ -61,16 +61,18 @@
             "properties": {}
         },
         {
-            "name": "GoToLeftTactic",
+            "name": "GoToSideTactic",
             "category": "action",
-            "title": "GoToLeftTactic",
+            "title": "GoToSideTactic",
             "description": null,
-            "properties": {}
+            "properties": {
+                "left": "true"
+            }
         },
         {
-            "name": "GoToRightTactic",
+            "name": "AvoidRobots",
             "category": "action",
-            "title": "GoToRightTactic",
+            "title": "AvoidRobots",
             "description": null,
             "properties": {}
         }

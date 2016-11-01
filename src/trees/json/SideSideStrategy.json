@@ -17,28 +17,6 @@
             },
             "child": "8f8d9f68-81a1-4668-8632-0fddb5500e94"
         },
-        "b96b86ba-a29e-45fd-8049-685b1c0e8c75": {
-            "id": "b96b86ba-a29e-45fd-8049-685b1c0e8c75",
-            "name": "GoToLeftTactic",
-            "title": "GoToLeftTactic",
-            "description": "",
-            "properties": {},
-            "display": {
-                "x": -120,
-                "y": -156
-            }
-        },
-        "00fa99ab-01af-4355-86b4-9aae586430b0": {
-            "id": "00fa99ab-01af-4355-86b4-9aae586430b0",
-            "name": "GoToRightTactic",
-            "title": "GoToRightTactic",
-            "description": "",
-            "properties": {},
-            "display": {
-                "x": -120,
-                "y": 12
-            }
-        },
         "8f8d9f68-81a1-4668-8632-0fddb5500e94": {
             "id": "8f8d9f68-81a1-4668-8632-0fddb5500e94",
             "name": "Sequence",
@@ -50,9 +28,35 @@
                 "y": -72
             },
             "children": [
-                "b96b86ba-a29e-45fd-8049-685b1c0e8c75",
-                "00fa99ab-01af-4355-86b4-9aae586430b0"
+                "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2",
+                "5a43c749-0d89-4c46-9e98-54acec995ecb"
             ]
+        },
+        "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2": {
+            "id": "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2",
+            "name": "GoToSideTactic",
+            "title": "GoToSideTactic",
+            "description": "",
+            "properties": {
+                "left": "true"
+            },
+            "display": {
+                "x": -108,
+                "y": -72
+            }
+        },
+        "5a43c749-0d89-4c46-9e98-54acec995ecb": {
+            "id": "5a43c749-0d89-4c46-9e98-54acec995ecb",
+            "name": "GoToSideTactic",
+            "title": "GoToSideTactic",
+            "description": "",
+            "properties": {
+                "left": "false"
+            },
+            "display": {
+                "x": -108,
+                "y": -12
+            }
         }
     },
     "display": {
@@ -99,19 +103,13 @@
             "properties": {}
         },
         {
-            "name": "GoToLeftTactic",
+            "name": "GoToSideTactic",
             "category": "action",
-            "title": "GoToLeftTactic",
+            "title": "GoToSideTactic",
             "description": null,
-            "properties": {}
-        },
-        {
-            "name": "GoToRightTactic",
-            "category": "action",
-            "title": "GoToRightTactic",
-            "description": null,
-            "properties": {}
+            "properties": {
+                "left": "true"
+            }
         }
     ]
 }
-

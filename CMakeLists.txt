@@ -266,6 +266,13 @@ target_link_libraries(tactics_test ${catkin_LIBRARIES})
 
 add_executable(RoleNode
     src/RoleNode.cpp
+    src/LastWorld.cpp
+    src/trees/alltrees.cpp
+    src/trees/alltrees_factory.cpp
+    src/utils.cpp
+    ${TACTICS_CONDITIONS_SOURCES}
+    ${TACTICS_SKILLS_SOURCES}
+    ${TACTICS_TACTICS_SOURCES}
     )
 add_dependencies(RoleNode
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
