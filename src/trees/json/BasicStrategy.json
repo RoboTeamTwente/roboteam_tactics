@@ -1,3 +1,5 @@
+
+
 {
   "id": "fd851f63-bb94-4194-8e9f-38299be13849",
   "title": "BasicStrategy",
@@ -16,7 +18,7 @@
         "y": -288
       },
       "children": [
-        "dd5d7129-39e3-4d09-8183-ecda7e7b3202",
+        "f8fc36fa-1627-4901-97f7-9a90d7e3a8bb",
         "51e3456a-13c2-46d9-b923-ec4e6c8e0ef2"
       ]
     },
@@ -42,17 +44,6 @@
         "y": -72
       }
     },
-    "dd5d7129-39e3-4d09-8183-ecda7e7b3202": {
-      "id": "dd5d7129-39e3-4d09-8183-ecda7e7b3202",
-      "name": "BallOnOurSide",
-      "title": "BallOnOurSide_first",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 48,
-        "y": -288
-      }
-    },
     "f8260eb4-7b76-435e-9748-7c540f69475c": {
       "id": "f8260eb4-7b76-435e-9748-7c540f69475c",
       "name": "Priority",
@@ -67,11 +58,22 @@
         "0a76eaf4-7f53-4825-823b-c3b59b2974aa",
         "15e192e3-ce42-4578-b5ba-d76694d6f502"
       ]
+    },
+    "f8fc36fa-1627-4901-97f7-9a90d7e3a8bb": {
+      "id": "f8fc36fa-1627-4901-97f7-9a90d7e3a8bb",
+      "name": "TeamHasBall",
+      "title": "TeamHasBall_First",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": -300
+      }
     }
   },
   "display": {
-    "camera_x": 927.5,
-    "camera_y": 495,
+    "camera_x": 907.5,
+    "camera_y": 532,
     "camera_z": 1,
     "x": -504,
     "y": -72
@@ -111,6 +113,50 @@
       "title": "GoToPos",
       "description": null,
       "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AimAt",
+      "category": "action",
+      "title": "AimAt",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TeamHasBall",
+      "category": "condition",
+      "title": "TeamHasBall",
+      "description": null,
+      "properties": {}
     }
   ]
 }
+
+

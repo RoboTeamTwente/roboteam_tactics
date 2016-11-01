@@ -11,7 +11,7 @@ TeamHasBall::TeamHasBall(std::string name, bt::Blackboard::Ptr blackboard) : Con
     our_team = GetBool("our_team");
 }
 
-bt::Node::Status TeamHasBall::Update() {
+bt::Node::Status TeamHasBall::Update() {ROS_INFO("called teamhasball");
     const auto bots = our_team ? LastWorld::get().us : LastWorld::get().them;
     bt::Blackboard tmp(*blackboard); //copy
     bt::Blackboard::Ptr tmp_ptr = std::make_shared<bt::Blackboard>(tmp);
