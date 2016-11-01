@@ -24,15 +24,7 @@ bool failure;
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree, bt::Blackboard::Ptr bb, bt::BehaviorTree* tree2, bt::Blackboard::Ptr bb2) {
     rtt::LastWorld::set(*world);
-
-    roboteam_msgs::World getworld = rtt::LastWorld::get();
-    roboteam_msgs::WorldBall ball = getworld.ball;
-    roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-    bb->SetDouble("RotateAroundPoint_A_centerx", center.x);
-    bb->SetDouble("RotateAroundPoint_A_centery", center.y);
-    bb2->SetDouble("RotateAroundPoint_A_centerx", center.x);
-    bb2->SetDouble("RotateAroundPoint_A_centery", center.y);
-
+    
     if (success1 != true) {
         bt::Node::Status status = tree->Update();
         if (status == bt::Node::Status::Success) {
@@ -58,7 +50,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "tactics");
     ros::NodeHandle n;
 
-    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(1.0, -1.0);
+    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(-1.0, 1.0);
 
     auto role = make_CoolTree(n);
     auto bb = role.GetBlackboard();
@@ -67,23 +59,16 @@ int main(int argc, char **argv) {
     auto bb2 = role2.GetBlackboard();
 
     bb->SetInt("ROBOT_ID", 1);
-    bb->SetString("RotateAroundPoint_A_center", "ball");
     bb->SetBool("GetBall_A_intercept", false);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);
-    bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", passTo.y);
-    bb->SetDouble("RotateAroundPoint_A_w",3.0);
-    bb->SetDouble("RotateAroundPoint_A_radius", 0.09);
+    bb->SetString("AimAt_A_At", "robot");
+    bb->SetInt("AimAt_A_AtRobot", 2);
 
     bb2->SetInt("ROBOT_ID", 2);
     bb2->SetBool("GetBall_A_intercept", true);
     bb2->SetDouble("GetBall_A_getBallAtX", passTo.x);
     bb2->SetDouble("GetBall_A_getBallAtY", passTo.y);
     bb2->SetDouble("GetBall_A_getBallAtTime", 5.0);
-    bb2->SetString("RotateAroundPoint_A_center", "ball");
-    bb2->SetDouble("RotateAroundPoint_A_faceTowardsPosx", 3.0);
-    bb2->SetDouble("RotateAroundPoint_A_faceTowardsPosy", 0.0);
-    bb2->SetDouble("RotateAroundPoint_A_w",3.0);
-    bb2->SetDouble("RotateAroundPoint_A_radius", 0.09);
+    bb2->SetString("AimAt_A_At", "theirgoal");
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);

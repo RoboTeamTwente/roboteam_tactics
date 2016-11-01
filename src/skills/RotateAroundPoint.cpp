@@ -90,17 +90,17 @@ bt::Node::Status RotateAroundPoint::Update (){
 	
 	
 	
-	
+	// int robotID2 = GetInt("ROBOT_ID");
+
 	// check and set ROBOT_ID
 	if(blackboard->HasInt("ROBOT_ID")){ 
 		robotID = blackboard->GetInt("ROBOT_ID");
 	}
 	else {
 		ROS_INFO("No int:ROBOT_ID specified"); 
-		// return Status::Failure;
+		return Status::Failure;
 	}
-	
-	
+
 	// get world, robot and ball
 	roboteam_msgs::World world = LastWorld::get();
 	
@@ -195,7 +195,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
-	
 	if (worldposDiff.length() < 1.5*radius) { // close enough
 		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
 		if(true){

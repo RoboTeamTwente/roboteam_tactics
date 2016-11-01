@@ -1,0 +1,78 @@
+{
+    "id": "ea65ee8d-b790-4e3d-8e13-910d1755f3f5",
+    "title": "GoToPosTree",
+    "description": "",
+    "root": "559b2700-8b5c-4198-962e-7001bf91bee5",
+    "properties": {},
+    "nodes": {
+        "559b2700-8b5c-4198-962e-7001bf91bee5": {
+            "id": "559b2700-8b5c-4198-962e-7001bf91bee5",
+            "name": "GoToPos",
+            "title": "GoToPos_X",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": 12,
+                "y": 12
+            }
+        }
+    },
+    "display": {
+        "camera_x": 767.5,
+        "camera_y": 380.5,
+        "camera_z": 1,
+        "x": -168,
+        "y": 12
+    },
+    "custom_nodes": [
+        {
+            "name": "BallOnOurSide",
+            "category": "condition",
+            "title": "BallOnOurSide",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "BasicAttackTactic",
+            "category": "action",
+            "title": "BasicAttackTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "BasicDefenseTactic",
+            "category": "action",
+            "title": "BasicDefenseTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "Repeat",
+            "category": "decorator",
+            "title": "Repeat",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToPos",
+            "category": "action",
+            "title": "GoToPos",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToLeftTactic",
+            "category": "action",
+            "title": "GoToLeftTactic",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "GoToRightTactic",
+            "category": "action",
+            "title": "GoToRightTactic",
+            "description": null,
+            "properties": {}
+        }
+    ]
+}

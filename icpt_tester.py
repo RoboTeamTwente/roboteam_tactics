@@ -6,7 +6,7 @@ from math import pi, atan2, degrees, sqrt, sin, cos, tan
 #x_range = np.linspace(-10, 10, 500)
 #y_range = np.linspace(-10, 10, 500)
 
-bot_base_vx = 1.0
+bot_base_vx = 0.0
 bot_base_vy = 0.0
 
 bot_x = 3.0
