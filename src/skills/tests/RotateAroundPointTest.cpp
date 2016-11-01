@@ -56,7 +56,6 @@ int main(int argc, char **argv) {
     bb->SetDouble("w",3.0);
     bb->SetInt("ROBOT_ID", 1);
     
-
 	rtt::RotateAroundPoint rotateAroundPoint(n, "", bb);
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackRotateAroundPoint, _1, &rotateAroundPoint, bb));
 	
