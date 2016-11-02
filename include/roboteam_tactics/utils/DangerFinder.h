@@ -35,6 +35,7 @@ bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot);
 
 double distance_score(const roboteam_msgs::WorldRobot& bot);
 double orientation_score(const roboteam_msgs::WorldRobot& bot);
+double base_danger_score(const roboteam_msgs::WorldRobot& bot);
 double danger_score(const roboteam_msgs::WorldRobot& bot);
     
 void dump_scores(const roboteam_msgs::World& world);    

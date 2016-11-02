@@ -3,6 +3,8 @@
 #include <map>
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_tactics/utils/utils.h"
+#include <boost/optional.hpp>
 
 namespace rtt {
  
@@ -36,17 +38,49 @@ bool can_see_our_goal(const roboteam_msgs::WorldRobot& bot) {
     return false;
 }
 
+bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot) {
+    // TODO: incorporate chipped passes
+    Vector goal = get_goal();
+    Position pos(bot.pos.x, bot.pos.y, bot.angle);
+    auto holder = getBallHolder();
+    if (!holder || holder->second) {
+        // Opponent does not have ball
+        return false;
+    }
+    const auto other = holder->first;
+    if (Vector(other.pos.x, other.pos.y) == pos.location()) {
+        // Can't cross to yourself
+        return false;
+    }
+    
+    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+    bb->SetInt("me", bot.id);
+    bb->SetDouble("x_coor", other.pos.x);
+    bb->SetDouble("y_coor", other.pos.y);
+    CanSeePoint csp("", bb);
+    if (csp.Update() != bt::Node::Status::Success) {
+        // Other can't see the current bot
+        return false;
+    }
+    
+    double my_score = base_danger_score(bot);
+    double other_score = base_danger_score(other);
+    if (my_score < other_score) {
+        // Other is in better position
+        return false;
+    }
+    
+    return true;
+}
+
 bool has_ball(const roboteam_msgs::WorldRobot& bot) {
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("me", bot.id);
+    bb->SetBool("our_team", false);
     IHaveBall ihb("", bb);
     return ihb.Update() == bt::Node::Status::Success;
 }
 
-bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot) {
-    return false; // TODO
-}
-    
 #define DISTANCE_DENOMINATOR 2.84605 // magic
 double distance_score(const roboteam_msgs::WorldRobot& bot) {
     Vector goal = get_goal();
@@ -64,14 +98,13 @@ double orientation_score(const roboteam_msgs::WorldRobot& bot) {
     double tgt_angle = goal.angle();
     double angle_diff = fabs(tgt_angle - bot.angle);
     double x = (angle_diff - M_PI) / ORIENTATION_DENOMINATOR;
-    return x*x;
+    return (x*x) / 3.0;
 }   
 
 
 #define HAS_BALL_DANGER 5.0
 #define CAN_SEE_GOAL_DANGER 5.0
-
-double danger_score(const roboteam_msgs::WorldRobot& bot) {
+double base_danger_score(const roboteam_msgs::WorldRobot& bot) {
     double score = 0.0;
     
     score += distance_score(bot);
@@ -81,6 +114,12 @@ double danger_score(const roboteam_msgs::WorldRobot& bot) {
     
     return score;
 } 
+
+double danger_score(const roboteam_msgs::WorldRobot& bot) {
+    double base = base_danger_score(bot);
+    double score = potential_cross_recepient(bot) ? base + 5 : base;
+    return score;
+}
 
 void dump_scores(const roboteam_msgs::World& world) {
     for (const auto& bot : world.them) {
