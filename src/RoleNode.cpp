@@ -4,6 +4,7 @@
 
 #include "ros/ros.h"
 #include "std_msgs/Empty.h"
+#include "uuid_msgs/UniqueID.h"
 
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
@@ -13,7 +14,9 @@
 ros::Publisher roleNodeDiscoveryPublisher;
 bt::BehaviorTree currentTree;
 bt::BehaviorTree emptyTree;
+
 bool sendNextSuccess = false;
+uuid_msgs::UniqueID currentToken;
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
@@ -33,6 +36,8 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bb->fromMsg(msg->blackboard);
 
     std::cout << "My robot: " << std::to_string(bb->GetInt("ROBOT_ID")) << "\n";
+
+    currentToken = msg->token;
 
     sendNextSuccess = true;
 }
