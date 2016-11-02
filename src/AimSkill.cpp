@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "actionlib/server/simple_action_server.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"

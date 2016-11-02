@@ -7,7 +7,7 @@
 
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
 
 ros::Publisher roleNodeDiscoveryPublisher;

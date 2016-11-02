@@ -1,7 +1,8 @@
-#include "roboteam_tactics/conditions/IHaveBall.h"
-#include "roboteam_tactics/LastWorld.h"
 #include <cmath>
 #include <cstdio>
+
+#include "roboteam_tactics/conditions/IHaveBall.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 namespace rtt {
 

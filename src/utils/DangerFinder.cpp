@@ -1,8 +1,9 @@
-#include "roboteam_tactics/utils/DangerFinder.h"
 #include <cmath>
 #include <map>
-#include "roboteam_tactics/conditions/IHaveBall.h"
+
 #include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
+#include "roboteam_tactics/utils/DangerFinder.h"
 
 namespace rtt {
  

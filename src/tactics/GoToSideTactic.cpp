@@ -1,11 +1,9 @@
 #include <memory>
 #include <iostream>
 
-#include "roboteam_msgs/Int32Entry.h"
-#include "roboteam_msgs/Float64Entry.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/GoToSideTactic.h"
-#include "roboteam_tactics/utils.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 

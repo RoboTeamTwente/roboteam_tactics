@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 
-#include "roboteam_tactics/utils.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 

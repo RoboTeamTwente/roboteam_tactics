@@ -1,7 +1,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 namespace rtt {
 
