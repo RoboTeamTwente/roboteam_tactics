@@ -13,6 +13,7 @@
 ros::Publisher roleNodeDiscoveryPublisher;
 bt::BehaviorTree currentTree;
 bt::BehaviorTree emptyTree;
+bool sendNextSuccess = false;
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
@@ -32,6 +33,8 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bb->fromMsg(msg->blackboard);
 
     std::cout << "My robot: " << std::to_string(bb->GetInt("ROBOT_ID")) << "\n";
+
+    sendNextSuccess = true;
 }
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {

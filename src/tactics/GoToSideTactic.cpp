@@ -6,7 +6,6 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/GoToSideTactic.h"
 #include "roboteam_tactics/utils.h"
-#include "roboteam_tactics/PickedTactic.h"
 
 namespace rtt {
 

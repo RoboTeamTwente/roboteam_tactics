@@ -17,12 +17,7 @@ set(CMAKE_CXX_FLAGS "\
 -Wsign-compare \
 ")
 
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES roboteam_tactics
-#  CATKIN_DEPENDS roboteam_msgs roscpp std_msgs
-#  DEPENDS system_lib
-)
+catkin_package()
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -34,17 +29,11 @@ file(GLOB TACTICS_SKILLS_SOURCES "src/skills/*.cpp")
 file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
 file(GLOB TACTICS_UTILS_SOURCES "src/utils/*.cpp")
 
-# To signify that the file is generated s.t. cmake won't throw
-# an error if it can't find the file in the config step.
-#set_source_files_properties(src/trees/alltrees.cpp
-#                            PROPERTIES GENERATED TRUE)
-
 add_executable(brain
     src/main.cpp
     src/LastWorld.cpp
-    src/PickedTactic.cpp
     src/trees/alltrees.cpp
-    src/utils.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -57,9 +46,9 @@ add_executable(KickAtGoal
     src/role_tests/KickAtGoal.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
-    src/PickedTactic.cpp
+    # src/PickedTactic.cpp
     src/trees/alltrees.cpp
-    src/utils.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -71,9 +60,9 @@ add_executable(Keeper
     src/role_tests/Keeper.cpp
     src/Aggregator.cpp
     src/LastWorld.cpp
-    src/PickedTactic.cpp
+    # src/PickedTactic.cpp
     src/trees/alltrees.cpp
-    src/utils.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -91,7 +80,7 @@ add_dependencies(converter generate_leafs_t)
 add_executable(TestX
     src/skills/tests/TestX.cpp
     src/LastWorld.cpp
-    src/utils.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -269,7 +258,6 @@ add_executable(CanReachPointTest
 add_dependencies(CanReachPointTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(CanReachPointTest ${catkin_LIBRARIES})
 
-
 catkin_add_gtest(tactics_test
     test/main.cpp 
 	test/SimpleTest.cpp
@@ -281,7 +269,7 @@ add_executable(RoleNode
     src/LastWorld.cpp
     src/trees/alltrees.cpp
     src/trees/alltrees_factory.cpp
-    src/utils.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
@@ -297,8 +285,8 @@ add_executable(StrategyNode
     src/StrategyNode.cpp
     src/trees/alltrees.cpp
     src/LastWorld.cpp
-    src/PickedTactic.cpp
-    src/utils.cpp
+    # src/PickedTactic.cpp
+    src/utils/utils.cpp
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}

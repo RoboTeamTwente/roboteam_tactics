@@ -1,5 +1,4 @@
 #include "roboteam_tactics/tactics/BasicDefenseTactic.h"
-#include "roboteam_tactics/PickedTactic.h"
 
 namespace rtt {
 

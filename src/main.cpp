@@ -13,7 +13,6 @@
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/PickedTactic.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
