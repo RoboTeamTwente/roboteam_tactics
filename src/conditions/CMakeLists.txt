@@ -1,0 +1,14 @@
+add_library(conditions
+    BallOnOurSide.cpp
+    CanInterceptBall.cpp
+    CanReachPoint.cpp
+    CanSeePoint.cpp
+    IHaveBall.cpp
+    TeamHasBall.cpp
+    TheyHaveBall.cpp
+    WeHaveBall.cpp
+    )
+add_dependencies(conditions
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    )
