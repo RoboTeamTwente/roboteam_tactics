@@ -50,7 +50,8 @@ class Leaf : public bt::Leaf {
                 throw std::logic_error("Incomplete switch statement in rtt::Leaf::validate_blackboard.");
             }
             if (!this_valid) {
-                ROS_ERROR("Blackboard verification error: no %s in blackboard \"%s\"", key.c_str(), name.c_str());
+                ROS_ERROR("Blackboard verification error: no %s of type %s in blackboard \"%s\"", key.c_str(), 
+                    bbArgTypeName(pair.second), name.c_str());
                 valid = false;
             }
         }
@@ -70,6 +71,23 @@ class Leaf : public bt::Leaf {
         return blackboard != nullptr;
     }
     
+    
+    static const char* bbArgTypeName(BBArgumentType arg) {
+        switch (arg) {
+        case BBArgumentType::Int:
+            return "int";
+        case BBArgumentType::Float:
+            return "float";
+        case BBArgumentType::Double:
+            return "double";
+        case BBArgumentType::Bool:
+            return "bool";
+        case BBArgumentType::String:
+            return "string";
+        default:
+            return "<<missing>>";
+        }
+    }
     
     Leaf(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr)
             : bt::Leaf(blackboard)
