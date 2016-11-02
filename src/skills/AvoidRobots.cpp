@@ -27,7 +27,6 @@ bt::Node::Status AvoidRobots::Update (){
     double attractiveForce = 10.0;
     double attractiveForceWhenClose = 4.0;
     double repulsiveForce = 1.0;
-    double priorityForce = 1.0;
 
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -52,6 +51,11 @@ bt::Node::Status AvoidRobots::Update (){
     bb2->SetInt("me", robotID);
     bb2->SetDouble("x_coor", xGoal);
     bb2->SetDouble("y_coor", yGoal);
+
+    // Set angleGoal such that you're always driving forwards, unless you're close to the target position
+    if (posError.length() > 0.5) {
+        angleGoal = posError.angle();
+    }
 
 
     // Proportional rotation controller

@@ -260,6 +260,15 @@ add_executable(AvoidRobotsTest
 add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(AvoidRobotsTest ${catkin_LIBRARIES})
 
+add_executable(CanReachPointTest
+    src/conditions/tests/CanReachPointTest.cpp
+    src/conditions/CanReachPoint.cpp
+    src/Aggregator.cpp
+    src/LastWorld.cpp
+)
+add_dependencies(CanReachPointTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(CanReachPointTest ${catkin_LIBRARIES})
+
 
 catkin_add_gtest(tactics_test
     test/main.cpp 
