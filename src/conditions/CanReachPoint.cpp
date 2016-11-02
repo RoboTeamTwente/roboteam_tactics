@@ -1,5 +1,5 @@
 #include "roboteam_tactics/conditions/CanReachPoint.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {

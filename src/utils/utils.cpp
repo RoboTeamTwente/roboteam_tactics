@@ -1,8 +1,9 @@
-#include "roboteam_tactics/utils/utils.h"
 #include <ros/ros.h>
-#include "roboteam_tactics/LastWorld.h"
-#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/conditions/IHaveBall.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_msgs/World.h"
 
 namespace rtt {
 

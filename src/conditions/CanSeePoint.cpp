@@ -1,9 +1,11 @@
-#include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "ros/ros.h"
+
 #include <boost/range/join.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/adaptor/filtered.hpp>
-#include "ros/ros.h"
-#include "roboteam_tactics/LastWorld.h"
+
+#include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 namespace rtt {
     

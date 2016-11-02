@@ -1,13 +1,14 @@
 #pragma once
 
-#include "roboteam_tactics/LastWorld.h"
+#include <boost/optional.hpp>
+#include <vector>
+#include <algorithm>
+
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Position.h"
-#include <boost/optional.hpp>
-#include <vector>
-#include <algorithm>
 
 namespace rtt {
     
