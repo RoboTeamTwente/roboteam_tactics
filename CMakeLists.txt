@@ -32,6 +32,7 @@ include_directories(
 file(GLOB TACTICS_CONDITIONS_SOURCES "src/conditions/*.cpp")
 file(GLOB TACTICS_SKILLS_SOURCES "src/skills/*.cpp")
 file(GLOB TACTICS_TACTICS_SOURCES "src/tactics/*.cpp")
+file(GLOB TACTICS_UTILS_SOURCES "src/utils/*.cpp")
 
 # To signify that the file is generated s.t. cmake won't throw
 # an error if it can't find the file in the config step.
@@ -47,6 +48,7 @@ add_executable(brain
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
+    ${TACTICS_UTILS_SOURCES}
 )
 add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
 target_link_libraries(brain ${catkin_LIBRARIES})
@@ -93,6 +95,7 @@ add_executable(TestX
     ${TACTICS_CONDITIONS_SOURCES}
     ${TACTICS_SKILLS_SOURCES}
     ${TACTICS_TACTICS_SOURCES}
+    ${TACTICS_UTILS_SOURCES}
     )
 add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
 target_link_libraries(TestX ${catkin_LIBRARIES})
