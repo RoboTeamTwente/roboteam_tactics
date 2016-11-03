@@ -19,6 +19,18 @@ roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, robo
 }
 
 bt::Node::Status CanReachPoint::Update() {
+	
+	// Set max velocities etc.. 
+	double time = 0.0;0
+	double speed = 0.0;
+	double travelledDistance = 0.0;
+	double timeStep = 0.01;
+	double maxRotSpeed = 6.3;
+	double maxSpeed = 2.0;
+	roboteam_utils::Vector2 maxAcc = roboteam_utils::Vector2(3.5, 2.0);
+
+
+	// Get world information
 	roboteam_msgs::World world = LastWorld::get();
 	int myID = GetInt("ROBOT_ID");
 	double xTarget = GetDouble("xGoal");
@@ -30,14 +42,8 @@ bt::Node::Status CanReachPoint::Update() {
 	roboteam_utils::Vector2 differenceVector = targetPos - myPos;
 	double myAngle = world.us.at(myID).angle;
 	
-	double time = 0.0;
-	double speed = 0.0;
-	double travelledDistance = 0.0;
-	double timeStep = 0.01;
-	double maxRotSpeed = 6.3;
-	double maxSpeed = 2.0;
-	roboteam_utils::Vector2 maxAcc = roboteam_utils::Vector2(3.5, 2.0);
-
+	
+	// Calculate our orientation with respect to the direction we have to move
 	double angleDiff = differenceVector.angle() - myAngle;
 	if (angleDiff < M_PI) {angleDiff += 2*M_PI;}
 	if (angleDiff > M_PI) {angleDiff -= 2*M_PI;}
@@ -47,6 +53,8 @@ bt::Node::Status CanReachPoint::Update() {
 		if (myAngle <= 0) {myAngle += M_PI;}
 	}
 
+
+	// See how many iterations it takes before the required distance is travelled with the maximum acceleration
 	while (travelledDistance < differenceVector.length()) {
 		double angleDiff = differenceVector.angle() - myAngle;
 		if (angleDiff < M_PI) {angleDiff += 2*M_PI;}
@@ -71,6 +79,8 @@ bt::Node::Status CanReachPoint::Update() {
 		if (time > 5.0) {break;}
 	}
 
+
+	// If the calculated time is less than the given limit, return succes
 	if (time < timeLimit) {
 		return Status::Success;
 	} else {
