@@ -87,17 +87,26 @@ bt::Node::Status AvoidRobots::Update (){
         requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
         requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-
-        // Fill and send command
-        roboteam_msgs::RobotCommand command;
-        command.id = robotID;
-        command.x_vel = requiredSpeed.x;
-        command.y_vel = requiredSpeed.y;
-        command.w = requiredRotSpeed;
-        if (dribbler) {command.dribbler = true;}
-        pub.publish(command);
-
-        return Status::Running;
+        if (posError.length() < 0.005 && rotError < 0.005) {
+            roboteam_msgs::RobotCommand command;
+            command.id = robotID;
+            command.x_vel = 0.0;
+            command.y_vel = 0.0;
+            command.w = 0.0;
+            if (dribbler) {command.dribbler = true;}
+            pub.publish(command);
+            ros::spinOnce();
+            return Status::Success;
+        } else {
+            roboteam_msgs::RobotCommand command;
+            command.id = robotID;
+            command.x_vel = requiredSpeed.x;
+            command.y_vel = requiredSpeed.y;
+            command.w = requiredRotSpeed;
+            if (dribbler) {command.dribbler = true;}
+            pub.publish(command);
+            return Status::Running;
+        }
     }
     
     double lookingDistance = 1.5;
@@ -205,8 +214,6 @@ bt::Node::Status AvoidRobots::Update (){
     requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
     requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-
-    // Fill and send command
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
     command.x_vel = requiredSpeed.x;
@@ -214,7 +221,6 @@ bt::Node::Status AvoidRobots::Update (){
     command.w = requiredRotSpeed;
     if (dribbler) {command.dribbler = true;}
     pub.publish(command);
-
     return Status::Running;
 };
 

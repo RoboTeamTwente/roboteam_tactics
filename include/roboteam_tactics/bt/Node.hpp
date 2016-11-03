@@ -5,12 +5,15 @@
 
 #include "Blackboard.hpp"
 
+
 namespace bt
 {
+
 
 class Node
 {
 public:
+    // When this is updated, updated the tostring method below too!
     enum class Status
     {
         Invalid,
@@ -55,5 +58,20 @@ protected:
 };
 
 using Nodes = std::vector<Node::Ptr>;
+
+static std::string statusToString(Node::Status status) {
+    if (status == bt::Node::Status::Success) {
+        return "Success";
+    } else if (status == bt::Node::Status::Failure) {
+        return "Failure";
+    } else if (status == bt::Node::Status::Invalid) {
+        return "Invalid";
+    } else if (status == bt::Node::Status::Running) {
+        return "Running";
+    } else {
+        std::cout << "Enum failure in Node::Status overload of to_string\n";
+        return "ERROR ERROR!!!";
+    }
+}
 
 }

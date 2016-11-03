@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(roboteam_tactics)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roboteam_utils
@@ -17,7 +19,6 @@ set(CMAKE_CXX_FLAGS "\
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
--fmax-errors=1 \
 ")
 
 catkin_package()
@@ -251,6 +252,17 @@ add_executable(AvoidRobotsTest
 )
 add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(AvoidRobotsTest 
+    skills
+    conditions
+    utils
+    ${catkin_LIBRARIES}
+    )
+
+add_executable(CanPassSafelyTest
+    src/conditions/tests/CanPassSafelyTest.cpp
+)
+add_dependencies(CanPassSafelyTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(CanPassSafelyTest 
     skills
     conditions
     utils

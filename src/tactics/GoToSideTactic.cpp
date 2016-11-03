@@ -1,9 +1,12 @@
 #include <memory>
 #include <iostream>
 
+#include "unique_id/unique_id.h"
+
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/GoToSideTactic.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
 
 namespace rtt {
 
@@ -12,6 +15,8 @@ GoToSideTactic::GoToSideTactic(bt::Blackboard::Ptr blackboard)
         {}
 
 void GoToSideTactic::Initialize() {
+    tokens.clear();
+
     bool left = private_bb->GetString("left") == "true";
 
     if (left) {
@@ -32,9 +37,9 @@ void GoToSideTactic::Initialize() {
         bb.SetInt("ROBOT_ID", i);
 
         if (left) {
-            bb.SetDouble("AvoidRobots_X_xGoal", 3);
-        } else {
             bb.SetDouble("AvoidRobots_X_xGoal", -3);
+        } else {
+            bb.SetDouble("AvoidRobots_X_xGoal", 3);
         }
 
         bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5);
@@ -45,6 +50,11 @@ void GoToSideTactic::Initialize() {
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
+
         // Send to rolenode
         directivePub.publish(wd);
         i++;
@@ -54,14 +64,29 @@ void GoToSideTactic::Initialize() {
 static int a = 0;
 
 bt::Node::Status GoToSideTactic::Update() {
-    a++;
+    bool allSucceeded = true;
+    bool oneFailed = false;
+    bool oneInvalid = false;
 
-    if (a > 600) {
-        a = 0;
-        return bt::Node::Status::Success;
+    for (auto token : tokens) {
+        if (feedbacks.find(token) != feedbacks.end()) {
+            Status status = feedbacks.at(token);
+            allSucceeded &= status == bt::Node::Status::Success;
+            oneFailed |= status == bt::Node::Status::Failure;
+            oneInvalid |= status == bt::Node::Status::Invalid;
+        } else {
+            allSucceeded = false;
+        }
     }
 
-    // std::cout << "Updating GoToSideTactic!\n";
+    if (oneFailed) {
+        return bt::Node::Status::Failure;
+    } else if (oneInvalid) {
+        return bt::Node::Status::Invalid;
+    } else if (allSucceeded) {
+        return bt::Node::Status::Success;
+    }
+ 
     return bt::Node::Status::Running;
 }
 

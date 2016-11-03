@@ -2,21 +2,9 @@
     "id": "fd851f63-bb94-4194-8e9f-38299be13849",
     "title": "SideSideStrategy",
     "description": "",
-    "root": "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69",
+    "root": "8f8d9f68-81a1-4668-8632-0fddb5500e94",
     "properties": {},
     "nodes": {
-        "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69": {
-            "id": "1a2b3e6f-eb2d-4897-b4a4-0fe7fd08fd69",
-            "name": "Repeat",
-            "title": "Repeat",
-            "description": "",
-            "properties": {},
-            "display": {
-                "x": -372,
-                "y": -72
-            },
-            "child": "8f8d9f68-81a1-4668-8632-0fddb5500e94"
-        },
         "8f8d9f68-81a1-4668-8632-0fddb5500e94": {
             "id": "8f8d9f68-81a1-4668-8632-0fddb5500e94",
             "name": "Sequence",
@@ -110,6 +98,13 @@
             "properties": {
                 "left": "true"
             }
+        },
+        {
+            "name": "AvoidRobots",
+            "category": "action",
+            "title": "AvoidRobots",
+            "description": null,
+            "properties": {}
         }
     ]
 }
