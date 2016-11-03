@@ -34,12 +34,4 @@ roboteam_msgs::Vector2f LastWorld::PredictBallPos(double t) {
 	return predictedBallPos;
 }
 
-bool LastWorld::we_are_blue() {
-    return LastWorld::blue;
-}
-
-void LastWorld::set_we_are_blue(bool b) {
-    LastWorld::blue = b;
-}
-
 }
