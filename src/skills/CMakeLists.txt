@@ -1,0 +1,15 @@
+add_library(skills
+    AimAt.cpp
+    Block.cpp
+    FollowPath.cpp
+    GoToPos.cpp
+    RotateAroundPoint.cpp
+    AvoidRobots.cpp
+    Dribble.cpp
+    GetBall.cpp
+    Kick.cpp
+    )
+add_dependencies(skills
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    )

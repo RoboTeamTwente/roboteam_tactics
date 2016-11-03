@@ -1,9 +1,9 @@
-#include <string>
-#include <vector>
-
 #include <ros/ros.h>
 
-#include "roboteam_tactics/utils.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_msgs/World.h"
 
 namespace rtt {
 
@@ -40,6 +40,27 @@ std::vector<std::string> getNodesSubscribedTo(std::string topic) {
     }
 
     return nodes;
+}
+
+boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
+    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+    bb->SetBool("our_team", true);
+    for (auto& bot : LastWorld::get().us) {
+        bb->SetInt("me", bot.id);
+        IHaveBall ihb("", bb);
+        if (ihb.Update() == bt::Node::Status::Success) {
+            return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, true));
+        }
+    }
+    bb->SetBool("our_team", false);
+    for (auto& bot : LastWorld::get().them) {
+        bb->SetInt("me", bot.id);
+        IHaveBall ihb("", bb);
+        if (ihb.Update() == bt::Node::Status::Success) {
+            return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, false));
+        }
+    }
+    return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>();
 }
 
 } // rtt

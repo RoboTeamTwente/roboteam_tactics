@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include "roboteam_tactics/tactics/BasicAttackTactic.h"
-#include "roboteam_tactics/PickedTactic.h"
 
 namespace rtt {
 

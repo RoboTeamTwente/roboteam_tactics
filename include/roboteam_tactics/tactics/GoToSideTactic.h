@@ -6,9 +6,9 @@
 
 namespace rtt {
 
-class GoToRightTactic : public Tactic {
+class GoToSideTactic : public Tactic {
     public:
-    GoToRightTactic(bt::Blackboard::Ptr blackboard = nullptr);
+    GoToSideTactic(bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize();
 
