@@ -42,6 +42,24 @@ std::vector<std::string> getNodesSubscribedTo(std::string topic) {
     return nodes;
 }
 
+std::string getMyNamespace() {
+    std::string ns = ros::this_node::getNamespace();
+
+    if (ns.size() >= 2) {
+        if (ns.substr(0, 2) == "//") {
+            ns = ns.substr(1, ns.size() - 1);
+        }
+    }
+
+    if (ns.size() >= 1) {
+        if (ns.at(ns.size() - 1) != '/') {
+            ns += "/";
+        }
+    }
+    
+    return ns;
+}
+
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->SetBool("our_team", true);

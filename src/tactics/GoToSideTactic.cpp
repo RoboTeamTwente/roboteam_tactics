@@ -29,17 +29,29 @@ void GoToSideTactic::Initialize() {
     roboteam_msgs::RoleDirective resetDirective;
     directivePub.publish(resetDirective);
 
-    auto workers = getNodesSubscribedTo("/role_directive");
+    auto workers = getNodesSubscribedTo(getMyNamespace() + "role_directive");
+    std::cout << "Number of workers: " << std::to_string(workers.size()) << "\n";
+    std::cout << "My namespace: " << getMyNamespace() << "\n";
     int i = 0;
+
+    int mod = 1;
+    std::string our_field_side = "left";
+    ros::param::get("our_field_side", our_field_side);
+    if (our_field_side == "left") {
+        mod = -1;
+    }
+
     for (auto worker : workers) {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", i);
 
+
+
         if (left) {
-            bb.SetDouble("AvoidRobots_X_xGoal", -3);
+            bb.SetDouble("AvoidRobots_X_xGoal", mod * 3);
         } else {
-            bb.SetDouble("AvoidRobots_X_xGoal", 3);
+            bb.SetDouble("AvoidRobots_X_xGoal", mod * -3);
         }
 
         bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5);
@@ -86,7 +98,7 @@ bt::Node::Status GoToSideTactic::Update() {
     } else if (allSucceeded) {
         return bt::Node::Status::Success;
     }
- 
+
     return bt::Node::Status::Running;
 }
 
