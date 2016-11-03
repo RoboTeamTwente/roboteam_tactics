@@ -17,7 +17,7 @@ class GoToSideTactic : public Tactic {
     Status Update();
 
     ros::NodeHandle n;
-    ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("/role_directive", 10);
+    ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 10);
 
     private:
     std::vector<boost::uuids::uuid> tokens;
