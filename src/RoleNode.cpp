@@ -8,6 +8,7 @@
 
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
 
@@ -72,10 +73,49 @@ int main(int argc, char *argv[]) {
         &roleDirectiveCallback
         );
 
+    ros::Publisher feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
+
     while (ros::ok()) {
         ros::spinOnce();
 
-        currentTree.Update();
+        bt::Node::Status status = currentTree.Update();
+
+        auto bb = currentTree.GetBlackboard();
+        if (bb->GetInt("ROBOT_ID") == 1) {
+            std::cout << "sendNextSuccess: " << std::to_string(sendNextSuccess) << "\n";
+            if (status ==  bt::Node::Status::Success) {
+                std::cout << "Success\n";
+            } else if (status == bt::Node::Status::Failure) {
+                std::cout << "Failure\n";
+            } else if (status == bt::Node::Status::Invalid) {
+                std::cout << "Invalid\n";
+            } else {
+                std::cout << "Running\n";
+            }
+        }
+
+        if (sendNextSuccess && 
+                (status == bt::Node::Status::Success
+                 || status == bt::Node::Status::Failure
+                 || status == bt::Node::Status::Invalid)) {
+            std::cout << "Sending feedback!\n";
+
+            roboteam_msgs::RoleFeedback feedback;
+            feedback.token = currentToken;
+
+            if (status == bt::Node::Status::Success) {
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
+                feedbackPub.publish(feedback);
+            } else if (status == bt::Node::Status::Invalid) {
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
+                feedbackPub.publish(feedback);
+            } else if (status == bt::Node::Status::Failure) {
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
+                feedbackPub.publish(feedback);
+            }
+
+            sendNextSuccess = false;
+        }
 
         fps60.sleep();
     }

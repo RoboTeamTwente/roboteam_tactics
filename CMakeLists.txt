@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(roboteam_tactics)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roboteam_utils
@@ -17,7 +19,6 @@ set(CMAKE_CXX_FLAGS "\
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
--fmax-errors=1 \
 ")
 
 catkin_package()

@@ -1,5 +1,8 @@
 <launch>
   <node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
+
+  <param name="num_role_nodes" type="int" value="6" />
+
   <node name="role1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
   <node name="role2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
   <node name="role3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
