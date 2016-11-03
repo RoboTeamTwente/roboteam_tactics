@@ -63,8 +63,12 @@ int main(int argc, char *argv[]) {
     while (ros::ok()) {
         ros::spinOnce();
         
-        strategy.Update();
+        bt::Node::Status status = strategy.Update();
 
+        if (status != bt::Node::Status::Running) {
+            std::cout << "Strategy result: " << bt::statusToString(status) << ". Starting again\n";
+        }
+            
         rate.sleep();
     }
 

@@ -37,9 +37,9 @@ void GoToSideTactic::Initialize() {
         bb.SetInt("ROBOT_ID", i);
 
         if (left) {
-            bb.SetDouble("AvoidRobots_X_xGoal", 3);
-        } else {
             bb.SetDouble("AvoidRobots_X_xGoal", -3);
+        } else {
+            bb.SetDouble("AvoidRobots_X_xGoal", 3);
         }
 
         bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5);
@@ -50,7 +50,7 @@ void GoToSideTactic::Initialize() {
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 
-        // Add random token
+        // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
         tokens.push_back(token);
         wd.token = unique_id::toMsg(token);
@@ -65,15 +65,28 @@ static int a = 0;
 
 bt::Node::Status GoToSideTactic::Update() {
     bool allSucceeded = true;
+    bool oneFailed = false;
+    bool oneInvalid = false;
 
     for (auto token : tokens) {
-        allSucceeded &= feedbacks.find(token) != feedbacks.end();
+        if (feedbacks.find(token) != feedbacks.end()) {
+            Status status = feedbacks.at(token);
+            allSucceeded &= status == bt::Node::Status::Success;
+            oneFailed |= status == bt::Node::Status::Failure;
+            oneInvalid |= status == bt::Node::Status::Invalid;
+        } else {
+            allSucceeded = false;
+        }
     }
 
-    if (allSucceeded) {
+    if (oneFailed) {
+        return bt::Node::Status::Failure;
+    } else if (oneInvalid) {
+        return bt::Node::Status::Invalid;
+    } else if (allSucceeded) {
         return bt::Node::Status::Success;
     }
-
+ 
     return bt::Node::Status::Running;
 }
 
