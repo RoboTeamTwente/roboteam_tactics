@@ -7,7 +7,6 @@ namespace rtt {
 
 roboteam_msgs::World LastWorld::lastWorld;
 roboteam_msgs::GeometryFieldSize LastWorld::field;
-bool LastWorld::blue;
 
 roboteam_msgs::World LastWorld::get() {
     return LastWorld::lastWorld;
@@ -32,14 +31,6 @@ roboteam_msgs::Vector2f LastWorld::PredictBallPos(double t) {
 	predictedBallPos.x = ball.pos.x + ballVel.x * t;
 	predictedBallPos.y = ball.pos.y + ballVel.y * t;
 	return predictedBallPos;
-}
-
-bool LastWorld::we_are_blue() {
-    return LastWorld::blue;
-}
-
-void LastWorld::set_we_are_blue(bool b) {
-    LastWorld::blue = b;
 }
 
 }

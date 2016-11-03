@@ -3,6 +3,7 @@ add_library(conditions
     CanInterceptBall.cpp
     CanReachPoint.cpp
     CanSeePoint.cpp
+    CanPassSafely.cpp
     IHaveBall.cpp
     TeamHasBall.cpp
     TheyHaveBall.cpp

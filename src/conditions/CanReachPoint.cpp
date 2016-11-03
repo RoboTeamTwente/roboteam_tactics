@@ -19,17 +19,8 @@ roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, robo
 }
 
 bt::Node::Status CanReachPoint::Update() {
-	roboteam_msgs::World world = LastWorld::get();
-	int myID = GetInt("ROBOT_ID");
-	double xTarget = GetDouble("xGoal");
-	double yTarget = GetDouble("yGoal");
-	double timeLimit = GetDouble("timeLimit");
 	
-	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
-	roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xTarget, yTarget);
-	roboteam_utils::Vector2 differenceVector = targetPos - myPos;
-	double myAngle = world.us.at(myID).angle;
-	
+	// Set max velocities etc.. 
 	double time = 0.0;
 	double speed = 0.0;
 	double travelledDistance = 0.0;
@@ -38,6 +29,31 @@ bt::Node::Status CanReachPoint::Update() {
 	double maxSpeed = 2.0;
 	roboteam_utils::Vector2 maxAcc = roboteam_utils::Vector2(3.5, 2.0);
 
+
+	// Get world information
+	roboteam_msgs::World world = LastWorld::get();
+	int myID = GetInt("ROBOT_ID");
+	double xTarget = GetDouble("xGoal");
+	double yTarget = GetDouble("yGoal");
+	double timeLimit = GetDouble("timeLimit");
+
+	roboteam_utils::Vector2 myPos;
+	double myAngle;
+	if (GetString("whichTeam") == "us") {
+		myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
+		myAngle = world.us.at(myID).angle;
+	} else if (GetString("whichTeam") == "them") {
+		myPos = roboteam_utils::Vector2(world.them.at(myID).pos.x, world.them.at(myID).pos.y); 
+		myAngle = world.them.at(myID).angle;
+	} else {
+		ROS_INFO("No team specified...");
+	}
+	
+	roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xTarget, yTarget);
+	roboteam_utils::Vector2 differenceVector = targetPos - myPos;
+	
+	
+	// Calculate our orientation with respect to the direction we have to move
 	double angleDiff = differenceVector.angle() - myAngle;
 	if (angleDiff < M_PI) {angleDiff += 2*M_PI;}
 	if (angleDiff > M_PI) {angleDiff -= 2*M_PI;}
@@ -47,6 +63,8 @@ bt::Node::Status CanReachPoint::Update() {
 		if (myAngle <= 0) {myAngle += M_PI;}
 	}
 
+
+	// See how many iterations it takes before the required distance is travelled with the maximum acceleration
 	while (travelledDistance < differenceVector.length()) {
 		double angleDiff = differenceVector.angle() - myAngle;
 		if (angleDiff < M_PI) {angleDiff += 2*M_PI;}
@@ -71,6 +89,9 @@ bt::Node::Status CanReachPoint::Update() {
 		if (time > 5.0) {break;}
 	}
 
+	// ROS_INFO_STREAM("robot " << myID << " can reach point in " << time << "seconds");
+	
+	// If the calculated time is less than the given limit, return succes
 	if (time < timeLimit) {
 		return Status::Success;
 	} else {
