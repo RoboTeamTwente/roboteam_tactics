@@ -7,7 +7,6 @@ namespace rtt {
 
 roboteam_msgs::World LastWorld::lastWorld;
 roboteam_msgs::GeometryFieldSize LastWorld::field;
-bool LastWorld::blue;
 
 roboteam_msgs::World LastWorld::get() {
     return LastWorld::lastWorld;
