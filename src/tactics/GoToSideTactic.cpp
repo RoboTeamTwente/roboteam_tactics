@@ -1,9 +1,12 @@
 #include <memory>
 #include <iostream>
 
+#include "unique_id/unique_id.h"
+
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/GoToSideTactic.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
 
 namespace rtt {
 
@@ -12,6 +15,8 @@ GoToSideTactic::GoToSideTactic(bt::Blackboard::Ptr blackboard)
         {}
 
 void GoToSideTactic::Initialize() {
+    tokens.clear();
+
     bool left = private_bb->GetString("left") == "true";
 
     if (left) {
@@ -45,6 +50,11 @@ void GoToSideTactic::Initialize() {
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 
+        // Add random token
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
+
         // Send to rolenode
         directivePub.publish(wd);
         i++;
@@ -54,14 +64,16 @@ void GoToSideTactic::Initialize() {
 static int a = 0;
 
 bt::Node::Status GoToSideTactic::Update() {
-    a++;
+    bool allSucceeded = true;
 
-    if (a > 600) {
-        a = 0;
+    for (auto token : tokens) {
+        allSucceeded &= feedbacks.find(token) != feedbacks.end();
+    }
+
+    if (allSucceeded) {
         return bt::Node::Status::Success;
     }
 
-    // std::cout << "Updating GoToSideTactic!\n";
     return bt::Node::Status::Running;
 }
 

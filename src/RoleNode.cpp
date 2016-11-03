@@ -81,18 +81,6 @@ int main(int argc, char *argv[]) {
         bt::Node::Status status = currentTree.Update();
 
         auto bb = currentTree.GetBlackboard();
-        if (bb->GetInt("ROBOT_ID") == 1) {
-            std::cout << "sendNextSuccess: " << std::to_string(sendNextSuccess) << "\n";
-            if (status ==  bt::Node::Status::Success) {
-                std::cout << "Success\n";
-            } else if (status == bt::Node::Status::Failure) {
-                std::cout << "Failure\n";
-            } else if (status == bt::Node::Status::Invalid) {
-                std::cout << "Invalid\n";
-            } else {
-                std::cout << "Running\n";
-            }
-        }
 
         if (sendNextSuccess && 
                 (status == bt::Node::Status::Success

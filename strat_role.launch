@@ -1,4 +1,6 @@
 <launch>
+  <include file="$(find roboteam_utils)/mini.launch" />
+
   <node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
 
   <param name="num_role_nodes" type="int" value="6" />
