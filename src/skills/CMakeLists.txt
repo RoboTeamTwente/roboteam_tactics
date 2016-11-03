@@ -8,6 +8,7 @@ add_library(skills
     Dribble.cpp
     GetBall.cpp
     Kick.cpp
+    KeeperBlock.cpp
     )
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

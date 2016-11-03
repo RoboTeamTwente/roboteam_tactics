@@ -82,6 +82,8 @@ add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TAR
 target_link_libraries(TestX
     tactics
     utils
+    skills
+    conditions
     ${catkin_LIBRARIES}
     )
 

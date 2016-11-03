@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 
 namespace rtt {
@@ -21,6 +21,7 @@ inline void test(C condition) {
 TEST(ConditionTests, IHaveBallTest) {
     bt::Blackboard bb;
     bb.SetInt("ihb_test_me", 0);
+    bb.SetBool("ihb_test_our_team", true);
     test<IHaveBall>(IHaveBall("ihb_test", std::make_shared<bt::Blackboard>(bb)));
 }
 }

@@ -149,6 +149,13 @@ roboteam_msgs::WorldRobot most_dangerous_bot() {
     it--;
     return *it;
 }
+
+roboteam_msgs::WorldRobot second_most_dangerous_bot() {
+    auto it = sorted_opponents(LastWorld::get()).end();
+    it--;
+    it--;
+    return *it;
+}
  
 boost::optional<roboteam_msgs::WorldRobot> charging_bot() {
     return boost::optional<roboteam_msgs::WorldRobot>();

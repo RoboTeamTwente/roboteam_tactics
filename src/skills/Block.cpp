@@ -25,7 +25,7 @@ Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skil
     my_id = GetInt("ROBOT_ID");
     tgt_id = GetInt("TGT_ID");
     block_id = GetInt("BLOCK_ID");
-    constant = block_id >= 0;
+    constant = block_id < 0;
     invert = GetBool("invert_direction");
 }
 
