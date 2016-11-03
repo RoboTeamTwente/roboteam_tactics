@@ -17,6 +17,7 @@ class CanReachPoint : public Condition {
 public:
     CanReachPoint(std::string name, bt::Blackboard::Ptr blackboard);  
     roboteam_utils::Vector2 ComputeMaxAcceleration(double angle, roboteam_utils::Vector2 maxAcc);
+    double cleanAngle(double angle);
     Status Update();
 private:
 };

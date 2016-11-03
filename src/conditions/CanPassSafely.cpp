@@ -50,9 +50,6 @@ bt::Node::Status CanPassSafely::Update (){
 			double frictionForce = ballMass*9.81 * ballFrictionCoefficient;
 			double ballAcc = frictionForce/ballMass;
 			ballSpeed -= ballAcc*timeStep;
-			// if (i == 0) {
-			// 	ROS_INFO_STREAM("ballSpeed: " << ballSpeed);
-			// }
 			if (ballSpeed < 0) {
 				ballSpeed = 0;
 				break;
@@ -60,8 +57,8 @@ bt::Node::Status CanPassSafely::Update (){
 			travelledDistance += ballSpeed*timeStep;
 			time += timeStep;
 		}
-		// ROS_INFO_STREAM(time << " seconds until ball travels distance " << projectionLength);
 
+		// Check whether the opponent can reach the calculated point within the calculated time
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("ROBOT_ID", i);
 		bb2->SetString("whichTeam", "them");

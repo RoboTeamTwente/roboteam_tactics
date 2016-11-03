@@ -29,9 +29,12 @@ int main(int argc, char **argv) {
 
 	auto bb = std::make_shared<bt::Blackboard>();
 	bb->SetInt("ROBOT_ID", 1);
+	bb->SetString("whichTeam", "us");
 	bb->SetDouble("xGoal", 0.0);
 	bb->SetDouble("yGoal", 0.0);
+	bb->SetDouble("angleGoal", 3.14);
 	bb->SetDouble("timeLimit", 1.0);
+	bb->SetBool("shouldStop", true);
 
 	rtt::CanReachPoint canReachPoint("", bb);
 
