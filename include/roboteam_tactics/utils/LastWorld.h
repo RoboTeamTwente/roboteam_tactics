@@ -16,13 +16,9 @@ class LastWorld {
 
     static roboteam_msgs::Vector2f PredictBallPos(double t);
 
-    static bool we_are_blue();
-    static void set_we_are_blue(bool);
-
     private:
     static roboteam_msgs::World lastWorld;
     static roboteam_msgs::GeometryFieldSize field;
-    static bool blue;
 };
 
 }
