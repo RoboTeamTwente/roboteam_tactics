@@ -255,6 +255,17 @@ target_link_libraries(AvoidRobotsTest
     ${catkin_LIBRARIES}
     )
 
+add_executable(CanPassSafelyTest
+    src/conditions/tests/CanPassSafelyTest.cpp
+)
+add_dependencies(CanPassSafelyTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(CanPassSafelyTest 
+    skills
+    conditions
+    utils
+    ${catkin_LIBRARIES}
+    )
+
 add_executable(CanReachPointTest
     src/conditions/tests/CanReachPointTest.cpp
 )

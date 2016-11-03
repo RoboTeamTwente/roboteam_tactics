@@ -21,7 +21,7 @@ roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, robo
 bt::Node::Status CanReachPoint::Update() {
 	
 	// Set max velocities etc.. 
-	double time = 0.0;0
+	double time = 0.0;
 	double speed = 0.0;
 	double travelledDistance = 0.0;
 	double timeStep = 0.01;
@@ -36,11 +36,21 @@ bt::Node::Status CanReachPoint::Update() {
 	double xTarget = GetDouble("xGoal");
 	double yTarget = GetDouble("yGoal");
 	double timeLimit = GetDouble("timeLimit");
+
+	roboteam_utils::Vector2 myPos;
+	double myAngle;
+	if (GetString("whichTeam") == "us") {
+		myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
+		myAngle = world.us.at(myID).angle;
+	} else if (GetString("whichTeam") == "them") {
+		myPos = roboteam_utils::Vector2(world.them.at(myID).pos.x, world.them.at(myID).pos.y); 
+		myAngle = world.them.at(myID).angle;
+	} else {
+		ROS_INFO("No team specified...");
+	}
 	
-	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
 	roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xTarget, yTarget);
 	roboteam_utils::Vector2 differenceVector = targetPos - myPos;
-	double myAngle = world.us.at(myID).angle;
 	
 	
 	// Calculate our orientation with respect to the direction we have to move
@@ -79,7 +89,8 @@ bt::Node::Status CanReachPoint::Update() {
 		if (time > 5.0) {break;}
 	}
 
-
+	// ROS_INFO_STREAM("robot " << myID << " can reach point in " << time << "seconds");
+	
 	// If the calculated time is less than the given limit, return succes
 	if (time < timeLimit) {
 		return Status::Success;
