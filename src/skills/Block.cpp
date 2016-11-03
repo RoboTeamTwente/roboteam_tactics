@@ -27,6 +27,7 @@ Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skil
     block_id = GetInt("BLOCK_ID");
     constant = block_id < 0;
     invert = GetBool("invert_direction");
+    gtp = nullptr;
 }
 
 void normalize(Position& pos) {
@@ -61,15 +62,13 @@ bt::Node::Status Block::Update() {
         Position mypos(me->pos.x, me->pos.y, me->angle);
         Position tgtpos(tgt->pos.x, tgt->pos.y, tgt->angle);
         Vector block;
-        
-        if (mypos.location().dist(tgtpos.location()) < .4) return bt::Node::Status::Failure;
             
         if (block_id == BLOCK_BALL_ID) {
             block = Vector(world.ball.pos.x, world.ball.pos.y);
-        } else if (constant) {
+        } else if (!constant) {
             block = Vector(GetDouble("block_x"), GetDouble("block_y"));
         } else {
-            roboteam_msgs::WorldRobot* blk;
+            roboteam_msgs::WorldRobot* blk = nullptr;
             for (auto bot : world.them) {
                 if (bot.id == block_id) {
                     blk = &bot;
@@ -79,6 +78,8 @@ bt::Node::Status Block::Update() {
             if (blk == nullptr) return bt::Node::Status::Invalid;
             block = Vector(blk->pos.x, blk->pos.y);
         }
+        
+        if (block.dist(tgtpos.location()) < .4) return bt::Node::Status::Failure;
         
         Position goal = pos->block_pos(mypos, tgtpos.location(), block);
         normalize(goal);
@@ -100,6 +101,8 @@ bt::Node::Status Block::Update() {
         private_bb->SetBool("dribbler", false);
         gtp  = new GoToPos(n, "", private_bb);
     }
+    
+    //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     
     bt::Node::Status gtpStatus = gtp->Update();
     if (gtpStatus != bt::Node::Status::Running) {
