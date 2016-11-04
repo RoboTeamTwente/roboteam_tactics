@@ -14,6 +14,7 @@
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/generated/alltrees_list.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/RobotDealer.h"
 
 std::random_device rd;
 std::mt19937 rng(rd());
@@ -59,6 +60,9 @@ int main(int argc, char *argv[]) {
         std::cout << "Waiting for " << std::to_string(numNodes) << " role nodes...\n";
         while ((int) directivePub.getNumSubscribers() < numNodes) {}
     }
+
+    rtt::RobotDealer::initialize_robots({0, 1, 2, 3, 4, 5});
+    rtt::RobotDealer::initialize_role_nodes();
 
     while (ros::ok()) {
         ros::spinOnce();

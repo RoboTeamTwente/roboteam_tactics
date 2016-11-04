@@ -74,6 +74,7 @@ class Tactic : public bt::Leaf {
 
     virtual void Terminate(Status s) {
         RobotDealer::release_robots(get_claimed_robots());
+        RobotDealer::release_role_nodes(get_claimed_role_nodes());
     }
 
     void claim_robot(int id) {
@@ -100,8 +101,23 @@ class Tactic : public bt::Leaf {
         return claimed_robots.find(id) != claimed_robots.end();
     }
 
+    void claim_role_node() {
+        claimed_role_nodes.insert(RobotDealer::claim_role_node()); 
+    }
+
+    void claim_role_nodes(size_t node_count) {
+        for (size_t i = 0; i < node_count; i++) {
+            claim_role_node();       
+        }
+    }
+
+    std::vector<std::string> get_claimed_role_nodes() {
+        return std::vector<std::string>(claimed_role_nodes.begin(), claimed_role_nodes.end());
+    }
+
     private:
     std::set<int> claimed_robots;
+    std::set<std::string> claimed_role_nodes;
 } ;
 
 }

@@ -10,8 +10,10 @@ namespace rtt {
 std::set<int> RobotDealer::taken_robots;
 std::set<int> RobotDealer::available_robots;
 
-void initialize_robots(std::vector<int> ids) {
-
+void RobotDealer::initialize_robots(std::vector<int> ids) {
+    taken_robots.clear();
+    available_robots.clear();
+    available_robots.insert(ids.begin(), ids.end());
 }
 
 std::vector<int> RobotDealer::get_available_robots() {
@@ -53,13 +55,20 @@ std::set<std::string> RobotDealer::available_role_nodes;
 
 void RobotDealer::initialize_role_nodes() {
     available_role_nodes.clear();
+    taken_role_nodes.clear();
     auto workers = getNodesSubscribedTo(getMyNamespace() + "role_directive");
 
-    available_role_nodes.insert(workers.begin(), workers.end());
+    for (std::string worker : workers) {
+        available_role_nodes.insert(worker);
+        std::cout << "Added worker: " << worker << "\n";
+    }
+    // available_role_nodes.insert(workers.begin(), workers.end());
 }
 
 std::string RobotDealer::claim_role_node() {
     std::string node = *available_role_nodes.begin();
+
+    std::cout << "Role node being claimed: " << node << "\n";
 
     if (taken_role_nodes.find(node) != taken_role_nodes.end()) {
         ROS_ERROR("Role node %s is already taken!\n", node.c_str());
@@ -82,6 +91,8 @@ void RobotDealer::release_role_node(std::string id) {
     if (taken_role_nodes.find(id) != taken_role_nodes.end()) {
         ROS_ERROR("Role node %s was not taken!\n", id.c_str());
     }
+
+    std::cout << "Role node being released: " << id << "\n";
 
     taken_role_nodes.erase(id);
     available_role_nodes.insert(id);

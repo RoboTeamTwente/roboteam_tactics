@@ -28,7 +28,7 @@
             "properties": {
                 "left": "true",
                 "pos": "left",
-                "robos": 3
+                "robots": 3
             },
             "display": {
                 "x": 96,
@@ -64,7 +64,7 @@
                 "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2",
                 "6bb89630-e6d2-4282-808a-2c340e689925",
                 "823901cd-7f8d-413a-abdf-f01bc76109ce"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
+            ]
         },
         "6bb89630-e6d2-4282-808a-2c340e689925": {
             "id": "6bb89630-e6d2-4282-808a-2c340e689925",
