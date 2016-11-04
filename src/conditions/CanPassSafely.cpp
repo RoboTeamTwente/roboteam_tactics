@@ -25,28 +25,19 @@ bt::Node::Status CanPassSafely::Update (){
 	bool failure;
 	for (size_t i = 0; i < world.them.size(); i++) {
 		roboteam_utils::Vector2 theirPos = roboteam_utils::Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
-		roboteam_utils::Vector2 vectorToOtherRobot = theirPos - myPos;
-		double angle = ballTrajectory.angle() - vectorToOtherRobot.angle();
-		double projectionLength = vectorToOtherRobot.length() * cos(angle);
-
+		
 		// projectionOnBallTrajectory contains the point on the ball trajectory to which the opponent is closest
-		roboteam_utils::Vector2 projectionOnBallTrajectory;
-		if (projectionLength > ballTrajectory.length()) {
-			projectionOnBallTrajectory = targetPos;
-		} else if (projectionLength < 0) {
-			projectionOnBallTrajectory = myPos;
-		} else {
-			projectionOnBallTrajectory = ballTrajectory.scale(projectionLength / ballTrajectory.length()) + myPos;
-		}
+		roboteam_utils::Vector2 projectionOnBallTrajectory = ballTrajectory.closestPointOnVector(myPos, theirPos);
 
 		// Estimate how long it will take for the ball to get there
+		double travelDistanceToClosestPoint = (projectionOnBallTrajectory-myPos).length();
 		double ballSpeed = 4.0;
 		double ballMass = 0.043;
 		double ballFrictionCoefficient = 0.05;
 		double timeStep = 0.01;
 		double time = 0.0;
 		double travelledDistance = 0.0;
-		while (travelledDistance < projectionLength) {
+		while (travelledDistance < travelDistanceToClosestPoint) {
 			double frictionForce = ballMass*9.81 * ballFrictionCoefficient;
 			double ballAcc = frictionForce/ballMass;
 			ballSpeed -= ballAcc*timeStep;
