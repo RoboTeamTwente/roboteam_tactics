@@ -53,14 +53,14 @@ int main(int argc, char **argv) {
 	bb1->SetBool("priority", false);
 	// auto bb2 = std::make_shared<bt::Blackboard>();
 	// bb2->SetInt("ROBOT_ID", 1);
-	// bb2->SetDouble("xGoal", -0.12);
+	// bb2->SetDouble("xGoal", -2.0);
 	// bb2->SetDouble("yGoal", 0.0);
 	// bb2->SetDouble("angleGoal", 0.0);
 	// bb2->SetBool("priority", false);
 	// auto bb3 = std::make_shared<bt::Blackboard>();
 	// bb3->SetInt("ROBOT_ID", 2);
-	// bb3->SetDouble("xGoal", 0.12);
-	// bb3->SetDouble("yGoal", 0.0);
+	// bb3->SetDouble("xGoal", -2.0);
+	// bb3->SetDouble("yGoal", -1.0);
 	// bb3->SetDouble("angleGoal", 0.0);
 	// bb3->SetBool("priority", false);
 
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 	// rtt::AvoidRobots avoidRobots2(n, "", bb2);
 	// rtt::AvoidRobots avoidRobots3(n, "", bb3);
 
-	// ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
+	// ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1, &avoidRobots2, &avoidRobots3));
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
 
 	while (ros::ok()) {
