@@ -31,6 +31,7 @@ bool can_see_our_goal(const roboteam_msgs::WorldRobot& bot) {
     for (const Vector& goal : goal_points) {
         bb->SetDouble("x_coor", goal.x);
         bb->SetDouble("y_coor", goal.y);
+        bb->SetBool("check_move", true);
         CanSeePoint csp("", bb);
         if (csp.Update() == bt::Node::Status::Success) {
             return true;
@@ -59,6 +60,7 @@ bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot) {
     bb->SetInt("me", bot.id);
     bb->SetDouble("x_coor", other.pos.x);
     bb->SetDouble("y_coor", other.pos.y);
+    bb->SetBool("check_move", true);
     CanSeePoint csp("", bb);
     if (csp.Update() != bt::Node::Status::Success) {
         // Other can't see the current bot
@@ -117,9 +119,10 @@ double base_danger_score(const roboteam_msgs::WorldRobot& bot) {
     return score;
 } 
 
-double danger_score(const roboteam_msgs::WorldRobot& bot) {
+double danger_score(const roboteam_msgs::WorldRobot& bot, unsigned int preferred) {
     double base = base_danger_score(bot);
     double score = potential_cross_recepient(bot) ? base + 5 : base;
+    if (bot.id == preferred && !can_see_our_goal(bot)) score += 5.0;
     return score;
 }
 
@@ -133,7 +136,7 @@ void dump_scores(const roboteam_msgs::World& world) {
     }
 }
 
-static std::vector<roboteam_msgs::WorldRobot> sorted_opponents(const roboteam_msgs::World& world) {
+static std::vector<roboteam_msgs::WorldRobot> sorted_opponents(const roboteam_msgs::World& world, unsigned int preferred) {
     std::vector<roboteam_msgs::WorldRobot> bots = world.them;
     auto comp = [](const roboteam_msgs::WorldRobot& a, const roboteam_msgs::WorldRobot& b) {
         return danger_score(a) < danger_score(b);
@@ -144,8 +147,19 @@ static std::vector<roboteam_msgs::WorldRobot> sorted_opponents(const roboteam_ms
     return res;
 }
 
-roboteam_msgs::WorldRobot most_dangerous_bot() {
-    auto it = sorted_opponents(LastWorld::get()).end();
+boost::optional<roboteam_msgs::WorldRobot> most_dangerous_bot(unsigned int preferred) {
+    roboteam_msgs::World world = LastWorld::get();
+    if (world.them.size() < 1) return boost::optional<roboteam_msgs::WorldRobot>();
+    auto it = sorted_opponents(world, preferred).end();
+    it--;
+    return *it;
+}
+
+boost::optional<roboteam_msgs::WorldRobot> second_most_dangerous_bot(unsigned int preferred) {
+    roboteam_msgs::World world = LastWorld::get();
+    if (world.them.size() < 2) return boost::optional<roboteam_msgs::WorldRobot>();
+    auto it = sorted_opponents(world, preferred).end();
+    it--;
     it--;
     return *it;
 }

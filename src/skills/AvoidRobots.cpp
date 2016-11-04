@@ -53,6 +53,7 @@ bt::Node::Status AvoidRobots::Update (){
     bb2->SetInt("me", robotID);
     bb2->SetDouble("x_coor", xGoal);
     bb2->SetDouble("y_coor", yGoal);
+    bb2->SetBool("check_move", true);
 
     // Set angleGoal such that you're always driving forwards, unless you're close to the target position
     if (posError.length() > 0.5) {

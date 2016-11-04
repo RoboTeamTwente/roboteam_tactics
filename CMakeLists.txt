@@ -69,6 +69,19 @@ target_link_libraries(Keeper
     ${catkin_LIBRARIES}
     )
 
+add_executable(DoStrategy
+    src/role_tests/DoStrategy.cpp
+)
+add_dependencies(DoStrategy ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
+target_link_libraries(DoStrategy
+	alltrees
+    skills
+    conditions
+    tactics
+    utils 
+	${catkin_LIBRARIES}
+	)
+
 # Executable that can convert behavior3 json to C++ functions
 add_executable(converter
     src/treegen/BTBuilder.cpp
@@ -83,6 +96,8 @@ add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TAR
 target_link_libraries(TestX
     tactics
     utils
+    skills
+    conditions
     ${catkin_LIBRARIES}
     )
 

@@ -1,10 +1,17 @@
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-
-#include "ros/ros.h"
+#pragma once
 
 #include "roboteam_tactics/generated/allskills_factory.h"
+#include <string>
+#include <vector>
+#include <exception>
+#include <memory>
+#include <cstdio>
+#include "ros/ros.h"
+#include "roboteam_tactics/Parts.h"
+
+namespace rtt {
+    
+// build_skill(name, arg_fmt, args...)
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -24,57 +31,17 @@ std::vector<std::string> split(const std::string &s, char delim) {
 bool is_digits(const std::string &str) {
     return std::all_of(str.begin(), str.end(), ::isdigit); 
 }
-            
-void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
-	rtt::LastWorld::set(*world);
-}
 
-int main(int argc, char **argv) {
-    srand(time(0));
-    int id = rand();
-    char buf[30];
-    snprintf(buf, 30, "TestX_%d", id);
-	ros::init(argc, argv, buf);
-	ros::NodeHandle n;
-
-    auto bb = std::make_shared<bt::Blackboard>();
-
-    std::vector<std::string> arguments(argv + 1, argv + argc);
-
-    if (arguments.at(0) == "help") {
-        std::string msg = R"###(
-[TestX]
-
-How to use:
-- To just test a skill:
-  "rosrun roboteam_tactics TestX [classname] argType1:argName1=argValue1 argType2:argName2=argValue2"
-  Here [classname] is the name of the classname you want to test (e.g. GoToPos).
-  argType# can be any of the following:
-    - string
-    - int
-    - double
-    - bool
-
-  If the type is string the value should be surrounded by quotes (e.g. "This is a string value!").
-  A double value has a decimal point (not a comma).
-  A bool is "true" or "false" without quotes.
-- To display this help:
-  "rosrun roboteam_tactics TestX help"
-)###";
-        std::cout << msg << "\n";
-        return 0;
-    }
-
-    std::string testClass = arguments.at(0);
-    std::cout << "Test class: " << testClass << "\n";
-
-    for (size_t i = 1; i < arguments.size(); i++) {
+bt::Blackboard::Ptr parse_bb(const std::string& skill_name, const std::vector<std::string>& arguments) {
+    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+    std::string prefix = skill_name == "" ? "" : skill_name + "_";
+    for (size_t i = 0; i < arguments.size(); i++) {
         std::vector<std::string> typeSplit;
         
         auto arg = arguments.at(i);
         
         auto nameSplit = split(arg, '=');
-        auto name = nameSplit.at(0);
+        auto name = prefix + nameSplit.at(0);
         auto rest = nameSplit.at(1);
         
         // Aggregate all the splitted = into one string
@@ -89,7 +56,7 @@ How to use:
             // Name contains type - lets take it out
             auto typeSplit = split(name, ':');
             argType = typeSplit.at(0);
-            name = typeSplit.at(1);
+            name = prefix + typeSplit.at(1);
         } else {
             // Derive type
             if (rest == "true") {
@@ -124,17 +91,25 @@ How to use:
             std::cout << "Unknown arg type: " << argType << "\n";
         }
     }
+    return bb;
+}
 
-    auto skill = rtt::make_skill<>(n, testClass, "", bb);
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
-
-    while (ros::ok()) {
-        ros::spinOnce();
-        if (skill->Update() == bt::Node::Status::Success) {
-            break;
-        }
+template <typename T>
+std::shared_ptr<T> build_skill(ros::NodeHandle n, const std::string& type_name, const std::string& skill_name, const std::string& arg_fmt, ...) {
+    char buf[1024];
+    va_list varargs;
+    va_start(varargs, arg_fmt);
+    vsnprintf(buf, 1024, arg_fmt.c_str(), varargs);
+    va_end(varargs);
+    
+    std::string args(buf);
+    bt::Blackboard::Ptr bb = parse_bb(skill_name, split(args, ' '));
+    if (!Leaf::validate_blackboard<T>(bb, skill_name)) {
+        throw std::invalid_argument("Blackboard verification failed - Check ROS logs."); 
     }
-
-    std::cout << "Test of " << testClass << " completed!\n";
-	return 0;
+    std::shared_ptr<T> ptr = make_skill<T>(n, type_name, skill_name, bb);
+    assert(ptr);
+    return ptr;
+}
+    
 }

@@ -11,6 +11,7 @@ namespace rtt {
     
 CanSeePoint::CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
     assert_valid<CanSeePoint>(name);
+    threshold_dist = GetBool("check_move") ? .35 : .15;
 }
 
 bt::Node::Status CanSeePoint::Update() {
@@ -44,7 +45,7 @@ bt::Node::Status CanSeePoint::Update() {
         roboteam_utils::Vector2 projection = pos.project(my_pos, target);
         double proj_dist = projection.dist(pos);
         double dist_to_start = my_pos.dist(pos);
-        if (proj_dist < .4 && dist_to_start > .0001) {
+        if (proj_dist < threshold_dist && dist_to_start > .0001) {
             return bt::Node::Status::Failure;
         }
     }
