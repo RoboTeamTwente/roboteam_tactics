@@ -1,5 +1,5 @@
 #include "roboteam_tactics/conditions/BallOnOurSide.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 namespace rtt {
 

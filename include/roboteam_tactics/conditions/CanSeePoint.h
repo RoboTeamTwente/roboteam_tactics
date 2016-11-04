@@ -2,7 +2,7 @@
 
 #include "roboteam_tactics/Leaf.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
@@ -17,11 +17,15 @@ class CanSeePoint : public Condition {
         params["me"] = BBArgumentType::Int;
         params["x_coor"] = BBArgumentType::Double;
         params["y_coor"] = BBArgumentType::Double;
+        params["check_move"] = BBArgumentType::Bool;
         return params;
     }
     
     CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard);
     Status Update() override;
+    
+    protected:
+    double threshold_dist;
     
 };
 
@@ -35,9 +39,11 @@ class CanSeeGoal : public CanSeePoint {
         blackboard->SetInt(name_a + "_me", GetInt("me"));
         blackboard->SetDouble(name_a + "_x_coor", a.x);
         blackboard->SetDouble(name_a + "_y_coor", a.y);
+        blackboard->SetBool(name_a + "check_move", true);
         blackboard->SetInt(name_b + "_me", GetInt("me"));
         blackboard->SetDouble(name_b + "_x_coor", b.x);
         blackboard->SetDouble(name_b + "_y_coor", b.y);
+        blackboard->SetBool(name_b + "check_move", true);
         goal_a = new CanSeePoint(name_a, blackboard);
         goal_b = new CanSeePoint(name_b, blackboard);
     }

@@ -4,12 +4,30 @@
 #include <unordered_map>
 #include <memory>
 
+#include "roboteam_msgs/StringEntry.h"
+#include "roboteam_msgs/BoolEntry.h"
+#include "roboteam_msgs/Int32Entry.h"
+#include "roboteam_msgs/Float64Entry.h"
+#include "roboteam_msgs/Blackboard.h"
+
 namespace bt
 {
 
 class Blackboard
 {
 public:
+    // Default constructors enabled
+    Blackboard() = default;
+    Blackboard(const Blackboard&) = default;
+    Blackboard(Blackboard&&) = default;
+    Blackboard& operator=(const Blackboard&) = default;
+    Blackboard& operator=(Blackboard&&) = default;
+    virtual ~Blackboard() = default;
+
+    Blackboard(const roboteam_msgs::Blackboard &msg) {
+        fromMsg(msg);
+    }
+
     void SetBool(std::string key, bool value) { bools[key] = value; }
     bool GetBool(std::string key)
     {
@@ -61,6 +79,58 @@ public:
     bool HasString(std::string key) const  { return strings.find(key) != strings.end(); }
 
     using Ptr = std::shared_ptr<Blackboard>;
+
+    roboteam_msgs::Blackboard toMsg() {
+        roboteam_msgs::Blackboard msg;
+
+        for (const auto& i : bools) {
+            roboteam_msgs::BoolEntry entry;
+            entry.name = i.first;
+            entry.value = i.second;
+            msg.bools.push_back(entry);
+        }
+
+        for (const auto& i : doubles) {
+            roboteam_msgs::Float64Entry entry;
+            entry.name = i.first;
+            entry.value = i.second;
+            msg.doubles.push_back(entry);
+        }
+
+        for (const auto& i : strings) {
+            roboteam_msgs::StringEntry entry;
+            entry.name = i.first;
+            entry.value = i.second;
+            msg.strings.push_back(entry);
+        }
+
+        for (const auto& i : ints) {
+            roboteam_msgs::Int32Entry entry;
+            entry.name = i.first;
+            entry.value = i.second;
+            msg.ints.push_back(entry);
+        }
+
+        return msg;
+    }
+
+    void fromMsg(const roboteam_msgs::Blackboard &msg) {
+        for (const roboteam_msgs::BoolEntry be : msg.bools) {
+            SetBool(be.name, be.value);
+        }
+
+        for (const roboteam_msgs::StringEntry se : msg.strings) {
+            SetString(se.name, se.value);
+        }
+
+        for (const roboteam_msgs::Int32Entry ie : msg.ints) {
+            SetInt(ie.name, ie.value);
+        }
+
+        for (const roboteam_msgs::Float64Entry de : msg.doubles) {
+            SetDouble(de.name, de.value);
+        }
+    }
 
 protected:
     std::unordered_map<std::string, bool> bools;

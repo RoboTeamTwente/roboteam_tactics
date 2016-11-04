@@ -1,16 +1,16 @@
 #include <string>
+#include <vector>
 
 #include "ros/ros.h"
-#include "roboteam_tactics/LastWorld.h"
-#include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/conditions/CanSeePoint.h"
-#include <vector>
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/Parts.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
@@ -27,7 +27,6 @@ bt::Node::Status AvoidRobots::Update (){
     double attractiveForce = 10.0;
     double attractiveForceWhenClose = 4.0;
     double repulsiveForce = 1.0;
-    double priorityForce = 1.0;
 
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -52,6 +51,12 @@ bt::Node::Status AvoidRobots::Update (){
     bb2->SetInt("me", robotID);
     bb2->SetDouble("x_coor", xGoal);
     bb2->SetDouble("y_coor", yGoal);
+    bb2->SetBool("check_move", true);
+
+    // Set angleGoal such that you're always driving forwards, unless you're close to the target position
+    if (posError.length() > 0.5) {
+        angleGoal = posError.angle();
+    }
 
 
     // Proportional rotation controller
@@ -83,17 +88,26 @@ bt::Node::Status AvoidRobots::Update (){
         requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
         requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-
-        // Fill and send command
-        roboteam_msgs::RobotCommand command;
-        command.id = robotID;
-        command.x_vel = requiredSpeed.x;
-        command.y_vel = requiredSpeed.y;
-        command.w = requiredRotSpeed;
-        if (dribbler) {command.dribbler = true;}
-        pub.publish(command);
-
-        return Status::Running;
+        if (posError.length() < 0.005 && rotError < 0.005) {
+            roboteam_msgs::RobotCommand command;
+            command.id = robotID;
+            command.x_vel = 0.0;
+            command.y_vel = 0.0;
+            command.w = 0.0;
+            if (dribbler) {command.dribbler = true;}
+            pub.publish(command);
+            ros::spinOnce();
+            return Status::Success;
+        } else {
+            roboteam_msgs::RobotCommand command;
+            command.id = robotID;
+            command.x_vel = requiredSpeed.x;
+            command.y_vel = requiredSpeed.y;
+            command.w = requiredRotSpeed;
+            if (dribbler) {command.dribbler = true;}
+            pub.publish(command);
+            return Status::Running;
+        }
     }
     
     double lookingDistance = 1.5;
@@ -201,8 +215,6 @@ bt::Node::Status AvoidRobots::Update (){
     requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
     requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-
-    // Fill and send command
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
     command.x_vel = requiredSpeed.x;
@@ -210,7 +222,6 @@ bt::Node::Status AvoidRobots::Update (){
     command.w = requiredRotSpeed;
     if (dribbler) {command.dribbler = true;}
     pub.publish(command);
-
     return Status::Running;
 };
 

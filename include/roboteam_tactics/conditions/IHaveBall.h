@@ -21,6 +21,7 @@ public:
     static VerificationMap required_params() {
         VerificationMap params;
         params["me"] = BBArgumentType::Int;
+        params["our_team"] = BBArgumentType::Bool;
         return params;
     }
     
@@ -28,6 +29,7 @@ public:
     std::vector<roboteam_msgs::World> fail_states() const override;
 private:
     int me;
+    bool us;
     boost::optional<roboteam_msgs::WorldRobot> find_bot_pos(const roboteam_msgs::World&) const;
 };
     

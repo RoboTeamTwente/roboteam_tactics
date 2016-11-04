@@ -2,7 +2,7 @@
 #include "actionlib/server/simple_action_server.h"
 #include "actionlib/client/simple_action_client.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/LastWorld.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/skills/DribbleCurve.h"
 
 #include "roboteam_msgs/World.h"
@@ -38,7 +38,7 @@ void DribbleCurve::stoprobot(int robotID) {
 	cmd.chipper_vel=0.0;
 	cmd.chipper_forced=false;
 
-	pubDribble.publish(cmd);
+	pubDribbleCurve.publish(cmd);
 }
 roboteam_utils::Vector2 DribbleCurve::worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
     roboteam_utils::Vector2 robotRequiredv;

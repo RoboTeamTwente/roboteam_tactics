@@ -5,14 +5,32 @@
 #include <vector>
 
 #include "ros/ros.h"
-
 #include "std_msgs/Empty.h"
+#include "unique_id/unique_id.h"
+
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/RoleFeedback.h"
+#include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/generated/alltrees_list.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
 
 std::random_device rd;
 std::mt19937 rng(rd());
+
+void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
+    auto uuid = unique_id::fromMsg(msg->token);   
+
+    std::cout << "Received a feedback on token " << uuid << "!\n";
+
+    if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Failure; 
+    } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
+    } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Success;
+    }
+}
 
 /**
  * TODO: strategy_debug_directive voor het ontvangen voor debug bomen voor robots
@@ -28,43 +46,30 @@ int main(int argc, char *argv[]) {
     ros::Rate rate(60);
 
     ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 10);
-
-    int cycles = 0;
+    ros::Subscriber feedbackSub = n.subscribe("role_feedback", 10, &feedbackCallback);
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
     auto strategy = rtt::make_SideSideStrategy(n);
 
+    // Wait for all the role nodes to come online if a param was set
+    if (ros::param::has("num_role_nodes")) {
+        int numNodes;
+        ros::param::get("num_role_nodes", numNodes);
+        std::cout << "Waiting for " << std::to_string(numNodes) << " role nodes...\n";
+        while ((int) directivePub.getNumSubscribers() < numNodes) {}
+    }
+
     while (ros::ok()) {
         ros::spinOnce();
-
-        // if (cycles >= 60) {
-            // cycles = 0;
-            
-            // auto workerNodes = getNodesSubscribedTo("/role_directive");
-            // std::cout << "Worker size: " << workerNodes.size() << "\n";
-
-            // if (workerNodes.size() >= 0) {
-                // std::uniform_int_distribution<uint32_t> uint_dist(0, workerNodes.size() - 1);
-                // std::string recipient = workerNodes.at(uint_dist(rng));
-
-                // uint_dist = std::uniform_int_distribution<uint32_t>(0, rtt::alltrees_list.size() - 1);
-                // std::string tree = rtt::alltrees_list.at(uint_dist(rng));
-
-                // std::cout << "Making node " << recipient << " do " << tree << "\n";
-
-                // roboteam_msgs::RoleDirective directive;
-                // directive.node_id = recipient;
-                // directive.tree = tree;
-
-                // directivePub.publish(directive);
-            // }
-        // }
         
-        strategy.Update();
+        bt::Node::Status status = strategy.Update();
 
+        if (status != bt::Node::Status::Running) {
+            std::cout << "Strategy result: " << bt::statusToString(status) << ". Starting again\n";
+        }
+            
         rate.sleep();
-        cycles++;
     }
 
     return 0;

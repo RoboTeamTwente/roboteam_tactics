@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 
 #include "ros/ros.h"
 
@@ -28,7 +30,11 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "TestX");
+    srand(time(0));
+    int id = rand();
+    char buf[30];
+    snprintf(buf, 30, "TestX_%d", id);
+	ros::init(argc, argv, buf);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();
@@ -119,7 +125,7 @@ How to use:
         }
     }
 
-    auto skill = rtt::make_skill(n, testClass, "", bb);
+    auto skill = rtt::make_skill<>(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
 
     while (ros::ok()) {
