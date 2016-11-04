@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     int id = rand();
     char buf[30];
     snprintf(buf, 30, "TestX_%d", id);
-	ros::init(argc, argv, buf);
+	ros::init(argc, argv, buf, ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();
