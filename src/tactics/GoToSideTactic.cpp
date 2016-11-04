@@ -17,13 +17,8 @@ GoToSideTactic::GoToSideTactic(bt::Blackboard::Ptr blackboard)
 void GoToSideTactic::Initialize() {
     tokens.clear();
 
-    bool left = private_bb->GetString("left") == "true";
-
-    if (left) {
-        std::cout << "Going left...\n";
-    } else {
-        std::cout << "Going right...\n";
-    }
+    std::string left = private_bb->GetString("pos"); 
+    int robot_count = private_bb->GetInt("robots");
 
     // Empty directive is reset all!
     roboteam_msgs::RoleDirective resetDirective;
@@ -45,8 +40,6 @@ void GoToSideTactic::Initialize() {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", i);
-
-
 
         if (left) {
             bb.SetDouble("AvoidRobots_X_xGoal", mod * 3);
