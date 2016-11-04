@@ -37,12 +37,12 @@ bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot);
 double distance_score(const roboteam_msgs::WorldRobot& bot);
 double orientation_score(const roboteam_msgs::WorldRobot& bot);
 double base_danger_score(const roboteam_msgs::WorldRobot& bot);
-double danger_score(const roboteam_msgs::WorldRobot& bot);
+double danger_score(const roboteam_msgs::WorldRobot& bot, unsigned int preferred = 999);
     
 void dump_scores(const roboteam_msgs::World& world);    
     
 boost::optional<roboteam_msgs::WorldRobot> charging_bot();
-roboteam_msgs::WorldRobot most_dangerous_bot();
-roboteam_msgs::WorldRobot second_most_dangerous_bot();
+boost::optional<roboteam_msgs::WorldRobot> most_dangerous_bot(unsigned int preferred = 999);
+boost::optional<roboteam_msgs::WorldRobot> second_most_dangerous_bot(unsigned int preferred = 999);
     
 }
