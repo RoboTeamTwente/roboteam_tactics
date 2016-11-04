@@ -14,7 +14,7 @@ GoToRightTactic::GoToRightTactic(bt::Blackboard::Ptr blackboard)
         : Tactic(blackboard) 
         {}
 
-void GoToRightTactic::Initialize() {
+void GoToRightTactic::Initialize() {/*
     std::cout << "Initializing GoToRight...\n";
 
     // Empty directive is reset all!
@@ -43,7 +43,7 @@ void GoToRightTactic::Initialize() {
         wd.blackboard.doubles.push_back(fe);
 
         directivePub.publish(wd);
-    }
+    }*/
 }
 
 static int a = 0;
