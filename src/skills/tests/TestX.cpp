@@ -28,7 +28,7 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "TestX");
+	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();

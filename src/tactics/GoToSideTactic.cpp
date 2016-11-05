@@ -54,6 +54,7 @@ void GoToSideTactic::Initialize() {
         }
 
         bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5 * mod);
+        bb.SetBool("AvoidRobots_X_endPoint", true);
 
         // Create message
         roboteam_msgs::RoleDirective wd;

@@ -75,6 +75,9 @@ class Tactic : public bt::Leaf {
     virtual void Terminate(Status s) {
         RobotDealer::release_robots(get_claimed_robots());
         RobotDealer::release_role_nodes(get_claimed_role_nodes());
+
+        claimed_robots.clear();
+        claimed_role_nodes.clear();
     }
 
     void claim_robot(int id) {

@@ -68,11 +68,14 @@ void RobotDealer::initialize_role_nodes() {
 std::string RobotDealer::claim_role_node() {
     std::string node = *available_role_nodes.begin();
 
-    std::cout << "Role node being claimed: " << node << "\n";
+    bool isRoleNodeTaken = taken_role_nodes.find(node) != taken_role_nodes.end();
+    bool isRoleNodeAvailable = available_role_nodes.find(node) != available_role_nodes.end();
 
-    if (taken_role_nodes.find(node) != taken_role_nodes.end()) {
-        ROS_ERROR("Role node %s is already taken!\n", node.c_str());
+    if (!(isRoleNodeAvailable && !isRoleNodeTaken)) {
+        ROS_ERROR("Role node %s is already taken! isRoleNodeAvailable: %d, isRoleNodeTaken: %d\n", node.c_str(), isRoleNodeAvailable, isRoleNodeTaken);
     }
+
+    std::cout << "Role node being claimed: " << node << "\n";
 
     available_role_nodes.erase(node);
     taken_role_nodes.insert(node);
@@ -87,15 +90,18 @@ std::vector<std::string> RobotDealer::claim_role_nodes(size_t n) {
     return nodes;
 }
 
-void RobotDealer::release_role_node(std::string id) {
-    if (taken_role_nodes.find(id) != taken_role_nodes.end()) {
-        ROS_ERROR("Role node %s was not taken!\n", id.c_str());
+void RobotDealer::release_role_node(std::string node) {
+    bool isRoleNodeTaken = taken_role_nodes.find(node) != taken_role_nodes.end();
+    bool isRoleNodeAvailable = available_role_nodes.find(node) != available_role_nodes.end();
+
+    if (!(isRoleNodeTaken && !isRoleNodeAvailable)) {
+        ROS_ERROR("Role node %s is not taken! isRoleNodeAvailable: %d, isRoleNodeTaken: %d\n", node.c_str(), isRoleNodeAvailable, isRoleNodeTaken);
     }
 
-    std::cout << "Role node being released: " << id << "\n";
+    std::cout << "Role node being released: " << node << "\n";
 
-    taken_role_nodes.erase(id);
-    available_role_nodes.insert(id);
+    taken_role_nodes.erase(node);
+    available_role_nodes.insert(node);
 }
 
 void RobotDealer::release_role_nodes(std::vector<std::string> ids) {
