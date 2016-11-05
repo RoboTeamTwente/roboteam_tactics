@@ -27,7 +27,7 @@
       "description": "",
       "properties": {
         "pos": "left",
-        "robots": 5
+        "robots": 6
       },
       "display": {
         "x": 108,
