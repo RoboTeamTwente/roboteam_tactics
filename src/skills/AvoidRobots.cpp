@@ -63,7 +63,7 @@ bt::Node::Status AvoidRobots::Update (){
 
     // Proportional rotation controller
     double requiredRotSpeed;
-    double pGainRot = 6.0;
+    double pGainRot = 15.0;
     double maxRotSpeed = 3.0;
     double angle = world.us.at(robotID).angle;
     double rotError = angleGoal - angle;
@@ -90,7 +90,7 @@ bt::Node::Status AvoidRobots::Update (){
         requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
         requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-        if (posError.length() < 0.005 && rotError < 0.001) {
+        if (posError.length() < 0.01 && rotError < 0.005) {
             roboteam_msgs::RobotCommand command;
             command.id = robotID;
             command.x_vel = 0.0;
@@ -180,10 +180,10 @@ bt::Node::Status AvoidRobots::Update (){
     forceX2 += posError.x*attractiveForce;
     forceY2 += posError.y*attractiveForce;
 
-    ROS_INFO_STREAM("forceX2: " << forceX2 << " forceY2: " << forceY2);
+    // ROS_INFO_STREAM("forceX2: " << forceX2 << " forceY2: " << forceY2);
     roboteam_utils::Vector2 forceVector = roboteam_utils::Vector2(forceX2, forceY2);
 
-    if (posError.length() > 0.2) {
+    if (posError.length() > 0.1) {
         if (forceVector.length() > 0) {
             forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
         } else {
