@@ -25,6 +25,7 @@ bool we_are_left() {
 bool can_see_our_goal(const roboteam_msgs::WorldRobot& bot) {
     std::vector<Vector> goal_points = we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
 
+/*
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("me", bot.id);
     
@@ -37,7 +38,12 @@ bool can_see_our_goal(const roboteam_msgs::WorldRobot& bot) {
             return true;
         }
     }
-    
+*/
+    for (const Vector& goal : goal_points) {
+        if (getObstacles(bot, goal, nullptr, true).empty()) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -56,6 +62,7 @@ bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot) {
         return false;
     }
     
+    /*
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("me", bot.id);
     bb->SetDouble("x_coor", other.pos.x);
@@ -63,6 +70,12 @@ bool potential_cross_recepient(const roboteam_msgs::WorldRobot& bot) {
     bb->SetBool("check_move", true);
     CanSeePoint csp("", bb);
     if (csp.Update() != bt::Node::Status::Success) {
+        // Other can't see the current bot
+        return false;
+    }
+    */
+    
+    if (!getObstacles(bot, Vector(other.pos.x, other.pos.y), nullptr, true).empty()) {
         // Other can't see the current bot
         return false;
     }
