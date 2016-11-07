@@ -191,7 +191,6 @@ bt::Node::Status CanReachPoint::Update() {
 
 	
 
-
 	// If the calculated time is less than the given limit, return succes
 	if (time < timeLimit) {
 		return Status::Success;

@@ -34,17 +34,21 @@ int GetBall::whichRobotHasBall() {
 	for (size_t i=0; i < world.us.size(); i++) {
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("me", i);
+		bb2->SetBool("our_team", true);
 		IHaveBall iHaveBall("", bb2);
 		if (iHaveBall.Update() == Status::Success) {
+			our_team = true;
 			return i;
 		}
 	}
 	for (size_t i=0; i < world.them.size(); i++) {
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("me", i);
+		bb2->SetBool("our_team", false);
 		IHaveBall iHaveBall("", bb2);
 		if (iHaveBall.Update() == Status::Success) {
-			return (i+6);
+			our_team = false;
+			return i;
 		}
 	}
 	return -1;
@@ -60,11 +64,11 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 	// Check if the same robot still has the ball
 	auto bb2 = std::make_shared<bt::Blackboard>();
 	bb2->SetInt("me", hasBall);
+	bb2->SetBool("our_team", our_team);
 	IHaveBall iHaveBall("", bb2);
 	if (iHaveBall.Update() != Status::Success) {
 		hasBall = whichRobotHasBall();
 	}
-	// ROS_INFO_STREAM(hasBall);
 
 	if (hasBall == -1) { // no robot has the ball
 		// Predict intercept pos from ball velocity
@@ -101,10 +105,9 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		// Predict intercept pos by looking at the robot that has the ball
 
 		roboteam_msgs::WorldRobot otherRobot;
-		if (hasBall < 6) {
+		if (our_team) {
 			otherRobot = world.us.at(hasBall);
 		} else {
-			hasBall -= 6;
 			otherRobot = world.them.at(hasBall);
 		}
 
@@ -213,6 +216,7 @@ bt::Node::Status GetBall::Update (){
 
 	auto bb2 = std::make_shared<bt::Blackboard>();
 	bb2->SetInt("me", robotID);
+	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
 
 	if (iHaveBall.Update() == Status::Success) {

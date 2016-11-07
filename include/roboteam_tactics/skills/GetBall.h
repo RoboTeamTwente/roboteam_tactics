@@ -50,6 +50,7 @@ private:
 	AvoidRobots avoidRobots;
 	// GoToPos goToPos;
 	int robotID;
+	bool our_team;
 };
 
 } // rtt
