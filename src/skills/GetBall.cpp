@@ -34,6 +34,7 @@ int GetBall::whichRobotHasBall() {
 	for (size_t i=0; i < world.us.size(); i++) {
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("me", i);
+		bb2->SetBool("our_team",blackboard->GetBool("our_team"));
 		IHaveBall iHaveBall("", bb2);
 		if (iHaveBall.Update() == Status::Success) {
 			return i;
@@ -42,6 +43,7 @@ int GetBall::whichRobotHasBall() {
 	for (size_t i=0; i < world.them.size(); i++) {
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("me", i);
+		bb2->SetBool("our_team",blackboard->GetBool("our_team"));
 		IHaveBall iHaveBall("", bb2);
 		if (iHaveBall.Update() == Status::Success) {
 			return (i+6);
@@ -60,6 +62,7 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 	// Check if the same robot still has the ball
 	auto bb2 = std::make_shared<bt::Blackboard>();
 	bb2->SetInt("me", hasBall);
+	bb2->SetBool("our_team",blackboard->GetBool("our_team"));
 	IHaveBall iHaveBall("", bb2);
 	if (iHaveBall.Update() != Status::Success) {
 		hasBall = whichRobotHasBall();
@@ -213,6 +216,7 @@ bt::Node::Status GetBall::Update (){
 
 	auto bb2 = std::make_shared<bt::Blackboard>();
 	bb2->SetInt("me", robotID);
+	bb2->SetBool("our_team",blackboard->GetBool("our_team"));
 	IHaveBall iHaveBall("", bb2);
 
 	if (iHaveBall.Update() == Status::Success) {
