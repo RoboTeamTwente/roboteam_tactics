@@ -29,9 +29,13 @@ bt::Node::Status CanSeePoint::Update() {
         ROS_WARN("CanSeePoint::Update was unable to find a bot with id %d.", id);
         return bt::Node::Status::Invalid;
     }
-    
-    roboteam_utils::Vector2 my_pos = roboteam_utils::Vector2(me->pos.x, me->pos.y);
     roboteam_utils::Vector2 target = roboteam_utils::Vector2(GetDouble("x_coor"), GetDouble("y_coor"));
+    if (getObstacles(*me, target, &world, GetBool("check_move")).empty()) {
+        return bt::Node::Status::Success;
+    }
+    return bt::Node::Status::Failure;
+    /* 
+    roboteam_utils::Vector2 my_pos = roboteam_utils::Vector2(me->pos.x, me->pos.y);
     
     auto positions = all_bots | 
         boost::adaptors::filtered([id](roboteam_msgs::WorldRobot& bot) {
@@ -49,7 +53,7 @@ bt::Node::Status CanSeePoint::Update() {
             return bt::Node::Status::Failure;
         }
     }
-    return bt::Node::Status::Success;
+    return bt::Node::Status::Success;*/
 }
     
 }
