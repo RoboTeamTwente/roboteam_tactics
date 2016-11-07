@@ -36,7 +36,8 @@ bt::Node::Status IWantToSeeRobot::Update() {
     bb2->SetBool("check_move", true);
 	CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
-
+    	// I can already see him
+    	
     }
 	
 }

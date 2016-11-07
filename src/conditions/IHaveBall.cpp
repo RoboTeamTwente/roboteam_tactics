@@ -39,7 +39,7 @@ bt::Node::Status IHaveBall::Update() {
     double dist = ball_norm.length();
     double angle = ball_norm.angle();
 
-    if (dist > 0.14 || fabs(angle - bot->angle) > 0.4) {
+    if (dist > 0.105 || fabs(angle - bot->angle) > 0.4) {
         return Status::Failure;
     }
 
