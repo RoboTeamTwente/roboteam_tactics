@@ -1,4 +1,5 @@
 add_library(utils
+    Cone.cpp
     DangerFinder.cpp
     FeedbackCollector.cpp
     LastWorld.cpp
