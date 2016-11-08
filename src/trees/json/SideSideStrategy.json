@@ -16,7 +16,7 @@
                 "y": -72
             },
             "children": [
-                "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2",
+                "3a99556e-e7a2-4d54-8944-d85f94683f49",
                 "5a43c749-0d89-4c46-9e98-54acec995ecb"
             ]
         },
@@ -26,10 +26,12 @@
             "title": "GoToSideTactic",
             "description": "",
             "properties": {
-                "left": "true"
+                "left": "true",
+                "pos": "left",
+                "robots": 2
             },
             "display": {
-                "x": -108,
+                "x": 96,
                 "y": -72
             }
         },
@@ -39,12 +41,60 @@
             "title": "GoToSideTactic",
             "description": "",
             "properties": {
-                "left": "false"
+                "left": "true",
+                "pos": "middle",
+                "robots": 5
             },
             "display": {
                 "x": -108,
+                "y": 120
+            }
+        },
+        "6bb89630-e6d2-4282-808a-2c340e689925": {
+            "id": "6bb89630-e6d2-4282-808a-2c340e689925",
+            "name": "GoToSideTactic",
+            "title": "GoToSideTactic",
+            "description": "",
+            "properties": {
+                "left": "true",
+                "pos": "middle",
+                "robots": 2
+            },
+            "display": {
+                "x": 96,
                 "y": -12
             }
+        },
+        "823901cd-7f8d-413a-abdf-f01bc76109ce": {
+            "id": "823901cd-7f8d-413a-abdf-f01bc76109ce",
+            "name": "GoToSideTactic",
+            "title": "GoToSideTactic",
+            "description": "",
+            "properties": {
+                "left": "true",
+                "robots": 1,
+                "pos": "right"
+            },
+            "display": {
+                "x": 96,
+                "y": 48
+            }
+        },
+        "3a99556e-e7a2-4d54-8944-d85f94683f49": {
+            "id": "3a99556e-e7a2-4d54-8944-d85f94683f49",
+            "name": "ParallelTactic",
+            "title": "ParallelTactic",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": -108,
+                "y": -72
+            },
+            "children": [
+                "c2fe37af-dbaa-4f2f-8743-28fb14eafcc2",
+                "6bb89630-e6d2-4282-808a-2c340e689925",
+                "823901cd-7f8d-413a-abdf-f01bc76109ce"
+            ]
         }
     },
     "display": {
@@ -103,6 +153,20 @@
             "name": "AvoidRobots",
             "category": "action",
             "title": "AvoidRobots",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "ParallelSequence",
+            "category": "composite",
+            "title": "ParallelSequence",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "ParallelTactic",
+            "category": "composite",
+            "title": "ParallelTactic",
             "description": null,
             "properties": {}
         }

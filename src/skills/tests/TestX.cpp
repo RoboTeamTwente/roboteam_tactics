@@ -30,11 +30,7 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 }
 
 int main(int argc, char **argv) {
-    srand(time(0));
-    int id = rand();
-    char buf[30];
-    snprintf(buf, 30, "TestX_%d", id);
-	ros::init(argc, argv, buf, ros::init_options::AnonymousName);
+	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();

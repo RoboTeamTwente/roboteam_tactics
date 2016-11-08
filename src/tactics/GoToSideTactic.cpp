@@ -17,22 +17,20 @@ GoToSideTactic::GoToSideTactic(bt::Blackboard::Ptr blackboard)
 void GoToSideTactic::Initialize() {
     tokens.clear();
 
-    bool left = private_bb->GetString("left") == "true";
+    std::string pos = private_bb->GetString("pos"); 
+    int robot_count = private_bb->GetDouble("robots");
 
-    if (left) {
-        std::cout << "Going left...\n";
-    } else {
-        std::cout << "Going right...\n";
+    // TODO: Tactics needs to reset rolenodes when terminate!
+    std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
+
+    claim_role_nodes(robot_count);
+    auto allRobots = RobotDealer::get_available_robots();
+    for (int i = 0; i < robot_count; ++i) {
+
+        claim_robot(allRobots.at(i));   
     }
 
-    // Empty directive is reset all!
-    roboteam_msgs::RoleDirective resetDirective;
-    directivePub.publish(resetDirective);
-
-    auto workers = getNodesSubscribedTo(getMyNamespace() + "role_directive");
-    std::cout << "Number of workers: " << std::to_string(workers.size()) << "\n";
-    std::cout << "My namespace: " << getMyNamespace() << "\n";
-    int i = 0;
+    std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n"; 
 
     int mod = 1;
     std::string our_field_side = "left";
@@ -41,25 +39,27 @@ void GoToSideTactic::Initialize() {
         mod = -1;
     }
 
-    for (auto worker : workers) {
+    int i = 0;
+    auto workers = get_claimed_role_nodes();
+    for (auto robot : get_claimed_robots()) {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", i);
+        bb.SetInt("ROBOT_ID", robot);
 
-
-
-        if (left) {
+        if (pos == "left") {
             bb.SetDouble("AvoidRobots_X_xGoal", mod * 3);
-        } else {
+        } else if (pos == "right") {
             bb.SetDouble("AvoidRobots_X_xGoal", mod * -3);
+        } else {
+            bb.SetDouble("AvoidRobots_X_xGoal", mod * 0);
         }
 
-        bb.SetDouble("AvoidRobots_X_yGoal", i * 0.5);
+        bb.SetDouble("AvoidRobots_X_yGoal", (i + 0.5) * 0.5 * mod);
         bb.SetBool("AvoidRobots_X_endPoint", true);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = worker;
+        wd.node_id = workers.at(i);
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 
@@ -73,8 +73,6 @@ void GoToSideTactic::Initialize() {
         i++;
     }
 }
-
-static int a = 0;
 
 bt::Node::Status GoToSideTactic::Update() {
     bool allSucceeded = true;

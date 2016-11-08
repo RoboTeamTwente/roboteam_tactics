@@ -26,13 +26,13 @@ sourcePreamble="
 #include \"roboteam_tactics/generated/allconditions.h\"
 #include \"roboteam_tactics/generated/alltactics.h\"
 #include \"roboteam_tactics/bt.hpp\"
+#include \"roboteam_tactics/utils/ParallelTactic.hpp\"
 "
 
 # Preamble of header file
 headerPreamble="
 #pragma once
 #include \"roboteam_tactics/bt.hpp\"
-#include \"roboteam_tactics/Aggregator.h\"
 "
 
 # Make sure destination files are empty

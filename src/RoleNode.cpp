@@ -26,8 +26,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << "\n";
-
     ros::NodeHandle n;
 
     currentTree = rtt::make_tree(msg->tree, n);
@@ -36,11 +34,11 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     
     bb->fromMsg(msg->blackboard);
 
-    std::cout << "My robot: " << std::to_string(bb->GetInt("ROBOT_ID")) << "\n";
-
     currentToken = msg->token;
 
     sendNextSuccess = true;
+
+    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << ". My robot is: " << bb->GetInt("ROBOT_ID") << "\n";
 }
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
