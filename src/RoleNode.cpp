@@ -10,7 +10,6 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/EmptyNode.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
 #include "roboteam_tactics/generated/alltrees_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"

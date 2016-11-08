@@ -65,6 +65,7 @@ printf "}" >> $treeHeader
 
 # Copy the header files to place catkin can find it and
 # delete it here.
+mkdir -p ../../include/roboteam_tactics/generated
 cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
 rm alltrees.h
 
