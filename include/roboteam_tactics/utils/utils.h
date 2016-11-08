@@ -18,4 +18,15 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);;
+
+/**
+ * Gets a random number in the range [0, max).
+ */
+int get_rand(int max);
+
+/**
+ * Gets a random number in the range [min, max).
+ */
+int get_rand(int min, int max);
+
 } // rtt

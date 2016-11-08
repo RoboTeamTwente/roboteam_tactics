@@ -28,7 +28,7 @@
             "properties": {
                 "left": "true",
                 "pos": "left",
-                "robots": 2
+                "robots": 3
             },
             "display": {
                 "x": 96,
@@ -43,7 +43,7 @@
             "properties": {
                 "left": "true",
                 "pos": "middle",
-                "robots": 5
+                "robots": 6
             },
             "display": {
                 "x": -108,

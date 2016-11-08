@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <memory>
 #include <iostream>
+#include <random>
 
 #include "unique_id/unique_id.h"
 
@@ -20,14 +22,16 @@ void GoToSideTactic::Initialize() {
     std::string pos = private_bb->GetString("pos"); 
     int robot_count = private_bb->GetDouble("robots");
 
-    // TODO: Tactics needs to reset rolenodes when terminate!
+    std::cout << "Initializing tactic!\n";
     std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
 
     claim_role_nodes(robot_count);
     auto allRobots = RobotDealer::get_available_robots();
     for (int i = 0; i < robot_count; ++i) {
-
-        claim_robot(allRobots.at(i));   
+        int random_index = get_rand(allRobots.size());
+        std::cout << "Claiming " << std::to_string(allRobots.at(random_index)) << "\n";
+        claim_robot(allRobots.at(random_index));
+        allRobots.erase(allRobots.begin() + random_index);
     }
 
     std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n"; 
@@ -41,7 +45,12 @@ void GoToSideTactic::Initialize() {
 
     int i = 0;
     auto workers = get_claimed_role_nodes();
-    for (auto robot : get_claimed_robots()) {
+    auto robots = get_claimed_robots();
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(robots.begin(), robots.end(), g);
+
+    for (auto robot : robots) {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", robot);

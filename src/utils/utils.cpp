@@ -119,5 +119,17 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     return result;
 }
 
+static std::random_device rd;
+static std::mt19937 rng(rd());
+
+int get_rand(int max) {
+    return get_rand(0, max);
+}
+
+int get_rand(int min, int max) {
+    std::uniform_int_distribution<>dis(min, max - 1)  ;
+    return dis(rng);
+}
+
 } // rtt
 
