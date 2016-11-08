@@ -5,9 +5,10 @@ add_library(utils
     LastWorld.cpp
     RobotDealer.cpp
     utils.cpp
+    NodeFactory.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
     )
-target_link_libraries(utils skills conditions)
+target_link_libraries(utils skills conditions alltrees)
