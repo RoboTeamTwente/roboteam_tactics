@@ -132,6 +132,12 @@ public:
         }
     }
 
+    const std::unordered_map<std::string, bool> getBools() { return bools; }
+    const std::unordered_map<std::string, int> getInts() { return ints; }
+    const std::unordered_map<std::string, float> getFloats() { return floats; }
+    const std::unordered_map<std::string, double> getDoubles() { return doubles; }
+    const std::unordered_map<std::string, std::string> getStrings() { return strings; }
+    
 protected:
     std::unordered_map<std::string, bool> bools;
     std::unordered_map<std::string, int> ints;
