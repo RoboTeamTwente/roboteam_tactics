@@ -6,6 +6,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -25,25 +26,11 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
 
 bt::Node::Status IHaveBall::Update() {
     roboteam_msgs::World world = LastWorld::get();
-    roboteam_msgs::Vector2f ball = world.ball.pos;
-
-    boost::optional<roboteam_msgs::WorldRobot> bot = find_bot_pos(world);
-
-    if (!bot) {
+    auto opt_bot = lookup_bot(me, us, &world);
+    if (!opt_bot) {
         return Status::Invalid;
     }
-
-    roboteam_utils::Vector2 ball_vec(ball.x, ball.y), bot_vec(bot->pos.x, bot->pos.y);
-    roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
-
-    double dist = ball_norm.length();
-    double angle = ball_norm.angle();
-
-    if (dist > 0.105 || fabs(angle - bot->angle) > 0.4) {
-        return Status::Failure;
-    }
-
-    return Status::Success;
+    return bot_has_ball(*opt_bot, world.ball) ? Status::Success : Status::Failure;
 }
 
 std::vector<roboteam_msgs::World> IHaveBall::success_states() const {

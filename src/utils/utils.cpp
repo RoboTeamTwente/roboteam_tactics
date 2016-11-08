@@ -119,5 +119,27 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     return result;
 }
 
+boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
+    const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    auto vec = our_team ? w.us : w.them;
+    for (const auto& bot : vec) {
+        if (bot.id == id) {
+            return boost::optional<roboteam_msgs::WorldRobot>(bot);
+        }
+    }
+    return boost::optional<roboteam_msgs::WorldRobot>();
+}
+
+bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
+    roboteam_utils::Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
+    roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
+
+    double dist = ball_norm.length();
+    double angle = ball_norm.angle();
+
+    // Within 10.5 cm and .4 radians (of center of dribbler)
+    return dist <= .105 && fabs(angle - bot.angle) <= .4;
+}
+
 } // rtt
 
