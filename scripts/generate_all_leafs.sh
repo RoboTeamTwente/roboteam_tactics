@@ -15,6 +15,8 @@ assert_tactics_root
 # $3 - what to call the set variable
 # $4 - the destination folder
 function makeIncludeList {
+    mkdir -p $4
+
     printf "#pragma once\n" > $4/$1
     for f in $2; do
         printf "#include \"roboteam_tactics/$f\"\n" >> $4/$1
@@ -30,6 +32,8 @@ function makeIncludeList {
 	# To make sure that the pattern matches below return an empty string
 	# in case of an empty directory
 	shopt -s nullglob
+
+    mkdir -p generated
 
 	makeIncludeList allconditions.h "conditions/*.h" CONDITIONS generated
 

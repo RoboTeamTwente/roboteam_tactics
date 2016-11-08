@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    auto strategy = rtt::make_SideSideStrategy(n);
+    auto strategy = rtt::make_SimpleSideSideStrategy(n);
 
     // Wait for all the role nodes to come online if a param was set
     if (ros::param::has("num_role_nodes")) {
