@@ -27,6 +27,7 @@ sourcePreamble="
 #include \"roboteam_tactics/generated/alltactics.h\"
 #include \"roboteam_tactics/bt.hpp\"
 #include \"roboteam_tactics/utils/ParallelTactic.hpp\"
+#include \"roboteam_tactics/utils/utils.h\"
 "
 
 # Preamble of header file
@@ -92,7 +93,7 @@ printf "
 
 namespace rtt {
 
-bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n) {" >> $factorySource
+bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n, bt::Blackboard* bb) {" >> $factorySource
 
 printf "
     if (false) {
@@ -103,7 +104,7 @@ for filepath in ./json/*.json; do
         name=$(basename $filepath .json)
 
         printf " else if (name == \"$name\") {
-        return make_$name(n);
+        return make_$name(n, bb);
     } " >> $factorySource
 done
 
@@ -127,7 +128,7 @@ printf "
 
 namespace rtt {
 
-bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n);
+bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n, bt::Blackboard* bb = nullptr);
 
 }
 " >> $factoryHeader
