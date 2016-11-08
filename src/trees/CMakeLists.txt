@@ -11,3 +11,5 @@ add_dependencies(alltrees
     )
 
 set(JSON_FILES ${JSON_FILES} PARENT_SCOPE)
+
+target_link_libraries(alltrees tactics)

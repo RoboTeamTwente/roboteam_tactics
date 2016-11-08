@@ -4,6 +4,8 @@
 
 #include "ros/ros.h"
 
+#include "roboteam_tactics/utils/utils.h"
+
 #include "roboteam_tactics/generated/allskills_factory.h"
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -120,6 +122,8 @@ How to use:
             std::cout << "Unknown arg type: " << argType << "\n";
         }
     }
+    
+    rtt::print_blackboard(bb);
 
     auto skill = rtt::make_skill<>(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
