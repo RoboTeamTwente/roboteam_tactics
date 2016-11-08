@@ -59,10 +59,11 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
-        << "(ros::NodeHandle n) {" 
+        << "(ros::NodeHandle n, bt::Blackboard* blackboard) {" 
         << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
+    out << DINDENT << "if(blackboard) merge_blackboards(bb, std::make_shared<bt::Blackboard>(*blackboard));" << std::endl;
 
     nlohmann::json root = nodes[json["root"]];
     defines(root);
