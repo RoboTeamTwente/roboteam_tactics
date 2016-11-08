@@ -1,0 +1,112 @@
+{
+  "id": "45d723a5-bfe6-4c6a-b03c-05e3c472e977",
+  "title": "SimpleSideSideStrategy",
+  "description": "",
+  "root": "1c300a57-a23d-45de-824f-c9892a9ab6c7",
+  "properties": {},
+  "nodes": {
+    "1c300a57-a23d-45de-824f-c9892a9ab6c7": {
+      "id": "1c300a57-a23d-45de-824f-c9892a9ab6c7",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -36,
+        "y": -12
+      },
+      "children": [
+        "2ad5c22d-c3be-431d-aae5-63ca13d562b6",
+        "693055d9-7fda-43a4-8b84-26e5ff423a7b"
+      ]
+    },
+    "2ad5c22d-c3be-431d-aae5-63ca13d562b6": {
+      "id": "2ad5c22d-c3be-431d-aae5-63ca13d562b6",
+      "name": "GoToSideTactic",
+      "title": "GoToSideTactic",
+      "description": "",
+      "properties": {
+        "pos": "left",
+        "robots": 6
+      },
+      "display": {
+        "x": 108,
+        "y": -96
+      }
+    },
+    "693055d9-7fda-43a4-8b84-26e5ff423a7b": {
+      "id": "693055d9-7fda-43a4-8b84-26e5ff423a7b",
+      "name": "GoToSideTactic",
+      "title": "GoToSideTactic",
+      "description": "",
+      "properties": {
+        "pos": "right",
+        "robots": 2
+      },
+      "display": {
+        "x": 108,
+        "y": 60
+      }
+    }
+  },
+  "display": {
+    "camera_x": 767.5,
+    "camera_y": 388.5,
+    "camera_z": 1,
+    "x": -144,
+    "y": -12
+  },
+  "custom_nodes": [
+    {
+      "name": "GoToSideTactic",
+      "category": "action",
+      "title": "GoToSideTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AvoidRobots",
+      "category": "action",
+      "title": "AvoidRobots",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+
+

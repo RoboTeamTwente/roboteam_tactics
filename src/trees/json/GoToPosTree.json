@@ -7,7 +7,7 @@
     "nodes": {
         "e6926a85-ac1a-4afc-8e3f-729c7c6a83c8": {
             "id": "e6926a85-ac1a-4afc-8e3f-729c7c6a83c8",
-            "name": "AvoidRobots",
+            "name": "GoToPos",
             "title": "AvoidRobots_X",
             "description": "",
             "properties": {},

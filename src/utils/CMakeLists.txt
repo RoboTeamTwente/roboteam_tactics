@@ -3,6 +3,7 @@ add_library(utils
     DangerFinder.cpp
     FeedbackCollector.cpp
     LastWorld.cpp
+    RobotDealer.cpp
     utils.cpp
     )
 add_dependencies(utils
