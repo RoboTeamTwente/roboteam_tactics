@@ -28,4 +28,14 @@ static bool bot_has_ball(unsigned int id, bool our_team, const roboteam_msgs::Wo
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out = std::cout);
 void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras);
 
+/**
+ * Gets a random number in the range [0, max).
+ */
+int get_rand(int max);
+
+/**
+ * Gets a random number in the range [min, max).
+ */
+int get_rand(int min, int max);
+
 } // rtt

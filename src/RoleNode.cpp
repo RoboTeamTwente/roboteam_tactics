@@ -10,11 +10,14 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/EmptyNode.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
+#include "roboteam_tactics/generated/alltrees_set.h"
+#include "roboteam_tactics/generated/allskills_set.h"
+#include "roboteam_tactics/generated/allskills_factory.h"
 
 ros::Publisher roleNodeDiscoveryPublisher;
-bt::BehaviorTree currentTree;
-bt::BehaviorTree emptyTree;
+bt::Node::Ptr currentTree;
 
 bool sendNextSuccess = false;
 uuid_msgs::UniqueID currentToken;
@@ -28,11 +31,23 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     ros::NodeHandle n;
 
-    currentTree = rtt::make_tree(msg->tree, n);
+    bt::Blackboard::Ptr bb;
 
-    auto bb = currentTree.GetBlackboard();
-    
-    bb->fromMsg(msg->blackboard);
+    if (rtt::alltrees_set.find(msg->tree) != rtt::alltrees_set.end()) {
+        std::shared_ptr<bt::BehaviorTree> tree = std::make_shared<bt::BehaviorTree>();
+        *tree = rtt::make_tree(msg->tree, n);
+
+        bb = tree->GetBlackboard();
+        bb->fromMsg(msg->blackboard);
+
+        currentTree = tree;
+    } else if (rtt::allskills_set.find(msg->tree) != rtt::allskills_set.end()) {
+        bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+        bb->fromMsg(msg->blackboard);
+        currentTree = rtt::make_skill(n, msg->tree, "", bb);
+    } else {
+        std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
+    }
 
     currentToken = msg->token;
 
@@ -59,10 +74,6 @@ int main(int argc, char *argv[]) {
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
-    
-    auto fakeSequence = std::make_shared<bt::Sequence>();
-    emptyTree.SetRoot(fakeSequence);
-    currentTree = emptyTree;
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
@@ -76,9 +87,12 @@ int main(int argc, char *argv[]) {
     while (ros::ok()) {
         ros::spinOnce();
 
-        bt::Node::Status status = currentTree.Update();
+        if (!currentTree){
+            fps60.sleep();
+            continue;
+        }
 
-        auto bb = currentTree.GetBlackboard();
+        bt::Node::Status status = currentTree->Update();
 
         if (sendNextSuccess && 
                 (status == bt::Node::Status::Success
