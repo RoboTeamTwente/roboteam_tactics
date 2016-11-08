@@ -141,5 +141,42 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     return dist <= .105 && fabs(angle - bot.angle) <= .4;
 }
 
+void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
+    out << "Blackboard:\n";
+    for (const auto& pair : bb->getBools()) {
+        out << "\t" << pair.first << ": " << (pair.second ? "true" : "false") << "\n";
+    }
+    for (const auto& pair : bb->getInts()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getDoubles()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getFloats()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getStrings()) {
+        out << "\t" << pair.first << ": \"" << pair.second << "\"\n";
+    }
+}
+
+void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras) {
+    for (const auto& pair : extras->getBools()) {
+        target->SetBool(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getInts()) {
+        target->SetInt(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getDoubles()) {
+        target->SetDouble(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getFloats()) {
+        target->SetFloat(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getStrings()) {
+        target->SetString(pair.first, pair.second);
+    }
+}
+
 } // rtt
 
