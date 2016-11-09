@@ -70,7 +70,14 @@ void DemoTactic::Initialize() {
 
     claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
-    roboteam_utils::Vector2 passTo(-3, get_rand(6000) / 6000.0 * 6 - 3);
+    int mod = -1;
+    std::string our_field_side = "left";
+    ros::param::get("our_field_side", our_field_side);
+    if (our_field_side == "left") {
+        mod = 1;
+    }
+
+    roboteam_utils::Vector2 passTo(3 * mod, get_rand(6000) / 6000.0 * 6 - 3);
 
     std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
 
