@@ -1,6 +1,7 @@
 #include "roboteam_tactics/conditions/IWantToSeeRobot.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/Cone.h"
 
 namespace rtt {
 
@@ -37,7 +38,9 @@ bt::Node::Status IWantToSeeRobot::Update() {
 	CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
     	// I can already see him
-    	
+    	ROS_INF0("I can already see him, you n00b");
     }
-	
+
+
+
 }

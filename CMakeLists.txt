@@ -343,4 +343,18 @@ if(NOT computername STREQUAL "minux")
         ${catkin_LIBRARIES}
         )
 
+add_executable(ConeTest
+        src/utils/tests/ConeTest.cpp
+    )
+    add_dependencies(ConeTest
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+    target_link_libraries(ConeTest 
+        skills
+        conditions
+        utils
+        ${catkin_LIBRARIES}
+        )
+
 endif(NOT computername STREQUAL "minux")

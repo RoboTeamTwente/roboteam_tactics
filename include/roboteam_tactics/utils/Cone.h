@@ -2,13 +2,12 @@
 
 #include "roboteam_utils/Vector2.h"
 
-namespace rtt
-{
+namespace rtt {
 
 class Cone {
 public:
 	Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoint, double distance);
-	void MakeCone();
+	double CleanAngle(double angle);
 	bool IsWithinCone(roboteam_utils::Vector2 point);
 	roboteam_utils::Vector2 ClosestPointOnSide(roboteam_utils::Vector2);
 	~Cone();
@@ -16,8 +15,7 @@ private:
 	roboteam_utils::Vector2 start;
 	roboteam_utils::Vector2 center;
 	double radius;
-	roboteam_utils::Vector2 firstSide;
-	roboteam_utils::Vector2 secondSide;
+	double angle;
 };
 
 } // rtt
