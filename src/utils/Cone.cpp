@@ -11,21 +11,22 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 	center = centerPoint;
 	radius = distance;
 	if (radius > 0) {
-		angle = 2.0 * asin((center-start).length() / (0.5*radius));
+		angle = 2.0 * asin((0.5*radius) / (center-start).length());
 	} else {
 		ROS_WARN("radius for cone invalid!");
 	}
 }
 
-double Cone::CleanAngle(double angle) {
-	if (angle <= M_PI && angle >= M_PI) {
-		return angle;
-	} else if (angle > M_PI) {
-		angle -= 2*M_PI;
-		return CleanAngle(angle);
-	} else if (angle < M_PI) {
-		angle += 2*M_PI;
-		return CleanAngle(angle);
+double Cone::CleanAngle(double cleanangle) {
+
+	if (cleanangle <= M_PI && cleanangle >= -M_PI) {
+		return cleanangle;
+	} else if (cleanangle > M_PI) {
+		cleanangle -= 2*M_PI;
+		return CleanAngle(cleanangle);
+	} else if (cleanangle < M_PI) {
+		cleanangle += 2*M_PI;
+		return CleanAngle(cleanangle);
 	}
 	return 0.0;
 }
@@ -33,7 +34,7 @@ double Cone::CleanAngle(double angle) {
 bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
-	if (fabs(CleanAngle((vectorToPoint-vectorToCenter).angle())) < angle) {
+	if (fabs(CleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < angle) {
 		return true;
 	} else {
 		return false;
@@ -50,10 +51,11 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) 
 	double pointAngle = CleanAngle((vectorToPoint-vectorToCenter).angle());
 	roboteam_utils::Vector2 closestSide;
 	if (pointAngle >= 0) {
-		closestSide = (center-start).rotate(angle);
+		closestSide = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length());
 	} else {
-		closestSide = (center-start).rotate(angle);
+		closestSide = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length());
 	}
+	return closestSide;
 }
 
 Cone::~Cone(){} // NOP
