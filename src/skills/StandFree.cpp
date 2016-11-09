@@ -1,20 +1,27 @@
-#include "roboteam_tactics/conditions/IWantToSeeRobot.h"
+#include "ros/ros.h"
+#include "roboteam_tactics/skills/StandFree.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_msgs/WorldRobot.h"
+#include <vector>
 
 namespace rtt {
 
-IWantToSeeRobot::IWantToSeeRobot(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
-    
+StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard) {
+
 }
 
-bt::Node::Status IWantToSeeRobot::Update() {
+bt::Node::Status StandFree::Update() {
 	// Get world and blackboard information
 	roboteam_msgs::World world = LastWorld::get();
 	int myID = GetInt("ROBOT_ID");
 	int theirID = GetInt("theirID");
 
+	roboteam_msgs::WorldRobot myRobot = world.us.at(myID);
 	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.x);
 	double myAngle = world.us.at(myID).angle;
 
@@ -38,9 +45,12 @@ bt::Node::Status IWantToSeeRobot::Update() {
 	CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
     	// I can already see him
-    	ROS_INF0("I can already see him, you n00b");
+    	ROS_INFO("I can already see him, you n00b");
     }
 
 
+    // std::vector<roboteam_msgs::WorldRobot> robotsInTheWay = getObstacles(&myRobot, &theirPos, &world, false);
 
 }
+
+} // rtt
