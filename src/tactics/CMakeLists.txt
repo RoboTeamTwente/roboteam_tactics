@@ -2,6 +2,7 @@ add_library(tactics
     BasicAttackTactic.cpp
     BasicDefenseTactic.cpp
     GoToSideTactic.cpp
+    DemoTactic.cpp
     )
 add_dependencies(tactics
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

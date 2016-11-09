@@ -78,6 +78,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     bt::Blackboard::Ptr bb;
 
+    // TODO: Migrate this to Dennis' Node factory
     if (rtt::alltrees_set.find(msg->tree) != rtt::alltrees_set.end()) {
         std::shared_ptr<bt::BehaviorTree> tree = std::make_shared<bt::BehaviorTree>();
         *tree = rtt::make_tree(msg->tree, n);
@@ -87,18 +88,25 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
         currentTree = tree;
     } else if (rtt::allskills_set.find(msg->tree) != rtt::allskills_set.end()) {
-        bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+        std::cout << "Executing a skill!\n";
+        bb = std::make_shared<bt::Blackboard>();
         bb->fromMsg(msg->blackboard);
         currentTree = rtt::make_skill(n, msg->tree, "", bb);
+        std::cout << "Made the skill!\n";
     } else {
         std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
     }
 
+    std::cout << "Getting the robot...\n";
     currentToken = msg->token;
+    std::cout << "Got the token\n";
+    std::cout << "Pointer: " << bb << "\n";
     if (bb->HasInt("ROBOT_ID")) {
+        std::cout << "Getting the actual id\n";
         currentRobotID = bb->GetInt("ROBOT_ID");
     }
 
+    std::cout << "Got the robot\n";
     sendNextSuccess = true;
 
     std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << ". My robot is: " << bb->GetInt("ROBOT_ID") << "\n";

@@ -18,7 +18,7 @@ class KeeperBlock : public Skill {
     
     static VerificationMap required_params() {
         VerificationMap params;
-        params["keeper"] = BBArgumentType::Int;
+        // params["keeper"] = BBArgumentType::Int;
         return params;
     }
 

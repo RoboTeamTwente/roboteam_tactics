@@ -104,8 +104,10 @@ class Tactic : public bt::Leaf {
         return claimed_robots.find(id) != claimed_robots.end();
     }
 
-    void claim_role_node() {
-        claimed_role_nodes.insert(RobotDealer::claim_role_node()); 
+    std::string claim_role_node() {
+        std::string node = RobotDealer::claim_role_node();
+        claimed_role_nodes.insert(node); 
+        return node;
     }
 
     void claim_role_nodes(size_t node_count) {
