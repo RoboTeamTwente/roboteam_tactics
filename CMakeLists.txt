@@ -357,4 +357,18 @@ add_executable(ConeTest
         ${catkin_LIBRARIES}
         )
 
+add_executable(StandFreeTest
+        src/skills/tests/StandFreeTest.cpp
+    )
+    add_dependencies(StandFreeTest
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+    target_link_libraries(StandFreeTest 
+        skills
+        conditions
+        utils
+        ${catkin_LIBRARIES}
+        )
+
 endif(NOT computername STREQUAL "minux")

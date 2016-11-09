@@ -9,6 +9,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/Vector2f.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
 #include <boost/optional.hpp>
 
 namespace rtt {
@@ -19,6 +20,7 @@ public:
     StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard);  
     Status Update();
 private:
+	AvoidRobots avoidRobots;
 };
     
 }

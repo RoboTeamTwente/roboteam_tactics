@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/skills/StandFree.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/Cone.h"
@@ -11,7 +12,8 @@
 namespace rtt {
 
 StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {
+        : Skill(n, name, blackboard)
+        , avoidRobots(n, "", private_bb) {
 
 }
 
@@ -22,8 +24,10 @@ bt::Node::Status StandFree::Update() {
 	int theirID = GetInt("theirID");
 
 	roboteam_msgs::WorldRobot myRobot = world.us.at(myID);
-	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.x);
+	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);
 	double myAngle = world.us.at(myID).angle;
+
+	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(world.ball.pos.x, world.ball.pos.y);
 
 	roboteam_utils::Vector2 theirPos;
 	double theirAngle;
@@ -46,11 +50,39 @@ bt::Node::Status StandFree::Update() {
     if (canSeePoint.Update() == Status::Success) {
     	// I can already see him
     	ROS_INFO("I can already see him, you n00b");
+    } else {
+    	ROS_INFO("Can't see him...");
     }
 
+    std::vector<roboteam_msgs::WorldRobot> robotsInTheWay = getObstacles(myRobot, theirPos, &world, false);
+    for (size_t i = 0; i < robotsInTheWay.size(); i++) {
+    	if (robotsInTheWay.at(i).id == theirID) {
+    		robotsInTheWay.erase(robotsInTheWay.begin()+i);
+    	}
+    }
 
-    // std::vector<roboteam_msgs::WorldRobot> robotsInTheWay = getObstacles(&myRobot, &theirPos, &world, false);
+    ROS_INFO_STREAM("length vector: " << robotsInTheWay.size());
 
+    roboteam_utils::Vector2 nearestFreePos;
+    for (size_t i = 0; i < robotsInTheWay.size(); i++) {
+    	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(i).pos.x, robotsInTheWay.at(i).pos.y);
+    	ROS_INFO_STREAM("theirPos: " << theirPos.x << " " << theirPos.y);
+    	ROS_INFO_STREAM("robotInTheWayPos: " << robotInTheWayPos.x << " " << robotInTheWayPos.y);
+    	ROS_INFO_STREAM("myPos: " << myPos.x << " " << myPos.y);
+    	Cone cone(theirPos, robotInTheWayPos, 0.2);
+    	nearestFreePos = cone.ClosestPointOnSide(myPos);
+    }
+
+    ROS_INFO_STREAM("nearest pos: " << nearestFreePos.x << " " << nearestFreePos.y);
+
+    private_bb->SetInt("ROBOT_ID", myID);
+    private_bb->SetDouble("xGoal", nearestFreePos.x);
+    private_bb->SetDouble("yGoal", nearestFreePos.y);
+    private_bb->SetDouble("angleGoal", myAngle);
+    
+    avoidRobots.Update();
+    
+    return Status::Running;
 }
 
 } // rtt

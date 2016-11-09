@@ -15,7 +15,7 @@ int main() {
 	double distance = 0.2;
 	rtt::Cone cone(startPoint, centerPoint, distance);
 
-	roboteam_utils::Vector2 isInConeTest1 = roboteam_utils::Vector2(2.0, 0.1);
+	roboteam_utils::Vector2 isInConeTest1 = roboteam_utils::Vector2(4.0, 0.1);
 	roboteam_utils::Vector2 isInConeTest2 = roboteam_utils::Vector2(3.0, 0.2);
 	roboteam_utils::Vector2 isInConeTest3 = roboteam_utils::Vector2(1.0, -0.01);
 	ROS_INFO_STREAM("test 1: " << cone.IsWithinCone(isInConeTest1));
