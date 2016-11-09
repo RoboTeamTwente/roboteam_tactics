@@ -16,15 +16,61 @@
 #include "roboteam_tactics/generated/allskills_factory.h"
 
 ros::Publisher roleNodeDiscoveryPublisher;
+ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
 
 bool sendNextSuccess = false;
 uuid_msgs::UniqueID currentToken;
+int currentRobotID = -1;
+
+void reset_tree() {
+    sendNextSuccess = false;
+    currentToken = uuid_msgs::UniqueID();
+    currentTree = nullptr;
+    currentRobotID = -1;
+}
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
     
-    if (name != msg->node_id) {
+    // Some control statements to regulate starting and stopping of rolenodes
+    if (msg->node_id.empty()) {
+        // Directive is meant for all
+        bt::Blackboard bb;
+        bb.fromMsg(msg->blackboard);
+        // If robot ID is set to ours...
+        if (bb.HasInt("ROBOT_ID") && bb.GetInt("ROBOT_ID") == currentRobotID) {
+            // And the tree directive is empty
+            if (msg->tree.empty()) {
+                // Stop executing the tree and notify the strategy node
+                // That we failed
+                roboteam_msgs::RoleFeedback feedback;
+                feedback.token = currentToken;
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
+                feedbackPub.publish(feedback);
+
+                reset_tree();
+                return;
+            }
+        } else if (!bb.HasInt("ROBOT_ID")) { // No Robot ID was set...
+            // And the tree is empty...
+            if (msg->tree.empty()) {
+                // And if we are currently controlling a robot...
+                if (currentRobotID == -1) { 
+                    // Stop executing it!
+                    roboteam_msgs::RoleFeedback feedback;
+                    feedback.token = currentToken;
+                    feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
+                    feedbackPub.publish(feedback);
+
+                    reset_tree();
+                    return;
+                }
+            }
+        }
+
+        return;
+    } else if (name != msg->node_id) {
         return;
     }
 
@@ -49,6 +95,9 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     }
 
     currentToken = msg->token;
+    if (bb->HasInt("ROBOT_ID")) {
+        currentRobotID = bb->GetInt("ROBOT_ID");
+    }
 
     sendNextSuccess = true;
 
@@ -81,7 +130,7 @@ int main(int argc, char *argv[]) {
         &roleDirectiveCallback
         );
 
-    ros::Publisher feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
+    feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -114,6 +163,8 @@ int main(int argc, char *argv[]) {
             }
 
             sendNextSuccess = false;
+
+            currentTree = nullptr;
         }
 
         fps60.sleep();
