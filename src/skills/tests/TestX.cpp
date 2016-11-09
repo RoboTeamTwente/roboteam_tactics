@@ -130,8 +130,8 @@ How to use:
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
 
-    bool break_on_success = dynamic_cast<rtt::Skill>(*node);
-
+    bool break_on_success = dynamic_cast<rtt::Skill*>(&(*node));
+    
     while (ros::ok()) {
         ros::spinOnce();
         if (break_on_success && node->Update() == bt::Node::Status::Success) {
