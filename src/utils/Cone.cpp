@@ -18,7 +18,6 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 }
 
 double Cone::CleanAngle(double cleanangle) {
-
 	if (cleanangle <= M_PI && cleanangle >= -M_PI) {
 		return cleanangle;
 	} else if (cleanangle > M_PI) {
@@ -58,6 +57,6 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) 
 	return closestSide;
 }
 
-Cone::~Cone(){} // NOP
+Cone::~Cone(){}
 
 } // rtt
