@@ -119,5 +119,76 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     return result;
 }
 
+boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
+    const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    auto vec = our_team ? w.us : w.them;
+    for (const auto& bot : vec) {
+        if (bot.id == id) {
+            return boost::optional<roboteam_msgs::WorldRobot>(bot);
+        }
+    }
+    return boost::optional<roboteam_msgs::WorldRobot>();
+}
+
+bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
+    roboteam_utils::Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
+    roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
+
+    double dist = ball_norm.length();
+    double angle = ball_norm.angle();
+
+    // Within 10.5 cm and .4 radians (of center of dribbler)
+    return dist <= .105 && fabs(angle - bot.angle) <= .4;
+}
+
+void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
+    out << "Blackboard:\n";
+    for (const auto& pair : bb->getBools()) {
+        out << "\t" << pair.first << ": " << (pair.second ? "true" : "false") << "\n";
+    }
+    for (const auto& pair : bb->getInts()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getDoubles()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getFloats()) {
+        out << "\t" << pair.first << ": " << pair.second << "\n";
+    }
+    for (const auto& pair : bb->getStrings()) {
+        out << "\t" << pair.first << ": \"" << pair.second << "\"\n";
+    }
+}
+
+void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras) {
+    for (const auto& pair : extras->getBools()) {
+        target->SetBool(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getInts()) {
+        target->SetInt(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getDoubles()) {
+        target->SetDouble(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getFloats()) {
+        target->SetFloat(pair.first, pair.second);
+    }
+    for (const auto& pair : extras->getStrings()) {
+        target->SetString(pair.first, pair.second);
+    }
+
+}
+static std::random_device rd;
+static std::mt19937 rng(rd());
+
+int get_rand(int max) {
+    return get_rand(0, max);
+}
+
+int get_rand(int min, int max) {
+    std::uniform_int_distribution<>dis(min, max - 1)  ;
+    return dis(rng);
+}
+
 } // rtt
 

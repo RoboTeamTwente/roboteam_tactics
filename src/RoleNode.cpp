@@ -11,36 +11,105 @@
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
+#include "roboteam_tactics/generated/alltrees_set.h"
+#include "roboteam_tactics/generated/allskills_set.h"
+#include "roboteam_tactics/generated/allskills_factory.h"
 
 ros::Publisher roleNodeDiscoveryPublisher;
-bt::BehaviorTree currentTree;
-bt::BehaviorTree emptyTree;
+ros::Publisher feedbackPub;
+bt::Node::Ptr currentTree;
 
 bool sendNextSuccess = false;
 uuid_msgs::UniqueID currentToken;
+int currentRobotID = -1;
+
+void reset_tree() {
+    sendNextSuccess = false;
+    currentToken = uuid_msgs::UniqueID();
+    currentTree = nullptr;
+    currentRobotID = -1;
+}
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
     
-    if (name != msg->node_id) {
+    // Some control statements to regulate starting and stopping of rolenodes
+    if (msg->node_id.empty()) {
+        // Directive is meant for all
+        bt::Blackboard bb;
+        bb.fromMsg(msg->blackboard);
+        // If robot ID is set to ours...
+        if (bb.HasInt("ROBOT_ID") && bb.GetInt("ROBOT_ID") == currentRobotID) {
+            // And the tree directive is empty
+            if (msg->tree.empty()) {
+                // Stop executing the tree and notify the strategy node
+                // That we failed
+                roboteam_msgs::RoleFeedback feedback;
+                feedback.token = currentToken;
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
+                feedbackPub.publish(feedback);
+
+                reset_tree();
+                return;
+            }
+        } else if (!bb.HasInt("ROBOT_ID")) { // No Robot ID was set...
+            // And the tree is empty...
+            if (msg->tree.empty()) {
+                // And if we are currently controlling a robot...
+                if (currentRobotID == -1) { 
+                    // Stop executing it!
+                    roboteam_msgs::RoleFeedback feedback;
+                    feedback.token = currentToken;
+                    feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
+                    feedbackPub.publish(feedback);
+
+                    reset_tree();
+                    return;
+                }
+            }
+        }
+
+        return;
+    } else if (name != msg->node_id) {
         return;
     }
 
-    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << "\n";
-
     ros::NodeHandle n;
 
-    currentTree = rtt::make_tree(msg->tree, n);
+    bt::Blackboard::Ptr bb;
 
-    auto bb = currentTree.GetBlackboard();
-    
-    bb->fromMsg(msg->blackboard);
+    // TODO: Migrate this to Dennis' Node factory
+    if (rtt::alltrees_set.find(msg->tree) != rtt::alltrees_set.end()) {
+        std::shared_ptr<bt::BehaviorTree> tree = std::make_shared<bt::BehaviorTree>();
+        *tree = rtt::make_tree(msg->tree, n);
 
-    std::cout << "My robot: " << std::to_string(bb->GetInt("ROBOT_ID")) << "\n";
+        bb = tree->GetBlackboard();
+        bb->fromMsg(msg->blackboard);
 
+        currentTree = tree;
+    } else if (rtt::allskills_set.find(msg->tree) != rtt::allskills_set.end()) {
+        std::cout << "Executing a skill!\n";
+        bb = std::make_shared<bt::Blackboard>();
+        bb->fromMsg(msg->blackboard);
+        currentTree = rtt::make_skill(n, msg->tree, "", bb);
+        std::cout << "Made the skill!\n";
+    } else {
+        std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
+    }
+
+    std::cout << "Getting the robot...\n";
     currentToken = msg->token;
+    std::cout << "Got the token\n";
+    std::cout << "Pointer: " << bb << "\n";
+    if (bb->HasInt("ROBOT_ID")) {
+        std::cout << "Getting the actual id\n";
+        currentRobotID = bb->GetInt("ROBOT_ID");
+    }
 
+    std::cout << "Got the robot\n";
     sendNextSuccess = true;
+
+    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << ". My robot is: " << bb->GetInt("ROBOT_ID") << "\n";
 }
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
@@ -61,10 +130,6 @@ int main(int argc, char *argv[]) {
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
-    
-    auto fakeSequence = std::make_shared<bt::Sequence>();
-    emptyTree.SetRoot(fakeSequence);
-    currentTree = emptyTree;
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
@@ -73,14 +138,17 @@ int main(int argc, char *argv[]) {
         &roleDirectiveCallback
         );
 
-    ros::Publisher feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
+    feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
 
     while (ros::ok()) {
         ros::spinOnce();
 
-        bt::Node::Status status = currentTree.Update();
+        if (!currentTree){
+            fps60.sleep();
+            continue;
+        }
 
-        auto bb = currentTree.GetBlackboard();
+        bt::Node::Status status = currentTree->Update();
 
         if (sendNextSuccess && 
                 (status == bt::Node::Status::Success
@@ -103,6 +171,8 @@ int main(int argc, char *argv[]) {
             }
 
             sendNextSuccess = false;
+
+            currentTree = nullptr;
         }
 
         fps60.sleep();
