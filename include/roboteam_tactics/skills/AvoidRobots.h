@@ -22,8 +22,8 @@ public:
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;
-        params["targetX"] = BBArgumentType::Double;
-        params["targetY"] = BBArgumentType::Double;
+        params["xGoal"] = BBArgumentType::Double;
+        params["yGoal"] = BBArgumentType::Double;
         return params;
     }
     

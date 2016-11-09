@@ -5,8 +5,8 @@
 #include "ros/ros.h"
 
 #include "roboteam_tactics/utils/utils.h"
-
 #include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/utils/NodeFactory.h"
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -125,12 +125,16 @@ How to use:
     
     rtt::print_blackboard(bb);
 
-    auto skill = rtt::make_skill<>(n, testClass, "", bb);
+    //auto skill = rtt::make_skill<>(n, testClass, "", bb);
+    rtt::print_blackboard(bb);
+    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
+
+    bool break_on_success = dynamic_cast<rtt::Skill>(*node);
 
     while (ros::ok()) {
         ros::spinOnce();
-        if (skill->Update() == bt::Node::Status::Success) {
+        if (break_on_success && node->Update() == bt::Node::Status::Success) {
             break;
         }
     }
