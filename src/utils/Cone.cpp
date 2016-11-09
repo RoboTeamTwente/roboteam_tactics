@@ -45,8 +45,10 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) 
 		ROS_WARN("This point is not inside the cone");
 		return roboteam_utils::Vector2(0.0, 0.0);
 	}
+	roboteam_utils::Vector2 vectorToPoint = point-start;
+	roboteam_utils::Vector2 vectorToCenter = center-start;
 	double pointAngle = CleanAngle((vectorToPoint-vectorToCenter).angle());
-	roboteam_utils::Vector2 closestSide
+	roboteam_utils::Vector2 closestSide;
 	if (pointAngle >= 0) {
 		closestSide = (center-start).rotate(angle);
 	} else {
