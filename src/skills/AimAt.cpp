@@ -31,7 +31,7 @@ bt::Node::Status AimAt::Update (){
 	// printf("%s\n", destination1.c_str());
 
 	if (world.us.size() == 0) {
-		ROS_INFO("No information about the world state :(");
+		//ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
