@@ -26,25 +26,14 @@ void delete_from_vector(std::vector<T> &items, const T &item) {
     }
 }
 
-void DemoTactic::Initialize() {
-    tokens.clear();
-
-    std::cout << "Initializing demo tactic";
-
-    roboteam_msgs::World world = LastWorld::get();
-
-    if (world.us.size() == 0) {
-        std::cout << "No robots, cannot initialize.\n";
-    }
-
-    std::vector<int> robots = RobotDealer::get_available_robots();
+int get_most_left_robot(std::vector<int> robots, const roboteam_msgs::World &world) {
     int furthest_robot = -1;
-    double furthest_robot_x = -std::numeric_limits<double>::max();
+    double furthest_robot_x = std::numeric_limits<double>::max();
     // TODO: Assuming that our goal is left. Either the world should
     // be normalized towards "our goal left" or there should be a bunch
     // of branches here
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        if (worldRobot.pos.x > furthest_robot_x) {
+        if (worldRobot.pos.x < furthest_robot_x) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
                 furthest_robot = worldRobot.id;
                 furthest_robot_x = worldRobot.pos.x;
@@ -52,30 +41,48 @@ void DemoTactic::Initialize() {
         }
     }
 
-    delete_from_vector(robots, furthest_robot);
+    return furthest_robot;
+}
 
-    int keeper_robot = -1;
-    double keeper_robot_x = std::numeric_limits<double>::max();
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        if (worldRobot.pos.x < keeper_robot_x) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                keeper_robot = worldRobot.id;
-                keeper_robot_x = worldRobot.pos.x;
-            }
-        }
+void DemoTactic::Initialize() {
+    tokens.clear();
+
+    std::cout << "Initializing demo tactic";
+
+    roboteam_msgs::World world = LastWorld::get();
+
+    if (world.us.size() < 4) {
+        std::cout << "Not enough robots, cannot initialize.\n";
     }
 
-    delete_from_vector(robots, keeper_robot);
+    std::vector<int> robots = RobotDealer::get_available_robots();
+    int score_bot = get_most_left_robot(robots, world);
+    delete_from_vector(robots, score_bot);
 
-    claim_robots({furthest_robot, keeper_robot});
+    int attack_bot = get_most_left_robot(robots, world);
+    delete_from_vector(robots, attack_bot);
+
+    int def_bot = get_most_left_robot(robots, world);
+    delete_from_vector(robots, def_bot);
+
+    int keeper_bot = get_most_left_robot(robots, world);
+    delete_from_vector(robots, keeper_bot);
+
+    claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
+
+    roboteam_utils::Vector2 passTo(-3, get_rand(6000) / 6000.0 * 6 - 3);
+
+    std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
 
     {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", furthest_robot);
-        bb.SetBool("GetBall_A_intercept", false);
-        bb.SetString("AimAt_A_At", "robot");
-        bb.SetInt("AimAt_A_AtRobot", 2);
+        bb.SetInt("ROBOT_ID", score_bot);
+        bb.SetBool("GetBall_A_intercept", true);
+        bb.SetDouble("GetBall_A_getBallAtX", passTo.x);
+        bb.SetDouble("GetBall_A_getBallAtY", passTo.y);
+        bb.SetDouble("GetBall_A_getBallAtTime", 5.0);
+        bb.SetString("AimAt_A_At", "theirgoal");
 
         // Create message
         roboteam_msgs::RoleDirective wd;
@@ -95,7 +102,30 @@ void DemoTactic::Initialize() {
     {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", keeper_robot);
+        bb.SetInt("ROBOT_ID", attack_bot);
+        bb.SetBool("GetBall_A_intercept", false);
+        bb.SetString("AimAt_A_At", "robot");
+        bb.SetInt("AimAt_A_AtRobot", score_bot);
+
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.node_id = claim_role_node();
+        wd.tree = "CoolTree";
+        wd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        directivePub.publish(wd);
+    }
+
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", def_bot);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
@@ -111,52 +141,6 @@ void DemoTactic::Initialize() {
         // Send to rolenode
         directivePub.publish(wd);
     }
-
-    // claim_role_nodes(robot_count);
-    // auto allRobots = RobotDealer::get_available_robots();
-    // for (int i = 0; i < robot_count; ++i) {
-        // int random_index = get_rand(allRobots.size());
-        // std::cout << "Claiming " << std::to_string(allRobots.at(random_index)) << "\n";
-        // claim_robot(allRobots.at(random_index));
-        // allRobots.erase(allRobots.begin() + random_index);
-    // }
-
-    // std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n"; 
-
-    // int mod = 1;
-    // std::string our_field_side = "left";
-    // ros::param::get("our_field_side", our_field_side);
-    // if (our_field_side == "left") {
-        // mod = -1;
-    // }
-
-    // int i = 0;
-    // auto workers = get_claimed_role_nodes();
-    // auto robots = get_claimed_robots();
-    // std::random_device rd;
-    // std::mt19937 g(rd());
-    // std::shuffle(robots.begin(), robots.end(), g);
-
-    // for (auto robot : robots) {
-        // // Fill blackboard with relevant info
-        // bt::Blackboard bb;
-        // bb.SetInt("ROBOT_ID", robot);
-
-        // // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.node_id = workers.at(i);
-        // wd.tree = "GoToPosTree";
-        // wd.blackboard = bb.toMsg();
-
-        // // Add random token and save it for later
-        // boost::uuids::uuid token = unique_id::fromRandom();
-        // tokens.push_back(token);
-        // wd.token = unique_id::toMsg(token);
-
-        // // Send to rolenode
-        // directivePub.publish(wd);
-        // i++;
-    // }
 }
 
 bt::Node::Status DemoTactic::Update() {
