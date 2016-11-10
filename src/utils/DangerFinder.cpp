@@ -19,7 +19,10 @@ inline Position get_opp(const roboteam_msgs::WorldRobot& bot) {
 }   
    
 bool we_are_left() {
-    return false;
+    std::string our_field_side = "left";
+    ros::param::get("our_field_side", our_field_side);
+
+    return our_field_side == "left";
 }
 
 bool can_see_our_goal(const roboteam_msgs::WorldRobot& bot) {

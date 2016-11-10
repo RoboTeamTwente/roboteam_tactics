@@ -29,7 +29,7 @@ void KeeperBlock::reevaluate_target() {
     auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
     impl = build_skill<Block>(n, "Block", "", 
         "ROBOT_ID=%d TGT_ID=%d int:BLOCK_ID=%d block_x=%f block_y=%f block_type=%s block_arg=%f bool:invert_direction=%s",
-        GetInt("keeper"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
+        GetInt("ROBOT_ID"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
 }
 
 bt::Node::Status KeeperBlock::Update() {

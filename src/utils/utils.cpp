@@ -190,5 +190,13 @@ int get_rand(int min, int max) {
     return dis(rng);
 }
 
+time_point now() {
+    return std::chrono::steady_clock::now();
+}
+
+seconds time_difference(time_point start, time_point end) {
+    return std::chrono::duration_cast<std::chrono::seconds>(end - start);
+}
+
 } // rtt
 

@@ -9,7 +9,6 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 
-
 namespace rtt {
 
 Kick::Kick(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
@@ -18,20 +17,36 @@ Kick::Kick(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         	ROS_INFO("Kicking the ball");
 }
 
-double Kick::cleanAngle(double angle){
+double Kick::cleanAngle(double angle) {
 	if (angle < M_PI){
 		return fmod(angle-M_PI, (2*M_PI))+M_PI;
-	}
-	else if(angle > M_PI){
+	} else if(angle > M_PI){
 		return fmod(angle+M_PI, (2*M_PI))-M_PI;
-	}
-	else {
+	} else {
 		return angle;
 	}
 }
 
+void Kick::Initialize() {
+    auto vel = LastWorld::get().ball.vel;
+    oldBallVel = roboteam_utils::Vector2(vel.x, vel.y);
+    cycleCounter = 0;
+}
+
 bt::Node::Status Kick::Update() {
+    cycleCounter++;
+    if (cycleCounter > 10) return bt::Node::Status::Failure;
+
 	roboteam_msgs::World world = LastWorld::get();
+
+    roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+
+    if ((currentBallVel - oldBallVel).length() >= 0.5) {
+        ROS_INFO("Velocity difference was enough");
+        return bt::Node::Status::Success;
+    }
+
+    oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");
 	ROS_INFO_STREAM("name: " << name << " " << robotID);
@@ -66,8 +81,8 @@ bt::Node::Status Kick::Update() {
 
 			pubKick.publish(command);
 			ros::spinOnce();
-			ROS_INFO("Kick skill done");
-			return Status::Success;
+			ROS_INFO("Triggered the kicker!");
+			return Status::Running;
 		}
 		else {
 			ROS_INFO("Ball is not in front of the dribbler");

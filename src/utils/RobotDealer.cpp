@@ -60,7 +60,7 @@ void RobotDealer::initialize_role_nodes() {
 
     for (std::string worker : workers) {
         available_role_nodes.insert(worker);
-        std::cout << "Added worker: " << worker << "\n";
+        // std::cout << "Added worker: " << worker << "\n";
     }
     // available_role_nodes.insert(workers.begin(), workers.end());
 }
@@ -75,7 +75,7 @@ std::string RobotDealer::claim_role_node() {
         ROS_ERROR("Role node %s is already taken! isRoleNodeAvailable: %d, isRoleNodeTaken: %d\n", node.c_str(), isRoleNodeAvailable, isRoleNodeTaken);
     }
 
-    std::cout << "Role node being claimed: " << node << "\n";
+    // std::cout << "Role node being claimed: " << node << "\n";
 
     available_role_nodes.erase(node);
     taken_role_nodes.insert(node);
@@ -98,7 +98,7 @@ void RobotDealer::release_role_node(std::string node) {
         ROS_ERROR("Role node %s is not taken! isRoleNodeAvailable: %d, isRoleNodeTaken: %d\n", node.c_str(), isRoleNodeAvailable, isRoleNodeTaken);
     }
 
-    std::cout << "Role node being released: " << node << "\n";
+    // std::cout << "Role node being released: " << node << "\n";
 
     taken_role_nodes.erase(node);
     available_role_nodes.insert(node);

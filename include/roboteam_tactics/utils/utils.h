@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
+#include <chrono>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -37,5 +38,12 @@ int get_rand(int max);
  * Gets a random number in the range [min, max).
  */
 int get_rand(int min, int max);
+
+using time_point = std::chrono::steady_clock::time_point;
+using seconds = std::chrono::seconds;
+
+time_point now();
+
+seconds time_difference(time_point start, time_point end);
 
 } // rtt
