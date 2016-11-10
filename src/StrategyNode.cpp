@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    rtt::RobotDealer::initialize_robots({0, 1, 2, 3});
+    rtt::RobotDealer::initialize_robots({0, 1, 2});
     rtt::RobotDealer::initialize_role_nodes();
     
     // Wait for robots to appear

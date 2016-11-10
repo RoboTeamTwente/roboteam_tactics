@@ -49,31 +49,27 @@ bt::Node::Status AimAt::Update (){
 	
 	}
 	else if(destination=="theirgoal"){
-		// assume yellow always scores left (x negative), blue always scores right (x positive)
-		std::string ourcolor;
-		n.getParam("our_color",  ourcolor);
-		if(ourcolor == "yellow"){
-			passTo=roboteam_utils::Vector2(-3.0,0.0);
-		}
-		else if(ourcolor == "blue"){
-			passTo=roboteam_utils::Vector2(3.0,0.0);
-		}
-		else {
-			ROS_ERROR("Could not determine goal side");
+        std::string our_field_side = "left";
+        n.getParam("our_field_side", our_field_side);
+
+        auto field = LastWorld::get_field();
+
+		if(our_field_side == "left"){
+			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
+		} else {
+			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}
 	}
 	else if(destination=="ourgoal"){
-		// assume yellow always scores left (x negative), blue always scores right (x positive)
-		std::string ourcolor;
-		n.getParam("our_color", ourcolor);
-		if(ourcolor == "yellow"){
-			passTo=roboteam_utils::Vector2(3.0,0.0);
-		}
-		else if(ourcolor == "blue"){
-			passTo=roboteam_utils::Vector2(-3.0,0.0);
-		}
-		else {
-			ROS_ERROR("Could not determine goal side");
+        std::string our_field_side = "left";
+        n.getParam("our_field_side", our_field_side);
+
+        auto field = LastWorld::get_field();
+
+		if(our_field_side == "right"){
+			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
+		} else {
+			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}
 	}
 	

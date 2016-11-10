@@ -5,6 +5,7 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -21,6 +22,8 @@ class DemoTactic : public Tactic {
 
     private:
     std::vector<boost::uuids::uuid> tokens;
+
+    time_point start;
 } ;
 
 }
