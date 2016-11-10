@@ -59,10 +59,10 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
     double closest_robot_ds = std::numeric_limits<double>::max();
 
     // TODO: Why is there not a copy constructor?
-    roboteam_utils::Vector2 ball_pos(world.ball.pos.x, world.ball.pos.y);
+    roboteam_utils::Vector2 ball_pos(world.ball.pos);
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos.x, worldRobot.pos.y);
+        roboteam_utils::Vector2 pos(worldRobot.pos);
 
         if ((pos - ball_pos).length() < closest_robot_ds) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
