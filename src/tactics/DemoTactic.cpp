@@ -4,8 +4,7 @@
 #include <random>
 #include <limits>
 
-#include "unique_id/unique_id.h"
-
+#include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/DemoTactic.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -100,10 +99,10 @@ void DemoTactic::Initialize() {
     int def_bot = robots.back();
     delete_from_vector(robots, def_bot);
 
-    // int keeper_bot = robots.back();
-    // delete_from_vector(robots, keeper_bot);
+    int keeper_bot = robots.back();
+    delete_from_vector(robots, keeper_bot);
 
-    claim_robots({score_bot, attack_bot, def_bot/*, keeper_bot*/});
+    claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
     std::string our_field_side = "left";
@@ -168,6 +167,25 @@ void DemoTactic::Initialize() {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", def_bot);
+
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.node_id = claim_role_node();
+        wd.tree = "SecondaryKeeper";
+        wd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        wd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        directivePub.publish(wd);
+    }
+
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", keeper_bot);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
