@@ -10,12 +10,15 @@ public:
 	double CleanAngle(double angle);
 	bool IsWithinCone(roboteam_utils::Vector2 point);
 	roboteam_utils::Vector2 ClosestPointOnSide(roboteam_utils::Vector2);
+	bool DoConesOverlap(Cone otherCone);
+	Cone MergeCones(Cone otherCone);
 	~Cone();
-private:
+
 	roboteam_utils::Vector2 start;
 	roboteam_utils::Vector2 center;
 	double radius;
 	double angle;
+private:
 };
 
 } // rtt

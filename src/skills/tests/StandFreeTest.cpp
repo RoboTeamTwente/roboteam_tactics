@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
 	auto bb1 = std::make_shared<bt::Blackboard>();
 	bb1->SetInt("ROBOT_ID", 0);
 	bb1->SetInt("theirID", 1);
+	bb1->SetDouble("distanceFromPoint", 0.3);
 	bb1->SetString("whichTeam", "us");
 
 	rtt::StandFree standFree(n, "", bb1);
