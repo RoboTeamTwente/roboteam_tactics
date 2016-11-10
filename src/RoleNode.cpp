@@ -88,25 +88,19 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
         currentTree = tree;
     } else if (rtt::allskills_set.find(msg->tree) != rtt::allskills_set.end()) {
-        std::cout << "Executing a skill!\n";
         bb = std::make_shared<bt::Blackboard>();
         bb->fromMsg(msg->blackboard);
         currentTree = rtt::make_skill(n, msg->tree, "", bb);
-        std::cout << "Made the skill!\n";
     } else {
         std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
+        return;
     }
 
-    std::cout << "Getting the robot...\n";
     currentToken = msg->token;
-    std::cout << "Got the token\n";
-    std::cout << "Pointer: " << bb << "\n";
     if (bb->HasInt("ROBOT_ID")) {
-        std::cout << "Getting the actual id\n";
         currentRobotID = bb->GetInt("ROBOT_ID");
     }
 
-    std::cout << "Got the robot\n";
     sendNextSuccess = true;
 
     std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << ". My robot is: " << bb->GetInt("ROBOT_ID") << "\n";
@@ -154,7 +148,7 @@ int main(int argc, char *argv[]) {
                 (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid)) {
-            std::cout << "Sending feedback!\n";
+            std::cout << "Finished a RoleDirective. Sending feedback\n";
 
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;
