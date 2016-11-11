@@ -41,6 +41,12 @@ function makeIncludeList {
 
 	makeIncludeList alltactics.h "tactics/*.h" TACTICS generated
 
+	make_typename_preamble typename_map.h rtt
+        make_typename_funcs "conditions/*.h" typename_map.h
+        make_typename_funcs "skills/*.h" typename_map.h
+        make_typename_funcs "tactics/*.h" typename_map.h
+        make_typename_postamble typename_map.h
+
     # 
     # Make skill factory
     # TODO: Factor this out in something generic...? Only if needed

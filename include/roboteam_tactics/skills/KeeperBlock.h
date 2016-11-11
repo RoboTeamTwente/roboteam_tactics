@@ -22,6 +22,8 @@ class KeeperBlock : public Skill {
         return params;
     }
 
+
+    std::string node_name() { return "KeeperBlock"; }
     protected:
     std::shared_ptr<Block> impl;
     unsigned int target;

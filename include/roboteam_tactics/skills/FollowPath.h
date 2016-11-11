@@ -28,6 +28,8 @@ public:
         params["wgoal"] = BBArgumentType::Double;
         return params;
     }
+    
+    std::string node_name() { return "FollowPath"; }
 private:
 
     enum FPState { COMPUTE, GOTO, CHECK };

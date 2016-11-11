@@ -19,6 +19,8 @@ set(CMAKE_CXX_FLAGS "\
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
+-fmax-errors=1 \
+-g \
 ")
 
 catkin_package()

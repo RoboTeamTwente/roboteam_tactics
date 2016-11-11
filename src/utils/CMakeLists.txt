@@ -6,6 +6,7 @@ add_library(utils
     RobotDealer.cpp
     utils.cpp
     NodeFactory.cpp
+    BTRunner.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

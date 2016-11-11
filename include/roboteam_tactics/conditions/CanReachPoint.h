@@ -19,6 +19,8 @@ public:
     roboteam_utils::Vector2 ComputeMaxAcceleration(double angle, roboteam_utils::Vector2 maxAcc);
     double cleanAngle(double angle);
     Status Update();
+    
+    std::string node_name() { return "CanReachPoint"; }
 private:
 };
     

@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include <cstdio>
+#include <cstdarg>
 
 #include "Blackboard.hpp"
 
@@ -52,9 +54,21 @@ public:
     using Ptr = std::shared_ptr<Node>;
 
     bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
+    
+    virtual std::string node_name() { return "<ERROR>"; };
+    static std::string status_desc;
 
 protected:
     Status status = Status::Invalid;
+    static void append_status(std::string fmt, ...) {
+        char buf[1024];
+        va_list varargs;
+        va_start(varargs, fmt);
+        vsnprintf(buf, 1024, fmt.c_str(), varargs);
+        va_end(varargs);
+        
+        status_desc += std::string(buf);
+    }
 };
 
 using Nodes = std::vector<Node::Ptr>;
