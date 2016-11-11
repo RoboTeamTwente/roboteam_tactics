@@ -47,32 +47,25 @@ bt::Node::Status AimAt::Update (){
 		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
 		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
 	
-	}
-	else if(destination=="theirgoal"){
-		// assume yellow always scores left (x negative), blue always scores right (x positive)
-		std::string ourcolor;
-		n.getParam("our_color",  ourcolor);
-		if(ourcolor == "yellow"){
+	} else if(destination=="theirgoal"){
+		std::string our_side;
+		n.getParam("our_side",  our_side);
+		if(our_side == "right"){
 			passTo=roboteam_utils::Vector2(-3.0,0.0);
-		}
-		else if(ourcolor == "blue"){
+		} else if(our_side == "left"){
 			passTo=roboteam_utils::Vector2(3.0,0.0);
-		}
-		else {
+		} else {
 			ROS_ERROR("Could not determine goal side");
 		}
-	}
-	else if(destination=="ourgoal"){
+	} else if(destination=="ourgoal"){
 		// assume yellow always scores left (x negative), blue always scores right (x positive)
-		std::string ourcolor;
-		n.getParam("our_color", ourcolor);
-		if(ourcolor == "yellow"){
+		std::string our_side;
+		n.getParam("our_color", our_side);
+		if(our_side == "right"){
 			passTo=roboteam_utils::Vector2(3.0,0.0);
-		}
-		else if(ourcolor == "blue"){
+		} else if(our_side == "left"){
 			passTo=roboteam_utils::Vector2(-3.0,0.0);
-		}
-		else {
+		} else {
 			ROS_ERROR("Could not determine goal side");
 		}
 	}
