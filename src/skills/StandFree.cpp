@@ -61,6 +61,19 @@ bt::Node::Status StandFree::Update() {
     	}
     }
 
+    for (size_t i = 0; i < (world.us.size()+world.them.size()); i++) {
+    	if (i < world.us.size()) {
+    		if ((world.us.at(i).pos - theirPos).length < (myPos-theirPos).length()) {
+    			roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
+    		}
+    	} else {
+    		int j = i-world.us.size();
+    		if ((world.them.at(j).pos - theirPos).length < (myPos-theirPos).length()) {
+    			roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.us.at(j).pos.x, world.us.at(j).pos.y);
+    		}
+    	}
+    }
+
     roboteam_utils::Vector2 nearestFreePos = myPos;
 	if (robotsInTheWay.size() == 1) {
     	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(0).pos.x, robotsInTheWay.at(0).pos.y);
