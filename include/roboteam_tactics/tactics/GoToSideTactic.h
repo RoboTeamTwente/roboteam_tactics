@@ -19,6 +19,8 @@ class GoToSideTactic : public Tactic {
     ros::NodeHandle n;
     ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 10);
 
+    
+    std::string node_name() { return "GoToSideTactic"; }
     private:
     std::vector<boost::uuids::uuid> tokens;
 } ;

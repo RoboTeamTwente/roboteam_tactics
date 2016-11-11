@@ -17,6 +17,8 @@ class CanPassSafely : public Condition {
 public:
     CanPassSafely(std::string name, bt::Blackboard::Ptr blackboard);  
     Status Update();
+    
+    std::string node_name() { return "CanPassSafely"; }
 private:
 };
     

@@ -17,7 +17,7 @@ public:
     void SetBlackboard(Blackboard::Ptr blackboard) { this->blackboard = blackboard; }
     
     virtual Status Update() = 0;
-
+    
 protected:
     Blackboard::Ptr blackboard;
 };

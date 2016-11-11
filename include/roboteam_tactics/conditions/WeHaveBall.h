@@ -11,6 +11,7 @@ class WeHaveBall : public Condition {
     ~WeHaveBall() { delete team; }
     Status Update() override;
     
+    std::string node_name() { return "WeHaveBall"; }
     private:
     TeamHasBall* team;
 };

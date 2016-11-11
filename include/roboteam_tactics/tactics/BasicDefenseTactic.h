@@ -10,6 +10,8 @@ class BasicDefenseTactic : public Tactic {
     BasicDefenseTactic(bt::Blackboard::Ptr blackboard = nullptr);
 
     Status Update();
+    
+    std::string node_name() { return "BasicDefenseTactic"; }
 } ;
 
 } // rtt

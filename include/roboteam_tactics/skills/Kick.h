@@ -19,7 +19,7 @@ public:
         params["ROBOT_ID"] = BBArgumentType::Int;
         return params;
     }
-
+    std::string node_name() { return "Kick"; }
 private:
 	ros::NodeHandle n;
 	ros::Publisher pubKick;

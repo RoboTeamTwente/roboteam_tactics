@@ -30,6 +30,8 @@ public:
         params["endPoint"] = BBArgumentType::Bool;
         return params;
     }
+    
+    std::string node_name() { return "GoToPos"; }
 private:
 	roboteam_msgs::World prevWorld;
     ros::NodeHandle n;

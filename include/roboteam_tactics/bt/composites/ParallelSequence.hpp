@@ -36,6 +36,7 @@ public:
         int totalFail = 0;
 
         for (auto &child : children) {
+            Node::append_status("[Parallel: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
             if (status == Status::Success) {
                 totalSuccess++;
@@ -54,6 +55,8 @@ public:
 
         return Status::Running;
     }
+    
+    std::string node_name() { return "ParallelSequence"; }
     
     using Ptr = std::shared_ptr<ParallelSequence>;
 
