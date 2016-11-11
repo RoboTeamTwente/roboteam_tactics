@@ -26,6 +26,7 @@ public:
         params["yGoal"] = BBArgumentType::Double;
         return params;
     }
+    std::string node_name() { return "AvoidRobots"; }
     
 private:
     ros::NodeHandle n;

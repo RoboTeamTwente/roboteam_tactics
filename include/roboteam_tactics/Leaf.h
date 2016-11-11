@@ -6,6 +6,15 @@
 
 namespace rtt {
 
+enum class BlackboardPolicy {
+    GLOBAL_FIRST,
+    PRIVATE_FIRST,
+    GLOBAL_ONLY,
+    PRIVATE_ONLY
+};    
+  
+constexpr BlackboardPolicy DEFAULT_BB_POLICY = BlackboardPolicy::GLOBAL_FIRST;
+  
 class Leaf : public bt::Leaf {
     public:
     
@@ -103,24 +112,164 @@ class Leaf : public bt::Leaf {
 
     // Proxies that prefix an id for lookups in the global table.
     inline void SetBool(std::string key, bool value) { blackboard->SetBool(getPrefixedId(key), value); }
-    inline bool GetBool(std::string key) { return blackboard->GetBool(getPrefixedId(key)); }
-    inline bool HasBool(std::string key) const { return blackboard->HasBool(getPrefixedId(key)); }
+    inline bool GetBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) { 
+        std::string real_key = getPrefixedId(key);
+        switch (policy) {
+            case BlackboardPolicy::GLOBAL_FIRST:
+            if (blackboard->HasBool(real_key)) {
+                return blackboard->GetBool(real_key);
+            }
+            case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
+            return private_bb->GetBool(real_key);
+ 
+            case BlackboardPolicy::PRIVATE_FIRST:
+            if (private_bb->HasBool(real_key)) {
+                return private_bb->GetBool(real_key);
+            }
+            case BlackboardPolicy::GLOBAL_ONLY:
+            return blackboard->GetBool(real_key);
+            default:
+            throw std::logic_error("Something really bad happened in GetBool...");
+        }
+    }
+    inline bool HasBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const { 
+        std::string real_key = getPrefixedId(key);
+        if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
+            return blackboard->HasBool(real_key) || private_bb->HasBool(real_key);
+        }
+        if (policy == BlackboardPolicy::GLOBAL_ONLY) {
+            return blackboard->HasBool(real_key);
+        }
+        return private_bb->HasBool(real_key);
+    }
 
     inline void SetInt(std::string key, int value)  { blackboard->SetInt(getPrefixedId(key), value); }
-    inline int GetInt(std::string key) { return blackboard->GetInt(getPrefixedId(key)); }
-    inline bool HasInt(std::string key) const  { return blackboard->HasInt(getPrefixedId(key)); }
+    inline int GetInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) { 
+        std::string real_key = getPrefixedId(key);
+        switch (policy) {
+            case BlackboardPolicy::GLOBAL_FIRST:
+            if (blackboard->HasInt(real_key)) {
+                return blackboard->GetInt(real_key);
+            }
+            case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
+            return private_bb->GetInt(real_key);
+ 
+            case BlackboardPolicy::PRIVATE_FIRST:
+            if (private_bb->HasInt(real_key)) {
+                return private_bb->GetInt(real_key);
+            }
+            case BlackboardPolicy::GLOBAL_ONLY:
+            return blackboard->GetInt(real_key);
+            default:
+            throw std::logic_error("Something really bad happened in GetInt...");
+        }
+    }
+    inline int HasInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const { 
+        std::string real_key = getPrefixedId(key);
+        if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
+            return blackboard->HasInt(real_key) || private_bb->HasInt(real_key);
+        }
+        if (policy == BlackboardPolicy::GLOBAL_ONLY) {
+            return blackboard->HasInt(real_key);
+        }
+        return private_bb->HasInt(real_key);
+    }
 
     inline void SetFloat(std::string key, float value)  { blackboard->SetFloat(getPrefixedId(key), value); }
-    inline float GetFloat(std::string key) { return blackboard->GetFloat(getPrefixedId(key)); }
-    inline bool HasFloat(std::string key) const  { return blackboard->HasFloat(getPrefixedId(key)); }
-
+    inline float GetFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) { 
+        std::string real_key = getPrefixedId(key);
+        switch (policy) {
+            case BlackboardPolicy::GLOBAL_FIRST:
+            if (blackboard->HasFloat(real_key)) {
+                return blackboard->GetFloat(real_key);
+            }
+            case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
+            return private_bb->GetFloat(real_key);
+ 
+            case BlackboardPolicy::PRIVATE_FIRST:
+            if (private_bb->HasFloat(real_key)) {
+                return private_bb->GetFloat(real_key);
+            }
+            case BlackboardPolicy::GLOBAL_ONLY:
+            return blackboard->GetFloat(real_key);
+            default:
+            throw std::logic_error("Something really bad happened in GetFloat...");
+        }
+    }   
+    inline float HasFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const { 
+        std::string real_key = getPrefixedId(key);
+        if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
+            return blackboard->HasFloat(real_key) || private_bb->HasFloat(real_key);
+        }
+        if (policy == BlackboardPolicy::GLOBAL_ONLY) {
+            return blackboard->HasFloat(real_key);
+        }
+        return private_bb->HasFloat(real_key);
+    }
+    
     inline void SetDouble(std::string key, double value)  { blackboard->SetDouble(getPrefixedId(key), value); }
-    inline double GetDouble(std::string key) { return blackboard->GetDouble(getPrefixedId(key)); }
-    inline bool HasDouble(std::string key) const  { return blackboard->HasDouble(getPrefixedId(key)); }
+    inline double GetDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) { 
+        std::string real_key = getPrefixedId(key);
+        switch (policy) {
+            case BlackboardPolicy::GLOBAL_FIRST:
+            if (blackboard->HasDouble(real_key)) {
+                return blackboard->GetDouble(real_key);
+            }
+            case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
+            return private_bb->GetDouble(real_key);
+ 
+            case BlackboardPolicy::PRIVATE_FIRST:
+            if (private_bb->HasDouble(real_key)) {
+                return private_bb->GetDouble(real_key);
+            }
+            case BlackboardPolicy::GLOBAL_ONLY:
+            return blackboard->GetDouble(real_key);
+            default:
+            throw std::logic_error("Something really bad happened in GetDouble...");
+        }
+    }
+    inline bool HasDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const { 
+        std::string real_key = getPrefixedId(key);
+        if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
+            return blackboard->HasDouble(real_key) || private_bb->HasDouble(real_key);
+        }
+        if (policy == BlackboardPolicy::GLOBAL_ONLY) {
+            return blackboard->HasDouble(real_key);
+        }
+        return private_bb->HasDouble(real_key);
+    }
 
     inline void SetString(std::string key, std::string value)  { blackboard->SetString(getPrefixedId(key), value); }
-    inline std::string GetString(std::string key) { return blackboard->GetString(getPrefixedId(key)); }
-    inline bool HasString(std::string key) const  { return blackboard->HasString(getPrefixedId(key)); }
+    inline std::string GetString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) { 
+        std::string real_key = getPrefixedId(key);
+        switch (policy) {
+            case BlackboardPolicy::GLOBAL_FIRST:
+            if (blackboard->HasString(real_key)) {
+                return blackboard->GetString(real_key);
+            }
+            case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
+            return private_bb->GetString(real_key);
+ 
+            case BlackboardPolicy::PRIVATE_FIRST:
+            if (private_bb->HasString(real_key)) {
+                return private_bb->GetString(real_key);
+            }
+            case BlackboardPolicy::GLOBAL_ONLY:
+            return blackboard->GetString(real_key);
+            default:
+            throw std::logic_error("Something really bad happened in GetString...");
+        }
+    }
+    inline bool HasString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const { 
+        std::string real_key = getPrefixedId(key);
+        if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
+            return blackboard->HasString(real_key) || private_bb->HasString(real_key);
+        }
+        if (policy == BlackboardPolicy::GLOBAL_ONLY) {
+            return blackboard->HasString(real_key);
+        }
+        return private_bb->HasString(real_key);
+    }
     
     std::string getPrefixedId(std::string id) const {
         if (name.empty()) {

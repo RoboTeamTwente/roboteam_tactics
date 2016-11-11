@@ -26,6 +26,7 @@ public:
         return params;
     }*/
     
+    std::string node_name() { return "DribbleCurve"; }
 private:
 	ros::NodeHandle n;
 	ros::Publisher pubDribbleCurve;

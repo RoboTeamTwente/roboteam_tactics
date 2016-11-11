@@ -1,4 +1,5 @@
 
+
 {
   "id": "9ee975b6-9edd-489f-8219-9febcb9157f8",
   "title": "BounceBall",
@@ -9,7 +10,7 @@
     "34b60c3d-0d7e-4c5e-a983-3ae8a696bc1c": {
       "id": "34b60c3d-0d7e-4c5e-a983-3ae8a696bc1c",
       "name": "RepeatUntilFailure",
-      "title": "repeater",
+      "title": "ruf",
       "description": "",
       "properties": {
         "maxLoop": -1
@@ -23,7 +24,7 @@
     "3c80f0d3-05ab-4a84-b15e-7817c530f717": {
       "id": "3c80f0d3-05ab-4a84-b15e-7817c530f717",
       "name": "Sequence",
-      "title": "main_seq",
+      "title": "seq",
       "description": "",
       "properties": {},
       "display": {
@@ -71,10 +72,10 @@
       "title": "get_ball",
       "description": "",
       "properties": {
-        "getBallAtX": -1,
-        "getBallAtY": -1,
-        "getBallAtTime": -1,
-        "intercept": "false"
+        "getBallAtX": 0,
+        "getBallAtY": 0,
+        "getBallAtTime": 0,
+        "intercept": "true"
       },
       "display": {
         "x": 156,
@@ -84,10 +85,10 @@
     "6abcd67e-38d4-47be-8c46-66dc4dee2af9": {
       "id": "6abcd67e-38d4-47be-8c46-66dc4dee2af9",
       "name": "AimAt",
-      "title": "aim",
+      "title": "rotate",
       "description": "",
       "properties": {
-        "At": "theirgoal"
+        "At": "ourgoal"
       },
       "display": {
         "x": 48,

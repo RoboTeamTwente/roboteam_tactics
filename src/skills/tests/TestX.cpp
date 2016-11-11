@@ -7,6 +7,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/utils/NodeFactory.h"
+#include "roboteam_tactics/utils/BTRunner.h"
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -123,20 +124,23 @@ How to use:
         }
     }
     
-    rtt::print_blackboard(bb);
-
     //auto skill = rtt::make_skill<>(n, testClass, "", bb);
     rtt::print_blackboard(bb);
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
 
-    bool break_on_success = dynamic_cast<rtt::Skill*>(&(*node));
+    bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
     
-    while (ros::ok()) {
-        ros::spinOnce();
-        if (break_on_success && node->Update() == bt::Node::Status::Success) {
-            break;
-        }
+    if (is_bt) {
+        rtt::BTRunner runner(*is_bt, true);
+        runner.run_until([]() { ros::spinOnce(); return ros::ok(); });
+    } else {
+        while (ros::ok()) {
+            ros::spinOnce();
+            if (node->Update() == bt::Node::Status::Success) {
+                break;
+            }
+        }   
     }
 
     std::cout << "Test of " << testClass << " completed!\n";

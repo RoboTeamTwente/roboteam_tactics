@@ -14,6 +14,7 @@ class Inverter : public Decorator
 public:
     Status Update() override
     {
+        Node::append_status("[Inverter: executing child of type %s]", child->node_name().c_str());
         auto s = child->Tick();
 
         if (s == Status::Success) {
@@ -25,6 +26,7 @@ public:
 
         return s;
     }
+    std::string node_name() { return "Inverter"; }
 };
 
 }

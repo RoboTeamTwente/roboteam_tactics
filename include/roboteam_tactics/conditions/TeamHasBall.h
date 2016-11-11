@@ -15,6 +15,7 @@ public:
     TeamHasBall(std::string name, bt::Blackboard::Ptr blackboard);
     Status Update() override;
     
+    std::string node_name() { return "TeamHasBall"; }
 private:
     bool our_team;
 };
