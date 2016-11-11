@@ -31,7 +31,7 @@ bt::Node::Status AimAt::Update (){
 	// printf("%s\n", destination1.c_str());
 
 	if (world.us.size() == 0) {
-		ROS_INFO("No information about the world state :(");
+		//ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
@@ -47,26 +47,29 @@ bt::Node::Status AimAt::Update (){
 		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
 		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
 	
-	} else if(destination=="theirgoal"){
-		std::string our_side;
-		n.getParam("our_side",  our_side);
-		if(our_side == "right"){
-			passTo=roboteam_utils::Vector2(-3.0,0.0);
-		} else if(our_side == "left"){
-			passTo=roboteam_utils::Vector2(3.0,0.0);
+
+	}else if(destination=="theirgoal"){
+        std::string our_field_side = "left";
+        n.getParam("our_field_side", our_field_side);
+
+        auto field = LastWorld::get_field();
+
+		if(our_field_side == "left"){
+			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
+
 		} else {
-			ROS_ERROR("Could not determine goal side");
+			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}
 	} else if(destination=="ourgoal"){
-		// assume yellow always scores left (x negative), blue always scores right (x positive)
-		std::string our_side;
-		n.getParam("our_color", our_side);
-		if(our_side == "right"){
-			passTo=roboteam_utils::Vector2(3.0,0.0);
-		} else if(our_side == "left"){
-			passTo=roboteam_utils::Vector2(-3.0,0.0);
+        std::string our_field_side = "left";
+        n.getParam("our_field_side", our_field_side);
+
+        auto field = LastWorld::get_field();
+
+		if(our_field_side == "right"){
+			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
 		} else {
-			ROS_ERROR("Could not determine goal side");
+			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}
 	}
 	

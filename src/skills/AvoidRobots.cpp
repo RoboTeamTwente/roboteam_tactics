@@ -56,7 +56,7 @@ bt::Node::Status AvoidRobots::Update (){
     bb2->SetBool("check_move", true);
 
     // Set angleGoal such that you're always driving forwards, unless you're close to the target position
-    if (posError.length() > 0.5) {
+    if (posError.length() > 1.0) {
         angleGoal = posError.angle();
     }
 
@@ -90,7 +90,7 @@ bt::Node::Status AvoidRobots::Update (){
         requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
         requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
 
-        if (posError.length() < 0.01 && rotError < 0.005) {
+        if (posError.length() < 0.01 && fabs(rotError) < 0.005) {
             roboteam_msgs::RobotCommand command;
             command.id = robotID;
             command.x_vel = 0.0;

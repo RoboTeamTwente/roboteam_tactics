@@ -27,6 +27,8 @@ public:
     
     std::vector<roboteam_msgs::World> success_states() const override;
     std::vector<roboteam_msgs::World> fail_states() const override;
+    
+    std::string node_name() { return "IHaveBall"; }
 private:
     int me;
     bool us;

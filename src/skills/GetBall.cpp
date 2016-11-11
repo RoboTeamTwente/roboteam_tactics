@@ -4,6 +4,7 @@
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/Parts.h"
@@ -30,6 +31,7 @@ GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackb
 }
 
 int GetBall::whichRobotHasBall() {
+    /*
 	roboteam_msgs::World world = LastWorld::get();
 	for (size_t i=0; i < world.us.size(); i++) {
 		auto bb2 = std::make_shared<bt::Blackboard>();
@@ -52,6 +54,14 @@ int GetBall::whichRobotHasBall() {
 		}
 	}
 	return -1;
+    */
+    auto holder = getBallHolder();
+    if (!holder) {
+        return -1;
+    }
+    ROS_INFO("Holder: %d - %d", holder->first.id, holder->second);
+    our_team = holder->second;
+    return holder->first.id;
 }
 
 InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, double getBallAtTime) {

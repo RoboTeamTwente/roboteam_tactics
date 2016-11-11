@@ -6,6 +6,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -23,6 +24,7 @@ class CanSeePoint : public Condition {
     
     CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard);
     Status Update() override;
+    std::string node_name() { return "CanSeePoint"; }
     
     protected:
     double threshold_dist;
@@ -57,12 +59,14 @@ class CanSeeGoal : public CanSeePoint {
         if (goal_a->Update() == Status::Success || goal_b->Update() == Status::Success) {
             return Status::Success;
         }
-        if (goal_a->Update() == Status::Invalid || goal_b->Update() == Status::Invalid) {
+        /*if (goal_a->Update() == Status::Invalid || goal_b->Update() == Status::Invalid) {
             return Status::Invalid;
-        }
+        }*/
         return Status::Failure;
     }
         
+        
+    std::string node_name() { return "CanSeeGoal"; }
     static VerificationMap required_params() { return CanSeePoint::required_params(); }
     
     private:

@@ -1,0 +1,149 @@
+#include "ros/ros.h"
+#include "roboteam_tactics/skills/StandFree.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_msgs/WorldRobot.h"
+#include <vector>
+
+namespace rtt {
+
+StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(n, name, blackboard)
+        , avoidRobots(n, "", private_bb) {
+
+}
+
+bt::Node::Status StandFree::Update() {
+	// Get world and blackboard information
+	roboteam_msgs::World world = LastWorld::get();
+	int myID = GetInt("ROBOT_ID");
+	int theirID = GetInt("theirID");
+	double distanceFromPoint = GetDouble("distanceFromPoint");
+
+	roboteam_msgs::WorldRobot myRobot = world.us.at(myID);
+	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);
+	double myAngle = world.us.at(myID).angle;
+
+	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(world.ball.pos.x, world.ball.pos.y);
+	roboteam_utils::Vector2 theirPos;
+	double theirAngle;
+	if (GetString("whichTeam") == "us") {
+		theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos.x, world.us.at(theirID).pos.y); 
+		theirAngle = world.us.at(theirID).angle;
+	} else if (GetString("whichTeam") == "them") {
+		theirPos = roboteam_utils::Vector2(world.them.at(theirID).pos.x, world.them.at(theirID).pos.y); 
+		theirAngle = world.them.at(theirID).angle;
+	} else {
+		ROS_WARN("No team specified...");
+	}
+
+	auto bb2 = std::make_shared<bt::Blackboard>();
+    bb2->SetInt("me", myID);
+    bb2->SetDouble("x_coor", theirPos.x);
+    bb2->SetDouble("y_coor", theirPos.y);
+    bb2->SetBool("check_move", true);
+	CanSeePoint canSeePoint("", bb2);
+    if (canSeePoint.Update() == Status::Success) {
+    	// I can already see him
+    	// ROS_INFO("I can already see him, you n00b");
+    } else {
+    	// ROS_INFO("Can't see him...");
+    }
+
+    // std::vector<roboteam_msgs::WorldRobot> robotsInTheWay = getObstacles(myRobot, theirPos, &world, false);
+    // for (size_t i = 0; i < robotsInTheWay.size(); i++) {
+    // 	if (robotsInTheWay.at(i).id == theirID) {
+    // 		robotsInTheWay.erase(robotsInTheWay.begin()+i);
+    // 	}
+    // }
+
+    std::vector<roboteam_utils::Vector2> robotsInTheWay;
+    for (size_t i = 0; i < (world.us.size()+world.them.size()); i++) {
+    	if (i < world.us.size()) {
+            if (!(GetString("whichTeam") == "us" && theirID == i)) {
+                roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
+                if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
+                    robotsInTheWay.push_back(robotPos);
+                }
+            }
+    	} else {
+            int j = i-world.us.size();
+            if (!(GetString("whichTeam") == "them" && theirID == j)) {
+                roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.them.at(j).pos.x, world.them.at(j).pos.y);
+                if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
+                    robotsInTheWay.push_back(robotPos);
+                }
+            }
+    	}
+    }
+
+    ROS_INFO_STREAM("size of robotsInTheWay: " << robotsInTheWay.size());
+
+    roboteam_utils::Vector2 nearestFreePos = myPos;
+    for (int i = 0; i < robotsInTheWay.size(); i++) {
+        ROS_INFO_STREAM("i: " << i);
+        Cone cone(theirPos, robotsInTheWay.at(i), distanceFromPoint);
+        if (cone.IsWithinCone(myPos)) {
+            for (int j = 0; j < robotsInTheWay.size(); j++) {
+                ROS_INFO_STREAM("j: " << j);
+                if (i!=j) {
+                    Cone cone2(theirPos, robotsInTheWay.at(j), distanceFromPoint);
+                    if (cone.DoConesOverlap(cone2)) {
+                        cone = cone.MergeCones(cone2);
+                        robotsInTheWay.erase(robotsInTheWay.begin()+j);
+                        ROS_INFO_STREAM("merged " << i << " with " << j);
+                    }
+                }
+            }
+            ROS_INFO_STREAM("done merging");
+            nearestFreePos = cone.ClosestPointOnSide(myPos);
+            break;
+        }
+    }
+    
+
+ //    roboteam_utils::Vector2 nearestFreePos = myPos;
+	// if (robotsInTheWay.size() == 1) {
+ //    	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(0).pos.x, robotsInTheWay.at(0).pos.y);
+	// 	Cone cone(theirPos, robotInTheWayPos, distanceFromPoint);
+	// 	if (cone.IsWithinCone(myPos)) {
+	// 		nearestFreePos = cone.ClosestPointOnSide(nearestFreePos);
+	// 	}
+ //    } else if (robotsInTheWay.size() > 1) {
+ //    	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(0).pos.x, robotsInTheWay.at(0).pos.y);
+	// 	Cone cone(theirPos, robotInTheWayPos, distanceFromPoint);
+ //    	int i = 0;
+ //    	ROS_INFO("starting merge");
+ //    	while (robotsInTheWay.size() > 0) {
+ //    		roboteam_utils::Vector2 robotInTheWayPos2 = roboteam_utils::Vector2(robotsInTheWay.at(i).pos.x, robotsInTheWay.at(i).pos.y);
+	// 		Cone cone2(theirPos, robotInTheWayPos2, distanceFromPoint);
+ //    		if (cone.DoConesOverlap(cone2)) {
+ //    			cone = cone.MergeCones(cone2);
+ //    			robotsInTheWay.erase(robotsInTheWay.begin()+i);
+ //    		} else {
+ //    			ROS_INFO("nope");
+ //    		}
+ //    		i++;
+ //    		if (i >= robotsInTheWay.size()) {i = 0;}
+ //    	}
+ //    	ROS_INFO("merge finished!");
+ //    	if (cone.IsWithinCone(myPos)) {
+	// 		nearestFreePos = cone.ClosestPointOnSide(nearestFreePos);
+	// 	}
+ //    }
+
+    double angleGoal = (theirPos-myPos).angle();
+    private_bb->SetInt("ROBOT_ID", myID);
+    private_bb->SetDouble("xGoal", nearestFreePos.x);
+    private_bb->SetDouble("yGoal", nearestFreePos.y);
+    private_bb->SetDouble("angleGoal", angleGoal);
+    avoidRobots.Update();
+    
+    return Status::Running;
+}
+
+} // rtt

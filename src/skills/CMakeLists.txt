@@ -11,6 +11,7 @@ add_library(skills
     Kick.cpp
     KeeperBlock.cpp
     SecondaryKeeper.cpp
+    StandFree.cpp
     )
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

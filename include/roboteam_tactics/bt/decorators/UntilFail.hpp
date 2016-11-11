@@ -14,6 +14,7 @@ public:
     Status Update() override
     {
         while (1) {
+            Node::append_status("[UntilFail: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
 
             if (status == Status::Failure) {
@@ -23,6 +24,7 @@ public:
             }
         }
     }
+    std::string node_name() { return "UntilFail"; }
 };
 
 }

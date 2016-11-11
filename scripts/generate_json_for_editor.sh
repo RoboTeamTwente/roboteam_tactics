@@ -46,6 +46,8 @@ for f in ./include/roboteam_tactics/tactics/*.h; do
 	entry $name action
 done
 
+entry ParallelTactic composite
+
 result=$(join_by , "${allNodes[@]}")
 
 printf "[\n" > $dstFile

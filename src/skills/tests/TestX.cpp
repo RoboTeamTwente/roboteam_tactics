@@ -4,7 +4,10 @@
 
 #include "ros/ros.h"
 
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/utils/NodeFactory.h"
+#include "roboteam_tactics/utils/BTRunner.h"
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -30,11 +33,7 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 }
 
 int main(int argc, char **argv) {
-    srand(time(0));
-    int id = rand();
-    char buf[30];
-    snprintf(buf, 30, "TestX_%d", id);
-	ros::init(argc, argv, buf, ros::init_options::AnonymousName);
+	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();
@@ -124,15 +123,24 @@ How to use:
             std::cout << "Unknown arg type: " << argType << "\n";
         }
     }
-
-    auto skill = rtt::make_skill<>(n, testClass, "", bb);
+    
+    //auto skill = rtt::make_skill<>(n, testClass, "", bb);
+    rtt::print_blackboard(bb);
+    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
 
-    while (ros::ok()) {
-        ros::spinOnce();
-        if (skill->Update() == bt::Node::Status::Success) {
-            break;
-        }
+    bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
+    
+    if (is_bt) {
+        rtt::BTRunner runner(*is_bt, true);
+        runner.run_until([]() { ros::spinOnce(); return ros::ok(); });
+    } else {
+        while (ros::ok()) {
+            ros::spinOnce();
+            if (node->Update() == bt::Node::Status::Success) {
+                break;
+            }
+        }   
     }
 
     std::cout << "Test of " << testClass << " completed!\n";

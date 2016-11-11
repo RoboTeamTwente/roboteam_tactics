@@ -12,6 +12,7 @@
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/Math.h";
@@ -22,7 +23,6 @@ RotateAroundPoint::RotateAroundPoint(ros::NodeHandle n, std::string name, bt::Bl
         : Skill(n, name, blackboard) {
 
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-        
 }
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -65,7 +65,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 	// double:faceTowardsPosy=				//
 	// double:w= (rotation speed (pick 2))	//
 	//**************************************//
-	
 	
 	
 	// int robotID2 = GetInt("ROBOT_ID");

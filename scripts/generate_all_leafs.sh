@@ -15,6 +15,8 @@ assert_tactics_root
 # $3 - what to call the set variable
 # $4 - the destination folder
 function makeIncludeList {
+    mkdir -p $4
+
     printf "#pragma once\n" > $4/$1
     for f in $2; do
         printf "#include \"roboteam_tactics/$f\"\n" >> $4/$1
@@ -31,11 +33,19 @@ function makeIncludeList {
 	# in case of an empty directory
 	shopt -s nullglob
 
+    mkdir -p generated
+
 	makeIncludeList allconditions.h "conditions/*.h" CONDITIONS generated
 
 	makeIncludeList allskills.h "skills/*.h" SKILLS generated
 
 	makeIncludeList alltactics.h "tactics/*.h" TACTICS generated
+
+	make_typename_preamble typename_map.h rtt
+        make_typename_funcs "conditions/*.h" typename_map.h
+        make_typename_funcs "skills/*.h" typename_map.h
+        make_typename_funcs "tactics/*.h" typename_map.h
+        make_typename_postamble typename_map.h
 
     # 
     # Make skill factory

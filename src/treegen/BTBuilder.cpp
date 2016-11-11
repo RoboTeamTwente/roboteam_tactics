@@ -59,10 +59,11 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
-        << "(ros::NodeHandle n) {" 
+        << "(ros::NodeHandle n, bt::Blackboard* blackboard) {" 
         << std::endl; 
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
+    out << DINDENT << "if(blackboard) merge_blackboards(bb, std::make_shared<bt::Blackboard>(*blackboard));" << std::endl;
 
     nlohmann::json root = nodes[json["root"]];
     defines(root);
@@ -77,16 +78,28 @@ std::string BTBuilder::build(nlohmann::json json) {
 
 void BTBuilder::define_seq(std::string name) {
     std::string memSeqName = "MemSequence";
+    std::string parallelSeqName = "ParallelSequence";
+    std::string ParallelTacticName = "ParallelTactic";
     std::string type = "bt::Sequence";
+    std::string params = "";
+
     if (name.compare(0, memSeqName.length(), memSeqName) == 0) {
         // It's a mem sequence
         type = "bt::MemSequence";
+    } else if (name.compare(0, parallelSeqName.length(), parallelSeqName) == 0) {
+        type = "bt::ParallelSequence";
+        // Need all to succeed, one to fail. See ParallelSequence.hpp
+        params = "true, false";
+    } else if (name.compare(0, ParallelTacticName.length(), ParallelTacticName) == 0) {
+        type = "rtt::ParallelTactic";
+        // Need all to succeed, one to fail. See ParallelTactic.hpp
+        params = "true, false";
     } else {
         // It's a regular sequence
         type = "bt::Sequence";
     }
 
-    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">();\n";
+    out << DINDENT << "auto " << name << " = std::make_shared<" << type << ">(" << params << ");\n";
 }
 
 void BTBuilder::define_sel(std::string name) {
@@ -171,7 +184,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         define_nod(jsonData["title"], jsonData["name"]);
         break;
     }
-
+    
     // Add properties to private blackboard if needed
     std::unordered_map<std::string, json> properties = jsonData["properties"];
     if (properties.size() > 0) {
@@ -179,7 +192,8 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_string()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetString(\""
+                    << "->private_bb->SetString(std::string("
+                    << jsonData["title"] << ")+\"_"
                     << property.first
                     << "\", \""
                     << property.second.get<std::string>()
@@ -189,7 +203,8 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_number()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetDouble(\""
+                    << "->private_bb->SetDouble(std::string("
+                    << jsonData["title"] << ")+\"_"
                     << property.first
                     << "\", "
                     << property.second.get<double>()
@@ -199,7 +214,8 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_boolean()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetBool(\""
+                    << "->private_bb->SetBool(std::string("
+                    << jsonData["title"] << ")+\"_"
                     << property.first
                     << "\", "
                     << (property.second.get<bool>() ? "true" : "false")
@@ -235,7 +251,10 @@ NodeType BTBuilder::determine_type(nlohmann::json json) {
 
     if (name == "Priority" || name == "MemPriority") {
         return SELECTOR;
-    } else if (name == "Sequence" || name == "MemSequence") {
+    } else if (name == "Sequence" 
+            || name == "MemSequence"
+            || name == "ParallelSequence"
+            || name == "ParallelTactic") {
         return SEQUENCE;
     } else if (json.find("child") != json.end()) {
         return DECORATOR;

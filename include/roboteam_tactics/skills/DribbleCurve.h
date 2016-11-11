@@ -26,6 +26,7 @@ public:
         return params;
     }*/
     
+    std::string node_name() { return "DribbleCurve"; }
 private:
 	bool goal1reached=false;
 	ros::NodeHandle n;

@@ -11,6 +11,7 @@ class SecondaryKeeper : public KeeperBlock {
     
     boost::optional<roboteam_msgs::WorldRobot> select_target() const override;
     
+    std::string node_name() { return "SecondaryKeeper"; }
     static VerificationMap required_params() {
         VerificationMap params;
         params["keeper"] = BBArgumentType::Int;

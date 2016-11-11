@@ -25,6 +25,7 @@ public:
         params["goaly"] = BBArgumentType::Double;
         return params;
     }
+    std::string node_name() { return "Dribble"; }
     
 private:
 	ros::NodeHandle n;

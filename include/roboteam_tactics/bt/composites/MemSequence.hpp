@@ -23,6 +23,7 @@ public:
         // Keep going until a child behavior says it's running.
         while (1) {
             auto &child = children.at(index);
+            Node::append_status("[MemSequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
 
             // If the child fails, or keeps running, do the same.
@@ -37,6 +38,8 @@ public:
             }
         }
     }
+    
+    std::string node_name() { return "MemSequence"; }
     
     using Ptr = std::shared_ptr<MemSequence>;
 };

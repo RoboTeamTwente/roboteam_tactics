@@ -21,6 +21,7 @@ public:
     Status Update() override
     {
         while (1) {
+            Node::append_status("[Repeater: executing child of type %s]", child->node_name().c_str());
             auto s = child->Tick();
 
             if (s == Status::Running) {
@@ -38,6 +39,7 @@ public:
             child->Reset();
         }
     }
+    std::string node_name() { return "Repeater"; }
 
 protected:
     int limit;
