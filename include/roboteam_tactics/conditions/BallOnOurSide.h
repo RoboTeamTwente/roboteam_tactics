@@ -12,6 +12,7 @@ class BallOnOurSide : public Condition {
     
     Status Update() override;
 
+    std::string node_name() { return "BallOnOurSide"; }
     private:
     int count = 0;
 } ;

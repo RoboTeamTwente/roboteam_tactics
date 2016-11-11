@@ -34,6 +34,8 @@ public:
         params["getBallAtTime"] = BBArgumentType::Double;
         return params;
     }
+    
+    std::string node_name() { return "GetBall"; }
 private:
 	InterceptPose GetInterceptPos(double getBallAtX, double getBallAtY, double getBallAtTime);
 	// std::vector<roboteam_utils::Vector2> CircleIntersections(roboteam_utils::Vector2 center, double radius, roboteam_utils::Vector2 startLine, roboteam_utils::Vector2 endLine);
@@ -41,7 +43,7 @@ private:
 	int GetSign(double number);
 	int whichRobotHasBall();
 	int hasBall;
-	double acceptableDeviation = 0.2;
+	double acceptableDeviation = 2000;
 	roboteam_utils::Vector2 prevTargetPos;
 	double prevTargetAngle;
 	roboteam_msgs::RobotCommand prevCommand;

@@ -64,7 +64,7 @@ bool Cone::DoConesOverlap(Cone otherCone) {
 	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
 	double angleDiff1 = cone1Side1.angle() - cone2Side2.angle();
 	double angleDiff2 = cone1Side2.angle() - cone2Side1.angle();
-	ROS_INFO_STREAM("angleDiff1: " << angleDiff1 << " angleDiff2: " << angleDiff2);
+	// ROS_INFO_STREAM("angleDiff1: " << angleDiff1 << " angleDiff2: " << angleDiff2);
 	if (angleDiff1 > 0 && angleDiff2 > 0) {
 		return false;
 	} else if (angleDiff1 < 0 && angleDiff2 < 0) {
@@ -93,10 +93,10 @@ Cone Cone::MergeCones(Cone otherCone) {
 	double newRadius;
 	if (fabs(angleDiff1) > fabs(angleDiff2)) {
 		newCenter = cone2Side2.rotate(0.5*angleDiff1) + start;
-		newRadius = (otherCone.center - newCenter).length();
+		newRadius = (cone2Side2 - (newCenter-start)).length();
 	} else {
 		newCenter = cone2Side1.rotate(0.5*angleDiff2) + start;
-		newRadius = (center - newCenter).length();
+		newRadius = (cone2Side1 - (newCenter-start)).length();
 	}
 
 	Cone newCone(start, newCenter, newRadius);

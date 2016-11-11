@@ -59,6 +59,7 @@ public:
         params["invert_direction"] = BBArgumentType::Bool;
         return params;
     }
+    std::string node_name() { return "Block"; }
 private:
     BlockPos* pos;
     GoToPos* gtp;

@@ -1,0 +1,291 @@
+
+
+{
+  "id": "9ee975b6-9edd-489f-8219-9febcb9157f8",
+  "title": "BounceBall",
+  "description": "",
+  "root": "34b60c3d-0d7e-4c5e-a983-3ae8a696bc1c",
+  "properties": {},
+  "nodes": {
+    "34b60c3d-0d7e-4c5e-a983-3ae8a696bc1c": {
+      "id": "34b60c3d-0d7e-4c5e-a983-3ae8a696bc1c",
+      "name": "RepeatUntilFailure",
+      "title": "ruf",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": -384,
+        "y": -132
+      },
+      "child": "3c80f0d3-05ab-4a84-b15e-7817c530f717"
+    },
+    "3c80f0d3-05ab-4a84-b15e-7817c530f717": {
+      "id": "3c80f0d3-05ab-4a84-b15e-7817c530f717",
+      "name": "Sequence",
+      "title": "seq",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -168,
+        "y": -132
+      },
+      "children": [
+        "7a58d218-d5d1-423c-8d6b-8966ae8499e2",
+        "6abcd67e-38d4-47be-8c46-66dc4dee2af9",
+        "f3516acb-0df0-4ca2-8767-ab6d8dd219b8"
+      ]
+    },
+    "abdcbd57-c889-463b-8e94-832aaa5824cc": {
+      "id": "abdcbd57-c889-463b-8e94-832aaa5824cc",
+      "name": "IHaveBall",
+      "title": "ball_check",
+      "description": "",
+      "properties": {
+        "me": 0,
+        "our_team": "true"
+      },
+      "display": {
+        "x": 156,
+        "y": -360
+      }
+    },
+    "7a58d218-d5d1-423c-8d6b-8966ae8499e2": {
+      "id": "7a58d218-d5d1-423c-8d6b-8966ae8499e2",
+      "name": "Priority",
+      "title": "prio",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -12,
+        "y": -300
+      },
+      "children": [
+        "abdcbd57-c889-463b-8e94-832aaa5824cc",
+        "132147d0-a2a4-452b-9362-4840ef7b0da9"
+      ]
+    },
+    "132147d0-a2a4-452b-9362-4840ef7b0da9": {
+      "id": "132147d0-a2a4-452b-9362-4840ef7b0da9",
+      "name": "GetBall",
+      "title": "get_ball",
+      "description": "",
+      "properties": {
+        "getBallAtX": 0,
+        "getBallAtY": 0,
+        "getBallAtTime": 0,
+        "intercept": "true"
+      },
+      "display": {
+        "x": 156,
+        "y": -240
+      }
+    },
+    "6abcd67e-38d4-47be-8c46-66dc4dee2af9": {
+      "id": "6abcd67e-38d4-47be-8c46-66dc4dee2af9",
+      "name": "AimAt",
+      "title": "rotate",
+      "description": "",
+      "properties": {
+        "At": "ourgoal"
+      },
+      "display": {
+        "x": 48,
+        "y": -120
+      }
+    },
+    "f3516acb-0df0-4ca2-8767-ab6d8dd219b8": {
+      "id": "f3516acb-0df0-4ca2-8767-ab6d8dd219b8",
+      "name": "Kick",
+      "title": "kick",
+      "description": "",
+      "properties": {
+        "ROBOT_ID": 0
+      },
+      "display": {
+        "x": 48,
+        "y": 12
+      }
+    }
+  },
+  "display": {
+    "camera_x": 927.5,
+    "camera_y": 492.5,
+    "camera_z": 1,
+    "x": -600,
+    "y": -132
+  },
+  "custom_nodes": [
+    {
+      "name": "AimAt",
+      "category": "action",
+      "title": "AimAt",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AvoidRobots",
+      "category": "action",
+      "title": "AvoidRobots",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Block",
+      "category": "action",
+      "title": "Block",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DribbleCurve",
+      "category": "action",
+      "title": "DribbleCurve",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Dribble",
+      "category": "action",
+      "title": "Dribble",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "FollowPath",
+      "category": "action",
+      "title": "FollowPath",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "KeeperBlock",
+      "category": "action",
+      "title": "KeeperBlock",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "SecondaryKeeper",
+      "category": "action",
+      "title": "SecondaryKeeper",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanInterceptBall",
+      "category": "condition",
+      "title": "CanInterceptBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanPassSafely",
+      "category": "condition",
+      "title": "CanPassSafely",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanReachPoint",
+      "category": "condition",
+      "title": "CanReachPoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeePoint",
+      "category": "condition",
+      "title": "CanSeePoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TeamHasBall",
+      "category": "condition",
+      "title": "TeamHasBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TheyHaveBall",
+      "category": "condition",
+      "title": "TheyHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "WeHaveBall",
+      "category": "condition",
+      "title": "WeHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToSideTactic",
+      "category": "action",
+      "title": "GoToSideTactic",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
+
+

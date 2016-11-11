@@ -25,7 +25,7 @@ public:
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
     double computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
 
-   
+    std::string node_name() { return "RotateAroundPoint"; }
 private:
 	uint32_t prevworldseq;
 	bool firstworld=true;

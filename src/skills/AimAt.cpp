@@ -56,6 +56,7 @@ bt::Node::Status AimAt::Update (){
 
 		if(our_field_side == "left"){
 			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
+
 		} else {
 			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}

@@ -30,16 +30,24 @@ int main() {
 	ROS_INFO_STREAM("cone1 center:" << cone2.center.x << " " << cone2.center.y << " distance: " << cone2.radius);
 	ROS_INFO_STREAM("cone1 center:" << cone3.center.x << " " << cone3.center.y << " distance: " << cone3.radius);
 
+	roboteam_utils::Vector2 cone1Side1 = (cone.center-cone.start).rotate(cone.angle);
+	cone1Side1 = cone1Side1.scale(1/cone1Side1.length());
+	roboteam_utils::Vector2 cone1Side2 = (cone.center-cone.start).rotate(-cone.angle);
+	cone1Side2 = cone1Side2.scale(1/cone1Side2.length());
+	roboteam_utils::Vector2 cone2Side1 = (cone2.center-cone2.start).rotate(cone2.angle);
+	cone2Side1 = cone2Side1.scale(1/cone2Side1.length());
+	roboteam_utils::Vector2 cone2Side2 = (cone2.center-cone2.start).rotate(-cone2.angle);
+	cone2Side2 = cone2Side2.scale(1/cone2Side2.length());
+	roboteam_utils::Vector2 cone3Side1 = (cone3.center-cone3.start).rotate(cone3.angle);
+	cone3Side1 = cone3Side1.scale(1/cone3Side1.length());
+	roboteam_utils::Vector2 cone3Side2 = (cone3.center-cone3.start).rotate(-cone3.angle);
+	cone3Side2 = cone3Side2.scale(1/cone3Side2.length());
 
-
-	// roboteam_utils::Vector2 isInConeTest1 = roboteam_utils::Vector2(4.0, 0.1);
-	// roboteam_utils::Vector2 isInConeTest2 = roboteam_utils::Vector2(3.0, 0.2);
-	// roboteam_utils::Vector2 isInConeTest3 = roboteam_utils::Vector2(1.0, -0.01);
-	// ROS_INFO_STREAM("test 1: " << cone.IsWithinCone(isInConeTest1));
-	// ROS_INFO_STREAM("test 2: " << cone.IsWithinCone(isInConeTest2));
-	// ROS_INFO_STREAM("test 3: " << cone.IsWithinCone(isInConeTest3));
-
-	// ROS_INFO_STREAM("pointtest1: " << cone.ClosestPointOnSide(isInConeTest1).x << " " << cone.ClosestPointOnSide(isInConeTest1).y);
-	// ROS_INFO_STREAM("pointtest2: " << cone.ClosestPointOnSide(isInConeTest3).x << " " << cone.ClosestPointOnSide(isInConeTest3).y);
+	ROS_INFO_STREAM("cone1Side1:" << cone1Side1.x << " " << cone1Side1.y);
+	ROS_INFO_STREAM("cone1Side2:" << cone1Side2.x << " " << cone1Side2.y);
+	ROS_INFO_STREAM("cone2Side1:" << cone2Side1.x << " " << cone2Side1.y);
+	ROS_INFO_STREAM("cone2Side2:" << cone2Side2.x << " " << cone2Side2.y);
+	ROS_INFO_STREAM("cone3Side1:" << cone3Side1.x << " " << cone3Side1.y);
+	ROS_INFO_STREAM("cone3Side2:" << cone3Side2.x << " " << cone3Side2.y);
 	return 0;
 }

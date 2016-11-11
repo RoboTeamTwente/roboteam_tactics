@@ -28,7 +28,7 @@ bt::Node::Status IHaveBall::Update() {
     roboteam_msgs::World world = LastWorld::get();
     auto opt_bot = lookup_bot(me, us, &world);
     if (!opt_bot) {
-        return Status::Invalid;
+        return Status::Failure;
     }
     return bot_has_ball(*opt_bot, world.ball) ? Status::Success : Status::Failure;
 }

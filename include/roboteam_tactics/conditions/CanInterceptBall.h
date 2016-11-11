@@ -83,6 +83,8 @@ class CanInterceptBall : public Condition {
         return {time > 0, icpt_pos, time};
     }
     
+    std::string node_name() { return "CanInterceptBall"; }
+    
     private:
     
 };
