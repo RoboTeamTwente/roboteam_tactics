@@ -85,16 +85,17 @@ bt::Node::Status StandFree::Update() {
 
     roboteam_utils::Vector2 nearestFreePos = myPos;
     for (int i = 0; i < robotsInTheWay.size(); i++) {
-        ROS_INFO_STREAM("i: " << i);
+        // ROS_INFO_STREAM("i: " << i);
         Cone cone(theirPos, robotsInTheWay.at(i), distanceFromPoint);
         if (cone.IsWithinCone(myPos)) {
+            ROS_INFO_STREAM("ok, number " << i << " is in the way");
             for (int j = 0; j < robotsInTheWay.size(); j++) {
-                ROS_INFO_STREAM("j: " << j);
+                // ROS_INFO_STREAM("j: " << j);
                 if (i!=j) {
                     Cone cone2(theirPos, robotsInTheWay.at(j), distanceFromPoint);
                     if (cone.DoConesOverlap(cone2)) {
                         cone = cone.MergeCones(cone2);
-                        robotsInTheWay.erase(robotsInTheWay.begin()+j);
+                        // robotsInTheWay.erase(robotsInTheWay.begin()+j);
                         ROS_INFO_STREAM("merged " << i << " with " << j);
                     }
                 }

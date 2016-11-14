@@ -72,6 +72,7 @@ bool Cone::DoConesOverlap(Cone otherCone) {
 	// } else if ((fabs(angleDiff1) > fabs(angle) && fabs(angleDiff1) > fabs(otherCone.angle)) || (fabs(angleDiff2) > fabs(angle) && fabs(angleDiff2) > fabs(otherCone.angle))) {
 		// return false;
 	} else {
+		ROS_INFO_STREAM("overlap!");
 		return true;
 	}
 }
