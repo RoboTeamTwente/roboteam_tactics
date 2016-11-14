@@ -18,8 +18,9 @@ void BTRunner::run_until(bt::Node::Status status) {
 void BTRunner::print() {
     std::string msg = bt::Node::status_desc;
     bt::Node::status_desc = "";
-    if (print_debug)
+    if (print_debug) {
         ROS_INFO("BT Update: %s", msg.c_str());
+    }
 }    
     
 }
