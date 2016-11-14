@@ -47,8 +47,8 @@ bt::Node::Status AimAt::Update (){
 		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
 		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
 	
-	}
-	else if(destination=="theirgoal"){
+
+	}else if(destination=="theirgoal"){
         std::string our_field_side = "left";
         n.getParam("our_field_side", our_field_side);
 
@@ -60,8 +60,7 @@ bt::Node::Status AimAt::Update (){
 		} else {
 			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
 		}
-	}
-	else if(destination=="ourgoal"){
+	} else if(destination=="ourgoal"){
         std::string our_field_side = "left";
         n.getParam("our_field_side", our_field_side);
 
