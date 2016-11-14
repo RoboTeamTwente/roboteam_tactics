@@ -47,19 +47,6 @@ bt::Node::Status StandFree::Update() {
     bb2->SetDouble("y_coor", theirPos.y);
     bb2->SetBool("check_move", true);
 	CanSeePoint canSeePoint("", bb2);
-    if (canSeePoint.Update() == Status::Success) {
-    	// I can already see him
-    	// ROS_INFO("I can already see him, you n00b");
-    } else {
-    	// ROS_INFO("Can't see him...");
-    }
-
-    // std::vector<roboteam_msgs::WorldRobot> robotsInTheWay = getObstacles(myRobot, theirPos, &world, false);
-    // for (size_t i = 0; i < robotsInTheWay.size(); i++) {
-    // 	if (robotsInTheWay.at(i).id == theirID) {
-    // 		robotsInTheWay.erase(robotsInTheWay.begin()+i);
-    // 	}
-    // }
 
     std::vector<roboteam_utils::Vector2> robotsInTheWay;
     for (size_t i = 0; i < (world.us.size()+world.them.size()); i++) {
@@ -81,61 +68,30 @@ bt::Node::Status StandFree::Update() {
     	}
     }
 
-    ROS_INFO_STREAM("size of robotsInTheWay: " << robotsInTheWay.size());
-
     roboteam_utils::Vector2 nearestFreePos = myPos;
     for (int i = 0; i < robotsInTheWay.size(); i++) {
         // ROS_INFO_STREAM("i: " << i);
         Cone cone(theirPos, robotsInTheWay.at(i), distanceFromPoint);
+        // ROS_INFO_STREAM("IsWithinCone " << i << ": " << cone.IsWithinCone(myPos));
         if (cone.IsWithinCone(myPos)) {
-            ROS_INFO_STREAM("ok, number " << i << " is in the way");
+            // ROS_INFO_STREAM("ok, number " << i << " is in the way");
             for (int j = 0; j < robotsInTheWay.size(); j++) {
                 // ROS_INFO_STREAM("j: " << j);
                 if (i!=j) {
                     Cone cone2(theirPos, robotsInTheWay.at(j), distanceFromPoint);
                     if (cone.DoConesOverlap(cone2)) {
+                        // ROS_INFO_STREAM("overlap!");
                         cone = cone.MergeCones(cone2);
                         // robotsInTheWay.erase(robotsInTheWay.begin()+j);
-                        ROS_INFO_STREAM("merged " << i << " with " << j);
+                        // ROS_INFO_STREAM("merged " << i << " with " << j);
                     }
                 }
             }
-            ROS_INFO_STREAM("done merging");
+            // ROS_INFO_STREAM("done merging");
             nearestFreePos = cone.ClosestPointOnSide(myPos);
             break;
         }
     }
-    
-
- //    roboteam_utils::Vector2 nearestFreePos = myPos;
-	// if (robotsInTheWay.size() == 1) {
- //    	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(0).pos.x, robotsInTheWay.at(0).pos.y);
-	// 	Cone cone(theirPos, robotInTheWayPos, distanceFromPoint);
-	// 	if (cone.IsWithinCone(myPos)) {
-	// 		nearestFreePos = cone.ClosestPointOnSide(nearestFreePos);
-	// 	}
- //    } else if (robotsInTheWay.size() > 1) {
- //    	roboteam_utils::Vector2 robotInTheWayPos = roboteam_utils::Vector2(robotsInTheWay.at(0).pos.x, robotsInTheWay.at(0).pos.y);
-	// 	Cone cone(theirPos, robotInTheWayPos, distanceFromPoint);
- //    	int i = 0;
- //    	ROS_INFO("starting merge");
- //    	while (robotsInTheWay.size() > 0) {
- //    		roboteam_utils::Vector2 robotInTheWayPos2 = roboteam_utils::Vector2(robotsInTheWay.at(i).pos.x, robotsInTheWay.at(i).pos.y);
-	// 		Cone cone2(theirPos, robotInTheWayPos2, distanceFromPoint);
- //    		if (cone.DoConesOverlap(cone2)) {
- //    			cone = cone.MergeCones(cone2);
- //    			robotsInTheWay.erase(robotsInTheWay.begin()+i);
- //    		} else {
- //    			ROS_INFO("nope");
- //    		}
- //    		i++;
- //    		if (i >= robotsInTheWay.size()) {i = 0;}
- //    	}
- //    	ROS_INFO("merge finished!");
- //    	if (cone.IsWithinCone(myPos)) {
-	// 		nearestFreePos = cone.ClosestPointOnSide(nearestFreePos);
-	// 	}
- //    }
 
     double angleGoal = (theirPos-myPos).angle();
     private_bb->SetInt("ROBOT_ID", myID);
