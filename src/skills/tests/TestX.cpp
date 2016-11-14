@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <unistd.h>
 
 #include "ros/ros.h"
 
@@ -140,6 +141,7 @@ How to use:
             if (node->Update() == bt::Node::Status::Success) {
                 break;
             }
+            usleep(62.5);
         }   
     }
 
