@@ -3,6 +3,7 @@ add_library(utils
     DangerFinder.cpp
     FeedbackCollector.cpp
     LastWorld.cpp
+    Math.cpp
     RobotDealer.cpp
     utils.cpp
     NodeFactory.cpp
