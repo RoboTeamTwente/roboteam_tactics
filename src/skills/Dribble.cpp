@@ -67,10 +67,9 @@ double Dribble::cleanAngle(double angle){
 
 bt::Node::Status Dribble::Update() {
 	// development
-	int robotID=0;
 	
 	roboteam_msgs::World world = LastWorld::get();
-    //int robotID = blackboard->GetInt("ROBOT_ID");
+    int robotID = blackboard->GetInt("ROBOT_ID");
 
 	roboteam_msgs::WorldBall ball = world.ball;
 
@@ -134,7 +133,7 @@ bt::Node::Status Dribble::Update() {
 			double vPconstant=2;
 		
 			roboteam_utils::Vector2 vtogoal=goalposDiff*-vPconstant;
-		
+			
 		
 		
 			if(vtogoal.length() > maxv){
