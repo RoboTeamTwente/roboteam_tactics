@@ -7,6 +7,7 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToPosTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/testparams.json
     PARENT_SCOPE
     )

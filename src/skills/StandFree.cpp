@@ -14,15 +14,16 @@ namespace rtt {
 StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , avoidRobots(n, "", private_bb) {
-
+            ROS_INFO_STREAM("Standing Free");
 }
 
 bt::Node::Status StandFree::Update() {
 	// Get world and blackboard information
 	roboteam_msgs::World world = LastWorld::get();
-	int myID = GetInt("ROBOT_ID");
+	int myID = blackboard->GetInt("ROBOT_ID");
 	int theirID = GetInt("theirID");
 	double distanceFromPoint = GetDouble("distanceFromPoint");
+    bool setRosParam = GetBool("setRosParam");
 
 	roboteam_msgs::WorldRobot myRobot = world.us.at(myID);
 	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);
@@ -48,24 +49,15 @@ bt::Node::Status StandFree::Update() {
     bb2->SetBool("check_move", true);
 	CanSeePoint canSeePoint("", bb2);
 
+    auto robotsBothTeams = world.us;
+    robotsBothTeams.insert(robotsBothTeams.end(), world.them.begin(), world.them.end());
+
     std::vector<roboteam_utils::Vector2> robotsInTheWay;
-    for (size_t i = 0; i < (world.us.size()+world.them.size()); i++) {
-    	if (i < world.us.size()) {
-            if (!(GetString("whichTeam") == "us" && theirID == i)) {
-                roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
-                if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
-                    robotsInTheWay.push_back(robotPos);
-                }
-            }
-    	} else {
-            int j = i-world.us.size();
-            if (!(GetString("whichTeam") == "them" && theirID == j)) {
-                roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(world.them.at(j).pos.x, world.them.at(j).pos.y);
-                if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
-                    robotsInTheWay.push_back(robotPos);
-                }
-            }
-    	}
+    for (size_t i = 0; i < robotsBothTeams.size(); i++) {
+        roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robotsBothTeams.at(i).pos.x, robotsBothTeams.at(i).pos.y);
+        if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
+            robotsInTheWay.push_back(robotPos);
+        }
     }
 
     roboteam_utils::Vector2 nearestFreePos = myPos;
@@ -91,6 +83,20 @@ bt::Node::Status StandFree::Update() {
             nearestFreePos = cone.ClosestPointOnSide(myPos);
             break;
         }
+    }
+
+    // ROS_INFO_STREAM("myPos: " << myPos.x << " " << myPos.y);
+    // ROS_INFO_STREAM("nearestFreePos: " << nearestFreePos.x << " " << nearestFreePos.y);
+
+    bool kickingTheBall;
+    if (setRosParam) {
+        n.getParam("/kickingTheBall", kickingTheBall); 
+    } else {
+        kickingTheBall = true;
+    }
+
+    if (nearestFreePos == myPos && kickingTheBall) {
+        return Status::Success;
     }
 
     double angleGoal = (theirPos-myPos).angle();

@@ -1,0 +1,156 @@
+{
+  "id": "593fd414-f7ba-4884-ad35-130a7c313356",
+  "title": "SuperCoolTree",
+  "description": "",
+  "root": "2ea46c48-bbea-4625-906e-da6d57200860",
+  "properties": {},
+  "nodes": {
+    "966bdcad-ec20-4248-829f-4ceb622fa5e5": {
+      "id": "966bdcad-ec20-4248-829f-4ceb622fa5e5",
+      "name": "StandFree",
+      "title": "StandFree_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 0,
+        "y": -36
+      }
+    },
+    "bd3e489a-1d05-4138-be42-da33cb216246": {
+      "id": "bd3e489a-1d05-4138-be42-da33cb216246",
+      "name": "GetBall",
+      "title": "GetBall_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 0,
+        "y": 24
+      }
+    },
+    "e1639164-0747-4b3c-9d82-7161547d4a90": {
+      "id": "e1639164-0747-4b3c-9d82-7161547d4a90",
+      "name": "AimAt",
+      "title": "AimAt_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 0,
+        "y": 84
+      }
+    },
+    "82e07d04-bd25-4d32-8440-c7fbfab3646c": {
+      "id": "82e07d04-bd25-4d32-8440-c7fbfab3646c",
+      "name": "Kick",
+      "title": "Kick_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 0,
+        "y": 156
+      }
+    },
+    "2ea46c48-bbea-4625-906e-da6d57200860": {
+      "id": "2ea46c48-bbea-4625-906e-da6d57200860",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -180,
+        "y": 24
+      },
+      "children": [
+        "966bdcad-ec20-4248-829f-4ceb622fa5e5",
+        "bd3e489a-1d05-4138-be42-da33cb216246",
+        "e1639164-0747-4b3c-9d82-7161547d4a90",
+        "82e07d04-bd25-4d32-8440-c7fbfab3646c"
+      ]
+    }
+  },
+  "display": {
+    "camera_x": 647.0699999999779,
+    "camera_y": 339,
+    "camera_z": 1,
+    "x": -264,
+    "y": 24
+  },
+  "custom_nodes": [
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AimAt",
+      "category": "action",
+      "title": "AimAt_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "StandFree",
+      "category": "action",
+      "title": "StandFree_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall_A",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}

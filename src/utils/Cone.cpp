@@ -33,7 +33,7 @@ double Cone::CleanAngle(double cleanangle) {
 bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
-	if (fabs(CleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < angle) {
+	if (fabs(CleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < angle*0.9) {
 		return true;
 	} else {
 		return false;
