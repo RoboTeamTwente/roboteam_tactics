@@ -28,6 +28,7 @@ GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackb
     pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
     ROS_INFO("Getting ball");
     hasBall = whichRobotHasBall();
+    n.setParam("/kickingTheBall", false);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -167,6 +168,7 @@ bt::Node::Status GetBall::Update (){
 	
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
+	bool setRosParam = GetBool("setRosParam");
 	
 	while (world.us.size() == 0) {
 		return Status::Running;
@@ -239,6 +241,10 @@ bt::Node::Status GetBall::Update (){
 		pubGetBall.publish(command);
 		ros::spinOnce();
 		ROS_INFO("GetBall skill completed.");
+		if (setRosParam) {
+			ROS_INFO_STREAM("setting the param to true");
+			n.setParam("/kickingTheBall", true);
+		}
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);

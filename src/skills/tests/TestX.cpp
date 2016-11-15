@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <unistd.h>
 
 #include "ros/ros.h"
 
@@ -142,6 +143,7 @@ How to use:
                 break;
             }
             fps60.sleep();
+
         }   
     }
 

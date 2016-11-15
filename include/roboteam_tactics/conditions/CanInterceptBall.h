@@ -69,10 +69,8 @@ class CanInterceptBall : public Condition {
         for (double t = ICPT_DELTA; t < MAX_ICPT_TIME; t += ICPT_DELTA) {
             roboteam_utils::Vector2 ball = ball_func(t);
             double range = bot_range(t, (ball).angle());
-#ifdef DEBUG_ICPT
-            printf("At t=%f: bot(%f, %f) ball(%f, %f) dist=%f, range=%f angle=%f\n\n", t, bot.x, bot.y, ball.x, ball.y,
+            DEBUG_INFO_ICPT("At t=%f: bot(%f, %f) ball(%f, %f) dist=%f, range=%f angle=%f\n\n", t, bot.x, bot.y, ball.x, ball.y,
                 ball.dist(bot), range, ball.angle());
-#endif
             if (fabs(ball.dist(bot) - range) < ICPT_RADIUS) {
                 time = t;
                 icpt_pos = ball;

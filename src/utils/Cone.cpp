@@ -11,7 +11,7 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 	center = centerPoint;
 	radius = distance;
 	if (radius > 0) {
-		angle = 2.0 * asin((0.5*radius) / (center-start).length());
+		angle = 2 * asin((0.5*radius) / (center-start).length());
 	} else {
 		ROS_WARN("radius for cone invalid!");
 	}
@@ -64,15 +64,14 @@ bool Cone::DoConesOverlap(Cone otherCone) {
 	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
 	double angleDiff1 = cone1Side1.angle() - cone2Side2.angle();
 	double angleDiff2 = cone1Side2.angle() - cone2Side1.angle();
-	// ROS_INFO_STREAM("angleDiff1: " << angleDiff1 << " angleDiff2: " << angleDiff2);
 	if (angleDiff1 > 0 && angleDiff2 > 0) {
 		return false;
 	} else if (angleDiff1 < 0 && angleDiff2 < 0) {
 		return false;
-	// } else if ((fabs(angleDiff1) > fabs(angle) && fabs(angleDiff1) > fabs(otherCone.angle)) || (fabs(angleDiff2) > fabs(angle) && fabs(angleDiff2) > fabs(otherCone.angle))) {
-		// return false;
-	} else {
+	} else if ((fabs(angleDiff1) < 2*angle && fabs(angleDiff1 < 2*otherCone.angle)) || (fabs(angleDiff2) < 2*angle && fabs(angleDiff2 < 2*otherCone.angle))) {
 		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -100,6 +99,26 @@ Cone Cone::MergeCones(Cone otherCone) {
 	}
 
 	Cone newCone(start, newCenter, newRadius);
+
+	// Debug info:
+	cone1Side1 = cone1Side1.scale(1/cone1Side1.length());
+	cone1Side2 = cone1Side2.scale(1/cone1Side2.length());
+	cone2Side1 = cone2Side1.scale(1/cone2Side1.length());
+	cone2Side2 = cone2Side2.scale(1/cone2Side2.length());
+	roboteam_utils::Vector2 cone3Side1 = (newCone.center-newCone.start).rotate(newCone.angle);
+	cone3Side1 = cone3Side1.scale(1/cone3Side1.length());
+	roboteam_utils::Vector2 cone3Side2 = (newCone.center-newCone.start).rotate(-newCone.angle);
+	cone3Side2 = cone3Side2.scale(1/cone3Side2.length());
+	cone3Side1 = cone3Side1.scale(1/cone3Side1.length());
+	cone3Side2 = cone3Side2.scale(1/cone3Side2.length());
+
+	ROS_INFO_STREAM("cone1Side1:" << cone1Side1.x << " " << cone1Side1.y);
+	ROS_INFO_STREAM("cone1Side2:" << cone1Side2.x << " " << cone1Side2.y);
+	ROS_INFO_STREAM("cone2Side1:" << cone2Side1.x << " " << cone2Side1.y);
+	ROS_INFO_STREAM("cone2Side2:" << cone2Side2.x << " " << cone2Side2.y);
+	ROS_INFO_STREAM("cone3Side1:" << cone3Side1.x << " " << cone3Side1.y);
+	ROS_INFO_STREAM("cone3Side2:" << cone3Side2.x << " " << cone3Side2.y);
+
 	return newCone;
 }
 
