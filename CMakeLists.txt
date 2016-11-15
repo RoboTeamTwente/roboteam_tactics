@@ -19,7 +19,6 @@ set(CMAKE_CXX_FLAGS "\
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
--fmax-errors=1 \
 -g \
 ")
 
@@ -289,7 +288,7 @@ if(NOT computername STREQUAL "minux")
         skills
         ${catkin_LIBRARIES}
         )
-    target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
+    #target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
     catkin_add_gtest(VerificationTest
         test/main.cpp
