@@ -7,7 +7,7 @@ namespace rtt {
 
 class BasicDefenseTactic : public Tactic {
     public:
-    BasicDefenseTactic(bt::Blackboard::Ptr blackboard = nullptr);
+    BasicDefenseTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     Status Update();
     

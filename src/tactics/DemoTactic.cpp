@@ -13,8 +13,8 @@
 
 namespace rtt {
 
-DemoTactic::DemoTactic(bt::Blackboard::Ptr blackboard)
-        : Tactic(blackboard) 
+DemoTactic::DemoTactic(std::string name, bt::Blackboard::Ptr blackboard)
+        : Tactic(name, blackboard) 
         {}
 
 template<typename T>

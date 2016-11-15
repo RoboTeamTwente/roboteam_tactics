@@ -59,10 +59,10 @@ class Condition : public Leaf {
     }    
 } ;
 
-class Tactic : public bt::Leaf {
+class Tactic : public Leaf {
     public:
-    Tactic(bt::Blackboard::Ptr blackboard = nullptr)
-            : Leaf(blackboard)
+    Tactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
+            : Leaf(name, blackboard)
             {}
     virtual ~Tactic() {}
 

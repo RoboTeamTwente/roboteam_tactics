@@ -12,18 +12,19 @@
 
 namespace rtt {
 
-GoToSideTactic::GoToSideTactic(bt::Blackboard::Ptr blackboard)
-        : Tactic(blackboard) 
+GoToSideTactic::GoToSideTactic(std::string name, bt::Blackboard::Ptr blackboard)
+        : Tactic(name, blackboard) 
         {}
 
 void GoToSideTactic::Initialize() {
     tokens.clear();
 
-    std::string pos = private_bb->GetString("pos"); 
-    int robot_count = private_bb->GetDouble("robots");
+    std::string pos = GetString("pos"); 
+    int robot_count = GetDouble("robots");
 
     std::cout << "Initializing tactic!\n";
     std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
+    std::cout << "Side :" << pos << "\n";
 
     claim_role_nodes(robot_count);
     auto allRobots = RobotDealer::get_available_robots();

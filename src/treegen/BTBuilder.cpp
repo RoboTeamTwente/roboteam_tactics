@@ -136,7 +136,8 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             << name
             << "\", bb);"
             << std::endl;
-    } else if (allconditions_set.find(type) != allconditions_set.end()) {
+    } else if (allconditions_set.find(type) != allconditions_set.end()
+            || alltactics_set.find(type) != alltactics_set.end()) {
         out << DINDENT
             << "auto "
             << name 

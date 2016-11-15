@@ -120,7 +120,10 @@ int main(int argc, char *argv[]) {
 
     std::string name = ros::this_node::getName();
 
-    ros::Rate fps60(60);
+    int iterationsPerSecond = 60;
+    ros::param::get("role_iterations_per_second", iterationsPerSecond);
+    ros::Rate sleeprate(iterationsPerSecond);
+    std::cout << "Iterations per second: " << std::to_string(iterationsPerSecond) << "\n";
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
@@ -138,7 +141,7 @@ int main(int argc, char *argv[]) {
         ros::spinOnce();
 
         if (!currentTree){
-            fps60.sleep();
+            sleeprate.sleep();
             continue;
         }
 
@@ -169,7 +172,7 @@ int main(int argc, char *argv[]) {
             currentTree = nullptr;
         }
 
-        fps60.sleep();
+        sleeprate.sleep();
     }
 
     return 0;
