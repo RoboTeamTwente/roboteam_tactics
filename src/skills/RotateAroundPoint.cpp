@@ -207,7 +207,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			robotrequiredv=worldToRobotFrame(radiusdirection+turndirection, robot.angle);
 			
-			ROS_INFO("robotrequiredv x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
+			// ROS_INFO("robotrequiredv x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
 			
 			roboteam_utils::Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;

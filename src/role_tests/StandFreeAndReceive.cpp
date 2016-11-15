@@ -26,7 +26,10 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     roboteam_msgs::World getworld = rtt::LastWorld::get();
     roboteam_msgs::WorldBall ball = getworld.ball;
     roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-
+    int myID = 1;
+    roboteam_utils::Vector2 myPos(getworld.us.at(myID).pos.x, getworld.us.at(myID).pos.y);
+    bb->SetDouble("GetBall_A_getBallAtX", myPos.x);
+    bb->SetDouble("GetBall_A_getBallAtY", myPos.y);
    
     bt::Node::Status status = tree->Update();
     if (status == bt::Node::Status::Success) {
@@ -43,24 +46,24 @@ void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
 
 int main(int argc, char **argv) {
     
-    ros::init(argc, argv, "KickAtGoal");
+    ros::init(argc, argv, "StandFreeAndReceive");
     ros::NodeHandle n;
+    n.setParam("/testParam", 1);
 
-    // roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(3.0, 0.1);
-
-    auto role = make_CoolTree(n);
+    auto role = make_SuperCoolTree(n);
     auto bb = role.GetBlackboard();
 
-    bb->SetInt("ROBOT_ID", 0);
-    bb->SetBool("GetBall_A_intercept", false);
-    bb->SetBool("GetBall_A_setRosParam", true);
-    bb->SetString("AimAt_A_At", "robot");
-    bb->SetInt("AimAt_A_AtRobot", 1);
-    // bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);
-    // bb->SetDouble("RotateAroundPoint_A_faceTowardsPosy", passTo.y);
+    bb->SetInt("ROBOT_ID", 1);
+    bb->SetInt("StandFree_A_theirID", 0);
+    bb->SetBool("StandFree_A_setRosParam", true);
+    bb->SetString("StandFree_A_whichTeam", "us");
+    bb->SetDouble("StandFree_A_distanceFromPoint", 0.4);
+    bb->SetBool("GetBall_A_setRosParam", false);
+    bb->SetBool("GetBall_A_intercept", true);
+    bb->SetDouble("GetBall_A_getBallAtX", 0.0);
+    bb->SetDouble("GetBall_A_getBallAtY", 0.0);
+    bb->SetString("AimAt_A_At", "theirgoal");
     
-    // params for aimAt are set in tree
-
     ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb));
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
 

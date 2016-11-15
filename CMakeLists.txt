@@ -384,4 +384,18 @@ add_executable(StandFreeTest
         ${catkin_LIBRARIES}
         )
 
+add_executable(StandFreeAndReceive
+        src/role_tests/StandFreeAndReceive.cpp
+    )
+    add_dependencies(StandFreeAndReceive
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+    target_link_libraries(StandFreeAndReceive 
+        skills
+        conditions
+        utils
+        ${catkin_LIBRARIES}
+        )
+
 endif(NOT computername STREQUAL "minux")
