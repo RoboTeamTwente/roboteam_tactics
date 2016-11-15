@@ -9,6 +9,8 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 
+#include "roboteam_tactics/utils/Cone.h"
+
 bool finished1;
 
 void msgCallBack(const roboteam_msgs::WorldConstPtr& world, rtt::StandFree* standFree) {
@@ -40,6 +42,47 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
+
+	// {
+	// 	roboteam_utils::Vector2 line1Start(0.0, 0.0);
+	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
+	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
+	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
+
+	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
+	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
+	// }
+
+	// {
+	// 	roboteam_utils::Vector2 line1Start(0.0, 0.0);
+	// 	roboteam_utils::Vector2 line1Dir(-1.0, 1.0);
+	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
+	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
+
+	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
+	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
+	// }
+
+	// {
+	// 	roboteam_utils::Vector2 line1Start(-3.0, 0.0);
+	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
+	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
+	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
+
+	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
+	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
+	// }
+
+	// {
+	// 	roboteam_utils::Vector2 line1Start(2.0, -1.0);
+	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
+	// 	roboteam_utils::Vector2 line2Start(10.0, 2.0);
+	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
+
+	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
+	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
+	// }
+
 	ROS_INFO("StandFree Test completed!");
 
 	return 0;
