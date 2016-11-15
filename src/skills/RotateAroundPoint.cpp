@@ -15,7 +15,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Math.h";
+#include "roboteam_tactics/utils/Math.h"
 
 namespace rtt {
 	
@@ -158,9 +158,8 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double targetAngle=computeAngle(robotPos, faceTowardsPos);
 
-	roboteam_utils::Vector2 worldposDiff = center-robotPos;
-	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
-	roboteam_utils::Vector2 targetPos=targetVector+center;
+	roboteam_utils::Vector2 worldposDiff = center-robotPos;;
+
 
 	
 
