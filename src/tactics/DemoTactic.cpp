@@ -82,7 +82,7 @@ void DemoTactic::Initialize() {
     roboteam_msgs::World world = LastWorld::get();
 
     
-    if (RobotDealer::get_available_robots().size() < 2) {
+    if (RobotDealer::get_available_robots().size() < 4) {
         std::cout << "Not enough robots, cannot initialize.\n";
         // TODO: Want to pass failure here as well!
         return;
@@ -90,11 +90,11 @@ void DemoTactic::Initialize() {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    // int attack_bot = get_robot_closest_to_ball(robots, world);
-    // delete_from_vector(robots, attack_bot);
+    int attack_bot = get_robot_closest_to_ball(robots, world);
+    delete_from_vector(robots, attack_bot);
 
-    // int score_bot = get_most_attacking_robot(robots, world);
-    // delete_from_vector(robots, score_bot);
+    int score_bot = get_most_attacking_robot(robots, world);
+    delete_from_vector(robots, score_bot);
 
     int def_bot = robots.back();
     delete_from_vector(robots, def_bot);
@@ -102,7 +102,7 @@ void DemoTactic::Initialize() {
     int keeper_bot = robots.back();
     delete_from_vector(robots, keeper_bot);
 
-    claim_robots({/*score_bot, attack_bot,*/ def_bot, keeper_bot});
+    claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
     std::string our_field_side = "left";
@@ -115,53 +115,53 @@ void DemoTactic::Initialize() {
 
     std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
 
-    // {
-        // // Fill blackboard with relevant info
-        // bt::Blackboard bb;
-        // bb.SetInt("ROBOT_ID", score_bot);
-        // bb.SetBool("GetBall_A_intercept", true);
-        // bb.SetDouble("GetBall_A_getBallAtX", passTo.x);
-        // bb.SetDouble("GetBall_A_getBallAtY", passTo.y);
-        // bb.SetDouble("GetBall_A_getBallAtTime", 5.0);
-        // bb.SetString("AimAt_A_At", "theirgoal");
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", score_bot);
+        bb.SetBool("GetBall_A_intercept", true);
+        bb.SetDouble("GetBall_A_getBallAtX", passTo.x);
+        bb.SetDouble("GetBall_A_getBallAtY", passTo.y);
+        bb.SetDouble("GetBall_A_getBallAtTime", 5.0);
+        bb.SetString("AimAt_A_At", "theirgoal");
 
-        // // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.node_id = claim_role_node();
-        // wd.tree = "CoolTree";
-        // wd.blackboard = bb.toMsg();
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.node_id = claim_role_node();
+        wd.tree = "CoolTree";
+        wd.blackboard = bb.toMsg();
 
-        // // Add random token and save it for later
-        // boost::uuids::uuid token = unique_id::fromRandom();
-        // tokens.push_back(token);
-        // wd.token = unique_id::toMsg(token);
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
 
-        // // Send to rolenode
-        // directivePub.publish(wd);
-    // }
+        // Send to rolenode
+        directivePub.publish(wd);
+    }
 
-    // {
-        // // Fill blackboard with relevant info
-        // bt::Blackboard bb;
-        // bb.SetInt("ROBOT_ID", attack_bot);
-        // bb.SetBool("GetBall_A_intercept", false);
-        // bb.SetString("AimAt_A_At", "robot");
-        // bb.SetInt("AimAt_A_AtRobot", score_bot);
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", attack_bot);
+        bb.SetBool("GetBall_A_intercept", false);
+        bb.SetString("AimAt_A_At", "robot");
+        bb.SetInt("AimAt_A_AtRobot", score_bot);
 
-        // // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.node_id = claim_role_node();
-        // wd.tree = "CoolTree";
-        // wd.blackboard = bb.toMsg();
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.node_id = claim_role_node();
+        wd.tree = "CoolTree";
+        wd.blackboard = bb.toMsg();
 
-        // // Add random token and save it for later
-        // boost::uuids::uuid token = unique_id::fromRandom();
-        // tokens.push_back(token);
-        // wd.token = unique_id::toMsg(token);
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
 
-        // // Send to rolenode
-        // directivePub.publish(wd);
-    // }
+        // Send to rolenode
+        directivePub.publish(wd);
+    }
 
     {
         // Fill blackboard with relevant info
@@ -176,6 +176,7 @@ void DemoTactic::Initialize() {
 
         // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
@@ -195,6 +196,7 @@ void DemoTactic::Initialize() {
 
         // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode

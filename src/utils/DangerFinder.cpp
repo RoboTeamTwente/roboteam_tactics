@@ -42,11 +42,11 @@ const DangerFactor can_see_our_goal = [](const Robot& bot, std::string* reasonin
     std::vector<Vector> goal_points = we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
     for (const Vector& goal : goal_points) {
         if (getObstacles(bot, goal, nullptr, true).empty()) {
-            reason("[bot can see goal; adding 5.0]");
+            // reason("[bot can see goal; adding 5.0]");
             return CAN_SEE_GOAL_DANGER;
         }
     }
-    reason("[bot cannot see goal]");
+    // reason("[bot cannot see goal]");
     return 0.0;
 };
 
@@ -64,7 +64,7 @@ const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullpt
     Vector goal = get_goal();
     Position opp = get_opp(bot);
     double x = (opp.location().dist(goal) - 9) / DISTANCE_DENOMINATOR;
-    reason("[distance=%f; score=%f]", opp.location().dist(goal), x*x);
+    // reason("[distance=%f; score=%f]", opp.location().dist(goal), x*x);
     return x*x;
     // score = ((dist - 9) / DISTANCE_DENOMINATOR)^2, 0 at dist=9, 10 at dist=0, quadratic growth
 };
@@ -76,7 +76,7 @@ const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nul
     double tgt_angle = goal.angle();
     double angle_diff = fabs(tgt_angle - bot.angle);
     double x = (angle_diff - M_PI) / ORIENTATION_DENOMINATOR;
-    reason("[orientation diff=%f; score=%f]", angle_diff, (x*x)/3.0);
+    // reason("[orientation diff=%f; score=%f]", angle_diff, (x*x)/3.0);
     return (x*x) / 3.0;
 };
 
@@ -125,7 +125,7 @@ double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors,
     if (bot.id == preferred) {
         score += 10.0;
     }
-    DEBUG_INFO_DANGER_FINDER("Reasoning for bot %d, final score=%f: %s", bot.id, score, reasoning.c_str());
+    // DEBUG_INFO_DANGER_FINDER("Reasoning for bot %d, final score=%f: %s", bot.id, score, reasoning.c_str());
     return score;
 }
 
