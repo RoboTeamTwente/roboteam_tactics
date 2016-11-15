@@ -21,6 +21,7 @@ public:
     Status Update();
 private:
 	AvoidRobots avoidRobots;
+	ros::Publisher debugPub;
 };
     
 }

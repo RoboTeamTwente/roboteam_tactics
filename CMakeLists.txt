@@ -19,7 +19,6 @@ set(CMAKE_CXX_FLAGS "\
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
--fmax-errors=1 \
 -g \
 ")
 
@@ -84,6 +83,7 @@ add_custom_command(
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
         always_rebuild
+        generate_dbg_macros_t
         converter
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
@@ -102,6 +102,17 @@ add_custom_command(
         always_rebuild
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
+    )
+
+# Generate debug macros
+add_custom_target(generate_dbg_macros_t DEPENDS generate_dbg_macros)
+add_custom_command(
+    OUTPUT generate_dbg_macros
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
+    DEPENDS
+        always_rebuild
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMENT "Generating debug macros"
     )
 
 # Dummy output which is never actually produced. Anything that depends on
@@ -277,7 +288,7 @@ if(NOT computername STREQUAL "minux")
         skills
         ${catkin_LIBRARIES}
         )
-    target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
+    #target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
     catkin_add_gtest(VerificationTest
         test/main.cpp
@@ -367,6 +378,20 @@ add_executable(StandFreeTest
         ${catkin_EXPORTED_TARGETS}
         )
     target_link_libraries(StandFreeTest 
+        skills
+        conditions
+        utils
+        ${catkin_LIBRARIES}
+        )
+
+add_executable(StandFreeAndReceive
+        src/role_tests/StandFreeAndReceive.cpp
+    )
+    add_dependencies(StandFreeAndReceive
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+    target_link_libraries(StandFreeAndReceive 
         skills
         conditions
         utils

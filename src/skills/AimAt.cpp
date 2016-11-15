@@ -43,12 +43,12 @@ bt::Node::Status AimAt::Update (){
 	
 	if (destination=="robot"){
 
-		int AtRobotID= GetInt("AtRobot");
+		int AtRobotID = GetInt("AtRobot");
 		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
 		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
 	
 
-	}else if(destination=="theirgoal"){
+	} else if(destination=="theirgoal"){
         std::string our_field_side = "left";
         n.getParam("our_field_side", our_field_side);
 
