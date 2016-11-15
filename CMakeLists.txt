@@ -68,25 +68,20 @@ target_link_libraries(TestX
 #### Stupid stuff to get the json files to be converted ####
 ############################################################
 
-# Custom target will always cause its dependencies to be evaluated and is
-# run by default
-#add_custom_target(dummy_target ALL
-    #DEPENDS
-        #generate_json
-        #generate_leafs
-    #)
-
 # custom_output will always be rebuilt because it depends on always_rebuild
-add_custom_target(generate_json_t DEPENDS generate_json)
 add_custom_command(
-    OUTPUT generate_json
+    OUTPUT
+        ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
-        always_rebuild
-        generate_dbg_macros_t
         converter
+        ${JSON_FILES}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
+    )
+add_custom_target(generate_json_t
+    DEPENDS
+        ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
     )
 
 # This extra custom target is needed to use it in brain
@@ -94,33 +89,43 @@ add_custom_command(
 # Generates files (like allconditions.h and allconditions_set.h)
 # that can be used to see which conditions exist (using the set)
 # and include all possible conditions at once.
-add_custom_target(generate_leafs_t DEPENDS generate_leafs)
+add_custom_target(generate_leafs_t
+    DEPENDS
+        generated/generate_all_leafs.stamp
+    )
 add_custom_command(
-    OUTPUT generate_leafs
+    OUTPUT 
+        ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
     DEPENDS
-        always_rebuild
+        ${CONDITION_SOURCES}
+        ${TACTIC_SOURCES}
+        ${SKILL_SOURCES}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
     )
 
 # Generate debug macros
-add_custom_target(generate_dbg_macros_t DEPENDS generate_dbg_macros)
+add_custom_target(generate_dbg_macros_t
+    DEPENDS
+        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    )
 add_custom_command(
-    OUTPUT generate_dbg_macros
+    OUTPUT
+        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
     DEPENDS
-        always_rebuild
+        ${PROJECT_SOURCE_DIR}/debug_names.txt
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating debug macros"
     )
 
 # Dummy output which is never actually produced. Anything that depends on
 # this will always be rebuilt.
-add_custom_command(
-    OUTPUT always_rebuild
-    COMMAND cmake -E echo
-    )
+# add_custom_command(
+    # OUTPUT always_rebuild
+    # COMMAND cmake -E echo
+    # )
 
 #############################
 #### End of stupid stuff ####
@@ -130,6 +135,13 @@ add_custom_command(
 file(GLOB GENERATED_FILES
     "include/roboteam_tactics/generated/*.h"
     )
+set(GENERATED_FILES
+    ${GENERATED_FILES}
+    ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+    ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
+    )
+
 
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_FILES})
 # End of hooks

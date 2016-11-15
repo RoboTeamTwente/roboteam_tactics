@@ -7,3 +7,6 @@
 
 # JSON generated for the editor
 all_custom_nodes.json
+
+# Folder for sentinel files
+generated/

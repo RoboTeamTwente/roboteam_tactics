@@ -1,13 +1,26 @@
+set(CONDITION_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/BallOnOurSide.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CanInterceptBall.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CanReachPoint.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CanSeePoint.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/CanPassSafely.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/IHaveBall.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/TeamHasBall.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/TheyHaveBall.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/WeHaveBall.cpp
+    )
+set(CONDITION_SOURCES
+    ${CONDITION_SOURCES}
+    PARENT_SCOPE
+    )
+
+add_custom_target(CONDITION_SOURCES_TARGET
+    DEPENDS
+        ${CONDITION_SOURCES}
+    )
+
 add_library(conditions
-    BallOnOurSide.cpp
-    CanInterceptBall.cpp
-    CanReachPoint.cpp
-    CanSeePoint.cpp
-    CanPassSafely.cpp
-    IHaveBall.cpp
-    TeamHasBall.cpp
-    TheyHaveBall.cpp
-    WeHaveBall.cpp
+    ${CONDITION_SOURCES}
     )
 add_dependencies(conditions
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

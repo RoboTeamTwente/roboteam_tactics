@@ -3,10 +3,13 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/1_2_Tree_2.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicRole.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/BounceBall.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolRole.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/DemoStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToPosTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/SimpleSideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/testparams.json
     PARENT_SCOPE

@@ -1,17 +1,25 @@
+set(SKILL_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/AimAt.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Block.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FollowPath.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GoToPos.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/RotateAroundPoint.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/AvoidRobots.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Dribble.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GetBall.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Kick.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/KeeperBlock.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SecondaryKeeper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/StandFree.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/RandomDrive.cpp
+    )
+set(SKILL_SOURCES
+    ${SKILL_SOURCES}
+    PARENT_SCOPE
+    )
+
 add_library(skills
-    AimAt.cpp
-    Block.cpp
-    FollowPath.cpp
-    GoToPos.cpp
-    RotateAroundPoint.cpp
-    AvoidRobots.cpp
-    Dribble.cpp
-    GetBall.cpp
-    Kick.cpp
-    KeeperBlock.cpp
-    SecondaryKeeper.cpp
-    StandFree.cpp
-    RandomDrive.cpp
+    ${SKILL_SOURCES}
     )
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

@@ -1,6 +1,6 @@
 #include "roboteam_tactics/skills/KeeperBlock.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
-#include "roboteam_tactics/utils/SkillFactory.h"
+// #include "roboteam_tactics/utils/SkillFactory.h"
 
 namespace rtt {
     
@@ -27,9 +27,21 @@ void KeeperBlock::reevaluate_target() {
     
     target = danger->id;
     auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
-    impl = build_skill<Block>(n, "Block", "", 
-        "ROBOT_ID=%d TGT_ID=%d int:BLOCK_ID=%d block_x=%f block_y=%f block_type=%s block_arg=%f bool:invert_direction=%s",
-        GetInt("ROBOT_ID"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
+    // impl = build_skill<Block>(n, "Block", "", 
+        // "ROBOT_ID=%d TGT_ID=%d int:BLOCK_ID=%d block_x=%f block_y=%f block_type=%s block_arg=%f bool:invert_direction=%s",
+        // GetInt("ROBOT_ID"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
+
+    auto bb = std::make_shared<bt::Blackboard>();
+    bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+    bb->SetInt("TGT_ID", target);
+    bb->SetInt("BLOCK_ID", -1);
+    bb->SetDouble("block_x", goal.x);
+    bb->SetDouble("block_y", goal.y);
+    bb->SetString("block_type", "CIRCLE");
+    bb->SetDouble("block_arg", cover_dist);
+    bb->SetBool("invert_direction", false);
+
+    impl = std::make_shared<Block>(n, "", bb);
 }
 
 bt::Node::Status KeeperBlock::Update() {
