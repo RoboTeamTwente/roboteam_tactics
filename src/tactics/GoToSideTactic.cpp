@@ -29,13 +29,13 @@ void GoToSideTactic::Initialize() {
     claim_role_nodes(robot_count);
     auto allRobots = RobotDealer::get_available_robots();
     for (int i = 0; i < robot_count; ++i) {
-        int random_index = get_rand(allRobots.size());
+        int random_index = get_rand_int(allRobots.size());
         std::cout << "Claiming " << std::to_string(allRobots.at(random_index)) << "\n";
         claim_robot(allRobots.at(random_index));
         allRobots.erase(allRobots.begin() + random_index);
     }
 
-    std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n"; 
+    std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n";
 
     int mod = 1;
     std::string our_field_side = "left";

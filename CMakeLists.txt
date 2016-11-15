@@ -266,6 +266,18 @@ if(NOT computername STREQUAL "minux")
         utils
         ${catkin_LIBRARIES}
         )
+        
+	add_executable(DribbleTest
+        src/skills/tests/DribbleTest.cpp
+    )
+    add_dependencies(DribbleTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+    target_link_libraries(DribbleTest 
+        skills
+        conditions
+        utils
+        ${catkin_LIBRARIES}
+        )
+
 
     add_executable(KickTest
         src/skills/tests/KickTest.cpp

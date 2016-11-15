@@ -6,12 +6,12 @@ add_library(skills
     RotateAroundPoint.cpp
     AvoidRobots.cpp
     Dribble.cpp
-    DribbleCurve.cpp
     GetBall.cpp
     Kick.cpp
     KeeperBlock.cpp
     SecondaryKeeper.cpp
     StandFree.cpp
+    RandomDrive.cpp
     )
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
