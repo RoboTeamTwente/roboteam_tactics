@@ -62,7 +62,8 @@ public:
     std::string node_name() { return "Block"; }
 private:
     BlockPos* pos;
-    GoToPos* gtp;
+    std::unique_ptr<GoToPos> goToPos;
+    bool gtp_valid;
     ros::NodeHandle n;
     unsigned int my_id, tgt_id, block_id;
     bool constant, invert;
