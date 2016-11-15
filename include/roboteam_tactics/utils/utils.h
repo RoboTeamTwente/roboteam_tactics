@@ -30,14 +30,24 @@ void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out = std::cou
 void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras);
 
 /**
- * Gets a random number in the range [0, max).
+ * Gets a random integer in the range [0, max).
  */
-int get_rand(int max);
+int get_rand_int(int max);
 
 /**
- * Gets a random number in the range [min, max).
+ * Gets a random integer in the range [min, max).
  */
-int get_rand(int min, int max);
+int get_rand_int(int min, int max);
+
+/**
+ * Gets a random real number in the range [0, max).
+ */
+float get_rand_real(float max);
+
+/**
+ * Gets a random real number in the range [min, max).
+ */
+float get_rand_real(float min, float max);
 
 using time_point = std::chrono::steady_clock::time_point;
 using seconds = std::chrono::seconds;

@@ -12,6 +12,7 @@ add_library(skills
     KeeperBlock.cpp
     SecondaryKeeper.cpp
     StandFree.cpp
+    RandomDrive.cpp
     )
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
