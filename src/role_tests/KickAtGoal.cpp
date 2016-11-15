@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
     bb->SetInt("ROBOT_ID", 0);
     bb->SetBool("GetBall_A_intercept", false);
-    bb->SetBool("GetBall_A_setRosParam", true);
+    bb->SetBool("AimAt_A_setRosParam", true);
     bb->SetString("AimAt_A_At", "robot");
     bb->SetInt("AimAt_A_AtRobot", 1);
     // bb->SetDouble("RotateAroundPoint_A_faceTowardsPosx", passTo.x);

@@ -56,7 +56,7 @@ std::string getMyNamespace() {
             ns += "/";
         }
     }
-    
+
     return ns;
 }
 
@@ -89,15 +89,15 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     const roboteam_msgs::World world = world_ptr == nullptr ? LastWorld::get() : *world_ptr;
     const roboteam_utils::Vector2 bot_pos(bot.pos.x, bot.pos.y);
     const auto all_bots = boost::join(world.us, world.them);
-    
+
     double threshold = sight_only ? .15 : .35;
-    
+
     std::vector<std::pair<roboteam_msgs::WorldRobot, double>> obstacles;
     for (const auto& obs : all_bots) {
         const roboteam_utils::Vector2 obs_pos(obs.pos.x, obs.pos.y);
-        
+
         if (obs_pos == bot_pos) continue;
-        
+
         const roboteam_utils::Vector2 proj = obs_pos.project(bot_pos, point);
         double proj_dist = proj.dist(obs_pos);
         double dist_to_start = bot_pos.dist(obs_pos);
@@ -105,8 +105,8 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
             obstacles.push_back(std::make_pair(obs, dist_to_start));
         }
     }
-    
-    auto sorter = [](const std::pair<roboteam_msgs::WorldRobot, double>& a, 
+
+    auto sorter = [](const std::pair<roboteam_msgs::WorldRobot, double>& a,
                      const std::pair<roboteam_msgs::WorldRobot, double>& b) {
         return a.second < b.second;
     };
@@ -181,12 +181,21 @@ void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr ext
 static std::random_device rd;
 static std::mt19937 rng(rd());
 
-int get_rand(int max) {
-    return get_rand(0, max);
+int get_rand_int(int max) {
+    return get_rand_int(0, max);
 }
 
-int get_rand(int min, int max) {
+int get_rand_int(int min, int max) {
     std::uniform_int_distribution<>dis(min, max - 1)  ;
+    return dis(rng);
+}
+
+float get_rand_real(float max) {
+    return get_rand_real(0, max);
+}
+
+float get_rand_real(float min, float max) {
+    std::uniform_real_distribution<>dis(min, max)  ;
     return dis(rng);
 }
 
@@ -199,4 +208,3 @@ seconds time_difference(time_point start, time_point end) {
 }
 
 } // rtt
-

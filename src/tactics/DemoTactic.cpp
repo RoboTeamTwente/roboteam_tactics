@@ -15,7 +15,7 @@
 namespace rtt {
 
 DemoTactic::DemoTactic(bt::Blackboard::Ptr blackboard)
-        : Tactic(blackboard) 
+        : Tactic(blackboard)
         {}
 
 template<typename T>
@@ -82,7 +82,7 @@ void DemoTactic::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
 
-    
+
     if (RobotDealer::get_available_robots().size() < 3) {
         std::cout << "Not enough robots, cannot initialize.\n";
         // TODO: Want to pass failure here as well!
@@ -112,7 +112,7 @@ void DemoTactic::Initialize() {
         mod = 1;
     }
 
-    roboteam_utils::Vector2 passTo(3 * mod, get_rand(6000) / 6000.0 * 6 - 3);
+    roboteam_utils::Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
 
     std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
 

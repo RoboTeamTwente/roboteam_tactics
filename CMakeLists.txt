@@ -300,7 +300,7 @@ if(NOT computername STREQUAL "minux")
         skills
         ${catkin_LIBRARIES}
         )
-    #target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
+    target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
 
     catkin_add_gtest(VerificationTest
         test/main.cpp

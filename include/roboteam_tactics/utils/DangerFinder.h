@@ -31,7 +31,7 @@ extern const DangerFactor has_ball;
 extern const DangerFactor distance;
 extern const DangerFactor orientation;
 
-const std::vector<DangerFactor> DEFAULT_FACTORS({distance, orientation, can_see_our_goal, has_ball});
+extern const std::vector<DangerFactor> DEFAULT_FACTORS;
 
 const std::vector<Vector> GOAL_POINTS_LEFT({
     Vector(-3, .35),
