@@ -135,11 +135,13 @@ How to use:
         rtt::BTRunner runner(*is_bt, true);
         runner.run_until([]() { ros::spinOnce(); return ros::ok(); });
     } else {
+    	ros::Rate fps60(60);
         while (ros::ok()) {
             ros::spinOnce();
             if (node->Update() == bt::Node::Status::Success) {
                 break;
             }
+            fps60.sleep();
         }   
     }
 

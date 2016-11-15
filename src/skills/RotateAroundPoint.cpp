@@ -152,7 +152,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 		ROS_INFO("no string:center choice specified ball|point"); 
 		return Status::Failure;
 	}
-	    
+	 
 	
 	// vector calculations
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
@@ -169,6 +169,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	if (worldposDiff.length() < 1.5*radius) { // close enough
 		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
 		if(true){
+		
 			roboteam_utils::Vector2 radiusdirection=center-robotPos;
 			radiusdirection=radiusdirection.normalize();
 			roboteam_utils::Vector2 turndirection(radiusdirection.y, -radiusdirection.x); // perpendicular;
