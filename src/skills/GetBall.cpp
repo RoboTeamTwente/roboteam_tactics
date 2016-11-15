@@ -26,7 +26,7 @@ GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackb
         // , goToPos(n, "", private_bb)
         , avoidRobots(n, "", private_bb) {
     pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-    ROS_INFO("Getting ball");
+    // ROS_INFO("Getting ball");
     hasBall = whichRobotHasBall();
     n.setParam("/kickingTheBall", false);
 }
@@ -60,7 +60,7 @@ int GetBall::whichRobotHasBall() {
     if (!holder) {
         return -1;
     }
-    ROS_INFO("Holder: %d - %d", holder->first.id, holder->second);
+    // ROS_INFO("Holder: %d - %d", holder->first.id, holder->second);
     our_team = holder->second;
     return holder->first.id;
 }
@@ -240,9 +240,9 @@ bt::Node::Status GetBall::Update (){
 		command.dribbler = true;
 		pubGetBall.publish(command);
 		ros::spinOnce();
-		ROS_INFO("GetBall skill completed.");
+		// ROS_INFO("GetBall skill completed.");
 		if (setRosParam) {
-			ROS_INFO_STREAM("setting the param to true");
+            // ROS_INFO_STREAM("setting the param to true");
 			n.setParam("/kickingTheBall", true);
 		}
 		return Status::Success;
