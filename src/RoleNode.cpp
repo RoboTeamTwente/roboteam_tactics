@@ -147,6 +147,10 @@ int main(int argc, char *argv[]) {
 
         bt::Node::Status status = currentTree->Update();
 
+        if (!sendNextSuccess) {
+            std::cout << "SendNextSuccess was false and my update was called.\n";
+        }
+
         if (sendNextSuccess && 
                 (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
@@ -163,6 +167,7 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
+                std::cout << "Role node failed! ID: " << std::to_string(currentRobotID) << "\n";
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }

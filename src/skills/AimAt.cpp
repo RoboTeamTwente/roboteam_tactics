@@ -21,6 +21,7 @@ AimAt::AimAt(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard
 
 bt::Node::Status AimAt::Update (){
 	roboteam_msgs::World world = LastWorld::get();
+	bool setRosParam = GetBool("setRosParam");
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
 	// is called before the first world state update
@@ -81,8 +82,16 @@ bt::Node::Status AimAt::Update (){
     private_bb->SetDouble("w",3.0);
     private_bb->SetDouble("radius", 0.1);
 
-	
-	return rotateAroundPoint.Update();
+    Status result = rotateAroundPoint.Update();
+	if (result == Status::Success) {
+		if (setRosParam) {
+			ROS_INFO_STREAM("setting the param to true");
+			n.setParam("/kickingTheBall", true);
+		}
+		return Status::Success;
+	} else {
+		return result;
+	}
 };
 
 } // rtt

@@ -176,7 +176,6 @@ void DemoTactic::Initialize() {
 
         // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
@@ -196,14 +195,13 @@ void DemoTactic::Initialize() {
 
         // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
         directivePub.publish(wd);
     }
 
-    start = std::chrono::steady_clock::now();
+    start = rtt::now();
 }
 
 bt::Node::Status DemoTactic::Update() {

@@ -4,7 +4,7 @@
   <node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
 
   <param name="role_iterations_per_second" type="int" value="20" />
-  <param name="num_role_nodes" type="int" value="2" />
+  <param name="num_role_nodes" type="int" value="4" />
   <param name="use_legacy_packets" type="boolean" value="false" />
 
   <node name="role1" pkg="roboteam_tactics" type="RoleNode" output="screen" />

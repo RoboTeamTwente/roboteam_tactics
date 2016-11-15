@@ -167,7 +167,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
 	if (worldposDiff.length() < 1.5*radius) { // close enough
-		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
+		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1) // oriented towards center		
 		if(true){
 		
 			roboteam_utils::Vector2 radiusdirection=center-robotPos;
@@ -270,9 +270,15 @@ bt::Node::Status RotateAroundPoint::Update (){
 			stoprobot(robotID);
 			return Status::Failure;
 		}
-	}
-	else {
-		ROS_INFO("not close enough to turn circle (center+radius)");
+	} else {
+        std::string our_color = "yellow";
+        ros::param::get("our_color", our_color);
+		ROS_INFO_STREAM(
+                "ID: "
+                << std::to_string(robotID)
+                << ", color: "
+                << our_color
+                << ": not close enough to turn circle (center+radius)");
 		stoprobot(robotID);
 		return Status::Failure;
 	}
