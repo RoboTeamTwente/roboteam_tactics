@@ -10,6 +10,7 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/Vector2f.h"
+#include "roboteam_msgs/DebugPoint.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 
@@ -19,7 +20,7 @@ namespace rtt {
             : Skill(n, name, blackboard)
             , rotateAroundPoint(n, "", private_bb) { 
         pubDribbleCurve = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-        pubDebugpoints = n.advertise<roboteam_msgs::Vector2f>("view_debug_points", 1000);
+        pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
         ROS_INFO("Dribbling");
 	}
 
@@ -64,6 +65,23 @@ double DribbleCurve::cleanAngle(double angle){
 	else {
 		return angle;
 	}
+}
+
+roboteam_utils::Vector2 DribbleCurve::saveDribbleDeceleration(roboteam_utils::Vector2 reqspeed){
+	roboteam_utils::Vector2 deceleration=prevspeed-reqspeed;
+	double timestep=1.0/60;
+	double maxdeceleration=1.0;
+	roboteam_utils::Vector2 speed;
+	if(deceleration.length() > timestep*maxdeceleration){
+		speed=prevspeed-deceleration.normalize()*maxdeceleration*timestep;
+	}
+	else {
+		speed=reqspeed;
+	}
+	
+	prevspeed=speed;
+	
+	return speed;
 }
 
 
@@ -112,37 +130,39 @@ bt::Node::Status DribbleCurve::Update() {
 	worldrotDiff=cleanAngle(worldrotDiff);
 	double worldrottoballdiff=cleanAngle(goalposDiff.angle()-robot.angle+M_PI);
 	
-	ROS_INFO("worldrotDiff: %f",worldrotDiff);
 	if(goalposDiff.length() > 0.02){
-		if((robotPos-ballPos).length() > 0.5){
+		if((robotPos-ballPos).length() > 0.2){
 			ROS_INFO("lost ball");
+			stoprobot(robotID);
 			return Status::Failure;
 		}
-		bool startdriving=false;
 		
 		roboteam_utils::Vector2 rotatearoundPos;
 		
-		if (worldrotDiff > 45.0/180.0*M_PI or worldrotDiff < -45.0/180.0*M_PI){ // oriented towards goal behind ball	
+		if (worldrotDiff > 20.0/180.0*M_PI or worldrotDiff < -20.0/180.0*M_PI){ // oriented towards goal behind ball	
+			ROS_INFO("rotate around ball");
 			rotatearoundPos=ballPos;
 		}
 		else {
 			rotatearoundPos=goalPos-goalposDiff*(fabs(worldrottoballdiff)/45.0);
 		}
-
+	
 		roboteam_utils::Vector2 facetowardsPos=goalPos*2-ballPos;
-		//ROS_INFO("behind ball");
 		
-		double radius=(rotatearoundPos-ballPos).length()+0.1;
-		
+		double radius=(rotatearoundPos-robotPos).length();
 		// debug points;
-		roboteam_msgs::Vector2f debugpoint;
-		debugpoint.x=rotatearoundPos.x;
-		debugpoint.y=rotatearoundPos.y;
+		roboteam_msgs::DebugPoint debugpoint;
+		debugpoint.name="rotatearound";
+		debugpoint.remove=false;
+		debugpoint.pos.x=rotatearoundPos.x;
+		debugpoint.pos.y=rotatearoundPos.y;
 		pubDebugpoints.publish(debugpoint);
 		
-		debugpoint.x=facetowardsPos.x;
-		debugpoint.y=facetowardsPos.y;
-		pubDebugpoints.publish(debugpoint);
+		//debugpoint.name="facetowards";
+		//debugpoint.remove=false;
+		//debugpoint.pos.x=facetowardsPos.x;
+		//debugpoint.pos.y=facetowardsPos.y;
+		//pubDebugpoints.publish(debugpoint);
 		
 		private_bb->SetInt("ROBOT_ID", robotID);
 		private_bb->SetString("center", "point");
@@ -155,11 +175,16 @@ bt::Node::Status DribbleCurve::Update() {
 	
 		double maxv=1.5;
 		// the higher worldrotDiff, the lower maxv
-	
-		if(fabs(worldrotDiff) > 0.1){
-			maxv=maxv*0.5/(fabs(worldrotDiff));
+		
+		
+		
+		if(fabs(worldrotDiff) < 45.0/180.0*M_PI){
+			maxv=maxv*(45.0/180.0*M_PI-worldrotDiff)/(45.0/180.0*M_PI);
 		}
-	
+		else {
+			maxv=0.0;
+		}
+		ROS_INFO("maxv: %f",maxv);
 		double vPconstant=1.5;
 	
 		roboteam_utils::Vector2 vtogoal=goalposDiff*-vPconstant;
@@ -169,18 +194,32 @@ bt::Node::Status DribbleCurve::Update() {
 		if(vtogoal.length() > maxv){
 			vtogoal=vtogoal/vtogoal.length()*maxv;
 		}
+		
+		
+		
+		
 		robotvtogoal=worldToRobotFrame(vtogoal, robot.angle);
-		/*
+		
 		ROS_INFO("robotvtogoal x:%f, y:%f",robotvtogoal.x, robotvtogoal.y);
 		
-		roboteam_utils::Vector2 diffPreviousRobotvtogoal=robotvtogoal-prevRobotvtogoal;
-		if(diffPreviousRobotvtogoal.length() > 0.1){
-			double timestep=1.0/60;
-			robotvtogoal=robotvtogoal+diffPreviousRobotvtogoal.normalize()/5*timestep;
+		// TODO: should improve timing accuracy, because rate is not really known.
 		
-		}
-		prevRobotvtogoal=robotvtogoal;
-		*/
+		debugpoint.name="oldrobotvtogoal";
+		debugpoint.remove=false;
+		debugpoint.pos.x=robotvtogoal.x;
+		debugpoint.pos.y=robotvtogoal.y;
+		pubDebugpoints.publish(debugpoint);
+		
+		robotvtogoal=saveDribbleDeceleration(robotvtogoal);
+		
+		ROS_INFO("robotvtogoal: x:%f, y:%f",robotvtogoal.x, robotvtogoal.y);
+		
+		debugpoint.name="robotvtogoal";
+		debugpoint.remove=false;
+		debugpoint.pos.x=robotvtogoal.x;
+		debugpoint.pos.y=robotvtogoal.y;
+		pubDebugpoints.publish(debugpoint);
+		
 		private_bb->SetDouble("extravx",robotvtogoal.x);
 		private_bb->SetDouble("extravy",robotvtogoal.y);
 		
@@ -193,7 +232,7 @@ bt::Node::Status DribbleCurve::Update() {
 		
 	}
 	rotateAroundPoint.Update();
-	
+	sleep(0.1);
 	return Status::Running;
 }
 

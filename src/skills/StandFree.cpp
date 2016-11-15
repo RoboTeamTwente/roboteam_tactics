@@ -7,6 +7,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/DebugPoint.h"
 #include "roboteam_msgs/DebugLine.h"
 #include <vector>
 
@@ -17,6 +18,41 @@ StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bl
         , avoidRobots(n, "", private_bb) {
             ROS_INFO_STREAM("Standing Free");
             debugPub = n.advertise<roboteam_msgs::DebugLine>("view_debug_lines", 1000);
+            debugPubPoint = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
+}
+
+boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
+    // Find out which of these robots are standing between me and the one I'm looking at
+    std::vector<roboteam_utils::Vector2> robotsInTheWay;
+    for (size_t i = 0; i < watchOutForTheseBots.size(); i++) {
+        roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(watchOutForTheseBots.at(i).pos.x, watchOutForTheseBots.at(i).pos.y);
+        if ((robotPos - targetPos).length() < (myPos-targetPos).length()) {
+            robotsInTheWay.push_back(robotPos);
+        }
+    }
+
+    double distanceFromPoint = GetDouble("distanceFromPoint");
+    for (int i = 0; i < robotsInTheWay.size(); i++) {
+        // ROS_INFO_STREAM("i: " << i);
+        Cone cone(targetPos, robotsInTheWay.at(i), distanceFromPoint);
+        // ROS_INFO_STREAM("IsWithinCone " << i << ": " << cone.IsWithinCone(myPos));
+        if (cone.IsWithinCone(myPos)) {
+            // ROS_INFO_STREAM("ok, number " << i << " is in the way");
+            for (int j = 0; j < robotsInTheWay.size(); j++) {
+                // ROS_INFO_STREAM("j: " << j);
+                if (i!=j) {
+                    Cone cone2(targetPos, robotsInTheWay.at(j), distanceFromPoint);
+                    if (cone.DoConesOverlap(cone2)) {
+                        // ROS_INFO_STREAM("overlap!");
+                        cone = cone.MergeCones(cone2);
+                        // ROS_INFO_STREAM("merged " << i << " with " << j);
+                    }
+                }
+            }
+            return cone;
+        }
+    }
+    return boost::none;
 }
 
 bt::Node::Status StandFree::Update() {
@@ -51,89 +87,198 @@ bt::Node::Status StandFree::Update() {
     bb2->SetBool("check_move", true);
 	CanSeePoint canSeePoint("", bb2);
 
-    // auto robotsBothTeams = world.them;
-    std::vector<roboteam_msgs::WorldRobot> robotsBothTeams;
+    // Fill a vector containing all the robots except me and the one I'm looking at
+    std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots;
     for (size_t i = 0; i < world.us.size(); i++) {
         if (!(GetString("whichTeam") == "us" && i == theirID) && i != myID) {
-            robotsBothTeams.insert(robotsBothTeams.end(), world.us.at(i));
+            watchOutForTheseBots.insert(watchOutForTheseBots.end(), world.us.at(i));
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         if (!(GetString("whichTeam") == "them" && i == theirID)) {
-            robotsBothTeams.insert(robotsBothTeams.end(), world.them.at(i));
+            watchOutForTheseBots.insert(watchOutForTheseBots.end(), world.them.at(i));
         }
     }
 
-    std::vector<roboteam_utils::Vector2> robotsInTheWay;
-    for (size_t i = 0; i < robotsBothTeams.size(); i++) {
-        roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robotsBothTeams.at(i).pos.x, robotsBothTeams.at(i).pos.y);
-        if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
-            robotsInTheWay.push_back(robotPos);
-            ROS_INFO_STREAM("robot " << i << " has ID " << robotsBothTeams.at(i).id);
-        }
-    }
-
-    ROS_INFO_STREAM("number of robots in the way: " << robotsInTheWay.size());
     roboteam_utils::Vector2 nearestFreePos = myPos;
-    for (int i = 0; i < robotsInTheWay.size(); i++) {
-        // ROS_INFO_STREAM("i: " << i);
-        Cone cone(theirPos, robotsInTheWay.at(i), distanceFromPoint);
-        // ROS_INFO_STREAM("IsWithinCone " << i << ": " << cone.IsWithinCone(myPos));
-        if (cone.IsWithinCone(myPos)) {
-            // ROS_INFO_STREAM("ok, number " << i << " is in the way");
-            for (int j = 0; j < robotsInTheWay.size(); j++) {
-                // ROS_INFO_STREAM("j: " << j);
-                if (i!=j) {
-                    Cone cone2(theirPos, robotsInTheWay.at(j), distanceFromPoint);
-                    if (cone.DoConesOverlap(cone2)) {
-                        // ROS_INFO_STREAM("overlap!");
-                        cone = cone.MergeCones(cone2);
-                        // robotsInTheWay.erase(robotsInTheWay.begin()+j);
-                        ROS_INFO_STREAM("merged " << i << " with " << j);
-                    }
-                }
-            }
-            // ROS_INFO_STREAM("done merging");
-            nearestFreePos = cone.ClosestPointOnSide(myPos);
 
-            roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
-            coneSide1 = coneSide1.scale(1/coneSide1.length());
-            roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-cone.angle);
-            coneSide2 = coneSide2.scale(1/coneSide2.length());
-            
-            roboteam_msgs::DebugLine firstLine;
-            firstLine.name = "firstLine";
-            roboteam_msgs::Vector2f startLine1;
-            startLine1.x = cone.start.x;
-            startLine1.y = cone.start.y;
-            roboteam_msgs::Vector2f endLine1;
-            endLine1.x = coneSide1.x + cone.start.x;
-            endLine1.y = coneSide1.y + cone.start.y;
-            firstLine.points.push_back(startLine1);
-            firstLine.points.push_back(endLine1);
-            debugPub.publish(firstLine);
+    // Make a Cover Cone for the robots standing between me and the target
+    boost::optional<Cone> coneRobots = MakeCoverCone(watchOutForTheseBots, myPos, theirPos);
+    if (coneRobots) {
+        Cone cone = *coneRobots;
+        nearestFreePos = cone.ClosestPointOnSide(myPos);
 
-            roboteam_msgs::DebugLine secondLine;
-            secondLine.name = "secondLine";
-            roboteam_msgs::Vector2f startLine2;
-            startLine2.x = cone.start.x;
-            startLine2.y = cone.start.y;
-            roboteam_msgs::Vector2f endLine2;
-            endLine2.x = coneSide2.x + cone.start.x;
-            endLine2.y = coneSide2.y + cone.start.y;
-            secondLine.points.push_back(startLine2);
-            secondLine.points.push_back(endLine2);
-            debugPub.publish(secondLine);
+        // Draw the lines of the cone in rqt_view
+        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
+        coneSide1 = coneSide1.scale(1/coneSide1.length());
+        roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-cone.angle);
+        coneSide2 = coneSide2.scale(1/coneSide2.length());
 
-            break;
-        }
+        roboteam_msgs::DebugLine firstLine;
+        firstLine.name = "firstLine";
+        roboteam_msgs::Vector2f startLine1;
+        startLine1.x = cone.start.x;
+        startLine1.y = cone.start.y;
+        roboteam_msgs::Vector2f endLine1;
+        endLine1.x = coneSide1.x + cone.start.x;
+        endLine1.y = coneSide1.y + cone.start.y;
+        firstLine.points.push_back(startLine1);
+        firstLine.points.push_back(endLine1);
+        debugPub.publish(firstLine);
+
+        roboteam_msgs::DebugLine secondLine;
+        secondLine.name = "secondLine";
+        roboteam_msgs::Vector2f startLine2;
+        startLine2.x = cone.start.x;
+        startLine2.y = cone.start.y;
+        roboteam_msgs::Vector2f endLine2;
+        endLine2.x = coneSide2.x + cone.start.x;
+        endLine2.y = coneSide2.y + cone.start.y;
+        secondLine.points.push_back(startLine2);
+        secondLine.points.push_back(endLine2);
+        debugPub.publish(secondLine);
     }
 
+    // Make a Cover Cone for the robots standing between me and the goal
+    roboteam_utils::Vector2 goalPos(-3.0, 0.0);
+    boost::optional<Cone> coneGoal = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
+    if (coneGoal) {
+        Cone cone = *coneGoal;
+        
+        if (coneRobots) {
+            nearestFreePos = cone.ClosestPointOnSideTwoCones(*coneRobots, myPos);
+            
+        } else {
+            nearestFreePos = cone.ClosestPointOnSide(myPos);
+        }
+        
+
+        // Draw the lines of the cone in rqt_view
+        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
+        coneSide1 = coneSide1.scale(1/coneSide1.length());
+        roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-cone.angle);
+        coneSide2 = coneSide2.scale(1/coneSide2.length());
+
+        roboteam_msgs::DebugLine firstLine;
+        firstLine.name = "thirdLine";
+        roboteam_msgs::Vector2f startLine1;
+        startLine1.x = cone.start.x;
+        startLine1.y = cone.start.y;
+        roboteam_msgs::Vector2f endLine1;
+        endLine1.x = coneSide1.x + cone.start.x;
+        endLine1.y = coneSide1.y + cone.start.y;
+        firstLine.points.push_back(startLine1);
+        firstLine.points.push_back(endLine1);
+        debugPub.publish(firstLine);
+
+        roboteam_msgs::DebugLine secondLine;
+        secondLine.name = "fourthLine";
+        roboteam_msgs::Vector2f startLine2;
+        startLine2.x = cone.start.x;
+        startLine2.y = cone.start.y;
+        roboteam_msgs::Vector2f endLine2;
+        endLine2.x = coneSide2.x + cone.start.x;
+        endLine2.y = coneSide2.y + cone.start.y;
+        secondLine.points.push_back(startLine2);
+        secondLine.points.push_back(endLine2);
+        debugPub.publish(secondLine);
+    }
+
+    roboteam_msgs::DebugPoint targetPosition;
+    targetPosition.name = "targetPosition";
+    targetPosition.pos.x = nearestFreePos.x;
+    targetPosition.pos.y = nearestFreePos.y;
+    debugPubPoint.publish(targetPosition);
+
+    // // Find out which of these robots are standing between me and the one I'm looking at
+    // std::vector<roboteam_utils::Vector2> robotsInTheWay;
+    // for (size_t i = 0; i < robotsBothTeams.size(); i++) {
+    //     roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robotsBothTeams.at(i).pos.x, robotsBothTeams.at(i).pos.y);
+    //     if ((robotPos - theirPos).length() < (myPos-theirPos).length()) {
+    //         robotsInTheWay.push_back(robotPos);
+    //         // ROS_INFO_STREAM("robot " << i << " has ID " << robotsBothTeams.at(i).id);
+    //     }
+    // }
+
+    // // Find out which of these robots are standing between me and the goal
+    // roboteam_utils::Vector2 goalPos(-3.0, 0.0);
+    // std::vector<roboteam_utils::Vector2> robotsInTheWayOfGoal;
+    // for (size_t i = 0; i < robotsBothTeams.size(); i++) {
+    //     roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robotsBothTeams.at(i).pos.x, robotsBothTeams.at(i).pos.y);
+    //     if ((robotPos - goalPos).length() < (myPos-goalPos).length()) {
+    //         robotsInTheWayOfGoal.push_back(robotPos);
+    //     }
+    // }
+
+
+    // boost::optional<Cone> a = MakeCoverCone();
+    // if (a) {
+    //     Cone cone = *a;
+    // } else {
+
+    // }
 
 
 
-    // ROS_INFO_STREAM("myPos: " << myPos.x << " " << myPos.y);
-    // ROS_INFO_STREAM("nearestFreePos: " << nearestFreePos.x << " " << nearestFreePos.y);
+    // // ROS_INFO_STREAM("number of robots in the way: " << robotsInTheWay.size());
+    // roboteam_utils::Vector2 nearestFreePos = myPos;
+    // for (int i = 0; i < robotsInTheWay.size(); i++) {
+    //     // ROS_INFO_STREAM("i: " << i);
+    //     Cone cone(theirPos, robotsInTheWay.at(i), distanceFromPoint);
+    //     // ROS_INFO_STREAM("IsWithinCone " << i << ": " << cone.IsWithinCone(myPos));
+    //     if (cone.IsWithinCone(myPos)) {
+    //         // ROS_INFO_STREAM("ok, number " << i << " is in the way");
+    //         for (int j = 0; j < robotsInTheWay.size(); j++) {
+    //             // ROS_INFO_STREAM("j: " << j);
+    //             if (i!=j) {
+    //                 Cone cone2(theirPos, robotsInTheWay.at(j), distanceFromPoint);
+    //                 if (cone.DoConesOverlap(cone2)) {
+    //                     // ROS_INFO_STREAM("overlap!");
+    //                     cone = cone.MergeCones(cone2);
+    //                     // ROS_INFO_STREAM("merged " << i << " with " << j);
+    //                 }
+    //             }
+    //         }
+
+
+
+
+    //         // ROS_INFO_STREAM("done merging");
+    //         nearestFreePos = cone.ClosestPointOnSide(myPos);
+
+    //         roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
+    //         coneSide1 = coneSide1.scale(1/coneSide1.length());
+    //         roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-cone.angle);
+    //         coneSide2 = coneSide2.scale(1/coneSide2.length());
+            
+    //         // Draw the lines of the cone in rqt_view
+    //         roboteam_msgs::DebugLine firstLine;
+    //         firstLine.name = "firstLine";
+    //         roboteam_msgs::Vector2f startLine1;
+    //         startLine1.x = cone.start.x;
+    //         startLine1.y = cone.start.y;
+    //         roboteam_msgs::Vector2f endLine1;
+    //         endLine1.x = coneSide1.x + cone.start.x;
+    //         endLine1.y = coneSide1.y + cone.start.y;
+    //         firstLine.points.push_back(startLine1);
+    //         firstLine.points.push_back(endLine1);
+    //         debugPub.publish(firstLine);
+
+    //         roboteam_msgs::DebugLine secondLine;
+    //         secondLine.name = "secondLine";
+    //         roboteam_msgs::Vector2f startLine2;
+    //         startLine2.x = cone.start.x;
+    //         startLine2.y = cone.start.y;
+    //         roboteam_msgs::Vector2f endLine2;
+    //         endLine2.x = coneSide2.x + cone.start.x;
+    //         endLine2.y = coneSide2.y + cone.start.y;
+    //         secondLine.points.push_back(startLine2);
+    //         secondLine.points.push_back(endLine2);
+    //         debugPub.publish(secondLine);
+    //         break;
+    //     }
+    // }
+
 
     bool kickingTheBall;
     if (setRosParam) {
@@ -141,18 +286,6 @@ bt::Node::Status StandFree::Update() {
     } else {
         kickingTheBall = true;
     }
-
-
-
-    // if (nearestFreePos == myPos && kickingTheBall) {
-    //     double angleGoal = (theirPos-myPos).angle();
-    //     private_bb->SetInt("ROBOT_ID", myID);
-    //     private_bb->SetDouble("xGoal", myPos.x);
-    //     private_bb->SetDouble("yGoal", myPos.y);
-    //     private_bb->SetDouble("angleGoal", myAngle);
-    //     avoidRobots.Update();
-    //     return Status::Success;
-    // }
 
     double angleGoal = (theirPos-myPos).angle();
     private_bb->SetInt("ROBOT_ID", myID);

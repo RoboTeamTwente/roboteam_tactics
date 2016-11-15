@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     bb->SetBool("StandFree_A_setRosParam", true);
     bb->SetString("StandFree_A_whichTeam", "us");
     bb->SetDouble("StandFree_A_distanceFromPoint", 0.4);
-    bb->SetBool("GetBall_A_setRosParam", false);
+    bb->SetBool("AimAt_A_setRosParam", false);
     bb->SetBool("GetBall_A_intercept", true);
     bb->SetDouble("GetBall_A_getBallAtX", 0.0);
     bb->SetDouble("GetBall_A_getBallAtY", 0.0);
