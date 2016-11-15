@@ -17,6 +17,8 @@ public:
 
 	double cleanAngle(double angle);
     roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
+    roboteam_utils::Vector2 saveDribbleDeceleration(roboteam_utils::Vector2 reqspeed);
+    
     /*
     static VerificationMap required_params() {
         VerificationMap params;
@@ -35,7 +37,7 @@ private:
 	int robotID;
 	roboteam_utils::Vector2 robotvtogoal=roboteam_utils::Vector2(0.0,0.0);
 	RotateAroundPoint rotateAroundPoint;
-	roboteam_utils::Vector2 prevRobotvtogoal=roboteam_utils::Vector2(0.0,0.0);
+	roboteam_utils::Vector2 prevspeed=roboteam_utils::Vector2(0.0,0.0);
 };
 
 

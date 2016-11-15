@@ -64,6 +64,7 @@ const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullpt
     Vector goal = get_goal();
     Position opp = get_opp(bot);
     double x = (opp.location().dist(goal) - 9) / DISTANCE_DENOMINATOR;
+    reason("[distance=%f; score=%f]", opp.location().dist(goal), x*x);
     return x*x;
     // score = ((dist - 9) / DISTANCE_DENOMINATOR)^2, 0 at dist=9, 10 at dist=0, quadratic growth
 };
@@ -75,6 +76,7 @@ const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nul
     double tgt_angle = goal.angle();
     double angle_diff = fabs(tgt_angle - bot.angle);
     double x = (angle_diff - M_PI) / ORIENTATION_DENOMINATOR;
+    reason("[orientation diff=%f; score=%f]", angle_diff, (x*x)/3.0);
     return (x*x) / 3.0;
 };
 
@@ -108,6 +110,8 @@ const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string*
     return POTENTIAL_CROSS_DANGER;
 };
 
+const std::vector<DangerFactor> DEFAULT_FACTORS({distance, orientation, can_see_our_goal, has_ball});
+
 double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors, 
                     bool include_cross, unsigned int preferred) {
     double score = 0.0;
@@ -121,7 +125,7 @@ double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors,
     if (bot.id == preferred) {
         score += 10.0;
     }
-    DEBUG_INFO_DANGER_FINDER("Reasoning for bot %d, final score=%f: %s", bot.id, score, reasoning);
+    DEBUG_INFO_DANGER_FINDER("Reasoning for bot %d, final score=%f: %s", bot.id, score, reasoning.c_str());
     return score;
 }
 
