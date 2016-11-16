@@ -4,8 +4,7 @@
 #include <random>
 #include <limits>
 
-#include "unique_id/unique_id.h"
-
+#include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/DemoTactic.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -14,8 +13,8 @@
 
 namespace rtt {
 
-DemoTactic::DemoTactic(bt::Blackboard::Ptr blackboard)
-        : Tactic(blackboard)
+DemoTactic::DemoTactic(std::string name, bt::Blackboard::Ptr blackboard)
+        : Tactic(name, blackboard) 
         {}
 
 template<typename T>
@@ -82,8 +81,7 @@ void DemoTactic::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
 
-
-    if (RobotDealer::get_available_robots().size() < 3) {
+    if (RobotDealer::get_available_robots().size() < 4) {
         std::cout << "Not enough robots, cannot initialize.\n";
         // TODO: Want to pass failure here as well!
         return;
@@ -100,10 +98,10 @@ void DemoTactic::Initialize() {
     int def_bot = robots.back();
     delete_from_vector(robots, def_bot);
 
-    // int keeper_bot = robots.back();
-    // delete_from_vector(robots, keeper_bot);
+    int keeper_bot = robots.back();
+    delete_from_vector(robots, keeper_bot);
 
-    claim_robots({score_bot, attack_bot, def_bot/*, keeper_bot*/});
+    claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
     std::string our_field_side = "left";
@@ -172,6 +170,25 @@ void DemoTactic::Initialize() {
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.node_id = claim_role_node();
+        wd.tree = "SecondaryKeeper";
+        wd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        wd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        directivePub.publish(wd);
+    }
+
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        bb.SetInt("ROBOT_ID", keeper_bot);
+
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.node_id = claim_role_node();
         wd.tree = "KeeperBlock";
         wd.blackboard = bb.toMsg();
 
@@ -183,7 +200,7 @@ void DemoTactic::Initialize() {
         directivePub.publish(wd);
     }
 
-    start = std::chrono::steady_clock::now();
+    start = rtt::now();
 }
 
 bt::Node::Status DemoTactic::Update() {

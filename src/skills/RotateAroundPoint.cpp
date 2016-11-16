@@ -15,7 +15,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Math.h";
+#include "roboteam_tactics/utils/Math.h"
 
 namespace rtt {
 	
@@ -158,16 +158,15 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double targetAngle=computeAngle(robotPos, faceTowardsPos);
 
-	roboteam_utils::Vector2 worldposDiff = center-robotPos;
-	roboteam_utils::Vector2 targetVector = roboteam_utils::Vector2(radius*cos(targetAngle),radius*sin(targetAngle));
-	roboteam_utils::Vector2 targetPos=targetVector+center;
+	roboteam_utils::Vector2 worldposDiff = center-robotPos;;
+
 
 	
 
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
 	if (worldposDiff.length() < 1.5*radius) { // close enough
-		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1){ // oriented towards center		
+		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1) // oriented towards center		
 		if(true){
 		
 			roboteam_utils::Vector2 radiusdirection=center-robotPos;
@@ -270,9 +269,15 @@ bt::Node::Status RotateAroundPoint::Update (){
 			stoprobot(robotID);
 			return Status::Failure;
 		}
-	}
-	else {
-		ROS_INFO("not close enough to turn circle (center+radius)");
+	} else {
+        std::string our_color = "yellow";
+        ros::param::get("our_color", our_color);
+		ROS_INFO_STREAM(
+                "ID: "
+                << std::to_string(robotID)
+                << ", color: "
+                << our_color
+                << ": not close enough to turn circle (center+radius)");
 		stoprobot(robotID);
 		return Status::Failure;
 	}

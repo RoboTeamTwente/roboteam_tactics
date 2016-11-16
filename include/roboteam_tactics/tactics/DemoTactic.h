@@ -11,7 +11,7 @@ namespace rtt {
 
 class DemoTactic : public Tactic {
     public:
-    DemoTactic(bt::Blackboard::Ptr blackboard = nullptr);
+    DemoTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize();
 

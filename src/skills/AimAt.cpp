@@ -82,14 +82,15 @@ bt::Node::Status AimAt::Update (){
     private_bb->SetDouble("w",3.0);
     private_bb->SetDouble("radius", 0.1);
 
-	if (rotateAroundPoint.Update() == Status::Success) {
+    Status result = rotateAroundPoint.Update();
+	if (result == Status::Success) {
 		if (setRosParam) {
 			ROS_INFO_STREAM("setting the param to true");
 			n.setParam("/kickingTheBall", true);
 		}
 		return Status::Success;
 	} else {
-		return rotateAroundPoint.Update();
+		return result;
 	}
 };
 

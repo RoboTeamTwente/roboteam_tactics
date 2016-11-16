@@ -71,6 +71,8 @@ class CanInterceptBall : public Condition {
             double range = bot_range(t, (ball).angle());
             //DEBUG_INFO_ICPT("At t=%f: bot(%f, %f) ball(%f, %f) dist=%f, range=%f angle=%f\n\n", t, bot.x, bot.y, ball.x, ball.y,
             //    ball.dist(bot), range, ball.angle());
+            // DEBUG_INFO_ICPT("At t=%f: bot(%f, %f) ball(%f, %f) dist=%f, range=%f angle=%f\n\n", t, bot.x, bot.y, ball.x, ball.y,
+                // ball.dist(bot), range, ball.angle());
             if (fabs(ball.dist(bot) - range) < ICPT_RADIUS) {
                 time = t;
                 icpt_pos = ball;

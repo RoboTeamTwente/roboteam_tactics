@@ -87,9 +87,9 @@ bt::Node::Status Block::Update() {
             goal.rot -= M_PI;
         if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
         
-        ROS_INFO("mypos=(%f, %f, %f), tgtpos=(%f, %f, %f), block=(%f, %f), goal=(%f, %f, %f)",
-            mypos.x, mypos.y, mypos.rot, tgtpos.x, tgtpos.y, tgtpos.rot,
-            block.x, block.y, goal.x, goal.y, goal.rot);
+        // ROS_INFO("mypos=(%f, %f, %f), tgtpos=(%f, %f, %f), block=(%f, %f), goal=(%f, %f, %f)",
+            // mypos.x, mypos.y, mypos.rot, tgtpos.x, tgtpos.y, tgtpos.rot,
+            // block.x, block.y, goal.x, goal.y, goal.rot);
         
         if (!goal.real()) return bt::Node::Status::Running;
         

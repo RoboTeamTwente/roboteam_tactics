@@ -5,8 +5,8 @@
 
 namespace rtt {
 
-BasicAttackTactic::BasicAttackTactic(bt::Blackboard::Ptr blackboard)
-        : Tactic(blackboard) 
+BasicAttackTactic::BasicAttackTactic(std::string name, bt::Blackboard::Ptr blackboard)
+        : Tactic(name, blackboard) 
         {}
 
 bt::Node::Status BasicAttackTactic::Update() {

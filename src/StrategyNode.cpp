@@ -26,14 +26,15 @@ std::mt19937 rng(rd());
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
     auto uuid = unique_id::fromMsg(msg->token);
 
-    std::cout << "Received a feedback on token " << uuid << "!\n";
-
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
+        std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
+        std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
+        std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
@@ -87,15 +88,15 @@ int main(int argc, char *argv[]) {
             rate.sleep();
         }
     }
-
-    rtt::RobotDealer::initialize_robots({0, 1, 2});
-    rtt::RobotDealer::initialize_role_nodes();
     
     // Wait for robots to appear
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
         rate.sleep();
     }
+
+    rtt::RobotDealer::initialize_robots({0, 1, 2, 3/*, 4, 5*/});
+    rtt::RobotDealer::initialize_role_nodes();
 
     std::cout << "More than one robot found. Starting...\n";
 

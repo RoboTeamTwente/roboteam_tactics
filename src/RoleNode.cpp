@@ -120,7 +120,10 @@ int main(int argc, char *argv[]) {
 
     std::string name = ros::this_node::getName();
 
-    ros::Rate fps60(60);
+    int iterationsPerSecond = 60;
+    ros::param::get("role_iterations_per_second", iterationsPerSecond);
+    ros::Rate sleeprate(iterationsPerSecond);
+    std::cout << "Iterations per second: " << std::to_string(iterationsPerSecond) << "\n";
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
@@ -138,11 +141,15 @@ int main(int argc, char *argv[]) {
         ros::spinOnce();
 
         if (!currentTree){
-            fps60.sleep();
+            sleeprate.sleep();
             continue;
         }
 
         bt::Node::Status status = currentTree->Update();
+
+        if (!sendNextSuccess) {
+            std::cout << "SendNextSuccess was false and my update was called.\n";
+        }
 
         if (sendNextSuccess && 
                 (status == bt::Node::Status::Success
@@ -160,6 +167,7 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
+                std::cout << "Role node failed! ID: " << std::to_string(currentRobotID) << "\n";
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }
@@ -169,7 +177,7 @@ int main(int argc, char *argv[]) {
             currentTree = nullptr;
         }
 
-        fps60.sleep();
+        sleeprate.sleep();
     }
 
     return 0;
