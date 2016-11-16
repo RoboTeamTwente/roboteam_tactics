@@ -3,6 +3,7 @@
 #include "ros/ros.h"
 
 #include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_utils/Vector2.h"
 
 namespace rtt {
 
@@ -17,7 +18,9 @@ private:
 
     AvoidRobots avoidRobots;
 
-    float goal_x, goal_y;
+    roboteam_utils::Vector2 goal;
+    float goal_angle;
+    bool pick_new_goal;
 };
 
 } // rtt
