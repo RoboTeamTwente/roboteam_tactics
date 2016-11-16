@@ -15,9 +15,9 @@
 
 // LIST DEBUG NAMES HERE:
 
-#define DEBUG_DANGER_FINDER
-
-#include "roboteam_tactics/generated/debug.h"
+// #define DEBUG_DANGER_FINDER
+//
+// #include "roboteam_tactics/generated/debug.h"
 
 namespace rtt {
 
@@ -47,7 +47,7 @@ class Condition : public Leaf {
     virtual Status Update() {
         return Status::Invalid;
     }
-    
+
     /**
      * @brief Returns a set of world states in which this Condition should succeed.
      * For use in testing. See test/ConditionsTest.cpp
@@ -55,14 +55,14 @@ class Condition : public Leaf {
     virtual std::vector<roboteam_msgs::World> success_states() const {
         return std::vector<roboteam_msgs::World>();
     }
-    
+
     /**
      * @brief Returns a set of world states in which this Condition should fail.
      * For use in testing. See test/ConditionsTest.cpp
      */
     virtual std::vector<roboteam_msgs::World> fail_states() const {
         return std::vector<roboteam_msgs::World>();
-    }    
+    }
 } ;
 
 class Tactic : public bt::Leaf {
@@ -112,13 +112,13 @@ class Tactic : public bt::Leaf {
 
     std::string claim_role_node() {
         std::string node = RobotDealer::claim_role_node();
-        claimed_role_nodes.insert(node); 
+        claimed_role_nodes.insert(node);
         return node;
     }
 
     void claim_role_nodes(size_t node_count) {
         for (size_t i = 0; i < node_count; i++) {
-            claim_role_node();       
+            claim_role_node();
         }
     }
 

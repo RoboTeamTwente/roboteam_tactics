@@ -9,6 +9,9 @@
 #include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/utils/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
+#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_msgs/GeometryData.h"
+#include "roboteam_msgs/World.h"
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -26,11 +29,15 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 bool is_digits(const std::string &str) {
-    return std::all_of(str.begin(), str.end(), ::isdigit); 
+    return std::all_of(str.begin(), str.end(), ::isdigit);
 }
-            
+
 void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 	rtt::LastWorld::set(*world);
+}
+
+void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
+    rtt::LastWorld::set_field(geometry->field);
 }
 
 int main(int argc, char **argv) {
@@ -70,13 +77,13 @@ How to use:
 
     for (size_t i = 1; i < arguments.size(); i++) {
         std::vector<std::string> typeSplit;
-        
+
         auto arg = arguments.at(i);
-        
+
         auto nameSplit = split(arg, '=');
         auto name = nameSplit.at(0);
         auto rest = nameSplit.at(1);
-        
+
         // Aggregate all the splitted = into one string
         // This happens if you try to set a value that contains multiple equals
         // (Then you only want to split on the first)
@@ -104,8 +111,8 @@ How to use:
                 argType = "string";
             }
         }
-        
-        
+
+
         // Uncomment to see the arguments
         // std::cout << "\n[Arg]\n";
         // std::cout << "Type: " << argType << "\n";
@@ -124,14 +131,15 @@ How to use:
             std::cout << "Unknown arg type: " << argType << "\n";
         }
     }
-    
+
     //auto skill = rtt::make_skill<>(n, testClass, "", bb);
     rtt::print_blackboard(bb);
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1));
+    ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
+    ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
-    
+
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, true);
         runner.run_until([]() { ros::spinOnce(); return ros::ok(); });
@@ -144,7 +152,7 @@ How to use:
             }
             fps60.sleep();
 
-        }   
+        }
     }
 
     std::cout << "Test of " << testClass << " completed!\n";
