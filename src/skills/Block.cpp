@@ -105,6 +105,7 @@ bt::Node::Status Block::Update() {
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     
     bt::Node::Status gtpStatus = goToPos->Update();
+    ROS_INFO("gtpStatus=%d", gtpStatus);
     if (gtpStatus != bt::Node::Status::Running) {
         gtp_valid = false;
     }
