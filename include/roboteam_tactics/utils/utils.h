@@ -6,7 +6,7 @@
 #include <vector>
 #include <iostream>
 
-#include "roboteam_tactics/bt/Blackboard.hpp"
+#include "roboteam_tactics/bt.hpp"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/World.h"
@@ -61,5 +61,7 @@ using seconds = std::chrono::seconds;
 time_point now();
 
 seconds time_difference(time_point start, time_point end);
+
+std::string describe_status(bt::Node::Status status);
 
 } // rtt

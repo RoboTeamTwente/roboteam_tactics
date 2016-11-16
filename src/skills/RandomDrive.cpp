@@ -40,7 +40,7 @@ bt::Node::Status RandomDrive::Update() {
         goal.x = get_rand_real(-half_field_length, half_field_length);
         goal.y = get_rand_real(-half_field_width, half_field_width);
 
-        goal_angle = get_rand_real(0, M_PI);
+        goal_angle = get_rand_real(-M_PI, M_PI);
 
         roboteam_msgs::DebugPoint point = roboteam_msgs::DebugPoint();
         point.name = "random drive " + std::to_string(debug_id);

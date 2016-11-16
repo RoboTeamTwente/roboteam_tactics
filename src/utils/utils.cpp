@@ -207,4 +207,14 @@ seconds time_difference(time_point start, time_point end) {
     return std::chrono::duration_cast<std::chrono::seconds>(end - start);
 }
 
+std::string describe_status(bt::Node::Status status) {
+    switch (status) {
+        case bt::Node::Status::Success: return "Success";
+        case bt::Node::Status::Failure: return "Failure";
+        case bt::Node::Status::Invalid: return "Invalid";
+        case bt::Node::Status::Running: return "Running";
+        default: return "<<Something is very, very broken>>";
+    }
+}
+
 } // rtt

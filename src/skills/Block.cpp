@@ -28,7 +28,6 @@ Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skil
     block_id = blackboard->GetInt("BLOCK_ID");
     constant = block_id < 0;
     invert = blackboard->GetBool("invert_direction");
-    gtp_valid = false;
 }
 
 void normalize(Position& pos) {
@@ -43,7 +42,7 @@ void normalize(Position& pos) {
 }
 
 bt::Node::Status Block::Update() {
-    if (!gtp_valid) {
+    if (!avoidBots) {
         roboteam_msgs::WorldRobot me, tgt;
 
         {
@@ -89,18 +88,19 @@ bt::Node::Status Block::Update() {
         private_bb->SetDouble("angleGoal", goal.rot);
         private_bb->SetBool("endPoint", true);
         private_bb->SetBool("dribbler", false);
-        goToPos = std::make_unique<GoToPos>(n, "", private_bb);
 
-        gtp_valid = true;
+        avoidBots = std::make_unique<AvoidRobots>(n, "", private_bb);
     }
     
     ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     
-    bt::Node::Status gtpStatus = goToPos->Update();
-    // ROS_INFO("gtpStatus=%s", bt::statusToString(gtpStatus).c_str());
-
+    bt::Node::Status gtpStatus = avoidBots->Update();
+    std::string desc = describe_status(gtpStatus);
+    ROS_INFO("gtpStatus=%s", desc.c_str());
     if (gtpStatus != bt::Node::Status::Running) {
-        gtp_valid = false;
+        ROS_INFO("invalidated");
+        avoidBots.reset();
+        avoidBots = std::unique_ptr<AvoidRobots>();
     }
 
     return gtpStatus == bt::Node::Status::Invalid || gtpStatus == bt::Node::Status::Failure ? gtpStatus : bt::Node::Status::Running;
