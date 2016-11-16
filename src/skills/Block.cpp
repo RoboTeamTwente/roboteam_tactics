@@ -4,6 +4,7 @@
 #include "roboteam_tactics/skills/Block.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -42,7 +43,8 @@ void normalize(Position& pos) {
 }
 
 bt::Node::Status Block::Update() {
-    if (!gtp_valid) {
+    if (!avoidBots) {
+        ROS_INFO("avoid invalid");
         roboteam_msgs::World world = LastWorld::get();
         roboteam_msgs::WorldRobot *me = nullptr, *tgt = nullptr;
         for (auto& bot : world.us) {
@@ -99,15 +101,18 @@ bt::Node::Status Block::Update() {
         private_bb->SetDouble("angleGoal", goal.rot);
         private_bb->SetBool("endPoint", true);
         private_bb->SetBool("dribbler", false);
-        goToPos = std::make_unique<GoToPos>(n, "", private_bb);
+        avoidBots = std::make_unique<AvoidRobots>(n, "", private_bb);
     }
     
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     
-    bt::Node::Status gtpStatus = goToPos->Update();
-    ROS_INFO("gtpStatus=%d", gtpStatus);
+    bt::Node::Status gtpStatus = avoidBots->Update();
+    std::string desc = describe_status(gtpStatus);
+    ROS_INFO("gtpStatus=%s", desc.c_str());
     if (gtpStatus != bt::Node::Status::Running) {
-        gtp_valid = false;
+        ROS_INFO("invalidated");
+        avoidBots.reset();
+        avoidBots = std::unique_ptr<AvoidRobots>();
     }
     return gtpStatus == bt::Node::Status::Invalid || gtpStatus == bt::Node::Status::Failure ? gtpStatus : bt::Node::Status::Running;
 }

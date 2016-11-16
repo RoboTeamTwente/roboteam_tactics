@@ -4,7 +4,7 @@
 
 #include "ros/ros.h"
 
-#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
@@ -62,8 +62,8 @@ public:
     std::string node_name() { return "Block"; }
 private:
     BlockPos* pos;
-    std::unique_ptr<GoToPos> goToPos;
-    bool gtp_valid;
+    std::unique_ptr<AvoidRobots> avoidBots;
+    bool avoid_valid;
     ros::NodeHandle n;
     unsigned int my_id, tgt_id, block_id;
     bool constant, invert;

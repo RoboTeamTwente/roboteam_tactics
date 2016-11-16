@@ -1,6 +1,7 @@
 #include "roboteam_tactics/skills/KeeperBlock.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_tactics/utils/SkillFactory.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
     
@@ -36,7 +37,7 @@ bt::Node::Status KeeperBlock::Update() {
     reevaluate_target();
     if (!impl) return bt::Node::Status::Running;
     bt::Node::Status stat = impl->Update();
-    
+    ROS_INFO("Block Status: %s", describe_status(stat).c_str());
     // Keeping is never done, unless something failed elsewhere.
     return stat == bt::Node::Status::Invalid ? stat : bt::Node::Status::Running;
 }
