@@ -15,7 +15,7 @@
 
 // LIST DEBUG NAMES HERE:
 
-//#define DEBUG_DANGER_FINDER
+// #define DEBUG_DANGER_FINDER
 
 #include "roboteam_tactics/generated/debug.h"
 

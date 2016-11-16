@@ -10,8 +10,13 @@ add_dependencies(alltrees
     generate_json_t
     )
 
-target_link_libraries(alltrees tactics)
+target_link_libraries(alltrees
+    skills
+    conditions
+    tactics
+    )
 
-set(JSON_FILES ${JSON_FILES} PARENT_SCOPE)
-
-target_link_libraries(alltrees tactics)
+set(JSON_FILES
+    ${JSON_FILES}
+    PARENT_SCOPE
+    )

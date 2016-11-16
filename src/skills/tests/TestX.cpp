@@ -139,12 +139,13 @@ How to use:
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
+    
+    ros::Rate fps60(60);
 
     if (is_bt) {
-        rtt::BTRunner runner(*is_bt, true);
-        runner.run_until([]() { ros::spinOnce(); return ros::ok(); });
+        rtt::BTRunner runner(*is_bt, false);
+        runner.run_until([&]() { ros::spinOnce(); fps60.sleep(); return ros::ok(); });
     } else {
-    	ros::Rate fps60(60);
         while (ros::ok()) {
             ros::spinOnce();
             if (node->Update() == bt::Node::Status::Success) {

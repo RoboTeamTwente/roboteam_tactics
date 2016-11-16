@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+
+# Get the shared code
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/shared.sh
+
+# Asserts that the script is being ran in tactics root
+assert_tactics_root
+
 NAME_FILE="include/roboteam_tactics/debug_names.txt"
 OUTPUT_FILE="include/roboteam_tactics/generated/debug.h"
 >$OUTPUT_FILE
@@ -20,3 +29,6 @@ do
 
 " >> $OUTPUT_FILE
 done < $NAME_FILE
+
+mkdir -p generated
+touch generated/generate_debug_directives.stamp
