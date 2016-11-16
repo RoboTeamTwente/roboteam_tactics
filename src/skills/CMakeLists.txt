@@ -12,6 +12,7 @@ set(SKILL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/SecondaryKeeper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/StandFree.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RandomDrive.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/NaiveBlockGoal.cpp
     )
 set(SKILL_SOURCES
     ${SKILL_SOURCES}
