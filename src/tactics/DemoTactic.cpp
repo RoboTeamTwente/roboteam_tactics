@@ -189,7 +189,7 @@ void DemoTactic::Initialize() {
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.node_id = claim_role_node();
-        wd.tree = "KeeperBlock";
+        wd.tree = "BasicKeeperTree";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

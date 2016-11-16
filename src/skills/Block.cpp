@@ -4,6 +4,7 @@
 #include "roboteam_tactics/skills/Block.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -43,40 +44,33 @@ void normalize(Position& pos) {
 
 bt::Node::Status Block::Update() {
     if (!gtp_valid) {
-        roboteam_msgs::World world = LastWorld::get();
-        roboteam_msgs::WorldRobot *me = nullptr, *tgt = nullptr;
-        for (auto& bot : world.us) {
-            if (bot.id == my_id) {
-                me = &bot;
-                break;
-            }
-        }    
-        for (auto& bot : world.them) {
-            if (bot.id == tgt_id) {
-                tgt = &bot;
-                break;
-            }
-        }    
-        if (me == nullptr || tgt == nullptr) return bt::Node::Status::Invalid;
+        roboteam_msgs::WorldRobot me, tgt;
+
+        {
+            auto maybeMe = lookup_bot(my_id, true);
+            auto maybeTgt = lookup_bot(tgt_id, false);
+            if (!maybeMe || !maybeTgt) return Status::Failure;
+
+            me = *maybeMe;
+            tgt = *maybeTgt;
+        }
         
-        Position mypos(me->pos.x, me->pos.y, me->angle);
-        Position tgtpos(tgt->pos.x, tgt->pos.y, tgt->angle);
+        Position mypos(me.pos.x, me.pos.y, me.angle);
+        Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
         Vector block;
             
         if (block_id == BLOCK_BALL_ID) {
-            block = Vector(world.ball.pos.x, world.ball.pos.y);
+            block = Vector(LastWorld::get().ball.pos);
         } else if (!constant) {
             block = Vector(GetDouble("block_x"), GetDouble("block_y"));
         } else {
-            roboteam_msgs::WorldRobot* blk = nullptr;
-            for (auto bot : world.them) {
-                if (bot.id == block_id) {
-                    blk = &bot;
-                    break;
-                }
+            roboteam_msgs::WorldRobot blk;
+            {
+                auto maybeBlk = lookup_bot(block_id, false);
+                if (!maybeBlk) return Status::Failure;
+                blk = *maybeBlk;
             }
-            if (blk == nullptr) return bt::Node::Status::Invalid;
-            block = Vector(blk->pos.x, blk->pos.y);
+            block = Vector(blk.pos);
         }
         
         if (block.dist(tgtpos.location()) < .4) return bt::Node::Status::Failure;
@@ -87,10 +81,6 @@ bt::Node::Status Block::Update() {
             goal.rot -= M_PI;
         if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
         
-        // ROS_INFO("mypos=(%f, %f, %f), tgtpos=(%f, %f, %f), block=(%f, %f), goal=(%f, %f, %f)",
-            // mypos.x, mypos.y, mypos.rot, tgtpos.x, tgtpos.y, tgtpos.rot,
-            // block.x, block.y, goal.x, goal.y, goal.rot);
-        
         if (!goal.real()) return bt::Node::Status::Running;
         
         private_bb->SetInt("ROBOT_ID", my_id);
@@ -100,15 +90,19 @@ bt::Node::Status Block::Update() {
         private_bb->SetBool("endPoint", true);
         private_bb->SetBool("dribbler", false);
         goToPos = std::make_unique<GoToPos>(n, "", private_bb);
+
+        gtp_valid = true;
     }
     
-    //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
+    ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     
     bt::Node::Status gtpStatus = goToPos->Update();
-    ROS_INFO("gtpStatus=%d", gtpStatus);
+    // ROS_INFO("gtpStatus=%s", bt::statusToString(gtpStatus).c_str());
+
     if (gtpStatus != bt::Node::Status::Running) {
         gtp_valid = false;
     }
+
     return gtpStatus == bt::Node::Status::Invalid || gtpStatus == bt::Node::Status::Failure ? gtpStatus : bt::Node::Status::Running;
 }
     

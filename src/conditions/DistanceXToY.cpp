@@ -73,10 +73,7 @@ Vector2 getPointOfInterest(std::string name) {
 }
 
 DistanceXToY::DistanceXToY(std::string name, bt::Blackboard::Ptr blackboard)
-        : Condition(name, blackboard) {
-            std::cout << "Received bb:\n";
-            rtt::print_blackboard(blackboard);
-        }
+        : Condition(name, blackboard) { }
 
 bt::Node::Status DistanceXToY::Update() {
 	roboteam_msgs::World world = LastWorld::get();
@@ -86,8 +83,6 @@ bt::Node::Status DistanceXToY::Update() {
     const std::string mode = GetString("mode");
     const std::string X = GetString("X");
     const std::string Y = GetString("Y");
-
-    // ROS_INFO_STREAM("DistanceXToY update. X " << X << " Y " << Y << ". ROBOT_ID: " << blackboard->GetInt("ROBOT_ID"));
 
     Vector2 vecX;
     if (X == "me") {
