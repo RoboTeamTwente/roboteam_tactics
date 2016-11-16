@@ -22,11 +22,11 @@ Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skil
         ROS_ERROR("%s", err);
         throw std::invalid_argument(err);
     }
-    my_id = GetInt("ROBOT_ID");
-    tgt_id = GetInt("TGT_ID");
-    block_id = GetInt("BLOCK_ID");
+    my_id = blackboard->GetInt("ROBOT_ID");
+    tgt_id = blackboard->GetInt("TGT_ID");
+    block_id = blackboard->GetInt("BLOCK_ID");
     constant = block_id < 0;
-    invert = GetBool("invert_direction");
+    invert = blackboard->GetBool("invert_direction");
     gtp_valid = false;
 }
 
