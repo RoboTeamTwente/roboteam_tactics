@@ -12,5 +12,6 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/SimpleSideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/testparams.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     PARENT_SCOPE
     )

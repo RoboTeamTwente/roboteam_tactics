@@ -22,8 +22,14 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
+/**
+ * Looks up the given bot on the given team in the given world, and returns an optional WorldRobot.
+ * If you don't pass a pointer to world, the function will get a world through LastWorld.
+ */
 boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world = nullptr);
+
 bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball);
+
 static bool bot_has_ball(unsigned int id, bool our_team, const roboteam_msgs::WorldBall& ball) { return bot_has_ball(*lookup_bot(id, our_team), ball); }
 
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out = std::cout);

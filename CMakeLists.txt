@@ -50,7 +50,10 @@ add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
     )
-add_dependencies(converter generate_leafs_t)
+add_dependencies(converter
+        generate_leafs_t
+        # ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
+        )
 
 add_executable(TestX
     src/skills/tests/TestX.cpp
@@ -76,6 +79,9 @@ add_custom_command(
     DEPENDS
         converter
         ${JSON_FILES}
+        ${CONDITION_SOURCES}
+        ${TACTIC_SOURCES}
+        ${SKILL_SOURCES}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
     )

@@ -32,7 +32,7 @@ void KeeperBlock::reevaluate_target() {
         // GetInt("ROBOT_ID"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
 
     auto bb = std::make_shared<bt::Blackboard>();
-    bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+    bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
     bb->SetInt("TGT_ID", target);
     bb->SetInt("BLOCK_ID", -1);
     bb->SetDouble("block_x", goal.x);

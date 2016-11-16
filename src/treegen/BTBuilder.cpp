@@ -76,7 +76,7 @@ std::string BTBuilder::build(nlohmann::json json) {
     return out.str();
 }
 
-void BTBuilder::define_seq(std::string name) {
+void BTBuilder::define_seq(std::string name, json properties = json::object()) {
     std::string memSeqName = "MemSequence";
     std::string parallelSeqName = "ParallelSequence";
     std::string ParallelTacticName = "ParallelTactic";
@@ -88,8 +88,26 @@ void BTBuilder::define_seq(std::string name) {
         type = "bt::MemSequence";
     } else if (name.compare(0, parallelSeqName.length(), parallelSeqName) == 0) {
         type = "bt::ParallelSequence";
-        // Need all to succeed, one to fail. See ParallelSequence.hpp
-        params = "true, false";
+
+        if (properties.find("minSuccess") != properties.end()
+                && properties.find("minFail") != properties.end()) {
+            int minSuccess = properties["minSuccess"];
+            int minFail = properties["minFail"];
+            params = std::to_string(minSuccess)
+                + ", "
+                + std::to_string(minFail);
+        } else if (properties.find("successOnAll") != properties.end()
+                && properties.find("failOnAll") != properties.end()) {
+            std::string successOnAll = properties["successOnAll"].get<bool>() ? "true" : "false";
+            std::string failOnAll = properties["failOnAll"].get<bool>() ? "true" : "false";
+            params = successOnAll + ", " + failOnAll;
+        } else {
+            std::cout << "// No minSuccess/minFail or successOnAll/failOnAll properties given. "
+                << "Defaulting to true/false (succeed on all, fail on one)\n";
+            std::cerr << "// No minSuccess/minFail or successOnAll/failOnAll properties given. "
+                << "Defaulting to true/false (succeed on all, fail on one)\n";
+            params = "true, false";
+        }
     } else if (name.compare(0, ParallelTacticName.length(), ParallelTacticName) == 0) {
         type = "rtt::ParallelTactic";
         // Need all to succeed, one to fail. See ParallelTactic.hpp
@@ -171,7 +189,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         }
         break;
     case SEQUENCE:
-        define_seq(jsonData["title"]);
+        define_seq(jsonData["title"], jsonData["properties"]);
         for (auto child : jsonData["children"]) {
             defines(nodes[child]);
         }
