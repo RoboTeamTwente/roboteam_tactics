@@ -57,10 +57,12 @@ float get_rand_real(float min, float max);
 
 using time_point = std::chrono::steady_clock::time_point;
 using seconds = std::chrono::seconds;
+using milliseconds = std::chrono::milliseconds;
 
 time_point now();
 
-seconds time_difference(time_point start, time_point end);
+seconds time_difference_seconds(time_point start, time_point end);
+milliseconds time_difference_milliseconds(time_point start, time_point end);
 
 std::string describe_status(bt::Node::Status status);
 
