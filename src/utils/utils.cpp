@@ -203,8 +203,12 @@ time_point now() {
     return std::chrono::steady_clock::now();
 }
 
-seconds time_difference(time_point start, time_point end) {
+seconds time_difference_seconds(time_point start, time_point end) {
     return std::chrono::duration_cast<std::chrono::seconds>(end - start);
+}
+
+milliseconds time_difference_milliseconds(time_point start, time_point end) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
 std::string describe_status(bt::Node::Status status) {

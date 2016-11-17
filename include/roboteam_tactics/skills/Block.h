@@ -64,7 +64,6 @@ public:
 private:
     BlockPos* pos;
     std::unique_ptr<AvoidRobots> avoidBots;
-    bool avoid_valid;
     ros::NodeHandle n;
     unsigned int my_id, tgt_id, block_id;
     bool constant, invert;

@@ -7,7 +7,7 @@ source $DIR/shared.sh
 # Asserts that the script is being ran in tactics root
 assert_tactics_root
 
-NAME_FILE="include/roboteam_tactics/debug_names.txt"
+NAME_FILE="debug_names.txt"
 OUTPUT_FILE="include/roboteam_tactics/generated/debug.h"
 >$OUTPUT_FILE
 

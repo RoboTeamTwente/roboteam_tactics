@@ -153,14 +153,19 @@ How to use:
             return ros::ok(); 
         });
     } else {
+        node->Initialize();
+
+        bt::Node::Status status;
         while (ros::ok()) {
             ros::spinOnce();
-            if (node->Update() == bt::Node::Status::Success) {
+            status = node->Update();
+            if (status == bt::Node::Status::Success) {
                 break;
             }
             fps60.sleep();
-
         }
+
+        node->Terminate(status);
     }
 
     std::cout << "Test of " << testClass << " completed!\n";
