@@ -98,7 +98,7 @@ bt::Node::Status AvoidRobots::Update (){
             command.w = 0.0;
             if (dribbler) {command.dribbler = true;}
             pub.publish(command);
-            ros::spinOnce();
+            //ros::spinOnce();
             return Status::Success;
         } else {
             roboteam_msgs::RobotCommand command;

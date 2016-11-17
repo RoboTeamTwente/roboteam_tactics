@@ -46,10 +46,11 @@ void KeeperBlock::reevaluate_target() {
 }
 
 bt::Node::Status KeeperBlock::Update() {
+    if (impl) impl->extra_update();
     reevaluate_target();
     if (!impl) return bt::Node::Status::Running;
     bt::Node::Status stat = impl->Update();
-    ROS_INFO("Block Status: %s", describe_status(stat).c_str());
+    // ROS_INFO("Block Status: %s", describe_status(stat).c_str());
     // Keeping is never done, unless something failed elsewhere.
     return stat == bt::Node::Status::Invalid ? stat : bt::Node::Status::Running;
 }

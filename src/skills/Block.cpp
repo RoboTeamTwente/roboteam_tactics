@@ -1,5 +1,6 @@
 #include <exception>
 #include <cmath>
+#include <sstream>
 
 #include "roboteam_tactics/skills/Block.h"
 #include "roboteam_msgs/World.h"
@@ -28,7 +29,6 @@ Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skil
     block_id = blackboard->GetInt("BLOCK_ID");
     constant = block_id < 0;
     invert = blackboard->GetBool("invert_direction");
-    gtp_valid = false;
 }
 
 void normalize(Position& pos) {
@@ -87,13 +87,13 @@ bt::Node::Status Block::Update() {
         normalize(goal);
         if (invert)
             goal.rot -= M_PI;
-        if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
+        //if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
         
         // ROS_INFO("mypos=(%f, %f, %f), tgtpos=(%f, %f, %f), block=(%f, %f), goal=(%f, %f, %f)",
             // mypos.x, mypos.y, mypos.rot, tgtpos.x, tgtpos.y, tgtpos.rot,
             // block.x, block.y, goal.x, goal.y, goal.rot);
         
-        if (!goal.real()) return bt::Node::Status::Running;
+       //  if (!goal.real()) return bt::Node::Status::Running;
         
         private_bb->SetInt("ROBOT_ID", my_id);
         private_bb->SetDouble("xGoal", goal.x);
@@ -101,20 +101,27 @@ bt::Node::Status Block::Update() {
         private_bb->SetDouble("angleGoal", goal.rot);
         private_bb->SetBool("endPoint", true);
         private_bb->SetBool("dribbler", false);
+        
         avoidBots = std::make_unique<AvoidRobots>(n, "", private_bb);
     }
     
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
-    
-    bt::Node::Status gtpStatus = avoidBots->Update();
-    std::string desc = describe_status(gtpStatus);
-    ROS_INFO("gtpStatus=%s", desc.c_str());
-    if (gtpStatus != bt::Node::Status::Running) {
-        ROS_INFO("invalidated");
+    std::ostringstream stream;
+    print_blackboard(private_bb, stream);
+    bt::Node::Status avoid_status = avoidBots->Update();
+    std::string desc = describe_status(avoid_status);
+    //ROS_INFO("avoid_status=%s", desc.c_str());
+    if (avoid_status != bt::Node::Status::Running) {
         avoidBots.reset();
         avoidBots = std::unique_ptr<AvoidRobots>();
     }
-    return gtpStatus == bt::Node::Status::Invalid || gtpStatus == bt::Node::Status::Failure ? gtpStatus : bt::Node::Status::Running;
+    return avoid_status == bt::Node::Status::Invalid || avoid_status == bt::Node::Status::Failure ? avoid_status : bt::Node::Status::Running;
 }
+    
+void Block::extra_update() {
+    if (avoidBots) {
+        avoidBots->Update();
+    }
+}    
     
 }
