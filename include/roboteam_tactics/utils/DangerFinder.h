@@ -34,15 +34,15 @@ extern const DangerFactor orientation;
 extern const std::vector<DangerFactor> DEFAULT_FACTORS;
 
 const std::vector<Vector> GOAL_POINTS_LEFT({
-    Vector(-3, .35),
-    Vector(-3, 0),
-    Vector(-3, -.35)
+    Vector(-4.5, .35),
+    Vector(-4.5, 0),
+    Vector(-4.5, -.35)
 });
   
 const std::vector<Vector> GOAL_POINTS_RIGHT({
-    Vector(3, .35),
-    Vector(3, 0),
-    Vector(3, -.35)
+    Vector(4.5, .35),
+    Vector(4.5, 0),
+    Vector(4.5, -.35)
 });
 
 

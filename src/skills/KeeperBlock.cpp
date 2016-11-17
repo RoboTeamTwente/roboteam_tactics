@@ -24,7 +24,7 @@ void KeeperBlock::reevaluate_target() {
     boost::optional<roboteam_msgs::WorldRobot> danger = select_target();
     if (!danger || target == danger->id) return;
     
-    ROS_INFO("Target: %d", danger->id);
+    //ROS_INFO("Target: %d", danger->id);
     
     target = danger->id;
     auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center

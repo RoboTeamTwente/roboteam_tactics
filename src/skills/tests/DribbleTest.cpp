@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 		}
 		
 		auto nu=rtt::now();
-		if(rtt::time_difference(start,nu).count()>5){
+		if(rtt::time_difference_seconds(start,nu).count()>5){
 			bb->SetDouble("goaly",2.0);
 		}
 		
