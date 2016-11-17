@@ -55,19 +55,8 @@
             },
             "children": [
                 "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
-                "4f74cfe0-2c17-4bb4-82b5-e2d0a6e2e0b6"
+                "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a"
             ]
-        },
-        "4f74cfe0-2c17-4bb4-82b5-e2d0a6e2e0b6": {
-            "id": "4f74cfe0-2c17-4bb4-82b5-e2d0a6e2e0b6",
-            "name": "KeeperBlock",
-            "title": "KeeperBlock_A",
-            "description": "",
-            "properties": {},
-            "display": {
-                "x": 420,
-                "y": 144
-            }
         },
         "06cf4fa4-1797-4bd1-87e1-88e481b4b04e": {
             "id": "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
@@ -81,8 +70,8 @@
                 "Y": "ball"
             },
             "display": {
-                "x": 420,
-                "y": 84
+                "x": 216,
+                "y": 24
             }
         },
         "056b3345-479b-4325-a163-9ca46b1af3b2": {
@@ -97,8 +86,8 @@
                 "Y": "ball"
             },
             "display": {
-                "x": 420,
-                "y": -228
+                "x": 204,
+                "y": -300
             }
         },
         "a8443757-1ef2-48c5-8738-34ef3acb4500": {
@@ -108,8 +97,8 @@
             "description": "",
             "properties": {},
             "display": {
-                "x": 600,
-                "y": -168
+                "x": 576,
+                "y": -228
             }
         },
         "05a76c04-81de-4c99-8b72-9f2bc7d96ad3": {
@@ -119,8 +108,8 @@
             "description": "",
             "properties": {},
             "display": {
-                "x": 600,
-                "y": -96
+                "x": 576,
+                "y": -156
             }
         },
         "35ca0114-f04b-4532-a71c-4a8bfaad3e1a": {
@@ -130,8 +119,8 @@
             "description": "",
             "properties": {},
             "display": {
-                "x": 600,
-                "y": -24
+                "x": 576,
+                "y": -84
             }
         },
         "e31f733e-5c7a-4136-b24c-e6e66a42eaf7": {
@@ -141,14 +130,25 @@
             "description": "",
             "properties": {},
             "display": {
-                "x": 360,
-                "y": -168
+                "x": 348,
+                "y": -228
             },
             "children": [
                 "a8443757-1ef2-48c5-8738-34ef3acb4500",
                 "05a76c04-81de-4c99-8b72-9f2bc7d96ad3",
                 "35ca0114-f04b-4532-a71c-4a8bfaad3e1a"
-            ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
+        },
+        "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a": {
+            "id": "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a",
+            "name": "NaiveBlockGoal",
+            "title": "NaiveBlockGoal_A",
+            "description": "",
+            "properties": {},
+            "display": {
+                "x": 432,
+                "y": 84
+            }
         }
     },
     "display": {
@@ -277,6 +277,13 @@
             "name": "DistanceXToY",
             "category": "condition",
             "title": "DistanceToBall",
+            "description": null,
+            "properties": {}
+        },
+        {
+            "name": "NaiveBlockGoal",
+            "category": "action",
+            "title": "NaiveBlockGoal",
             "description": null,
             "properties": {}
         }

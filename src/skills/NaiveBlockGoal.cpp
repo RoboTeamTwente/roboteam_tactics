@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
@@ -19,21 +21,26 @@ NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboa
             // ROS_INFO("NaiveBlockGoaling the ball");
 }
 
-Vector2 intersectLines(Vector2 s1, Vector2 e1, Vector2 s2, Vector2 e2) {
-
-}
-
-
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
 
-    const double FIELD_WIDTH = LastWorld::get_field().field_width;
-    const double BOUNDARY_WIDTH = LastWorld::get_field().boundary_width;
+    // std::cout << "\n\n\nUpdating nbg...\n";
+
+    const double GOAL_AREA_WIDTH = 2.5 * 0.8;
     // Distance from front of goal area to goal
-    const double GOAL_AREA_LENGTH = 2;
+    const double GOAL_AREA_LENGTH = 1 * 0.8;
+    const double FIELD_LENGTH = LastWorld::get_field().field_length;
 
     auto ballPos = Vector2(LastWorld::get().ball.pos);
-    auto goalPos = Vector2(4.5, 0);
+    Vector2 goalPos;
+
+    std::string our_field_side = "right";
+    ros::param::get("our_field_side", our_field_side);
+    if (our_field_side == "left") {
+        goalPos = Vector2(FIELD_LENGTH / -2, 0);
+    } else {
+        goalPos = Vector2(FIELD_LENGTH / 2, 0);
+    }
 
     auto ballVec = ballPos - goalPos;
 
@@ -41,82 +48,47 @@ bt::Node::Status NaiveBlockGoal::Update() {
     Vector2 vertVec;
 
     vertVec = ballVec.normalize();
-    vertVec *= 1 / vertVec.x;
-    vertVec *= GOAL_AREA_LENGTH;
+    vertVec = vertVec * std::abs(1 / vertVec.x);
+    vertVec = vertVec * (GOAL_AREA_LENGTH);
 
     horVec = ballVec.normalize();
-
-    if (ballVec.y < 0) {
-        horVec *= -1 / vertVec.y;
-    } else {
-        horVec *= 1 / vertVec.y;
-    }
-    
-    horVec *= BOUNDARY_WIDTH / 2;
+    horVec = horVec * std::abs(1 / horVec.y);
+    horVec = horVec * (GOAL_AREA_WIDTH / 2);
 
     // TODO: Emit drawing commands?
 
-    return Status::Failure;
+    Vector2 minVec;
 
-    // cycleCounter++;
-    // if (cycleCounter > 10) return bt::Node::Status::Failure;
+    if (!horVec.real()) {
+        minVec = vertVec;
+    } else if (!vertVec.real()) {
+        minVec = horVec;
+    } else if (vertVec.length() < horVec.length()) {
+        minVec = vertVec;
+    } else {
+        minVec = horVec;
+    }
 
-	// roboteam_msgs::World world = LastWorld::get();
+    // std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
+    // std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
+    // std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
+    // std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
+    // std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
 
-    // roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+    minVec = minVec + goalPos;
+    // std::cout << "Target: " << minVec.x << " " << minVec.y << "\n";
 
-    // if ((currentBallVel - oldBallVel).length() >= 0.5) {
-        // ROS_INFO("Velocity difference was enough");
-        // return bt::Node::Status::Success;
-    // }
+    // minVec.x = 2.5;
+    // minVec.y = 0;
+    
+    private_bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
+    private_bb->SetDouble("xGoal", minVec.x);
+    private_bb->SetDouble("yGoal", minVec.y);
+    private_bb->SetDouble("angleGoal", ballVec.angle());
+    private_bb->SetBool("endPoint", true);
+    goToPos.Update();
 
-    // oldBallVel = currentBallVel;
-
-    // int robotID = blackboard->GetInt("ROBOT_ID");
-	// ROS_INFO_STREAM("name: " << name << " " << robotID);
-	// roboteam_msgs::WorldBall ball = world.ball;
-
-	// // Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
-	// // is called before the first world state update
-	// if (world.us.size() == 0) {
-		// ROS_INFO("No information about the world state :(");
-		// return Status::Running;
-	// }
-
-	// roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	// roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	// roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	// roboteam_utils::Vector2 posDiff = ballPos-robotPos;		
-
-	// double rotDiff = posDiff.angle() - robot.angle;
-	// rotDiff = cleanAngle(rotDiff);
-
-	// if (posDiff.length() < 0.105) { // ball is close
-		// if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
-			// roboteam_msgs::RobotCommand command;
-			// command.id = robotID;
-			// command.dribbler = false;
-			// command.kicker = true;
-			// command.kicker_forced = true;
-			// command.kicker_vel = 4;
-			// command.x_vel = 0.0;
-			// command.y_vel = 0.0;
-			// command.w = 0.0;
-
-			// pubNaiveBlockGoal.publish(command);
-			// ros::spinOnce();
-			// ROS_INFO("Triggered the kicker!");
-			// return Status::Running;
-		// }
-		// else {
-			// ROS_INFO("Ball is not in front of the dribbler");
-			// return Status::Failure;
-		// }
-	// }
-	// else {
-		// ROS_INFO("Ball is not close to the robot");
-		// return Status::Failure;
-	// } 
+    return Status::Running;
 }
 
 } // rtt

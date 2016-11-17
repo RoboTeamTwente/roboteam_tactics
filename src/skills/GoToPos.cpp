@@ -43,7 +43,7 @@ bt::Node::Status GoToPos::Update (){
 
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
-    double pGain=3.0;
+    double pGain=3;
     double maxSpeed=1.0;
     requiredSpeed.x=(xGoal-robotPos.x)*pGain;
     requiredSpeed.y=(yGoal-robotPos.y)*pGain;
