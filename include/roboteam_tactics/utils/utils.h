@@ -68,4 +68,6 @@ milliseconds time_difference_milliseconds(time_point start, time_point end);
 
 std::string describe_status(bt::Node::Status status);
 
+std::string get_our_field_side();
+
 } // rtt

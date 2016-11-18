@@ -24,10 +24,8 @@ const double GOAL_AREA_LENGTH = 1 * 0.8;
 
 bool isBallInGoalArea() {
     Vector2 ballPos(LastWorld::get().ball.pos);
-    std::string our_field_side = "right";
-    ros::param::get("our_field_side", our_field_side);
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
-    if (our_field_side == "left") {
+    if (get_our_field_side() == "left") {
         if (ballPos.x > -FIELD_LENGTH / 2
                 && ballPos.x < -FIELD_LENGTH / 2 + GOAL_AREA_LENGTH
                 && ballPos.y > -GOAL_AREA_WIDTH / 2
@@ -50,7 +48,6 @@ NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboa
         : Skill(n, name, blackboard)
         , goToPos(n, "", private_bb) {
         	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-            // ROS_INFO("NaiveBlockGoaling the ball");
 }
 
 bt::Node::Status NaiveBlockGoal::Update() {
@@ -59,17 +56,16 @@ bt::Node::Status NaiveBlockGoal::Update() {
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
 
     auto ballPos = Vector2(LastWorld::get().ball.pos);
-    Vector2 goalPos;
+    Vector2 goalPos = LastWorld::get_our_goal_center();
     Vector2 minVec;
 
-    std::string our_field_side = "right";
-    ros::param::get("our_field_side", our_field_side);
-    if (our_field_side == "left") {
-        goalPos = Vector2(FIELD_LENGTH / -2, 0);
-    } else {
-        goalPos = Vector2(FIELD_LENGTH / 2, 0);
-    }
+    // if (our_field_side == "left") {
+        // goalPos = Vector2(FIELD_LENGTH / -2, 0);
+    // } else {
+        // goalPos = Vector2(FIELD_LENGTH / 2, 0);
+    // }
 
+    std::string our_field_side = get_our_field_side();
     auto ballVec = ballPos - goalPos;
 
     double padding = 0.10;
