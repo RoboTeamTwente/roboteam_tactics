@@ -147,21 +147,21 @@ class Leaf : public bt::Leaf {
     private:
     template<typename T, bool (bt::Blackboard::*Checker)(std::string) const, T (bt::Blackboard::*Getter)(std::string)>
     T GetVar(const std::string& key, BlackboardPolicy policy) const {
-        std::string real_key = getPrefixedId(key);
+        std::string global_key = getPrefixedId(key);
         switch (policy) {
             case BlackboardPolicy::GLOBAL_FIRST:
-            if ((*blackboard.*Checker)(real_key)) {
-                return (*blackboard.*Getter)(real_key);
+            if ((*blackboard.*Checker)(global_key)) {
+                return (*blackboard.*Getter)(global_key);
             }
             case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
-            return (*private_bb.*Getter)(real_key);
+            return (*private_bb.*Getter)(key);
  
             case BlackboardPolicy::PRIVATE_FIRST:
-            if ((*private_bb.*Checker)(real_key)) {
-                return (*private_bb.*Getter)(real_key);
+            if ((*private_bb.*Checker)(key)) {
+                return (*private_bb.*Getter)(key);
             }
             case BlackboardPolicy::GLOBAL_ONLY:
-            return (*blackboard.*Getter)(real_key);
+            return (*blackboard.*Getter)(global_key);
             default:
             throw std::logic_error("Something really bad happened in GetVar...");
         }
