@@ -34,6 +34,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
 
     auto ballPos = Vector2(LastWorld::get().ball.pos);
     Vector2 goalPos;
+    Vector2 minVec;
 
     std::string our_field_side = "right";
     ros::param::get("our_field_side", our_field_side);
@@ -43,57 +44,71 @@ bt::Node::Status NaiveBlockGoal::Update() {
         goalPos = Vector2(FIELD_LENGTH / 2, 0);
     }
 
-    auto ballVec = ballPos - goalPos;
-
-    Vector2 horVec;
-    Vector2 vertVec;
-
-    vertVec = ballVec.normalize();
-    vertVec = vertVec * std::abs(1 / vertVec.x);
-    vertVec = vertVec * (GOAL_AREA_LENGTH);
-
-    horVec = ballVec.normalize();
-    horVec = horVec * std::abs(1 / horVec.y);
-    horVec = horVec * (GOAL_AREA_WIDTH / 2);
-
-    // TODO: Emit drawing commands?
-
-    Vector2 minVec;
-
-    if (!horVec.real()) {
-        minVec = vertVec;
-    } else if (!vertVec.real()) {
-        minVec = horVec;
-    } else if (vertVec.length() < horVec.length()) {
-        minVec = vertVec;
+    double padding = 0.10;
+    if (our_field_side == "left" && ballPos.x <= -FIELD_LENGTH / 2) {
+        minVec.x = -FIELD_LENGTH / 2 + padding;
+        minVec.y = ballPos.y;
+    } else if (our_field_side == "right" && ballPos.x >= FIELD_LENGTH / 2) {
+        minVec.x = FIELD_LENGTH / 2 - padding;
+        minVec.y = ballPos.y;
     } else {
-        minVec = horVec;
+        auto ballVec = ballPos - goalPos;
+
+        Vector2 horVec;
+        Vector2 vertVec;
+
+        vertVec = ballVec.normalize();
+        vertVec = vertVec * std::abs(1 / vertVec.x);
+        vertVec = vertVec * (GOAL_AREA_LENGTH);
+
+        horVec = ballVec.normalize();
+        horVec = horVec * std::abs(1 / horVec.y);
+        horVec = horVec * (GOAL_AREA_WIDTH / 2);
+
+        if (!horVec.real()) {
+            minVec = vertVec;
+        } else if (!vertVec.real()) {
+            minVec = horVec;
+        } else if (vertVec.length() < horVec.length()) {
+            minVec = vertVec;
+        } else {
+            minVec = horVec;
+        }
+
+        std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
+        std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
+        std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
+        std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
+        std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
+
+        minVec = minVec + goalPos;
+
+        // If not real, stand in the center of the goal
+        if (!minVec.real()) {
+            if (our_field_side == "left") {
+                minVec.x = -FIELD_LENGTH / 2;
+            } else {
+                minVec.x = FIELD_LENGTH / 2;
+            }
+            minVec.y = 0;
+        }
+
+        // const double FIELD_WIDTH = LastWorld::get_field().field_width;
+        // const double mod = 0.98;
+
+        // // First collapse point on side line
+        // if (minVec.x > FIELD_LENGTH / 2) minVec.x = FIELD_LENGTH / 2 * mod;
+        // if (minVec.x < -FIELD_LENGTH / 2) minVec.x = -FIELD_LENGTH / 2 * mod;
+        // // Then towards goal
+        // if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;
+        // if (minVec.y < -GOAL_AREA_WIDTH / 2) minVec.y = -GOAL_AREA_WIDTH / 2;
+
     }
-
-    // std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
-    // std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
-    // std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
-    // std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
-    // std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
-
-    minVec = minVec + goalPos;
-
-    // If not real, use the previous position
-    if (!minVec.real()) {
-        minVec.x = private_bb->GetDouble("xGoal");
-        minVec.y = private_bb->GetDouble("yGoal");
-    }
-
-    const double FIELD_WIDTH = LastWorld::get_field().field_width;
-    const double mod = 0.98;
-
-    // First collapse point on side line
-    if (minVec.x > FIELD_LENGTH / 2) minVec.x = FIELD_LENGTH / 2 * mod;
-    if (minVec.x < -FIELD_LENGTH / 2) minVec.x = -FIELD_LENGTH / 2 * mod;
-    // Then towards goal
+    
     if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;
     if (minVec.y < -GOAL_AREA_WIDTH / 2) minVec.y = -GOAL_AREA_WIDTH / 2;
 
+    // Always face the ball
     double angle = 0;
     { 
         auto possibleRobot = lookup_our_bot(blackboard->GetInt("ROBOT_ID"));
