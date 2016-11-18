@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include "std_msgs/Empty.h"
 #include "uuid_msgs/UniqueID.h"
 
@@ -14,6 +14,7 @@
 #include "roboteam_tactics/generated/alltrees_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/bt.hpp"
 
 ros::Publisher roleNodeDiscoveryPublisher;
 ros::Publisher feedbackPub;
@@ -32,7 +33,6 @@ void reset_tree() {
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
-
     
     // Some control statements to regulate starting and stopping of rolenodes
     if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {

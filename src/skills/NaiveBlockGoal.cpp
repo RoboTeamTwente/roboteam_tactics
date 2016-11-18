@@ -2,6 +2,7 @@
 
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/NaiveBlockGoal.h"
 #include "roboteam_tactics/skills/GoToPos.h"
@@ -14,6 +15,8 @@
 
 namespace rtt {
 
+using namespace roboteam_utils;
+
 NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , goToPos(n, "", private_bb) {
@@ -23,8 +26,6 @@ NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboa
 
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
-
-    // std::cout << "\n\n\nUpdating nbg...\n";
 
     const double GOAL_AREA_WIDTH = 2.5 * 0.8;
     // Distance from front of goal area to goal
@@ -76,17 +77,36 @@ bt::Node::Status NaiveBlockGoal::Update() {
     // std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
 
     minVec = minVec + goalPos;
-    // std::cout << "Target: " << minVec.x << " " << minVec.y << "\n";
 
-    // minVec.x = 2.5;
-    // minVec.y = 0;
+    // If not real, use the previous position
+    if (!minVec.real()) {
+        minVec.x = private_bb->GetDouble("xGoal");
+        minVec.y = private_bb->GetDouble("yGoal");
+    }
+
+    const double FIELD_WIDTH = LastWorld::get_field().field_width;
+    const double mod = 0.98;
+
+    // First collapse point on side line
+    if (minVec.x > FIELD_LENGTH / 2) minVec.x = FIELD_LENGTH / 2 * mod;
+    if (minVec.x < -FIELD_LENGTH / 2) minVec.x = -FIELD_LENGTH / 2 * mod;
+    // Then towards goal
+    if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;
+    if (minVec.y < -GOAL_AREA_WIDTH / 2) minVec.y = -GOAL_AREA_WIDTH / 2;
+
+    double angle = 0;
+    { 
+        auto possibleRobot = lookup_our_bot(blackboard->GetInt("ROBOT_ID"));
+        if (possibleRobot) {
+            auto robot = *possibleRobot;
+            angle = (ballPos - Vector2(robot.pos)).angle();
+        }
+    }
     
     private_bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
-    if (minVec.real()) {
-        private_bb->SetDouble("xGoal", minVec.x);
-        private_bb->SetDouble("yGoal", minVec.y);
-    }
-    private_bb->SetDouble("angleGoal", ballVec.angle());
+    private_bb->SetDouble("xGoal", minVec.x);
+    private_bb->SetDouble("yGoal", minVec.y);
+    private_bb->SetDouble("angleGoal", angle);
     private_bb->SetBool("endPoint", true);
     goToPos.Update();
 

@@ -130,6 +130,15 @@ boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_
     return boost::optional<roboteam_msgs::WorldRobot>();
 }
 
+boost::optional<roboteam_msgs::WorldRobot> lookup_our_bot(unsigned int id, const roboteam_msgs::World* world) {
+    return lookup_bot(id, true, world);
+}
+
+boost::optional<roboteam_msgs::WorldRobot> lookup_their_bot(unsigned int id, const roboteam_msgs::World* world) {
+    return lookup_bot(id, false, world);
+}
+
+
 bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
     roboteam_utils::Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
     roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
