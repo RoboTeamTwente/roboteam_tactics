@@ -212,7 +212,7 @@ bt::Node::Status AttackerTactic::Update() {
         return bt::Node::Status::Success;
     }
 
-    auto duration = time_difference(start, now());
+    auto duration = time_difference_seconds(start, now());
     if (duration.count() >= 5) {
         return Status::Failure;
     }
