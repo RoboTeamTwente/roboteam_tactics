@@ -46,6 +46,7 @@ class Block : public Skill {
 public:
     Block(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update() override;
+    void extra_update();
     
     static VerificationMap required_params() {
         VerificationMap params;

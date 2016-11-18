@@ -24,7 +24,7 @@ void KeeperBlock::reevaluate_target() {
     boost::optional<roboteam_msgs::WorldRobot> danger = select_target();
     if (!danger || target == danger->id) return;
     
-    ROS_INFO("Target: %d", danger->id);
+    //ROS_INFO("Target: %d", danger->id);
     
     target = danger->id;
     auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
@@ -46,10 +46,11 @@ void KeeperBlock::reevaluate_target() {
 }
 
 bt::Node::Status KeeperBlock::Update() {
+    if (impl) impl->extra_update();
     reevaluate_target();
     if (!impl) return bt::Node::Status::Running;
     bt::Node::Status stat = impl->Update();
-    ROS_INFO("Block Status: %s", describe_status(stat).c_str());
+    // ROS_INFO("Block Status: %s", describe_status(stat).c_str());
     // Keeping is never done, unless something failed elsewhere.
     return stat == bt::Node::Status::Invalid ? stat : bt::Node::Status::Running;
 }

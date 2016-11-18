@@ -55,6 +55,32 @@ class CanVerify {
      * impossible.
      */
     static constexpr bool can_it = decltype(test<L>(nullptr))::value;
+}; 
+
+
+/**
+ * @class HasStringOptions
+ * @author Dennis 
+ * @date 16/11/16
+ * @file verifier.h
+ * @brief Similar to CanVerify, but checks the following signature:
+ *      static std::vector<std::string> valid_options(const std::string& key);
+ */
+template<typename L>
+class HasStringOptions {
+    private:
+    template<typename T, T> struct ValueHasType;
+    
+    template<typename T>
+    static std::true_type test(ValueHasType<std::vector<std::string>(*)(const std::string&), &T::valid_option>*);
+    
+    template<typename T>
+    static std::false_type test(...);
+
+    HasStringOptions() { throw new std::logic_error("HasStringOptions cannot be initialized."); } 
+    public:    
+    
+    static constexpr bool value = decltype(test<L>(nullptr))::value;
 };    
 
 }

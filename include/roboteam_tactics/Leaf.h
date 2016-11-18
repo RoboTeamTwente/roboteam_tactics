@@ -3,6 +3,7 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/verifier.h"
 #include "ros/ros.h"
+#include <boost/optional.hpp>
 
 namespace rtt {
 
@@ -17,6 +18,32 @@ constexpr BlackboardPolicy DEFAULT_BB_POLICY = BlackboardPolicy::GLOBAL_FIRST;
   
 class Leaf : public bt::Leaf {
     public:
+    
+    template<typename Impl>
+    static boost::optional<std::string> valid_string_opt(typename std::enable_if<HasStringOptions<Impl>::value, 
+                                                                  std::pair<std::string, std::string>>::type key_value) {
+        std::vector<std::string> possible = Impl::valid_options(key_value.first);
+        if (!possible.empty() && std::find(possible.begin(), possible.end(), key_value.second()) == possible.end()) {
+            std::string msg = "Blackboard verification error: Option '%s' is invalid for key '%s'. Possible options are: [";
+            bool first = true;
+            for (const std::string& opt : possible) {
+                if (!first) {
+                    msg += ", ";
+                } else {
+                    first = false;
+                }
+                msg += opt;
+            }
+            return boost::optional<std::string>(msg + "].");
+        }
+        return boost::optional<std::string>();
+    }
+    
+    template<typename Impl>
+    static boost::optional<std::string> valid_string_opt(typename std::enable_if<!HasStringOptions<Impl>::value, 
+                                                                  std::pair<std::string, std::string>>::type key_value) {
+        return boost::optional<std::string>();
+    }
     
     /**
      * @brief Tests whether a certain Blackboard instance contains the required variables for a certain type of Leaf (Impl).
@@ -36,6 +63,7 @@ class Leaf : public bt::Leaf {
         if (blackboard == nullptr) return false;
         VerificationMap required = Impl::required_params();
         bool valid = true;
+
         for (const auto& pair : required) {
             std::string key = name.empty() ? pair.first : name + "_" + pair.first;
             bool this_valid = true;
@@ -52,9 +80,15 @@ class Leaf : public bt::Leaf {
                 case BBArgumentType::Bool:
                     this_valid = blackboard->HasBool(key);
                     break;
-                case BBArgumentType::String:
+                case BBArgumentType::String: {
                     this_valid = blackboard->HasString(key);
+                    boost::optional<std::string> error = valid_string_opt<Impl>({key, blackboard->GetString(key)});
+                    if ((bool) error) {
+                        this_valid = false;
+                        ROS_ERROR("%s", error->c_str());
+                    }
                     break;
+                }
                 default:
                 throw std::logic_error("Incomplete switch statement in rtt::Leaf::validate_blackboard.");
             }

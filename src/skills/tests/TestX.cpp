@@ -13,6 +13,8 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
 
+static volatile bool may_update = true;
+
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
     ss.str(s);
@@ -34,6 +36,7 @@ bool is_digits(const std::string &str) {
 
 void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 	rtt::LastWorld::set(*world);
+    may_update = true;
 }
 
 void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
@@ -144,16 +147,25 @@ How to use:
 
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
-        runner.run_until([&]() { ros::spinOnce(); fps60.sleep(); return ros::ok(); });
+        runner.run_until([&]() { 
+            while (!may_update) ros::spinOnce();
+            //fps60.sleep(); 
+            return ros::ok(); 
+        });
     } else {
+        node->Initialize();
+
+        bt::Node::Status status;
         while (ros::ok()) {
             ros::spinOnce();
-            if (node->Update() == bt::Node::Status::Success) {
+            status = node->Update();
+            if (status == bt::Node::Status::Success) {
                 break;
             }
             fps60.sleep();
-
         }
+
+        node->Terminate(status);
     }
 
     std::cout << "Test of " << testClass << " completed!\n";
