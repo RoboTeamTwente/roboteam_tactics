@@ -17,6 +17,35 @@ namespace rtt {
 
 using namespace roboteam_utils;
 
+// TODO: Hardcoded!
+const double GOAL_AREA_WIDTH = 2.5 * 0.8;
+// Distance from front of goal area to goal
+const double GOAL_AREA_LENGTH = 1 * 0.8;
+
+bool isBallInGoalArea() {
+    Vector2 ballPos(LastWorld::get().ball.pos);
+    std::string our_field_side = "right";
+    ros::param::get("our_field_side", our_field_side);
+    const double FIELD_LENGTH = LastWorld::get_field().field_length;
+    if (our_field_side == "left") {
+        if (ballPos.x > -FIELD_LENGTH / 2
+                && ballPos.x < -FIELD_LENGTH / 2 + GOAL_AREA_LENGTH
+                && ballPos.y > -GOAL_AREA_WIDTH / 2
+                && ballPos.y < GOAL_AREA_WIDTH / 2) {
+           return true;
+        }
+    } else {
+        if (ballPos.x < FIELD_LENGTH / 2
+                && ballPos.x > FIELD_LENGTH / 2 - GOAL_AREA_LENGTH
+                && ballPos.y > -GOAL_AREA_WIDTH / 2
+                && ballPos.y < GOAL_AREA_WIDTH / 2) {
+           return true;
+        }
+    }
+
+    return false;
+}
+
 NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , goToPos(n, "", private_bb) {
@@ -27,9 +56,6 @@ NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboa
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
 
-    const double GOAL_AREA_WIDTH = 2.5 * 0.8;
-    // Distance from front of goal area to goal
-    const double GOAL_AREA_LENGTH = 1 * 0.8;
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
 
     auto ballPos = Vector2(LastWorld::get().ball.pos);
@@ -44,6 +70,8 @@ bt::Node::Status NaiveBlockGoal::Update() {
         goalPos = Vector2(FIELD_LENGTH / 2, 0);
     }
 
+    auto ballVec = ballPos - goalPos;
+
     double padding = 0.10;
     if (our_field_side == "left" && ballPos.x <= -FIELD_LENGTH / 2) {
         minVec.x = -FIELD_LENGTH / 2 + padding;
@@ -51,9 +79,9 @@ bt::Node::Status NaiveBlockGoal::Update() {
     } else if (our_field_side == "right" && ballPos.x >= FIELD_LENGTH / 2) {
         minVec.x = FIELD_LENGTH / 2 - padding;
         minVec.y = ballPos.y;
+    } else if (isBallInGoalArea()) {
+        minVec = ballVec * 0.9 + goalPos;
     } else {
-        auto ballVec = ballPos - goalPos;
-
         Vector2 horVec;
         Vector2 vertVec;
 
@@ -64,7 +92,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
         horVec = ballVec.normalize();
         horVec = horVec * std::abs(1 / horVec.y);
         horVec = horVec * (GOAL_AREA_WIDTH / 2);
-
+        
         if (!horVec.real()) {
             minVec = vertVec;
         } else if (!vertVec.real()) {
