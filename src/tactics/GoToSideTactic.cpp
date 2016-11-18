@@ -26,7 +26,6 @@ void GoToSideTactic::Initialize() {
     std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
     std::cout << "Side :" << pos << "\n";
 
-    claim_role_nodes(robot_count);
     auto allRobots = RobotDealer::get_available_robots();
     for (int i = 0; i < robot_count; ++i) {
         int random_index = get_rand_int(allRobots.size());
@@ -34,8 +33,6 @@ void GoToSideTactic::Initialize() {
         claim_robot(allRobots.at(random_index));
         allRobots.erase(allRobots.begin() + random_index);
     }
-
-    std::cout << "Claimed role nodes: " << get_claimed_role_nodes().size() << "\n";
 
     int mod = 1;
     std::string our_field_side = "left";
@@ -45,7 +42,6 @@ void GoToSideTactic::Initialize() {
     }
 
     int i = 0;
-    auto workers = get_claimed_role_nodes();
     auto robots = get_claimed_robots();
     std::random_device rd;
     std::mt19937 g(rd());
@@ -69,7 +65,7 @@ void GoToSideTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = workers.at(i);
+        wd.robot_id = robot;
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 
@@ -80,7 +76,6 @@ void GoToSideTactic::Initialize() {
 
         // Send to rolenode
         directivePub.publish(wd);
-        i++;
     }
 }
 
