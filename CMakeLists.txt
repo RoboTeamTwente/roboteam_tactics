@@ -196,7 +196,7 @@ target_link_libraries(StrategyNode
 # Disables tests on bob's desktop
 site_name(computername)
 
-if(NOT computername STREQUAL "minux")
+if(NOT computername STREQUAL "lapbobe")
 
     add_executable(brain
         src/main.cpp
