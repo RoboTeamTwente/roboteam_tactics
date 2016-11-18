@@ -49,7 +49,7 @@ bt::Node::Status Kick::Update() {
     oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");
-	ROS_INFO_STREAM("name: " << name << " " << robotID);
+	// ROS_INFO_STREAM("name: " << name << " " << robotID);
 	roboteam_msgs::WorldBall ball = world.ball;
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
@@ -74,7 +74,7 @@ bt::Node::Status Kick::Update() {
 			command.dribbler = false;
 			command.kicker = true;
 			command.kicker_forced = true;
-			command.kicker_vel = 4;
+			command.kicker_vel = 5;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
 			command.w = 0.0;

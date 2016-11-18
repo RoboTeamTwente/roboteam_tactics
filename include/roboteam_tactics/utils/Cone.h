@@ -9,6 +9,7 @@ public:
 	Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoint, double distance);
 	double CleanAngle(double angle);
 	bool IsWithinCone(roboteam_utils::Vector2 point);
+	bool IsWithinField(roboteam_utils::Vector2 point);
 	roboteam_utils::Vector2 ClosestPointOnSide(roboteam_utils::Vector2);
 	roboteam_utils::Vector2 ClosestPointOnSideTwoCones(Cone otherCone, roboteam_utils::Vector2 point);
 	static roboteam_utils::Vector2 LineIntersection(roboteam_utils::Vector2 line1Start, roboteam_utils::Vector2 line1Dir, roboteam_utils::Vector2 line2Start, roboteam_utils::Vector2 line2Dir);

@@ -169,6 +169,7 @@ bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	// bool setRosParam = GetBool("setRosParam");
+	ROS_INFO_STREAM("GetBallUpdate");
 	
 	while (world.us.size() == 0) {
 		return Status::Running;
