@@ -82,8 +82,10 @@ bt::Node::Status NaiveBlockGoal::Update() {
     // minVec.y = 0;
     
     private_bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
-    private_bb->SetDouble("xGoal", minVec.x);
-    private_bb->SetDouble("yGoal", minVec.y);
+    if (minVec.real()) {
+        private_bb->SetDouble("xGoal", minVec.x);
+        private_bb->SetDouble("yGoal", minVec.y);
+    }
     private_bb->SetDouble("angleGoal", ballVec.angle());
     private_bb->SetBool("endPoint", true);
     goToPos.Update();
