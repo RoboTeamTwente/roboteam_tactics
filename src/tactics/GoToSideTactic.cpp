@@ -69,7 +69,7 @@ void GoToSideTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = workers.at(i);
+        wd.robot_id = robot;
         wd.tree = "GoToPosTree";
         wd.blackboard = bb.toMsg();
 

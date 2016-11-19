@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include "std_msgs/Empty.h"
 #include "uuid_msgs/UniqueID.h"
 
@@ -14,6 +14,7 @@
 #include "roboteam_tactics/generated/alltrees_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/bt.hpp"
 
 ros::Publisher roleNodeDiscoveryPublisher;
 ros::Publisher feedbackPub;
@@ -21,60 +22,46 @@ bt::Node::Ptr currentTree;
 
 bool sendNextSuccess = false;
 uuid_msgs::UniqueID currentToken;
-int currentRobotID = -1;
+int ROBOT_ID;
+bool ignoring_strategy_instructions = false;
 
 void reset_tree() {
     sendNextSuccess = false;
     currentToken = uuid_msgs::UniqueID();
     currentTree = nullptr;
-    currentRobotID = -1;
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     std::string name = ros::this_node::getName();
     
     // Some control statements to regulate starting and stopping of rolenodes
-    if (msg->node_id.empty()) {
-        // Directive is meant for all
-        bt::Blackboard bb;
-        bb.fromMsg(msg->blackboard);
-        // If robot ID is set to ours...
-        if (bb.HasInt("ROBOT_ID") && bb.GetInt("ROBOT_ID") == currentRobotID) {
-            // And the tree directive is empty
-            if (msg->tree.empty()) {
-                // Stop executing the tree and notify the strategy node
-                // That we failed
-                roboteam_msgs::RoleFeedback feedback;
-                feedback.token = currentToken;
-                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
-                feedbackPub.publish(feedback);
-
-                reset_tree();
-                return;
-            }
-        } else if (!bb.HasInt("ROBOT_ID")) { // No Robot ID was set...
-            // And the tree is empty...
-            if (msg->tree.empty()) {
-                // And if we are currently controlling a robot...
-                if (currentRobotID == -1) { 
-                    // Stop executing it!
-                    roboteam_msgs::RoleFeedback feedback;
-                    feedback.token = currentToken;
-                    feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
-                    feedbackPub.publish(feedback);
-
-                    reset_tree();
-                    return;
-                }
-            }
-        }
-
-        return;
-    } else if (name != msg->node_id) {
+    if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
+        // Continue
+    } else if (msg->robot_id == ROBOT_ID) {
+        // Also continue;
+    } else {
+        // Message is not for us!
         return;
     }
 
     ros::NodeHandle n;
+
+    if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
+        // Empty tree means do nothing
+        reset_tree();
+        return;
+    } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
+        reset_tree();
+        ignoring_strategy_instructions = true;
+        return;
+    } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
+        ignoring_strategy_instructions = false;
+        return;
+    }
+
+    if (ignoring_strategy_instructions) {
+        return;
+    }
 
     bt::Blackboard::Ptr bb;
 
@@ -97,9 +84,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     }
 
     currentToken = msg->token;
-    if (bb->HasInt("ROBOT_ID")) {
-        currentRobotID = bb->GetInt("ROBOT_ID");
-    }
 
     sendNextSuccess = true;
 
@@ -119,6 +103,11 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle n;
 
     std::string name = ros::this_node::getName();
+    // Chop off the leading "/robot"
+    std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
+    std::cout << "Name: " << name << ", robotIDStr: " << robotIDStr << "\n";
+    // Convert to int
+    ROBOT_ID = std::stoi(robotIDStr);
 
     int iterationsPerSecond = 60;
     ros::param::get("role_iterations_per_second", iterationsPerSecond);
@@ -167,7 +156,7 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
-                std::cout << "Role node failed! ID: " << std::to_string(currentRobotID) << "\n";
+                std::cout << "Role node failed! ID: " << ROBOT_ID << "\n";
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }

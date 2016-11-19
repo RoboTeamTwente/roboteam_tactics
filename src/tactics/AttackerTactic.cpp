@@ -97,7 +97,7 @@ void AttackerTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = claim_role_node();
+        wd.robot_id = primaryAttacker;
         wd.tree = "CoolTree";
         wd.blackboard = bb.toMsg();
 
@@ -134,7 +134,7 @@ void AttackerTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = claim_role_node();
+        wd.robot_id = secondaryAttacker;
         wd.tree = "SuperCoolTree";
         wd.blackboard = bb.toMsg();
 
@@ -154,7 +154,7 @@ void AttackerTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = claim_role_node();
+        wd.robot_id = def_bot;
         wd.tree = "SecondaryKeeper";
         wd.blackboard = bb.toMsg();
 
@@ -173,7 +173,7 @@ void AttackerTactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.node_id = claim_role_node();
+        wd.robot_id = keeper_bot;
         wd.tree = "BasicKeeperTree";
         wd.blackboard = bb.toMsg();
 
