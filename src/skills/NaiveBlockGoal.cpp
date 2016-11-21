@@ -12,6 +12,9 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG NaiveBlockGoal
 
 namespace rtt {
 
@@ -98,12 +101,12 @@ bt::Node::Status NaiveBlockGoal::Update() {
         } else {
             minVec = horVec;
         }
-
-        // std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
-        // std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
-        // std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
-        // std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
-        // std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
+        
+        RTT_DEBUG("Goal area width: %f\n", GOAL_AREA_WIDTH);
+        RTT_DEBUG("Ball vec: %f %f\n", ballVec.x, ballVec.y);
+        RTT_DEBUG("Hor vec: %f %f\n", horVec.x, horVec.y);
+        RTT_DEBUG("Vert vec: %f %f\n", vertVec.x, vertVec.y);
+        RTT_DEBUG("Min vec: %f %f\n", minVec.x, minVec.y);
 
         minVec = minVec + goalPos;
 
@@ -116,17 +119,6 @@ bt::Node::Status NaiveBlockGoal::Update() {
             }
             minVec.y = 0;
         }
-
-        // const double FIELD_WIDTH = LastWorld::get_field().field_width;
-        // const double mod = 0.98;
-
-        // // First collapse point on side line
-        // if (minVec.x > FIELD_LENGTH / 2) minVec.x = FIELD_LENGTH / 2 * mod;
-        // if (minVec.x < -FIELD_LENGTH / 2) minVec.x = -FIELD_LENGTH / 2 * mod;
-        // // Then towards goal
-        // if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;
-        // if (minVec.y < -GOAL_AREA_WIDTH / 2) minVec.y = -GOAL_AREA_WIDTH / 2;
-
     }
     
     if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;

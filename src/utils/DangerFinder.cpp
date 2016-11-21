@@ -7,7 +7,6 @@
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
-#include "roboteam_tactics/generated/debug.h"
 
 #define reason(msg, ...) if (reasoning != nullptr) { \
 char buf[100]; \
