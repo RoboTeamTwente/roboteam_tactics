@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
-	bb->SetInt("ROBOT_ID", 2);
+	bb->SetInt("ROBOT_ID", 1);
 	bb->SetBool("intercept", true);
 	bb->SetDouble("getBallAtX", 0.0);
 	bb->SetDouble("getBallAtY", 0.0);

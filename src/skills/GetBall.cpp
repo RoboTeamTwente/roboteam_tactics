@@ -159,24 +159,16 @@ bt::Node::Status GetBall::Update (){
 			InterceptPose interceptPose = GetInterceptPos(getBallAtX, getBallAtY, getBallAtTime);
 			roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
 			double interceptAngle = interceptPose.interceptAngle;
-			if (interceptPos.x > 100.0 && interceptPos.y > 100.0) {
-				targetPos.x = getBallAtX;
-				targetPos.y = getBallAtY;
-				targetAngle = (ballPos-robotPos).angle();
+
+			roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
+			if (IsPointInCircle(getBallAtPos, acceptableDeviation, interceptPos)) {
+				targetPos = interceptPos;
+				targetAngle = interceptAngle;
 			} else {
-				if (interceptPos.x < -100.0 && interceptPos.y < -100.0) {
-					ROS_INFO("Something probably went wrong in computing the intercept position :(");
-					return Status::Invalid;
-				}
-				roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
-				if (IsPointInCircle(getBallAtPos, acceptableDeviation, interceptPos)) {
-					targetPos = interceptPos;
-					targetAngle = interceptAngle;
-				} else {
-					ROS_INFO("This is probably not a valid intercept position...");
-					return Status::Invalid;
-				}
+				ROS_INFO("This is probably not a valid intercept position...");
+				return Status::Invalid;
 			}
+				
 		} else { // If we are close enough to the ball we can drive towards it and turn on the dribbler
 			roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 			roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
