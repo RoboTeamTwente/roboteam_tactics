@@ -152,8 +152,16 @@ bt::Node::Status GetBall::Update (){
 
 	if (intercept) {
 		if (distanceToBall > acceptableDeviation) {
-			double getBallAtX = GetDouble("getBallAtX");
-			double getBallAtY = GetDouble("getBallAtY");
+			double getBallAtX;
+			double getBallAtY;
+			if (GetBool("getBallAtCurrentPos")) {
+				getBallAtX = robotPos.x;
+				getBallAtY = robotPos.y;
+			} else {
+				getBallAtX = GetDouble("getBallAtX");
+				getBallAtY = GetDouble("getBallAtY");
+			}
+			
 			double getBallAtTime = GetDouble("getBallAtTime");
 
 			InterceptPose interceptPose = GetInterceptPos(getBallAtX, getBallAtY, getBallAtTime);

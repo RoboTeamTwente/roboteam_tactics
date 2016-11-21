@@ -63,13 +63,14 @@ void AttackerTactic::Initialize() {
     delete_from_vector(robots, primaryAttacker);
     delete_from_vector(robots, secondaryAttacker);
 
-    int def_bot = robots.back();
-    delete_from_vector(robots, def_bot);
+    // int def_bot = robots.back();
+    // delete_from_vector(robots, def_bot);
 
-    int keeper_bot = robots.back();
-    delete_from_vector(robots, keeper_bot);
+    // int keeper_bot = robots.back();
+    // delete_from_vector(robots, keeper_bot);
 
-    claim_robots({primaryAttacker, secondaryAttacker, def_bot, keeper_bot});
+    // claim_robots({primaryAttacker, secondaryAttacker, def_bot, keeper_bot});
+    claim_robots({primaryAttacker, secondaryAttacker});
 
 
     ROS_INFO_STREAM("primaryAttacker: " << primaryAttacker << " secondaryAttacker: " << secondaryAttacker);
@@ -125,8 +126,9 @@ void AttackerTactic::Initialize() {
 
         // Receive the ball
         bb.SetBool("GetBall_A_intercept", true);
-        bb.SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
-        bb.SetDouble("GetBall_A_getBallAtY", 0.0);
+        // bb.SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
+        // bb.SetDouble("GetBall_A_getBallAtY", 0.0);
+        bb.SetDouble("GetBall_A_getBallAtCurrentPos", true);
 
         // Aim at goal
         bb.SetBool("AimAt_A_setRosParam", false);
@@ -147,43 +149,43 @@ void AttackerTactic::Initialize() {
         directivePub.publish(wd);
     }
 
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", def_bot);
+    // {
+    //     // Fill blackboard with relevant info
+    //     bt::Blackboard bb;
+    //     bb.SetInt("ROBOT_ID", def_bot);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = def_bot;
-        wd.tree = "SecondaryKeeper";
-        wd.blackboard = bb.toMsg();
+    //     // Create message
+    //     roboteam_msgs::RoleDirective wd;
+    //     wd.robot_id = def_bot;
+    //     wd.tree = "SecondaryKeeper";
+    //     wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        wd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        directivePub.publish(wd);
-    }
+    //     // Send to rolenode
+    //     directivePub.publish(wd);
+    // }
 
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", keeper_bot);
+    // {
+    //     // Fill blackboard with relevant info
+    //     bt::Blackboard bb;
+    //     bb.SetInt("ROBOT_ID", keeper_bot);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = keeper_bot;
-        wd.tree = "BasicKeeperTree";
-        wd.blackboard = bb.toMsg();
+    //     // Create message
+    //     roboteam_msgs::RoleDirective wd;
+    //     wd.robot_id = keeper_bot;
+    //     wd.tree = "BasicKeeperTree";
+    //     wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        wd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        directivePub.publish(wd);
-    }
+    //     // Send to rolenode
+    //     directivePub.publish(wd);
+    // }
 
     start = rtt::now();
 }

@@ -30,44 +30,47 @@ int primaryAttacker;
 int secondaryAttacker;
 
 
-
 void worldStateCallbackInit(const roboteam_msgs::WorldConstPtr& world) {
     rtt::LastWorld::set(*world);
     receivedTheFirstWorldMessage = true;
 }
 
-void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree1, bt::Blackboard::Ptr bb1, bt::BehaviorTree* tree2, bt::Blackboard::Ptr bb2) {
-    rtt::LastWorld::set(*world);
+// void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree1, bt::Blackboard::Ptr bb1, bt::BehaviorTree* tree2, bt::Blackboard::Ptr bb2) {
+//     rtt::LastWorld::set(*world);
 
-    roboteam_msgs::World getworld = rtt::LastWorld::get();
-    roboteam_msgs::WorldBall ball = getworld.ball;
-    roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+//     roboteam_msgs::World getworld = rtt::LastWorld::get();
+//     roboteam_msgs::WorldBall ball = getworld.ball;
+//     roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 
-    roboteam_utils::Vector2 secondaryAttackerPos(getworld.us.at(secondaryAttacker).pos.x, getworld.us.at(secondaryAttacker).pos.y);
-    bb2->SetDouble("GetBall_A_getBallAtX", secondaryAttackerPos.x);
-    bb2->SetDouble("GetBall_A_getBallAtY", secondaryAttackerPos.y);
+//     roboteam_utils::Vector2 secondaryAttackerPos(getworld.us.at(secondaryAttacker).pos.x, getworld.us.at(secondaryAttacker).pos.y);
+//     bb2->SetDouble("GetBall_A_getBallAtX", secondaryAttackerPos.x);
+//     bb2->SetDouble("GetBall_A_getBallAtY", secondaryAttackerPos.y);
     
-    if (!success1 && !failure1) {
-        bt::Node::Status status1 = tree1->Update();
-        if (status1 == bt::Node::Status::Success) {success1 = true;}
-        if (status1 == bt::Node::Status::Failure) {failure1 = true;}
-    }
+//     if (!success1 && !failure1) {
+//         bt::Node::Status status1 = tree1->Update();
+//         if (status1 == bt::Node::Status::Success) {success1 = true;}
+//         if (status1 == bt::Node::Status::Failure) {failure1 = true;}
+//     }
 
-    if (!success2 && !failure2) {
-        bt::Node::Status status2 = tree2->Update();
-        if (status2 == bt::Node::Status::Success) {success2 = true;}
-        if (status2 == bt::Node::Status::Failure) {failure2 = true;}
-    }
+//     if (!success2 && !failure2) {
+//         bt::Node::Status status2 = tree2->Update();
+//         if (status2 == bt::Node::Status::Success) {success2 = true;}
+//         if (status2 == bt::Node::Status::Failure) {failure2 = true;}
+//     }
 
-    auto bb3 = std::make_shared<bt::Blackboard>();
-    bb3->SetBool("our_goal", false);
-    IsBallInGoal isBallInGoal("", bb3);
-    bt::Node::Status weScored = isBallInGoal.Update();
-    if (weScored == bt::Node::Status::Success) {
-        successAll = true;
-    } else {
-        successAll = false;
-    }
+//     auto bb3 = std::make_shared<bt::Blackboard>();
+//     bb3->SetBool("our_goal", false);
+//     IsBallInGoal isBallInGoal("", bb3);
+//     bt::Node::Status weScored = isBallInGoal.Update();
+//     if (weScored == bt::Node::Status::Success) {
+//         successAll = true;
+//     } else {
+//         successAll = false;
+//     }
+// }
+
+void worldStateCallback2(const roboteam_msgs::WorldConstPtr& world) {
+    rtt::LastWorld::set(*world);
 }
 
 void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
@@ -127,8 +130,9 @@ void initializeRoles(bt::Blackboard::Ptr bb1, bt::Blackboard::Ptr bb2) {
 
     // Receive the ball
     bb2->SetBool("GetBall_A_intercept", true);
-    bb2->SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
-    bb2->SetDouble("GetBall_A_getBallAtY", 0.0);
+    // bb2->SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
+    // bb2->SetDouble("GetBall_A_getBallAtY", 0.0);
+    bb2->SetBool("GetBall_A_getBallAtCurrentPosition", true);
 
     // Aim at goal
     bb2->SetBool("AimAt_A_setRosParam", false);
@@ -155,29 +159,51 @@ int main(int argc, char **argv) {
     auto bb2 = role2.GetBlackboard();
     initializeRoles(bb1, bb2);
     
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role1, bb1, &role2, bb2));
+    // ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role1, bb1, &role2, bb2));
+    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, worldStateCallback2);
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
 
-    while(ros::ok()) {
+    ros::Rate rate(60);
+    bool finished1;
+    bool finished2;
+
+    while (ros::ok()) {
         ros::spinOnce();
-        bool dontStopMeNow_ImHavingSuchAGoodTime = false;
-        if (successAll) {
-            if (dontStopMeNow_ImHavingSuchAGoodTime) {
-                ROS_INFO("start again");
-                success1 = false;
-                success2 = false;
-                successAll = false;
-                initializeRoles(bb1, bb2);
-            } else {
-                ROS_INFO("finished");
-                break;
+        if (!finished1) {
+            if (role1.Update() != bt::Node::Status::Running) {
+                finished1 = true;
             }
         }
-        if (failure1 || failure2) {
-            ROS_INFO("failed :(");
-            break;
+        if (!finished2) {
+            if (role2.Update() != bt::Node::Status::Running) {
+                finished2 = true;
+            }
         }
+        if (finished1 && finished2) {break;}
+        // rate.sleep();
     }
+
+
+    // while(ros::ok()) {
+    //     ros::spinOnce();
+    //     bool dontStopMeNow_ImHavingSuchAGoodTime = false;
+    //     if (successAll) {
+    //         if (dontStopMeNow_ImHavingSuchAGoodTime) {
+    //             ROS_INFO("start again");
+    //             success1 = false;
+    //             success2 = false;
+    //             successAll = false;
+    //             initializeRoles(bb1, bb2);
+    //         } else {
+    //             ROS_INFO("finished");
+    //             break;
+    //         }
+    //     }
+    //     if (failure1 || failure2) {
+    //         ROS_INFO("failed :(");
+    //         break;
+    //     }
+    // }
     return 0;
 }
 
