@@ -31,6 +31,8 @@ boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldR
         }
     }
 
+    // Make a Cone for a robot standing between me and the target, and then see whether this cone overlaps with the cones of other robots,
+    // in which case they can be merged into a big cone
     double distanceFromPoint = GetDouble("distanceFromPoint");
     for (int i = 0; i < robotsInTheWay.size(); i++) {
         Cone cone(targetPos, robotsInTheWay.at(i), distanceFromPoint);
@@ -50,8 +52,6 @@ boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldR
 }
 
 bt::Node::Status StandFree::Update() {
-    //
-
 	// Get world and blackboard information
 	roboteam_msgs::World world = LastWorld::get();
 	int myID = blackboard->GetInt("ROBOT_ID");
@@ -98,6 +98,7 @@ bt::Node::Status StandFree::Update() {
 
     roboteam_utils::Vector2 nearestFreePos = myPos;
 
+    // Drawing lines in rqt_view
     roboteam_msgs::DebugLine firstLine;
     firstLine.name = "firstLine";
     firstLine.remove = true;
@@ -197,6 +198,8 @@ bt::Node::Status StandFree::Update() {
     debugPub.publish(fourthLine);
     debugPubPoint.publish(targetPosition);
 
+    // kickingTheBall is here to communicate with another skill that passes the ball towards this robot. This robot 
+    // will only finish this skill once kickingTheBall is set to true by the other robot
     bool kickingTheBall;
     if (setRosParam) {
         n.getParam("/kickingTheBall", kickingTheBall); 
