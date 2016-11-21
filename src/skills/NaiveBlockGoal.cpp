@@ -103,11 +103,11 @@ bt::Node::Status NaiveBlockGoal::Update() {
             minVec = horVec;
         }
 
-        std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
-        std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
-        std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
-        std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
-        std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
+        // std::cout << "Goal area width: " << GOAL_AREA_WIDTH << "\n";
+        // std::cout << "Ball vec: " << ballVec.x  << " " << ballVec.y << "\n";
+        // std::cout << "Hor vec: " << horVec.x << " " << horVec.y << "\n";
+        // std::cout << "Vert vec: " << vertVec.x << " " << vertVec.y << "\n";
+        // std::cout << "Min vec: " << minVec.x << " " << minVec.y << "\n";
 
         minVec = minVec + goalPos;
 
