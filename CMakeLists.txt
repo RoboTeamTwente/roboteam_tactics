@@ -400,28 +400,28 @@ add_executable(ConeTest
         ${catkin_LIBRARIES}
         )
 
-add_executable(StandFreeTest
-        src/skills/tests/StandFreeTest.cpp
+add_executable(CanSeeRobotTest
+        src/conditions/tests/CanSeeRobotTest.cpp
     )
-    add_dependencies(StandFreeTest
+    add_dependencies(CanSeeRobotTest
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(StandFreeTest 
+    target_link_libraries(CanSeeRobotTest 
         skills
         conditions
         utils
         ${catkin_LIBRARIES}
         )
 
-add_executable(StandFreeAndReceive
-        src/role_tests/StandFreeAndReceive.cpp
+add_executable(AttackTactic
+        src/role_tests/AttackTactic.cpp
     )
-    add_dependencies(StandFreeAndReceive
+    add_dependencies(AttackTactic
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(StandFreeAndReceive 
+    target_link_libraries(AttackTactic 
         skills
         conditions
         utils

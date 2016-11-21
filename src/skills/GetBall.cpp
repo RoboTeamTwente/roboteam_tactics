@@ -23,44 +23,17 @@ namespace rtt {
 
 GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
-        // , goToPos(n, "", private_bb)
         , avoidRobots(n, "", private_bb) {
     pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-    // ROS_INFO("Getting ball");
     hasBall = whichRobotHasBall();
     n.setParam("/kickingTheBall", false);
 }
 
 int GetBall::whichRobotHasBall() {
-    /*
-	roboteam_msgs::World world = LastWorld::get();
-	for (size_t i=0; i < world.us.size(); i++) {
-		auto bb2 = std::make_shared<bt::Blackboard>();
-		bb2->SetInt("me", i);
-		bb2->SetBool("our_team", true);
-		IHaveBall iHaveBall("", bb2);
-		if (iHaveBall.Update() == Status::Success) {
-			our_team = true;
-			return i;
-		}
-	}
-	for (size_t i=0; i < world.them.size(); i++) {
-		auto bb2 = std::make_shared<bt::Blackboard>();
-		bb2->SetInt("me", i);
-		bb2->SetBool("our_team", false);
-		IHaveBall iHaveBall("", bb2);
-		if (iHaveBall.Update() == Status::Success) {
-			our_team = false;
-			return i;
-		}
-	}
-	return -1;
-    */
     auto holder = getBallHolder();
     if (!holder) {
         return -1;
     }
-    // ROS_INFO("Holder: %d - %d", holder->first.id, holder->second);
     our_team = holder->second;
     return holder->first.id;
 }
@@ -82,16 +55,14 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 	}
 
 	if (hasBall == -1) { // no robot has the ball
-		// Predict intercept pos from ball velocity
 
+		// Predict intercept pos from ball velocity
 		roboteam_msgs::Vector2f predictedBallPos = LastWorld::PredictBallPos(getBallAtTime);
 		roboteam_utils::Vector2 ballPosNow = roboteam_utils::Vector2(world.ball.pos.x, world.ball.pos.y);
 		roboteam_utils::Vector2 ballPosThen = roboteam_utils::Vector2(predictedBallPos.x, predictedBallPos.y);
 		roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
 		roboteam_utils::Vector2 ballTrajectory = ballPosThen - ballPosNow;
 		roboteam_utils::Vector2 ballToCenter = getBallAtPos - ballPosNow;
-
-		// ROS_INFO_STREAM("no robot has the ball, ");
 
 		double ballTrajectoryMagn = ballTrajectory.length();
 		ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
@@ -104,7 +75,6 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		} else {
 			interceptPos.x = getBallAtX;
 			interceptPos.y = getBallAtY;
-			// ROS_INFO_STREAM("set targetAngle: " << (ballPosNow - getBallAtPos).angle());
 			interceptAngle = (ballPosNow - getBallAtPos).angle();
 		}
 		interceptPose.interceptPos = interceptPos;
@@ -113,16 +83,14 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		return interceptPose;
 
 	} else {
-		// Predict intercept pos by looking at the robot that has the ball
 
+		// Predict intercept pos by looking at the robot that has the bal
 		roboteam_msgs::WorldRobot otherRobot;
 		if (our_team) {
 			otherRobot = world.us.at(hasBall);
 		} else {
 			otherRobot = world.them.at(hasBall);
 		}
-
-		// ROS_INFO_STREAM("robot " << hasBall << " has the ball!");
 
 		roboteam_utils::Vector2 otherRobotLooksAt = roboteam_utils::Vector2(1, 0);
 		otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
@@ -168,7 +136,6 @@ bt::Node::Status GetBall::Update (){
 	
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
-	// bool setRosParam = GetBool("setRosParam");
 	
 	while (world.us.size() == 0) {
 		return Status::Running;
@@ -193,33 +160,31 @@ bt::Node::Status GetBall::Update (){
 			roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
 			double interceptAngle = interceptPose.interceptAngle;
 			if (interceptPos.x > 100.0 && interceptPos.y > 100.0) {
-				// ROS_INFO("Ball is not estimated to be within range within the specified time, but I'll wait...");
 				targetPos.x = getBallAtX;
 				targetPos.y = getBallAtY;
 				targetAngle = (ballPos-robotPos).angle();
 			} else {
 				if (interceptPos.x < -100.0 && interceptPos.y < -100.0) {
-					ROS_INFO("Something went wrong in computing the intercept position :(");
+					ROS_INFO("Something probably went wrong in computing the intercept position :(");
 					return Status::Invalid;
 				}
 				roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
 				if (IsPointInCircle(getBallAtPos, acceptableDeviation, interceptPos)) {
-					// ROS_INFO("Nice! This is probably a valid intercept position");
 					targetPos = interceptPos;
 					targetAngle = interceptAngle;
 				} else {
-					ROS_INFO("This is probably not a valid intercept position, please fix your code...");
+					ROS_INFO("This is probably not a valid intercept position...");
 					return Status::Invalid;
 				}
 			}
-		} else {
+		} else { // If we are close enough to the ball we can drive towards it and turn on the dribbler
 			roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 			roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
 			targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
 			targetAngle = posDiff.angle();
 			private_bb->SetBool("dribbler", true);
 		}
-	} else {
+	} else { // If we need not intercept the ball, then just drive towards it
 		roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
@@ -242,21 +207,14 @@ bt::Node::Status GetBall::Update (){
 		ros::spinOnce();
 
 		ROS_INFO("GetBall skill completed.");
-		// if (setRosParam) {
-		// 	ROS_INFO_STREAM("setting the param to true");
-		// 	n.setParam("/kickingTheBall", true);
-		// }
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
-        // ROS_INFO_STREAM("go to angle: " << targetAngle);
         private_bb->SetDouble("angleGoal", targetAngle);
-        // private_bb->SetBool("endPoint", true);
         
         avoidRobots.Update();
-		// goToPos.Update();
 		prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);
 		prevTargetAngle = targetAngle;
 		return Status::Running;

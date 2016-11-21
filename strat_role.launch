@@ -5,7 +5,7 @@
 
   <param name="role_iterations_per_second" type="int" value="13" />
   <param name="num_role_nodes" type="int" value="4" />
-  <param name="use_legacy_packets" type="boolean" value="false" />
+  <param name="use_legacy_packets" type="boolean" value="true" />
 
   <node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
   <node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
