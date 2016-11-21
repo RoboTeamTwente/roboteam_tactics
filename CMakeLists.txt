@@ -112,19 +112,19 @@ add_custom_command(
     )
 
 # Generate debug macros
-add_custom_target(generate_dbg_macros_t
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    )
-add_custom_command(
-    OUTPUT
-        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/debug_names.txt
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating debug macros"
-    )
+# add_custom_target(generate_dbg_macros_t
+    # DEPENDS
+        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    # )
+# add_custom_command(
+    # OUTPUT
+        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    # COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
+    # DEPENDS
+        # ${PROJECT_SOURCE_DIR}/debug_names.txt
+    # WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    # COMMENT "Generating debug macros"
+    # )
 
 # Dummy output which is never actually produced. Anything that depends on
 # this will always be rebuilt.
