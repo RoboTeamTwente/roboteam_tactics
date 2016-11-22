@@ -20,13 +20,53 @@ AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Pt
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
-bt::Node::Status AvoidRobots::Update (){
+// roboteam_msgs::RobotCommand AvoidRobots::SimplePositionController(roboteam_utils::Vector2 posError, double rotError) {
+//     // Proportional rotation controller
+//     roboteam_msgs::World world = LastWorld::get();
+//     double requiredRotSpeed;
+//     double pGainRot = 15.0;
+//     double maxRotSpeed = 3.0;
+//     double angle = world.us.at(robotID).angle;
+//     // double rotError = angleGoal - angle;
 
-    // Set control variables
-    double maxSpeed = 1.5;
-    double attractiveForce = 10.0;
-    double attractiveForceWhenClose = 4.0;
-    double repulsiveForce = 10.0;
+//     if (rotError < M_PI) {rotError += 2*M_PI;}
+//     if (rotError > M_PI) {rotError -= 2*M_PI;}
+
+//     requiredRotSpeed = rotError * pGainRot;
+//     if (fabs(requiredRotSpeed) > maxRotSpeed) {
+//         requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
+//     }
+
+//     roboteam_utils::Vector2 forceVector = posError*attractiveForceWhenClose;
+//     if (posError.length() > 0.3) {
+//         forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
+//     }
+
+//     // Rotate from robot frame to world frame
+//     roboteam_utils::Vector2 requiredSpeed;  
+//     requiredSpeed.x=forceVector.x*cos(-angle)-forceVector.y*sin(-angle);
+//     requiredSpeed.y=forceVector.x*sin(-angle)+forceVector.y*cos(-angle);
+
+//     if (posError.length() < 0.01 && fabs(rotError) < 0.005) {
+//         roboteam_msgs::RobotCommand command;
+//         command.id = robotID;
+//         command.x_vel = 0.0;
+//         command.y_vel = 0.0;
+//         command.w = 0.0;
+//         if (dribbler) {command.dribbler = true;}
+//         return command;
+//     } else {
+//         roboteam_msgs::RobotCommand command;
+//         command.id = robotID;
+//         command.x_vel = requiredSpeed.x;
+//         command.y_vel = requiredSpeed.y;
+//         command.w = requiredRotSpeed;
+//         if (dribbler) {command.dribbler = true;}
+//         return command;
+//     }
+// }
+
+bt::Node::Status AvoidRobots::Update (){
 
     // Get the latest world state
 	roboteam_msgs::World world = LastWorld::get();
@@ -36,18 +76,15 @@ bt::Node::Status AvoidRobots::Update (){
     }
 
     // Get blackboard info
-    double xGoal = GetDouble("xGoal");
-    double yGoal = GetDouble("yGoal");
-    double angleGoal = GetDouble("angleGoal");
-    uint robotID = blackboard->GetInt("ROBOT_ID");
-    bool dribbler = GetBool("dribbler");
+    xGoal = GetDouble("xGoal");
+    yGoal = GetDouble("yGoal");
+    angleGoal = GetDouble("angleGoal");
+    robotID = blackboard->GetInt("ROBOT_ID");
+    dribbler = GetBool("dribbler");
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
-    roboteam_utils::Vector2 myVel = roboteam_utils::Vector2(world.us.at(robotID).vel.x, world.us.at(robotID).vel.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
-    myVel.x = 1.0;
-    myVel.y = 0.0;
 
     auto bb2 = std::make_shared<bt::Blackboard>();
     bb2->SetInt("me", robotID);
@@ -76,7 +113,6 @@ bt::Node::Status AvoidRobots::Update (){
         requiredRotSpeed = requiredRotSpeed / fabs(requiredRotSpeed) * maxRotSpeed;
     }
     
-
     // If you can see the end point, just go towards it
     CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
@@ -110,7 +146,6 @@ bt::Node::Status AvoidRobots::Update (){
             return Status::Running;
         }
     }
-    
 
     // Determine how far we should look ahead to avoid other robots
     double lookingDistance = 0.75;

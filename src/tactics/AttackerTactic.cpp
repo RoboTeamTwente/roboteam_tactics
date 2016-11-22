@@ -69,11 +69,11 @@ void AttackerTactic::Initialize() {
     // int keeper_bot = robots.back();
     // delete_from_vector(robots, keeper_bot);
 
-    // claim_robots({primaryAttacker, secondaryAttacker, def_bot, keeper_bot});
+    // claim_robots({def_bot, keeper_bot});
     claim_robots({primaryAttacker, secondaryAttacker});
 
 
-    ROS_INFO_STREAM("primaryAttacker: " << primaryAttacker << " secondaryAttacker: " << secondaryAttacker);
+    // ROS_INFO_STREAM("primaryAttacker: " << primaryAttacker << " secondaryAttacker: " << secondaryAttacker);
 
     {
 

@@ -17,6 +17,7 @@ namespace rtt {
 class AvoidRobots : public Skill {
 public:
 	AvoidRobots(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    // roboteam_msgs::RobotCommand SimplePositionController(roboteam_utils::Vector2 posError, double rotError);
 	Status Update();
     
     static VerificationMap required_params() {
@@ -31,6 +32,19 @@ public:
 private:
     ros::NodeHandle n;
 	ros::Publisher pub;
+
+    // Control variables
+    double maxSpeed = 1.5;
+    double attractiveForce = 10.0;
+    double attractiveForceWhenClose = 4.0;
+    double repulsiveForce = 10.0;
+
+    double xGoal;
+    double yGoal;
+    double angleGoal;
+    uint   robotID;
+    bool   dribbler;
+
 };
 
 } // rtt
