@@ -1,0 +1,40 @@
+{
+  "id": "e3064883-eccb-4e99-8990-5418cd9e907b",
+  "title": "CheckParamTest",
+  "description": "",
+  "root": "e8f423b5-60fd-4b01-84e5-9a5178459af3",
+  "properties": {},
+  "nodes": {
+    "e8f423b5-60fd-4b01-84e5-9a5178459af3": {
+      "id": "e8f423b5-60fd-4b01-84e5-9a5178459af3",
+      "name": "ParamCheck",
+      "title": "ParamCheck_A",
+      "description": "",
+      "properties": {
+        "signal": "test_signal",
+        "mode": "eq",
+        "value": "true"
+      },
+      "display": {
+        "x": 144,
+        "y": 0
+      }
+    }
+  },
+  "display": {
+    "camera_x": 927.5,
+    "camera_y": 495,
+    "camera_z": 1,
+    "x": 0,
+    "y": 0
+  },
+  "custom_nodes": [
+    {
+      "name": "ParamCheck",
+      "category": "condition",
+      "title": "ParamCheck",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}

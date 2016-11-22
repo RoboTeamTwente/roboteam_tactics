@@ -14,5 +14,6 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/testparams.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
     PARENT_SCOPE
     )

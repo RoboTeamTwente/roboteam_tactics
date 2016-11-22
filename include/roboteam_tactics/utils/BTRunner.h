@@ -11,7 +11,8 @@ class BTRunner {
     
     template<typename Func>
     void run_until(Func f) {
-        while (f()) { run_once(); }
+        bt::Node::Status previousStatus = bt::Node::Status::Running;
+        while (f(previousStatus)) { previousStatus = run_once(); }
     }
     
     private:
