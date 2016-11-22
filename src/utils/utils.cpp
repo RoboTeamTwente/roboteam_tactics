@@ -236,4 +236,22 @@ std::string get_our_field_side() {
     return our_field_side;
 }
 
+roboteam_msgs::RobotCommand stop_command(unsigned int id) {
+    roboteam_msgs::RobotCommand cmd;
+    cmd.id = id;
+    cmd.active = true;
+	cmd.x_vel = 0.0;
+	cmd.y_vel = 0.0;
+	cmd.w = 0.0;
+
+	cmd.dribbler=true;
+	cmd.kicker=false;
+	cmd.kicker_vel=0.0;
+	cmd.kicker_forced=false;
+	cmd.chipper=false;
+	cmd.chipper_vel=0.0;
+	cmd.chipper_forced=false;
+    return cmd;
+}
+
 } // rtt

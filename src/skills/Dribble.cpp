@@ -4,6 +4,7 @@
 #include "actionlib/client/simple_action_client.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/skills/Dribble.h"
 
 #include "roboteam_msgs/World.h"
@@ -25,23 +26,7 @@ namespace rtt {
 	}
 
 void Dribble::stoprobot(int robotID) {
-
-	roboteam_msgs::RobotCommand cmd;
-	cmd.id = robotID;
-	cmd.active = true;
-	cmd.x_vel = 0.0;
-	cmd.y_vel = 0.0;
-	cmd.w = 0.0;
-
-	cmd.dribbler=true;
-	cmd.kicker=false;
-	cmd.kicker_vel=0.0;
-	cmd.kicker_forced=false;
-	cmd.chipper=false;
-	cmd.chipper_vel=0.0;
-	cmd.chipper_forced=false;
-
-	pubDribble.publish(cmd);
+	pubDribble.publish(stop_command(robotID));
 }
 roboteam_utils::Vector2 Dribble::worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
     roboteam_utils::Vector2 robotRequiredv;
