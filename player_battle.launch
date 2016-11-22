@@ -3,8 +3,8 @@
 		<param name="our_color" value="blue" type="str" />
 		<param name="our_field_side" value="right" type="str" />
 		<include file="$(find roboteam_tactics)/strat_role.launch" />
-<!--		<node name="demoref" pkg="roboteam_demoref" type="roboteam_demoref" output="screen" />
--->		<node name="rqt_view" pkg="roboteam_rqt_view" type="run_world_view.py" />
+		<node name="demoref" pkg="roboteam_demoref" type="roboteam_demoref" output="screen" />
+		<node name="rqt_view" pkg="roboteam_rqt_view" type="run_world_view.py" />
 	</group>
 
 	<group ns="yellow">
