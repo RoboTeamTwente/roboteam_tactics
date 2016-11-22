@@ -9,7 +9,7 @@ SecondaryKeeper::SecondaryKeeper(ros::NodeHandle n, std::string name,
 }
 
 boost::optional<roboteam_msgs::WorldRobot> SecondaryKeeper::select_target() const {
-    return second_most_dangerous_bot(target);
+    return second_most_dangerous_bot();
 }
     
 }
