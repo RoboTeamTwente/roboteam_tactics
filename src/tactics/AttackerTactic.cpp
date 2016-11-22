@@ -128,7 +128,7 @@ void AttackerTactic::Initialize() {
         bb.SetBool("GetBall_A_intercept", true);
         // bb.SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
         // bb.SetDouble("GetBall_A_getBallAtY", 0.0);
-        bb.SetDouble("GetBall_A_getBallAtCurrentPos", true);
+        bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
 
         // Aim at goal
         bb.SetBool("AimAt_A_setRosParam", false);
