@@ -185,6 +185,7 @@ bt::Node::Status GetBall::Update (){
 			private_bb->SetBool("dribbler", true);
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
+		ROS_INFO("driving to the ball");
 		roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius

@@ -3,7 +3,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/AvoidRobots.h"
 
 namespace rtt {
 
@@ -31,7 +31,7 @@ private:
 	ros::NodeHandle n;
 	ros::Publisher pubNaiveBlockGoal;
 
-    GoToPos goToPos;
+    AvoidRobots avoidRobots;
 
 };
 

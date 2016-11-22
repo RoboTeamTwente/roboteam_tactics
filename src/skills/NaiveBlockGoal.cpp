@@ -49,7 +49,7 @@ bool isBallInGoalArea() {
 
 NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
-        , goToPos(n, "", private_bb) {
+        , avoidRobots(n, "", private_bb) {
         	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
@@ -138,8 +138,8 @@ bt::Node::Status NaiveBlockGoal::Update() {
     private_bb->SetDouble("xGoal", minVec.x);
     private_bb->SetDouble("yGoal", minVec.y);
     private_bb->SetDouble("angleGoal", angle);
-    private_bb->SetBool("endPoint", true);
-    goToPos.Update();
+    // private_bb->SetBool("endPoint", true);
+    avoidRobots.Update();
 
     return Status::Running;
 }
