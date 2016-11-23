@@ -428,4 +428,4 @@ add_executable(AttackTactic
         ${catkin_LIBRARIES}
         )
 
-endif(NOT computername STREQUAL "minux")
+endif(NOT computername STREQUAL "lapbobe")

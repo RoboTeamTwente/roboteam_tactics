@@ -12,7 +12,6 @@ add_library(utils
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
-    generate_dbg_macros_t
     )
 target_link_libraries(utils
     skills

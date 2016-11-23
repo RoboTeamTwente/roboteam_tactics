@@ -2,9 +2,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
+#include <ros/ros.h>
 
-#include "ros/ros.h"
-
+#include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/utils/NodeFactory.h"
@@ -28,10 +28,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
-}
-
-bool is_digits(const std::string &str) {
-    return std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
 void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
@@ -108,7 +104,7 @@ How to use:
                 argType = "bool";
             } else if (rest.find(".") != std::string::npos) {
                 argType = "double";
-            } else if (is_digits(rest)) {
+            } else if (rtt::is_digits(rest)) {
                 argType = "int";
             } else {
                 argType = "string";
@@ -135,7 +131,6 @@ How to use:
         }
     }
 
-    //auto skill = rtt::make_skill<>(n, testClass, "", bb);
     rtt::print_blackboard(bb);
     ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
@@ -149,10 +144,12 @@ How to use:
 
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
-        runner.run_until([&]() {
-            while (!may_update) ros::spinOnce();
-            //fps60.sleep();
-            return ros::ok();
+        
+        runner.run_until([&](bt::Node::Status previousStatus) {
+            ros::spinOnce();
+            fps60.sleep();
+
+            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status;
         });
     } else {
         node->Initialize();

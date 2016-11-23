@@ -72,4 +72,6 @@ std::string describe_status(bt::Node::Status status);
 std::string get_our_field_side();
 roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
+bool is_digits(const std::string &str);
+
 } // rtt

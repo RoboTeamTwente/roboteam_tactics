@@ -236,6 +236,10 @@ std::string get_our_field_side() {
     return our_field_side;
 }
 
+bool is_digits(const std::string &str) {
+    return std::all_of(str.begin(), str.end(), ::isdigit);
+}
+
 roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     roboteam_msgs::RobotCommand cmd;
     cmd.id = id;

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "roboteam_tactics/generated/allskills_factory.h"
-#include <string>
-#include <vector>
+#include <cstdio>
 #include <exception>
 #include <memory>
-#include <cstdio>
-#include "ros/ros.h"
+#include <string>
+#include <vector>
+#include <ros/ros.h>
+
+#include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 
 namespace rtt {
@@ -26,10 +28,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
-}
-
-bool is_digits(const std::string &str) {
-    return std::all_of(str.begin(), str.end(), ::isdigit); 
 }
 
 bt::Blackboard::Ptr parse_bb(const std::string& skill_name, const std::vector<std::string>& arguments) {
