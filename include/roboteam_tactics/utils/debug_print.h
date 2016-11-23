@@ -22,5 +22,6 @@ namespace rtt {
 SET_DEBUG_FOR(AimAt, false);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamCheck, true);
+SET_DEBUG_FOR(ParamSet, true);
 
 } // rtt

@@ -117,6 +117,9 @@ How to use:
         // std::cout << "Type: " << argType << "\n";
         // std::cout << "Name: " << name << "\n";
         // std::cout << "Value: " << rest << "\n";
+        // TODO: Factor the logic here into a few common functions
+        // (one for going string -> T and one for going T -> string)
+        // and use them here, paramset, paramget, and in some of Dennis's bb code
 
         if (argType == "string") {
             bb->SetString(name, rest);

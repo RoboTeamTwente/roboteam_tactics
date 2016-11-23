@@ -2,7 +2,7 @@
   "id": "e3064883-eccb-4e99-8990-5418cd9e907b",
   "title": "CheckParamTest",
   "description": "",
-  "root": "e8f423b5-60fd-4b01-84e5-9a5178459af3",
+  "root": "22d2e303-c7f8-40c2-8a90-4ec949b1c88e",
   "properties": {},
   "nodes": {
     "e8f423b5-60fd-4b01-84e5-9a5178459af3": {
@@ -17,22 +17,58 @@
       },
       "display": {
         "x": 144,
-        "y": 0
+        "y": 24
       }
+    },
+    "b1870962-4219-4e03-a2d6-58d3327fcf86": {
+      "id": "b1870962-4219-4e03-a2d6-58d3327fcf86",
+      "name": "ParamSet",
+      "title": "ParamSet_A",
+      "description": "",
+      "properties": {
+        "signal": "test_signal",
+        "value": "true"
+      },
+      "display": {
+        "x": 144,
+        "y": -48
+      }
+    },
+    "22d2e303-c7f8-40c2-8a90-4ec949b1c88e": {
+      "id": "22d2e303-c7f8-40c2-8a90-4ec949b1c88e",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -24,
+        "y": -12
+      },
+      "children": [
+        "b1870962-4219-4e03-a2d6-58d3327fcf86",
+        "e8f423b5-60fd-4b01-84e5-9a5178459af3"
+      ]
     }
   },
   "display": {
     "camera_x": 927.5,
     "camera_y": 495,
     "camera_z": 1,
-    "x": 0,
-    "y": 0
+    "x": -120,
+    "y": -12
   },
   "custom_nodes": [
     {
       "name": "ParamCheck",
       "category": "condition",
       "title": "ParamCheck",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParamSet",
+      "category": "action",
+      "title": "ParamSet",
       "description": null,
       "properties": {}
     }
