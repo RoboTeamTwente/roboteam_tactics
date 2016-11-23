@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
             rate.sleep();
         }
     }
-    
+
     // Wait for robots to appear
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();

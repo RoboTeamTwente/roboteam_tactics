@@ -1,8 +1,10 @@
 #include "ros/ros.h"
+
+#include "roboteam_tactics/skills/Chip.h"
+
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/Kick.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -10,24 +12,25 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 
+
 namespace rtt {
 
-Kick::Kick(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+Chip::Chip(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
 
-        	pubKick = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-            // ROS_INFO("Kicking the ball");
+    	pubChip = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
-void Kick::Initialize() {
+void Chip::Initialize() {
     auto vel = LastWorld::get().ball.vel;
     oldBallVel = roboteam_utils::Vector2(vel.x, vel.y);
     cycleCounter = 0;
 }
 
-bt::Node::Status Kick::Update() {
+
+bt::Node::Status Chip::Update() {
     cycleCounter++;
-    if (cycleCounter > 20) return bt::Node::Status::Failure;
+    if (cycleCounter > 10) return bt::Node::Status::Failure;
 
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -47,7 +50,6 @@ bt::Node::Status Kick::Update() {
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update
 	// is called before the first world state update
 	if (world.us.size() == 0) {
-		ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 
@@ -60,21 +62,21 @@ bt::Node::Status Kick::Update() {
 	rotDiff = cleanAngle(rotDiff);
 
 	if (posDiff.length() < 0.105) { // ball is close
-
 		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
+            //command.active = true;
 			command.dribbler = false;
-			command.kicker = true;
-			command.kicker_forced = true;
-			command.kicker_vel = 5;
+			command.chipper = true;
+			command.chipper_forced = true;
+			command.chipper_vel = 5;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
 			command.w = 0.0;
 
-			pubKick.publish(command);
+			pubChip.publish(command);
 			ros::spinOnce();
-			ROS_INFO("Triggered the kicker!");
+			ROS_INFO("Triggered the chipper!");
 			return Status::Running;
 		}
 		else {
