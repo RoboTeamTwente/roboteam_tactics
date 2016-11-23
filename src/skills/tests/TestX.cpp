@@ -13,7 +13,7 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
 
-static volatile bool may_update = true;
+static volatile bool may_update = false;
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -132,9 +132,11 @@ How to use:
     }
 
     rtt::print_blackboard(bb);
-    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
+   
+    while (!may_update) ros::spinOnce();
+    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
     
