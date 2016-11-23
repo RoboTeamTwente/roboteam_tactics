@@ -144,12 +144,12 @@ How to use:
 
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
-        
+
         runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
             fps60.sleep();
 
-            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status;
+            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
     } else {
         node->Initialize();
