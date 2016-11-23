@@ -11,6 +11,14 @@ class RandomDrive : public Skill {
 public:
     RandomDrive(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update();
+
+    static VerificationMap required_params() {
+        VerificationMap params;
+        params["ROBOT_ID"] = BBArgumentType::Int;
+        return params;
+    }
+
+    std::string node_name() { return "RandomDrive"; }
 private:
     ros::Publisher debug_pub;
     // Id to add to the debug point, so that multiple of these nodes don't interfere.

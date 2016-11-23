@@ -137,21 +137,22 @@ How to use:
     rtt::print_blackboard(bb);
     ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
-   
+
     while (!may_update) ros::spinOnce();
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
-    
+
     ros::Rate fps60(60);
 
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
-        runner.run_until([&](bt::Node::Status previousStatus) { 
-            ros::spinOnce();
-            fps60.sleep(); 
 
-            return ros::ok() && previousStatus != bt::Node::Status::Success; 
+        runner.run_until([&](bt::Node::Status previousStatus) {
+            ros::spinOnce();
+            fps60.sleep();
+
+            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
     } else {
         node->Initialize();
@@ -160,14 +161,26 @@ How to use:
         while (ros::ok()) {
             ros::spinOnce();
             status = node->Update();
-            if (status == bt::Node::Status::Success) {
+            if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
                 break;
             }
             fps60.sleep();
         }
 
+        std::cout << "Terminating..." << std::endl;
+
         node->Terminate(status);
     }
+
+    // Busy loop to make sure all the messages have been sent.
+    // Not sure if neccesary.
+    for (int i = 0; i < 10; i++) {
+        fps60.sleep();
+        ros::spinOnce();
+    }
+
+    // Gracefully close all the publishers.
+    n.shutdown();
 
     std::cout << "Test of " << testClass << " completed!\n";
 	return 0;
