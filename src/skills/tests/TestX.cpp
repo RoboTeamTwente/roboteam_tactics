@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 #include <ros/ros.h>
 
 #include "roboteam_tactics/bt.hpp"
@@ -143,6 +145,9 @@ How to use:
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 
+    // Wait for the node's `robotcommand` publisher to have initialized properly.
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     ros::Rate fps60(60);
 
     if (is_bt) {
@@ -170,13 +175,6 @@ How to use:
         std::cout << "Terminating..." << std::endl;
 
         node->Terminate(status);
-    }
-
-    // Busy loop to make sure all the messages have been sent.
-    // Not sure if neccesary.
-    for (int i = 0; i < 10; i++) {
-        fps60.sleep();
-        ros::spinOnce();
     }
 
     // Gracefully close all the publishers.
