@@ -1,4 +1,5 @@
 set(TACTIC_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/AttackerTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicAttackTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicDefenseTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToSideTactic.cpp

@@ -13,7 +13,7 @@
       "properties": {},
       "display": {
         "x": 0,
-        "y": -36
+        "y": -132
       }
     },
     "bd3e489a-1d05-4138-be42-da33cb216246": {
@@ -23,8 +23,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 0,
-        "y": 24
+        "x": 312,
+        "y": -60
       }
     },
     "e1639164-0747-4b3c-9d82-7161547d4a90": {
@@ -34,8 +34,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 0,
-        "y": 84
+        "x": 312,
+        "y": 0
       }
     },
     "82e07d04-bd25-4d32-8440-c7fbfab3646c": {
@@ -46,7 +46,7 @@
       "properties": {},
       "display": {
         "x": 0,
-        "y": 156
+        "y": 144
       }
     },
     "2ea46c48-bbea-4625-906e-da6d57200860": {
@@ -61,15 +61,43 @@
       },
       "children": [
         "966bdcad-ec20-4248-829f-4ceb622fa5e5",
-        "bd3e489a-1d05-4138-be42-da33cb216246",
-        "e1639164-0747-4b3c-9d82-7161547d4a90",
+        "87689268-8e44-4955-a126-3f1423c83756",
         "82e07d04-bd25-4d32-8440-c7fbfab3646c"
+      ]
+    },
+    "87689268-8e44-4955-a126-3f1423c83756": {
+      "id": "87689268-8e44-4955-a126-3f1423c83756",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": 12,
+        "y": -24
+      },
+      "child": "5d1269b9-014f-4b3b-a810-086dea70639d"
+    },
+    "5d1269b9-014f-4b3b-a810-086dea70639d": {
+      "id": "5d1269b9-014f-4b3b-a810-086dea70639d",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 180,
+        "y": -24
+      },
+      "children": [
+        "bd3e489a-1d05-4138-be42-da33cb216246",
+        "e1639164-0747-4b3c-9d82-7161547d4a90"
       ]
     }
   },
   "display": {
-    "camera_x": 647.0699999999779,
-    "camera_y": 339,
+    "camera_x": 646.0199999999786,
+    "camera_y": 306.1999999999989,
     "camera_z": 1,
     "x": -264,
     "y": 24
@@ -125,30 +153,44 @@
       "properties": {}
     },
     {
-      "name": "Kick",
+      "name": "GetBall",
       "category": "action",
-      "title": "Kick_A",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "AimAt",
-      "category": "action",
-      "title": "AimAt_A",
+      "title": "GetBall_B",
       "description": null,
       "properties": {}
     },
     {
       "name": "StandFree",
       "category": "action",
-      "title": "StandFree_A",
+      "title": "StandFree_B",
       "description": null,
       "properties": {}
     },
     {
-      "name": "GetBall",
+      "name": "AimAt",
       "category": "action",
-      "title": "GetBall_A",
+      "title": "AimAt_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeeTheirGoal",
+      "category": "condition",
+      "title": "CanSeeTheirGoal_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeeRobot",
+      "category": "condition",
+      "title": "CanSeeRobot_B",
       "description": null,
       "properties": {}
     }

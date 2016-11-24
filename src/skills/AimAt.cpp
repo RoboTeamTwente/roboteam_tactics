@@ -89,8 +89,12 @@ bt::Node::Status AimAt::Update (){
 			n.setParam("/kickingTheBall", true);
 		}
 		return Status::Success;
+	} else if (result == Status::Failure) {
+		ROS_INFO_STREAM("AimAt failed :(");
+		return Status::Failure;
+		// return result;
 	} else {
-		return result;
+		return Status::Running;
 	}
 };
 

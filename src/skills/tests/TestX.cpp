@@ -2,9 +2,11 @@
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
+#include <ros/ros.h>
 
-#include "ros/ros.h"
-
+#include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/utils/NodeFactory.h"
@@ -15,7 +17,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RefereeData.h"
 
-static volatile bool may_update = true;
+static volatile bool may_update = false;
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -30,10 +32,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
-}
-
-bool is_digits(const std::string &str) {
-    return std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
 void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
@@ -115,7 +113,7 @@ How to use:
                 argType = "bool";
             } else if (rest.find(".") != std::string::npos) {
                 argType = "double";
-            } else if (is_digits(rest)) {
+            } else if (rtt::is_digits(rest)) {
                 argType = "int";
             } else {
                 argType = "string";
@@ -128,6 +126,9 @@ How to use:
         // std::cout << "Type: " << argType << "\n";
         // std::cout << "Name: " << name << "\n";
         // std::cout << "Value: " << rest << "\n";
+        // TODO: Factor the logic here into a few common functions
+        // (one for going string -> T and one for going T -> string)
+        // and use them here, paramset, paramget, and in some of Dennis's bb code
 
         if (argType == "string") {
             bb->SetString(name, rest);
@@ -142,22 +143,26 @@ How to use:
         }
     }
 
-    //auto skill = rtt::make_skill<>(n, testClass, "", bb);
     rtt::print_blackboard(bb);
-    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
+
+    while (!may_update) ros::spinOnce();
+    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
+
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
-    
+
+    // Wait for the node's `robotcommand` publisher to have initialized properly.
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     ros::Rate fps60(60);
 
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
-        runner.run_until([&]() { 
-            ros::spinOnce();
-            //fps60.sleep(); 
-            return ros::ok(); 
+
+            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
+            
         });
     } else {
         node->Initialize();
@@ -166,14 +171,21 @@ How to use:
         while (ros::ok()) {
             ros::spinOnce();
             status = node->Update();
-            if (status == bt::Node::Status::Success) {
-                break; ROS_INFO("returned succes");
+
+            if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
+                break;
+
             }
             fps60.sleep();
         }
 
+        std::cout << "Terminating..." << std::endl;
+
         node->Terminate(status);
     }
+
+    // Gracefully close all the publishers.
+    n.shutdown();
 
     std::cout << "Test of " << testClass << " completed!\n";
 	return 0;

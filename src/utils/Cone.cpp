@@ -40,6 +40,16 @@ bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
 	}
 }
 
+bool Cone::IsWithinField(roboteam_utils::Vector2 point) {
+ 	double fieldLimitX = 3.0;
+	double fieldLimitY = 2.0;
+	if (point.x > fieldLimitX || point.x < -fieldLimitX || point.y > fieldLimitY || point.y < -fieldLimitY) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) {
 	if (!IsWithinCone(point)) {
 		ROS_WARN("This point is not inside the cone");
@@ -48,13 +58,16 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) 
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
 	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
-	roboteam_utils::Vector2 closestSide;
+	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 	if (pointAngle >= 0) {
-		closestSide = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+		if (IsWithinField(option1)) return option1;
+		else if (IsWithinField(option2)) return option2;
 	} else {
-		closestSide = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+		if (IsWithinField(option2)) return option2;
+		else if (IsWithinField(option1)) return option1;
 	}
-	return closestSide;
+	return point;
 }
 
 roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, roboteam_utils::Vector2 point) {
@@ -81,25 +94,27 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, robotea
 	roboteam_utils::Vector2 cone2Side1 = (otherCone.center-otherCone.start).rotate(otherCone.angle);
 	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
 
-	ROS_INFO_STREAM("intersection1, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
-	ROS_INFO_STREAM("intersection2, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
-	ROS_INFO_STREAM("intersection3, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
-	ROS_INFO_STREAM("intersection4, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
+	// ROS_INFO_STREAM("intersection1, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
+	// ROS_INFO_STREAM("intersection2, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
+	// ROS_INFO_STREAM("intersection3, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
+	// ROS_INFO_STREAM("intersection4, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
 
 	roboteam_utils::Vector2 intersection1 = LineIntersection(start, cone1Side1, otherCone.start, cone2Side1);
 	roboteam_utils::Vector2 intersection2 = LineIntersection(start, cone1Side1, otherCone.start, cone2Side2);
 	roboteam_utils::Vector2 intersection3 = LineIntersection(start, cone1Side2, otherCone.start, cone2Side1);
 	roboteam_utils::Vector2 intersection4 = LineIntersection(start, cone1Side2, otherCone.start, cone2Side2);
 
-	ROS_INFO_STREAM("intersection1: " << intersection1.x << " " << intersection1.y);
-	ROS_INFO_STREAM("intersection2: " << intersection2.x << " " << intersection2.y);
-	ROS_INFO_STREAM("intersection3: " << intersection3.x << " " << intersection3.y);
-	ROS_INFO_STREAM("intersection4: " << intersection4.x << " " << intersection4.y);
+	// ROS_INFO_STREAM("intersection1: " << intersection1.x << " " << intersection1.y);
+	// ROS_INFO_STREAM("intersection2: " << intersection2.x << " " << intersection2.y);
+	// ROS_INFO_STREAM("intersection3: " << intersection3.x << " " << intersection3.y);
+	// ROS_INFO_STREAM("intersection4: " << intersection4.x << " " << intersection4.y);
 
-	roboteam_utils::Vector2 closestIntersection = intersection1;
-	if ((intersection2 - point).length() < (closestIntersection - point).length()) closestIntersection = intersection2;
-	if ((intersection3 - point).length() < (closestIntersection - point).length()) closestIntersection = intersection3;
-	if ((intersection4 - point).length() < (closestIntersection - point).length()) closestIntersection = intersection4;
+	roboteam_utils::Vector2 closestIntersection(100.0, 100.0);
+	if ((intersection1 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection1)) closestIntersection = intersection1;
+	if ((intersection2 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection2)) closestIntersection = intersection2;
+	if ((intersection3 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection3)) closestIntersection = intersection3;
+	if ((intersection4 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection4)) closestIntersection = intersection4;
+	if (closestIntersection.length() > 100.0) {closestIntersection = point;}
 	return closestIntersection;
 }
 

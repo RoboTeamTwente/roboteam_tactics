@@ -230,4 +230,32 @@ std::string describe_status(bt::Node::Status status) {
     }
 }
 
+std::string get_our_field_side() {
+    std::string our_field_side = "right";
+    ros::param::get("our_field_side", our_field_side);
+    return our_field_side;
+}
+
+bool is_digits(const std::string &str) {
+    return std::all_of(str.begin(), str.end(), ::isdigit);
+}
+
+roboteam_msgs::RobotCommand stop_command(unsigned int id) {
+    roboteam_msgs::RobotCommand cmd;
+    cmd.id = id;
+    cmd.active = true;
+	cmd.x_vel = 0.0;
+	cmd.y_vel = 0.0;
+	cmd.w = 0.0;
+
+	cmd.dribbler=true;
+	cmd.kicker=false;
+	cmd.kicker_vel=0.0;
+	cmd.kicker_forced=false;
+	cmd.chipper=false;
+	cmd.chipper_vel=0.0;
+	cmd.chipper_forced=false;
+    return cmd;
+}
+
 } // rtt

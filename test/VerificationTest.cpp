@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 #include "roboteam_tactics/Parts.h"
+#include "roboteam_tactics/bt.hpp"
+
+std::string bt::Node::status_desc;
 
 namespace rtt {
 

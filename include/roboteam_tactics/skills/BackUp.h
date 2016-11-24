@@ -2,6 +2,9 @@
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Position.h"
+#include "roboteam_tactics/skills/Dribble.h"
+#include "roboteam_msgs/RobotCommand.h"
+#include "ros/ros.h"
 
 namespace rtt {
     
@@ -22,7 +25,8 @@ class BackUp : public Skill {
     private:
     roboteam_utils::Position original_pos;
     roboteam_utils::Position target_pos;
-    
+    std::shared_ptr<Dribble> dribble;
+    ros::Publisher pub;
 }; 
     
 }

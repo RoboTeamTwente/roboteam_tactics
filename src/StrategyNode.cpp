@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    auto strategy = rtt::make_DemoStrategy(n);
+    auto strategy = rtt::make_AttackerStrategy(n);
 
     // Wait for all the role nodes to come online if a param was set
     if (ros::param::has("num_role_nodes")) {
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
             rate.sleep();
         }
     }
-    
+
     // Wait for robots to appear
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();

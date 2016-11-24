@@ -112,19 +112,19 @@ add_custom_command(
     )
 
 # Generate debug macros
-add_custom_target(generate_dbg_macros_t
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    )
-add_custom_command(
-    OUTPUT
-        ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
-    DEPENDS
-        ${PROJECT_SOURCE_DIR}/debug_names.txt
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating debug macros"
-    )
+# add_custom_target(generate_dbg_macros_t
+    # DEPENDS
+        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    # )
+# add_custom_command(
+    # OUTPUT
+        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
+    # COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
+    # DEPENDS
+        # ${PROJECT_SOURCE_DIR}/debug_names.txt
+    # WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    # COMMENT "Generating debug macros"
+    # )
 
 # Dummy output which is never actually produced. Anything that depends on
 # this will always be rebuilt.
@@ -400,32 +400,32 @@ add_executable(ConeTest
         ${catkin_LIBRARIES}
         )
 
-add_executable(StandFreeTest
-        src/skills/tests/StandFreeTest.cpp
+add_executable(CanSeeRobotTest
+        src/conditions/tests/CanSeeRobotTest.cpp
     )
-    add_dependencies(StandFreeTest
+    add_dependencies(CanSeeRobotTest
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(StandFreeTest 
+    target_link_libraries(CanSeeRobotTest 
         skills
         conditions
         utils
         ${catkin_LIBRARIES}
         )
 
-add_executable(StandFreeAndReceive
-        src/role_tests/StandFreeAndReceive.cpp
+add_executable(AttackTactic
+        src/role_tests/AttackTactic.cpp
     )
-    add_dependencies(StandFreeAndReceive
+    add_dependencies(AttackTactic
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(StandFreeAndReceive 
+    target_link_libraries(AttackTactic 
         skills
         conditions
         utils
         ${catkin_LIBRARIES}
         )
 
-endif(NOT computername STREQUAL "minux")
+endif(NOT computername STREQUAL "lapbobe")

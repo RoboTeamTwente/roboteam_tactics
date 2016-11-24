@@ -17,7 +17,7 @@ KeeperBlock::~KeeperBlock() {
 }
 
 boost::optional<roboteam_msgs::WorldRobot> KeeperBlock::select_target() const {
-    return most_dangerous_bot(target);
+    return most_dangerous_bot();
 }
 
 void KeeperBlock::reevaluate_target() {
