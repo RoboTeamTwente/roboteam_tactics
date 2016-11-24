@@ -47,10 +47,8 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
         } else {
             forceVector = roboteam_utils::Vector2(0.0, 0.0);
         }
-    } else {
-        ROS_INFO_STREAM("Getting close! Slowing down now... " << forceVector.length());
     }
-
+    
     // Rotate from robot frame to world frame
     roboteam_utils::Vector2 requiredSpeed;  
     requiredSpeed.x=forceVector.x*cos(-myAngle)-forceVector.y*sin(-myAngle);
