@@ -27,7 +27,7 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
     cycleCounter++;
-    if (cycleCounter > 20) return bt::Node::Status::Failure;
+    if (cycleCounter > 10) return bt::Node::Status::Failure;
 
 	roboteam_msgs::World world = LastWorld::get();
 
