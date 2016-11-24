@@ -13,12 +13,6 @@
 #include "roboteam_tactics/Leaf.h"
 #include "roboteam_msgs/World.h"
 
-// LIST DEBUG NAMES HERE:
-
-// #define DEBUG_DANGER_FINDER
-
-// #include "roboteam_tactics/generated/debug.h"
-
 namespace rtt {
 
 class Skill : public Leaf {
@@ -79,7 +73,15 @@ class Tactic : public Leaf {
     }
 
     virtual void Terminate(Status s) {
-        RobotDealer::release_robots(get_claimed_robots());
+        auto robots = get_claimed_robots();
+
+        for (auto robotID : robots) {
+            // TODO: Sent a "stop" packet to every robot here!
+            // But we need a global publisher for that;
+            // here it will happen too fast!
+        }
+
+        RobotDealer::release_robots(robots);
         claimed_robots.clear();
     }
 

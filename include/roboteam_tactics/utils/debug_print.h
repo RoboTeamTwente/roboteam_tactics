@@ -19,9 +19,15 @@ RTT_DEBUG_TAG( RTT_CURRENT_DEBUG_TAG , format, ##__VA_ARGS__)
 
 namespace rtt {
 
-SET_DEBUG_FOR(AimAt, false);
+SET_DEBUG_FOR(AimAt, true);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
-SET_DEBUG_FOR(ParamCheck, true);
-SET_DEBUG_FOR(ParamSet, true);
+SET_DEBUG_FOR(ParamCheck, false);
+SET_DEBUG_FOR(ParamSet, false);
+SET_DEBUG_FOR(StrategyNode, true);
+SET_DEBUG_FOR(GetBall, false);
+SET_DEBUG_FOR(Kick, false);
+SET_DEBUG_FOR(CanSeeRobot, false);
+SET_DEBUG_FOR(DemoTactic, true);
+SET_DEBUG_FOR(CanSeeTheirGoal, false);
 
 } // rtt

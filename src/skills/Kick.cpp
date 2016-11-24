@@ -9,6 +9,9 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG Kick
 
 namespace rtt {
 
@@ -27,14 +30,17 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
     cycleCounter++;
-    if (cycleCounter > 20) return bt::Node::Status::Failure;
+    if (cycleCounter > 20) {
+        RTT_DEBUG("Failed to kick!\n");
+        return bt::Node::Status::Failure;
+    }
 
 	roboteam_msgs::World world = LastWorld::get();
 
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
     if ((currentBallVel - oldBallVel).length() >= 0.5) {
-        ROS_INFO("Velocity difference was enough");
+        RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
     }
 
@@ -47,7 +53,7 @@ bt::Node::Status Kick::Update() {
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update
 	// is called before the first world state update
 	if (world.us.size() == 0) {
-		ROS_INFO("No information about the world state :(");
+		RTT_DEBUG("No information about the world state :(\n");
 		return Status::Running;
 	}
 
@@ -74,16 +80,16 @@ bt::Node::Status Kick::Update() {
 
 			pubKick.publish(command);
 			ros::spinOnce();
-			ROS_INFO("Triggered the kicker!");
+			RTT_DEBUG("Triggered the kicker!\n");
 			return Status::Running;
 		}
 		else {
-			ROS_INFO("Ball is not in front of the dribbler");
+			RTT_DEBUG("Ball is not in front of the dribbler\n");
 			return Status::Failure;
 		}
 	}
 	else {
-		ROS_INFO("Ball is not close to the robot");
+		RTT_DEBUG("Ball is not close to the robot\n");
 		return Status::Failure;
 	}
 }

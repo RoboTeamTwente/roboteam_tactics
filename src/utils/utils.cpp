@@ -258,4 +258,15 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
+void initialize_robotcommand_publisher() {
+    ros::NodeHandle n;
+    _private.robotcommand_publisher = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
+}
+
+ros::Publisher& get_robotcommand_publisher() {
+    return _private.robotcommand_publisher;
+}
+
+ros::Publisher _private::robotcommand_publisher;
+
 } // rtt

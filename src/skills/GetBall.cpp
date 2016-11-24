@@ -15,9 +15,12 @@
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 #include <cmath>
 #include <vector>
+
+#define RTT_CURRENT_DEBUG_TAG GetBall
 
 namespace rtt {
 
@@ -173,7 +176,7 @@ bt::Node::Status GetBall::Update (){
 				targetPos = interceptPos;
 				targetAngle = interceptAngle;
 			} else {
-				ROS_INFO("This is probably not a valid intercept position...");
+				ROS_ERROR("This is probably not a valid intercept position...");
 				return Status::Invalid;
 			}
 				
@@ -185,7 +188,7 @@ bt::Node::Status GetBall::Update (){
 			private_bb->SetBool("dribbler", true);
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
-		ROS_INFO("driving to the ball");
+		RTT_DEBUG("driving to the ball");
 		roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
@@ -207,7 +210,7 @@ bt::Node::Status GetBall::Update (){
 		pubGetBall.publish(command);
 		ros::spinOnce();
 
-		ROS_INFO("GetBall skill completed.");
+		RTT_DEBUG("GetBall skill completed.");
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);

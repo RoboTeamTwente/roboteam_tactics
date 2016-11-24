@@ -109,7 +109,6 @@ const std::vector<DangerFactor> DEFAULT_FACTORS({distance, orientation, can_see_
 DangerFinder::DangerFinder() {
     running = false;
     _stop = false;
-    ROS_INFO("DF ctor");
 }
 
 void DangerFinder::run(unsigned int delay) {
@@ -141,7 +140,6 @@ DangerResult DangerFinder::update() const {
 
 void DangerFinder::_run(unsigned int delay) {
     while (!_stop) {
-        ROS_INFO("DF update");
         DangerResult new_res = update();
                     
         while (!lock.try_lock()) {

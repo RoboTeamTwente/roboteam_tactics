@@ -7,8 +7,11 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 #include <vector>
+
+#define RTT_CURRENT_DEBUG_TAG CanSeeTheirGoal
 
 namespace rtt {
 
@@ -17,7 +20,7 @@ CanSeeTheirGoal::CanSeeTheirGoal(std::string name, bt::Blackboard::Ptr blackboar
 }
 
 bt::Node::Status CanSeeTheirGoal::Update() {
-	ROS_INFO("called CanSeeTheirGoal");
+	RTT_DEBUG("called CanSeeTheirGoal");
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 
@@ -39,11 +42,11 @@ bt::Node::Status CanSeeTheirGoal::Update() {
 	CanSeePoint canSeePoint("", bb2);
 
 	if (canSeePoint.Update() == bt::Node::Status::Success) {
-		ROS_INFO("i can see the goal!");
+		RTT_DEBUG("i can see the goal!");
 		return bt::Node::Status::Success;
 	}
 	if (canSeePoint.Update() == bt::Node::Status::Failure) {
-		ROS_INFO("i cannot see the goal :(");
+		RTT_DEBUG("i cannot see the goal :(");
 		return bt::Node::Status::Failure;
 	}
 

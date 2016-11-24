@@ -10,6 +10,9 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG DemoTactic
 
 namespace rtt {
 
@@ -98,8 +101,7 @@ void DemoTactic::Initialize() {
     int def_bot = robots.back();
     delete_from_vector(robots, def_bot);
 
-    int keeper_bot = robots.back();
-    delete_from_vector(robots, keeper_bot);
+    int keeper_bot = RobotDealer::get_keeper();
 
     claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
@@ -112,7 +114,7 @@ void DemoTactic::Initialize() {
 
     roboteam_utils::Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
 
-    std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
+    RTT_DEBUG("Attack bot: %i, score bot: %i, keeper bot: %i\n", attack_bot, score_bot, keeper_bot);
 
     {
         // Fill blackboard with relevant info
@@ -178,7 +180,7 @@ void DemoTactic::Initialize() {
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        directivePub.publish(wd);
+        // directivePub.publish(wd);
     }
 
     {

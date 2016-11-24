@@ -8,7 +8,6 @@ BasicDefenseTactic::BasicDefenseTactic(std::string name, bt::Blackboard::Ptr bla
 
 bt::Node::Status BasicDefenseTactic::Update() {
     std::cout << "Picking BasicDefenseTactic!\n";
-    // pickedTactic = std::make_shared<BasicDefenseTactic>();
     return bt::Node::Status::Success;
 }
 
