@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 	bb->SetDouble("getBallAtX", 0.0);
 	bb->SetDouble("getBallAtY", 0.0);
 	bb->SetDouble("getBallAtTime", 5.0);
+	bb->SetDouble("targetAngle", 0.0);
 
 	rtt::GetBall getBall_B(n, "", bb);
 	

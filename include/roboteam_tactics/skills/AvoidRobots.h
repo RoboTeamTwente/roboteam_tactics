@@ -40,7 +40,7 @@ private:
     // Control variables
     double maxSpeed = 2.0;
     double attractiveForce = 10.0;
-    double attractiveForceWhenClose = 2.0;
+    double attractiveForceWhenClose = 4.0;
     double repulsiveForce = 20.0;
 
     double xGoal;
