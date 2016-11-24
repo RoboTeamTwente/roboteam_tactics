@@ -9,9 +9,12 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RefereeCommand.h"
+#include "roboteam_msgs/RefereeData.h"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/LastRef.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 
@@ -38,6 +41,10 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
     if (status == bt::Node::Status::Failure) {
         failure = true;
     }
+}
+
+void refStateCallback(const roboteam_msgs::RefereeData refCommand) {
+    rtt::LastRef::set(refCommand);
 }
 
 void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
@@ -71,6 +78,8 @@ int main(int argc, char **argv) {
 
     ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
     ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
+	ros::Subscriber subRef = n.subscribe("vision_referee", 10, &refStateCallback);
+
 
     while(ros::ok()) {
         ros::spinOnce();

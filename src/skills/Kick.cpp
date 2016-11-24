@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/LastRef.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Kick.h"
 
@@ -8,6 +9,8 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_msgs/RefereeData.h"
+#include "roboteam_msgs/RefereeStage.h"
 
 namespace rtt {
 
@@ -38,12 +41,13 @@ bt::Node::Status Kick::Update() {
     if (cycleCounter > 10) return bt::Node::Status::Failure;
 
 	roboteam_msgs::World world = LastWorld::get();
-
+	
+	
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
     if ((currentBallVel - oldBallVel).length() >= 0.5) {
         ROS_INFO("Velocity difference was enough");
-        return bt::Node::Status::Success;
+        return bt::Node::Status::Running;
     }
 
     oldBallVel = currentBallVel;
@@ -86,12 +90,12 @@ bt::Node::Status Kick::Update() {
 		}
 		else {
 			ROS_INFO("Ball is not in front of the dribbler");
-			return Status::Failure;
+			return Status::Running;
 		}
 	}
 	else {
 		ROS_INFO("Ball is not close to the robot");
-		return Status::Failure;
+		return Status::Running;
 	} 
 }
 

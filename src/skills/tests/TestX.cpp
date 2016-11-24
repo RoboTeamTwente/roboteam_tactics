@@ -10,8 +10,10 @@
 #include "roboteam_tactics/utils/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/LastRef.h"
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RefereeData.h"
 
 static volatile bool may_update = true;
 
@@ -41,6 +43,11 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
 
 void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
     rtt::LastWorld::set_field(geometry->field);
+}
+
+void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    rtt::LastRef::set(*refdata);
+    //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
 int main(int argc, char **argv) {
@@ -140,7 +147,7 @@ How to use:
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
     ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
     ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
-
+    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
     
     ros::Rate fps60(60);
@@ -148,7 +155,7 @@ How to use:
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
         runner.run_until([&]() { 
-            while (!may_update) ros::spinOnce();
+            ros::spinOnce();
             //fps60.sleep(); 
             return ros::ok(); 
         });
@@ -160,7 +167,7 @@ How to use:
             ros::spinOnce();
             status = node->Update();
             if (status == bt::Node::Status::Success) {
-                break;
+                break; ROS_INFO("returned succes");
             }
             fps60.sleep();
         }
