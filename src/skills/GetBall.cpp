@@ -177,7 +177,7 @@ bt::Node::Status GetBall::Update (){
 				targetAngle = interceptAngle;
 			} else {
 				ROS_ERROR("This is probably not a valid intercept position...");
-				return Status::Invalid;
+				return Status::Failure;
 			}
 				
 		} else { // If we are close enough to the ball we can drive towards it and turn on the dribbler

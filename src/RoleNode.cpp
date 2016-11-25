@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include <memory>
 
 #include <ros/ros.h>
 #include "std_msgs/Empty.h"
@@ -10,6 +11,7 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/NodeFactory.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
 #include "roboteam_tactics/generated/alltrees_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"
@@ -47,8 +49,12 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     ros::NodeHandle n;
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
-        // Empty tree means do nothing
         reset_tree();
+
+        // Stop the robot in its tracks
+        auto& pub = rtt::get_robotcommand_publisher();
+        pub.publish(rtt::stop_command(ROBOT_ID));
+
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
         reset_tree();
@@ -63,22 +69,13 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    bt::Blackboard::Ptr bb;
+    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+    bb->fromMsg(msg->blackboard);
 
-    // TODO: Migrate this to Dennis' Node factory
-    if (rtt::alltrees_set.find(msg->tree) != rtt::alltrees_set.end()) {
-        std::shared_ptr<bt::BehaviorTree> tree = std::make_shared<bt::BehaviorTree>();
-        *tree = rtt::make_tree(msg->tree, n);
-
-        bb = tree->GetBlackboard();
-        bb->fromMsg(msg->blackboard);
-
-        currentTree = tree;
-    } else if (rtt::allskills_set.find(msg->tree) != rtt::allskills_set.end()) {
-        bb = std::make_shared<bt::Blackboard>();
-        bb->fromMsg(msg->blackboard);
-        currentTree = rtt::make_skill(n, msg->tree, "", bb);
-    } else {
+    try {
+        ros::NodeHandle n;
+        currentTree = rtt::generate_node(n, msg->tree, "", bb);
+    } catch (...) {
         std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
         return;
     }

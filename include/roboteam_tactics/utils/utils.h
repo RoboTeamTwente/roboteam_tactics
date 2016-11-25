@@ -77,9 +77,13 @@ bool is_digits(const std::string &str);
 void initialize_robotcommand_publisher();
 ros::Publisher& get_robotcommand_publisher();
 
+void initialize_roledirective_publisher();
+ros::Publisher& get_roledirective_publisher();
+
 namespace _private {
 
 extern ros::Publisher robotcommand_publisher;
+extern ros::Publisher roledirective_publisher;
 
 } // _private
 

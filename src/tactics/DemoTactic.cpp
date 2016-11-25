@@ -29,14 +29,7 @@ void delete_from_vector(std::vector<T> &items, const T &item) {
 }
 
 int get_most_attacking_robot(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int side = -3;
-    std::string our_side = "right";
-    ros::param::get("our_field_side", our_side);
-    if (our_side == "left") {
-        side = -3;
-    } else {
-        side = 3;
-    }
+    int side = LastWorld::get_our_goal_center().x;
 
     int furthest_robot = -1;
     double furthest_robot_side_dist = -std::numeric_limits<double>::max();
@@ -106,9 +99,7 @@ void DemoTactic::Initialize() {
     claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
-    std::string our_field_side = "left";
-    ros::param::get("our_field_side", our_field_side);
-    if (our_field_side == "left") {
+    if (rtt::get_our_field_side() == "left") {
         mod = 1;
     }
 
@@ -164,24 +155,24 @@ void DemoTactic::Initialize() {
         directivePub.publish(wd);
     }
 
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", def_bot);
+    // {
+        // // Fill blackboard with relevant info
+        // bt::Blackboard bb;
+        // bb.SetInt("ROBOT_ID", def_bot);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = def_bot;
-        wd.tree = "SecondaryKeeper";
-        wd.blackboard = bb.toMsg();
+        // // Create message
+        // roboteam_msgs::RoleDirective wd;
+        // wd.robot_id = def_bot;
+        // wd.tree = "SecondaryKeeper";
+        // wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        wd.token = unique_id::toMsg(token);
+        // // Add random token and save it for later
+        // boost::uuids::uuid token = unique_id::fromRandom();
+        // wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        // directivePub.publish(wd);
-    }
+        // // Send to rolenode
+        // // directivePub.publish(wd);
+    // }
 
     {
         // Fill blackboard with relevant info

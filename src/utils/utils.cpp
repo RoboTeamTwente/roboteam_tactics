@@ -267,6 +267,16 @@ ros::Publisher& get_robotcommand_publisher() {
     return _private::robotcommand_publisher;
 }
 
+void initialize_roledirective_publisher() {
+    ros::NodeHandle n;
+    _private::roledirective_publisher = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+}
+
+ros::Publisher& get_roledirective_publisher() {
+    return _private::roledirective_publisher;
+}
+
 ros::Publisher _private::robotcommand_publisher;
+ros::Publisher _private::roledirective_publisher;
 
 } // rtt

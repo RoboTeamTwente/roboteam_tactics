@@ -3,15 +3,17 @@
 #include <map>
 #include <type_traits>
 #include <vector>
+#include <ros/ros.h>
 
-#include "ros/ros.h"
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RoleDirective.h"
 
 #include "roboteam_tactics/bt.hpp"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/verifier.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/Leaf.h"
-#include "roboteam_msgs/World.h"
 
 namespace rtt {
 
@@ -75,10 +77,15 @@ class Tactic : public Leaf {
     virtual void Terminate(Status s) {
         auto robots = get_claimed_robots();
 
+        auto& pub = get_roledirective_publisher();
+
+        roboteam_msgs::RoleDirective directive;
+        directive.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+
+        // Stop every robot
         for (auto robotID : robots) {
-            // TODO: Sent a "stop" packet to every robot here!
-            // But we need a global publisher for that;
-            // here it will happen too fast!
+            directive.robot_id = robotID;
+            pub.publish(directive);
         }
 
         RobotDealer::release_robots(robots);
