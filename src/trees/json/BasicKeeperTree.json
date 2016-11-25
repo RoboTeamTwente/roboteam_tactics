@@ -2,7 +2,7 @@
   "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
   "title": "BasicKeeperTree",
   "description": "",
-  "root": "bc69a869-8a57-4785-8807-9826ad781b51",
+  "root": "682baaa5-1ccc-49d1-bb08-71ac5eae9693",
   "properties": {
     "ROBOT_ID": 0
   },
@@ -14,12 +14,12 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 36,
+        "x": 348,
         "y": -228
       },
       "children": [
-        "e31f733e-5c7a-4136-b24c-e6e66a42eaf7",
-        "c0d3322e-fbb8-4aa3-9eb4-bc8286772b1d"
+        "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
+        "161eaa4a-2442-45d0-9fe6-a3e670345f13"
       ]
     },
     "06cf4fa4-1797-4bd1-87e1-88e481b4b04e": {
@@ -34,8 +34,8 @@
         "Y": "ball"
       },
       "display": {
-        "x": 276,
-        "y": -24
+        "x": 840,
+        "y": 36
       }
     },
     "056b3345-479b-4325-a163-9ca46b1af3b2": {
@@ -50,8 +50,8 @@
         "Y": "ball"
       },
       "display": {
-        "x": 408,
-        "y": -336
+        "x": 948,
+        "y": -300
       }
     },
     "a8443757-1ef2-48c5-8738-34ef3acb4500": {
@@ -59,10 +59,12 @@
       "name": "GetBall",
       "title": "GetBall_A",
       "description": "",
-      "properties": {},
+      "properties": {
+        "targetAngle": 3.141592653589793
+      },
       "display": {
-        "x": 576,
-        "y": -228
+        "x": 948,
+        "y": -192
       }
     },
     "05a76c04-81de-4c99-8b72-9f2bc7d96ad3": {
@@ -72,8 +74,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 576,
-        "y": -156
+        "x": 948,
+        "y": -120
       }
     },
     "35ca0114-f04b-4532-a71c-4a8bfaad3e1a": {
@@ -83,8 +85,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 576,
-        "y": -84
+        "x": 948,
+        "y": -48
       }
     },
     "e31f733e-5c7a-4136-b24c-e6e66a42eaf7": {
@@ -94,11 +96,10 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 144,
-        "y": -228
+        "x": 756,
+        "y": -192
       },
       "children": [
-        "056b3345-479b-4325-a163-9ca46b1af3b2",
         "a8443757-1ef2-48c5-8738-34ef3acb4500",
         "05a76c04-81de-4c99-8b72-9f2bc7d96ad3",
         "35ca0114-f04b-4532-a71c-4a8bfaad3e1a"
@@ -111,24 +112,59 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 252,
-        "y": 36
+        "x": 840,
+        "y": 108
       }
     },
-    "c0d3322e-fbb8-4aa3-9eb4-bc8286772b1d": {
-      "id": "c0d3322e-fbb8-4aa3-9eb4-bc8286772b1d",
-      "name": "Sequence",
-      "title": "Sequence",
+    "3360157c-b17b-4858-8ebc-14f7a8fa8f27": {
+      "id": "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
+      "name": "ParallelSequence",
+      "title": "ParallelSequence",
       "description": "",
-      "properties": {},
+      "properties": {
+        "minFail": 1,
+        "minSuccess": 2
+      },
       "display": {
-        "x": 108,
-        "y": -12
+        "x": 576,
+        "y": -240
+      },
+      "children": [
+        "056b3345-479b-4325-a163-9ca46b1af3b2",
+        "e31f733e-5c7a-4136-b24c-e6e66a42eaf7"
+      ]
+    },
+    "161eaa4a-2442-45d0-9fe6-a3e670345f13": {
+      "id": "161eaa4a-2442-45d0-9fe6-a3e670345f13",
+      "name": "ParallelSequence",
+      "title": "ParallelSequence",
+      "description": "",
+      "properties": {
+        "minFail": 1,
+        "minSuccess": 2
+      },
+      "display": {
+        "x": 600,
+        "y": 36
       },
       "children": [
         "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
         "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a"
       ]
+    },
+    "682baaa5-1ccc-49d1-bb08-71ac5eae9693": {
+      "id": "682baaa5-1ccc-49d1-bb08-71ac5eae9693",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": 132,
+        "y": -228
+      },
+      "child": "bc69a869-8a57-4785-8807-9826ad781b51"
     }
   },
   "display": {
@@ -140,9 +176,156 @@
   },
   "custom_nodes": [
     {
+      "name": "AimAt",
+      "category": "action",
+      "title": "AimAt",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AvoidRobots",
+      "category": "action",
+      "title": "AvoidRobots",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Block",
+      "category": "action",
+      "title": "Block",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DribbleCurve",
+      "category": "action",
+      "title": "DribbleCurve",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Dribble",
+      "category": "action",
+      "title": "Dribble",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "FollowPath",
+      "category": "action",
+      "title": "FollowPath",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "KeeperBlock",
+      "category": "action",
+      "title": "KeeperBlock",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "SecondaryKeeper",
+      "category": "action",
+      "title": "SecondaryKeeper",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "StandFree",
+      "category": "action",
+      "title": "StandFree",
+      "description": null,
+      "properties": {}
+    },
+    {
       "name": "BallOnOurSide",
       "category": "condition",
       "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanInterceptBall",
+      "category": "condition",
+      "title": "CanInterceptBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanPassSafely",
+      "category": "condition",
+      "title": "CanPassSafely",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanReachPoint",
+      "category": "condition",
+      "title": "CanReachPoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeePoint",
+      "category": "condition",
+      "title": "CanSeePoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TeamHasBall",
+      "category": "condition",
+      "title": "TeamHasBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TheyHaveBall",
+      "category": "condition",
+      "title": "TheyHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "WeHaveBall",
+      "category": "condition",
+      "title": "WeHaveBall",
       "description": null,
       "properties": {}
     },
@@ -161,58 +344,30 @@
       "properties": {}
     },
     {
+      "name": "DemoTactic",
+      "category": "action",
+      "title": "DemoTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToSideTactic",
+      "category": "action",
+      "title": "GoToSideTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParallelTactic",
+      "category": "composite",
+      "title": "ParallelTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
       "name": "Repeat",
       "category": "decorator",
       "title": "Repeat",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "GoToPos",
-      "category": "action",
-      "title": "GoToPos",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "RotateAroundPoint",
-      "category": "action",
-      "title": "RotateAroundPoint_A",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "IHaveBall",
-      "category": "condition",
-      "title": "IHaveBall_A",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "GetBall",
-      "category": "action",
-      "title": "GetBall_B",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "StandFree",
-      "category": "action",
-      "title": "StandFree_B",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "AimAt",
-      "category": "action",
-      "title": "AimAt_B",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "Kick",
-      "category": "action",
-      "title": "Kick_B",
       "description": null,
       "properties": {}
     },
@@ -231,46 +386,9 @@
       "properties": {}
     },
     {
-      "name": "GoToSideTactic",
-      "category": "action",
-      "title": "GoToSideTactic",
-      "description": null,
-      "properties": {
-        "left": "true"
-      }
-    },
-    {
-      "name": "AvoidRobots",
-      "category": "action",
-      "title": "AvoidRobots",
-      "description": null,
-      "properties": {}
-    },
-    {
       "name": "ParallelSequence",
       "category": "composite",
       "title": "ParallelSequence",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "ParallelTactic",
-      "category": "composite",
-      "title": "ParallelTactic",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "DemoTactic",
-      "category": "action",
-      "title": "DemoTactic",
-      "description": null,
-      "properties": {}
-    },
-    {
-      "name": "KeeperBlock",
-      "category": "action",
-      "title": "KeeperBlock",
       "description": null,
       "properties": {}
     },
