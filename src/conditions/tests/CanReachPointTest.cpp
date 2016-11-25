@@ -80,7 +80,6 @@ int main(int argc, char **argv) {
 
 	time_t startTime;
 	time(&startTime);
-	time_t finishTime;
 
 	auto start = std::chrono::steady_clock::now();
 
