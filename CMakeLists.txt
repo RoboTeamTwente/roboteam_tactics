@@ -237,21 +237,6 @@ if(NOT computername STREQUAL "lapbobe")
         ${catkin_LIBRARIES}
         )
 
-    add_executable(AimSkill
-        src/AimSkill.cpp
-    )
-    add_dependencies(AimSkill 
-        ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        ${catkin_EXPORTED_TARGETS}
-        )
-    target_link_libraries(AimSkill
-        utils
-        skills
-        conditions
-        ${catkin_LIBRARIES}
-        )
-
-
     add_executable(RotateAroundPoint
         src/skills/tests/RotateAroundPointTest.cpp
     )
