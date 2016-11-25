@@ -10,6 +10,9 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG AttackerTactic
 
 namespace rtt {
 
@@ -17,66 +20,38 @@ AttackerTactic::AttackerTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-template<typename T>
-void delete_from_vector(std::vector<T> &items, const T &item) {
-    auto it = std::find(items.begin(), items.end(), item);
-    if (it != items.end()) {
-        items.erase(it);
-    }
-}
-
-
 void AttackerTactic::Initialize() {
     tokens.clear();
 
-    std::cout << "Initializing attacker tactic";
+    RTT_DEBUG("Initializing\n");
     
     if (RobotDealer::get_available_robots().size() < 4) {
-        std::cout << "Not enough robots, cannot initialize.\n";
+        RTT_DEBUG("Not enough robots, cannot initialize.\n");
         // TODO: Want to pass failure here as well!
         return;
     }
 
-
     roboteam_msgs::World world = rtt::LastWorld::get();
-    roboteam_utils::Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
 
     // This tactic directs two robots
-    std::array<int, 2> availableRobots = {0, 1};
-    roboteam_utils::Vector2 firstRobotPos(world.us.at(availableRobots.at(0)).pos.x, world.us.at(availableRobots.at(0)).pos.y);
-    roboteam_utils::Vector2 secondRobotPos(world.us.at(availableRobots.at(1)).pos.x, world.us.at(availableRobots.at(1)).pos.y);
-    
     int primaryAttacker;
     int secondaryAttacker;
 
-    // Assign the role of primary attacker to the robot that is closest to the ball
-    if ((firstRobotPos - ballPos).length() < (secondRobotPos - ballPos).length()) {
-        primaryAttacker = availableRobots.at(0);
-        secondaryAttacker = availableRobots.at(1);
-    } else {
-        primaryAttacker = availableRobots.at(1);
-        secondaryAttacker = availableRobots.at(0);
-    }
-
     std::vector<int> robots = RobotDealer::get_available_robots();
-
+    
+    primaryAttacker = get_robot_closest_to_ball(robots);
     delete_from_vector(robots, primaryAttacker);
+    
+    secondaryAttacker = get_robot_closest_to_their_goal(robots);
     delete_from_vector(robots, secondaryAttacker);
 
-    // int def_bot = robots.back();
-    // delete_from_vector(robots, def_bot);
+    claim_robots({primaryAttacker, secondaryAttacker});
 
-    // int keeper_bot = robots.back();
-    // delete_from_vector(robots, keeper_bot);
+    RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
 
-    // claim_robots({keeper_bot});
-    claim_robots({primaryAttacker, secondaryAttacker/*, keeper_bot*/});
-
-
-    ROS_INFO_STREAM("primaryAttacker: " << primaryAttacker << " secondaryAttacker: " << secondaryAttacker);
+    auto& pub = get_roledirective_publisher();
 
     {
-
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         // Attacker 1
@@ -108,7 +83,7 @@ void AttackerTactic::Initialize() {
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        directivePub.publish(wd);
+        pub.publish(wd);
     }
 
     {
@@ -126,8 +101,6 @@ void AttackerTactic::Initialize() {
 
         // Receive the ball
         bb.SetBool("GetBall_A_intercept", true);
-        // bb.SetDouble("GetBall_A_getBallAtX", 0.0); // these positions will be updated in the world callback to match the robot's current position
-        // bb.SetDouble("GetBall_A_getBallAtY", 0.0);
         bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
 
         // Aim at goal
@@ -146,50 +119,8 @@ void AttackerTactic::Initialize() {
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        directivePub.publish(wd);
+        pub.publish(wd);
     }
-
-    // {
-    //     // Fill blackboard with relevant info
-    //     bt::Blackboard bb;
-    //     bb.SetInt("ROBOT_ID", def_bot);
-
-    //     // Create message
-    //     roboteam_msgs::RoleDirective wd;
-    //     wd.robot_id = def_bot;
-    //     wd.tree = "SecondaryKeeper";
-    //     wd.blackboard = bb.toMsg();
-
-    //     // Add random token and save it for later
-    //     boost::uuids::uuid token = unique_id::fromRandom();
-    //     wd.token = unique_id::toMsg(token);
-
-    //     // Send to rolenode
-    //     directivePub.publish(wd);
-    // }
-
-    // {
-        // // Fill blackboard with relevant info
-        // bt::Blackboard bb;
-        // bb.SetInt("ROBOT_ID", keeper_bot);
-
-        // bb.SetBool("GetBall_A_intercept", false);
-        // bb.SetString("AimAt_A_At", "robot");
-        // bb.SetInt("AimAt_A_AtRobot", primaryAttacker);
-
-        // // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.robot_id = keeper_bot;
-        // wd.tree = "BasicKeeperTree";
-        // wd.blackboard = bb.toMsg();
-
-        // // Add random token and save it for later
-        // boost::uuids::uuid token = unique_id::fromRandom();
-        // wd.token = unique_id::toMsg(token);
-
-        // // Send to rolenode
-        // directivePub.publish(wd);
-    // }
 
     start = rtt::now();
 }
@@ -219,7 +150,7 @@ bt::Node::Status AttackerTactic::Update() {
     }
 
     auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 5) {
+    if (duration.count() >= 8) {
         return Status::Failure;
     }
 

@@ -29,6 +29,8 @@ private:
     void defines(nlohmann::json);
     void build_structure(nlohmann::json);
 
+    std::string get_parallel_params_from_properties(json properties);
+
     NodeType determine_type(nlohmann::json);
 };
 

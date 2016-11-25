@@ -4,6 +4,9 @@
 
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG RobotDealer
 
 namespace rtt {
 
@@ -54,6 +57,8 @@ void RobotDealer::claim_robot(int id) {
 }
 
 void RobotDealer::release_robot(int id) {
+    RTT_DEBUGLN("Releasing robot %i", id);
+
     if (id == keeper) {
         if (keeper_available) {
             ROS_ERROR("Goalkeeper was not claimed! ID: %i", keeper);

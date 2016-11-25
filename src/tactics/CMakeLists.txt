@@ -4,6 +4,7 @@ set(TACTIC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicDefenseTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToSideTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DemoTactic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTactic.cpp
     )
 set(TACTIC_SOURCES
     ${TACTIC_SOURCES}

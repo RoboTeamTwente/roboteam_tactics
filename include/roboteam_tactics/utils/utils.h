@@ -16,6 +16,14 @@
 
 namespace rtt {
 
+template<typename T>
+void delete_from_vector(std::vector<T> &items, const T &item) {
+    auto it = std::find(items.begin(), items.end(), item);
+    if (it != items.end()) {
+        items.erase(it);
+    }
+}
+
 std::vector<std::string> getNodesSubscribedTo(std::string topic);
 std::string getMyNamespace();
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
@@ -88,5 +96,8 @@ extern ros::Publisher robotcommand_publisher;
 extern ros::Publisher roledirective_publisher;
 
 } // _private
+
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
 
 } // rtt

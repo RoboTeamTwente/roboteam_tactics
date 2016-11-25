@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "roboteam_tactics/bt/Composite.hpp"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG ParallelTactic
 
 namespace rtt {
 
@@ -14,6 +17,7 @@ public:
     std::vector<bt::Node::Status> lastStatus;
 
     void Initialize() override {
+        RTT_DEBUGLN("Initializing Parallel Tactic");
         lastStatus.clear();
         for (auto child : children) {
             lastStatus.push_back(bt::Node::Status::Running);
@@ -42,6 +46,7 @@ public:
 
         int totalSuccess = 0;
         int totalFail = 0;
+        bool encounteredAnInvalid = false;
 
         int i = 0;
         for (auto &child : children) {
@@ -53,21 +58,47 @@ public:
             if (lastStatus.at(i) == Status::Success) {
                 totalSuccess++;
             }
+
             if (lastStatus.at(i) == Status::Failure) {
                 totalFail++;
+            }
+
+            if (lastStatus.at(i) == Status::Invalid) {
+                encounteredAnInvalid = true;
             }
 
             i++;
         }
 
+        if (encounteredAnInvalid) {
+            CallLeftoverTerminators();
+            return Status::Failure;
+        }
+
         if (totalSuccess >= minimumSuccess) {
+            CallLeftoverTerminators();
             return Status::Success;
         }
         if (totalFail >= minimumFail) {
+            CallLeftoverTerminators();
             return Status::Failure;
         }
 
         return Status::Running;
+    }
+
+    void CallLeftoverTerminators() {
+        int i = 0;
+        for (auto &child : children) {
+            if (lastStatus.at(i) == Status::Running) {
+                child->Terminate(Status::Running);
+                child->Reset();
+            }
+
+            ++i;
+        }
+
+        return;
     }
     
     using Ptr = std::shared_ptr<ParallelTactic>;

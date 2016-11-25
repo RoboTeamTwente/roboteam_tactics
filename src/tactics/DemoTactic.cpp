@@ -20,56 +20,6 @@ DemoTactic::DemoTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-template<typename T>
-void delete_from_vector(std::vector<T> &items, const T &item) {
-    auto it = std::find(items.begin(), items.end(), item);
-    if (it != items.end()) {
-        items.erase(it);
-    }
-}
-
-int get_most_attacking_robot(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int side = LastWorld::get_our_goal_center().x;
-
-    int furthest_robot = -1;
-    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
-    // TODO: Assuming that our goal is left. Either the world should
-    // be normalized towards "our goal left" or there should be a bunch
-    // of branches here
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
-        if (this_robot_side_dist > furthest_robot_side_dist) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                furthest_robot = worldRobot.id;
-                furthest_robot_side_dist = this_robot_side_dist;
-            }
-        }
-    }
-
-    return furthest_robot;
-}
-
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int closest_robot = -1;
-    double closest_robot_ds = std::numeric_limits<double>::max();
-
-    // TODO: Why is there not a copy constructor?
-    roboteam_utils::Vector2 ball_pos(world.ball.pos);
-
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos);
-
-        if ((pos - ball_pos).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
-            }
-        }
-    }
-
-    return closest_robot;
-}
-
 void DemoTactic::Initialize() {
     tokens.clear();
 
@@ -88,7 +38,7 @@ void DemoTactic::Initialize() {
     int attack_bot = get_robot_closest_to_ball(robots, world);
     delete_from_vector(robots, attack_bot);
 
-    int score_bot = get_most_attacking_robot(robots, world);
+    int score_bot = get_robot_closest_to_their_goal(robots, world);
     delete_from_vector(robots, score_bot);
 
     int def_bot = robots.back();

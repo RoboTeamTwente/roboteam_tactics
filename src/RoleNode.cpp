@@ -23,6 +23,7 @@
 
 ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
+std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
@@ -74,6 +75,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     try {
         ros::NodeHandle n;
+        currentTreeName = msg->tree;
         currentTree = rtt::generate_node(n, msg->tree, "", bb);
     } catch (...) {
         ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
@@ -137,7 +139,7 @@ int main(int argc, char *argv[]) {
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
-            std::cout << "Finished a RoleDirective. Sending feedback\n";
+            RTT_DEBUG("Robot %i has finished tree %s\n", ROBOT_ID, currentTreeName.c_str());
 
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;

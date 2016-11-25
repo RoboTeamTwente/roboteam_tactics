@@ -7,14 +7,14 @@
 
 namespace rtt {
 
-class BasicDefenseTactic : public Tactic {
+class BasicKeeperTactic : public Tactic {
 public:
-    BasicDefenseTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    BasicKeeperTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize();
     Status Update();
     
-    std::string node_name() override { return "BasicDefenseTactic"; }
+    std::string node_name() override { return "BasicKeeperTactic"; }
 
 private:
     std::vector<boost::uuids::uuid> tokens;
