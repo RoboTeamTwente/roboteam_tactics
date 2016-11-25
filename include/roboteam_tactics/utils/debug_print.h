@@ -29,5 +29,6 @@ SET_DEBUG_FOR(Kick, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
 SET_DEBUG_FOR(DemoTactic, true);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
+SET_DEBUG_FOR(RoleNode, true);
 
 } // rtt

@@ -21,6 +21,7 @@
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -48,8 +49,7 @@ int main(int argc, char *argv[]) {
 
     ros::Rate rate(60);
 
-    ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 10);
-    ros::Subscriber feedbackSub = n.subscribe("role_feedback", 10, &feedbackCallback);
+    auto& directivePub = rtt::get_roledirective_publisher();
     
     rtt::LastWorld::initialise_lastworld();
 
@@ -59,31 +59,32 @@ int main(int argc, char *argv[]) {
     if (arguments.size() > 0) {
         strategy = rtt::make_tree(arguments[0], n);
     } else {
-        ROS_INFO_STREAM("No strategy tree passed as argument. Aborting.");
-        return 0;
+        ROS_ERROR("No strategy tree passed as argument. Aborting.");
+        return 1;
     }
 
     // Wait for all the role nodes to come online if a param was set
     if (ros::param::has("num_role_nodes")) {
         int numNodes;
         ros::param::get("num_role_nodes", numNodes);
-        std::cout << "Waiting for " << std::to_string(numNodes) << " role nodes...\n";
+        RTT_DEBUG("Waiting for %d role nodes...\n", numNodes);
         while ((int) directivePub.getNumSubscribers() < numNodes) {
             ros::spinOnce();
             rate.sleep();
         }
     }
 
-    std::cout << "Found role nodes. Waiting for more than 0 robots to appear...\n";
+    RTT_DEBUG("Found role nodes. Waiting for more than 0 robots to appear...\n");
 
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
         rate.sleep();
     }
 
-    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4/*, 5*/});
+    // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
+    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
-    std::cout << "More than one robot found. Starting...\n";
+    RTT_DEBUG("More than one robot found. Starting...\n");
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -91,7 +92,8 @@ int main(int argc, char *argv[]) {
         bt::Node::Status status = strategy.Update();
 
         if (status != bt::Node::Status::Running) {
-            std::cout << "Strategy result: " << bt::statusToString(status) << ". Starting again\n";
+            auto statusStr = bt::statusToString(status);
+            RTT_DEBUG("Strategy result: %s. Starting again.\n", statusStr.c_str());
         }
 
         rate.sleep();

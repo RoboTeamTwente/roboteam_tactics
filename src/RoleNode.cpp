@@ -17,18 +17,18 @@
 #include "roboteam_tactics/generated/allskills_set.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/bt.hpp"
+#include "roboteam_tactics/utils/debug_print.h"
 
-ros::Publisher roleNodeDiscoveryPublisher;
+#define RTT_CURRENT_DEBUG_TAG RoleNode
+
 ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
 
-bool sendNextSuccess = false;
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
 bool ignoring_strategy_instructions = false;
 
 void reset_tree() {
-    sendNextSuccess = false;
     currentToken = uuid_msgs::UniqueID();
     currentTree = nullptr;
 }
@@ -76,24 +76,22 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         ros::NodeHandle n;
         currentTree = rtt::generate_node(n, msg->tree, "", bb);
     } catch (...) {
-        std::cout << "Tree name is neither tree nor skill: \"" << msg->tree << "\"\n";
+        ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
         return;
     }
 
     currentToken = msg->token;
 
-    sendNextSuccess = true;
-
-    std::cout << "It's for me, " << name << ". I have to start executing tree " << msg->tree << ". My robot is: " << bb->GetInt("ROBOT_ID") << "\n";
+    RTT_DEBUG("Robot ID: %i. Executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
 }
 
-void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
-    rtt::LastWorld::set(*world);
-}
+// void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
+    // rtt::LastWorld::set(*world);
+// }
 
-void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
-    rtt::LastWorld::set_field(geom->field);
-}
+// void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
+    // rtt::LastWorld::set_field(geom->field);
+// }
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
@@ -102,17 +100,20 @@ int main(int argc, char *argv[]) {
     std::string name = ros::this_node::getName();
     // Chop off the leading "/robot"
     std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
-    std::cout << "Name: " << name << ", robotIDStr: " << robotIDStr << "\n";
     // Convert to int
-    ROBOT_ID = std::stoi(robotIDStr);
+    try {
+        ROBOT_ID = std::stoi(robotIDStr);
+    } catch (...) {
+        ROS_ERROR("Could not parse Robot ID from node name \"%s\". Aborting.", name.c_str());
+        return 1;
+    }
 
     int iterationsPerSecond = 60;
     ros::param::get("role_iterations_per_second", iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    std::cout << "Iterations per second: " << std::to_string(iterationsPerSecond) << "\n";
-
-    ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
-    ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
+    RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
+    
+    rtt::LastWorld::initialise_lastworld();
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
@@ -133,14 +134,9 @@ int main(int argc, char *argv[]) {
 
         bt::Node::Status status = currentTree->Update();
 
-        if (!sendNextSuccess) {
-            std::cout << "SendNextSuccess was false and my update was called.\n";
-        }
-
-        if (sendNextSuccess && 
-                (status == bt::Node::Status::Success
+        if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
-                 || status == bt::Node::Status::Invalid)) {
+                 || status == bt::Node::Status::Invalid) {
             std::cout << "Finished a RoleDirective. Sending feedback\n";
 
             roboteam_msgs::RoleFeedback feedback;
@@ -157,8 +153,6 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }
-
-            sendNextSuccess = false;
 
             currentTree = nullptr;
         }

@@ -73,7 +73,7 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
 void DemoTactic::Initialize() {
     tokens.clear();
 
-    std::cout << "Initializing demo tactic";
+    RTT_DEBUG("Initializing demo tactic\n");
 
     roboteam_msgs::World world = LastWorld::get();
 

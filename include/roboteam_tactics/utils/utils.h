@@ -82,6 +82,8 @@ ros::Publisher& get_roledirective_publisher();
 
 namespace _private {
 
+extern bool is_robotcommand_publisher_initialized;
+extern bool is_roledirective_publisher_initialized;
 extern ros::Publisher robotcommand_publisher;
 extern ros::Publisher roledirective_publisher;
 
