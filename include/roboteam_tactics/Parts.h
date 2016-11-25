@@ -14,6 +14,7 @@
 #include "roboteam_tactics/verifier.h"
 #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/Leaf.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 namespace rtt {
 
@@ -61,6 +62,9 @@ class Condition : public Leaf {
     }
 } ;
 
+// Enable RTT_DEBUG for Tactic
+#define RTT_CURRENT_DEBUG_TAG Tactic
+
 class Tactic : public Leaf {
     public:
     Tactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
@@ -88,6 +92,8 @@ class Tactic : public Leaf {
             pub.publish(directive);
         }
 
+        RTT_DEBUGLN("Releasing tactic robots!\n");
+
         RobotDealer::release_robots(robots);
         claimed_robots.clear();
     }
@@ -95,6 +101,9 @@ class Tactic : public Leaf {
     void claim_robot(int id) {
         if (claimed_robots.find(id) != claimed_robots.end()) {
             ROS_ERROR("Robot %d is already claimed by this tactic!\n", id);
+            for (const int ROBOT_ID : claimed_robots) {
+                ROS_ERROR("Claimed robot: %d", ROBOT_ID);
+            }
         }
 
         claimed_robots.insert(id);
@@ -119,5 +128,8 @@ class Tactic : public Leaf {
     private:
     std::set<int> claimed_robots;
 } ;
+
+// Make sure sources that include this are not troubled by the def
+#undef RTT_CURRENT_DEBUG_TAG
 
 }

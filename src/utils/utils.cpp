@@ -291,4 +291,42 @@ bool _private::is_roledirective_publisher_initialized = false;
 ros::Publisher _private::robotcommand_publisher;
 ros::Publisher _private::roledirective_publisher;
 
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    roboteam_utils::Vector2 ball_pos(world.ball.pos);
+
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        roboteam_utils::Vector2 pos(worldRobot.pos);
+
+        if ((pos - ball_pos).length() < closest_robot_ds) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                closest_robot = worldRobot.id;
+                closest_robot_ds = (pos - ball_pos).length();
+            }
+        }
+    }
+
+    return closest_robot;
+}
+
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
+    int side = LastWorld::get_our_goal_center().x;
+
+    int furthest_robot = -1;
+    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
+        if (this_robot_side_dist > furthest_robot_side_dist) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                furthest_robot = worldRobot.id;
+                furthest_robot_side_dist = this_robot_side_dist;
+            }
+        }
+    }
+
+    return furthest_robot;
+}
+
 } // rtt

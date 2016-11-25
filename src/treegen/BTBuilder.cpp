@@ -76,6 +76,24 @@ std::string BTBuilder::build(nlohmann::json json) {
     return out.str();
 }
 
+std::string BTBuilder::get_parallel_params_from_properties(json properties) {
+    if (properties.find("minSuccess") != properties.end()
+            && properties.find("minFail") != properties.end()) {
+        int minSuccess = properties["minSuccess"];
+        int minFail = properties["minFail"];
+        return std::to_string(minSuccess)
+            + ", "
+            + std::to_string(minFail);
+    } else if (properties.find("successOnAll") != properties.end()
+            && properties.find("failOnAll") != properties.end()) {
+        std::string successOnAll = properties["successOnAll"].get<bool>() ? "true" : "false";
+        std::string failOnAll = properties["failOnAll"].get<bool>() ? "true" : "false";
+        return successOnAll + ", " + failOnAll;
+    } else {
+        return "true, false";
+    }
+}
+
 void BTBuilder::define_seq(std::string name, json properties = json::object()) {
     std::string memSeqName = "MemSequence";
     std::string parallelSeqName = "ParallelSequence";
@@ -87,31 +105,13 @@ void BTBuilder::define_seq(std::string name, json properties = json::object()) {
         // It's a mem sequence
         type = "bt::MemSequence";
     } else if (name.compare(0, parallelSeqName.length(), parallelSeqName) == 0) {
+        // Parallel sequence with repeat
         type = "bt::ParallelSequence";
-
-        if (properties.find("minSuccess") != properties.end()
-                && properties.find("minFail") != properties.end()) {
-            int minSuccess = properties["minSuccess"];
-            int minFail = properties["minFail"];
-            params = std::to_string(minSuccess)
-                + ", "
-                + std::to_string(minFail);
-        } else if (properties.find("successOnAll") != properties.end()
-                && properties.find("failOnAll") != properties.end()) {
-            std::string successOnAll = properties["successOnAll"].get<bool>() ? "true" : "false";
-            std::string failOnAll = properties["failOnAll"].get<bool>() ? "true" : "false";
-            params = successOnAll + ", " + failOnAll;
-        } else {
-            std::cout << "// No minSuccess/minFail or successOnAll/failOnAll properties given. "
-                << "Defaulting to true/false (succeed on all, fail on one)\n";
-            std::cerr << "// No minSuccess/minFail or successOnAll/failOnAll properties given. "
-                << "Defaulting to true/false (succeed on all, fail on one)\n";
-            params = "true, false";
-        }
+        params = get_parallel_params_from_properties(properties);
     } else if (name.compare(0, ParallelTacticName.length(), ParallelTacticName) == 0) {
+        // Parallel sequence without repeat
         type = "rtt::ParallelTactic";
-        // Need all to succeed, one to fail. See ParallelTactic.hpp
-        params = "true, false";
+        params = get_parallel_params_from_properties(properties);
     } else {
         // It's a regular sequence
         type = "bt::Sequence";
