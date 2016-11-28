@@ -42,7 +42,7 @@ std::string BTBuilder::build(nlohmann::json json) {
         // Put it back
         element["title"] = title;
     }
-    
+
     while (!stack.empty()) {
         std::string id = stack.top();
         stack.pop();
@@ -59,8 +59,8 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
-        << "(ros::NodeHandle n, bt::Blackboard* blackboard) {" 
-        << std::endl; 
+        << "(ros::NodeHandle n, bt::Blackboard* blackboard) {"
+        << std::endl;
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
     out << DINDENT << "if(blackboard) merge_blackboards(bb, std::make_shared<bt::Blackboard>(*blackboard));" << std::endl;
@@ -94,21 +94,18 @@ std::string BTBuilder::get_parallel_params_from_properties(json properties) {
     }
 }
 
-void BTBuilder::define_seq(std::string name, json properties = json::object()) {
-    std::string memSeqName = "MemSequence";
-    std::string parallelSeqName = "ParallelSequence";
-    std::string ParallelTacticName = "ParallelTactic";
+void BTBuilder::define_seq(std::string name, std::string nodeType, json properties = json::object()) {
     std::string type = "bt::Sequence";
     std::string params = "";
 
-    if (name.compare(0, memSeqName.length(), memSeqName) == 0) {
+    if (nodeType == "MemSequence") {
         // It's a mem sequence
         type = "bt::MemSequence";
-    } else if (name.compare(0, parallelSeqName.length(), parallelSeqName) == 0) {
+    } else if (nodeType == "ParallelSequence") {
         // Parallel sequence with repeat
         type = "bt::ParallelSequence";
         params = get_parallel_params_from_properties(properties);
-    } else if (name.compare(0, ParallelTacticName.length(), ParallelTacticName) == 0) {
+    } else if (nodeType == "ParallelTactic") {
         // Parallel sequence without repeat
         type = "rtt::ParallelTactic";
         params = get_parallel_params_from_properties(properties);
@@ -147,9 +144,9 @@ void BTBuilder::define_nod(std::string name, std::string type) {
     if (allskills_set.find(type) != allskills_set.end()) {
         out << DINDENT
             << "auto "
-            << name 
+            << name
             << " = std::make_shared<"
-            << type 
+            << type
             << ">(n, \""
             << name
             << "\", bb);"
@@ -158,9 +155,9 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             || alltactics_set.find(type) != alltactics_set.end()) {
         out << DINDENT
             << "auto "
-            << name 
+            << name
             << " = std::make_shared<"
-            << type 
+            << type
             << ">(\""
             << name
             << "\", bb);"
@@ -171,7 +168,7 @@ void BTBuilder::define_nod(std::string name, std::string type) {
 }
 
 void BTBuilder::add_to_composite(std::string comp, std::string child) {
-    out << DINDENT << comp << "->AddChild(" << child << ");" << std::endl;    
+    out << DINDENT << comp << "->AddChild(" << child << ");" << std::endl;
 }
 
 void BTBuilder::set_decorator_child(std::string decorator, std::string child) {
@@ -189,7 +186,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         }
         break;
     case SEQUENCE:
-        define_seq(jsonData["title"], jsonData["properties"]);
+        define_seq(jsonData["title"], jsonData["name"], jsonData["properties"]);
         for (auto child : jsonData["children"]) {
             defines(nodes[child]);
         }
@@ -203,7 +200,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         define_nod(jsonData["title"], jsonData["name"]);
         break;
     }
-    
+
     // Add properties to private blackboard if needed
     std::unordered_map<std::string, json> properties = jsonData["properties"];
     if (properties.size() > 0) {
@@ -211,7 +208,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_string()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetString(\"" 
+                    << "->private_bb->SetString(\""
                     << property.first
                     << "\", \""
                     << property.second.get<std::string>()
@@ -231,7 +228,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             if (property.second.is_boolean()) {
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetBool(\"" 
+                    << "->private_bb->SetBool(\""
                     << property.first
                     << "\", "
                     << (property.second.get<bool>() ? "true" : "false")
@@ -267,7 +264,7 @@ NodeType BTBuilder::determine_type(nlohmann::json json) {
 
     if (name == "Priority" || name == "MemPriority") {
         return SELECTOR;
-    } else if (name == "Sequence" 
+    } else if (name == "Sequence"
             || name == "MemSequence"
             || name == "ParallelSequence"
             || name == "ParallelTactic") {
