@@ -16,9 +16,14 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/generated/alltrees_list.h"
+#include "roboteam_tactics/generated/alltrees_factory.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
+#include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/utils.h"
+
+#define RTT_CURRENT_DEBUG_TAG StrategyNode
 
 std::random_device rd;
 std::mt19937 rng(rd());
@@ -38,66 +43,48 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
     }
 }
 
-/*
- * TODO: Implement actually ignoring robots.
- */
-void robotIgnoreCallback(const roboteam_msgs::StrategyIgnoreRobot msg) {
-    ROS_INFO("Ignore packet. id: %i", msg.id);
-}
-
-void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
-    rtt::LastWorld::set(*world);
-}
-
-void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
-    rtt::LastWorld::set_field(geom->field);
-}
-
-/**
- * TODO: strategy_debug_directive voor het ontvangen voor debug bomen voor robots
- */
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
 
-    std::string name = ros::this_node::getName();
-
-    std::cout << "Name: " << name << "\n";
-
     ros::Rate rate(60);
 
-    ros::Publisher directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 10);
-    ros::Subscriber feedbackSub = n.subscribe("role_feedback", 10, &feedbackCallback);
-
-    ros::Subscriber ignoreRobotSub = n.subscribe("strategy_ignore_robot", 10, robotIgnoreCallback);
-
-    ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 10, &worldStateCallback);
-    ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
+    auto& directivePub = rtt::get_roledirective_publisher();
+    
+    rtt::LastWorld::initialise_lastworld();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    auto strategy = rtt::make_AttackerStrategy(n);
+    bt::BehaviorTree strategy;
+    if (arguments.size() > 0) {
+        strategy = rtt::make_tree(arguments[0], n);
+    } else {
+        ROS_ERROR("No strategy tree passed as argument. Aborting.");
+        return 1;
+    }
 
     // Wait for all the role nodes to come online if a param was set
     if (ros::param::has("num_role_nodes")) {
         int numNodes;
         ros::param::get("num_role_nodes", numNodes);
-        std::cout << "Waiting for " << std::to_string(numNodes) << " role nodes...\n";
+        RTT_DEBUG("Waiting for %d role nodes...\n", numNodes);
         while ((int) directivePub.getNumSubscribers() < numNodes) {
             ros::spinOnce();
             rate.sleep();
         }
     }
 
-    // Wait for robots to appear
+    RTT_DEBUG("Found role nodes. Waiting for more than 0 robots to appear...\n");
+
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
         rate.sleep();
     }
 
-    rtt::RobotDealer::initialize_robots({0, 1, 2, 3/*, 4, 5*/});
+    // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
+    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
-    std::cout << "More than one robot found. Starting...\n";
+    RTT_DEBUG("More than one robot found. Starting...\n");
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -105,7 +92,8 @@ int main(int argc, char *argv[]) {
         bt::Node::Status status = strategy.Update();
 
         if (status != bt::Node::Status::Running) {
-            std::cout << "Strategy result: " << bt::statusToString(status) << ". Starting again\n";
+            auto statusStr = bt::statusToString(status);
+            RTT_DEBUG("Strategy result: %s. Starting again.\n", statusStr.c_str());
         }
 
         rate.sleep();

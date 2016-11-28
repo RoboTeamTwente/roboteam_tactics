@@ -1,4 +1,5 @@
 #pragma once
+#include <ros/ros.h>
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -24,8 +25,7 @@ class LastWorld {
 // }
     static void callback_world_state(const roboteam_msgs::WorldConstPtr& world);
     static void callback_geom_data(const roboteam_msgs::GeometryDataConstPtr& geometry);
-    static void register_callbacks(bool world_state = true, bool geometry_data = true);
-
+    static void initialise_lastworld(bool world_state = true, bool geometry_data = true);
 
     static roboteam_msgs::World get();
     static void set(roboteam_msgs::World world);

@@ -119,6 +119,32 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     return result;
 }
 
+roboteam_utils::Vector2 predictBallPos(double seconds) {
+    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    roboteam_msgs::World w = LastWorld::get();
+    roboteam_utils::Vector2 ballPosNow(w.ball.pos);
+    roboteam_utils::Vector2 ballVelNow(w.ball.vel);
+    roboteam_utils::Vector2 predictedBallPos = ballPosNow + ballVelNow*seconds;
+    return predictedBallPos;
+}
+
+roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
+    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    roboteam_msgs::World w = LastWorld::get();
+    roboteam_utils::Vector2 robotPosNow;
+    roboteam_utils::Vector2 robotVelNow;
+    if (our_team) {
+        robotPosNow = w.us.at(robot_id).pos;
+        robotVelNow = w.us.at(robot_id).vel;
+    } else {
+        robotPosNow = w.them.at(robot_id).pos;
+        robotVelNow = w.them.at(robot_id).vel;
+    }
+    roboteam_utils::Vector2 predictedBallPos = robotPosNow + robotVelNow*seconds;
+    return predictedBallPos;
+}
+
+
 boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
     const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     auto vec = our_team ? w.us : w.them;
@@ -256,6 +282,77 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 	cmd.chipper_vel=0.0;
 	cmd.chipper_forced=false;
     return cmd;
+}
+
+void initialize_robotcommand_publisher() {
+    ros::NodeHandle n;
+    _private::robotcommand_publisher = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
+    _private::is_robotcommand_publisher_initialized = true;
+}
+
+ros::Publisher& get_robotcommand_publisher() {
+    if (!_private::is_robotcommand_publisher_initialized) {
+        initialize_robotcommand_publisher();
+    }
+
+    return _private::robotcommand_publisher;
+}
+
+void initialize_roledirective_publisher() {
+    ros::NodeHandle n;
+    _private::roledirective_publisher = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    _private::is_roledirective_publisher_initialized = true;
+}
+
+ros::Publisher& get_roledirective_publisher() {
+    if (!_private::is_roledirective_publisher_initialized) {
+        initialize_roledirective_publisher();
+    }
+
+    return _private::roledirective_publisher;
+}
+
+bool _private::is_robotcommand_publisher_initialized = false;
+bool _private::is_roledirective_publisher_initialized = false;
+ros::Publisher _private::robotcommand_publisher;
+ros::Publisher _private::roledirective_publisher;
+
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    roboteam_utils::Vector2 ball_pos(world.ball.pos);
+
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        roboteam_utils::Vector2 pos(worldRobot.pos);
+
+        if ((pos - ball_pos).length() < closest_robot_ds) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                closest_robot = worldRobot.id;
+                closest_robot_ds = (pos - ball_pos).length();
+            }
+        }
+    }
+
+    return closest_robot;
+}
+
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
+    int side = LastWorld::get_our_goal_center().x;
+
+    int furthest_robot = -1;
+    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
+        if (this_robot_side_dist > furthest_robot_side_dist) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                furthest_robot = worldRobot.id;
+                furthest_robot_side_dist = this_robot_side_dist;
+            }
+        }
+    }
+
+    return furthest_robot;
 }
 
 } // rtt

@@ -15,9 +15,12 @@
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 #include <cmath>
 #include <vector>
+
+#define RTT_CURRENT_DEBUG_TAG GetBall
 
 namespace rtt {
 
@@ -173,8 +176,8 @@ bt::Node::Status GetBall::Update (){
 				targetPos = interceptPos;
 				targetAngle = interceptAngle;
 			} else {
-				ROS_INFO("This is probably not a valid intercept position...");
-				return Status::Invalid;
+				ROS_ERROR("This is probably not a valid intercept position...");
+				return Status::Failure;
 			}
 				
 		} else { // If we are close enough to the ball we can drive towards it and turn on the dribbler
@@ -185,11 +188,22 @@ bt::Node::Status GetBall::Update (){
 			private_bb->SetBool("dribbler", true);
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
-		ROS_INFO("driving to the ball");
-		roboteam_utils::Vector2 posDiff = ballPos - robotPos;
-		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
-		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
-		targetAngle = posDiff.angle();
+		RTT_DEBUG("driving to the ball");
+		targetAngle = GetDouble("targetAngle");
+		// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
+		// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
+		// target position. It's hard to explain without drawing, for questions ask Jim :)
+		if ((targetAngle - (ballPos - robotPos).angle()) > 0.5*M_PI) {
+			targetAngle = (ballPos - robotPos).rotate(0.5*M_PI).angle();
+		} else if ((targetAngle - (ballPos - robotPos).angle()) < -0.5*M_PI) {
+			targetAngle = (ballPos - robotPos).rotate(-0.5*M_PI).angle();
+		}
+		double posDiff = (ballPos - robotPos).length();
+		if (posDiff > 0.2) {
+			targetPos = ballPos + roboteam_utils::Vector2(0.18, 0.0).rotate(targetAngle + M_PI);	
+		} else {
+			targetPos = ballPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
+		}
 	}
 
 	auto bb2 = std::make_shared<bt::Blackboard>();
@@ -197,7 +211,7 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
 
-	if (iHaveBall.Update() == Status::Success) {
+	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
 		roboteam_msgs::RobotCommand command;
 		command.id = robotID;
 		command.x_vel = 0.0;
@@ -207,7 +221,7 @@ bt::Node::Status GetBall::Update (){
 		pubGetBall.publish(command);
 		ros::spinOnce();
 
-		ROS_INFO("GetBall skill completed.");
+		RTT_DEBUG("GetBall skill completed.");
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);

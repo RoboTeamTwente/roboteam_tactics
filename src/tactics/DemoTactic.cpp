@@ -10,6 +10,9 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/utils/debug_print.h"
+
+#define RTT_CURRENT_DEBUG_TAG DemoTactic
 
 namespace rtt {
 
@@ -17,67 +20,10 @@ DemoTactic::DemoTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-template<typename T>
-void delete_from_vector(std::vector<T> &items, const T &item) {
-    auto it = std::find(items.begin(), items.end(), item);
-    if (it != items.end()) {
-        items.erase(it);
-    }
-}
-
-int get_most_attacking_robot(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int side = -3;
-    std::string our_side = "right";
-    ros::param::get("our_field_side", our_side);
-    if (our_side == "left") {
-        side = -3;
-    } else {
-        side = 3;
-    }
-
-    int furthest_robot = -1;
-    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
-    // TODO: Assuming that our goal is left. Either the world should
-    // be normalized towards "our goal left" or there should be a bunch
-    // of branches here
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
-        if (this_robot_side_dist > furthest_robot_side_dist) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                furthest_robot = worldRobot.id;
-                furthest_robot_side_dist = this_robot_side_dist;
-            }
-        }
-    }
-
-    return furthest_robot;
-}
-
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int closest_robot = -1;
-    double closest_robot_ds = std::numeric_limits<double>::max();
-
-    // TODO: Why is there not a copy constructor?
-    roboteam_utils::Vector2 ball_pos(world.ball.pos);
-
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos);
-
-        if ((pos - ball_pos).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
-            }
-        }
-    }
-
-    return closest_robot;
-}
-
 void DemoTactic::Initialize() {
     tokens.clear();
 
-    std::cout << "Initializing demo tactic";
+    RTT_DEBUG("Initializing demo tactic\n");
 
     roboteam_msgs::World world = LastWorld::get();
 
@@ -92,27 +38,24 @@ void DemoTactic::Initialize() {
     int attack_bot = get_robot_closest_to_ball(robots, world);
     delete_from_vector(robots, attack_bot);
 
-    int score_bot = get_most_attacking_robot(robots, world);
+    int score_bot = get_robot_closest_to_their_goal(robots, world);
     delete_from_vector(robots, score_bot);
 
     int def_bot = robots.back();
     delete_from_vector(robots, def_bot);
 
-    int keeper_bot = robots.back();
-    delete_from_vector(robots, keeper_bot);
+    int keeper_bot = RobotDealer::get_keeper();
 
     claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
-    std::string our_field_side = "left";
-    ros::param::get("our_field_side", our_field_side);
-    if (our_field_side == "left") {
+    if (rtt::get_our_field_side() == "left") {
         mod = 1;
     }
 
     roboteam_utils::Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
 
-    std::cout << std::to_string(passTo.x) << ", "<< std::to_string(passTo.y) << "\n";
+    RTT_DEBUG("Attack bot: %i, score bot: %i, keeper bot: %i\n", attack_bot, score_bot, keeper_bot);
 
     {
         // Fill blackboard with relevant info
@@ -162,24 +105,24 @@ void DemoTactic::Initialize() {
         directivePub.publish(wd);
     }
 
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", def_bot);
+    // {
+        // // Fill blackboard with relevant info
+        // bt::Blackboard bb;
+        // bb.SetInt("ROBOT_ID", def_bot);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = def_bot;
-        wd.tree = "SecondaryKeeper";
-        wd.blackboard = bb.toMsg();
+        // // Create message
+        // roboteam_msgs::RoleDirective wd;
+        // wd.robot_id = def_bot;
+        // wd.tree = "SecondaryKeeper";
+        // wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        wd.token = unique_id::toMsg(token);
+        // // Add random token and save it for later
+        // boost::uuids::uuid token = unique_id::fromRandom();
+        // wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        directivePub.publish(wd);
-    }
+        // // Send to rolenode
+        // // directivePub.publish(wd);
+    // }
 
     {
         // Fill blackboard with relevant info

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdio>
 
 #define RTT_xstr(a) RTT_str(a)
@@ -15,13 +17,39 @@ if (RTT_PASTER3(rtt::PRINT, tag, MESSAGES)) { \
 #define RTT_DEBUG(format, ...) \
 RTT_DEBUG_TAG( RTT_CURRENT_DEBUG_TAG , format, ##__VA_ARGS__)
 
+#define RTT_DEBUGLN(format, ...) \
+RTT_DEBUG(format "\n", ##__VA_ARGS__)
+
 // Enable below here which debug statements should be on and/or off
 
 namespace rtt {
 
-SET_DEBUG_FOR(AimAt, false);
+// Top level nodes
+SET_DEBUG_FOR(StrategyNode, true);
+SET_DEBUG_FOR(RoleNode, true);
+
+// Building blocks
+SET_DEBUG_FOR(RobotDealer, true);
+SET_DEBUG_FOR(ParallelTactic, false);
+SET_DEBUG_FOR(Tactic, false);
+
+// Skills
+SET_DEBUG_FOR(AimAt, true);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
-SET_DEBUG_FOR(ParamCheck, false);
 SET_DEBUG_FOR(ParamSet, false);
+SET_DEBUG_FOR(GetBall, false);
+SET_DEBUG_FOR(Kick, false);
+
+// Conditions
+SET_DEBUG_FOR(ParamCheck, false);
+SET_DEBUG_FOR(CanSeeTheirGoal, false);
+SET_DEBUG_FOR(CanSeeRobot, false);
+SET_DEBUG_FOR(DistanceXToY, true);
+
+// Tactics
+SET_DEBUG_FOR(DemoTactic, true);
+SET_DEBUG_FOR(AttackerTactic, true);
+SET_DEBUG_FOR(BasicDefenseTactic, true);
+SET_DEBUG_FOR(BasicKeeperTactic, true);
 
 } // rtt

@@ -22,7 +22,7 @@ AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Pt
 
 // Simple proportional rotation controller
 double AvoidRobots::RotationController(double angleError) {
-    double pGainRot = 15.0;
+    double pGainRot = 3.0;
     double maxRotSpeed = 3.0;
 
     if (angleError < M_PI) {angleError += 2*M_PI;}
@@ -54,7 +54,7 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
     requiredSpeed.x=forceVector.x*cos(-myAngle)-forceVector.y*sin(-myAngle);
     requiredSpeed.y=forceVector.x*sin(-myAngle)+forceVector.y*cos(-myAngle);
 
-    if (posError.length() < 0.01 && fabs(angleError) < 0.005) {
+    if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
         roboteam_msgs::RobotCommand command;
         command.id = robotID;
         command.x_vel = 0.0;
@@ -122,7 +122,7 @@ bt::Node::Status AvoidRobots::Update () {
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = world.us.at(robotID).angle;
-    if (posError.length() > 1.5) {
+    if (posError.length() > 1.0) {
         angleGoal = posError.angle();
     }
     double angleError = angleGoal - myAngle;

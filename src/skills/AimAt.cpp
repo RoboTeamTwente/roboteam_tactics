@@ -10,6 +10,7 @@
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -23,55 +24,30 @@ bt::Node::Status AimAt::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	bool setRosParam = GetBool("setRosParam");
 
-	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
-	// is called before the first world state update
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	std::string destination = GetString("At");
-	// std::string destination=private_bb->GetString("At");
-	// ROS_INFO_STREAM("destination1: " << destination);
-	// printf("%s\n", destination1.c_str());
 
+	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
+	// is called before the first world state update
 	if (world.us.size() == 0) {
 		//ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
-
-	// roboteam_msgs::WorldBall ball = world.ball;
-	// roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	//roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	
 	roboteam_utils::Vector2 passTo;
 	
 	if (destination=="robot"){
-
-		int AtRobotID = GetInt("AtRobot");
-		roboteam_msgs::WorldRobot passTorobot=world.us.at(AtRobotID);
-		passTo=roboteam_utils::Vector2(passTorobot.pos.x, passTorobot.pos.y);
-	
-
+        int AtRobotID = GetInt("AtRobot");
+        auto possibleBot = lookup_our_bot(AtRobotID);
+        if (possibleBot) {
+            passTo = roboteam_utils::Vector2(possibleBot->pos);
+        } else {
+            return Status::Failure;
+        }
 	} else if(destination=="theirgoal"){
-        std::string our_field_side = "left";
-        n.getParam("our_field_side", our_field_side);
-
-        auto field = LastWorld::get_field();
-
-		if(our_field_side == "left"){
-			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
-
-		} else {
-			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
-		}
+        passTo = LastWorld::get_their_goal_center();
 	} else if(destination=="ourgoal"){
-        std::string our_field_side = "left";
-        n.getParam("our_field_side", our_field_side);
-
-        auto field = LastWorld::get_field();
-
-		if(our_field_side == "right"){
-			passTo=roboteam_utils::Vector2(field.field_length/2.0, 0);
-		} else {
-			passTo=roboteam_utils::Vector2(field.field_length/-2.0, 0);
-		}
+        passTo = LastWorld::get_our_goal_center();
 	}
 	
 	// ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);

@@ -21,9 +21,6 @@ bool failure;
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree, bt::Blackboard::Ptr bb) {
     rtt::LastWorld::set(*world);
-
-    roboteam_msgs::World getworld = rtt::LastWorld::get();
-    roboteam_msgs::WorldBall ball = getworld.ball;
    
     bt::Node::Status status = tree->Update();
     if (status == bt::Node::Status::Success) {
@@ -39,7 +36,6 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "doStrategy");
     ros::NodeHandle n;
 	ROS_INFO("doing strategy");
-    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(3.0, 0.1);
 
     auto role = make_BasicStrategy(n);
     auto bb = role.GetBlackboard();

@@ -4,6 +4,8 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/Vector2.h"
 
 bool success;
 
@@ -24,6 +26,7 @@ int main(int argc, char **argv) {
 	bb->SetDouble("getBallAtX", 0.0);
 	bb->SetDouble("getBallAtY", 0.0);
 	bb->SetDouble("getBallAtTime", 5.0);
+	bb->SetDouble("targetAngle", 0.0);
 
 	rtt::GetBall getBall_B(n, "", bb);
 	

@@ -41,7 +41,7 @@ target_link_libraries(DoStrategy
     skills
     conditions
     tactics
-    utils 
+    utils
 	${catkin_LIBRARIES}
 	)
 
@@ -100,7 +100,7 @@ add_custom_target(generate_leafs_t
         generated/generate_all_leafs.stamp
     )
 add_custom_command(
-    OUTPUT 
+    OUTPUT
         ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
     DEPENDS
@@ -153,7 +153,7 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_F
 # End of hooks
 
 catkin_add_gtest(tactics_test
-    test/main.cpp 
+    test/main.cpp
 	test/SimpleTest.cpp
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
@@ -166,7 +166,7 @@ add_dependencies(RoleNode
     ${catkin_EXPORTED_TARGETS}
     generate_json_t
     )
-target_link_libraries(RoleNode 
+target_link_libraries(RoleNode
     alltrees
     skills
     conditions
@@ -196,7 +196,7 @@ target_link_libraries(StrategyNode
 # Disables tests on bob's desktop
 site_name(computername)
 
-if(NOT computername STREQUAL "lapbobe")
+if(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU"))
 
     add_executable(brain
         src/main.cpp
@@ -236,27 +236,12 @@ if(NOT computername STREQUAL "lapbobe")
         utils
         ${catkin_LIBRARIES}
         )
-
-    add_executable(AimSkill
-        src/AimSkill.cpp
-    )
-    add_dependencies(AimSkill 
-        ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        ${catkin_EXPORTED_TARGETS}
-        )
-    target_link_libraries(AimSkill
-        utils
-        skills
-        conditions
-        ${catkin_LIBRARIES}
-        )
-
-
+        
     add_executable(RotateAroundPoint
         src/skills/tests/RotateAroundPointTest.cpp
     )
     add_dependencies(RotateAroundPoint ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(RotateAroundPoint 
+    target_link_libraries(RotateAroundPoint
         skills
         conditions
         utils
@@ -278,18 +263,18 @@ if(NOT computername STREQUAL "lapbobe")
         src/skills/tests/GetBallTest.cpp
     )
     add_dependencies(GetBallTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(GetBallTest 
+    target_link_libraries(GetBallTest
         skills
         conditions
         utils
         ${catkin_LIBRARIES}
         )
-        
+
 	add_executable(DribbleTest
         src/skills/tests/DribbleTest.cpp
     )
     add_dependencies(DribbleTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(DribbleTest 
+    target_link_libraries(DribbleTest
         skills
         conditions
         utils
@@ -312,7 +297,7 @@ if(NOT computername STREQUAL "lapbobe")
         src/conditions/CanInterceptBall.cpp
     )
     add_dependencies(IcptTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(IcptTest 
+    target_link_libraries(IcptTest
         utils
         conditions
         skills
@@ -330,7 +315,7 @@ if(NOT computername STREQUAL "lapbobe")
         test/main.cpp
         test/ConditionsTest.cpp
     )
-    target_link_libraries(ConditionsTest 
+    target_link_libraries(ConditionsTest
         conditions
         utils
         ${catkin_LIBRARIES}
@@ -354,7 +339,7 @@ if(NOT computername STREQUAL "lapbobe")
         src/skills/tests/AvoidRobotsTest.cpp
     )
     add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(AvoidRobotsTest 
+    target_link_libraries(AvoidRobotsTest
         skills
         conditions
         utils
@@ -365,7 +350,7 @@ if(NOT computername STREQUAL "lapbobe")
         src/conditions/tests/CanPassSafelyTest.cpp
     )
     add_dependencies(CanPassSafelyTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    target_link_libraries(CanPassSafelyTest 
+    target_link_libraries(CanPassSafelyTest
         skills
         conditions
         utils
@@ -379,7 +364,7 @@ if(NOT computername STREQUAL "lapbobe")
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(CanReachPointTest 
+    target_link_libraries(CanReachPointTest
         skills
         conditions
         utils
@@ -393,7 +378,7 @@ add_executable(ConeTest
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(ConeTest 
+    target_link_libraries(ConeTest
         skills
         conditions
         utils
@@ -407,7 +392,7 @@ add_executable(CanSeeRobotTest
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(CanSeeRobotTest 
+    target_link_libraries(CanSeeRobotTest
         skills
         conditions
         utils
@@ -421,11 +406,11 @@ add_executable(AttackTactic
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         )
-    target_link_libraries(AttackTactic 
+    target_link_libraries(AttackTactic
         skills
         conditions
         utils
         ${catkin_LIBRARIES}
         )
 
-endif(NOT computername STREQUAL "lapbobe")
+endif(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU"))

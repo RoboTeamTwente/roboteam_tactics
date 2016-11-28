@@ -16,6 +16,14 @@
 
 namespace rtt {
 
+template<typename T>
+void delete_from_vector(std::vector<T> &items, const T &item) {
+    auto it = std::find(items.begin(), items.end(), item);
+    if (it != items.end()) {
+        items.erase(it);
+    }
+}
+
 std::vector<std::string> getNodesSubscribedTo(std::string topic);
 std::string getMyNamespace();
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
@@ -23,6 +31,13 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
+
+/**
+ * Predict the ball or robot position in the future based on the current velocity
+ */
+roboteam_utils::Vector2 predictBallPos(double seconds);
+roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
+
 /**
  * Looks up the given bot on the given team in the given world, and returns an optional WorldRobot.
  * If you don't pass a pointer to world, the function will get a world through LastWorld.
@@ -73,5 +88,23 @@ std::string get_our_field_side();
 roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
+
+void initialize_robotcommand_publisher();
+ros::Publisher& get_robotcommand_publisher();
+
+void initialize_roledirective_publisher();
+ros::Publisher& get_roledirective_publisher();
+
+namespace _private {
+
+extern bool is_robotcommand_publisher_initialized;
+extern bool is_roledirective_publisher_initialized;
+extern ros::Publisher robotcommand_publisher;
+extern ros::Publisher roledirective_publisher;
+
+} // _private
+
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
 
 } // rtt
