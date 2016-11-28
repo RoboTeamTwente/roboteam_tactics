@@ -258,43 +258,6 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-void initialize_robotcommand_publisher() {
-    ros::NodeHandle n;
-    if (!_private::is_robotcommand_publisher_initialized) {
-        _private::robotcommand_publisher = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
-        _private::is_robotcommand_publisher_initialized = true;
-    }
-}
-
-ros::Publisher& get_robotcommand_publisher() {
-    if (!_private::is_robotcommand_publisher_initialized) {
-        initialize_robotcommand_publisher();
-    }
-
-    return _private::robotcommand_publisher;
-}
-
-void initialize_roledirective_publisher() {
-    ros::NodeHandle n;
-    if (!_private::is_roledirective_publisher_initialized) {
-        _private::roledirective_publisher = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
-        _private::is_roledirective_publisher_initialized = true;
-    }
-}
-
-ros::Publisher& get_roledirective_publisher() {
-    if (!_private::is_roledirective_publisher_initialized) {
-        initialize_roledirective_publisher();
-    }
-
-    return _private::roledirective_publisher;
-}
-
-bool _private::is_robotcommand_publisher_initialized = false;
-bool _private::is_roledirective_publisher_initialized = false;
-ros::Publisher _private::robotcommand_publisher;
-ros::Publisher _private::roledirective_publisher;
-
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();

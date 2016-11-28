@@ -21,6 +21,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
+ros::Publisher pub;
 ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
 std::string currentTreeName;
@@ -53,7 +54,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         reset_tree();
 
         // Stop the robot in its tracks
-        auto& pub = rtt::get_robotcommand_publisher();
+        // auto pub = rtt::get_robotcommand_publisher();
         pub.publish(rtt::stop_command(ROBOT_ID));
 
         return;
@@ -91,6 +92,8 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
+    pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
+
     std::string name = ros::this_node::getName();
     // Chop off the leading "/robot"
     std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
@@ -107,7 +110,7 @@ int main(int argc, char *argv[]) {
     ros::Rate sleeprate(iterationsPerSecond);
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
     
-    rtt::LastWorld::initialise_lastworld();
+    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
@@ -152,12 +155,10 @@ int main(int argc, char *argv[]) {
             currentTree = nullptr;
             
             // Stop the robot in its tracks
-            auto& pub = rtt::get_robotcommand_publisher();
+            // auto pub = rtt::get_robotcommand_publisher();
             pub.publish(rtt::stop_command(ROBOT_ID));
         }
     }
-
-    rtt::get_robotcommand_publisher().shutdown();
 
     return 0;
 }

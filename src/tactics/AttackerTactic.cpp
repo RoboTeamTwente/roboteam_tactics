@@ -49,7 +49,9 @@ void AttackerTactic::Initialize() {
 
     RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
 
-    auto& pub = get_roledirective_publisher();
+    // auto pub = get_roledirective_publisher();
+    ros::NodeHandle n;
+    auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
 
     {
         // Fill blackboard with relevant info

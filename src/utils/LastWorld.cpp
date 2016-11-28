@@ -18,18 +18,18 @@ void LastWorld::callback_geom_data(const roboteam_msgs::GeometryDataConstPtr& ge
     LastWorld::set_field(geometry->field);
 }
 
-void LastWorld::initialise_lastworld(bool world_state, bool geometry_data) {
-    ros::NodeHandle n;
+// void LastWorld::initialise_lastworld(bool world_state, bool geometry_data) {
+    // ros::NodeHandle n;
 
-    // Queues are 1 to make sure only the newest version is kept
-    if (world_state) {
-        LastWorld::world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1, LastWorld::callback_world_state);
-    }
+    // // Queues are 1 to make sure only the newest version is kept
+    // if (world_state) {
+        // LastWorld::world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1, LastWorld::callback_world_state);
+    // }
 
-    if (geometry_data) {
-        LastWorld::geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1, LastWorld::callback_geom_data);
-    }
-}
+    // if (geometry_data) {
+        // LastWorld::geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1, LastWorld::callback_geom_data);
+    // }
+// }
 
 roboteam_msgs::World LastWorld::get() {
     return LastWorld::lastWorld;

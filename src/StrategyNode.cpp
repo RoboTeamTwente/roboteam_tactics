@@ -49,9 +49,10 @@ int main(int argc, char *argv[]) {
 
     ros::Rate rate(60);
 
-    auto& directivePub = rtt::get_roledirective_publisher();
+    // auto directivePub = rtt::get_roledirective_publisher();
+    auto directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
     
-    rtt::LastWorld::initialise_lastworld();
+    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
@@ -101,3 +102,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+// http://answers.ros.org/question/143756/rostimer-leads-to-boostlock_error-at-process-cleanup/

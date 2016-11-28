@@ -33,7 +33,10 @@ void BasicKeeperTactic::Initialize() {
     wd.blackboard = bb.toMsg();
 
     // Send to rolenode
-    rtt::get_roledirective_publisher().publish(wd);
+    // rtt::get_roledirective_publisher().publish(wd);
+    ros::NodeHandle n;
+    auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    pub.publish(wd);
 }
 
 bt::Node::Status BasicKeeperTactic::Update() {
