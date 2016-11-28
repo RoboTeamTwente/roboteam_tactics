@@ -44,6 +44,7 @@ SET_DEBUG_FOR(Kick, false);
 SET_DEBUG_FOR(ParamCheck, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
+SET_DEBUG_FOR(DistanceXToY, true);
 
 // Tactics
 SET_DEBUG_FOR(DemoTactic, true);

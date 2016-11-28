@@ -3,6 +3,8 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/Vector2.h"
 
+#define RTT_CURRENT_DEBUG_TAG DistanceXToY
+
 namespace rtt {
 
 using namespace roboteam_utils;
@@ -77,12 +79,14 @@ DistanceXToY::DistanceXToY(std::string name, bt::Blackboard::Ptr blackboard)
 
 bt::Node::Status DistanceXToY::Update() {
 	roboteam_msgs::World world = LastWorld::get();
-    
+
     const int ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     const double checkDistance = GetDouble("distance");
     const std::string mode = GetString("mode");
     const std::string X = GetString("X");
     const std::string Y = GetString("Y");
+
+    RTT_DEBUGLN("Checking distance from %s to %s...", X.c_str(), Y.c_str());
 
     Vector2 vecX;
     if (X == "me") {
