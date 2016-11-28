@@ -25,7 +25,7 @@
     "06cf4fa4-1797-4bd1-87e1-88e481b4b04e": {
       "id": "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
       "name": "DistanceXToY",
-      "title": "DistanceMeToBall_2",
+      "title": "Distance_me_to_ball_B",
       "description": "",
       "properties": {
         "distance": 0.5,
@@ -34,14 +34,14 @@
         "Y": "ball"
       },
       "display": {
-        "x": 840,
-        "y": 36
+        "x": 924,
+        "y": 96
       }
     },
     "056b3345-479b-4325-a163-9ca46b1af3b2": {
       "id": "056b3345-479b-4325-a163-9ca46b1af3b2",
       "name": "DistanceXToY",
-      "title": "DistanceMeToBall_1",
+      "title": "Distance_me_to_ball_A",
       "description": "",
       "properties": {
         "distance": 0.5,
@@ -63,8 +63,8 @@
         "targetAngle": 3.141592653589793
       },
       "display": {
-        "x": 948,
-        "y": -192
+        "x": 960,
+        "y": -156
       }
     },
     "05a76c04-81de-4c99-8b72-9f2bc7d96ad3": {
@@ -74,8 +74,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 948,
-        "y": -120
+        "x": 960,
+        "y": -84
       }
     },
     "35ca0114-f04b-4532-a71c-4a8bfaad3e1a": {
@@ -85,8 +85,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 948,
-        "y": -48
+        "x": 960,
+        "y": -12
       }
     },
     "e31f733e-5c7a-4136-b24c-e6e66a42eaf7": {
@@ -96,8 +96,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 756,
-        "y": -192
+        "x": 768,
+        "y": -156
       },
       "children": [
         "a8443757-1ef2-48c5-8738-34ef3acb4500",
@@ -112,40 +112,41 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 840,
-        "y": 108
+        "x": 912,
+        "y": 180
       }
     },
     "3360157c-b17b-4858-8ebc-14f7a8fa8f27": {
       "id": "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
       "name": "ParallelSequence",
-      "title": "ParallelSequence",
+      "title": "Parallel_A",
       "description": "",
       "properties": {
         "minFail": 1,
         "minSuccess": 2
       },
       "display": {
-        "x": 576,
-        "y": -240
+        "x": 588,
+        "y": -228
       },
       "children": [
         "056b3345-479b-4325-a163-9ca46b1af3b2",
+        "1f558064-3589-4ccb-8d38-0c5acd9dbbbc",
         "e31f733e-5c7a-4136-b24c-e6e66a42eaf7"
       ]
     },
     "161eaa4a-2442-45d0-9fe6-a3e670345f13": {
       "id": "161eaa4a-2442-45d0-9fe6-a3e670345f13",
       "name": "ParallelSequence",
-      "title": "ParallelSequence",
+      "title": "Parallel_B",
       "description": "",
       "properties": {
         "minFail": 1,
         "minSuccess": 2
       },
       "display": {
-        "x": 600,
-        "y": 36
+        "x": 612,
+        "y": 96
       },
       "children": [
         "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
@@ -161,10 +162,26 @@
         "maxLoop": -1
       },
       "display": {
-        "x": 132,
+        "x": 144,
         "y": -228
       },
       "child": "bc69a869-8a57-4785-8807-9826ad781b51"
+    },
+    "1f558064-3589-4ccb-8d38-0c5acd9dbbbc": {
+      "id": "1f558064-3589-4ccb-8d38-0c5acd9dbbbc",
+      "name": "DistanceXToY",
+      "title": "Distance_me_to_goal_A",
+      "description": "",
+      "properties": {
+        "distance": 2,
+        "mode": "lt",
+        "X": "me",
+        "Y": "goal"
+      },
+      "display": {
+        "x": 948,
+        "y": -240
+      }
     }
   },
   "display": {

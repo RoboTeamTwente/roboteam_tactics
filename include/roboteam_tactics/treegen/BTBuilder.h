@@ -18,7 +18,7 @@ private:
     std::map<std::string, nlohmann::json> nodes;
     std::stringstream out;
 
-    void define_seq(std::string name, json properties);
+    void define_seq(std::string name, std::string nodeType, json properties);
     void define_sel(std::string name);
     void define_dec(std::string name, std::string type);
     void define_nod(std::string name, std::string type);
@@ -35,4 +35,3 @@ private:
 };
 
 }
-
