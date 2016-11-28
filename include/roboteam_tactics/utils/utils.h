@@ -92,4 +92,7 @@ bool is_digits(const std::string &str);
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
 
+// ros::Publisher& get_rolecommand_publisher();
+// ros::Publisher& get_roledirective_publisher();
+
 } // rtt

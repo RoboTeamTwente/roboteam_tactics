@@ -22,17 +22,20 @@ class LastWorld {
     static roboteam_msgs::GeometryFieldSize get_field();
     static void set_field(roboteam_msgs::GeometryFieldSize field);
 
+    static bool have_received_first_world();
+    static bool have_received_first_geom();
+
     static roboteam_msgs::Vector2f PredictBallPos(double t);
 
     static Vector2 get_our_goal_center();
     static Vector2 get_their_goal_center();
 
-    static ros::Subscriber world_sub;
-    static ros::Subscriber geom_sub;
-
     private:
     static roboteam_msgs::World lastWorld;
     static roboteam_msgs::GeometryFieldSize field;
+
+    static bool received_first_world;
+    static bool received_first_geom;
 
 };
 
