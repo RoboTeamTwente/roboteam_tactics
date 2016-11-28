@@ -4,6 +4,8 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/Vector2.h"
 
 bool success;
 
