@@ -102,5 +102,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-// http://answers.ros.org/question/143756/rostimer-leads-to-boostlock_error-at-process-cleanup/
