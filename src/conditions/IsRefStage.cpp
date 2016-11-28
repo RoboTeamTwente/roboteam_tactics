@@ -22,7 +22,7 @@ bt::Node::Status IsRefStage::Update() {
 		return Status::Success;
 	} else {
 		ROS_INFO("nee, stage: %ld", (long)refstage.stage);
-		return Status::Failure;
+		return Status::Running;
 	}
 }
 
