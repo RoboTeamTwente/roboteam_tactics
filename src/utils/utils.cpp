@@ -260,8 +260,10 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 
 void initialize_robotcommand_publisher() {
     ros::NodeHandle n;
-    _private::robotcommand_publisher = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
-    _private::is_robotcommand_publisher_initialized = true;
+    if (!_private::is_robotcommand_publisher_initialized) {
+        _private::robotcommand_publisher = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
+        _private::is_robotcommand_publisher_initialized = true;
+    }
 }
 
 ros::Publisher& get_robotcommand_publisher() {
@@ -274,8 +276,10 @@ ros::Publisher& get_robotcommand_publisher() {
 
 void initialize_roledirective_publisher() {
     ros::NodeHandle n;
-    _private::roledirective_publisher = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
-    _private::is_roledirective_publisher_initialized = true;
+    if (!_private::is_roledirective_publisher_initialized) {
+        _private::roledirective_publisher = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+        _private::is_roledirective_publisher_initialized = true;
+    }
 }
 
 ros::Publisher& get_roledirective_publisher() {
