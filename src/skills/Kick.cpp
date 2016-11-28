@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/Math.h"
+
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Kick.h"
 
@@ -36,12 +37,14 @@ bt::Node::Status Kick::Update() {
     }
 
 	roboteam_msgs::World world = LastWorld::get();
-
+	
+	
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
     if ((currentBallVel - oldBallVel).length() >= 0.5) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
+
     }
 
     oldBallVel = currentBallVel;

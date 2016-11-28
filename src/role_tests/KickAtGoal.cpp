@@ -22,7 +22,6 @@ bool failure;
 
 void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorTree* tree, bt::Blackboard::Ptr bb) {
     rtt::LastWorld::set(*world);
-   
     bt::Node::Status status = tree->Update();
     if (status == bt::Node::Status::Success) {
         success = true;

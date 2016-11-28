@@ -31,6 +31,13 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
+
+/**
+ * Predict the ball or robot position in the future based on the current velocity
+ */
+roboteam_utils::Vector2 predictBallPos(double seconds);
+roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
+
 /**
  * Looks up the given bot on the given team in the given world, and returns an optional WorldRobot.
  * If you don't pass a pointer to world, the function will get a world through LastWorld.

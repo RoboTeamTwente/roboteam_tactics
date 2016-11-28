@@ -119,6 +119,32 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
     return result;
 }
 
+roboteam_utils::Vector2 predictBallPos(double seconds) {
+    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    roboteam_msgs::World w = LastWorld::get();
+    roboteam_utils::Vector2 ballPosNow(w.ball.pos);
+    roboteam_utils::Vector2 ballVelNow(w.ball.vel);
+    roboteam_utils::Vector2 predictedBallPos = ballPosNow + ballVelNow*seconds;
+    return predictedBallPos;
+}
+
+roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
+    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    roboteam_msgs::World w = LastWorld::get();
+    roboteam_utils::Vector2 robotPosNow;
+    roboteam_utils::Vector2 robotVelNow;
+    if (our_team) {
+        robotPosNow = w.us.at(robot_id).pos;
+        robotVelNow = w.us.at(robot_id).vel;
+    } else {
+        robotPosNow = w.them.at(robot_id).pos;
+        robotVelNow = w.them.at(robot_id).vel;
+    }
+    roboteam_utils::Vector2 predictedBallPos = robotPosNow + robotVelNow*seconds;
+    return predictedBallPos;
+}
+
+
 boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
     const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     auto vec = our_team ? w.us : w.them;
