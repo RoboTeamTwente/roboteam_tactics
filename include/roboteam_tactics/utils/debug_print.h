@@ -34,7 +34,7 @@ SET_DEBUG_FOR(ParallelTactic, false);
 SET_DEBUG_FOR(Tactic, false);
 
 // Skills
-SET_DEBUG_FOR(AimAt, true);
+SET_DEBUG_FOR(AimAt, false);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(GetBall, false);
@@ -44,7 +44,7 @@ SET_DEBUG_FOR(Kick, false);
 SET_DEBUG_FOR(ParamCheck, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
-SET_DEBUG_FOR(DistanceXToY, true);
+SET_DEBUG_FOR(DistanceXToY, false);
 
 // Tactics
 SET_DEBUG_FOR(DemoTactic, true);

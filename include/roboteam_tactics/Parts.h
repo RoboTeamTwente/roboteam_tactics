@@ -81,7 +81,9 @@ class Tactic : public Leaf {
     virtual void Terminate(Status s) {
         auto robots = get_claimed_robots();
 
-        auto& pub = get_roledirective_publisher();
+        // auto pub = get_roledirective_publisher();
+        ros::NodeHandle n;
+        auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
 
         roboteam_msgs::RoleDirective directive;
         directive.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;

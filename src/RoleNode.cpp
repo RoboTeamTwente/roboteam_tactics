@@ -21,6 +21,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
+ros::Publisher pub;
 ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
 std::string currentTreeName;
@@ -53,7 +54,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         reset_tree();
 
         // Stop the robot in its tracks
-        auto& pub = rtt::get_robotcommand_publisher();
+        // auto pub = rtt::get_robotcommand_publisher();
         pub.publish(rtt::stop_command(ROBOT_ID));
 
         return;
@@ -87,17 +88,11 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     RTT_DEBUG("Robot ID: %i. Executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
 }
 
-// void worldStateCallback(const roboteam_msgs::WorldConstPtr& world) {
-    // rtt::LastWorld::set(*world);
-// }
-
-// void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
-    // rtt::LastWorld::set_field(geom->field);
-// }
-
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
+
+    pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
 
     std::string name = ros::this_node::getName();
     // Chop off the leading "/robot"
@@ -115,7 +110,7 @@ int main(int argc, char *argv[]) {
     ros::Rate sleeprate(iterationsPerSecond);
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
     
-    rtt::LastWorld::initialise_lastworld();
+    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
@@ -129,8 +124,9 @@ int main(int argc, char *argv[]) {
     while (ros::ok()) {
         ros::spinOnce();
 
+        sleeprate.sleep();
+
         if (!currentTree){
-            sleeprate.sleep();
             continue;
         }
 
@@ -139,7 +135,7 @@ int main(int argc, char *argv[]) {
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
-            RTT_DEBUG("Robot %i has finished tree %s\n", ROBOT_ID, currentTreeName.c_str());
+            RTT_DEBUGLN("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
 
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;
@@ -151,15 +147,17 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
-                std::cout << "Role node failed! ID: " << ROBOT_ID << "\n";
+                RTT_DEBUGLN("Role node failed! ID: %d", ROBOT_ID);
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }
 
             currentTree = nullptr;
+            
+            // Stop the robot in its tracks
+            // auto pub = rtt::get_robotcommand_publisher();
+            pub.publish(rtt::stop_command(ROBOT_ID));
         }
-
-        sleeprate.sleep();
     }
 
     return 0;

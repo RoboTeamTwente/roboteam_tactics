@@ -12,23 +12,12 @@ using namespace roboteam_utils;
 
 void LastWorld::callback_world_state(const roboteam_msgs::WorldConstPtr& world) {
     LastWorld::set(*world);
+    LastWorld::received_first_world = true;
 }
 
 void LastWorld::callback_geom_data(const roboteam_msgs::GeometryDataConstPtr& geometry) {
     LastWorld::set_field(geometry->field);
-}
-
-void LastWorld::initialise_lastworld(bool world_state, bool geometry_data) {
-    ros::NodeHandle n;
-
-    // Queues are 1 to make sure only the newest version is kept
-    if (world_state) {
-        LastWorld::world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1, LastWorld::callback_world_state);
-    }
-
-    if (geometry_data) {
-        LastWorld::geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1, LastWorld::callback_geom_data);
-    }
+    LastWorld::received_first_geom = true;
 }
 
 roboteam_msgs::World LastWorld::get() {
@@ -45,6 +34,14 @@ roboteam_msgs::GeometryFieldSize LastWorld::get_field() {
 
 void LastWorld::set_field(roboteam_msgs::GeometryFieldSize field) {
     LastWorld::field = field;
+}
+
+bool LastWorld::have_received_first_world() {
+    return LastWorld::received_first_world;
+}
+
+bool LastWorld::have_received_first_geom() {
+    return LastWorld::received_first_geom;
 }
 
 roboteam_msgs::Vector2f LastWorld::PredictBallPos(double t) {
@@ -68,9 +65,9 @@ Vector2 LastWorld::get_their_goal_center() {
     return get_our_goal_center() * -1;
 }
 
-ros::Subscriber LastWorld::world_sub;
-ros::Subscriber LastWorld::geom_sub;
 roboteam_msgs::World LastWorld::lastWorld;
 roboteam_msgs::GeometryFieldSize LastWorld::field;
+bool LastWorld::received_first_geom = false;
+bool LastWorld::received_first_world = false;
 
 }
