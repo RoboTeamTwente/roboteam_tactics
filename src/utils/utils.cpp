@@ -120,7 +120,6 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
 }
 
 roboteam_utils::Vector2 predictBallPos(double seconds) {
-    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     roboteam_msgs::World w = LastWorld::get();
     roboteam_utils::Vector2 ballPosNow(w.ball.pos);
     roboteam_utils::Vector2 ballVelNow(w.ball.vel);
@@ -129,7 +128,6 @@ roboteam_utils::Vector2 predictBallPos(double seconds) {
 }
 
 roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
-    // const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     roboteam_msgs::World w = LastWorld::get();
     roboteam_utils::Vector2 robotPosNow;
     roboteam_utils::Vector2 robotVelNow;
