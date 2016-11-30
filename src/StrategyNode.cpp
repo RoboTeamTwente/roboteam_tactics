@@ -49,10 +49,10 @@ int main(int argc, char *argv[]) {
 
     ros::Rate rate(60);
 
-    // auto directivePub = rtt::get_roledirective_publisher();
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
     
     RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    rtt::LastWorld::wait_for_first_messages();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 

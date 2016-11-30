@@ -25,6 +25,8 @@ class LastWorld {
     static bool have_received_first_world();
     static bool have_received_first_geom();
 
+    static void wait_for_first_messages();
+
     static roboteam_msgs::Vector2f PredictBallPos(double t);
 
     static Vector2 get_our_goal_center();

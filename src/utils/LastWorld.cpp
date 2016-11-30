@@ -44,6 +44,15 @@ bool LastWorld::have_received_first_geom() {
     return LastWorld::received_first_geom;
 }
 
+void LastWorld::wait_for_first_messages() {
+    ros::Rate fps60(60);
+
+    while (!(rtt::LastWorld::have_received_first_geom() && rtt::LastWorld::have_received_first_world())) {
+        fps60.sleep();
+        ros::spinOnce();
+    }
+}
+
 roboteam_msgs::Vector2f LastWorld::PredictBallPos(double t) {
 	roboteam_msgs::WorldBall ball = lastWorld.ball;
 	roboteam_msgs::Vector2f ballVel = ball.vel;
