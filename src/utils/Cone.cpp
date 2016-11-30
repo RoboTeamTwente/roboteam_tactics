@@ -1,6 +1,8 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 
 #include <cmath>
 
@@ -15,6 +17,8 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 	} else {
 		ROS_WARN("radius for cone invalid!");
 	}
+	side1 = (center-start).rotate(angle);
+	side2 = (center-start).rotate(-angle);
 }
 
 double Cone::CleanAngle(double cleanangle) {
@@ -41,8 +45,9 @@ bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
 }
 
 bool Cone::IsWithinField(roboteam_utils::Vector2 point) {
- 	double fieldLimitX = 3.0;
-	double fieldLimitY = 2.0;
+ 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+ 	double fieldLimitX = field.field_length / 2.0;
+	double fieldLimitY = field.field_width / 2.0;
 	if (point.x > fieldLimitX || point.x < -fieldLimitX || point.y > fieldLimitY || point.y < -fieldLimitY) {
 		return false;
 	} else {
@@ -60,12 +65,34 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) 
 	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
 	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+
 	if (pointAngle >= 0) {
 		if (IsWithinField(option1)) return option1;
 		else if (IsWithinField(option2)) return option2;
+		else return option1;
 	} else {
 		if (IsWithinField(option2)) return option2;
 		else if (IsWithinField(option1)) return option1;
+		else return option2;
+	}
+}
+
+roboteam_utils::Vector2 Cone::SecondClosestPointOnSide(roboteam_utils::Vector2 point) {
+	if (!IsWithinCone(point)) {
+		ROS_WARN("This point is not inside the cone");
+		return point;
+	}
+	roboteam_utils::Vector2 vectorToPoint = point-start;
+	roboteam_utils::Vector2 vectorToCenter = center-start;
+	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
+	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+	if (pointAngle >= 0) {
+		if (IsWithinField(option2)) return option2;
+		else if (IsWithinField(option1)) return option1;
+	} else {
+		if (IsWithinField(option1)) return option1;
+		else if (IsWithinField(option2)) return option2;
 	}
 	return point;
 }
@@ -76,46 +103,64 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, robotea
 		return point;
 	}
 
+	roboteam_utils::Vector2 closestPointSoFar(100.0, 100.0);
+
 	// Check whether's there's an easy way out
 	roboteam_utils::Vector2 closestSideCone1 = this->ClosestPointOnSide(point);
 	if (!otherCone.IsWithinCone(closestSideCone1)) {
-		return closestSideCone1; 
+		if ((closestSideCone1 - point).length() - (closestPointSoFar - point).length()) {
+			closestPointSoFar = closestSideCone1;
+		}
 	}
-
 	roboteam_utils::Vector2 closestSideCone2 = otherCone.ClosestPointOnSide(point);
 	if (!this->IsWithinCone(closestSideCone2)) {
-		return closestSideCone2; 
+		if ((closestSideCone2 - point).length() - (closestPointSoFar - point).length()) {
+			closestPointSoFar = closestSideCone2;
+		}
 	}
-	ROS_INFO_STREAM("going to intersectoin");
 
-	// Where do the two cones cross?
-	roboteam_utils::Vector2 cone1Side1 = (center-start).rotate(angle);
-	roboteam_utils::Vector2 cone1Side2 = (center-start).rotate(-angle);
-	roboteam_utils::Vector2 cone2Side1 = (otherCone.center-otherCone.start).rotate(otherCone.angle);
-	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
+	// If one of these is found, return immediately because they will always be the closest
+	if ((closestPointSoFar - point).length() < 100.0) {return closestPointSoFar;}
 
-	// ROS_INFO_STREAM("intersection1, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
-	// ROS_INFO_STREAM("intersection2, start1: " << start.x << " " << start.y << " dir1: " << cone1Side1.x << " " << cone1Side1.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
-	// ROS_INFO_STREAM("intersection3, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side1.x << " " << cone2Side1.y);
-	// ROS_INFO_STREAM("intersection4, start1: " << start.x << " " << start.y << " dir1: " << cone1Side2.x << " " << cone1Side2.y << " start2: " << otherCone.start.x << " " << otherCone.start.y << " dir2: " << cone2Side2.x << " " << cone2Side2.y);
+	// If not the closest side, maybe the other side of the cone...
+	roboteam_utils::Vector2 closestSide2Cone1 = this->SecondClosestPointOnSide(point);
+	if (!otherCone.IsWithinCone(closestSide2Cone1)) {
+		if ((closestSide2Cone1 - point).length() - (closestPointSoFar - point).length()) {
+			closestPointSoFar = closestSide2Cone1;
+		}
+	}
+	roboteam_utils::Vector2 closestSide2Cone2 = otherCone.SecondClosestPointOnSide(point);
+	if (!this->IsWithinCone(closestSide2Cone2)) {
+		if ((closestSide2Cone2 - point).length() - (closestPointSoFar - point).length()) {
+			closestPointSoFar = closestSide2Cone2;
+		}
+	}
 
-	roboteam_utils::Vector2 intersection1 = LineIntersection(start, cone1Side1, otherCone.start, cone2Side1);
-	roboteam_utils::Vector2 intersection2 = LineIntersection(start, cone1Side1, otherCone.start, cone2Side2);
-	roboteam_utils::Vector2 intersection3 = LineIntersection(start, cone1Side2, otherCone.start, cone2Side1);
-	roboteam_utils::Vector2 intersection4 = LineIntersection(start, cone1Side2, otherCone.start, cone2Side2);
+	roboteam_utils::Vector2 intersection1 = LineIntersection(start, side1, otherCone.start, otherCone.side1);
+	roboteam_utils::Vector2 intersection2 = LineIntersection(start, side1, otherCone.start, otherCone.side2);
+	roboteam_utils::Vector2 intersection3 = LineIntersection(start, side2, otherCone.start, otherCone.side1);
+	roboteam_utils::Vector2 intersection4 = LineIntersection(start, side2, otherCone.start, otherCone.side2);
+	
+	if ((intersection1 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection1)) closestPointSoFar = intersection1;
+	if ((intersection2 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection2)) closestPointSoFar = intersection2;
+	if ((intersection3 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection3)) closestPointSoFar = intersection3;
+	if ((intersection4 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection4)) closestPointSoFar = intersection4;
+	if (closestPointSoFar.length() > 100.0) {closestPointSoFar = point;}
+	return closestPointSoFar;
+}
 
-	// ROS_INFO_STREAM("intersection1: " << intersection1.x << " " << intersection1.y);
-	// ROS_INFO_STREAM("intersection2: " << intersection2.x << " " << intersection2.y);
-	// ROS_INFO_STREAM("intersection3: " << intersection3.x << " " << intersection3.y);
-	// ROS_INFO_STREAM("intersection4: " << intersection4.x << " " << intersection4.y);
-
-	roboteam_utils::Vector2 closestIntersection(100.0, 100.0);
-	if ((intersection1 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection1)) closestIntersection = intersection1;
-	if ((intersection2 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection2)) closestIntersection = intersection2;
-	if ((intersection3 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection3)) closestIntersection = intersection3;
-	if ((intersection4 - point).length() < (closestIntersection - point).length() && IsWithinField(intersection4)) closestIntersection = intersection4;
-	if (closestIntersection.length() > 100.0) {closestIntersection = point;}
-	return closestIntersection;
+roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoConesMin(Cone otherCone, roboteam_utils::Vector2 point) {
+	if (!this->IsWithinCone(point) || !otherCone.IsWithinCone(point)) {
+		ROS_WARN("This point is not inside both cones");
+		return point;
+	}
+	roboteam_utils::Vector2 closestSideCone1 = this->ClosestPointOnSide(point);
+	roboteam_utils::Vector2 closestSideCone2 = otherCone.ClosestPointOnSide(point);
+	if ((closestSideCone1 - point).length() < (closestSideCone2 - point).length()) {
+		return closestSideCone1;
+	} else {
+		return closestSideCone2;
+	}
 }
 
 roboteam_utils::Vector2 Cone::LineIntersection(roboteam_utils::Vector2 line1Start, roboteam_utils::Vector2 line1Dir, roboteam_utils::Vector2 line2Start, roboteam_utils::Vector2 line2Dir) {
@@ -127,12 +172,8 @@ roboteam_utils::Vector2 Cone::LineIntersection(roboteam_utils::Vector2 line1Star
 }
 
 bool Cone::DoConesOverlap(Cone otherCone) {
-	roboteam_utils::Vector2 cone1Side1 = (center-start).rotate(angle);
-	roboteam_utils::Vector2 cone1Side2 = (center-start).rotate(-angle);
-	roboteam_utils::Vector2 cone2Side1 = (otherCone.center-otherCone.start).rotate(otherCone.angle);
-	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
-	double angleDiff1 = cone1Side1.angle() - cone2Side2.angle();
-	double angleDiff2 = cone1Side2.angle() - cone2Side1.angle();
+	double angleDiff1 = side1.angle() - otherCone.side2.angle();
+	double angleDiff2 = side2.angle() - otherCone.side1.angle();
 	if (angleDiff1 > 0 && angleDiff2 > 0) {
 		return false;
 	} else if (angleDiff1 < 0 && angleDiff2 < 0) {
@@ -150,21 +191,15 @@ Cone Cone::MergeCones(Cone otherCone) {
 		return *this;
 	}
 
-	roboteam_utils::Vector2 cone1Side1 = (center-start).rotate(angle);
-	roboteam_utils::Vector2 cone1Side2 = (center-start).rotate(-angle);
-	roboteam_utils::Vector2 cone2Side1 = (otherCone.center-otherCone.start).rotate(otherCone.angle);
-	roboteam_utils::Vector2 cone2Side2 = (otherCone.center-otherCone.start).rotate(-otherCone.angle);
-	double angleDiff1 = cone1Side1.angle() - cone2Side2.angle();
-	double angleDiff2 = cone1Side2.angle() - cone2Side1.angle();
+	double angleDiff1 = side1.angle() - otherCone.side2.angle();
+	double angleDiff2 = side2.angle() - otherCone.side1.angle();
 
 	if (angle > otherCone.angle) {
-		if (cone2Side2.angle() > cone1Side2.angle() && cone2Side1.angle() < cone1Side1.angle()) {
-			// ROS_INFO_STREAM("one cone inside another");
+		if (otherCone.side2.angle() > side2.angle() && otherCone.side1.angle() < side1.angle()) {
 			return *this;
 		}
 	} else {
-		if (cone1Side2.angle() > cone2Side2.angle() && cone1Side1.angle() < cone2Side1.angle()) {
-			// ROS_INFO_STREAM("one cone inside another");
+		if (side2.angle() > otherCone.side2.angle() && side1.angle() < otherCone.side1.angle()) {
 			return otherCone;
 		}
 	}
@@ -172,34 +207,14 @@ Cone Cone::MergeCones(Cone otherCone) {
 	roboteam_utils::Vector2 newCenter;
 	double newRadius;
 	if (fabs(angleDiff1) > fabs(angleDiff2)) {
-		newCenter = cone2Side2.rotate(0.5*angleDiff1) + start;
-		newRadius = (cone2Side2 - (newCenter-start)).length();
+		newCenter = otherCone.side2.rotate(0.5*angleDiff1) + start;
+		newRadius = (otherCone.side2 - (newCenter-start)).length();
 	} else {
-		newCenter = cone2Side1.rotate(0.5*angleDiff2) + start;
-		newRadius = (cone2Side1 - (newCenter-start)).length();
+		newCenter = otherCone.side1.rotate(0.5*angleDiff2) + start;
+		newRadius = (otherCone.side1 - (newCenter-start)).length();
 	}
 
 	Cone newCone(start, newCenter, newRadius);
-
-	// Debug info:
-	// cone1Side1 = cone1Side1.scale(1/cone1Side1.length());
-	// cone1Side2 = cone1Side2.scale(1/cone1Side2.length());
-	// cone2Side1 = cone2Side1.scale(1/cone2Side1.length());
-	// cone2Side2 = cone2Side2.scale(1/cone2Side2.length());
-	// roboteam_utils::Vector2 cone3Side1 = (newCone.center-newCone.start).rotate(newCone.angle);
-	// cone3Side1 = cone3Side1.scale(1/cone3Side1.length());
-	// roboteam_utils::Vector2 cone3Side2 = (newCone.center-newCone.start).rotate(-newCone.angle);
-	// cone3Side2 = cone3Side2.scale(1/cone3Side2.length());
-	// cone3Side1 = cone3Side1.scale(1/cone3Side1.length());
-	// cone3Side2 = cone3Side2.scale(1/cone3Side2.length());
-
-	// ROS_INFO_STREAM("cone1Side1:" << cone1Side1.x << " " << cone1Side1.y);
-	// ROS_INFO_STREAM("cone1Side2:" << cone1Side2.x << " " << cone1Side2.y);
-	// ROS_INFO_STREAM("cone2Side1:" << cone2Side1.x << " " << cone2Side1.y);
-	// ROS_INFO_STREAM("cone2Side2:" << cone2Side2.x << " " << cone2Side2.y);
-	// ROS_INFO_STREAM("cone3Side1:" << cone3Side1.x << " " << cone3Side1.y);
-	// ROS_INFO_STREAM("cone3Side2:" << cone3Side2.x << " " << cone3Side2.y);
-
 	return newCone;
 }
 
