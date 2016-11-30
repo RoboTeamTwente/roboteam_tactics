@@ -1,159 +1,12 @@
 {
-  "id": "784f6c94-adcd-4181-b19b-e6f0c3b2e17c",
-  "title": "BasicKeeperTree",
+  "id": "5074bb31-1bac-4cb4-a136-c1ec19cbb17b",
+  "title": "DistanceTesterTree",
   "description": "",
-  "root": "682baaa5-1ccc-49d1-bb08-71ac5eae9693",
-  "properties": {
-    "ROBOT_ID": 0
-  },
+  "root": "ecb7fc04-274c-4aba-96d1-ace24412af70",
+  "properties": {},
   "nodes": {
-    "bc69a869-8a57-4785-8807-9826ad781b51": {
-      "id": "bc69a869-8a57-4785-8807-9826ad781b51",
-      "name": "Priority",
-      "title": "Priority",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 348,
-        "y": -228
-      },
-      "children": [
-        "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
-        "161eaa4a-2442-45d0-9fe6-a3e670345f13"
-      ]
-    },
-    "06cf4fa4-1797-4bd1-87e1-88e481b4b04e": {
-      "id": "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
-      "name": "DistanceXToY",
-      "title": "Distance_me_to_ball_B",
-      "description": "",
-      "properties": {
-        "distance": 0.5,
-        "mode": "geq",
-        "X": "me",
-        "Y": "ball"
-      },
-      "display": {
-        "x": 912,
-        "y": 144
-      }
-    },
-    "056b3345-479b-4325-a163-9ca46b1af3b2": {
-      "id": "056b3345-479b-4325-a163-9ca46b1af3b2",
-      "name": "DistanceXToY",
-      "title": "Distance_me_to_ball_A",
-      "description": "",
-      "properties": {
-        "distance": 0.5,
-        "mode": "lt",
-        "X": "me",
-        "Y": "ball"
-      },
-      "display": {
-        "x": 984,
-        "y": -324
-      }
-    },
-    "a8443757-1ef2-48c5-8738-34ef3acb4500": {
-      "id": "a8443757-1ef2-48c5-8738-34ef3acb4500",
-      "name": "GetBall",
-      "title": "GetBall_A",
-      "description": "",
-      "properties": {
-        "targetAngle": 3.141592653589793
-      },
-      "display": {
-        "x": 960,
-        "y": -156
-      }
-    },
-    "05a76c04-81de-4c99-8b72-9f2bc7d96ad3": {
-      "id": "05a76c04-81de-4c99-8b72-9f2bc7d96ad3",
-      "name": "AimAt",
-      "title": "AimAt_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 960,
-        "y": -84
-      }
-    },
-    "35ca0114-f04b-4532-a71c-4a8bfaad3e1a": {
-      "id": "35ca0114-f04b-4532-a71c-4a8bfaad3e1a",
-      "name": "Kick",
-      "title": "Kick_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 960,
-        "y": -12
-      }
-    },
-    "e31f733e-5c7a-4136-b24c-e6e66a42eaf7": {
-      "id": "e31f733e-5c7a-4136-b24c-e6e66a42eaf7",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 768,
-        "y": -156
-      },
-      "children": [
-        "a8443757-1ef2-48c5-8738-34ef3acb4500",
-        "05a76c04-81de-4c99-8b72-9f2bc7d96ad3",
-        "35ca0114-f04b-4532-a71c-4a8bfaad3e1a"
-      ]
-    },
-    "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a": {
-      "id": "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a",
-      "name": "NaiveBlockGoal",
-      "title": "NaiveBlockGoal_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 900,
-        "y": 240
-      }
-    },
-    "3360157c-b17b-4858-8ebc-14f7a8fa8f27": {
-      "id": "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
-      "name": "ParallelSequence",
-      "title": "Parallel_A",
-      "description": "",
-      "properties": {
-        "minFail": 1,
-        "minSuccess": 2
-      },
-      "display": {
-        "x": 588,
-        "y": -228
-      },
-      "children": [
-        "d20c7375-4e5f-4f1d-b38b-cb73d20ddc0c",
-        "e31f733e-5c7a-4136-b24c-e6e66a42eaf7"
-      ]
-    },
-    "161eaa4a-2442-45d0-9fe6-a3e670345f13": {
-      "id": "161eaa4a-2442-45d0-9fe6-a3e670345f13",
-      "name": "ParallelSequence",
-      "title": "Parallel_B",
-      "description": "",
-      "properties": {
-        "minFail": 1,
-        "minSuccess": 2
-      },
-      "display": {
-        "x": 612,
-        "y": 144
-      },
-      "children": [
-        "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
-        "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a"
-      ]
-    },
-    "682baaa5-1ccc-49d1-bb08-71ac5eae9693": {
-      "id": "682baaa5-1ccc-49d1-bb08-71ac5eae9693",
+    "ecb7fc04-274c-4aba-96d1-ace24412af70": {
+      "id": "ecb7fc04-274c-4aba-96d1-ace24412af70",
       "name": "RepeatUntilSuccess",
       "title": "Repeat Until Success",
       "description": "",
@@ -161,15 +14,15 @@
         "maxLoop": -1
       },
       "display": {
-        "x": 144,
-        "y": -228
+        "x": -216,
+        "y": -24
       },
-      "child": "bc69a869-8a57-4785-8807-9826ad781b51"
+      "child": "1256286a-4693-4836-bb31-97b40cd2bd89"
     },
-    "1f558064-3589-4ccb-8d38-0c5acd9dbbbc": {
-      "id": "1f558064-3589-4ccb-8d38-0c5acd9dbbbc",
+    "1256286a-4693-4836-bb31-97b40cd2bd89": {
+      "id": "1256286a-4693-4836-bb31-97b40cd2bd89",
       "name": "DistanceXToY",
-      "title": "Distance_me_to_defense_area",
+      "title": "DistanceToBall",
       "description": "",
       "properties": {
         "distance": 0.5,
@@ -178,32 +31,17 @@
         "Y": "our defense area"
       },
       "display": {
-        "x": 1020,
-        "y": -264
+        "x": 36,
+        "y": -24
       }
-    },
-    "d20c7375-4e5f-4f1d-b38b-cb73d20ddc0c": {
-      "id": "d20c7375-4e5f-4f1d-b38b-cb73d20ddc0c",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 756,
-        "y": -276
-      },
-      "children": [
-        "056b3345-479b-4325-a163-9ca46b1af3b2",
-        "1f558064-3589-4ccb-8d38-0c5acd9dbbbc"
-      ]
     }
   },
   "display": {
-    "camera_x": 372.82500000032996,
-    "camera_y": 492.65499999999884,
+    "camera_x": 960,
+    "camera_y": 483,
     "camera_z": 1,
-    "x": -48,
-    "y": -228
+    "x": -396,
+    "y": -24
   },
   "custom_nodes": [
     {
