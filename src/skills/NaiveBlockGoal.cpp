@@ -21,9 +21,9 @@ namespace rtt {
 using namespace roboteam_utils;
 
 // TODO: Hardcoded!
-const double GOAL_AREA_WIDTH = 2.5 * 0.8;
+const double GOAL_AREA_WIDTH = 0.9;
 // Distance from front of goal area to goal
-const double GOAL_AREA_LENGTH = 1 * 0.8;
+const double GOAL_AREA_LENGTH = 0.5;
 
 bool isBallInGoalArea() {
     Vector2 ballPos(LastWorld::get().ball.pos);
@@ -91,7 +91,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
         horVec = ballVec.normalize();
         horVec = horVec * std::abs(1 / horVec.y);
         horVec = horVec * (GOAL_AREA_WIDTH / 2);
-        
+
         if (!horVec.real()) {
             minVec = vertVec;
         } else if (!vertVec.real()) {
@@ -101,7 +101,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
         } else {
             minVec = horVec;
         }
-        
+
         RTT_DEBUG("Goal area width: %f\n", GOAL_AREA_WIDTH);
         RTT_DEBUG("Ball vec: %f %f\n", ballVec.x, ballVec.y);
         RTT_DEBUG("Hor vec: %f %f\n", horVec.x, horVec.y);
@@ -120,20 +120,20 @@ bt::Node::Status NaiveBlockGoal::Update() {
             minVec.y = 0;
         }
     }
-    
+
     if (minVec.y > GOAL_AREA_WIDTH / 2) minVec.y = GOAL_AREA_WIDTH / 2;
     if (minVec.y < -GOAL_AREA_WIDTH / 2) minVec.y = -GOAL_AREA_WIDTH / 2;
 
     // Always face the ball
     double angle = 0;
-    { 
+    {
         auto possibleRobot = lookup_our_bot(blackboard->GetInt("ROBOT_ID"));
         if (possibleRobot) {
             auto robot = *possibleRobot;
             angle = (ballPos - Vector2(robot.pos)).angle();
         }
     }
-    
+
     private_bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
     private_bb->SetDouble("xGoal", minVec.x);
     private_bb->SetDouble("yGoal", minVec.y);
