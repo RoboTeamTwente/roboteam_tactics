@@ -176,7 +176,7 @@
         "distance": 2,
         "mode": "lt",
         "X": "me",
-        "Y": "goal"
+        "Y": "our goal"
       },
       "display": {
         "x": 948,
