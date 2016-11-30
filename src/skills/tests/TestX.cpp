@@ -16,6 +16,7 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RefereeData.h"
+#include "roboteam_tactics/utils/LastWorld.h"
 
 static volatile bool may_update = false;
 
@@ -34,14 +35,14 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
-void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
-	rtt::LastWorld::set(*world);
-    may_update = true;
-}
+// void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
+	// rtt::LastWorld::set(*world);
+    // may_update = true;
+// }
 
-void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
-    rtt::LastWorld::set_field(geometry->field);
-}
+// void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
+    // rtt::LastWorld::set_field(geometry->field);
+// }
 
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
@@ -144,18 +145,22 @@ How to use:
     }
 
     rtt::print_blackboard(bb);
-    ros::Subscriber world_sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, msgCallBackGoToPos);
-    ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
+
+    // Create subscribers for world & geom messages
+    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+
+    // Create subscriber for referee messages
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
 
-    while (!may_update) ros::spinOnce();
+    // Wait for the first geom & world message
+    rtt::LastWorld::wait_for_first_messages();
+
     std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 
-    // Wait for the node's `robotcommand` publisher to have initialized properly.
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
+    
     ros::Rate fps60(60);
 
     if (is_bt) {

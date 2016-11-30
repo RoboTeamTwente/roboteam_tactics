@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
     
     RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    rtt::LastWorld::wait_for_first_messages();
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(

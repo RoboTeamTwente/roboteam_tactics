@@ -10,8 +10,10 @@ public:
 	double CleanAngle(double angle);
 	bool IsWithinCone(roboteam_utils::Vector2 point);
 	bool IsWithinField(roboteam_utils::Vector2 point);
-	roboteam_utils::Vector2 ClosestPointOnSide(roboteam_utils::Vector2);
+	roboteam_utils::Vector2 ClosestPointOnSide(roboteam_utils::Vector2 point);
+	roboteam_utils::Vector2 SecondClosestPointOnSide(roboteam_utils::Vector2 point);
 	roboteam_utils::Vector2 ClosestPointOnSideTwoCones(Cone otherCone, roboteam_utils::Vector2 point);
+	roboteam_utils::Vector2 ClosestPointOnSideTwoConesMin(Cone otherCone, roboteam_utils::Vector2 point);
 	static roboteam_utils::Vector2 LineIntersection(roboteam_utils::Vector2 line1Start, roboteam_utils::Vector2 line1Dir, roboteam_utils::Vector2 line2Start, roboteam_utils::Vector2 line2Dir);
 	bool DoConesOverlap(Cone otherCone);
 	Cone MergeCones(Cone otherCone);
@@ -21,6 +23,8 @@ public:
 	roboteam_utils::Vector2 center;
 	double radius;
 	double angle;
+	roboteam_utils::Vector2 side1;
+	roboteam_utils::Vector2 side2;
 private:
 };
 

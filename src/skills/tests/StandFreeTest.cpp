@@ -22,6 +22,10 @@ void msgCallBack(const roboteam_msgs::WorldConstPtr& world, rtt::StandFree* stan
 	}
 }
 
+void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
+    rtt::LastWorld::set_field(geometry->field);
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "StandFreeTest");
 	ros::NodeHandle n;
@@ -35,6 +39,7 @@ int main(int argc, char **argv) {
 	rtt::StandFree standFree(n, "", bb1);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &standFree));
+	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
 
 	while (ros::ok()) {
 		ros::spinOnce();
@@ -42,46 +47,6 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-
-	// {
-	// 	roboteam_utils::Vector2 line1Start(0.0, 0.0);
-	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
-	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
-	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
-
-	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
-	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
-	// }
-
-	// {
-	// 	roboteam_utils::Vector2 line1Start(0.0, 0.0);
-	// 	roboteam_utils::Vector2 line1Dir(-1.0, 1.0);
-	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
-	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
-
-	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
-	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
-	// }
-
-	// {
-	// 	roboteam_utils::Vector2 line1Start(-3.0, 0.0);
-	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
-	// 	roboteam_utils::Vector2 line2Start(1.0, 0.0);
-	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
-
-	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
-	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
-	// }
-
-	// {
-	// 	roboteam_utils::Vector2 line1Start(2.0, -1.0);
-	// 	roboteam_utils::Vector2 line1Dir(1.0, 1.0);
-	// 	roboteam_utils::Vector2 line2Start(10.0, 2.0);
-	// 	roboteam_utils::Vector2 line2Dir(-1.0, 1.0);
-
-	// 	roboteam_utils::Vector2 intersection = rtt::Cone::LineIntersection(line1Start, line1Dir, line2Start, line2Dir);
-	// 	ROS_INFO_STREAM("intersection: " << intersection.x << " " << intersection.y);
-	// }
 
 	ROS_INFO("StandFree Test completed!");
 
