@@ -49,12 +49,15 @@ function getProperties {
         # Find all the properties.
         if [[ $line =~ $paramRegex ]]
         then
-            if ! $first
+            if ! [ "${BASH_REMATCH[1]}" == "ROBOT_ID" ]
             then
-                properties+=",\n"
+                if ! $first
+                then
+                    properties+=",\n"
+                fi
+                properties+="\"${BASH_REMATCH[1]}\": \"\""
+                local first=false
             fi
-            properties+="\"${BASH_REMATCH[1]}\": \"\""
-            local first=false
         fi
     done < $1
 }
