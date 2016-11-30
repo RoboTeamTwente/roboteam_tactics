@@ -12,6 +12,9 @@ assert_tactics_root
 
 dstFile="./all_custom_nodes.json"
 
+# TODO: Check for commented out lines.
+paramRegex="\[\"(.*)\"\][ \t]*=[ \t]*BBArgumentType::"
+
 > $dstFile
 
 allNodes=()
@@ -19,31 +22,60 @@ allNodes=()
 # Appends a node item to allNodes array
 # $1 Name + title of node
 # $2 Category
+# $3 properties
 function entry {
-   node=$(printf "    {
+    node=$(printf "    {
         \"name\": \"$1\",
         \"category\": \"$2\",
         \"title\": \"$1\",
         \"description\": null,
-        \"properties\": {}
+        \"properties\": {$3}
     }")
 
     allNodes+=("$node")
 }
 
+
+# Gets the properties out of a header file.
+# Stores the string into `properties`.
+# $1 the file name
+function getProperties {
+    properties="\n"
+
+    local first=true
+
+    while read line
+    do
+        # Find all the properties.
+        if [[ $line =~ $paramRegex ]]
+        then
+            if ! $first
+            then
+                properties+=",\n"
+            fi
+            properties+="\"${BASH_REMATCH[1]}\": \"\""
+            local first=false
+        fi
+    done < $1
+}
+
+
 for f in ./include/roboteam_tactics/skills/*.h; do
     name=$(basename "$f" .h)
-	entry $name action
+    getProperties $f
+	entry $name action "$properties"
 done
 
 for f in ./include/roboteam_tactics/conditions/*.h; do
     name=$(basename "$f" .h)
-	entry $name condition
+    getProperties $f
+	entry $name condition "$properties"
 done
 
 for f in ./include/roboteam_tactics/tactics/*.h; do
     name=$(basename "$f" .h)
-	entry $name action
+    getProperties $f
+	entry $name action "$properties"
 done
 
 # Custom Composites/decorators here
