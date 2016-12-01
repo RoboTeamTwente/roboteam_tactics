@@ -26,6 +26,7 @@ void delete_from_vector(std::vector<T> &items, const T &item) {
 
 std::vector<std::string> getNodesSubscribedTo(std::string topic);
 std::string getMyNamespace();
+double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, bool target_our_team);
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
                                                     const roboteam_utils::Vector2& point,

@@ -60,6 +60,41 @@ std::string getMyNamespace() {
     return ns;
 }
 
+double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, bool target_our_team) {
+    roboteam_msgs::World w = LastWorld::get();
+    boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(myID, our_team, &w);
+    roboteam_msgs::WorldRobot robot;
+    if (bot) {robot = *bot;}
+    else {
+        ROS_WARN("utils/GetTargetAngle: cannot find robot");
+        return 0.0;
+    }
+
+    if (target == "theirgoal") {
+        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        double targetAngle = (theirGoalPos - roboteam_utils::Vector2(robot.pos)).angle();
+        return targetAngle;
+    }
+    if (target == "ourgoal") {
+        roboteam_utils::Vector2 ourGoalPos = LastWorld::get_our_goal_center();
+        double targetAngle = (ourGoalPos - roboteam_utils::Vector2(robot.pos)).angle();
+        return targetAngle;
+    }
+    if (target == "robot") {
+        if (target_our_team) {
+            roboteam_utils::Vector2 theirPos = w.us.at(theirID).pos;
+            double targetAngle = (theirPos - roboteam_utils::Vector2(robot.pos)).angle();
+            return targetAngle;
+        } else {
+            roboteam_utils::Vector2 theirPos = w.them.at(theirID).pos;
+            double targetAngle = (theirPos - roboteam_utils::Vector2(robot.pos)).angle();
+            return targetAngle;
+        }
+    }
+    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
+    return 0.0;
+}
+
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->SetBool("our_team", true);

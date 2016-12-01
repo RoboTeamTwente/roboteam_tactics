@@ -5,6 +5,7 @@
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/Parts.h"
@@ -19,6 +20,7 @@
 
 #include <cmath>
 #include <vector>
+#include <string>
 
 #define RTT_CURRENT_DEBUG_TAG GetBall
 
@@ -188,19 +190,28 @@ bt::Node::Status GetBall::Update (){
 			private_bb->SetBool("dribbler", true);
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
-		RTT_DEBUG("driving to the ball");
-		targetAngle = GetDouble("targetAngle");
+		if (HasString("AimAt")) {
+			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam"));
+		} else {
+			targetAngle = (ballPos - robotPos).angle();
+		}
+		targetAngle = cleanAngle(targetAngle);
+			
 		// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 		// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 		// target position. It's hard to explain without drawing, for questions ask Jim :)
-		if ((targetAngle - (ballPos - robotPos).angle()) > 0.5*M_PI) {
+		double angleDiff = (targetAngle - (ballPos - robotPos).angle());
+		angleDiff = cleanAngle(angleDiff);
+
+		if (angleDiff > 0.5*M_PI) {
 			targetAngle = (ballPos - robotPos).rotate(0.5*M_PI).angle();
-		} else if ((targetAngle - (ballPos - robotPos).angle()) < -0.5*M_PI) {
+		} else if (angleDiff < -0.5*M_PI) {
 			targetAngle = (ballPos - robotPos).rotate(-0.5*M_PI).angle();
 		}
 		double posDiff = (ballPos - robotPos).length();
-		if (posDiff > 0.2) {
-			targetPos = ballPos + roboteam_utils::Vector2(0.18, 0.0).rotate(targetAngle + M_PI);	
+
+		if (posDiff > 0.3) {
+			targetPos = ballPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 		} else {
 			targetPos = ballPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
 		}
