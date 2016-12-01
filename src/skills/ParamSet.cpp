@@ -9,7 +9,7 @@
 
 namespace rtt {
 
-ParamSet::ParamSet(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) { }
 
 bt::Node::Status ParamSet::Update() {

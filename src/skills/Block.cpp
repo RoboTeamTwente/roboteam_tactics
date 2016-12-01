@@ -9,7 +9,7 @@
 
 namespace rtt {
 
-Block::Block(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb) : Skill(n, name, bb) {
+Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(n, name, bb) {
     assert_valid<Block>(name);
     std::string type = GetString("block_type");
     if (type == block_type_names.at(BlockType::RELATIVE)) {

@@ -12,7 +12,7 @@
 
 namespace rtt {
 
-RandomDrive::RandomDrive(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+RandomDrive::RandomDrive(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , avoidRobots(n, "", private_bb) {
 	debug_pub = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);

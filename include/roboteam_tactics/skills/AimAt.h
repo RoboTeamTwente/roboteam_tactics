@@ -15,7 +15,7 @@ namespace rtt {
 
 class AimAt : public Skill {
 public:
-	AimAt(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	AimAt(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     std::string node_name() { return "AimAt"; }
     

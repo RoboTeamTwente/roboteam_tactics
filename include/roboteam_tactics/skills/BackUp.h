@@ -11,7 +11,7 @@ namespace rtt {
 class BackUp : public Skill {
 
     public:
-    BackUp(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr bb = nullptr);
+    BackUp(std::string name = "", bt::Blackboard::Ptr bb = nullptr);
     Status Update() override;
     
     std::string node_name() { return "BackUp"; }

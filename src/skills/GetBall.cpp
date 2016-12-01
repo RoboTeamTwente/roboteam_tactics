@@ -24,7 +24,7 @@
 
 namespace rtt {
 
-GetBall::GetBall(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , avoidRobots(n, "", private_bb) {
     pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);

@@ -5,7 +5,7 @@
 
 namespace rtt {
     
-KeeperBlock::KeeperBlock(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard) : Skill(n, name, blackboard) {
+KeeperBlock::KeeperBlock(std::string name, bt::Blackboard::Ptr blackboard) : Skill(n, name, blackboard) {
     assert_valid<KeeperBlock>(name);
     target = -1;
     cover_dist = .4;

@@ -8,7 +8,7 @@
 
 namespace rtt {
     
-BackUp::BackUp(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb)
+BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
         : Skill(n, name, bb) {
     assert_valid<BackUp>(name);
     auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));

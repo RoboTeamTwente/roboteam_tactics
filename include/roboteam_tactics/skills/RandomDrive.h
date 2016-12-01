@@ -9,7 +9,7 @@ namespace rtt {
 
 class RandomDrive : public Skill {
 public:
-    RandomDrive(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    RandomDrive(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update();
 
     static VerificationMap required_params() {

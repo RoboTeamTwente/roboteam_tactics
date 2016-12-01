@@ -19,7 +19,7 @@
 
 namespace rtt {
 	
-RotateAroundPoint::RotateAroundPoint(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
 
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);

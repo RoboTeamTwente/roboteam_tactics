@@ -14,7 +14,7 @@
 
 namespace rtt {
 
-GoToPos::GoToPos(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }

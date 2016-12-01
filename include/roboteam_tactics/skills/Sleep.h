@@ -10,7 +10,7 @@ namespace rtt {
 
 class Sleep : public Skill {
 public:
-	Sleep(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	Sleep(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
 	Status Update();
     

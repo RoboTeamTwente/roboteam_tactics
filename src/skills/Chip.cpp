@@ -15,7 +15,7 @@
 
 namespace rtt {
 
-Chip::Chip(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard) {
 
     	pubChip = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);

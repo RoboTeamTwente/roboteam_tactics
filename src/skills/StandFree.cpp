@@ -13,7 +13,7 @@
 
 namespace rtt {
 
-StandFree::StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
+StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(n, name, blackboard)
         , avoidRobots(n, "", private_bb) {
             ROS_INFO_STREAM("Standing Free");
