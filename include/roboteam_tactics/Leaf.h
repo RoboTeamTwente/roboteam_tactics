@@ -171,12 +171,12 @@ class Leaf : public bt::Leaf {
     bool HasVar(const std::string& key, BlackboardPolicy policy) const {
         std::string real_key = getPrefixedId(key);
         if (policy == BlackboardPolicy::GLOBAL_FIRST || policy == BlackboardPolicy::PRIVATE_FIRST) {
-            return (*blackboard.*Checker)(real_key) || (*private_bb.*Checker)(real_key);
+            return (*blackboard.*Checker)(real_key) || (*private_bb.*Checker)(key);
         }
         if (policy == BlackboardPolicy::GLOBAL_ONLY) {
             return (*blackboard.*Checker)(real_key);
         }
-        return (*private_bb.*Checker)(real_key);
+        return (*private_bb.*Checker)(key);
     }
 
     public:
