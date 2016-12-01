@@ -33,9 +33,9 @@ std::string BTBuilder::build(nlohmann::json json) {
                 && allconditions_set.find(element["name"]) == allconditions_set.end()) {
             // Get title and append ctr
             title += "_" + std::to_string(ctr++);
-            // Replace spaces with _
         }
 
+        // Replace spaces with _
         std::transform(title.begin(), title.end(), title.begin(), [](char ch) {
             return ch == ' ' ? '_' : ch;
         });
