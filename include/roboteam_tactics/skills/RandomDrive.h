@@ -20,6 +20,7 @@ public:
 
     std::string node_name() { return "RandomDrive"; }
 private:
+    ros::NodeHandle n;
     ros::Publisher debug_pub;
     // Id to add to the debug point, so that multiple of these nodes don't interfere.
     int debug_id;

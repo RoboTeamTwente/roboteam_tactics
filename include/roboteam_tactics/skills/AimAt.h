@@ -33,7 +33,7 @@ public:
         return std::vector<std::string>();
     }
 private:
-    //ros::NodeHandle n;
+    ros::NodeHandle n;
 	ros::Publisher pub;
 	
 	RotateAroundPoint rotateAroundPoint;

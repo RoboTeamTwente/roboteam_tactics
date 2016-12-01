@@ -9,7 +9,7 @@
 
 namespace rtt {
 
-Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(n, name, bb) {
+Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     assert_valid<Block>(name);
     std::string type = GetString("block_type");
     if (type == block_type_names.at(BlockType::RELATIVE)) {
@@ -90,7 +90,7 @@ bt::Node::Status Block::Update() {
         private_bb->SetBool("endPoint", true);
         private_bb->SetBool("dribbler", false);
         
-        avoidBots = std::make_unique<AvoidRobots>(n, "", private_bb);
+        avoidBots = std::make_unique<AvoidRobots>("", private_bb);
     }
     
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));

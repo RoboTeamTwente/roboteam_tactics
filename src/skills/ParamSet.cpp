@@ -10,7 +10,7 @@
 namespace rtt {
 
 ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) { }
+        : Skill(name, blackboard) { }
 
 bt::Node::Status ParamSet::Update() {
     std::string signal = "signal_" + GetString("signal");

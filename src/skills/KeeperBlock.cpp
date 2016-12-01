@@ -5,7 +5,7 @@
 
 namespace rtt {
     
-KeeperBlock::KeeperBlock(std::string name, bt::Blackboard::Ptr blackboard) : Skill(n, name, blackboard) {
+KeeperBlock::KeeperBlock(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard) {
     assert_valid<KeeperBlock>(name);
     target = -1;
     cover_dist = .4;
@@ -28,7 +28,7 @@ void KeeperBlock::reevaluate_target() {
     
     target = danger->id;
     auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
-    // impl = build_skill<Block>(n, "Block", "", 
+    // impl = build_skill<Block>("Block", "", 
         // "ROBOT_ID=%d TGT_ID=%d int:BLOCK_ID=%d block_x=%f block_y=%f block_type=%s block_arg=%f bool:invert_direction=%s",
         // GetInt("ROBOT_ID"), target, -1, goal.x, goal.y, "CIRCLE", cover_dist, "false");
 
@@ -42,7 +42,7 @@ void KeeperBlock::reevaluate_target() {
     bb->SetDouble("block_arg", cover_dist);
     bb->SetBool("invert_direction", false);
 
-    impl = std::make_shared<Block>(n, "", bb);
+    impl = std::make_shared<Block>("", bb);
 }
 
 bt::Node::Status KeeperBlock::Update() {

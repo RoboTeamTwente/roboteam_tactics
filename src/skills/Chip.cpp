@@ -16,7 +16,7 @@
 namespace rtt {
 
 Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {
+        : Skill(name, blackboard) {
 
     	pubChip = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }

@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
     bt::BehaviorTree strategy;
     if (arguments.size() > 0) {
-        strategy = rtt::make_tree(arguments[0], n);
+        strategy = rtt::make_tree(arguments[0]);
     } else {
         ROS_ERROR("No strategy tree passed as argument. Aborting.");
         return 1;

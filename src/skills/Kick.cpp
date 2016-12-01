@@ -17,7 +17,7 @@
 namespace rtt {
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {
+        : Skill(name, blackboard) {
 
         	pubKick = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
             // ROS_INFO("Kicking the ball");

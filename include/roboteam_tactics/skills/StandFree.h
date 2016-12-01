@@ -22,6 +22,7 @@ public:
 	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
     Status Update();
 private:
+    ros::NodeHandle n;
 	AvoidRobots avoidRobots;
 	ros::Publisher debugPub;
 	ros::Publisher debugPubPoint;

@@ -24,6 +24,7 @@ public:
     std::string node_name() { return "RotateAroundPoint"; }
 
 private:
+    ros::NodeHandle n;
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;

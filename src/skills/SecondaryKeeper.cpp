@@ -4,7 +4,7 @@
 namespace rtt {
     
 SecondaryKeeper::SecondaryKeeper(std::string name, 
-        bt::Blackboard::Ptr blackboard) : KeeperBlock(n, name, blackboard) {
+        bt::Blackboard::Ptr blackboard) : KeeperBlock(name, blackboard) {
     cover_dist = .75;
 }
 

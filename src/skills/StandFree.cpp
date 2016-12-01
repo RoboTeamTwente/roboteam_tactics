@@ -14,8 +14,8 @@
 namespace rtt {
 
 StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard)
-        , avoidRobots(n, "", private_bb) {
+        : Skill(name, blackboard)
+        , avoidRobots("", private_bb) {
             ROS_INFO_STREAM("Standing Free");
             debugPub = n.advertise<roboteam_msgs::DebugLine>("view_debug_lines", 1000);
             debugPubPoint = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);

@@ -20,6 +20,7 @@ public:
     }
     std::string node_name() { return "Sleep"; }
 private:
+    ros::NodeHandle n;
 	ros::Publisher pubSleep;
 
     time_point start;
