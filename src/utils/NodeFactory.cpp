@@ -20,21 +20,21 @@ RunType determine_type(const std::string& name) {
     return INVALID;
 }
 
-std::shared_ptr<Skill> generate_skill(ros::NodeHandle n, const std::string& className, const std::string& nodeName, bt::Blackboard::Ptr bb) {
-    return std::dynamic_pointer_cast<Skill, Leaf>(make_skill<>(n, className, nodeName, bb));
+std::shared_ptr<Skill> generate_skill(const std::string& className, const std::string& nodeName, bt::Blackboard::Ptr bb) {
+    return std::dynamic_pointer_cast<Skill, Leaf>(make_skill<>(className, nodeName, bb));
 }
 
-std::shared_ptr<bt::BehaviorTree> generate_role(const std::string& name, ros::NodeHandle& n, bt::Blackboard bb) {
-    return std::make_shared<bt::BehaviorTree>(make_tree(name, n, &bb));
+std::shared_ptr<bt::BehaviorTree> generate_role(const std::string& name, bt::Blackboard bb) {
+    return std::make_shared<bt::BehaviorTree>(make_tree(name, &bb));
 }
 
-std::shared_ptr<bt::Node> generate_node(ros::NodeHandle& n, std::string className, std::string nodeName, bt::Blackboard::Ptr bb) {
+std::shared_ptr<bt::Node> generate_node(std::string className, std::string nodeName, bt::Blackboard::Ptr bb) {
     RunType type = determine_type(className);
     switch (type) {
         case SKILL:
-        return generate_skill(n, className, nodeName, bb);
+        return generate_skill(className, nodeName, bb);
         case ROLE:
-        return generate_role(className, n, *bb);
+        return generate_role(className, *bb);
         default:
         throw std::logic_error("Not yet implemented");
     }

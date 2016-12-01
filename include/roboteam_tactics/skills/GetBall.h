@@ -23,7 +23,7 @@ typedef struct {
 
 class GetBall : public Skill {
 public:
-    GetBall(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     
     static VerificationMap required_params() {

@@ -9,6 +9,6 @@
 
 namespace rtt {
 
-std::shared_ptr<bt::Node> generate_node(ros::NodeHandle& n, std::string className, std::string nodeName, bt::Blackboard::Ptr bb);
+std::shared_ptr<bt::Node> generate_node(std::string className, std::string nodeName, bt::Blackboard::Ptr bb);
 
 }

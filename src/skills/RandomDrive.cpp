@@ -12,9 +12,9 @@
 
 namespace rtt {
 
-RandomDrive::RandomDrive(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard)
-        , avoidRobots(n, "", private_bb) {
+RandomDrive::RandomDrive(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard)
+        , avoidRobots("", private_bb) {
 	debug_pub = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
 
     // Generate a random id for this RandomDriver.

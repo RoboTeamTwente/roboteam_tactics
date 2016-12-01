@@ -18,12 +18,13 @@ namespace rtt {
 class RotateAroundPoint : public Skill {
 public:
 	
-    RotateAroundPoint(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    RotateAroundPoint(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update();   
     void stoprobot(int RobotID);
     std::string node_name() { return "RotateAroundPoint"; }
 
 private:
+    ros::NodeHandle n;
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;

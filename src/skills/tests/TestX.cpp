@@ -35,15 +35,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
-// void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world) {
-	// rtt::LastWorld::set(*world);
-    // may_update = true;
-// }
-
-// void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
-    // rtt::LastWorld::set_field(geometry->field);
-// }
-
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
@@ -155,7 +146,7 @@ How to use:
     // Wait for the first geom & world message
     rtt::LastWorld::wait_for_first_messages();
 
-    std::shared_ptr<bt::Node> node = rtt::generate_node(n, testClass, "", bb);
+    std::shared_ptr<bt::Node> node = rtt::generate_node(testClass, "", bb);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 

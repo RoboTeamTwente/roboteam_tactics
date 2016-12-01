@@ -111,7 +111,7 @@ std::string name_of_node<$hName>($hName* node) { return \"$hName\"; }
 namespace rtt {
 
 template <typename T=Leaf>
-std::shared_ptr<T> make_skill(ros::NodeHandle n, std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
+std::shared_ptr<T> make_skill(std::string className, std::string name = \"\", bt::Blackboard::Ptr bb = nullptr) {
     if (false) {
         // Dummy condition
     } " >> generated/$factoryFile
@@ -119,7 +119,7 @@ std::shared_ptr<T> make_skill(ros::NodeHandle n, std::string className, std::str
     for f in skills/*.h; do
         skillName=$(basename "$f" .h) 
         printf "else if (className == \"$skillName\") {
-        return std::dynamic_pointer_cast<T, $skillName>(std::make_shared<$skillName>(n, name, bb));
+        return std::dynamic_pointer_cast<T, $skillName>(std::make_shared<$skillName>(name, bb));
     } " >> generated/$factoryFile
     done
 

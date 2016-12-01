@@ -8,8 +8,8 @@
 
 namespace rtt {
     
-BackUp::BackUp(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr bb)
-        : Skill(n, name, bb) {
+BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
+        : Skill(name, bb) {
     assert_valid<BackUp>(name);
     auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));
     original_pos = roboteam_utils::Position(bot.pos.x, bot.pos.y, bot.angle);
@@ -38,7 +38,7 @@ bt::Node::Status BackUp::Update() {
     }
     
     if (!dribble) {
-       dribble = build_skill<Dribble>(n, "Dribble", "", "ROBOT_ID=%d goalx=%f goaly=%f", 
+       dribble = build_skill<Dribble>("Dribble", "", "ROBOT_ID=%d goalx=%f goaly=%f", 
             blackboard->GetInt("ROBOT_ID"), target_pos.x, target_pos.y);
     }
     

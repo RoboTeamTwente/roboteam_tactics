@@ -11,7 +11,7 @@ namespace rtt {
     
 class KeeperBlock : public Skill {
     public:
-    KeeperBlock(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    KeeperBlock(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     virtual ~KeeperBlock();
     
     Status Update() override final;
