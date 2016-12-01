@@ -9,6 +9,7 @@ add_library(utils
     utils.cpp
     NodeFactory.cpp
     BTRunner.cpp
+    LeafRegister.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

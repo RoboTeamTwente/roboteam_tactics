@@ -23,6 +23,8 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
 
+#include "roboteam_tactics/utils/LeafRegister.h"
+
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
 std::random_device rd;
@@ -46,6 +48,17 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
+
+    using namespace rtt::factories;
+
+    // auto& skillRepo = getRepo<Factory<rtt::Skill>>();
+    // std::cout << "Number of skills: " << skillRepo.size() << "\n";
+    // for (const auto& entry: skillRepo) {
+        // std::cout << "Skill: " << entry.first << "\n";
+    // }
+    // std::cout << "Done listing skills.\n";
+
+    // auto getBallSkill = skillRepo["GetBall"]("", nullptr);
 
     ros::Rate rate(60);
 
@@ -72,6 +85,11 @@ int main(int argc, char *argv[]) {
         while ((int) directivePub.getNumSubscribers() < numNodes) {
             ros::spinOnce();
             rate.sleep();
+
+            if (!ros::ok()) {
+                RTT_DEBUGLN("Interrupt received, exiting...");
+                return 0;
+            }
         }
     }
 
@@ -80,6 +98,11 @@ int main(int argc, char *argv[]) {
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
         rate.sleep();
+
+        if (!ros::ok()) {
+            RTT_DEBUGLN("Interrupt received, exiting...");
+            return 0;
+        }
     }
 
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
