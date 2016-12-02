@@ -27,7 +27,11 @@
 
 namespace rtt {
 
+namespace {
+
 factories::LeafRegisterer<GetBall, Skill> GetBall_registerer("GetBall");
+
+} // anonymous namespace
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

@@ -29,6 +29,7 @@ assert_tactics_root
     #include \"roboteam_tactics/bt.hpp\"
     #include \"roboteam_tactics/utils/ParallelTactic.hpp\"
     #include \"roboteam_tactics/utils/utils.h\"
+    #include \"roboteam_tactics/utils/LeafRegister.h\"
     "
 
     # Preamble of header file

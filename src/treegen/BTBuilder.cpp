@@ -57,6 +57,7 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
+    // Create constructor function
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
         << "(bt::Blackboard* blackboard) {"
@@ -71,7 +72,18 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << DINDENT << "tree.SetRoot(" << root["title"].get<std::string>() << ");" << std::endl;
     out << DINDENT << "return tree;" << std::endl;
-    out << INDENT << "}" << std::endl;
+    out << INDENT << "}\n\n";
+
+    out << INDENT << "namespace {\n\n";
+    out << INDENT
+        << "factories::TreeRegisterer rtt_"
+        << json["title"].get<std::string>()
+        << "_registerer(\""
+        << json["title"].get<std::string>()
+        << "\", &make_"
+        << json["title"].get<std::string>()
+        << ");\n\n";
+    out << INDENT << "} // anonymous namespace\n";
 
     return out.str();
 }
@@ -107,7 +119,7 @@ void BTBuilder::define_seq(std::string name, std::string nodeType, json properti
         params = get_parallel_params_from_properties(properties);
     } else if (nodeType == "ParallelTactic") {
         // Parallel sequence without repeat
-        type = "rtt::ParallelTactic";
+        type = "ParallelTactic";
         params = get_parallel_params_from_properties(properties);
     } else {
         // It's a regular sequence

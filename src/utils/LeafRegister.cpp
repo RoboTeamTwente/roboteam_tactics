@@ -1,34 +1,43 @@
 #include "roboteam_tactics/utils/LeafRegister.h"
 
-namespace rtt {
+rtt::factories::TreeRegisterer::TreeRegisterer(const std::string &name, TreeConstructor tc) {
+    auto treeFactory = [=](std::string name, bt::Blackboard::Ptr bb) {
+        // Name is not used
+        return std::make_shared<bt::BehaviorTree>(tc(bb.get()));
+    };
 
-namespace factories {
+    std::cout << "Registering tree " << name << "\n";
 
-// Repo<TreeFactory>& getFactoryRepo() {
-    // static Repo<TreeFactory> repo;
+    getRepo<Factory<bt::BehaviorTree>>()[name] = treeFactory;
+    std::cout << "Repo size: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
+    std::cout << "Repo location (constructor): " << &getRepo<Factory<bt::BehaviorTree>>() << "\n";
+}
 
-    // return repo;
-// }
+// // Repo<TreeFactory>& getFactoryRepo() {
+    // // static Repo<TreeFactory> repo;
 
-// Repo<Factory<Condition>>& getConditionFactoryMap() {
-    // static Repo<Factory<Condition>> repo;
+    // // return repo;
+// // }
+
+// // Repo<Factory<Condition>>& getConditionFactoryMap() {
+    // // static Repo<Factory<Condition>> repo;
 
 
-    // return repo;
-// }
+    // // return repo;
+// // }
 
-// Repo<Factory<Skill>>& getSkillFactoryMap() {
-    // static Repo<Factory<Skill>> repo;
+// // Repo<Factory<Skill>>& getSkillFactoryMap() {
+    // // static Repo<Factory<Skill>> repo;
 
-    // return repo;
-// }
+    // // return repo;
+// // }
 
-// Repo<Factory<Tactic>>& getTacticFactoryMap() {
-    // static Repo<Factory<Tactic>> repo;
+// // Repo<Factory<Tactic>>& getTacticFactoryMap() {
+    // // static Repo<Factory<Tactic>> repo;
 
-    // return repo;
-// }
+    // // return repo;
+// // }
 
-} // factories
+// } // factories
 
-} // rtt
+// } // rtt
