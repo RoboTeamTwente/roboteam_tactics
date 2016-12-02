@@ -8,11 +8,6 @@ from widgets import main_widget
 
 
 def main():
-    # Check that we are executing inside a catkin workspace.
-    if not os.path.isfile('.catkin_workspace'):
-        print "Please execute me in the roboteam catkin workspace."
-        sys.exit(1)
-
     widget = main_widget.MainWidget()
     sys.exit(app.exec_())
 

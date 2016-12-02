@@ -9,12 +9,7 @@ class BehaviourTree:
     def __init__(self):
 
         self.title = ""
-        self.description=  ""
-        # Points to the first node on the tree.
-        self._root = None
-        self.display = vector2.Vector2()
-
-        self.properties = {}
+        self._root_node = None
 
         # All the nodes in the tree.
         self._nodes = {}
@@ -26,17 +21,23 @@ class BehaviourTree:
         self._nodes[node.id()] = node
 
 
+    def root(self):
+        return self._root_node
+
     def nodes(self):
         return self._nodes
 
 
     def load_from_json(self, data):
         self.title = data['title']
-        self.description = data['description']
-        self._root = uuid.UUID(data['root'])
 
-        self.display.x = data['display']['x']
-        self.display.y = data['display']['y']
+        self._root_node = tree.node.Node()
+
+        self._root_node.title = self.title
+        self._root_node.description = data['description']
+
+        self._root_node.display.x = data['display']['x']
+        self._root_node.display.y = data['display']['y']
 
         # Add the nodes.
         for key, node_data in data['nodes'].iteritems():
@@ -46,6 +47,10 @@ class BehaviourTree:
             self._nodes[node.id()] = node
 
         # Connect the nodes to each other.
+        if 'root' in data:
+            uid = uuid.UUID(data['root'])
+            self._root_node.add_child(self._nodes[uid])
+
         for key, node_data in data['nodes'].iteritems():
             uid = uuid.UUID(key)
             node = self._nodes[uid]

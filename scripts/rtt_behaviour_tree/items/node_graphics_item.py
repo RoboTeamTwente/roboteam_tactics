@@ -48,3 +48,10 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
             connector = QtWidgets.QGraphicsPathItem(path)
             connector.setParentItem(self)
             self.connectors.append(connector)
+
+
+    def boundingRect(self):
+        return self.body.boundingRect()
+
+    def paint(self, painter, option, widget):
+        pass

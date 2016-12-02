@@ -1,5 +1,7 @@
 import sys
 
+import rospkg
+
 from python_qt_binding import QtWidgets, QtGui
 
 from tree import tree_list
@@ -7,7 +9,7 @@ from widgets import pan_graphics_view
 from items import tree_graphics_item
 
 
-TREE_DIR = "src/roboteam_tactics/src/trees/json/"
+TREE_DIR = rospkg.RosPack().get_path('roboteam_tactics') + "/src/trees/json/"
 
 
 class MainWidget(QtWidgets.QWidget):
