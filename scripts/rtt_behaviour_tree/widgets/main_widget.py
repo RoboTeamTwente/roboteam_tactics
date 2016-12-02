@@ -17,25 +17,27 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self):
         super(QtWidgets.QWidget, self).__init__()
 
-        default_tree = 'BasicKeeperTree'
+        self.selected_tree = None
 
         # Read the tree name from the command line arguments.
         if len(sys.argv) > 1:
-            default_tree = sys.argv[1]
-            print default_tree
+            self.selected_tree = sys.argv[1]
+            print self.selected_tree
 
         self._trees = tree_list.TreeList()
 
         self.init_ui()
 
+
         self._trees.load_trees(TREE_DIR)
+        self.init_list_widget()
 
-        self._tree_item = tree_graphics_item.TreeGraphicsItem(self._trees.get_tree(default_tree))
+        default_tree = None
+        if self.selected_tree:
+            default_tree = self._trees.get_tree(self.selected_tree)
+
+        self._tree_item = tree_graphics_item.TreeGraphicsItem(default_tree)
         self.scene.addItem(self._tree_item)
-
-        # with open(TREE_FOLDER + "CoolRole.json") as data_file:
-        #     data = json.load(data_file)
-        #     self._tree.from_json(data)
 
 
     def init_ui(self):
@@ -43,11 +45,7 @@ class MainWidget(QtWidgets.QWidget):
         self.resize(500, 500)
         self.setWindowTitle("rtt behaviour tree")
 
-        self.setLayout(QtWidgets.QVBoxLayout())
-
-        self.b_add_node = QtWidgets.QPushButton("Add node")
-        self.layout().addWidget(self.b_add_node)
-        self.b_add_node.clicked.connect(self.slot_add_node)
+        self.setLayout(QtWidgets.QHBoxLayout())
 
         # ---- Tree view ----
 
@@ -62,10 +60,36 @@ class MainWidget(QtWidgets.QWidget):
 
         # ---- Tree view ----
 
+        # ---- Tree list ----
+
+        self.list_widget = QtWidgets.QListWidget()
+        self.list_widget.setSizePolicy(self.list_widget.sizePolicy().Preferred, self.list_widget.sizePolicy().Preferred)
+        self.layout().addWidget(self.list_widget)
+
+        self.list_widget.currentTextChanged.connect(self.list_select_tree)
+
+        # ---- Tree list ----
+
         self.show()
 
 
-    # ---- Button slots ----------
+    def init_list_widget(self):
+        # TODO: Don't make double entries. Also remove old ones.
+        for title in self._trees.title_list():
+            self.list_widget.addItem(title)
 
-    def slot_add_node(self):
-        pass
+
+    # ---- Slots ----------
+
+    def list_select_tree(self, title):
+        self.selected_tree = title
+
+        self.scene.removeItem(self._tree_item)
+
+        new_tree = self._trees.get_tree(self.selected_tree)
+
+        self._tree_item = tree_graphics_item.TreeGraphicsItem(new_tree)
+        self.scene.addItem(self._tree_item)
+
+        # Shrink the scene to fit the new tree when is smaller.
+        self.scene.setSceneRect(self.scene.itemsBoundingRect())

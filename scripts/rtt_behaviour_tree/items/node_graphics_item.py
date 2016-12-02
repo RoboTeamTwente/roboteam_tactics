@@ -11,22 +11,24 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
         """
         super(QtWidgets.QGraphicsItem, self).__init__()
 
-        self._node = node_reference
+        if node_reference:
 
-        self.node_body = QtWidgets.QGraphicsItemGroup(parent=self)
-        # Make the body dragable.
-        self.node_body.setFlag(QtWidgets.QGraphicsItemGroup.ItemIsMovable, True)
+            self._node = node_reference
 
-        self.size = vector2.Vector2(100, 30)
+            self.node_body = QtWidgets.QGraphicsItemGroup(parent=self)
+            # Make the body dragable.
+            self.node_body.setFlag(QtWidgets.QGraphicsItemGroup.ItemIsMovable, True)
 
-        self.body = QtWidgets.QGraphicsRectItem(0, 0, self.size.x, self.size.y)
-        self.node_body.addToGroup(self.body)
-        self.text = QtWidgets.QGraphicsTextItem("")
-        self.node_body.addToGroup(self.text)
+            self.size = vector2.Vector2(100, 30)
 
-        self.connectors = []
+            self.body = QtWidgets.QGraphicsRectItem(0, 0, self.size.x, self.size.y)
+            self.node_body.addToGroup(self.body)
+            self.text = QtWidgets.QGraphicsTextItem("")
+            self.node_body.addToGroup(self.text)
 
-        self.update()
+            self.connectors = []
+
+            self.update()
 
 
     def update(self):

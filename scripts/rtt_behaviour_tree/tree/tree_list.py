@@ -24,6 +24,16 @@ class TreeList:
                     self._trees[tree.title] = tree
 
 
+    def title_list(self):
+        """
+        Returns a list of all tree titles.
+        """
+        titles = []
+        for key, tree in self._trees.iteritems():
+            titles.append(tree.title)
+        return titles
+
+
     def get_tree(self, title):
         """
         Returns the tree with the given title.

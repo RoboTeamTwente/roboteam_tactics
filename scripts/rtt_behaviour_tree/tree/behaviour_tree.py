@@ -33,7 +33,7 @@ class BehaviourTree:
 
         self._root_node = tree.node.Node()
 
-        self._root_node.title = self.title
+        self._root_node.title = "O"
         self._root_node.description = data['description']
 
         self._root_node.display.x = data['display']['x']
