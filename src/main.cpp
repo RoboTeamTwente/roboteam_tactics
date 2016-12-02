@@ -58,10 +58,10 @@ int main(int argc, char **argv) {
 
     roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(-1.0, 1.0);
 
-    auto role = make_CoolTree(n);
+    auto role = make_CoolTree();
     auto bb = role.GetBlackboard();
 
-    auto role2 = make_CoolTree(n);
+    auto role2 = make_CoolTree();
     auto bb2 = role2.GetBlackboard();
 
     bb->SetInt("ROBOT_ID", 1);

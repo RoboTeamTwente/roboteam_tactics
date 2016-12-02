@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 
     // roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(3.0, 0.1);
 
-    auto role = make_CoolTree(n);
+    auto role = make_CoolTree();
     auto bb = role.GetBlackboard();
 
     bb->SetInt("ROBOT_ID", 0);

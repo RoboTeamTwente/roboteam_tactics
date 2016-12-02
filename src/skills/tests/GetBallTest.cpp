@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 	// bb->SetDouble("getBallAtTime", 5.0);
 	bb->SetString("AimAt", "theirgoal");
 
-	rtt::GetBall getBall_B(n, "", bb);
+	rtt::GetBall getBall_B("", bb);
 	
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall_B));
 

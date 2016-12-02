@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 	auto bb = std::make_shared<bt::Blackboard>();
 	bb->SetInt("ROBOT_ID", 1);
 
-	rtt::Kick Kick(n, "", bb);
+	rtt::Kick Kick("", bb);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackKick, _1, &Kick));
 

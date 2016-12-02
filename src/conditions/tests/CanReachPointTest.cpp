@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 	bb1->SetDouble("yGoal", 0.0);
 	bb1->SetDouble("angleGoal", 3.14);
 	// bb1->SetBool("priority", false);
-	rtt::AvoidRobots avoidRobots1(n, "", bb1);
+	rtt::AvoidRobots avoidRobots1("", bb1);
 
 	ros::Subscriber sub2 = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
 

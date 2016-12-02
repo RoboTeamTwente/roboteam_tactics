@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     bb->SetInt("ROBOT_ID", 0);
     bb->SetBool("endPoint", true);
 
-	rtt::GoToPos goToPos(n, "", bb);
+	rtt::GoToPos goToPos("", bb);
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1, &goToPos));
 
 	while (ros::ok()) {
