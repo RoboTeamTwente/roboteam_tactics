@@ -16,6 +16,8 @@ void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall*
 	}
 }
 
+
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "GetBallTest");
 	ros::NodeHandle n;
@@ -23,10 +25,10 @@ int main(int argc, char **argv) {
 	auto bb = std::make_shared<bt::Blackboard>();
 	bb->SetInt("ROBOT_ID", 1);
 	bb->SetBool("intercept", false);
-	bb->SetDouble("getBallAtX", 0.0);
-	bb->SetDouble("getBallAtY", 0.0);
-	bb->SetDouble("getBallAtTime", 5.0);
-	bb->SetDouble("targetAngle", 0.0);
+	// bb->SetDouble("getBallAtX", 0.0);
+	// bb->SetDouble("getBallAtY", 0.0);
+	// bb->SetDouble("getBallAtTime", 5.0);
+	bb->SetString("AimAt", "theirgoal");
 
 	rtt::GetBall getBall_B(n, "", bb);
 	

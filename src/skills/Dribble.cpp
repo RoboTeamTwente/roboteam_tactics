@@ -17,9 +17,9 @@
 
 
 namespace rtt {
-	Dribble::Dribble(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-            : Skill(n, name, blackboard)
-            , rotateAroundPoint(n, "", private_bb) { 
+	Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
+            : Skill(name, blackboard)
+            , rotateAroundPoint("", private_bb) { 
         pubDribble = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
         pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
         ROS_INFO("Dribbling");

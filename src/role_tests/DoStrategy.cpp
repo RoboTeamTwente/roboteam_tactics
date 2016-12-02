@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 	ROS_INFO("doing strategy");
 
-    auto role = make_BasicStrategy(n);
+    auto role = make_BasicStrategy();
     auto bb = role.GetBlackboard();
 
     bb->SetInt("ROBOT_ID", 0);

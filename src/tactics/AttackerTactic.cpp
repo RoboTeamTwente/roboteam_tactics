@@ -61,6 +61,7 @@ void AttackerTactic::Initialize() {
 
         // Get the ball!
         bb.SetBool("GetBall_A_intercept", false);
+        bb.SetString("GetBall_A_AimAt", "theirgoal");
         
         // If you can see the goal, aim towards it
         bb.SetBool("AimAt_A_setRosParam", false);

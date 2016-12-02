@@ -15,8 +15,8 @@
 
 namespace rtt {
 
-AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {
+AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard) {
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
@@ -122,7 +122,7 @@ bt::Node::Status AvoidRobots::Update () {
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = world.us.at(robotID).angle;
-    if (posError.length() > 1.0) {
+    if (posError.length() > 1.5) {
         angleGoal = posError.angle();
     }
     double angleError = angleGoal - myAngle;

@@ -15,10 +15,9 @@
 
 namespace rtt {
 
-FollowPath::FollowPath(ros::NodeHandle nh, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(nh, name, blackboard) {
+FollowPath::FollowPath(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard) {
 		// state = "computePath";
-        n = nh;
         state = COMPUTE;
         client = n.serviceClient<roboteam_msgs::navsim>("navsim");
 }
@@ -66,7 +65,7 @@ void FollowPath::CallGoToPos(roboteam_msgs::Vector2f point, double wGoal, int ro
     if (goToPos != nullptr) {
     	delete goToPos;
     }
-    goToPos = new GoToPos(n, "", bb);
+    goToPos = new GoToPos("", bb);
 }
 
 bt::Node::Status FollowPath::Update () {
