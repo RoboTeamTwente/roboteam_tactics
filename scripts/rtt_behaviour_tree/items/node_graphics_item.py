@@ -21,7 +21,12 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
 
             self.size = vector2.Vector2(100, 30)
 
-            self.body = QtWidgets.QGraphicsRectItem(0, 0, self.size.x, self.size.y)
+            if self._node.type.category.name == 'condition':
+                self.body = QtWidgets.QGraphicsEllipseItem(0, 0, self.size.x, self.size.y)
+            else:
+                self.body = QtWidgets.QGraphicsRectItem(0, 0, self.size.x, self.size.y)
+
+
             self.node_body.addToGroup(self.body)
             self.text = QtWidgets.QGraphicsTextItem("")
             self.node_body.addToGroup(self.text)
@@ -34,7 +39,14 @@ class NodeGraphicsItem(QtWidgets.QGraphicsItem):
     def update(self):
 
         self.setPos(self._node.display.x, self._node.display.y)
-        self.text.setPlainText(self._node.title)
+
+        text_string = self._node.title
+
+        # See if the node has an overriding custom icon.
+        if self._node.type.has_custom_icon():
+            text_string = self._node.type.custom_icon
+
+        self.text.setPlainText(text_string)
 
         self.size.x = self.text.boundingRect().width()
         self.size.y = self.text.boundingRect().height()

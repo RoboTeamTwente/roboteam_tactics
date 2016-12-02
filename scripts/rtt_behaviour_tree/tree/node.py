@@ -1,12 +1,13 @@
 import uuid
 
 from utils import vector2
+from tree import node_types
 
 class Node:
 
     def __init__(self):
         self._id = uuid.uuid1()
-        self.type = ""
+        self.type = None
         self.title = ""
         self.description = ""
         self.display = vector2.Vector2()
@@ -19,7 +20,7 @@ class Node:
     def load_from_json(self, data):
         self._id = uuid.UUID(data['id'])
 
-        self.type = data['name']
+        self.type = node_types.node_types[data['name']]
         self.title = data['title']
         self.description = data['description']
 
