@@ -17,7 +17,7 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/utils/LeafRegister.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include <cmath>
 #include <vector>
@@ -27,11 +27,11 @@
 
 namespace rtt {
 
-namespace {
+// namespace {
 
 factories::LeafRegisterer<GetBall, Skill> GetBall_registerer("GetBall");
 
-} // anonymous namespace
+// } // anonymous namespace
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

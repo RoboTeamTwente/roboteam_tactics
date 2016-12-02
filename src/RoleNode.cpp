@@ -11,7 +11,7 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/NodeFactory.h"
+#include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/generated/alltrees_factory.h"
 #include "roboteam_tactics/generated/alltrees_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"
@@ -77,7 +77,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     try {
         ros::NodeHandle n;
         currentTreeName = msg->tree;
-        currentTree = rtt::generate_node(msg->tree, "", bb);
+        currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
     } catch (...) {
         ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
         return;

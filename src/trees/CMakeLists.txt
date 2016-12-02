@@ -1,6 +1,6 @@
 add_subdirectory(json)
 
-add_library(alltrees
+add_library(alltrees OBJECT
     alltrees.cpp
     alltrees_factory.cpp
     )
@@ -11,9 +11,10 @@ add_dependencies(alltrees
     )
 
 target_link_libraries(alltrees
-    skills
-    conditions
-    tactics
+    $<TARGET_OBJECTS:treegen>
+    $<TARGET_OBJECTS:skills>
+    $<TARGET_OBJECTS:conditions>
+    $<TARGET_OBJECTS:tactics>
     )
 
 set(JSON_FILES

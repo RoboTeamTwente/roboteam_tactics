@@ -29,8 +29,8 @@ assert_tactics_root
     #include \"roboteam_tactics/bt.hpp\"
     #include \"roboteam_tactics/utils/ParallelTactic.hpp\"
     #include \"roboteam_tactics/utils/utils.h\"
-    #include \"roboteam_tactics/utils/LeafRegister.h\"
-    "
+    #include \"roboteam_tactics/treegen/LeafRegister.h\"
+"
 
     # Preamble of header file
     headerPreamble="
@@ -47,7 +47,7 @@ assert_tactics_root
     printf "$headerPreamble" >> $treeHeader
 
     # Append namespace specifiers
-    printf "namespace rtt {\n" >> $treeSource
+    #printf "namespace rtt {\n" >> $treeSource
     printf "namespace rtt {\n" >> $treeHeader
 
     # Generate declarations and implementations for the behavior trees
@@ -63,7 +63,7 @@ assert_tactics_root
     done
 
     # Closing brackets :D
-    printf "}" >> $treeSource
+    #printf "}" >> $treeSource
     printf "}" >> $treeHeader
 
     # Copy the header files to place catkin can find it and

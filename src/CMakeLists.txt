@@ -3,6 +3,7 @@ add_subdirectory(skills)
 add_subdirectory(tactics)
 add_subdirectory(utils)
 add_subdirectory(trees)
+add_subdirectory(treegen)
 
 set(JSON_FILES ${JSON_FILES} PARENT_SCOPE)
 

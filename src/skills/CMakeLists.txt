@@ -23,7 +23,7 @@ set(SKILL_SOURCES
     PARENT_SCOPE
     )
 
-add_library(skills
+add_library(skills OBJECT
     ${SKILL_SOURCES}
     )
 add_dependencies(skills

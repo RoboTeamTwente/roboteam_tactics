@@ -1,4 +1,4 @@
-#include "roboteam_tactics/utils/LeafRegister.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 rtt::factories::TreeRegisterer::TreeRegisterer(const std::string &name, TreeConstructor tc) {
     auto treeFactory = [=](std::string name, bt::Blackboard::Ptr bb) {

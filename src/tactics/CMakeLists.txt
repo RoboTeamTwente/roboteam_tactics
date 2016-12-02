@@ -11,7 +11,7 @@ set(TACTIC_SOURCES
     PARENT_SCOPE
     )
 
-add_library(tactics
+add_library(tactics OBJECT
     ${TACTIC_SOURCES}
     )
 add_dependencies(tactics

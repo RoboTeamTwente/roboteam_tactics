@@ -9,7 +9,7 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/generated/allskills_factory.h"
-#include "roboteam_tactics/utils/NodeFactory.h"
+#include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/LastRef.h"
@@ -146,7 +146,7 @@ How to use:
     // Wait for the first geom & world message
     rtt::LastWorld::wait_for_first_messages();
 
-    std::shared_ptr<bt::Node> node = rtt::generate_node(testClass, "", bb);
+    std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 

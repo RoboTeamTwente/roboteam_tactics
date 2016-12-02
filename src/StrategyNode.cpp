@@ -22,8 +22,7 @@
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
-
-#include "roboteam_tactics/utils/LeafRegister.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -49,26 +48,26 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
 
-    using namespace rtt::factories;
+    // using namespace rtt::factories;
 
-    auto& skillRepo = getRepo<Factory<rtt::Skill>>();
-    std::cout << "Number of skills: " << skillRepo.size() << "\n";
-    for (const auto& entry: skillRepo) {
-        std::cout << "Skill: " << entry.first << "\n";
-    }
-    std::cout << "Done listing skills.\n";
+    // auto& skillRepo = getRepo<Factory<rtt::Skill>>();
+    // std::cout << "Number of skills: " << skillRepo.size() << "\n";
+    // for (const auto& entry: skillRepo) {
+        // std::cout << "Skill: " << entry.first << "\n";
+    // }
+    // std::cout << "Done listing skills.\n";
 
-    auto getBallSkill = skillRepo["GetBall"]("", nullptr);
+    // auto getBallSkill = skillRepo["GetBall"]("", nullptr);
     
-    auto& treeRepo = getRepo<Factory<bt::BehaviorTree>>();
-    std::cout << "Repo location: " << &treeRepo << "\n";
-    std::cout << "Actual number of trees: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
-    std::cout << "Repo size: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
-    std::cout << "Number of trees: " << treeRepo.size() << "\n";
-    for (const auto& entry: treeRepo) {
-        std::cout << "Tree: " << entry.first << "\n";
-    }
-    std::cout << "Done listing trees.\n";
+    // auto& treeRepo = getRepo<Factory<bt::BehaviorTree>>();
+    // std::cout << "Repo location: " << &treeRepo << "\n";
+    // std::cout << "Actual number of trees: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
+    // std::cout << "Repo size: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
+    // std::cout << "Number of trees: " << treeRepo.size() << "\n";
+    // for (const auto& entry: treeRepo) {
+        // std::cout << "Tree: " << entry.first << "\n";
+    // }
+    // std::cout << "Done listing trees.\n";
 
     ros::Rate rate(60);
 

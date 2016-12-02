@@ -8,6 +8,7 @@
 #include "roboteam_tactics/generated/allconditions_set.h"
 #include "roboteam_tactics/generated/allskills_set.h"
 #include "roboteam_tactics/generated/alltactics_set.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define INDENT "    "
 #define DINDENT "        "
@@ -23,11 +24,33 @@ std::string BTBuilder::build(nlohmann::json json) {
     std::stack<std::string> stack;
     stack.push(json["root"]);
 
+    std::vector<std::string> usedSkills, usedConditions, usedTactics;
+
+    using namespace rtt::factories;
+    auto& skillRepo = getRepo<Factory<Skill>>();
+    auto& conditionRepo = getRepo<Factory<Condition>>();
+    auto& tacticRepo = getRepo<Factory<Tactic>>();
+
+    std::cerr << "skillRepo location: " << &skillRepo << "\n";
+    std::cerr << "skillRepo size: " << skillRepo.size() << "\n";
+
     // Give all nodes who are not a skill nor condition
     // a unique name by appending a number at the end
     int ctr = 0;
     for (auto& element : json["nodes"]) {
         std::string title = element["title"];
+
+        if (skillRepo.find(element["name"].get<std::string>()) != skillRepo.end()) {
+            usedSkills.push_back(element["name"]);
+        }
+
+        if (conditionRepo.find(element["name"].get<std::string>()) != conditionRepo.end()) {
+            usedSkills.push_back(element["name"]);
+        }
+
+        if (tacticRepo.find(element["name"].get<std::string>()) != tacticRepo.end()) {
+            usedSkills.push_back(element["name"]);
+        }
 
         if (allskills_set.find(element["name"]) == allskills_set.end()
                 && allconditions_set.find(element["name"]) == allconditions_set.end()) {
@@ -57,7 +80,23 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
+    out << INDENT << "// Used skills: \n";
+    for (const auto& skill : usedSkills) {
+        out << "// " << skill << "\n";
+    }
+
+    out << INDENT << "// Used conditions: \n";
+    for (const auto& condition : usedConditions) {
+        out << "// " << condition << "\n";
+    }
+
+    out << INDENT << "// Used tactics: \n";
+    for (const auto& tactic : usedTactics) {
+        out << "// " << tactic << "\n";
+    }
+
     // Create constructor function
+    out << INDENT << "namespace rtt {\n\n";
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
         << "(bt::Blackboard* blackboard) {"
@@ -73,14 +112,15 @@ std::string BTBuilder::build(nlohmann::json json) {
     out << DINDENT << "tree.SetRoot(" << root["title"].get<std::string>() << ");" << std::endl;
     out << DINDENT << "return tree;" << std::endl;
     out << INDENT << "}\n\n";
+    out << INDENT << "} // rtt\n\n";
 
     out << INDENT << "namespace {\n\n";
     out << INDENT
-        << "factories::TreeRegisterer rtt_"
+        << "rtt::factories::TreeRegisterer rtt_"
         << json["title"].get<std::string>()
         << "_registerer(\""
         << json["title"].get<std::string>()
-        << "\", &make_"
+        << "\", &rtt::make_"
         << json["title"].get<std::string>()
         << ");\n\n";
     out << INDENT << "} // anonymous namespace\n";

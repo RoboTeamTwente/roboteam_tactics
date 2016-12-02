@@ -4,6 +4,8 @@
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
 
+#include "roboteam_tactics/skills/GetBall.h"
+
 int main(int argc, char** argv) {
     std::string line;
     std::string input;

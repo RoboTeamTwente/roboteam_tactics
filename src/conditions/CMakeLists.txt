@@ -26,7 +26,7 @@ add_custom_target(CONDITION_SOURCES_TARGET
         ${CONDITION_SOURCES}
     )
 
-add_library(conditions
+add_library(conditions OBJECT
     ${CONDITION_SOURCES}
     )
 add_dependencies(conditions
