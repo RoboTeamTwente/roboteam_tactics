@@ -10,7 +10,7 @@ namespace rtt {
 
 class Dribble : public Skill {
 public:
-	Dribble(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	Dribble(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
 	void stoprobot(int RobotID);
 	double computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);

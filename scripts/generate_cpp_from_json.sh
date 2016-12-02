@@ -95,7 +95,7 @@ assert_tactics_root
 
     namespace rtt {
 
-    bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n, bt::Blackboard* bb) {" >> $factorySource
+    bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb) {" >> $factorySource
 
     printf "
         if (false) {
@@ -106,7 +106,7 @@ assert_tactics_root
             name=$(basename $filepath .json)
 
             printf " else if (name == \"$name\") {
-            return make_$name(n, bb);
+            return make_$name(bb);
         } " >> $factorySource
     done
 
@@ -130,7 +130,7 @@ assert_tactics_root
 
     namespace rtt {
 
-    bt::BehaviorTree make_tree(std::string name, ros::NodeHandle n, bt::Blackboard* bb = nullptr);
+    bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb = nullptr);
 
     }
     " >> $factoryHeader

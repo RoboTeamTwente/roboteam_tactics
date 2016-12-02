@@ -6,7 +6,7 @@ namespace rtt{
     
 class SecondaryKeeper : public KeeperBlock {
     public:
-    SecondaryKeeper(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    SecondaryKeeper(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     ~SecondaryKeeper() {}
     
     boost::optional<roboteam_msgs::WorldRobot> select_target() const override;

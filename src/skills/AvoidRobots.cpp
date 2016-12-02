@@ -15,8 +15,8 @@
 
 namespace rtt {
 
-AvoidRobots::AvoidRobots(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard) {
+AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard) {
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 

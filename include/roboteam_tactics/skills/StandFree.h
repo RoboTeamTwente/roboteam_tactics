@@ -18,10 +18,11 @@ namespace rtt {
 class StandFree : public Skill {
 
 public:
-    StandFree(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard);  
+    StandFree(std::string name, bt::Blackboard::Ptr blackboard);  
 	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
     Status Update();
 private:
+    ros::NodeHandle n;
 	AvoidRobots avoidRobots;
 	ros::Publisher debugPub;
 	ros::Publisher debugPubPoint;

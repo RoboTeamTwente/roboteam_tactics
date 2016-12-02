@@ -9,7 +9,7 @@ namespace rtt {
 
 class Kick : public Skill {
 public:
-	Kick(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	Kick(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
 	Status Update();
 

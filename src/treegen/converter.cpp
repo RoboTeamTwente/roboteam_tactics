@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         std::cout << builder.build(info);
     } else if (arguments.size() == 1 && arguments[0] == "decl") {
         // Function definition
-        std::cout << "bt::BehaviorTree make_" << info["title"].get<std::string>() << "(ros::NodeHandle n, bt::Blackboard* blackboard = nullptr);\n";
+        std::cout << "bt::BehaviorTree make_" << info["title"].get<std::string>() << "(bt::Blackboard* blackboard = nullptr);\n";
     }
 
 }

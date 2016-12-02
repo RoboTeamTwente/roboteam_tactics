@@ -21,17 +21,14 @@ namespace rtt {
 class Skill : public Leaf {
 public:
 
-    Skill(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard = nullptr)
+    Skill(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
             : Leaf(name, blackboard)
-            , n{n}
             {}
     virtual ~Skill() {}
 
     virtual Status Update() {
         return Status::Invalid;
     }
-
-    ros::NodeHandle n;
 } ;
 
 class Condition : public Leaf {

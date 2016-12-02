@@ -9,7 +9,7 @@ namespace rtt {
 
 class ParamSet : public Skill {
 public:
-	ParamSet(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	ParamSet(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update() override;
     
     static VerificationMap required_params() {

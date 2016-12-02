@@ -14,9 +14,9 @@
 
 namespace rtt {
 
-AimAt::AimAt(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard)
-        , rotateAroundPoint(n, "", private_bb) {
+AimAt::AimAt(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard)
+        , rotateAroundPoint("", private_bb) {
 	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 

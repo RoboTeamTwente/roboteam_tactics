@@ -47,9 +47,9 @@ bool isBallInGoalArea() {
     return false;
 }
 
-NaiveBlockGoal::NaiveBlockGoal(ros::NodeHandle n, std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(n, name, blackboard)
-        , avoidRobots(n, "", private_bb) {
+NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
+        : Skill(name, blackboard)
+        , avoidRobots("", private_bb) {
         	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
 }
 
