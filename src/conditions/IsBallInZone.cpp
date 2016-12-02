@@ -32,7 +32,7 @@ bt::Node::Status IsBallInZone::Update() {
 	double zone1y1=3.0;
 	double zone1y2=0.0;
 	
-	// zone1 is as seen from the goal: left rear
+	// zone2 is as seen from the goal: left rear
 	double zone2x1=4.5;
 	double zone2x2=1.5;
 	double zone2y1=0.0;
@@ -66,7 +66,7 @@ bt::Node::Status IsBallInZone::Update() {
 	
 	}
 	
-	return Status::Running;
+	return Status::Failure;
 }
 
 }

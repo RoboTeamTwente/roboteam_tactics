@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	// bb3->SetDouble("angleGoal", 0.0);
 	// bb3->SetBool("priority", false);
 
-	rtt::AvoidRobots avoidRobots1(n, "", bb1);
+	rtt::AvoidRobots avoidRobots1("", bb1);
 	// rtt::AvoidRobots avoidRobots2(n, "", bb2);
 	// rtt::AvoidRobots avoidRobots3(n, "", bb3);
 

@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 	bb->SetDouble("goaly", 0.0);
 		
 	
-	rtt::Dribble dribble_B(n, "", bb);
+	rtt::Dribble dribble_B("", bb);
 	
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackDribble, _1, &dribble_B));
 	int count=0;
