@@ -31,8 +31,8 @@ std::string BTBuilder::build(nlohmann::json json) {
     auto& conditionRepo = getRepo<Factory<Condition>>();
     auto& tacticRepo = getRepo<Factory<Tactic>>();
 
-    std::cerr << "skillRepo location: " << &skillRepo << "\n";
-    std::cerr << "skillRepo size: " << skillRepo.size() << "\n";
+    // std::cerr << "skillRepo location: " << &skillRepo << "\n";
+    // std::cerr << "skillRepo size: " << skillRepo.size() << "\n";
 
     // Give all nodes who are not a skill nor condition
     // a unique name by appending a number at the end

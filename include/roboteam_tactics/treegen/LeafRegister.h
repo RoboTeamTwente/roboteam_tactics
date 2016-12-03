@@ -48,13 +48,7 @@ public:
             return std::make_shared<L>(name, bb);
         };
 
-        std::cout << "Registering skill: " << name << "\n";
-
         getRepo<Factory<Parent>>()[name] = leafFactory;
-    }
-
-    int frob() {
-        std::cout << "Frobbing...\n";
     }
 } ;
 
