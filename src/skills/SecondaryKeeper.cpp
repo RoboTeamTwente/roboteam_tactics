@@ -3,8 +3,8 @@
 
 namespace rtt {
     
-SecondaryKeeper::SecondaryKeeper(ros::NodeHandle n, std::string name, 
-        bt::Blackboard::Ptr blackboard) : KeeperBlock(n, name, blackboard) {
+SecondaryKeeper::SecondaryKeeper(std::string name, 
+        bt::Blackboard::Ptr blackboard) : KeeperBlock(name, blackboard) {
     cover_dist = .75;
 }
 

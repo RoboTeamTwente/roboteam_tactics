@@ -15,7 +15,7 @@ namespace rtt {
 
 class FollowPath : public Skill {
 public:
-    FollowPath(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    FollowPath(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     std::vector<roboteam_msgs::Vector2f> ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos);
     void CallGoToPos(roboteam_msgs::Vector2f point, double wGoal, int robotID);
 	Status Update();

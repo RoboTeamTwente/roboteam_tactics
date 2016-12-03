@@ -15,5 +15,6 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/testparams.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/SideSideTestTree.json
     PARENT_SCOPE
     )

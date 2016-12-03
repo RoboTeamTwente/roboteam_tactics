@@ -77,7 +77,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     try {
         ros::NodeHandle n;
         currentTreeName = msg->tree;
-        currentTree = rtt::generate_node(n, msg->tree, "", bb);
+        currentTree = rtt::generate_node(msg->tree, "", bb);
     } catch (...) {
         ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
         return;

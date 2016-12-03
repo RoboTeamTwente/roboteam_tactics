@@ -16,7 +16,7 @@ namespace rtt {
 
 class AvoidRobots : public Skill {
 public:
-	AvoidRobots(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	AvoidRobots(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     double RotationController(double angleError);
     roboteam_msgs::RobotCommand PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle);
     roboteam_utils::Vector2 GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);

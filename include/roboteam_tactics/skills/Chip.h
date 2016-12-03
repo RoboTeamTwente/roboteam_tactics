@@ -11,7 +11,7 @@ namespace rtt {
 
 class Chip : public Skill {
 public:
-    Chip(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    Chip(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
     Status Update();
 

@@ -153,9 +153,9 @@ int main(int argc, char **argv) {
     }
     subInit.shutdown();
 
-    auto role1 = make_CoolTree(n);
+    auto role1 = make_CoolTree();
     auto bb1 = role1.GetBlackboard();
-    auto role2 = make_SuperCoolTree(n);
+    auto role2 = make_SuperCoolTree();
     auto bb2 = role2.GetBlackboard();
     initializeRoles(bb1, bb2);
     

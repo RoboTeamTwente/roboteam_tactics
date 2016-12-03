@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     bb->SetDouble("wGoal", 2);
     bb->SetInt("ROBOT_ID", 0);
 
-	rtt::FollowPath followPath(n, "", bb);
+	rtt::FollowPath followPath("", bb);
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackFollowPath, _1, &followPath));
 
 	while (ros::ok()) {

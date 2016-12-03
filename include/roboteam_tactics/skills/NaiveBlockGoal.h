@@ -18,7 +18,7 @@ namespace rtt {
  */
 class NaiveBlockGoal : public Skill {
 public:
-	NaiveBlockGoal(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	NaiveBlockGoal(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     
     static VerificationMap required_params() {

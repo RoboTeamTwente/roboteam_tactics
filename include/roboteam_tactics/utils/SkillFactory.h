@@ -93,7 +93,7 @@ bt::Blackboard::Ptr parse_bb(const std::string& skill_name, const std::vector<st
 }
 
 template <typename T>
-std::shared_ptr<T> build_skill(ros::NodeHandle n, const std::string& type_name, const std::string& skill_name, const std::string& arg_fmt, ...) {
+std::shared_ptr<T> build_skill(const std::string& type_name, const std::string& skill_name, const std::string& arg_fmt, ...) {
     char buf[1024];
     va_list varargs;
     va_start(varargs, arg_fmt);
@@ -105,7 +105,7 @@ std::shared_ptr<T> build_skill(ros::NodeHandle n, const std::string& type_name, 
     if (!Leaf::validate_blackboard<T>(bb, skill_name)) {
         throw std::invalid_argument("Blackboard verification failed - Check ROS logs."); 
     }
-    std::shared_ptr<T> ptr = make_skill<T>(n, type_name, skill_name, bb);
+    std::shared_ptr<T> ptr = make_skill<T>(type_name, skill_name, bb);
     assert(ptr);
     return ptr;
 }

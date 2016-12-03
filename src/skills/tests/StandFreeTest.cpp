@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 	bb1->SetDouble("distanceFromPoint", 0.4);
 	bb1->SetString("whichTeam", "us");
 
-	rtt::StandFree standFree(n, "", bb1);
+	rtt::StandFree standFree("", bb1);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &standFree));
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);

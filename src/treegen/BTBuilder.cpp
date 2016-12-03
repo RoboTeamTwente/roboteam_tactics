@@ -33,9 +33,9 @@ std::string BTBuilder::build(nlohmann::json json) {
                 && allconditions_set.find(element["name"]) == allconditions_set.end()) {
             // Get title and append ctr
             title += "_" + std::to_string(ctr++);
-            // Replace spaces with _
         }
 
+        // Replace spaces with _
         std::transform(title.begin(), title.end(), title.begin(), [](char ch) {
             return ch == ' ' ? '_' : ch;
         });
@@ -59,7 +59,7 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
-        << "(ros::NodeHandle n, bt::Blackboard* blackboard) {"
+        << "(bt::Blackboard* blackboard) {"
         << std::endl;
     out << DINDENT << "bt::BehaviorTree tree;" << std::endl;
     out << DINDENT << "auto bb = tree.GetBlackboard();" << std::endl;
@@ -147,7 +147,7 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             << name
             << " = std::make_shared<"
             << type
-            << ">(n, \""
+            << ">(\""
             << name
             << "\", bb);"
             << std::endl;

@@ -17,7 +17,7 @@ namespace rtt {
 
 class GoToPos : public Skill {
 public:
-	GoToPos(ros::NodeHandle n, std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     
     static VerificationMap required_params() {
