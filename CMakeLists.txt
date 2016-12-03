@@ -196,7 +196,8 @@ target_link_libraries(StrategyNode
 # Disables tests on bob's desktop
 site_name(computername)
 
-if(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU" OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"))
+#   OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"
+if(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU"))
 
     add_executable(brain
         src/main.cpp
@@ -427,4 +428,5 @@ add_executable(StandFreeTest
         ${catkin_LIBRARIES}
         )
 
-endif(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU" OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"))
+#  OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"
+endif(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU"))

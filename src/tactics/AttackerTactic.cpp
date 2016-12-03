@@ -11,6 +11,7 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/conditions/IsBallInGoal.h"
 
 #define RTT_CURRENT_DEBUG_TAG AttackerTactic
 
@@ -60,16 +61,12 @@ void AttackerTactic::Initialize() {
         bb.SetInt("ROBOT_ID", primaryAttacker);
 
         // Get the ball!
-        bb.SetBool("GetBall_A_intercept", false);
-        bb.SetString("GetBall_A_AimAt", "theirgoal");
-        
-        // If you can see the goal, aim towards it
-        bb.SetBool("AimAt_A_setRosParam", false);
-        bb.SetString("AimAt_A_At", "theirgoal");
+        bb.SetBool("GetBall_B_intercept", false);
+        bb.SetString("GetBall_B_AimAt", "theirgoal");
 
-        // Else, if you can see the other attacker, aim to him
-        bb.SetBool("CanSeeRobot_A_our_team", true);
-        bb.SetInt("CanSeeRobot_A_targetID", secondaryAttacker);
+        // If you can't see the goal, check if you can see the other attacker, aim to him
+        bb.SetBool("CanSeeRobot_B_our_team", true);
+        bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);
         bb.SetBool("AimAt_B_setRosParam", true);
         bb.SetString("AimAt_B_At", "robot");
         bb.SetInt("AimAt_B_AtRobot", secondaryAttacker);
@@ -77,7 +74,7 @@ void AttackerTactic::Initialize() {
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = primaryAttacker;
-        wd.tree = "CoolTree";
+        wd.tree = "BasicAttacker1";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -107,13 +104,13 @@ void AttackerTactic::Initialize() {
         bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
 
         // Aim at goal
-        bb.SetBool("AimAt_A_setRosParam", false);
-        bb.SetString("AimAt_A_At", "theirgoal");
+        bb.SetBool("AimAt_B_setRosParam", false);
+        bb.SetString("AimAt_B_At", "theirgoal");
 
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = secondaryAttacker;
-        wd.tree = "SuperCoolTree";
+        wd.tree = "BasicAttacker2";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -130,6 +127,7 @@ void AttackerTactic::Initialize() {
 
 bt::Node::Status AttackerTactic::Update() {
     bool allSucceeded = true;
+    bool oneSucceeded = false;
     bool oneFailed = false;
     bool oneInvalid = false;
 
@@ -137,6 +135,7 @@ bt::Node::Status AttackerTactic::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             allSucceeded &= status == bt::Node::Status::Success;
+            oneSucceeded |= status == bt::Node::Status::Success;
             oneFailed |= status == bt::Node::Status::Failure;
             oneInvalid |= status == bt::Node::Status::Invalid;
         } else {
@@ -148,7 +147,7 @@ bt::Node::Status AttackerTactic::Update() {
         return bt::Node::Status::Failure;
     } else if (oneInvalid) {
         return bt::Node::Status::Invalid;
-    } else if (allSucceeded) {
+    } else if (oneSucceeded) {
         return bt::Node::Status::Success;
     }
 
@@ -158,6 +157,17 @@ bt::Node::Status AttackerTactic::Update() {
     }
 
     return bt::Node::Status::Running;
+
+    // auto bb2 = std::make_shared<bt::Blackboard>();
+    // bb2->SetBool("our_goal", false);
+    // IsBallInGoal isBallInGoal("", bb2);
+
+    // if (isBallInGoal.Update() == bt::Node::Status::Success) {
+    //     return bt::Node::Status::Success;
+    // } else {
+    //     return bt::Node::Status::Running;
+    // }
+
 }
 
 } // rtt

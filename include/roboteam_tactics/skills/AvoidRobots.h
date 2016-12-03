@@ -20,7 +20,10 @@ public:
     double RotationController(double angleError);
     roboteam_msgs::RobotCommand PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle);
     roboteam_utils::Vector2 GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
-	Status Update();
+    // roboteam_utils::Vector2 StayWithinField(roboteam_utils::Vector2 myPos);
+    roboteam_utils::Vector2 AvoidGoals(roboteam_utils::Vector2 myPos);
+
+    Status Update();
     
     static VerificationMap required_params() {
         VerificationMap params;

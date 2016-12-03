@@ -11,6 +11,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
+#include "roboteam_tactics/utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
@@ -102,6 +103,29 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
     return forceVector;
 }
 
+// roboteam_utils::Vector2 AvoidRobots::StayWithinField(roboteam_utils::Vector2 myPos) {
+
+//     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+
+//     roboteam_utils::Vector2 distanceFromSide;
+//     distanceFromSide.x = signum(myPos.x)*(field.field_length/2) - myPos.x;
+//     distanceFromSide.y = signum(myPos.y)*(field.field_width/2) - myPos.y;
+
+//     ROS_INFO_STREAM("distanceFromSide: " << distanceFromSide.x << " " << distanceFromSide.y);
+
+//     roboteam_utils::Vector2 force(0.0, 0.0);
+//     force.x = -1.0 / (distanceFromSide.x * distanceFromSide.x);
+//     force.y = -1.0 / (distanceFromSide.y * distanceFromSide.y);
+//     ROS_INFO_STREAM("force: " << force.x << " " << force.y);
+
+//     return force;
+// }
+
+roboteam_utils::Vector2 AvoidRobots::AvoidGoals(roboteam_utils::Vector2 myPos) {
+    roboteam_utils::Vector2 force;
+    return force;
+}
+
 bt::Node::Status AvoidRobots::Update () {
 
     // Get the latest world state
@@ -117,6 +141,17 @@ bt::Node::Status AvoidRobots::Update () {
     angleGoal = GetDouble("angleGoal");
     robotID = blackboard->GetInt("ROBOT_ID");
     dribbler = GetBool("dribbler");
+
+    // Checking inputs
+    double marginOutsideField = 0.5; // meter
+    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    if (xGoal > field.field_length/2+marginOutsideField || xGoal < -field.field_length/2-marginOutsideField) {
+        xGoal = signum(xGoal)*field.field_length/2+marginOutsideField;
+    }
+    if (yGoal > field.field_width/2+marginOutsideField || yGoal < -field.field_width/2-marginOutsideField) {
+        yGoal = signum(yGoal)*field.field_width/2-marginOutsideField;
+    }
+    angleGoal = cleanAngle(angleGoal);
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
@@ -137,53 +172,62 @@ bt::Node::Status AvoidRobots::Update () {
 
 
     // If you can see the end point, just go towards it
-    CanSeePoint canSeePoint("", bb2);
-    if (canSeePoint.Update() == Status::Success) {
-        roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
-        pub.publish(command);
-        if (success) {
-            return Status::Success;
-        } else {
-            return Status::Running;
-        }
-    }
+    // CanSeePoint canSeePoint("", bb2);
+    // if (canSeePoint.Update() == Status::Success) {
+    //     roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
+    //     pub.publish(command);
+    //     if (success) {
+    //         return Status::Success;
+    //     } else {
+    //         return Status::Running;
+    //     }
+    // }
 
     // For each robot, compute the 'force' it exerts on us, and add these forces
-    double forceX = 0.0;
-    double forceY = 0.0;
+    // double forceX = 0.0;
+    // double forceY = 0.0;
+
+    roboteam_utils::Vector2 sumOfForces(0.0, 0.0);
+
     for (size_t i = 0; i < world.us.size(); i++) {
         if (i != robotID) { // TODO: change this to check whether the robot ID corresponds to i instead of just its place in world.us
             roboteam_utils::Vector2 otherRobotPos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
             roboteam_utils::Vector2 forceVector = GetForceVectorFromRobot(myPos, otherRobotPos, posError);
-            forceX -= forceVector.x * repulsiveForce;
-            forceY -= forceVector.y * repulsiveForce;
+            // forceX -= forceVector.x * repulsiveForce;
+            // forceY -= forceVector.y * repulsiveForce;
+            sumOfForces = sumOfForces - forceVector*repulsiveForce;
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_utils::Vector2 otherRobotPos = roboteam_utils::Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
         roboteam_utils::Vector2 forceVector = GetForceVectorFromRobot(myPos, otherRobotPos, posError);
-        forceX -= forceVector.x * repulsiveForce;
-        forceY -= forceVector.y * repulsiveForce;
+        // forceX -= forceVector.x * repulsiveForce;
+        // forceY -= forceVector.y * repulsiveForce;
+        sumOfForces = sumOfForces - forceVector*repulsiveForce;
     }
 
     // Add an attractive force towards the target
-    forceX += posError.x*attractiveForce;
-    forceY += posError.y*attractiveForce;
-    roboteam_utils::Vector2 forceVector = roboteam_utils::Vector2(forceX, forceY);
+    // forceX += posError.x*attractiveForce;
+    // forceY += posError.y*attractiveForce;
+    sumOfForces = sumOfForces + posError*attractiveForceWhenClose;
+    
+
+
 
     // Slow down once we get close to the goal, other go at maximum speed
     if (posError.length() > 0.2) {
-        if (forceVector.length() > 0) {
-            forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
+        if (sumOfForces.length() > 0) {
+            sumOfForces = sumOfForces.scale(1/sumOfForces.length() * maxSpeed);
         } else {
-            forceVector = roboteam_utils::Vector2(0.0, 0.0);
+            sumOfForces = roboteam_utils::Vector2(0.0, 0.0);
         }
     }
 
+
     // Rotate from robot frame to world frame
     roboteam_utils::Vector2 requiredSpeed;  
-    requiredSpeed.x=forceVector.x*cos(-myAngle)-forceVector.y*sin(-myAngle);
-    requiredSpeed.y=forceVector.x*sin(-myAngle)+forceVector.y*cos(-myAngle);
+    requiredSpeed.x=sumOfForces.x*cos(-myAngle)-sumOfForces.y*sin(-myAngle);
+    requiredSpeed.y=sumOfForces.x*sin(-myAngle)+sumOfForces.y*cos(-myAngle);
 
     double requiredRotSpeed = RotationController(angleError);
 
@@ -192,6 +236,9 @@ bt::Node::Status AvoidRobots::Update () {
     command.x_vel = requiredSpeed.x;
     command.y_vel = requiredSpeed.y;
     command.w = requiredRotSpeed;
+    // command.x_vel = 0.0;
+    // command.y_vel = 0.0;
+    // command.w = 0.0;
     if (dribbler) {command.dribbler = true;}
     pub.publish(command);
     return Status::Running;

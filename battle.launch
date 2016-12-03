@@ -2,12 +2,12 @@
 	<group ns="blue">
 		<param name="our_color" value="blue" type="str" />
 		<param name="our_field_side" value="left" type="str" />
-		<include file="$(find roboteam_tactics)/strat_role.launch" />
+		<include file="$(find roboteam_tactics)/attackers.launch" />
 	</group>
 
 	<group ns="yellow">
 		<param name="our_color" value="yellow" type="str" />
 		<param name="our_field_side" value="right" type="str" />
-		<include file="$(find roboteam_tactics)/strat_role.launch" />
+		<include file="$(find roboteam_tactics)/defenders.launch" />
 	</group>
 </launch>
