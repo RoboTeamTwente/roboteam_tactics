@@ -52,6 +52,35 @@ public:
     }
 } ;
 
+template<
+    class L
+>
+void print_all(std::string category) {
+    auto& repo = getRepo<Factory<L>>();
+    std::cout << "Printing all entries in repo of category \""
+              << category
+              << "\" ("
+              << repo.size()
+              << " items):\n";
+    for (const auto& entry : repo) {
+        std::cout << "\t- " << entry.first << "\n";
+    }
+}
+
+template<
+    class L
+>
+std::vector<std::string> get_entry_names() {
+    std::vector<std::string> entries;
+    auto& repo = getRepo<Factory<L>>();
+
+    for (const auto& entry : repo) {
+        entries.push_back(entry.first);
+    }
+
+    return entries;
+}
+
 } // factories
 
 } // rtt

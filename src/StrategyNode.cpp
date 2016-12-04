@@ -15,14 +15,13 @@
 #include "roboteam_msgs/StrategyIgnoreRobot.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
-#include "roboteam_tactics/generated/alltrees_list.h"
-#include "roboteam_tactics/generated/alltrees_factory.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/Parts.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -47,40 +46,41 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
-
-    using namespace rtt::factories;
-
-    auto& skillRepo = getRepo<Factory<rtt::Skill>>();
-    std::cout << "Number of skills: " << skillRepo.size() << "\n";
-    for (const auto& entry: skillRepo) {
-        std::cout << "Skill: " << entry.first << "\n";
-    }
-    std::cout << "Done listing skills.\n";
-
-    auto getBallSkill = skillRepo["GetBall"]("", nullptr);
     
-    auto& treeRepo = getRepo<Factory<bt::BehaviorTree>>();
-    std::cout << "Repo location: " << &treeRepo << "\n";
-    std::cout << "Actual number of trees: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
-    std::cout << "Repo size: " << getRepo<Factory<bt::BehaviorTree>>().size() << "\n";
-    std::cout << "Number of trees: " << treeRepo.size() << "\n";
-    for (const auto& entry: treeRepo) {
-        std::cout << "Tree: " << entry.first << "\n";
-    }
-    std::cout << "Done listing trees.\n";
+    namespace f = rtt::factories;
+
+    // Uncomment to check all the captured conditions, skills, tactics, strategies, & roles
+    // std::cout << "[Printing everything]\n";
+    // f::print_all<rtt::Condition>("Condition");
+    // f::print_all<rtt::Skill>("Skill");
+    // f::print_all<rtt::Tactic>("Tactic");
+    // f::print_all<bt::BehaviorTree>("bt::BehaviorTree");
 
     ros::Rate rate(60);
 
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
     
     RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    RTT_DEBUGLN("Waiting for first world & geom message...");
     rtt::LastWorld::wait_for_first_messages();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
-    bt::BehaviorTree strategy;
+    std::shared_ptr<bt::BehaviorTree> strategy;
+    // Only continue if arguments were given
     if (arguments.size() > 0) {
-        strategy = rtt::make_tree(arguments[0]);
+        // Get all available trees
+        auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
+        // If the given name exists...
+        if (repo.find(arguments[0]) != repo.end()) {
+            // Get the factory
+            auto treeFactory = repo.at(arguments[0]);
+            // Create the tree
+            strategy = treeFactory("", nullptr);
+        } else {
+            ROS_ERROR("\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
+            return 1;
+        }
     } else {
         ROS_ERROR("No strategy tree passed as argument. Aborting.");
         return 1;
@@ -90,7 +90,9 @@ int main(int argc, char *argv[]) {
     if (ros::param::has("num_role_nodes")) {
         int numNodes;
         ros::param::get("num_role_nodes", numNodes);
-        RTT_DEBUG("Waiting for %d role nodes...\n", numNodes);
+
+        RTT_DEBUGLN("Waiting for %i robot nodes to come online", numNodes);
+       
         while ((int) directivePub.getNumSubscribers() < numNodes) {
             ros::spinOnce();
             rate.sleep();
@@ -102,7 +104,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    RTT_DEBUG("Found role nodes. Waiting for more than 0 robots to appear...\n");
+    RTT_DEBUGLN("Found role nodes. Waiting for more than 0 robots to appear...");
 
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
@@ -117,12 +119,12 @@ int main(int argc, char *argv[]) {
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
-    RTT_DEBUG("More than one robot found. Starting...\n");
+    RTT_DEBUGLN("More than one robot found. Starting...");
 
     while (ros::ok()) {
         ros::spinOnce();
 
-        bt::Node::Status status = strategy.Update();
+        bt::Node::Status status = strategy->Update();
 
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);

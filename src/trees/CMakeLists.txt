@@ -2,7 +2,7 @@ add_subdirectory(json)
 
 add_library(alltrees OBJECT
     alltrees.cpp
-    alltrees_factory.cpp
+    # alltrees_factory.cpp
     # $<TARGET_OBJECTS:treegen>
     # $<TARGET_OBJECTS:skills>
     # $<TARGET_OBJECTS:conditions>

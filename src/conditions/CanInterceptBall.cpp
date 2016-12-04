@@ -1,10 +1,21 @@
 #include "roboteam_tactics/conditions/CanInterceptBall.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #ifdef DEBUG_ICPT
 #include <cstdio>
 #endif
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(CanInterceptBall);
+
+CanInterceptBall::CanInterceptBall(std::string name, bt::Blackboard::Ptr blackboard) :
+    Condition(name, blackboard) { }
+
+bt::Node::Status CanInterceptBall::Update() {
+    // TODO: Why is this not implemented? - Bob
+    return Status::Failure;
+}
 
 struct intercept_data CanInterceptBall::calc_intercept() {
     roboteam_msgs::World world = LastWorld::get();

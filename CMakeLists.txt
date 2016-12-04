@@ -47,6 +47,8 @@ target_link_libraries(DoStrategy
 	)
 
 # Executable that can convert behavior3 json to C++ functions
+# TODO: Make the converter scan dirs instead of include every skill condition
+# tactic etc.
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
@@ -73,7 +75,11 @@ add_executable(TestX
     $<TARGET_OBJECTS:skills>
     $<TARGET_OBJECTS:conditions>
     )
-add_dependencies(TestX ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_leafs_t)
+add_dependencies(TestX 
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    # generate_leafs_t
+    )
 target_link_libraries(TestX
     ${catkin_LIBRARIES}
     )
@@ -90,9 +96,9 @@ add_custom_command(
     DEPENDS
         converter
         ${JSON_FILES}
-        ${CONDITION_SOURCES}
-        ${TACTIC_SOURCES}
-        ${SKILL_SOURCES}
+        # ${CONDITION_SOURCES}
+        # ${TACTIC_SOURCES}
+        # ${SKILL_SOURCES}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
     )
@@ -106,21 +112,21 @@ add_custom_target(generate_json_t
 # Generates files (like allconditions.h and allconditions_set.h)
 # that can be used to see which conditions exist (using the set)
 # and include all possible conditions at once.
-add_custom_target(generate_leafs_t
-    DEPENDS
-        generated/generate_all_leafs.stamp
-    )
-add_custom_command(
-    OUTPUT
-        ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
-    DEPENDS
-        ${CONDITION_SOURCES}
-        ${TACTIC_SOURCES}
-        ${SKILL_SOURCES}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
-    )
+# add_custom_target(generate_leafs_t
+    # DEPENDS
+        # generated/generate_all_leafs.stamp
+    # )
+# add_custom_command(
+    # OUTPUT
+        # ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
+    # COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
+    # DEPENDS
+        # ${CONDITION_SOURCES}
+        # ${TACTIC_SOURCES}
+        # ${SKILL_SOURCES}
+    # WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    # COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
+    # )
 
 # Generate debug macros
 # add_custom_target(generate_dbg_macros_t

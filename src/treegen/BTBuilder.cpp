@@ -5,10 +5,8 @@
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
-#include "roboteam_tactics/generated/allconditions_set.h"
-#include "roboteam_tactics/generated/allskills_set.h"
-#include "roboteam_tactics/generated/alltactics_set.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/Parts.h"
 
 #define INDENT "    "
 #define DINDENT "        "
@@ -21,6 +19,22 @@ BTBuilder::BTBuilder() {}
 BTBuilder::~BTBuilder() {}
 
 std::string BTBuilder::build(nlohmann::json json) {
+    namespace f = rtt::factories;
+
+    allskills_list = f::get_entry_names<Skill>();
+    allconditions_list = f::get_entry_names<Condition>();
+    alltactics_list = f::get_entry_names<Tactic>();
+
+    // To turn every list into a set and clear the previous sets
+    auto initializeSet = [](std::set<std::string> &theSet, std::vector<std::string> &theVector) {
+        theSet.clear();
+        theSet.insert(theVector.begin(), theVector.end());
+    };
+    
+    initializeSet(allskills_set, allskills_list);
+    initializeSet(allconditions_set, allconditions_list);
+    initializeSet(alltactics_set, alltactics_list);
+
     std::stack<std::string> stack;
     stack.push(json["root"]);
 

@@ -8,7 +8,6 @@
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/utils/LastWorld.h"

@@ -12,10 +12,6 @@
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/treegen/NodeFactory.h"
-#include "roboteam_tactics/generated/alltrees_factory.h"
-#include "roboteam_tactics/generated/alltrees_set.h"
-#include "roboteam_tactics/generated/allskills_set.h"
-#include "roboteam_tactics/generated/allskills_factory.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/debug_print.h"
 
