@@ -22,14 +22,15 @@ assert_tactics_root
     treeHeader="alltrees.h"
 
     # Preamble of the source file
-    sourcePreamble="
     #include \"roboteam_tactics/generated/allskills.h\"
     #include \"roboteam_tactics/generated/allconditions.h\"
     #include \"roboteam_tactics/generated/alltactics.h\"
+    sourcePreamble="
     #include \"roboteam_tactics/bt.hpp\"
     #include \"roboteam_tactics/utils/ParallelTactic.hpp\"
     #include \"roboteam_tactics/utils/utils.h\"
     #include \"roboteam_tactics/treegen/LeafRegister.h\"
+
 "
 
     # Preamble of header file

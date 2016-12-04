@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/Math.h"
@@ -15,6 +16,8 @@
 #define RTT_CURRENT_DEBUG_TAG Kick
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(Kick);
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
@@ -83,6 +86,7 @@ bt::Node::Status Kick::Update() {
 
 			pubKick.publish(command);
 			ros::spinOnce();
+
 			RTT_DEBUG("Triggered the kicker!\n");
 			return Status::Running;
 		}

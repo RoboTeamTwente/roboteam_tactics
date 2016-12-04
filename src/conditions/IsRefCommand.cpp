@@ -7,8 +7,11 @@
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_msgs/RefereeStage.h"
 #include "roboteam_msgs/RefereeCommand.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(IsRefCommand);
 
 IsRefCommand::IsRefCommand(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}

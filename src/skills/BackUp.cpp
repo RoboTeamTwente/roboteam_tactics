@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/BackUp.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/SkillFactory.h"
@@ -8,6 +9,8 @@
 
 namespace rtt {
     
+RTT_REGISTER_SKILL(BackUp);
+
 BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
         : Skill(name, bb) {
     assert_valid<BackUp>(name);

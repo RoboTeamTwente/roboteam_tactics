@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 
 #include "roboteam_tactics/skills/Chip.h"
@@ -12,8 +13,9 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 
-
 namespace rtt {
+
+RTT_REGISTER_SKILL(Chip);
 
 Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {

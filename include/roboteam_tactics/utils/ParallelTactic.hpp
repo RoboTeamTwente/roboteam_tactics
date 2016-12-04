@@ -117,3 +117,6 @@ static ParallelTactic::Ptr MakeParallelTactic()
 }
 
 }
+
+// Disable debug tag to prevent spilling in cpp files
+#undef RTT_CURRENT_DEBUG_TAG

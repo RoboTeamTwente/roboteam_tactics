@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/KeeperBlock.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
 //#include "roboteam_tactics/utils/SkillFactory.h"
@@ -5,6 +6,8 @@
 
 namespace rtt {
     
+RTT_REGISTER_SKILL(KeeperBlock);
+
 KeeperBlock::KeeperBlock(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard) {
     assert_valid<KeeperBlock>(name);
     target = -1;

@@ -52,6 +52,17 @@ public:
     }
 } ;
 
-}  // factories
+} // factories
 
 } // rtt
+
+// Macros (anonymous namespace s.t. it doesn't leak outside the source file
+// Double colon is for startin resolution from global namespace
+#define RTT_REGISTER_LEAF(leafName, typeName) \
+    namespace { \
+    ::rtt::factories::LeafRegisterer<leafName, typeName> leafName ## _registerer(#leafName); \
+    }
+
+#define RTT_REGISTER_SKILL(skillName) RTT_REGISTER_LEAF(skillName, Skill)
+#define RTT_REGISTER_CONDITION(conditionName) RTT_REGISTER_LEAF(conditionName, Condition)
+#define RTT_REGISTER_TACTIC(tacticName) RTT_REGISTER_LEAF(tacticName, Tactic)

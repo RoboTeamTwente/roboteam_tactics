@@ -9,8 +9,11 @@
 #include "roboteam_tactics/tactics/GoToSideTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_TACTIC(GoToSideTactic);
 
 GoToSideTactic::GoToSideTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 

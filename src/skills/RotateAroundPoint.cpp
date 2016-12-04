@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <cstring>
 #include <iostream>
 
@@ -19,6 +20,8 @@
 
 namespace rtt {
 	
+RTT_REGISTER_SKILL(RotateAroundPoint);
+
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
 

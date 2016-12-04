@@ -24,15 +24,12 @@ std::string BTBuilder::build(nlohmann::json json) {
     std::stack<std::string> stack;
     stack.push(json["root"]);
 
-    std::vector<std::string> usedSkills, usedConditions, usedTactics;
+    std::set<std::string> usedSkills, usedConditions, usedTactics;
 
     using namespace rtt::factories;
     auto& skillRepo = getRepo<Factory<Skill>>();
     auto& conditionRepo = getRepo<Factory<Condition>>();
     auto& tacticRepo = getRepo<Factory<Tactic>>();
-
-    // std::cerr << "skillRepo location: " << &skillRepo << "\n";
-    // std::cerr << "skillRepo size: " << skillRepo.size() << "\n";
 
     // Give all nodes who are not a skill nor condition
     // a unique name by appending a number at the end
@@ -41,15 +38,15 @@ std::string BTBuilder::build(nlohmann::json json) {
         std::string title = element["title"];
 
         if (skillRepo.find(element["name"].get<std::string>()) != skillRepo.end()) {
-            usedSkills.push_back(element["name"]);
+            usedSkills.insert(element["name"].get<std::string>());
         }
 
         if (conditionRepo.find(element["name"].get<std::string>()) != conditionRepo.end()) {
-            usedSkills.push_back(element["name"]);
+            usedConditions.insert(element["name"].get<std::string>());
         }
 
         if (tacticRepo.find(element["name"].get<std::string>()) != tacticRepo.end()) {
-            usedSkills.push_back(element["name"]);
+            usedTactics.insert(element["name"].get<std::string>());
         }
 
         if (allskills_set.find(element["name"]) == allskills_set.end()
@@ -82,18 +79,22 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "// Used skills: \n";
     for (const auto& skill : usedSkills) {
-        out << "// " << skill << "\n";
+        // out << INDENT << "// " << skill << "\n";
+        out << INDENT << "#include \"roboteam_tactics/skills/" << skill << ".h\"\n";
     }
 
     out << INDENT << "// Used conditions: \n";
     for (const auto& condition : usedConditions) {
-        out << "// " << condition << "\n";
+        // out << INDENT << "// " << condition << "\n";
+        out << INDENT << "#include \"roboteam_tactics/conditions/" << condition << ".h\"\n";
     }
 
     out << INDENT << "// Used tactics: \n";
     for (const auto& tactic : usedTactics) {
-        out << "// " << tactic << "\n";
+        // out << INDENT << "// " << tactic << "\n";
+        out << INDENT << "#include \"roboteam_tactics/tactics/" << tactic << ".h\"\n";
     }
+    out << "\n";
 
     // Create constructor function
     out << INDENT << "namespace rtt {\n\n";

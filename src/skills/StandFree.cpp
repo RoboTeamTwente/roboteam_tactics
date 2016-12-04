@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 #include "roboteam_tactics/skills/StandFree.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
@@ -12,6 +13,8 @@
 #include <vector>
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(StandFree);
 
 StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

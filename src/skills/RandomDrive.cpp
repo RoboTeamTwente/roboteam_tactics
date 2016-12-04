@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <string>
 #include <math.h>
 
@@ -11,6 +12,8 @@
 
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(RandomDrive);
 
 RandomDrive::RandomDrive(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

@@ -8,8 +8,11 @@
 #include "roboteam_tactics/conditions/IsBallInGoal.h"
 
 #include <vector>
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(IsBallInGoal);
 
 IsBallInGoal::IsBallInGoal(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
 

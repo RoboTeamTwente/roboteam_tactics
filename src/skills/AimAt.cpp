@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <string>
 
 #include "ros/ros.h"
@@ -13,6 +14,8 @@
 #include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(AimAt);
 
 AimAt::AimAt(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

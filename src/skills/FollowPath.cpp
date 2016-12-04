@@ -1,7 +1,7 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <vector>
 
 #include "ros/ros.h"
-
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
@@ -14,6 +14,8 @@
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(FollowPath);
 
 FollowPath::FollowPath(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {

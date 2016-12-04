@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <exception>
 #include <cmath>
 #include <sstream>
@@ -8,6 +9,8 @@
 #include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(Block);
 
 Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     assert_valid<Block>(name);
