@@ -44,7 +44,7 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
     double requiredRotSpeed = RotationController(angleError);
     roboteam_utils::Vector2 forceVector = posError*attractiveForceWhenClose;
 
-    // Slow down once we get close to the goal, other go at maximum speed
+    // Slow down once we get close to the goal, otherwise go at maximum speed
     if (posError.length() > 0.5) { // TODO: compute this distance depending on the maximum speed, so that there is no overshoot
         if (forceVector.length() > 0) {
             forceVector = forceVector.scale(1/forceVector.length() * maxSpeed);
@@ -76,6 +76,11 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
         if (dribbler) {command.dribbler = true;}
         return command;
     }
+}
+
+//TODO
+roboteam_msgs::RobotCommand AvoidRobots::VelocityController() {
+
 }
 
 roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError) {

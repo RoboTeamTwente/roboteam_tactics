@@ -20,6 +20,10 @@ class StandFree : public Skill {
 public:
     StandFree(std::string name, bt::Blackboard::Ptr blackboard);  
 	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
+    void DrawLine(std::string name, roboteam_utils::Vector2 start, roboteam_utils::Vector2 line);
+    void RemoveLine(std::string name);
+    void DrawPoint(std::string name, roboteam_utils::Vector2 point);
+    void RemovePoint(std::string name);
     Status Update();
 private:
     ros::NodeHandle n;

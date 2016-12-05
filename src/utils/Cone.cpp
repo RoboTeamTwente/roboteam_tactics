@@ -55,18 +55,19 @@ bool Cone::IsWithinField(roboteam_utils::Vector2 point) {
 	}
 }
 
-roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point) {
+roboteam_utils::Vector2 Cone::ClosestPointOnSide(roboteam_utils::Vector2 point, roboteam_utils::Vector2 closeTo) {
 	if (!IsWithinCone(point)) {
 		ROS_WARN("This point is not inside the cone");
 		return point;
 	}
-	roboteam_utils::Vector2 vectorToPoint = point-start;
-	roboteam_utils::Vector2 vectorToCenter = center-start;
-	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
-	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
-	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 
-	if (pointAngle >= 0) {
+	roboteam_utils::Vector2 option1 = side1.scale(10 / side1.length()).closestPointOnVector(start, point);
+	roboteam_utils::Vector2 option2 = side2.scale(10 / side2.length()).closestPointOnVector(start, point);
+
+	double option1Dist = (closeTo-option1).length();
+	double option2Dist = (closeTo-option2).length();
+
+	if (option1Dist <= option2Dist) {
 		if (IsWithinField(option1)) return option1;
 		else if (IsWithinField(option2)) return option2;
 		else return option1;
@@ -87,6 +88,9 @@ roboteam_utils::Vector2 Cone::SecondClosestPointOnSide(roboteam_utils::Vector2 p
 	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
 	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
+
+	
+
 	if (pointAngle >= 0) {
 		if (IsWithinField(option2)) return option2;
 		else if (IsWithinField(option1)) return option1;
@@ -97,7 +101,7 @@ roboteam_utils::Vector2 Cone::SecondClosestPointOnSide(roboteam_utils::Vector2 p
 	return point;
 }
 
-roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, roboteam_utils::Vector2 point) {
+roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, roboteam_utils::Vector2 point, roboteam_utils::Vector2 closeTo) {
 	if (!(this->IsWithinCone(point) && otherCone.IsWithinCone(point))) {
 		ROS_WARN("This point is not inside either of the cones");
 		return point;
@@ -105,62 +109,34 @@ roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoCones(Cone otherCone, robotea
 
 	roboteam_utils::Vector2 closestPointSoFar(100.0, 100.0);
 
-	// Check whether's there's an easy way out
-	roboteam_utils::Vector2 closestSideCone1 = this->ClosestPointOnSide(point);
-	if (!otherCone.IsWithinCone(closestSideCone1)) {
-		if ((closestSideCone1 - point).length() - (closestPointSoFar - point).length()) {
-			closestPointSoFar = closestSideCone1;
-		}
-	}
-	roboteam_utils::Vector2 closestSideCone2 = otherCone.ClosestPointOnSide(point);
-	if (!this->IsWithinCone(closestSideCone2)) {
-		if ((closestSideCone2 - point).length() - (closestPointSoFar - point).length()) {
-			closestPointSoFar = closestSideCone2;
-		}
-	}
+	roboteam_utils::Vector2 option1 = side1.scale(10 / side1.length()).closestPointOnVector(start, point);
+	roboteam_utils::Vector2 option2 = side2.scale(10 / side2.length()).closestPointOnVector(start, point);
+	roboteam_utils::Vector2 option3 = otherCone.side1.scale(10 / otherCone.side1.length()).closestPointOnVector(otherCone.start, point);
+	roboteam_utils::Vector2 option4 = otherCone.side2.scale(10 / otherCone.side2.length()).closestPointOnVector(otherCone.start, point);
+
+	// Find the one of these options that is closest to closeTo
+	if (!otherCone.IsWithinCone(option1) && (option1 - closeTo).length() - (closestPointSoFar - closeTo).length()) closestPointSoFar = option1;
+	if (!otherCone.IsWithinCone(option2) && (option2 - closeTo).length() - (closestPointSoFar - closeTo).length()) closestPointSoFar = option2;
+	if (!this->IsWithinCone(option3) && (option3 - closeTo).length() - (closestPointSoFar - closeTo).length()) closestPointSoFar = option3;
+	if (!this->IsWithinCone(option4) && (option4 - closeTo).length() - (closestPointSoFar - closeTo).length()) closestPointSoFar = option4;
 
 	// If one of these is found, return immediately because they will always be the closest
-	if ((closestPointSoFar - point).length() < 100.0) {return closestPointSoFar;}
-
-	// If not the closest side, maybe the other side of the cone...
-	roboteam_utils::Vector2 closestSide2Cone1 = this->SecondClosestPointOnSide(point);
-	if (!otherCone.IsWithinCone(closestSide2Cone1)) {
-		if ((closestSide2Cone1 - point).length() - (closestPointSoFar - point).length()) {
-			closestPointSoFar = closestSide2Cone1;
-		}
-	}
-	roboteam_utils::Vector2 closestSide2Cone2 = otherCone.SecondClosestPointOnSide(point);
-	if (!this->IsWithinCone(closestSide2Cone2)) {
-		if ((closestSide2Cone2 - point).length() - (closestPointSoFar - point).length()) {
-			closestPointSoFar = closestSide2Cone2;
-		}
+	if ((closestPointSoFar - closeTo).length() < 100.0) {
+		return closestPointSoFar;
 	}
 
+	// Otherwise, find the closest intersection of the two cones
 	roboteam_utils::Vector2 intersection1 = LineIntersection(start, side1, otherCone.start, otherCone.side1);
 	roboteam_utils::Vector2 intersection2 = LineIntersection(start, side1, otherCone.start, otherCone.side2);
 	roboteam_utils::Vector2 intersection3 = LineIntersection(start, side2, otherCone.start, otherCone.side1);
 	roboteam_utils::Vector2 intersection4 = LineIntersection(start, side2, otherCone.start, otherCone.side2);
 	
-	if ((intersection1 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection1)) closestPointSoFar = intersection1;
-	if ((intersection2 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection2)) closestPointSoFar = intersection2;
-	if ((intersection3 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection3)) closestPointSoFar = intersection3;
-	if ((intersection4 - point).length() < (closestPointSoFar - point).length() && IsWithinField(intersection4)) closestPointSoFar = intersection4;
+	if ((intersection1 - closeTo).length() < (closestPointSoFar - closeTo).length() && IsWithinField(intersection1)) closestPointSoFar = intersection1;
+	if ((intersection2 - closeTo).length() < (closestPointSoFar - closeTo).length() && IsWithinField(intersection2)) closestPointSoFar = intersection2;
+	if ((intersection3 - closeTo).length() < (closestPointSoFar - closeTo).length() && IsWithinField(intersection3)) closestPointSoFar = intersection3;
+	if ((intersection4 - closeTo).length() < (closestPointSoFar - closeTo).length() && IsWithinField(intersection4)) closestPointSoFar = intersection4;
 	if (closestPointSoFar.length() > 100.0) {closestPointSoFar = point;}
 	return closestPointSoFar;
-}
-
-roboteam_utils::Vector2 Cone::ClosestPointOnSideTwoConesMin(Cone otherCone, roboteam_utils::Vector2 point) {
-	if (!this->IsWithinCone(point) || !otherCone.IsWithinCone(point)) {
-		ROS_WARN("This point is not inside both cones");
-		return point;
-	}
-	roboteam_utils::Vector2 closestSideCone1 = this->ClosestPointOnSide(point);
-	roboteam_utils::Vector2 closestSideCone2 = otherCone.ClosestPointOnSide(point);
-	if ((closestSideCone1 - point).length() < (closestSideCone2 - point).length()) {
-		return closestSideCone1;
-	} else {
-		return closestSideCone2;
-	}
 }
 
 roboteam_utils::Vector2 Cone::LineIntersection(roboteam_utils::Vector2 line1Start, roboteam_utils::Vector2 line1Dir, roboteam_utils::Vector2 line2Start, roboteam_utils::Vector2 line2Dir) {
