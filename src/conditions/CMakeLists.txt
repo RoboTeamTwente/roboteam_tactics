@@ -12,8 +12,9 @@ set(CONDITION_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/TheyHaveBall.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/WeHaveBall.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DistanceXToY.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/IsRefStage.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/IsRefCommand.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/IsRefStage.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/IsRefCommand.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/IsBallInZone.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ParamCheck.cpp
     )
 set(CONDITION_SOURCES

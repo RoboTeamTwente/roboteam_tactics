@@ -90,7 +90,6 @@ bt::Node::Status CanReachPoint::Update() {
 		roboteam_utils::Vector2 maxAccInDirection = ComputeMaxAcceleration(fabs(angleDiff), maxAcc);
 		speed += maxAccInDirection.length()*timeStep;
 		if (speed > maxSpeed) {speed = maxSpeed;}
-		// ROS_INFO_STREAM("speed: " << speed);
 		travelledDistance += speed*timeStep;
 		
 		// Rotate towards your goal, so you get maximum acceleration

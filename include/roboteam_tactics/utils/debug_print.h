@@ -45,6 +45,8 @@ SET_DEBUG_FOR(ParamCheck, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
 SET_DEBUG_FOR(DistanceXToY, false);
+SET_DEBUG_FOR(IsRefStage, true);
+SET_DEBUG_FOR(IsRefCommand, true);
 
 // Tactics
 SET_DEBUG_FOR(DemoTactic, true);

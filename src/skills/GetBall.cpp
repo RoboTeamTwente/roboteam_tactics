@@ -213,8 +213,8 @@ bt::Node::Status GetBall::Update (){
 		}
 		double posDiff = (ballPos - robotPos).length();
 
-		if (posDiff > 0.3) {
-			targetPos = ballPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
+		if (posDiff > 0.3 || fabs(angleDiff) > 0.2*M_PI) {
+			targetPos = ballPos + roboteam_utils::Vector2(0.2, 0.0).rotate(targetAngle + M_PI);
 		} else {
 			targetPos = ballPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
 		}

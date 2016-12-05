@@ -22,6 +22,10 @@ void msgCallBackAvoidRobots(const roboteam_msgs::WorldConstPtr& world, rtt::Avoi
 	}
 }
 
+void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometry) {
+    rtt::LastWorld::set_field(geometry->field);
+}
+
 // void msgCallBackAvoidRobots(const roboteam_msgs::WorldConstPtr& world, rtt::AvoidRobots* avoidRobots1, rtt::AvoidRobots* avoidRobots2, rtt::AvoidRobots* avoidRobots3) {
 // 	rtt::LastWorld::set(*world);
 // 	if (!finished1) {
@@ -47,7 +51,7 @@ int main(int argc, char **argv) {
 
 	auto bb1 = std::make_shared<bt::Blackboard>();
 	bb1->SetInt("ROBOT_ID", 0);
-	bb1->SetDouble("xGoal", 0.0);
+	bb1->SetDouble("xGoal", 5.0);
 	bb1->SetDouble("yGoal", 0.0);
 	bb1->SetDouble("angleGoal", 0.0);
 	bb1->SetBool("priority", false);
@@ -64,12 +68,13 @@ int main(int argc, char **argv) {
 	// bb3->SetDouble("angleGoal", 0.0);
 	// bb3->SetBool("priority", false);
 
-	rtt::AvoidRobots avoidRobots1(n, "", bb1);
+	rtt::AvoidRobots avoidRobots1("", bb1);
 	// rtt::AvoidRobots avoidRobots2(n, "", bb2);
 	// rtt::AvoidRobots avoidRobots3(n, "", bb3);
 
 	// ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1, &avoidRobots2, &avoidRobots3));
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
+	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
 
 	while (ros::ok()) {
 		ros::spinOnce();

@@ -1,66 +1,145 @@
 {
-  "id": "ccc95a81-e376-440c-8c4a-14809390ac4e",
-  "title": "AttackerStrategy",
+  "id": "24b55629-a01e-4b1e-8a60-a8658e8e0e28",
+  "title": "BasicAttacker1",
   "description": "",
-  "root": "a390dfc8-62ae-4c80-833f-7a6f08b5216e",
+  "root": "fd2b6502-d397-4206-89d9-419bcff5aa22",
   "properties": {},
   "nodes": {
-    "a390dfc8-62ae-4c80-833f-7a6f08b5216e": {
-      "id": "a390dfc8-62ae-4c80-833f-7a6f08b5216e",
-      "name": "ParallelTactic",
-      "title": "ParallelTactic",
+    "6c419ef7-fe5f-4f29-aaa1-e8db880377fb": {
+      "id": "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
+      "name": "GetBall",
+      "title": "GetBall_B",
       "description": "",
-      "properties": {
-        "minSuccess": 1,
-        "minFail": 1
-      },
+      "properties": {},
       "display": {
-        "x": 60,
+        "x": -72,
+        "y": -84
+      }
+    },
+    "c78aef73-73fe-4734-9dc2-54a3bb17bd2f": {
+      "id": "c78aef73-73fe-4734-9dc2-54a3bb17bd2f",
+      "name": "Kick",
+      "title": "Kick_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -432,
+        "y": 60
+      }
+    },
+    "e427bf0e-c806-4bdf-8ca8-6546b342c106": {
+      "id": "e427bf0e-c806-4bdf-8ca8-6546b342c106",
+      "name": "Priority",
+      "title": "Priority",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -132,
+        "y": 0
+      },
+      "children": [
+        "24eeb9dd-63a3-4f7e-bd97-44d475d647ba",
+        "11a15123-42d1-4f67-9d08-2d0368d5b04a"
+      ]
+    },
+    "fd2b6502-d397-4206-89d9-419bcff5aa22": {
+      "id": "fd2b6502-d397-4206-89d9-419bcff5aa22",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -660,
         "y": -12
       },
       "children": [
-        "77fab948-26ba-48de-8c11-ff1a1ba92b92"
+        "0880bf87-ce76-4ad5-8da9-b46f88e20b27",
+        "c78aef73-73fe-4734-9dc2-54a3bb17bd2f"
       ]
     },
-    "2079ce16-3852-42ca-8d2e-f70dfdcf9821": {
-      "id": "2079ce16-3852-42ca-8d2e-f70dfdcf9821",
-      "name": "BasicDefenseTactic",
-      "title": "BasicDefenseTactic",
+    "24eeb9dd-63a3-4f7e-bd97-44d475d647ba": {
+      "id": "24eeb9dd-63a3-4f7e-bd97-44d475d647ba",
+      "name": "CanSeeTheirGoal",
+      "title": "CanSeeTheirGoal_B",
       "description": "",
       "properties": {},
       "display": {
-        "x": 264,
-        "y": 84
+        "x": 60,
+        "y": -24
       }
     },
-    "261f2e73-b4b1-409a-87de-cc85344661fc": {
-      "id": "261f2e73-b4b1-409a-87de-cc85344661fc",
-      "name": "BasicKeeperTactic",
-      "title": "BasicKeeperTactic",
+    "11a15123-42d1-4f67-9d08-2d0368d5b04a": {
+      "id": "11a15123-42d1-4f67-9d08-2d0368d5b04a",
+      "name": "Sequence",
+      "title": "Sequence",
       "description": "",
       "properties": {},
       "display": {
-        "x": 264,
-        "y": 168
+        "x": -36,
+        "y": 60
+      },
+      "children": [
+        "e4a89447-5fba-4611-841e-c2a33483117c",
+        "ce757864-d6a5-4b9e-825a-f4f6390cec30"
+      ]
+    },
+    "e4a89447-5fba-4611-841e-c2a33483117c": {
+      "id": "e4a89447-5fba-4611-841e-c2a33483117c",
+      "name": "CanSeeRobot",
+      "title": "CanSeeRobot_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 120,
+        "y": 60
       }
     },
-    "77fab948-26ba-48de-8c11-ff1a1ba92b92": {
-      "id": "77fab948-26ba-48de-8c11-ff1a1ba92b92",
-      "name": "AttackerTactic",
-      "title": "AttackerTactic",
+    "ce757864-d6a5-4b9e-825a-f4f6390cec30": {
+      "id": "ce757864-d6a5-4b9e-825a-f4f6390cec30",
+      "name": "AimAt",
+      "title": "AimAt_B",
       "description": "",
       "properties": {},
       "display": {
-        "x": 264,
-        "y": -12
+        "x": 120,
+        "y": 120
       }
+    },
+    "0880bf87-ce76-4ad5-8da9-b46f88e20b27": {
+      "id": "0880bf87-ce76-4ad5-8da9-b46f88e20b27",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": -444,
+        "y": -84
+      },
+      "child": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e"
+    },
+    "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e": {
+      "id": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -276,
+        "y": -84
+      },
+      "children": [
+        "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
+        "e427bf0e-c806-4bdf-8ca8-6546b342c106"
+      ]
     }
   },
   "display": {
-    "camera_x": 469.7799999974668,
-    "camera_y": 337.96999999973923,
+    "camera_x": 1077.0799999972805,
+    "camera_y": 334,
     "camera_z": 1,
-    "x": -72,
+    "x": -756,
     "y": -12
   },
   "custom_nodes": [

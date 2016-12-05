@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "KeeperTactic");
     ros::NodeHandle n;
 
-    auto role2 = make_CoolTree(n);
+    auto role2 = make_CoolTree();
     auto bb2 = role2.GetBlackboard();
 
     bb2->SetInt("ROBOT_ID", 2);
