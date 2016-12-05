@@ -16,6 +16,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 static volatile bool may_update = false;
 
@@ -147,6 +148,11 @@ How to use:
 
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
+    if (!node) {
+        ROS_ERROR("Test for \"%s\" could not be constructred. Aborting.", testClass.c_str());
+        return 1;
+    }
+
     bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -156,12 +162,9 @@ How to use:
     if (is_bt) {
         rtt::BTRunner runner(*is_bt, false);
 		runner.run_until([&](bt::Node::Status previousStatus) {
-          ros::spinOnce();
-           fps60.sleep();
-		
-		
-        return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
-            
+            ros::spinOnce();
+            fps60.sleep();
+            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
     } else {
         node->Initialize();
