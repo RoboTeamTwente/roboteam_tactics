@@ -127,7 +127,6 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
 }
 
 bt::Node::Status AvoidRobots::Update () {
-
     // Get the latest world state
 	roboteam_msgs::World world = LastWorld::get();
     if (world.us.size() == 0) {

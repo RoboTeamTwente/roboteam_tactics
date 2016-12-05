@@ -16,8 +16,8 @@
         "zone": 1
       },
       "display": {
-        "x": 492,
-        "y": -288
+        "x": 588,
+        "y": -312
       }
     },
     "c007c28f-cb0b-428d-8b19-b53a56589fba": {
@@ -27,23 +27,9 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 456,
-        "y": 36
+        "x": 432,
+        "y": 96
       }
-    },
-    "35c75391-3c78-4208-8f72-4f3208288193": {
-      "id": "35c75391-3c78-4208-8f72-4f3208288193",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 144,
-        "y": 36
-      },
-      "children": [
-        "c007c28f-cb0b-428d-8b19-b53a56589fba"
-      ]
     },
     "671b7dbc-2282-4085-84be-6cd502351d11": {
       "id": "671b7dbc-2282-4085-84be-6cd502351d11",
@@ -56,8 +42,8 @@
         "angleGoal": 3.14
       },
       "display": {
-        "x": 348,
-        "y": -216
+        "x": 408,
+        "y": -240
       }
     },
     "1a449bf5-174a-417c-87c3-c53226315625": {
@@ -67,8 +53,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 312,
-        "y": -288
+        "x": 384,
+        "y": -312
       },
       "child": "01158d10-1380-43ee-8c67-6609abb53746"
     },
@@ -83,24 +69,8 @@
         "y": -156
       },
       "children": [
-        "01797b25-94bd-4c5a-8d8f-d19edafb98ad",
-        "35c75391-3c78-4208-8f72-4f3208288193"
-      ]
-    },
-    "01797b25-94bd-4c5a-8d8f-d19edafb98ad": {
-      "id": "01797b25-94bd-4c5a-8d8f-d19edafb98ad",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 156,
-        "y": -252
-      },
-      "children": [
-        "1a449bf5-174a-417c-87c3-c53226315625",
-        "671b7dbc-2282-4085-84be-6cd502351d11",
-        "562dc858-50c8-42e7-8322-7c742cbd334c"
+        "8c9131b8-6b1a-446d-8ebf-a00d839176b9",
+        "ccc795a1-7b65-4dbd-a47e-b0b036186990"
       ]
     },
     "f667f950-4bbe-42ca-8bc5-740df284fdc9": {
@@ -117,21 +87,59 @@
       },
       "child": "067fb6da-268c-4435-8e0c-53116487a521"
     },
-    "562dc858-50c8-42e7-8322-7c742cbd334c": {
-      "id": "562dc858-50c8-42e7-8322-7c742cbd334c",
-      "name": "Failer",
-      "title": "Failer_A",
+    "3b36fbd9-8cc5-49f3-8417-29a95086b7ce": {
+      "id": "3b36fbd9-8cc5-49f3-8417-29a95086b7ce",
+      "name": "IsBallInZone",
+      "title": "IsBallInZone_B",
       "description": "",
-      "properties": {},
+      "properties": {
+        "zone": 1
+      },
       "display": {
-        "x": 348,
-        "y": -156
+        "x": 432,
+        "y": -24
       }
+    },
+    "ccc795a1-7b65-4dbd-a47e-b0b036186990": {
+      "id": "ccc795a1-7b65-4dbd-a47e-b0b036186990",
+      "name": "ParallelSequence",
+      "title": "ParallelSequence",
+      "description": "",
+      "properties": {
+        "minSuccess": 2,
+        "minFail": 1
+      },
+      "display": {
+        "x": 168,
+        "y": 48
+      },
+      "children": [
+        "3b36fbd9-8cc5-49f3-8417-29a95086b7ce",
+        "c007c28f-cb0b-428d-8b19-b53a56589fba"
+      ]
+    },
+    "8c9131b8-6b1a-446d-8ebf-a00d839176b9": {
+      "id": "8c9131b8-6b1a-446d-8ebf-a00d839176b9",
+      "name": "ParallelSequence",
+      "title": "ParallelSequence",
+      "description": "",
+      "properties": {
+        "minSuccess": 3,
+        "minFail": 1
+      },
+      "display": {
+        "x": 168,
+        "y": -264
+      },
+      "children": [
+        "1a449bf5-174a-417c-87c3-c53226315625",
+        "671b7dbc-2282-4085-84be-6cd502351d11"
+      ]
     }
   },
   "display": {
-    "camera_x": 781.5,
-    "camera_y": 563.5,
+    "camera_x": 777.5,
+    "camera_y": 631.5,
     "camera_z": 1,
     "x": -384,
     "y": -156
