@@ -3,11 +3,11 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/filesystem.hpp>
+namespace bf = boost::filesystem;
+
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
-#include "roboteam_tactics/generated/allconditions_set.h"
-#include "roboteam_tactics/generated/allskills_set.h"
-#include "roboteam_tactics/generated/alltactics_set.h"
 
 #define INDENT "    "
 #define DINDENT "        "
@@ -19,15 +19,78 @@ namespace rtt {
 BTBuilder::BTBuilder() {}
 BTBuilder::~BTBuilder() {}
 
+namespace {
+    std::vector<std::string> get_all(std::string category) {
+        bf::path categoryPath("src/" + category);
+
+        std::vector<std::string> xs;
+        try {
+            if (exists(categoryPath)) {
+                for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
+                    if (de.path().extension().string() == ".cpp") {
+                        xs.push_back(de.path().stem().string());
+                    }
+                }
+            } else {
+                std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
+                return {};
+            }
+
+            return xs;
+        } catch (const bf::filesystem_error& ex) {
+            return {};
+        }
+    }
+}
+
 std::string BTBuilder::build(nlohmann::json json) {
+
+    // namespace f = rtt::factories;
+
+    // allskills_list = f::get_entry_names<Skill>();
+    // allconditions_list = f::get_entry_names<Condition>();
+    // alltactics_list = f::get_entry_names<Tactic>();
+
+    allskills_list = get_all("skills");
+    allconditions_list = get_all("conditions");
+    alltactics_list = get_all("tactics");
+
+    // To turn every list into a set and clear the previous sets
+    auto initializeSet = [](std::set<std::string> &theSet, std::vector<std::string> &theVector) {
+        theSet.clear();
+        theSet.insert(theVector.begin(), theVector.end());
+    };
+    
+    initializeSet(allskills_set, allskills_list);
+    initializeSet(allconditions_set, allconditions_list);
+    initializeSet(alltactics_set, alltactics_list);
+
     std::stack<std::string> stack;
     stack.push(json["root"]);
+
+    std::set<std::string> usedSkills, usedConditions, usedTactics;
+
+    // auto& skillRepo = getRepo<Factory<Skill>>();
+    // auto& conditionRepo = getRepo<Factory<Condition>>();
+    // auto& tacticRepo = getRepo<Factory<Tactic>>();
 
     // Give all nodes who are not a skill nor condition
     // a unique name by appending a number at the end
     int ctr = 0;
     for (auto& element : json["nodes"]) {
         std::string title = element["title"];
+
+        if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
+            usedSkills.insert(element["name"].get<std::string>());
+        }
+
+        if (allconditions_set.find(element["name"].get<std::string>()) != allconditions_set.end()) {
+            usedConditions.insert(element["name"].get<std::string>());
+        }
+
+        if (alltactics_set.find(element["name"].get<std::string>()) != alltactics_set.end()) {
+            usedTactics.insert(element["name"].get<std::string>());
+        }
 
         if (allskills_set.find(element["name"]) == allskills_set.end()
                 && allconditions_set.find(element["name"]) == allconditions_set.end()) {
@@ -57,6 +120,24 @@ std::string BTBuilder::build(nlohmann::json json) {
         }
     }
 
+    out << INDENT << "// Used skills: \n";
+    for (const auto& skill : usedSkills) {
+        out << INDENT << "#include \"roboteam_tactics/skills/" << skill << ".h\"\n";
+    }
+
+    out << INDENT << "// Used conditions: \n";
+    for (const auto& condition : usedConditions) {
+        out << INDENT << "#include \"roboteam_tactics/conditions/" << condition << ".h\"\n";
+    }
+
+    out << INDENT << "// Used tactics: \n";
+    for (const auto& tactic : usedTactics) {
+        out << INDENT << "#include \"roboteam_tactics/tactics/" << tactic << ".h\"\n";
+    }
+    out << "\n";
+
+    // Create constructor function
+    out << INDENT << "namespace rtt {\n\n";
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
         << "(bt::Blackboard* blackboard) {"
@@ -71,7 +152,19 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << DINDENT << "tree.SetRoot(" << root["title"].get<std::string>() << ");" << std::endl;
     out << DINDENT << "return tree;" << std::endl;
-    out << INDENT << "}" << std::endl;
+    out << INDENT << "}\n\n";
+    out << INDENT << "} // rtt\n\n";
+
+    out << INDENT << "namespace {\n\n";
+    out << INDENT
+        << "rtt::factories::TreeRegisterer rtt_"
+        << json["title"].get<std::string>()
+        << "_registerer(\""
+        << json["title"].get<std::string>()
+        << "\", &rtt::make_"
+        << json["title"].get<std::string>()
+        << ");\n\n";
+    out << INDENT << "} // anonymous namespace\n";
 
     return out.str();
 }
@@ -107,7 +200,7 @@ void BTBuilder::define_seq(std::string name, std::string nodeType, json properti
         params = get_parallel_params_from_properties(properties);
     } else if (nodeType == "ParallelTactic") {
         // Parallel sequence without repeat
-        type = "rtt::ParallelTactic";
+        type = "ParallelTactic";
         params = get_parallel_params_from_properties(properties);
     } else {
         // It's a regular sequence

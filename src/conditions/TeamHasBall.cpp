@@ -3,8 +3,11 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(TeamHasBall);
 
 TeamHasBall::TeamHasBall(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
     assert_valid<TeamHasBall>(name);

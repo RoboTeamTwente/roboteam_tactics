@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 
 #include "roboteam_tactics/Parts.h"
@@ -8,6 +9,8 @@
 #define RTT_CURRENT_DEBUG_TAG ParamSet
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(ParamSet);
 
 ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) { }

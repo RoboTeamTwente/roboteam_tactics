@@ -6,12 +6,15 @@
 
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_msgs/RefereeStage.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include "roboteam_utils/RefLookup.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #define RTT_CURRENT_DEBUG_TAG IsRefStage
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(IsRefStage);
 
 IsRefStage::IsRefStage(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}

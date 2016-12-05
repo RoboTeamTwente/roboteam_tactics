@@ -13,23 +13,29 @@ source $DIR/shared.sh
 # Asserts that the script is being ran in tactics root
 assert_tactics_root
 
-(
-    # Go to the tree dir
-    cd src/trees
+#(
+    ## Go to the tree dir
+    #cd src/trees
 
     # Destination files
-    treeSource="alltrees.cpp"
-    treeHeader="alltrees.h"
+    treeSource="src/trees/alltrees.cpp"
+    treeHeader="include/roboteam_tactics/generated/alltrees.h"
+
+    # Construct folders in case of fresh build
+    mkdir -p $(dirname $treeSource)
+    mkdir -p $(dirname $treeHeader)
 
     # Preamble of the source file
-    sourcePreamble="
     #include \"roboteam_tactics/generated/allskills.h\"
     #include \"roboteam_tactics/generated/allconditions.h\"
     #include \"roboteam_tactics/generated/alltactics.h\"
+    sourcePreamble="
     #include \"roboteam_tactics/bt.hpp\"
     #include \"roboteam_tactics/utils/ParallelTactic.hpp\"
     #include \"roboteam_tactics/utils/utils.h\"
-    "
+    #include \"roboteam_tactics/treegen/LeafRegister.h\"
+
+"
 
     # Preamble of header file
     headerPreamble="
@@ -46,12 +52,12 @@ assert_tactics_root
     printf "$headerPreamble" >> $treeHeader
 
     # Append namespace specifiers
-    printf "namespace rtt {\n" >> $treeSource
+    #printf "namespace rtt {\n" >> $treeSource
     printf "namespace rtt {\n" >> $treeHeader
 
     # Generate declarations and implementations for the behavior trees
     # And append them to the sourc and header files
-    for filepath in ./json/*.json; do
+    for filepath in src/trees/json/*.json; do
         # Generate implementations
         cat $filepath | rosrun roboteam_tactics converter impl >> $treeSource
         printf "\n" >> $treeSource
@@ -62,97 +68,97 @@ assert_tactics_root
     done
 
     # Closing brackets :D
-    printf "}" >> $treeSource
+    #printf "}" >> $treeSource
     printf "}" >> $treeHeader
 
     # Copy the header files to place catkin can find it and
     # delete it here.
-    mkdir -p ../../include/roboteam_tactics/generated
-    cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
-    rm alltrees.h
+    #mkdir -p ../../include/roboteam_tactics/generated
+    #cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
+    #rm alltrees.h
 
     ###########################
     ## Make the tree factory ##
     ###########################
 
-    # Destination files
-    factorySource="alltrees_factory.cpp"
-    factoryHeader="alltrees_factory.h"
+    ## Destination files
+    #factorySource="alltrees_factory.cpp"
+    #factoryHeader="alltrees_factory.h"
 
-    # Empty both files
-    > $factorySource
-    > $factoryHeader
+    ## Empty both files
+    #> $factorySource
+    #> $factoryHeader
 
-    # Source
-    printf "
-    #include <iostream>
-    #include <string>
+    ## Source
+    #printf "
+    ##include <iostream>
+    ##include <string>
 
-    #include \"ros/ros.h\"
+    ##include \"ros/ros.h\"
 
-    #include \"roboteam_tactics/bt.hpp\"
-    #include \"roboteam_tactics/generated/alltrees.h\"
+    ##include \"roboteam_tactics/bt.hpp\"
+    ##include \"roboteam_tactics/generated/alltrees.h\"
 
-    namespace rtt {
+    #namespace rtt {
 
-    bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb) {" >> $factorySource
+    #bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb) {" >> $factorySource
 
-    printf "
-        if (false) {
-            // Bogus if clause
-        }" >> $factorySource
+    #printf "
+        #if (false) {
+            #// Bogus if clause
+        #}" >> $factorySource
 
-    for filepath in ./json/*.json; do
-            name=$(basename $filepath .json)
+    #for filepath in ./json/*.json; do
+            #name=$(basename $filepath .json)
 
-            printf " else if (name == \"$name\") {
-            return make_$name(bb);
-        } " >> $factorySource
-    done
+            #printf " else if (name == \"$name\") {
+            #return make_$name(bb);
+        #} " >> $factorySource
+    #done
 
-    printf "
+    #printf "
        
-        std::cout << \"Could not find tree with name \" << name << \". Aborting\\\\n\";
-        exit(1);
-    }
+        #std::cout << \"Could not find tree with name \" << name << \". Aborting\\\\n\";
+        #exit(1);
+    #}
 
-    }" >> $factorySource
+    #}" >> $factorySource
 
-    # Header
-    printf "
-    #pragma once
+    ## Header
+    #printf "
+    ##pragma once
 
-    #include <string>
+    ##include <string>
 
-    #include \"ros/ros.h\"
+    ##include \"ros/ros.h\"
 
-    #include \"roboteam_tactics/bt.hpp\"
+    ##include \"roboteam_tactics/bt.hpp\"
 
-    namespace rtt {
+    #namespace rtt {
 
-    bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb = nullptr);
+    #bt::BehaviorTree make_tree(std::string name, bt::Blackboard* bb = nullptr);
 
-    }
-    " >> $factoryHeader
+    #}
+    #" >> $factoryHeader
 
-    # Make set & lists for all json trees
-    make_aggregate_container "set" "./json/*.json" "alltrees_set" "alltrees_set.h" "rtt"
+    ## Make set & lists for all json trees
+    #make_aggregate_container "set" "./json/*.json" "alltrees_set" "alltrees_set.h" "rtt"
 
-    make_aggregate_container "vector" "./json/*.json" "alltrees_list" "alltrees_list.h" "rtt"
+    #make_aggregate_container "vector" "./json/*.json" "alltrees_list" "alltrees_list.h" "rtt"
 
-    # Copy the header files to place catkin can find it and
-    # delete it here.
-    # $1 - the header file
-    function saveHeader {
-        cp $1 ../../include/roboteam_tactics/generated/$1
-        rm $1
-    }
+    ## Copy the header files to place catkin can find it and
+    ## delete it here.
+    ## $1 - the header file
+    #function saveHeader {
+        #cp $1 ../../include/roboteam_tactics/generated/$1
+        #rm $1
+    #}
 
-    saveHeader alltrees_factory.h
-    saveHeader alltrees_list.h
-    saveHeader alltrees_set.h
+    #saveHeader alltrees_factory.h
+    #saveHeader alltrees_list.h
+    #saveHeader alltrees_set.h
 
-)
+#)
 
 mkdir -p generated
 touch generated/generate_cpp_from_json.stamp

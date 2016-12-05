@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/Math.h"
@@ -15,6 +16,8 @@
 #define RTT_CURRENT_DEBUG_TAG Kick
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(Kick);
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
@@ -70,7 +73,7 @@ bt::Node::Status Kick::Update() {
 
 	if (posDiff.length() < 0.105) { // ball is close
 
-		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
+		if(rotDiff < 0.2 and rotDiff > -0.2){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
 			command.dribbler = false;
@@ -83,6 +86,7 @@ bt::Node::Status Kick::Update() {
 
 			pubKick.publish(command);
 			ros::spinOnce();
+
 			RTT_DEBUG("Triggered the kicker!\n");
 			return Status::Running;
 		}

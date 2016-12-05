@@ -1,6 +1,7 @@
 #include "json.hpp"
 #include <string>
 #include <map>
+#include <set>
 #include <sstream>
 
 namespace rtt {
@@ -32,6 +33,15 @@ private:
     std::string get_parallel_params_from_properties(json properties);
 
     NodeType determine_type(nlohmann::json);
+
+    std::vector<std::string> allskills_list,
+                             allconditions_list,
+                             alltactics_list
+                             ;
+    std::set<std::string> allskills_set,
+                          allconditions_set,
+                          alltactics_set
+                          ;
 };
 
 }

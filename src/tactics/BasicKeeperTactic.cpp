@@ -1,9 +1,12 @@
 #include "roboteam_tactics/tactics/BasicKeeperTactic.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG BasicKeeperTactic
 
 namespace rtt {
+
+RTT_REGISTER_TACTIC(BasicKeeperTactic);
 
 BasicKeeperTactic::BasicKeeperTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 

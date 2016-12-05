@@ -1,8 +1,11 @@
 #include "roboteam_tactics/conditions/CanReachPoint.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(CanReachPoint);
 
 CanReachPoint::CanReachPoint(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
     
@@ -87,7 +90,6 @@ bt::Node::Status CanReachPoint::Update() {
 		roboteam_utils::Vector2 maxAccInDirection = ComputeMaxAcceleration(fabs(angleDiff), maxAcc);
 		speed += maxAccInDirection.length()*timeStep;
 		if (speed > maxSpeed) {speed = maxSpeed;}
-		// ROS_INFO_STREAM("speed: " << speed);
 		travelledDistance += speed*timeStep;
 		
 		// Rotate towards your goal, so you get maximum acceleration

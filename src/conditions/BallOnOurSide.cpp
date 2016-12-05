@@ -1,7 +1,10 @@
 #include "roboteam_tactics/conditions/BallOnOurSide.h"
 #include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(BallOnOurSide);
 
 BallOnOurSide::BallOnOurSide(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}

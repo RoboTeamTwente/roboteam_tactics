@@ -11,10 +11,12 @@
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include <vector>
 
 namespace rtt {
+
 
 typedef struct {
 	roboteam_utils::Vector2 interceptPos;
@@ -54,5 +56,7 @@ private:
 	int robotID;
 	bool our_team;
 };
+
+extern factories::LeafRegisterer<GetBall, Skill> GetBall_registerer;
 
 } // rtt

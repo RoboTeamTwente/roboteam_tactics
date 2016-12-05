@@ -11,10 +11,13 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG DemoTactic
 
 namespace rtt {
+
+RTT_REGISTER_TACTIC(DemoTactic);
 
 DemoTactic::DemoTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 

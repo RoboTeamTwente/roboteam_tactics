@@ -1,7 +1,7 @@
 import json
 import os
 
-from tree import behaviour_tree
+from tree import behaviour_tree, node_types
 
 
 class TreeList:
@@ -18,6 +18,10 @@ class TreeList:
             if file_name.endswith(".json"):
                 with open(tree_dir + file_name) as data_file:
                     data = json.load(data_file)
+
+                    # Extract the custom node types from the tree.
+                    if 'custom_nodes' in data:
+                        node_types.add_types_from_json(data['custom_nodes'])
 
                     tree = behaviour_tree.BehaviourTree()
                     tree.load_from_json(data)

@@ -50,6 +50,10 @@ void LastWorld::wait_for_first_messages() {
     while (!(rtt::LastWorld::have_received_first_geom() && rtt::LastWorld::have_received_first_world())) {
         fps60.sleep();
         ros::spinOnce();
+
+        if (!ros::ok()) {
+            return;
+        }
     }
 }
 

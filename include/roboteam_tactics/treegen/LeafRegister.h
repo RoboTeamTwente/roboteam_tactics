@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <map>
 #include <functional>
@@ -17,41 +18,80 @@ template <
 >
 using Repo = std::map<std::string, T>;
 
-using TreeConstructor = std::function<bt::BehaviorTree(ros::NodeHandle, bt::Blackboard)>;
-using TreeFactory = std::function<std::shared_ptr<bt::BehaviorTree>(bt::Blackboard*)>;
+using TreeConstructor = std::function<bt::BehaviorTree(bt::Blackboard*)>;
 template <
     class T
 >
 using Factory = std::function<std::shared_ptr<T>(std::string name, bt::Blackboard::Ptr)>;
 
-Repo<TreeFactory>& getTreeFactoryMap();
-Repo<Factory<Condition>>& getConditionFactoryMap();
-Repo<Factory<Skill>>& getSkillFactoryMap();
-Repo<Factory<Tactic>>& getTacticFactoryMap();
+template <
+    class T
+>
+Repo<T>& getRepo() {
+    static Repo<T> repo;
+    return repo;
+}
 
 class TreeRegisterer {
-    TreeRegisterer(const std::string &name, TreeConstructor tc) {
-        auto treeFactory = [=](bt::Blackboard* bb) {
-            ros::NodeHandle n;
-            return std::make_shared<bt::BehaviorTree>(tc(n, *bb));
-        };
-        getTreeFactoryMap()[name] = treeFactory;
-    }
+public:
+    TreeRegisterer(const std::string &name, TreeConstructor tc);
 } ;
 
 template <
-    class L
+    class L,
+    class Parent
 >
 class LeafRegisterer {
-    LeafRegisterer(const std::string &name, std::function<Repo<Factory<L>>&()> factoryRepoGetter) {
+public:
+    LeafRegisterer(const std::string &name) {
         auto leafFactory = [=](std::string name, bt::Blackboard::Ptr bb) {
             return std::make_shared<L>(name, bb);
         };
 
-        factoryRepoGetter()[name] = leafFactory;
+        getRepo<Factory<Parent>>()[name] = leafFactory;
     }
 } ;
 
-}  // factories
+template<
+    class L
+>
+void print_all(std::string category) {
+    auto& repo = getRepo<Factory<L>>();
+    std::cout << "Printing all entries in repo of category \""
+              << category
+              << "\" ("
+              << repo.size()
+              << " items):\n";
+    for (const auto& entry : repo) {
+        std::cout << "\t- " << entry.first << "\n";
+    }
+}
+
+template<
+    class L
+>
+std::vector<std::string> get_entry_names() {
+    std::vector<std::string> entries;
+    auto& repo = getRepo<Factory<L>>();
+
+    for (const auto& entry : repo) {
+        entries.push_back(entry.first);
+    }
+
+    return entries;
+}
+
+} // factories
 
 } // rtt
+
+// Macros (anonymous namespace s.t. it doesn't leak outside the source file
+// Double colon is for startin resolution from global namespace
+#define RTT_REGISTER_LEAF(leafName, typeName) \
+    namespace { \
+    ::rtt::factories::LeafRegisterer<leafName, typeName> leafName ## _registerer(#leafName); \
+    }
+
+#define RTT_REGISTER_SKILL(skillName) RTT_REGISTER_LEAF(skillName, Skill)
+#define RTT_REGISTER_CONDITION(conditionName) RTT_REGISTER_LEAF(conditionName, Condition)
+#define RTT_REGISTER_TACTIC(tacticName) RTT_REGISTER_LEAF(tacticName, Tactic)

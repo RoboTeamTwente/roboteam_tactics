@@ -17,6 +17,7 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include <cmath>
 #include <vector>
@@ -25,6 +26,8 @@
 #define RTT_CURRENT_DEBUG_TAG GetBall
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(GetBall);
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
@@ -210,8 +213,8 @@ bt::Node::Status GetBall::Update (){
 		}
 		double posDiff = (ballPos - robotPos).length();
 
-		if (posDiff > 0.3) {
-			targetPos = ballPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
+		if (posDiff > 0.3 || fabs(angleDiff) > 0.2*M_PI) {
+			targetPos = ballPos + roboteam_utils::Vector2(0.2, 0.0).rotate(targetAngle + M_PI);
 		} else {
 			targetPos = ballPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
 		}

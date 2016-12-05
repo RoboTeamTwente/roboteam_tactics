@@ -6,6 +6,7 @@
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/FieldCircularArc.h"
 #include "roboteam_msgs/FieldLineSegment.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG DistanceXToY
 
@@ -222,6 +223,8 @@ double getDistToDefenseArea(std::string name, Vector2 point) {
     return dist;
 }
 
+
+RTT_REGISTER_CONDITION(DistanceXToY);
 
 DistanceXToY::DistanceXToY(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) { }
