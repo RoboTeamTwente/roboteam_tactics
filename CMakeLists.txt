@@ -14,6 +14,13 @@ find_package(catkin REQUIRED COMPONENTS
   unique_id
 )
 
+# Only enable this one if you're just testing one skill
+set(BUILD_TESTX TRUE)
+
+# Enable these if you're also testing strategies
+set(BUILD_STRATEGYNODE TRUE)
+set(BUILD_ROBOTNODE TRUE)
+
 set(CMAKE_CXX_FLAGS "\
 --std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
@@ -31,20 +38,23 @@ include_directories(
 
 add_subdirectory(src)
 
-
-add_executable(DoStrategy
-    src/role_tests/DoStrategy.cpp
-    $<TARGET_OBJECTS:treegen>
-    $<TARGET_OBJECTS:alltrees>
-    $<TARGET_OBJECTS:skills>
-    $<TARGET_OBJECTS:conditions>
-    $<TARGET_OBJECTS:tactics>
-    $<TARGET_OBJECTS:utils>
-)
-add_dependencies(DoStrategy ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
-target_link_libraries(DoStrategy
-	${catkin_LIBRARIES}
-	)
+# add_executable(DoStrategy
+    # src/role_tests/DoStrategy.cpp
+    # $<TARGET_OBJECTS:treegen>
+    # $<TARGET_OBJECTS:alltrees>
+    # $<TARGET_OBJECTS:skills>
+    # $<TARGET_OBJECTS:conditions>
+    # $<TARGET_OBJECTS:tactics>
+    # $<TARGET_OBJECTS:utils>
+# )
+# add_dependencies(DoStrategy 
+    # ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    # ${catkin_EXPORTED_TARGETS}
+    # generate_json_t
+    # )
+# target_link_libraries(DoStrategy
+	# ${catkin_LIBRARIES}
+	# )
 
 # Executable that can convert behavior3 json to C++ functions
 # TODO: Make the converter scan dirs instead of include every skill condition
@@ -52,11 +62,6 @@ target_link_libraries(DoStrategy
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
-    # $<TARGET_OBJECTS:treegen>
-    # $<TARGET_OBJECTS:skills>
-    # $<TARGET_OBJECTS:conditions>
-    # $<TARGET_OBJECTS:tactics>
-    # $<TARGET_OBJECTS:utils>
     )
 add_dependencies(converter
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -66,41 +71,42 @@ target_link_libraries(converter
 	${catkin_LIBRARIES}
 	)
 
-add_executable(TestX
-    src/skills/tests/TestX.cpp
-    $<TARGET_OBJECTS:treegen>
-    $<TARGET_OBJECTS:tactics>
-    $<TARGET_OBJECTS:utils>
-    $<TARGET_OBJECTS:skills>
-    $<TARGET_OBJECTS:conditions>
-    )
-add_dependencies(TestX 
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-    )
-target_link_libraries(TestX
-    ${catkin_LIBRARIES}
-    )
+if (BUILD_TESTX)
+
+    add_executable(TestX
+        src/skills/tests/TestX.cpp
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        )
+    add_dependencies(TestX 
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+    target_link_libraries(TestX
+        ${catkin_LIBRARIES}
+        )
+
+endif (BUILD_TESTX)
 
 ############################################################
 #### Stupid stuff to get the json files to be converted ####
 ############################################################
 
-# custom_output will always be rebuilt because it depends on always_rebuild
 add_custom_command(
     OUTPUT
         ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
-        converter
         ${JSON_FILES}
-        # ${CONDITION_SOURCES}
-        # ${TACTIC_SOURCES}
-        # ${SKILL_SOURCES}
+        converter
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
     )
 add_custom_target(generate_json_t
+    ALL
     DEPENDS
         ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
     )
@@ -173,41 +179,49 @@ catkin_add_gtest(tactics_test
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
 
-add_executable(RoleNode
-    src/RoleNode.cpp
-    $<TARGET_OBJECTS:treegen>
-    $<TARGET_OBJECTS:alltrees>
-    $<TARGET_OBJECTS:skills>
-    $<TARGET_OBJECTS:conditions>
-    $<TARGET_OBJECTS:tactics>
-    $<TARGET_OBJECTS:utils>
-    )
-add_dependencies(RoleNode
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-    generate_json_t
-    )
-target_link_libraries(RoleNode
-    ${catkin_LIBRARIES}
-    )
+if (BUILD_ROBOTNODE)
 
-add_executable(StrategyNode
-    src/StrategyNode.cpp
-    $<TARGET_OBJECTS:treegen>
-    $<TARGET_OBJECTS:alltrees>
-    $<TARGET_OBJECTS:skills>
-    $<TARGET_OBJECTS:conditions>
-    $<TARGET_OBJECTS:tactics>
-    $<TARGET_OBJECTS:utils>
-    )
-add_dependencies(StrategyNode
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-    generate_json_t
-    )
-target_link_libraries(StrategyNode
-    ${catkin_LIBRARIES}
-    )
+    add_executable(RoleNode
+        src/RoleNode.cpp
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:alltrees>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        )
+    add_dependencies(RoleNode
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        generate_json_t
+        )
+    target_link_libraries(RoleNode
+        ${catkin_LIBRARIES}
+        )
+
+endif (BUILD_ROBOTNODE)
+
+if (BUILD_STRATEGYNODE)
+
+    add_executable(StrategyNode
+        src/StrategyNode.cpp
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:alltrees>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        )
+    add_dependencies(StrategyNode
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        generate_json_t
+        )
+    target_link_libraries(StrategyNode
+        ${catkin_LIBRARIES}
+        )
+
+endif (BUILD_STRATEGYNODE)
 
 ### Test executables ###
 # Disables tests on bob's desktop
