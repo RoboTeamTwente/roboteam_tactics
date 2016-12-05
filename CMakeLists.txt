@@ -75,6 +75,7 @@ if (BUILD_TESTX)
 
     add_executable(TestX
         src/skills/tests/TestX.cpp
+        $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:tactics>
         $<TARGET_OBJECTS:utils>
