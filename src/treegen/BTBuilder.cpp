@@ -3,10 +3,11 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/filesystem.hpp>
+namespace bf = boost::filesystem;
+
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
-#include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_tactics/Parts.h"
 
 #define INDENT "    "
 #define DINDENT "        "
@@ -18,12 +19,41 @@ namespace rtt {
 BTBuilder::BTBuilder() {}
 BTBuilder::~BTBuilder() {}
 
-std::string BTBuilder::build(nlohmann::json json) {
-    namespace f = rtt::factories;
+namespace {
+    std::vector<std::string> get_all(std::string category) {
+        bf::path categoryPath("src/" + category);
 
-    allskills_list = f::get_entry_names<Skill>();
-    allconditions_list = f::get_entry_names<Condition>();
-    alltactics_list = f::get_entry_names<Tactic>();
+        std::vector<std::string> xs;
+        try {
+            if (exists(categoryPath)) {
+                for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
+                    if (de.path().extension().string() == ".cpp") {
+                        xs.push_back(de.path().stem().string());
+                    }
+                }
+            } else {
+                std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
+                return {};
+            }
+
+            return xs;
+        } catch (const bf::filesystem_error& ex) {
+            return {};
+        }
+    }
+}
+
+std::string BTBuilder::build(nlohmann::json json) {
+
+    // namespace f = rtt::factories;
+
+    // allskills_list = f::get_entry_names<Skill>();
+    // allconditions_list = f::get_entry_names<Condition>();
+    // alltactics_list = f::get_entry_names<Tactic>();
+
+    allskills_list = get_all("skills");
+    allconditions_list = get_all("conditions");
+    alltactics_list = get_all("tactics");
 
     // To turn every list into a set and clear the previous sets
     auto initializeSet = [](std::set<std::string> &theSet, std::vector<std::string> &theVector) {
@@ -40,10 +70,9 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     std::set<std::string> usedSkills, usedConditions, usedTactics;
 
-    using namespace rtt::factories;
-    auto& skillRepo = getRepo<Factory<Skill>>();
-    auto& conditionRepo = getRepo<Factory<Condition>>();
-    auto& tacticRepo = getRepo<Factory<Tactic>>();
+    // auto& skillRepo = getRepo<Factory<Skill>>();
+    // auto& conditionRepo = getRepo<Factory<Condition>>();
+    // auto& tacticRepo = getRepo<Factory<Tactic>>();
 
     // Give all nodes who are not a skill nor condition
     // a unique name by appending a number at the end
@@ -51,15 +80,15 @@ std::string BTBuilder::build(nlohmann::json json) {
     for (auto& element : json["nodes"]) {
         std::string title = element["title"];
 
-        if (skillRepo.find(element["name"].get<std::string>()) != skillRepo.end()) {
+        if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
             usedSkills.insert(element["name"].get<std::string>());
         }
 
-        if (conditionRepo.find(element["name"].get<std::string>()) != conditionRepo.end()) {
+        if (allconditions_set.find(element["name"].get<std::string>()) != allconditions_set.end()) {
             usedConditions.insert(element["name"].get<std::string>());
         }
 
-        if (tacticRepo.find(element["name"].get<std::string>()) != tacticRepo.end()) {
+        if (alltactics_set.find(element["name"].get<std::string>()) != alltactics_set.end()) {
             usedTactics.insert(element["name"].get<std::string>());
         }
 
@@ -93,19 +122,16 @@ std::string BTBuilder::build(nlohmann::json json) {
 
     out << INDENT << "// Used skills: \n";
     for (const auto& skill : usedSkills) {
-        // out << INDENT << "// " << skill << "\n";
         out << INDENT << "#include \"roboteam_tactics/skills/" << skill << ".h\"\n";
     }
 
     out << INDENT << "// Used conditions: \n";
     for (const auto& condition : usedConditions) {
-        // out << INDENT << "// " << condition << "\n";
         out << INDENT << "#include \"roboteam_tactics/conditions/" << condition << ".h\"\n";
     }
 
     out << INDENT << "// Used tactics: \n";
     for (const auto& tactic : usedTactics) {
-        // out << INDENT << "// " << tactic << "\n";
         out << INDENT << "#include \"roboteam_tactics/tactics/" << tactic << ".h\"\n";
     }
     out << "\n";

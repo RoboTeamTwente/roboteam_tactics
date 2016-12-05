@@ -13,13 +13,17 @@ source $DIR/shared.sh
 # Asserts that the script is being ran in tactics root
 assert_tactics_root
 
-(
-    # Go to the tree dir
-    cd src/trees
+#(
+    ## Go to the tree dir
+    #cd src/trees
 
     # Destination files
-    treeSource="alltrees.cpp"
-    treeHeader="alltrees.h"
+    treeSource="src/trees/alltrees.cpp"
+    treeHeader="include/roboteam_tactics/generated/alltrees.h"
+
+    # Construct folders in case of fresh build
+    mkdir -p $(dirname $treeSource)
+    mkdir -p $(dirname $treeHeader)
 
     # Preamble of the source file
     #include \"roboteam_tactics/generated/allskills.h\"
@@ -53,7 +57,7 @@ assert_tactics_root
 
     # Generate declarations and implementations for the behavior trees
     # And append them to the sourc and header files
-    for filepath in ./json/*.json; do
+    for filepath in src/trees/json/*.json; do
         # Generate implementations
         cat $filepath | rosrun roboteam_tactics converter impl >> $treeSource
         printf "\n" >> $treeSource
@@ -69,9 +73,9 @@ assert_tactics_root
 
     # Copy the header files to place catkin can find it and
     # delete it here.
-    mkdir -p ../../include/roboteam_tactics/generated
-    cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
-    rm alltrees.h
+    #mkdir -p ../../include/roboteam_tactics/generated
+    #cp alltrees.h ../../include/roboteam_tactics/generated/alltrees.h
+    #rm alltrees.h
 
     ###########################
     ## Make the tree factory ##
@@ -154,7 +158,7 @@ assert_tactics_root
     #saveHeader alltrees_list.h
     #saveHeader alltrees_set.h
 
-)
+#)
 
 mkdir -p generated
 touch generated/generate_cpp_from_json.stamp

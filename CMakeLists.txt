@@ -52,14 +52,13 @@ target_link_libraries(DoStrategy
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
-    $<TARGET_OBJECTS:treegen>
-    $<TARGET_OBJECTS:skills>
-    $<TARGET_OBJECTS:conditions>
-    $<TARGET_OBJECTS:tactics>
-    $<TARGET_OBJECTS:utils>
+    # $<TARGET_OBJECTS:treegen>
+    # $<TARGET_OBJECTS:skills>
+    # $<TARGET_OBJECTS:conditions>
+    # $<TARGET_OBJECTS:tactics>
+    # $<TARGET_OBJECTS:utils>
     )
 add_dependencies(converter
-    generate_leafs_t
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
     )
@@ -78,7 +77,6 @@ add_executable(TestX
 add_dependencies(TestX 
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
-    # generate_leafs_t
     )
 target_link_libraries(TestX
     ${catkin_LIBRARIES}
