@@ -20,8 +20,7 @@ public:
     double RotationController(double angleError);
     roboteam_msgs::RobotCommand PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle);
     roboteam_utils::Vector2 GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
-    // roboteam_utils::Vector2 StayWithinField(roboteam_utils::Vector2 myPos);
-    roboteam_utils::Vector2 AvoidGoals(roboteam_utils::Vector2 myPos);
+    roboteam_utils::Vector2 CheckTargetPos(roboteam_utils::Vector2 targetPos);
 
     Status Update();
     

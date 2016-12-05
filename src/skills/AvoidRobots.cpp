@@ -103,27 +103,24 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
     return forceVector;
 }
 
-// roboteam_utils::Vector2 AvoidRobots::StayWithinField(roboteam_utils::Vector2 myPos) {
+roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targetPos) {
+    double xGoal = targetPos.x;
+    double yGoal = targetPos.y;
+    double marginOutsideField = 0.5; // meter
+    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    if (xGoal > field.field_length/2+marginOutsideField || xGoal < -field.field_length/2-marginOutsideField) {
+        xGoal = signum(xGoal)*field.field_length/2+marginOutsideField;
+        ROS_WARN("position target outside of field");
+    }
+    if (yGoal > field.field_width/2+marginOutsideField || yGoal < -field.field_width/2-marginOutsideField) {
+        yGoal = signum(yGoal)*field.field_width/2-marginOutsideField;
+        ROS_WARN("position target outside of field");
+    }
 
-//     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    //TODO: check whether the target position is not within the goal area where we are not allowed to come
 
-//     roboteam_utils::Vector2 distanceFromSide;
-//     distanceFromSide.x = signum(myPos.x)*(field.field_length/2) - myPos.x;
-//     distanceFromSide.y = signum(myPos.y)*(field.field_width/2) - myPos.y;
-
-//     ROS_INFO_STREAM("distanceFromSide: " << distanceFromSide.x << " " << distanceFromSide.y);
-
-//     roboteam_utils::Vector2 force(0.0, 0.0);
-//     force.x = -1.0 / (distanceFromSide.x * distanceFromSide.x);
-//     force.y = -1.0 / (distanceFromSide.y * distanceFromSide.y);
-//     ROS_INFO_STREAM("force: " << force.x << " " << force.y);
-
-//     return force;
-// }
-
-roboteam_utils::Vector2 AvoidRobots::AvoidGoals(roboteam_utils::Vector2 myPos) {
-    roboteam_utils::Vector2 force;
-    return force;
+    roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
+    return newTargetPos;
 }
 
 bt::Node::Status AvoidRobots::Update () {
@@ -143,17 +140,10 @@ bt::Node::Status AvoidRobots::Update () {
     dribbler = GetBool("dribbler");
 
     // Checking inputs
-    double marginOutsideField = 0.5; // meter
-    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-    if (xGoal > field.field_length/2+marginOutsideField || xGoal < -field.field_length/2-marginOutsideField) {
-        xGoal = signum(xGoal)*field.field_length/2+marginOutsideField;
-    }
-    if (yGoal > field.field_width/2+marginOutsideField || yGoal < -field.field_width/2-marginOutsideField) {
-        yGoal = signum(yGoal)*field.field_width/2-marginOutsideField;
-    }
-    angleGoal = cleanAngle(angleGoal);
-
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
+    targetPos = CheckTargetPos(targetPos);
+    angleGoal = cleanAngle(angleGoal);
+    
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = world.us.at(robotID).angle;
@@ -168,47 +158,36 @@ bt::Node::Status AvoidRobots::Update () {
     bb2->SetDouble("y_coor", yGoal);
     bb2->SetBool("check_move", true);
     
-    
-
 
     // If you can see the end point, just go towards it
-    // CanSeePoint canSeePoint("", bb2);
-    // if (canSeePoint.Update() == Status::Success) {
-    //     roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
-    //     pub.publish(command);
-    //     if (success) {
-    //         return Status::Success;
-    //     } else {
-    //         return Status::Running;
-    //     }
-    // }
+    CanSeePoint canSeePoint("", bb2);
+    if (canSeePoint.Update() == Status::Success) {
+        roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
+        pub.publish(command);
+        if (success) {
+            return Status::Success;
+        } else {
+            return Status::Running;
+        }
+    }
 
     // For each robot, compute the 'force' it exerts on us, and add these forces
-    // double forceX = 0.0;
-    // double forceY = 0.0;
-
     roboteam_utils::Vector2 sumOfForces(0.0, 0.0);
 
     for (size_t i = 0; i < world.us.size(); i++) {
         if (i != robotID) { // TODO: change this to check whether the robot ID corresponds to i instead of just its place in world.us
             roboteam_utils::Vector2 otherRobotPos = roboteam_utils::Vector2(world.us.at(i).pos.x, world.us.at(i).pos.y);
             roboteam_utils::Vector2 forceVector = GetForceVectorFromRobot(myPos, otherRobotPos, posError);
-            // forceX -= forceVector.x * repulsiveForce;
-            // forceY -= forceVector.y * repulsiveForce;
             sumOfForces = sumOfForces - forceVector*repulsiveForce;
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_utils::Vector2 otherRobotPos = roboteam_utils::Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
         roboteam_utils::Vector2 forceVector = GetForceVectorFromRobot(myPos, otherRobotPos, posError);
-        // forceX -= forceVector.x * repulsiveForce;
-        // forceY -= forceVector.y * repulsiveForce;
         sumOfForces = sumOfForces - forceVector*repulsiveForce;
     }
 
     // Add an attractive force towards the target
-    // forceX += posError.x*attractiveForce;
-    // forceY += posError.y*attractiveForce;
     sumOfForces = sumOfForces + posError*attractiveForceWhenClose;
     
 
