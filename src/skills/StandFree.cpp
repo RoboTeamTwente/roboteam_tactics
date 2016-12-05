@@ -122,12 +122,14 @@ bt::Node::Status StandFree::Update() {
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
         if (!(GetString("whichTeam") == "us" && currentRobot.id == theirID) && currentRobot.id != myID) {
+            ROS_INFO_STREAM("watch out for " << i << " of our team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.them.at(i);
         if (!(GetString("whichTeam") == "them" && currentRobot.id == theirID)) {
+            ROS_INFO_STREAM("watch out for " << i << " of their team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }
@@ -137,7 +139,9 @@ bt::Node::Status StandFree::Update() {
     boost::optional<Cone> coneRobots = MakeCoverCone(watchOutForTheseBots, myPos, theirPos);
     if (coneRobots) {
         Cone cone = *coneRobots;
-        nearestFreePos = cone.ClosestPointOnSide(myPos);
+        // nearestFreePos = cone.ClosestPointOnSide(myPos);
+        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
 
         // Draw the lines of the cone in rqt_view
         roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
@@ -161,26 +165,27 @@ bt::Node::Status StandFree::Update() {
 
     if (coneGoal && coneGoal2) {
         Cone cone = *coneGoal;
+        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         if (coneRobots) {
-            nearestFreePos = cone.ClosestPointOnSideTwoCones(*coneRobots, myPos);
+            nearestFreePos = cone.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
         } else {
-            nearestFreePos = cone.ClosestPointOnSide(myPos);
+            nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
         }
 
         Cone cone2 = *coneGoal2;
         if (coneRobots) {
-            nearestFreePos2 = cone2.ClosestPointOnSideTwoCones(*coneRobots, myPos);
+            nearestFreePos2 = cone2.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
         } else {
-            nearestFreePos2 = cone2.ClosestPointOnSide(myPos);
+            nearestFreePos2 = cone2.ClosestPointOnSide(myPos, theirGoalPos);
         }
 
         // Draw the lines in rqt_view
-        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
-        coneSide1 = coneSide1.scale(3/coneSide1.length());
-        roboteam_utils::Vector2 coneSide2 = (cone2.center-cone2.start).rotate(-cone2.angle);
-        coneSide2 = coneSide2.scale(3/coneSide2.length());
-        DrawLine("coneGoalSide1", cone.start, coneSide1);
-        DrawLine("coneGoalSide2", cone2.start, coneSide2);
+        roboteam_utils::Vector2 cone1Side1 = (cone.center-cone.start).rotate(cone.angle);
+        cone1Side1 = cone1Side1.scale(3/cone1Side1.length());
+        roboteam_utils::Vector2 cone2Side2 = (cone2.center-cone2.start).rotate(-cone2.angle);
+        cone2Side2 = cone2Side2.scale(3/cone2Side2.length());
+        DrawLine("coneGoal1Side1", cone.start, cone1Side1);
+        DrawLine("coneGoal2Side2", cone2.start, cone2Side2);
     } else {
         RemoveLine("coneGoalSide1");
         RemoveLine("coneGoalSide2");
@@ -210,8 +215,10 @@ bt::Node::Status StandFree::Update() {
         // Remove the lines from rqt view
         RemoveLine("coneRobotsSide1");
         RemoveLine("coneRobotsSide2");
-        RemoveLine("coneGoalSide1");
-        RemoveLine("coneGoalSide2");
+        RemoveLine("coneGoal1Side1");
+        RemoveLine("coneGoal1Side2");
+        RemoveLine("coneGoal2Side1");
+        RemoveLine("coneGoal2Side2");
         RemovePoint("nearestFreePos");
         return Status::Success;
     }
