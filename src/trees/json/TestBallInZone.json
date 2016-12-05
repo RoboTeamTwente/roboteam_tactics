@@ -4,23 +4,9 @@
   "id": "e17eb865-d4ea-41db-85f3-aa445ad39d93",
   "title": "TestBallInZone",
   "description": "",
-  "root": "ea0860b4-f8a9-48c5-8664-72afc970ec9b",
+  "root": "f667f950-4bbe-42ca-8bc5-740df284fdc9",
   "properties": {},
   "nodes": {
-    "ea0860b4-f8a9-48c5-8664-72afc970ec9b": {
-      "id": "ea0860b4-f8a9-48c5-8664-72afc970ec9b",
-      "name": "RepeatUntilSuccess",
-      "title": "Repeat Until Success",
-      "description": "",
-      "properties": {
-        "maxLoop": -1
-      },
-      "display": {
-        "x": -60,
-        "y": -24
-      },
-      "child": "01158d10-1380-43ee-8c67-6609abb53746"
-    },
     "01158d10-1380-43ee-8c67-6609abb53746": {
       "id": "01158d10-1380-43ee-8c67-6609abb53746",
       "name": "IsBallInZone",
@@ -30,17 +16,125 @@
         "zone": 1
       },
       "display": {
-        "x": 204,
-        "y": -24
+        "x": 492,
+        "y": -288
+      }
+    },
+    "c007c28f-cb0b-428d-8b19-b53a56589fba": {
+      "id": "c007c28f-cb0b-428d-8b19-b53a56589fba",
+      "name": "GetBall",
+      "title": "GetBall_A",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 456,
+        "y": 36
+      }
+    },
+    "35c75391-3c78-4208-8f72-4f3208288193": {
+      "id": "35c75391-3c78-4208-8f72-4f3208288193",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": 36
+      },
+      "children": [
+        "c007c28f-cb0b-428d-8b19-b53a56589fba"
+      ]
+    },
+    "671b7dbc-2282-4085-84be-6cd502351d11": {
+      "id": "671b7dbc-2282-4085-84be-6cd502351d11",
+      "name": "AvoidRobots",
+      "title": "AvoidRobots_A",
+      "description": "",
+      "properties": {
+        "xGoal": 3,
+        "yGoal": 1.5,
+        "angleGoal": 3.14
+      },
+      "display": {
+        "x": 348,
+        "y": -216
+      }
+    },
+    "1a449bf5-174a-417c-87c3-c53226315625": {
+      "id": "1a449bf5-174a-417c-87c3-c53226315625",
+      "name": "Inverter",
+      "title": "Inverter",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 312,
+        "y": -288
+      },
+      "child": "01158d10-1380-43ee-8c67-6609abb53746"
+    },
+    "067fb6da-268c-4435-8e0c-53116487a521": {
+      "id": "067fb6da-268c-4435-8e0c-53116487a521",
+      "name": "Priority",
+      "title": "Priority",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 0,
+        "y": -156
+      },
+      "children": [
+        "01797b25-94bd-4c5a-8d8f-d19edafb98ad",
+        "35c75391-3c78-4208-8f72-4f3208288193"
+      ]
+    },
+    "01797b25-94bd-4c5a-8d8f-d19edafb98ad": {
+      "id": "01797b25-94bd-4c5a-8d8f-d19edafb98ad",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 156,
+        "y": -252
+      },
+      "children": [
+        "1a449bf5-174a-417c-87c3-c53226315625",
+        "671b7dbc-2282-4085-84be-6cd502351d11",
+        "562dc858-50c8-42e7-8322-7c742cbd334c"
+      ]
+    },
+    "f667f950-4bbe-42ca-8bc5-740df284fdc9": {
+      "id": "f667f950-4bbe-42ca-8bc5-740df284fdc9",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": -180,
+        "y": -156
+      },
+      "child": "067fb6da-268c-4435-8e0c-53116487a521"
+    },
+    "562dc858-50c8-42e7-8322-7c742cbd334c": {
+      "id": "562dc858-50c8-42e7-8322-7c742cbd334c",
+      "name": "Failer",
+      "title": "Failer",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 348,
+        "y": -156
       }
     }
   },
   "display": {
-    "camera_x": 882.5,
-    "camera_y": 495.5,
+    "camera_x": 781.5,
+    "camera_y": 563.5,
     "camera_z": 1,
-    "x": -228,
-    "y": -24
+    "x": -384,
+    "y": -156
   },
   "custom_nodes": [
     {
