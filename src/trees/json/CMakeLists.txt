@@ -16,6 +16,7 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideTestTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/TestBallInZone.json
     )
 
 set(JSON_FILES
