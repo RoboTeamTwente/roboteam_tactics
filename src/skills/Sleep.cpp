@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <chrono>
 
 #include "ros/ros.h"
@@ -12,6 +13,8 @@
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(Sleep);
 
 Sleep::Sleep(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {

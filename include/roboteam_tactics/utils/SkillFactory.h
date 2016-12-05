@@ -7,13 +7,15 @@
 #include <vector>
 #include <ros/ros.h>
 
-#include "roboteam_tactics/generated/allskills_factory.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 
 namespace rtt {
     
 // build_skill(name, arg_fmt, args...)
+
+namespace {
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -92,6 +94,9 @@ bt::Blackboard::Ptr parse_bb(const std::string& skill_name, const std::vector<st
     return bb;
 }
 
+} // anonymous namespace
+  // Just like "static"
+
 template <typename T>
 std::shared_ptr<T> build_skill(const std::string& type_name, const std::string& skill_name, const std::string& arg_fmt, ...) {
     char buf[1024];
@@ -105,9 +110,17 @@ std::shared_ptr<T> build_skill(const std::string& type_name, const std::string& 
     if (!Leaf::validate_blackboard<T>(bb, skill_name)) {
         throw std::invalid_argument("Blackboard verification failed - Check ROS logs."); 
     }
-    std::shared_ptr<T> ptr = make_skill<T>(type_name, skill_name, bb);
-    assert(ptr);
-    return ptr;
+
+    namespace f = rtt::factories;
+
+    auto& repo = f::getRepo<f::Factory<Skill>>();
+    if (repo.find(type_name) == repo.end()) {
+        throw std::invalid_argument("Could not construct skill of type \"" + type_name + "\""); 
+    }
+
+    auto skillFactory = repo.at(type_name);
+
+    return std::dynamic_pointer_cast<T>(skillFactory(skill_name, bb));
 }
     
 }

@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <cmath>
 
 #include "ros/ros.h"
@@ -46,6 +47,8 @@ bool isBallInGoalArea() {
 
     return false;
 }
+
+RTT_REGISTER_SKILL(NaiveBlockGoal);
 
 NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

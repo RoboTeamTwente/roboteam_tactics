@@ -1,3 +1,4 @@
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 #include <stdlib.h>
 #include "actionlib/server/simple_action_server.h"
@@ -17,7 +18,10 @@
 
 
 namespace rtt {
-	Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
+
+RTT_REGISTER_SKILL(Dribble);
+
+Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
             : Skill(name, blackboard)
             , rotateAroundPoint("", private_bb) { 
         pubDribble = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);

@@ -10,10 +10,13 @@
 #include "roboteam_tactics/utils/debug_print.h"
 
 #include <vector>
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG CanSeeTheirGoal
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(CanSeeTheirGoal);
 
 CanSeeTheirGoal::CanSeeTheirGoal(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
 

@@ -11,11 +11,14 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/conditions/IsBallInGoal.h"
 
 #define RTT_CURRENT_DEBUG_TAG AttackerTactic
 
 namespace rtt {
+
+RTT_REGISTER_TACTIC(AttackerTactic);
 
 AttackerTactic::AttackerTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 

@@ -5,11 +5,14 @@
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 // To make sure RTT_DEBUG logs everything on ParamCheck
 #define RTT_CURRENT_DEBUG_TAG ParamCheck
 
 namespace rtt {
+
+RTT_REGISTER_CONDITION(ParamCheck);
 
 ParamCheck::ParamCheck(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}

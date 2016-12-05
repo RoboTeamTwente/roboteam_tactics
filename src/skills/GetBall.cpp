@@ -17,6 +17,7 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include <cmath>
 #include <vector>
@@ -25,6 +26,8 @@
 #define RTT_CURRENT_DEBUG_TAG GetBall
 
 namespace rtt {
+
+RTT_REGISTER_SKILL(GetBall);
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)

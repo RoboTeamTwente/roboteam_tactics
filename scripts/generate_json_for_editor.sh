@@ -83,6 +83,8 @@ done
 
 # Custom Composites/decorators here
 entry ParallelTactic composite
+entry ParallelSequence composite
+entry Repeat decorator
 
 result=$(join_by , "${allNodes[@]}")
 
