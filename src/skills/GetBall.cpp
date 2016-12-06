@@ -141,7 +141,7 @@ int GetBall::GetSign(double number) {
 }
 
 bt::Node::Status GetBall::Update (){
-	
+	ROS_INFO("in getball");
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	

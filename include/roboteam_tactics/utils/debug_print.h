@@ -39,6 +39,8 @@ SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(GetBall, false);
 SET_DEBUG_FOR(Kick, false);
+SET_DEBUG_FOR(Failer, true);
+SET_DEBUG_FOR(Runner, true);
 
 // Conditions
 SET_DEBUG_FOR(ParamCheck, false);
