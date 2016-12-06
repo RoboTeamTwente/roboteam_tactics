@@ -176,8 +176,8 @@ How to use:
 
             if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
                 break;
-
             }
+
             fps60.sleep();
         }
 
