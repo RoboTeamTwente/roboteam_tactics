@@ -8,7 +8,7 @@
     "88b80f0f-c7ee-4064-8a28-da24a916ac7b": {
       "id": "88b80f0f-c7ee-4064-8a28-da24a916ac7b",
       "name": "DistanceXToY",
-      "title": "Distance_to_ball",
+      "title": "Distance_to_ball_X",
       "description": "",
       "properties": {
         "distance": 0.5,
@@ -38,7 +38,7 @@
     "955cb7c7-0fc8-4227-9f6d-0c5ec16a1df0": {
       "id": "955cb7c7-0fc8-4227-9f6d-0c5ec16a1df0",
       "name": "GetBall",
-      "title": "GetBall",
+      "title": "GetBall_X",
       "description": "",
       "properties": {
         "getBallAtX": "",
@@ -120,7 +120,7 @@
     "6436efcc-36a0-47d6-86ca-47e3585260b8": {
       "id": "6436efcc-36a0-47d6-86ca-47e3585260b8",
       "name": "AvoidRobots",
-      "title": "AvoidRobots",
+      "title": "AvoidRobots_X",
       "description": "",
       "properties": {
         "xGoal": 0,
