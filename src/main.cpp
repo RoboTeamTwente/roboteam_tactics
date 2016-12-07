@@ -76,9 +76,9 @@ int main(int argc, char **argv) {
     bb2->SetDouble("GetBall_A_getBallAtTime", 5.0);
     bb2->SetString("AimAt_A_At", "theirgoal");
 
-    ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
-    ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
-	ros::Subscriber subRef = n.subscribe("vision_referee", 10, &refStateCallback);
+    ros::Subscriber subWorld = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&worldStateCallback, _1, &role, bb, &role2, bb2));
+    ros::Subscriber subField = n.subscribe(TOPIC_GEOMETRY, 10, &fieldUpdateCallback);
+	ros::Subscriber subRef = n.subscribe(TOPIC_REFEREE, 10, &refStateCallback);
 
 
     while(ros::ok()) {

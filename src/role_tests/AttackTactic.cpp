@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "AttackTactic");
     ros::NodeHandle n;
 
-    ros::Subscriber subInit = n.subscribe<roboteam_msgs::World> ("world_state", 1000, worldStateCallbackInit);
+    ros::Subscriber subInit = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, worldStateCallbackInit);
     while (!receivedTheFirstWorldMessage) {
         ROS_INFO("Waiting for the first world message to initialize the tactic");
         ros::spinOnce();
@@ -159,9 +159,9 @@ int main(int argc, char **argv) {
     auto bb2 = role2.GetBlackboard();
     initializeRoles(bb1, bb2);
     
-    // ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role1, bb1, &role2, bb2));
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, worldStateCallback2);
-    ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
+    // ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&worldStateCallback, _1, &role1, bb1, &role2, bb2));
+    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, worldStateCallback2);
+    ros::Subscriber subField = n.subscribe(TOPIC_GEOMETRY, 10, &fieldUpdateCallback);
 
     ros::Rate rate(60);
     bool finished1;

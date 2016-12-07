@@ -21,8 +21,8 @@ StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
             ROS_INFO_STREAM("Standing Free");
-            debugPub = n.advertise<roboteam_msgs::DebugLine>("view_debug_lines", 1000);
-            debugPubPoint = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
+            debugPub = n.advertise<roboteam_msgs::DebugLine>(TOPIC_DEBUG_LINES, 1000);
+            debugPubPoint = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
 }
 
 boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
@@ -201,7 +201,7 @@ bt::Node::Status StandFree::Update() {
     // will only finish this skill once kickingTheBall is set to true by the other robot
     bool kickingTheBall;
     if (setRosParam) {
-        n.getParam("/kickingTheBall", kickingTheBall); 
+        get_PARAM_KICKING(kickingTheBall);
     } else {
         kickingTheBall = true;
     }

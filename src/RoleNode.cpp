@@ -14,6 +14,7 @@
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_utils/constants.h"
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
@@ -88,7 +89,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
-    pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 100);
+    pub = n.advertise<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS, 100);
 
     std::string name = ros::this_node::getName();
     // Chop off the leading "/robot"
@@ -102,7 +103,7 @@ int main(int argc, char *argv[]) {
     }
 
     int iterationsPerSecond = 60;
-    ros::param::get("role_iterations_per_second", iterationsPerSecond);
+    rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
     
@@ -111,12 +112,12 @@ int main(int argc, char *argv[]) {
 
     // For receiving trees
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
-        "role_directive",
+        rtt::TOPIC_ROLE_DIRECTIVE,
         1000,
         &roleDirectiveCallback
         );
 
-    feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>("role_feedback", 10);
+    feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 
     while (ros::ok()) {
         ros::spinOnce();

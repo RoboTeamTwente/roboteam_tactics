@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
 
 	rtt::CanSeeTheirGoal canSeeTheirGoal("", bb);
 
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &canSeeTheirGoal));
-	ros::Subscriber subField = n.subscribe("vision_geometry", 10, &fieldUpdateCallback);
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBack, _1, &canSeeTheirGoal));
+	ros::Subscriber subField = n.subscribe(TOPIC_GEOMETRY, 10, &fieldUpdateCallback);
 
 	while (ros::ok()) {
 		ros::spinOnce();

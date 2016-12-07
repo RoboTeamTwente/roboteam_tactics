@@ -22,7 +22,7 @@ RTT_REGISTER_SKILL(Kick);
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
 
-        	pubKick = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        	pubKick = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
             // ROS_INFO("Kicking the ball");
 }
 

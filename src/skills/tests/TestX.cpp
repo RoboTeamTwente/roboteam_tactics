@@ -17,6 +17,7 @@
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_utils/constants.h"
 
 static volatile bool may_update = false;
 

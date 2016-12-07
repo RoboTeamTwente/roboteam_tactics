@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
 	rtt::CanPassSafely canPassSafely("", bb);
 
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &canPassSafely));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBack, _1, &canPassSafely));
 
 	while (ros::ok()) {
 		ros::spinOnce();
