@@ -25,8 +25,8 @@ Vector2 getPointOfInterest(std::string name) {
     } else if (name == "our goal" || name == "their goal") {
         // Get the side of the field
         std::string our_side = "right";
-        ros::param::get("our_side", our_side);
-
+        get_PARAM_OUR_SIDE(our_side);
+        
         // Get the length of the field
         double field_length = LastWorld::get_field().field_length;
 
@@ -154,7 +154,7 @@ double getDistToDefenseArea(std::string name, Vector2 point) {
     GeometryFieldSize field = LastWorld::get_field();
 
     std::string our_side = "right";
-    ros::param::get("our_side", our_side);
+    get_PARAM_OUR_SIDE(our_side);
 
     if ((name == "our defense area" && our_side == "right") ||
         (name == "their defense area" && our_side == "left")) {

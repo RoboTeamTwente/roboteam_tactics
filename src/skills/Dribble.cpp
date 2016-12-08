@@ -24,8 +24,8 @@ RTT_REGISTER_SKILL(Dribble);
 Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
             : Skill(name, blackboard)
             , rotateAroundPoint("", private_bb) { 
-        pubDribble = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
-        pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
+        pubDribble = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
+        pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
         ROS_INFO("Dribbling");
 	}
 
