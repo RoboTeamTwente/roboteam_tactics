@@ -11,6 +11,10 @@ WeHaveBall::WeHaveBall(std::string name, bt::Blackboard::Ptr blackboard) : Condi
     assert_valid<WeHaveBall>(name);
     std::string internal = name + "_internal_teamhasball";
     blackboard->SetBool("our_team", true);
+    // TODO: MEMORY LEAK! omfg!
+    // std::unique_ptr should be used here
+    // Or it should just be a class member
+    // But no mem leaking!
     team = new TeamHasBall(internal, blackboard);
 }
 
