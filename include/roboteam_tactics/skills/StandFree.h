@@ -27,8 +27,8 @@ public:
     Status Update();
 private:
     ros::NodeHandle n;
-	AvoidRobots avoidRobots;
 	ros::Publisher debugPub;
+	AvoidRobots avoidRobots;
 	ros::Publisher debugPubPoint;
 };
     

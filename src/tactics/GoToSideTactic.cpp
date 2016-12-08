@@ -50,6 +50,9 @@ void GoToSideTactic::Initialize() {
     std::mt19937 g(rd());
     std::shuffle(robots.begin(), robots.end(), g);
 
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
     for (auto robot : robots) {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
@@ -78,7 +81,7 @@ void GoToSideTactic::Initialize() {
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        directivePub.publish(wd);
+        pub.publish(wd);
     }
 }
 

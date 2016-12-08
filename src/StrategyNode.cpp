@@ -60,8 +60,12 @@ int main(int argc, char *argv[]) {
     ros::Rate rate(60);
 
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
+
+    // Construct the global role directive publisher
+    rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
     
-    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    // Creates the callbacks and removes them at the end
+    rtt::WorldAndGeomCallbackCreator cb;
     RTT_DEBUGLN("Waiting for first world & geom message...");
     rtt::LastWorld::wait_for_first_messages();
 

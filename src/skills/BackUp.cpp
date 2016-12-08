@@ -20,8 +20,6 @@ BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
     double dx = cosl(theta) * BACK_UP_DIST;
     double dy = sinl(theta) * BACK_UP_DIST;
     target_pos = roboteam_utils::Position(original_pos.x - dx, original_pos.y - dy, original_pos.rot);
-    
-    pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 inline double limit(double x) {
@@ -34,6 +32,7 @@ bt::Node::Status BackUp::Update() {
     
     roboteam_utils::Vector2 vec = target_pos.location() - current_pos.location();
     
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     
     if (vec.length() < .101) {
         pub.publish(stop_command(blackboard->GetInt("ROBOT_ID")));

@@ -27,9 +27,8 @@ void BasicDefenseTactic::Initialize() {
     double yStep = LastWorld::get_field().field_width / (robots.size() + 1);
     double startY = LastWorld::get_field().field_width / 2 - yStep;
 
-    // auto pub = rtt::get_roledirective_publisher();
-    ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     const Vector2 theirGoal = rtt::LastWorld::get_their_goal_center();
 

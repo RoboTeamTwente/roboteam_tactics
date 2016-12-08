@@ -24,14 +24,12 @@ public:
     std::string node_name() { return "RotateAroundPoint"; }
 
 private:
-    ros::NodeHandle n;
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
 	// double targetAngle;
 	roboteam_utils::Vector2 faceTowardsPos;
 	double rotw;
-	ros::Publisher pub;
 	roboteam_utils::Vector2 center;
    	double radius=radius;
    	

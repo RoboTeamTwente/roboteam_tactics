@@ -24,8 +24,6 @@ RTT_REGISTER_SKILL(RotateAroundPoint);
 
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
-
-	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -45,7 +43,7 @@ void RotateAroundPoint::stoprobot(int robotID) {
 	cmd.chipper_vel=0.0;
 	cmd.chipper_forced=false;
 
-	pub.publish(cmd);
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(cmd);
 }
 
 bt::Node::Status RotateAroundPoint::Update (){
@@ -255,7 +253,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				cmd.chipper_vel=0.0;
 				cmd.chipper_forced=false;
 				//ROS_INFO("rotDiff:%f cmd vel x:%f, y:%f, w:%f", worldrotDiff ,cmd.x_vel,cmd.y_vel,cmd.w);
-				pub.publish(cmd);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(cmd);
 	
 				return Status::Running;
 				

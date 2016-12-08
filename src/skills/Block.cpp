@@ -29,6 +29,7 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     }
     my_id = blackboard->GetInt("ROBOT_ID");
     tgt_id = blackboard->GetInt("TGT_ID");
+    // TODO: ERROR! block_id is unsigned and can never be less than zero!
     block_id = blackboard->GetInt("BLOCK_ID");
     constant = block_id < 0;
     invert = blackboard->GetBool("invert_direction");

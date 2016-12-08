@@ -49,8 +49,6 @@ private:
 	roboteam_utils::Vector2 prevTargetPos;
 	double prevTargetAngle;
 	roboteam_msgs::RobotCommand prevCommand;
-	ros::NodeHandle n;
-	ros::Publisher pubGetBall;
 	AvoidRobots avoidRobots;
 	// GoToPos goToPos;
 	int robotID;

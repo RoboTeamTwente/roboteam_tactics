@@ -32,7 +32,6 @@ public:
 private:
 	bool goal1reached=false;
 	ros::NodeHandle n;
-	ros::Publisher pubDribble;
 	ros::Publisher pubDebugpoints;
 	int robotID;
 	roboteam_utils::Vector2 robotvtogoal=roboteam_utils::Vector2(0.0,0.0);

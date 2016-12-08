@@ -20,9 +20,7 @@ namespace rtt {
 RTT_REGISTER_SKILL(AvoidRobots);
 
 AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
-}
+        : Skill(name, blackboard) { }
 
 // Simple proportional rotation controller
 double AvoidRobots::RotationController(double angleError) {
@@ -166,6 +164,8 @@ bt::Node::Status AvoidRobots::Update () {
     bb2->SetDouble("y_coor", yGoal);
     bb2->SetBool("check_move", true);
     
+    // Get global robot command publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 
     // If you can see the end point, just go towards it
     CanSeePoint canSeePoint("", bb2);

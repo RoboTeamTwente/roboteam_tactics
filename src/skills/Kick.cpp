@@ -20,11 +20,7 @@ namespace rtt {
 RTT_REGISTER_SKILL(Kick);
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) {
-
-        	pubKick = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
-            // ROS_INFO("Kicking the ball");
-}
+        : Skill(name, blackboard) { }
 
 void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
@@ -84,7 +80,8 @@ bt::Node::Status Kick::Update() {
 			command.y_vel = 0.0;
 			command.w = 0.0;
 
-			pubKick.publish(command);
+            rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+            // TODO: Shouldn't be needed
 			ros::spinOnce();
 
 			RTT_DEBUG("Triggered the kicker!\n");

@@ -11,17 +11,15 @@ class Kick : public Skill {
 public:
 	Kick(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
-	Status Update();
+	Status Update() override;
 
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;
         return params;
     }
-    std::string node_name() { return "Kick"; }
+    std::string node_name() override { return "Kick"; }
 private:
-	ros::NodeHandle n;
-	ros::Publisher pubKick;
 	int robotID;
 
     roboteam_utils::Vector2 oldBallVel;

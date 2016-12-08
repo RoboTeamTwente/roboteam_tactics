@@ -36,9 +36,8 @@ void BasicKeeperTactic::Initialize() {
     wd.blackboard = bb.toMsg();
 
     // Send to rolenode
-    // rtt::get_roledirective_publisher().publish(wd);
-    ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     pub.publish(wd);
 }
 

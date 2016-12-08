@@ -35,9 +35,6 @@ public:
     std::string node_name() { return "AvoidRobots"; }
     
 private:
-    ros::NodeHandle n;
-	ros::Publisher pub;
-
     bool success = false;
 
     // Control variables

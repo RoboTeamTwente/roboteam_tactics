@@ -139,7 +139,7 @@ How to use:
     rtt::print_blackboard(bb);
 
     // Create subscribers for world & geom messages
-    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    rtt::WorldAndGeomCallbackCreator cb;
 
     // Create subscriber for referee messages
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);

@@ -60,11 +60,11 @@ public:
         params["invert_direction"] = BBArgumentType::Bool;
         return params;
     }
-    std::string node_name() { return "Block"; }
+    std::string node_name() override { return "Block"; }
 private:
     BlockPos* pos;
     std::unique_ptr<AvoidRobots> avoidBots;
-    ros::NodeHandle n;
+ 
     unsigned int my_id, tgt_id, block_id;
     bool constant, invert;
 };

@@ -83,4 +83,8 @@ roboteam_msgs::GeometryFieldSize LastWorld::field;
 bool LastWorld::received_first_geom = false;
 bool LastWorld::received_first_world = false;
 
+WorldAndGeomCallbackCreator::WorldAndGeomCallbackCreator()
+    : worldSubscriber(n.subscribe<roboteam_msgs::World>(rtt::TOPIC_WOLRD_STATE, 1, rtt::LastWorld::callback_world_state))
+    , geomSubscriber(n.subscribe<roboteam_msgs::GeometryData>(rtt::TOPIC_GEOMETRY, 1, rtt::LastWorld::callback_geom_data)) {}
+
 }

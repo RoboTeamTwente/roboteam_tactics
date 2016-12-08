@@ -106,8 +106,12 @@ int main(int argc, char *argv[]) {
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
+
+    // Create global robot command publisher
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
     
-    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    // Create world & geom callbacks
+    rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
 
     // For receiving trees
