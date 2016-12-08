@@ -20,7 +20,7 @@ RTT_REGISTER_SKILL(Chip);
 Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
 
-    	pubChip = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+    	pubChip = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 void Chip::Initialize() {

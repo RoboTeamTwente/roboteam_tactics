@@ -22,6 +22,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
+#include "roboteam_utils/constants.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
 
     ros::Rate rate(60);
 
-    auto directivePub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
     
     RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
     RTT_DEBUGLN("Waiting for first world & geom message...");
@@ -87,9 +88,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Wait for all the role nodes to come online if a param was set
-    if (ros::param::has("num_role_nodes")) {
+    if (rtt::has_PARAM_NUM_ROLE_NODES()) {
         int numNodes;
-        ros::param::get("num_role_nodes", numNodes);
+        rtt::get_PARAM_NUM_ROLE_NODES(numNodes);
 
         RTT_DEBUGLN("Waiting for %i robot nodes to come online", numNodes);
        

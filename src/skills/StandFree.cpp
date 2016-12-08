@@ -160,7 +160,7 @@ bt::Node::Status StandFree::Update() {
     // will only finish this skill once kickingTheBall is set to true by the other robot
     bool kickingTheBall;
     if (setRosParam) {
-        n.getParam("/kickingTheBall", kickingTheBall); 
+        get_PARAM_KICKING(kickingTheBall);
     } else {
         kickingTheBall = true;
     }

@@ -29,7 +29,7 @@ void BasicDefenseTactic::Initialize() {
 
     // auto pub = rtt::get_roledirective_publisher();
     ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
 
     const Vector2 theirGoal = rtt::LastWorld::get_their_goal_center();
 

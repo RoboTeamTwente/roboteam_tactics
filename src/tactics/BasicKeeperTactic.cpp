@@ -38,7 +38,7 @@ void BasicKeeperTactic::Initialize() {
     // Send to rolenode
     // rtt::get_roledirective_publisher().publish(wd);
     ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
     pub.publish(wd);
 }
 

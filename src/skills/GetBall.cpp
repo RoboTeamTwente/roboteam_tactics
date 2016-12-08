@@ -32,9 +32,9 @@ RTT_REGISTER_SKILL(GetBall);
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
-    pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+    pubGetBall = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
     hasBall = whichRobotHasBall();
-    n.setParam("/kickingTheBall", false);
+    set_PARAM_KICKING(false);
 }
 
 int GetBall::whichRobotHasBall() {

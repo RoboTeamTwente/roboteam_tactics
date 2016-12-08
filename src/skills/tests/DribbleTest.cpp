@@ -16,7 +16,7 @@ void msgCallBackDribble(const roboteam_msgs::WorldConstPtr& world, rtt::Dribble*
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "DribbleTest");
+	ros::init(argc, argv, NODE_DRIBBLE_TEST);
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 	
 	rtt::Dribble dribble_B("", bb);
 	
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackDribble, _1, &dribble_B));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackDribble, _1, &dribble_B));
 	int count=0;
 	auto start=rtt::now();
 	

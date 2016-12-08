@@ -2,7 +2,7 @@
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_msgs/World.h"
+#include "roboteam_utils/constants.h"
 #include <boost/range/join.hpp>
 
 namespace rtt {

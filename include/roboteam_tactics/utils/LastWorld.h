@@ -5,6 +5,7 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/constants.h"
 #include "roboteam_msgs/GeometryData.h"
 
 namespace rtt {
@@ -48,5 +49,5 @@ class LastWorld {
 // exception that's hard to debug (probably).
 
 #define RTT_CREATE_WORLD_AND_GEOM_CALLBACKS \
-    auto RTT__WORLD__SUBSCRIBER =  n.subscribe<roboteam_msgs::World> ("world_state", 1, rtt::LastWorld::callback_world_state); \
-    auto RTT_GEOM_SUBSCRIBER = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1, rtt::LastWorld::callback_geom_data);
+    auto RTT__WORLD__SUBSCRIBER =  n.subscribe<roboteam_msgs::World> (rtt::TOPIC_WOLRD_STATE, 1, rtt::LastWorld::callback_world_state); \
+    auto RTT_GEOM_SUBSCRIBER = n.subscribe<roboteam_msgs::GeometryData> (rtt::TOPIC_GEOMETRY, 1, rtt::LastWorld::callback_geom_data);

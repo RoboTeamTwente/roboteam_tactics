@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
 	rtt::CanReachPoint canReachPoint("", bb);
 	{
-		ros::Subscriber sub1 = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &canReachPoint));
+		ros::Subscriber sub1 = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBack, _1, &canReachPoint));
 
 		while (ros::ok()) {
 			ros::spinOnce();
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	// bb1->SetBool("priority", false);
 	rtt::AvoidRobots avoidRobots1("", bb1);
 
-	ros::Subscriber sub2 = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
+	ros::Subscriber sub2 = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
 
 	time_t startTime;
 	time(&startTime);

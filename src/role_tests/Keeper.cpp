@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     bb2->SetDouble("RotateAroundPoint_A_w",3.0);
     bb2->SetDouble("RotateAroundPoint_A_radius", 0.09);
 
-    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldStateCallback, _1, &role2, bb2));
+    ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&worldStateCallback, _1, &role2, bb2));
 
     while(ros::ok()) {
         ros::spinOnce();
