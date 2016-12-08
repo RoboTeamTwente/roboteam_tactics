@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 
     // Construct the global role directive publisher
     rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
+    // rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
     
     // Creates the callbacks and removes them at the end
     rtt::WorldAndGeomCallbackCreator cb;
