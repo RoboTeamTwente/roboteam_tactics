@@ -44,7 +44,6 @@ double AvoidRobots::RotationController(double angleError) {
 roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle) {
     
     double requiredRotSpeed = RotationController(angleError);
-    ROS_INFO_STREAM("angleError: " << angleError << " requiredRotSpeed: " << requiredRotSpeed);
     roboteam_utils::Vector2 forceVector = posError*attractiveForceWhenClose;
 
     // Slow down once we get close to the goal, otherwise go at maximum speed
@@ -62,6 +61,7 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
     requiredSpeed.x=forceVector.x*cos(-myAngle)-forceVector.y*sin(-myAngle);
     requiredSpeed.y=forceVector.x*sin(-myAngle)+forceVector.y*cos(-myAngle);
 
+    // TODO: use the velocity controller, once it is better tested
     // roboteam_msgs::RobotCommand command = VelocityController(forceVector, requiredRotSpeed, posError);
 
     roboteam_msgs::RobotCommand command;
@@ -79,25 +79,7 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
         }
         if (dribbler) {command.dribbler = true;}
     }
-    // ROS_INFO_STREAM("posError: " << posError.x << " " << posError.y);
-    // ROS_INFO_STREAM("forceVector: " << forceVector.x << " " << forceVector.y);
-    // ROS_INFO_STREAM("velocity command: " << command.x_vel << " " << command.y_vel);
     return command;
-
-    // if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
-    //     roboteam_msgs::RobotCommand command;
-    //     command.id = robotID;
-    //     command.x_vel = 0.0;
-    //     command.y_vel = 0.0;
-    //     command.w = 0.0;
-    //     if (dribbler) {command.dribbler = true;}
-    //     success = true;
-    //     return command;
-    // } else {
-    //     roboteam_msgs::RobotCommand command = VelocityController(forceVector, requiredRotSpeed, posError);
-    //     if (dribbler) {command.dribbler = true;}
-    //     return command;
-    // }
 }
 
 // TODO: maybe add the controller for the rotational velocity as well, if that appears to be necessary
@@ -126,10 +108,7 @@ roboteam_msgs::RobotCommand AvoidRobots::VelocityController(roboteam_utils::Vect
 
     roboteam_utils::Vector2 requiredSpeed;  
     double myAngle = world.us.at(robotID).angle;
-    requiredSpeed = worldToRobotFrame(requiredSpeed, myAngle);
-    // 
-    // requiredSpeed.x=velCommand.x*cos(-myAngle)-velCommand.y*sin(-myAngle);
-    // requiredSpeed.y=velCommand.x*sin(-myAngle)+velCommand.y*cos(-myAngle);
+    requiredSpeed = worldToRobotFrame(velCommand, myAngle);
 
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
@@ -229,7 +208,7 @@ bt::Node::Status AvoidRobots::Update () {
     // Checking inputs
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
     drawer.DrawPoint("targetPos", targetPos);
-    targetPos = CheckTargetPos(targetPos);
+    targetPos = CheckTargetPos(targetPos); // TODO: this does not need to be done every Update, only when the goal position changes
     drawer.SetColor(0, 0, 255);
     drawer.DrawPoint("newTargetPos", targetPos);
     drawer.SetColor(0, 0, 0);

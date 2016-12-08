@@ -116,15 +116,8 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     FieldCircularArc top_arc;
     FieldCircularArc bottom_arc;
 
-<<<<<<< HEAD
     std::string our_field_side;
-    ros::param::get("our_field_side", our_field_side);
-=======
-    GeometryFieldSize field = LastWorld::get_field();
-
-    std::string our_side = "right";
-    get_PARAM_OUR_SIDE(our_side);
->>>>>>> 14807da9ea8b44c30a75ef4f473300d22a1d6c53
+    get_PARAM_OUR_SIDE(our_field_side);
 
     double safetyMarginLine = safetyMargin;
 
