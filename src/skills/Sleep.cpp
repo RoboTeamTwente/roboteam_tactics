@@ -18,7 +18,7 @@ RTT_REGISTER_SKILL(Sleep);
 
 Sleep::Sleep(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
-        	pubSleep = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        	pubSleep = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 void Sleep::Initialize() {

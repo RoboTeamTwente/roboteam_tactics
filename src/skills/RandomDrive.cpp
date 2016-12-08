@@ -18,7 +18,7 @@ RTT_REGISTER_SKILL(RandomDrive);
 RandomDrive::RandomDrive(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
-	debug_pub = n.advertise<roboteam_msgs::DebugPoint>("view_debug_points", 1000);
+	debug_pub = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
 
     // Generate a random id for this RandomDriver.
     debug_id = get_rand_int(100000);

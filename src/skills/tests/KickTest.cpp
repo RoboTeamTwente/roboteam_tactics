@@ -20,7 +20,7 @@ void msgCallBackKick(const roboteam_msgs::WorldConstPtr& world, rtt::Kick* Kick)
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "KickTest");
+	ros::init(argc, argv, NODE_KICK_TEST);
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
 	rtt::Kick Kick("", bb);
 
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackKick, _1, &Kick));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackKick, _1, &Kick));
 
 	while (ros::ok()) {
 		ros::spinOnce();

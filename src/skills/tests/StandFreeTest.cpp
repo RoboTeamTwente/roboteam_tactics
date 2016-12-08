@@ -27,7 +27,7 @@ void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometr
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "StandFreeTest");
+	ros::init(argc, argv, NODE_STAND_FREE_TEST);
 	ros::NodeHandle n;
 
 	auto bb1 = std::make_shared<bt::Blackboard>();
@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
 
 	rtt::StandFree standFree("", bb1);
 
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBack, _1, &standFree));
-	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBack, _1, &standFree));
+	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> (TOPIC_GEOMETRY, 1000, msgCallbackFieldGeometry);
 
 	while (ros::ok()) {
 		ros::spinOnce();

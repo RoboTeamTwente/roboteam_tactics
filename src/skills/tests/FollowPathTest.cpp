@@ -18,7 +18,7 @@ void msgCallBackFollowPath(const roboteam_msgs::WorldConstPtr& world, rtt::Follo
 	}
 }
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "FollowPathTest");
+	ros::init(argc, argv, NODE_FOLLOW_PATH_TEST);
 	ros::NodeHandle n;
 
     auto bb = std::make_shared<bt::Blackboard>();
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     bb->SetInt("ROBOT_ID", 0);
 
 	rtt::FollowPath followPath("", bb);
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackFollowPath, _1, &followPath));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackFollowPath, _1, &followPath));
 
 	while (ros::ok()) {
 		ros::spinOnce();

@@ -25,7 +25,7 @@ RTT_REGISTER_SKILL(RotateAroundPoint);
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
 
-	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -274,7 +274,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 		}
 	} else {
         std::string our_color = "yellow";
-        ros::param::get("our_color", our_color);
+        get_PARAM_OUR_COLOR(our_color);
 		ROS_INFO_STREAM(
                 "ID: "
                 << std::to_string(robotID)

@@ -2,8 +2,11 @@
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/Parts.h"
+#include "roboteam_utils/Vector2.h"
 
 namespace rtt {
+
+roboteam_utils::Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
 
 /**
  * Checks if measured distance from X to Y is more, less,
@@ -43,6 +46,7 @@ class DistanceXToY : public Condition {
     Status Update() override;
     private:
     int count = 0;
+
 } ;
 
 }

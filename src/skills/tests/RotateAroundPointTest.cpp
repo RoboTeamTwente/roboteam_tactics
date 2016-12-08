@@ -33,10 +33,10 @@ void msgCallBackRotateAroundPoint(const roboteam_msgs::WorldConstPtr& world, rtt
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "RotateAroundPoint");
+	ros::init(argc, argv, NODE_ROTATE_AROUND_POINT_TEST);
 	ros::NodeHandle n;
 	
-	ros::Publisher pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+	ros::Publisher pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 	ROS_INFO("waiting for connection");
 	while(pub.getNumSubscribers() < 1){sleep(0.1);}
 	ROS_INFO("connected");
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     bb->SetInt("ROBOT_ID", 1);
     
 	rtt::RotateAroundPoint rotateAroundPoint("", bb);
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackRotateAroundPoint, _1, &rotateAroundPoint, bb));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackRotateAroundPoint, _1, &rotateAroundPoint, bb));
 	
 	while (ros::ok()) {
 

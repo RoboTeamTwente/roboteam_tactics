@@ -17,6 +17,7 @@
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_utils/constants.h"
 
 static volatile bool may_update = false;
 
@@ -176,8 +177,8 @@ How to use:
 
             if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
                 break;
-
             }
+
             fps60.sleep();
         }
 

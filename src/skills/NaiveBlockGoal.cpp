@@ -53,7 +53,7 @@ RTT_REGISTER_SKILL(NaiveBlockGoal);
 NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
-        	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+        	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 bt::Node::Status NaiveBlockGoal::Update() {

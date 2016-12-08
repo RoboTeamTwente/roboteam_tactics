@@ -5,6 +5,8 @@
 #include <vector>
 #include <ros/ros.h>
 
+#include "roboteam_utils/constants.h"
+
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RoleDirective.h"
 
@@ -80,7 +82,7 @@ class Tactic : public Leaf {
 
         // auto pub = get_roledirective_publisher();
         ros::NodeHandle n;
-        auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+        auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
 
         roboteam_msgs::RoleDirective directive;
         directive.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;

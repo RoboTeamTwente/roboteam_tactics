@@ -46,7 +46,7 @@ void msgCallbackFieldGeometry(const roboteam_msgs::GeometryDataConstPtr& geometr
 // }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "AvoidRobotsTest");
+	ros::init(argc, argv, NODE_AVOID_ROBOTS_TEST);
 	ros::NodeHandle n;
 
 	auto bb1 = std::make_shared<bt::Blackboard>();
@@ -72,9 +72,9 @@ int main(int argc, char **argv) {
 	// rtt::AvoidRobots avoidRobots2(n, "", bb2);
 	// rtt::AvoidRobots avoidRobots3(n, "", bb3);
 
-	// ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1, &avoidRobots2, &avoidRobots3));
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
-	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, msgCallbackFieldGeometry);
+	// ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1, &avoidRobots2, &avoidRobots3));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackAvoidRobots, _1, &avoidRobots1));
+	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> (TOPIC_GEOMETRY, 1000, msgCallbackFieldGeometry);
 
 	while (ros::ok()) {
 		ros::spinOnce();

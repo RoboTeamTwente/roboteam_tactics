@@ -19,7 +19,7 @@ void msgCallBackGetBall(const roboteam_msgs::WorldConstPtr& world, rtt::GetBall*
 
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "GetBallTest");
+	ros::init(argc, argv, GET_BALL_TEST);
 	ros::NodeHandle n;
 
 	auto bb = std::make_shared<bt::Blackboard>();
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 
 	rtt::GetBall getBall_B("", bb);
 	
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGetBall, _1, &getBall_B));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackGetBall, _1, &getBall_B));
 
 	while (ros::ok()) {
 		ros::spinOnce();

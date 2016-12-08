@@ -32,9 +32,9 @@ RTT_REGISTER_SKILL(GetBall);
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
-    pubGetBall = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+    pubGetBall = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
     hasBall = whichRobotHasBall();
-    n.setParam("/kickingTheBall", false);
+    set_PARAM_KICKING(false);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -194,7 +194,7 @@ bt::Node::Status GetBall::Update (){
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
 		if (HasString("AimAt")) {
-			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam"));
+			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 		} else {
 			targetAngle = (ballPos - robotPos).angle();
 		}

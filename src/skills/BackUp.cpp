@@ -21,7 +21,7 @@ BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
     double dy = sinl(theta) * BACK_UP_DIST;
     target_pos = roboteam_utils::Position(original_pos.x - dx, original_pos.y - dy, original_pos.rot);
     
-    pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+    pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 inline double limit(double x) {

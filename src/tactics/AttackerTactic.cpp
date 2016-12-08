@@ -55,7 +55,7 @@ void AttackerTactic::Initialize() {
 
     // auto pub = get_roledirective_publisher();
     ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>("role_directive", 100);
+    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
 
     {
         // Fill blackboard with relevant info

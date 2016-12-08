@@ -20,7 +20,7 @@ RTT_REGISTER_SKILL(AimAt);
 AimAt::AimAt(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , rotateAroundPoint("", private_bb) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 bt::Node::Status AimAt::Update (){
@@ -65,7 +65,7 @@ bt::Node::Status AimAt::Update (){
 	if (result == Status::Success) {
 		if (setRosParam) {
 			ROS_INFO_STREAM("setting the param to true");
-			n.setParam("/kickingTheBall", true);
+			set_PARAM_KICKING(true);
 		}
 		return Status::Success;
 	} else if (result == Status::Failure) {

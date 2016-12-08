@@ -19,7 +19,7 @@ RTT_REGISTER_SKILL(GoToPos);
 
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>("robotcommands", 1000);
+	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 bt::Node::Status GoToPos::Update (){

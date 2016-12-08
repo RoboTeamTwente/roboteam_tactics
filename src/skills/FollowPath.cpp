@@ -21,7 +21,7 @@ FollowPath::FollowPath(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
 		// state = "computePath";
         state = COMPUTE;
-        client = n.serviceClient<roboteam_msgs::navsim>("navsim");
+        client = n.serviceClient<roboteam_msgs::navsim>(SERVICE_NAVSIM);
 }
 
 std::vector<roboteam_msgs::Vector2f> FollowPath::ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos) {

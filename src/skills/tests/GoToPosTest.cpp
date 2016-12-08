@@ -18,7 +18,7 @@ void msgCallBackGoToPos(const roboteam_msgs::WorldConstPtr& world, rtt::GoToPos*
 	}
 }
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "GoToPosTest");
+	ros::init(argc, argv, NODE_GO_TO_POS_TEST);
 	ros::NodeHandle n;
 	
     auto bb = std::make_shared<bt::Blackboard>();
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     bb->SetBool("endPoint", true);
 
 	rtt::GoToPos goToPos("", bb);
-	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&msgCallBackGoToPos, _1, &goToPos));
+	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> (TOPIC_WOLRD_STATE, 1000, boost::bind(&msgCallBackGoToPos, _1, &goToPos));
 
 	while (ros::ok()) {
 		ros::spinOnce();
