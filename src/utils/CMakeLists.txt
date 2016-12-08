@@ -1,6 +1,7 @@
 add_library(utils OBJECT
     Cone.cpp
     DangerFinder.cpp
+    Draw.cpp
     FeedbackCollector.cpp
     LastWorld.cpp
     LastRef.cpp

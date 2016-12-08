@@ -8,11 +8,13 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/utils/Math.h"
+#include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
@@ -26,7 +28,7 @@ AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
 
 // Simple proportional rotation controller
 double AvoidRobots::RotationController(double angleError) {
-    double pGainRot = 3.0;
+    double pGainRot = 6.0;
     double maxRotSpeed = 3.0;
 
     if (angleError < M_PI) {angleError += 2*M_PI;}
@@ -40,8 +42,9 @@ double AvoidRobots::RotationController(double angleError) {
 }
 
 roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle) {
-
+    
     double requiredRotSpeed = RotationController(angleError);
+    ROS_INFO_STREAM("angleError: " << angleError << " requiredRotSpeed: " << requiredRotSpeed);
     roboteam_utils::Vector2 forceVector = posError*attractiveForceWhenClose;
 
     // Slow down once we get close to the goal, otherwise go at maximum speed
@@ -52,35 +55,88 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
             forceVector = roboteam_utils::Vector2(0.0, 0.0);
         }
     }
-    
-    // Rotate from robot frame to world frame
-    roboteam_utils::Vector2 requiredSpeed;  
+
+    // roboteam_msgs::World world = LastWorld::get();
+    // double myAngle = world.us.at(robotID).angle;
+    roboteam_utils::Vector2 requiredSpeed;
     requiredSpeed.x=forceVector.x*cos(-myAngle)-forceVector.y*sin(-myAngle);
     requiredSpeed.y=forceVector.x*sin(-myAngle)+forceVector.y*cos(-myAngle);
 
-    if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
-        roboteam_msgs::RobotCommand command;
-        command.id = robotID;
+    // roboteam_msgs::RobotCommand command = VelocityController(forceVector, requiredRotSpeed, posError);
+
+    roboteam_msgs::RobotCommand command;
+    command.id = robotID;
+    command.x_vel = requiredSpeed.x;
+    command.y_vel = requiredSpeed.y;
+    command.w = requiredRotSpeed;
+
+    if (posError.length() < 0.01) {
         command.x_vel = 0.0;
         command.y_vel = 0.0;
-        command.w = 0.0;
+        if (fabs(angleError) < 0.05) {
+            command.w = 0.0;
+            success = true;
+        }
         if (dribbler) {command.dribbler = true;}
-        success = true;
-        return command;
-    } else {
-        roboteam_msgs::RobotCommand command;
-        command.id = robotID;
-        command.x_vel = requiredSpeed.x;
-        command.y_vel = requiredSpeed.y;
-        command.w = requiredRotSpeed;
-        if (dribbler) {command.dribbler = true;}
-        return command;
     }
+    // ROS_INFO_STREAM("posError: " << posError.x << " " << posError.y);
+    // ROS_INFO_STREAM("forceVector: " << forceVector.x << " " << forceVector.y);
+    // ROS_INFO_STREAM("velocity command: " << command.x_vel << " " << command.y_vel);
+    return command;
+
+    // if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
+    //     roboteam_msgs::RobotCommand command;
+    //     command.id = robotID;
+    //     command.x_vel = 0.0;
+    //     command.y_vel = 0.0;
+    //     command.w = 0.0;
+    //     if (dribbler) {command.dribbler = true;}
+    //     success = true;
+    //     return command;
+    // } else {
+    //     roboteam_msgs::RobotCommand command = VelocityController(forceVector, requiredRotSpeed, posError);
+    //     if (dribbler) {command.dribbler = true;}
+    //     return command;
+    // }
 }
 
-//TODO
-roboteam_msgs::RobotCommand AvoidRobots::VelocityController() {
+// TODO: maybe add the controller for the rotational velocity as well, if that appears to be necessary
+roboteam_msgs::RobotCommand AvoidRobots::VelocityController(roboteam_utils::Vector2 velTarget, double wTarget, roboteam_utils::Vector2 posError) {
+    double velIGain = 0.2;
+    // double wIGain = 0.0;
 
+    roboteam_msgs::World world = LastWorld::get();
+    roboteam_utils::Vector2 myVel = world.us.at(robotID).vel;
+    roboteam_utils::Vector2 velError = velTarget - myVel;
+    // double myW = world.us.at(robotID).w;
+    // double wError = wTarget - myW;
+
+    double timeStep = 1.0/40.0;
+    velControllerI = velControllerI + velError.scale(timeStep);
+    // wControllerI = wControllerI + wError * timeStep;
+    if (velControllerI.length() > 1.0) {
+        velControllerI = velControllerI.scale(1.0 / velControllerI.length());
+    }
+    if (posError.length() < 0.5) {
+        velControllerI = Vector2(0.0, 0.0);
+    }
+    roboteam_utils::Vector2 velCommand = velTarget + velControllerI * velIGain;
+    // double wCommand = wTarget + wControllerI * wIGain;
+    double wCommand = wTarget;
+
+    roboteam_utils::Vector2 requiredSpeed;  
+    double myAngle = world.us.at(robotID).angle;
+    requiredSpeed = worldToRobotFrame(requiredSpeed, myAngle);
+    // 
+    // requiredSpeed.x=velCommand.x*cos(-myAngle)-velCommand.y*sin(-myAngle);
+    // requiredSpeed.y=velCommand.x*sin(-myAngle)+velCommand.y*cos(-myAngle);
+
+    roboteam_msgs::RobotCommand command;
+    command.id = robotID;
+    command.x_vel = requiredSpeed.x;
+    command.y_vel = requiredSpeed.y;
+    command.w = wCommand;
+    return command;
 }
 
 roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError) {
@@ -114,8 +170,15 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
 roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
+    
+    double safetyMarginGoalAreas = 0.2;
     double marginOutsideField = 0.5; // meter
+
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
+        marginOutsideField = 0.0; // we should not go outside the field close to the goal areas.
+    }
+    
     if (xGoal > field.field_length/2+marginOutsideField || xGoal < -field.field_length/2-marginOutsideField) {
         xGoal = signum(xGoal)*field.field_length/2+marginOutsideField;
         ROS_WARN("position target outside of field");
@@ -125,9 +188,26 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
         ROS_WARN("position target outside of field");
     }
 
-    //TODO: check whether the target position is not within the goal area where we are not allowed to come
-
     roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
+    std::string our_field_side;
+    ros::param::get("our_field_side", our_field_side);
+
+    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+    roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+
+    if (our_field_side == "left") {
+        if (newTargetPos.x < 0.0 && distToOurDefenseArea.x > 0.0) {
+            newTargetPos = newTargetPos + distToOurDefenseArea;
+        } else if (newTargetPos.x > 0.0 && distToTheirDefenseArea.x < 0.0) {
+            newTargetPos = newTargetPos + distToTheirDefenseArea;
+        }
+    } else if (our_field_side == "right") {
+        if (newTargetPos.x < 0.0 && distToTheirDefenseArea.x > 0.0) {
+            newTargetPos = newTargetPos + distToTheirDefenseArea;
+        } else if (newTargetPos.x > 0.0 && distToOurDefenseArea.x < 0.0) {
+            newTargetPos = newTargetPos + distToOurDefenseArea;
+        }
+    }
     return newTargetPos;
 }
 
@@ -148,13 +228,17 @@ bt::Node::Status AvoidRobots::Update () {
 
     // Checking inputs
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
+    drawer.DrawPoint("targetPos", targetPos);
     targetPos = CheckTargetPos(targetPos);
+    drawer.SetColor(0, 0, 255);
+    drawer.DrawPoint("newTargetPos", targetPos);
+    drawer.SetColor(0, 0, 0);
     angleGoal = cleanAngle(angleGoal);
     
     roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(robotID).pos.x, world.us.at(robotID).pos.y);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = world.us.at(robotID).angle;
-    if (posError.length() > 1.5) {
+    if (posError.length() > 0.8) {
         angleGoal = posError.angle();
     }
     double angleError = angleGoal - myAngle;
@@ -165,7 +249,6 @@ bt::Node::Status AvoidRobots::Update () {
     bb2->SetDouble("y_coor", yGoal);
     bb2->SetBool("check_move", true);
     
-
     // If you can see the end point, just go towards it
     CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
@@ -196,9 +279,6 @@ bt::Node::Status AvoidRobots::Update () {
 
     // Add an attractive force towards the target
     sumOfForces = sumOfForces + posError*attractiveForceWhenClose;
-    
-
-
 
     // Slow down once we get close to the goal, other go at maximum speed
     if (posError.length() > 0.2) {
@@ -209,22 +289,9 @@ bt::Node::Status AvoidRobots::Update () {
         }
     }
 
-
     // Rotate from robot frame to world frame
-    roboteam_utils::Vector2 requiredSpeed;  
-    requiredSpeed.x=sumOfForces.x*cos(-myAngle)-sumOfForces.y*sin(-myAngle);
-    requiredSpeed.y=sumOfForces.x*sin(-myAngle)+sumOfForces.y*cos(-myAngle);
-
     double requiredRotSpeed = RotationController(angleError);
-
-    roboteam_msgs::RobotCommand command;
-    command.id = robotID;
-    command.x_vel = requiredSpeed.x;
-    command.y_vel = requiredSpeed.y;
-    command.w = requiredRotSpeed;
-    // command.x_vel = 0.0;
-    // command.y_vel = 0.0;
-    // command.w = 0.0;
+    roboteam_msgs::RobotCommand command = VelocityController(sumOfForces, requiredRotSpeed, posError);  
     if (dribbler) {command.dribbler = true;}
     pub.publish(command);
     return Status::Running;

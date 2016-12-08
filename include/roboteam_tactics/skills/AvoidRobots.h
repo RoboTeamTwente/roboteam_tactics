@@ -11,6 +11,7 @@
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/Draw.h"
 
 namespace rtt {
 
@@ -19,7 +20,7 @@ public:
 	AvoidRobots(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     double RotationController(double angleError);
     roboteam_msgs::RobotCommand PositionController(roboteam_utils::Vector2 posError, double angleError, double myAngle);
-    roboteam_msgs::RobotCommand VelocityController();
+    roboteam_msgs::RobotCommand VelocityController(roboteam_utils::Vector2 velTarget, double wTarget, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 CheckTargetPos(roboteam_utils::Vector2 targetPos);
 
@@ -43,7 +44,7 @@ private:
     // Control variables
     double maxSpeed = 2.0;
     double attractiveForce = 10.0;
-    double attractiveForceWhenClose = 4.0;
+    double attractiveForceWhenClose = 2.0;
     double repulsiveForce = 20.0;
 
     double xGoal;
@@ -52,6 +53,10 @@ private:
     uint   robotID;
     bool   dribbler;
 
+    roboteam_utils::Vector2 velControllerI;
+    // double wControllerI;
+
+    Draw drawer;
 };
 
 } // rtt

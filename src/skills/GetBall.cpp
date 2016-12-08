@@ -194,7 +194,7 @@ bt::Node::Status GetBall::Update (){
 		}
 	} else { // If we need not intercept the ball, then just drive towards it
 		if (HasString("AimAt")) {
-			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam"));
+			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 		} else {
 			targetAngle = (ballPos - robotPos).angle();
 		}
