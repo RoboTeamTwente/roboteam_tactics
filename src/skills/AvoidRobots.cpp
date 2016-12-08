@@ -80,7 +80,8 @@ roboteam_msgs::RobotCommand AvoidRobots::PositionController(roboteam_utils::Vect
 
 //TODO
 roboteam_msgs::RobotCommand AvoidRobots::VelocityController() {
-
+    roboteam_msgs::RobotCommand r;
+    return r;
 }
 
 roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError) {
