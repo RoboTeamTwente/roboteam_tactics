@@ -52,8 +52,6 @@ include_directories(
 add_subdirectory(src)
 
 # Executable that can convert behavior3 json to C++ functions
-# TODO: Make the converter scan dirs instead of include every skill condition
-# tactic etc.
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp

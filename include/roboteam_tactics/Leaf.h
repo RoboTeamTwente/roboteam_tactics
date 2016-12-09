@@ -24,6 +24,7 @@ class Leaf : public bt::Leaf {
 public:
 
     Status Tick() {
+        // Logic to, if enabled, send tree traces to the debug gui
         #ifdef RTT_ENABLE_BT_RQT_TRACE
 
         Status previousStatus = status;
@@ -32,16 +33,21 @@ public:
 
         roboteam_msgs::Blackboard bb;
 
-        if (newStatus == bt::Node::Status::Success) {
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::SUCCESS, bb);
-        } else if (newStatus == bt::Node::Status::Failure) {
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::FAILURE, bb);
-        } else if (newStatus == bt::Node::Status::Invalid) {
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::INVALID, bb);
-        } else if (previousStatus != bt::Node::Status::Running) {
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::STARTUP, bb);
-        } else {
-            // Don't send anything
+        if (newStatus != bt::Node::Status::Running) {
+            roboteam_msgs::BtDebugInfo::_type_type msgStatus;
+
+            if (newStatus == bt::Node::Status::Success) {
+                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
+            } else if (newStatus == bt::Node::Status::Failure) {
+                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
+            } else if (newStatus == bt::Node::Status::Invalid) {
+                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
+            }
+
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
+        } else if (newStatus != previousStatus) {
+            roboteam_msgs::BtDebugInfo::_type_type msgStatus = roboteam_msgs::BtStatus::STARTUP;
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
         }
             
         return newStatus;

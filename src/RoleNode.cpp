@@ -10,6 +10,7 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
+#include "roboteam_msgs/BtDebugInfo.h"
 #include "roboteam_msgs/BtStatus.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/treegen/NodeFactory.h"
@@ -54,7 +55,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         reset_tree();
 
         // Stop the robot in its tracks
-        // auto pub = rtt::get_robotcommand_publisher();
         pub.publish(rtt::stop_command(ROBOT_ID));
 
         return;
@@ -87,7 +87,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     RTT_DEBUG("Robot ID: %i. Executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
 
-    RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+    RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
@@ -150,6 +150,8 @@ int main(int argc, char *argv[]) {
 
             roboteam_msgs::Blackboard bb;
 
+            // TODO: Maybe implement bt rqt feedback here as well?
+
             if (status == bt::Node::Status::Success) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
                 feedbackPub.publish(feedback);
@@ -165,7 +167,6 @@ int main(int argc, char *argv[]) {
             currentTree = nullptr;
             
             // Stop the robot in its tracks
-            // auto pub = rtt::get_robotcommand_publisher();
             pub.publish(rtt::stop_command(ROBOT_ID));
         }
     }
