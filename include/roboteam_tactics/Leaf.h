@@ -20,23 +20,15 @@ class Leaf : public bt::Leaf {
 public:
 
     Status Tick() {
-        if (status != Status::Running) {
-            #ifdef RTT_ENABLE_BT_RQT_TRACE
-            std::cout << "[Leaf] " << name << "\n";
-            #endif
+        #ifdef RTT_ENABLE_BT_RQT_TRACE
 
-            // Initialize();
+        if (status != Status::Running) {
+            std::cout << "[Leaf] " << name << "\n";
         }
 
+        #endif
+
         return bt::Leaf::Tick();
-
-        // status = Update();
-
-        // if (status != Status::Running) {
-            // Terminate(status);
-        // }
-
-        // return status;
     }
 
     template<typename Impl>
