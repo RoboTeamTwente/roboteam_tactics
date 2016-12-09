@@ -21,6 +21,19 @@ set(BUILD_TESTX TRUE)
 set(BUILD_STRATEGYNODE TRUE)
 set(BUILD_ROBOTNODE TRUE)
 
+# Interesting debug feedback features
+set(ENABLE_BT_TRACE TRUE)
+set(ENABLE_DEBUG_GRAPHICS TRUE)
+
+# Set defines based on settings
+if (ENABLE_BT_TRACE)
+    add_definitions(-DRTT_ENABLE_BT_RQT_TRACE)
+endif (ENABLE_BT_TRACE)
+
+if (ENABLE_DEBUG_GRAPHICS)
+    add_definitions(-DRTT_ENABLE_DEBUG_GRAPHICS)
+endif (ENABLE_DEBUG_GRAPHICS)
+
 set(CMAKE_CXX_FLAGS "\
 --std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
@@ -37,24 +50,6 @@ include_directories(
 )
 
 add_subdirectory(src)
-
-# add_executable(DoStrategy
-    # src/role_tests/DoStrategy.cpp
-    # $<TARGET_OBJECTS:treegen>
-    # $<TARGET_OBJECTS:alltrees>
-    # $<TARGET_OBJECTS:skills>
-    # $<TARGET_OBJECTS:conditions>
-    # $<TARGET_OBJECTS:tactics>
-    # $<TARGET_OBJECTS:utils>
-# )
-# add_dependencies(DoStrategy 
-    # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    # ${catkin_EXPORTED_TARGETS}
-    # generate_json_t
-    # )
-# target_link_libraries(DoStrategy
-	# ${catkin_LIBRARIES}
-	# )
 
 # Executable that can convert behavior3 json to C++ functions
 # TODO: Make the converter scan dirs instead of include every skill condition
@@ -111,49 +106,6 @@ add_custom_target(generate_json_t
     DEPENDS
         ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
     )
-
-# This extra custom target is needed to use it in brain
-# as a dependency. (Something to do with working folders)
-# Generates files (like allconditions.h and allconditions_set.h)
-# that can be used to see which conditions exist (using the set)
-# and include all possible conditions at once.
-# add_custom_target(generate_leafs_t
-    # DEPENDS
-        # generated/generate_all_leafs.stamp
-    # )
-# add_custom_command(
-    # OUTPUT
-        # ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
-    # COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_all_leafs.sh
-    # DEPENDS
-        # ${CONDITION_SOURCES}
-        # ${TACTIC_SOURCES}
-        # ${SKILL_SOURCES}
-    # WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    # COMMENT "Generating C++ based on implemented skills, conditions, and tactics"
-    # )
-
-# Generate debug macros
-# add_custom_target(generate_dbg_macros_t
-    # DEPENDS
-        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    # )
-# add_custom_command(
-    # OUTPUT
-        # ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    # COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_debug_directives.sh
-    # DEPENDS
-        # ${PROJECT_SOURCE_DIR}/debug_names.txt
-    # WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    # COMMENT "Generating debug macros"
-    # )
-
-# Dummy output which is never actually produced. Anything that depends on
-# this will always be rebuilt.
-# add_custom_command(
-    # OUTPUT always_rebuild
-    # COMMAND cmake -E echo
-    # )
 
 #############################
 #### End of stupid stuff ####

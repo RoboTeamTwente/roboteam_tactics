@@ -17,7 +17,27 @@ enum class BlackboardPolicy {
 constexpr BlackboardPolicy DEFAULT_BB_POLICY = BlackboardPolicy::GLOBAL_FIRST;
 
 class Leaf : public bt::Leaf {
-    public:
+public:
+
+    Status Tick() {
+        if (status != Status::Running) {
+            #ifdef RTT_ENABLE_BT_RQT_TRACE
+            std::cout << "[Leaf] " << name << "\n";
+            #endif
+
+            // Initialize();
+        }
+
+        return bt::Leaf::Tick();
+
+        // status = Update();
+
+        // if (status != Status::Running) {
+            // Terminate(status);
+        // }
+
+        // return status;
+    }
 
     template<typename Impl>
     static boost::optional<std::string> valid_string_opt(typename std::enable_if<HasStringOptions<Impl>::value,
