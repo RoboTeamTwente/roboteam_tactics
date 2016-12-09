@@ -1,9 +1,13 @@
 #pragma once
 
+#include <boost/optional.hpp>
+#include <ros/ros.h>
+
+#include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/verifier.h"
-#include "ros/ros.h"
-#include <boost/optional.hpp>
+#include "roboteam_msgs/BtDebugInfo.h"
+#include "roboteam_msgs/BtStatus.h"
 
 namespace rtt {
 
@@ -22,13 +26,31 @@ public:
     Status Tick() {
         #ifdef RTT_ENABLE_BT_RQT_TRACE
 
-        if (status != Status::Running) {
-            std::cout << "[Leaf] " << name << "\n";
-        }
+        Status previousStatus = status;
 
-        #endif
+        Status newStatus = bt::Leaf::Tick();
+
+        roboteam_msgs::Blackboard bb;
+
+        if (newStatus == bt::Node::Status::Success) {
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::SUCCESS, bb);
+        } else if (newStatus == bt::Node::Status::Failure) {
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::FAILURE, bb);
+        } else if (newStatus == bt::Node::Status::Invalid) {
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::INVALID, bb);
+        } else if (previousStatus != bt::Node::Status::Running) {
+            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtStatus::STARTUP, bb);
+        } else {
+            // Don't send anything
+        }
+            
+        return newStatus;
+
+        #else   
 
         return bt::Leaf::Tick();
+
+        #endif
     }
 
     template<typename Impl>

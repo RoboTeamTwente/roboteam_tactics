@@ -140,6 +140,7 @@ How to use:
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
+    CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
     // Create subscriber for referee messages
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);

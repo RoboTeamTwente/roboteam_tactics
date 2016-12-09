@@ -23,6 +23,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/constants.h"
+#include "roboteam_tactics/utils/BtDebug.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -61,9 +62,9 @@ int main(int argc, char *argv[]) {
 
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
 
-    // Construct the global role directive publisher
+    // Construct the global role directive publisher & bt debug publisher if needed
     rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
-    // rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
+    CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
     
     // Creates the callbacks and removes them at the end
     rtt::WorldAndGeomCallbackCreator cb;
