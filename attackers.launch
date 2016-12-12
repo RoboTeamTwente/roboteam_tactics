@@ -1,10 +1,13 @@
 <launch>
 	<include file="$(find roboteam_utils)/mini.launch" />
 
-	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="AttackerStrategy" output="screen" /> 
+	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="SimpleAttackerStrategy" output="screen" /> 
 
 	<param name="role_iterations_per_second" type="int" value="40" />
 	<param name="num_role_nodes" type="int" value="4" />
+
+	<param name="our_side" type="str" value="right" />
+  	<param name="our_color" type="str" value="yellow" />
 
 	<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 	<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />

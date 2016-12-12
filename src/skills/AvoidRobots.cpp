@@ -166,8 +166,8 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
     }
 
     roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
-    std::string our_field_side;
-    ros::param::get("our_field_side", our_field_side);
+    std::string our_side;
+    ros::param::get("our_side", our_side);
 
     roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
     roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);

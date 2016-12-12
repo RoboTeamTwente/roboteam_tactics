@@ -141,6 +141,8 @@ How to use:
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
 
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
+
     // Create subscriber for referee messages
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
 
