@@ -39,9 +39,9 @@ public:
             if (newStatus == bt::Node::Status::Success) {
                 msgStatus = roboteam_msgs::BtStatus::SUCCESS;
             } else if (newStatus == bt::Node::Status::Failure) {
-                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
+                msgStatus = roboteam_msgs::BtStatus::FAILURE;
             } else if (newStatus == bt::Node::Status::Invalid) {
-                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
+                msgStatus = roboteam_msgs::BtStatus::INVALID;
             }
 
             RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
@@ -49,10 +49,10 @@ public:
             roboteam_msgs::BtDebugInfo::_type_type msgStatus = roboteam_msgs::BtStatus::STARTUP;
             RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
         }
-            
+
         return newStatus;
 
-        #else   
+        #else
 
         return bt::Leaf::Tick();
 
