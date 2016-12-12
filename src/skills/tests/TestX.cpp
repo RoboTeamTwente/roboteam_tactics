@@ -140,6 +140,7 @@ How to use:
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
+    CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
 

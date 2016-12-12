@@ -9,15 +9,9 @@ add_library(utils OBJECT
     RobotDealer.cpp
     utils.cpp
     BTRunner.cpp
-    # $<TARGET_OBJECTS:skills>
-    # $<TARGET_OBJECTS:conditions>
+    BtDebug.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
     )
-# target_link_libraries(utils
-    # $<TARGET_OBJECTS:skills>
-    # $<TARGET_OBJECTS:conditions>
-    # alltrees
-    # )

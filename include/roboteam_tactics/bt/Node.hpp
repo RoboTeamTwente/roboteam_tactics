@@ -30,7 +30,7 @@ public:
     virtual void Initialize() {}
     virtual void Terminate(Status s) {}
 
-    Status Tick()
+    virtual Status Tick()
     {
         if (status != Status::Running) {
             Initialize();
