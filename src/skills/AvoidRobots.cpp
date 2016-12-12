@@ -172,13 +172,13 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
     roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
     roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
 
-    if (our_field_side == "left") {
+    if (our_side == "left") {
         if (newTargetPos.x < 0.0 && distToOurDefenseArea.x > 0.0) {
             newTargetPos = newTargetPos + distToOurDefenseArea;
         } else if (newTargetPos.x > 0.0 && distToTheirDefenseArea.x < 0.0) {
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
-    } else if (our_field_side == "right") {
+    } else if (our_side == "right") {
         if (newTargetPos.x < 0.0 && distToTheirDefenseArea.x > 0.0) {
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         } else if (newTargetPos.x > 0.0 && distToOurDefenseArea.x < 0.0) {
