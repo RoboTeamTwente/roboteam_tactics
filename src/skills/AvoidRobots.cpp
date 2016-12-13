@@ -205,10 +205,10 @@ bt::Node::Status AvoidRobots::Update () {
 
     // Checking inputs
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
-    drawer.DrawPoint("targetPos", targetPos);
+    // drawer.DrawPoint("targetPos", targetPos);
     targetPos = CheckTargetPos(targetPos); // TODO: this does not need to be done every Update, only when the goal position changes
     drawer.SetColor(0, 0, 255);
-    drawer.DrawPoint("newTargetPos", targetPos);
+    // drawer.DrawPoint("newTargetPos", targetPos);
     drawer.SetColor(0, 0, 0);
     angleGoal = cleanAngle(angleGoal);
     

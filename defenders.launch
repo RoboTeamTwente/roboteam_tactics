@@ -1,5 +1,5 @@
 <launch>
-	<include file="$(find roboteam_utils)/mini.launch" />
+	
 
 	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="DefenderStrategy" output="screen" /> 
 

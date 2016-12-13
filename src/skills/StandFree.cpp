@@ -156,7 +156,7 @@ bt::Node::Status StandFree::Update() {
         nearestFreePos = nearestFreePos2;
     }
 
-    drawer.DrawPoint("nearestFreePos", nearestFreePos);
+    // drawer.DrawPoint("nearestFreePos", nearestFreePos);
 
     // kickingTheBall is here to communicate with another skill that passes the ball towards this robot. This robot 
     // will only finish this skill once kickingTheBall is set to true by the other robot

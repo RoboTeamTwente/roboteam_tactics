@@ -1,4 +1,5 @@
 <launch>
+	<include file="$(find roboteam_utils)/mini.launch" />
 	<group ns="blue">
 		<param name="our_color" value="blue" type="str" />
 		<param name="our_field_side" value="left" type="str" />

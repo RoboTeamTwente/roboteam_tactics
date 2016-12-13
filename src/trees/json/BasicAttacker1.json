@@ -2,7 +2,7 @@
   "id": "24b55629-a01e-4b1e-8a60-a8658e8e0e28",
   "title": "BasicAttacker1",
   "description": "",
-  "root": "fd2b6502-d397-4206-89d9-419bcff5aa22",
+  "root": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e",
   "properties": {},
   "nodes": {
     "6c419ef7-fe5f-4f29-aaa1-e8db880377fb": {
@@ -23,8 +23,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": -432,
-        "y": 60
+        "x": -72,
+        "y": 204
       }
     },
     "e427bf0e-c806-4bdf-8ca8-6546b342c106": {
@@ -40,21 +40,6 @@
       "children": [
         "24eeb9dd-63a3-4f7e-bd97-44d475d647ba",
         "11a15123-42d1-4f67-9d08-2d0368d5b04a"
-      ]
-    },
-    "fd2b6502-d397-4206-89d9-419bcff5aa22": {
-      "id": "fd2b6502-d397-4206-89d9-419bcff5aa22",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": -660,
-        "y": -12
-      },
-      "children": [
-        "0880bf87-ce76-4ad5-8da9-b46f88e20b27",
-        "c78aef73-73fe-4734-9dc2-54a3bb17bd2f"
       ]
     },
     "24eeb9dd-63a3-4f7e-bd97-44d475d647ba": {
@@ -105,20 +90,6 @@
         "y": 120
       }
     },
-    "0880bf87-ce76-4ad5-8da9-b46f88e20b27": {
-      "id": "0880bf87-ce76-4ad5-8da9-b46f88e20b27",
-      "name": "RepeatUntilSuccess",
-      "title": "Repeat Until Success",
-      "description": "",
-      "properties": {
-        "maxLoop": -1
-      },
-      "display": {
-        "x": -444,
-        "y": -84
-      },
-      "child": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e"
-    },
     "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e": {
       "id": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e",
       "name": "Sequence",
@@ -131,16 +102,17 @@
       },
       "children": [
         "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
-        "e427bf0e-c806-4bdf-8ca8-6546b342c106"
+        "e427bf0e-c806-4bdf-8ca8-6546b342c106",
+        "c78aef73-73fe-4734-9dc2-54a3bb17bd2f"
       ]
     }
   },
   "display": {
-    "camera_x": 1077.0799999972805,
+    "camera_x": 815.9399999972775,
     "camera_y": 334,
     "camera_z": 1,
-    "x": -756,
-    "y": -12
+    "x": -456,
+    "y": -84
   },
   "custom_nodes": [
     {
