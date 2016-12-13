@@ -116,18 +116,17 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     FieldCircularArc top_arc;
     FieldCircularArc bottom_arc;
 
-    std::string our_field_side;
-    get_PARAM_OUR_SIDE(our_field_side);
+    std::string our_side = get_our_side();
 
     double safetyMarginLine = safetyMargin;
 
     GeometryFieldSize field = LastWorld::get_field();
-    if ((name == "our defense area" && our_field_side == "right") || (name == "their defense area" && our_field_side == "left")) {
+    if ((name == "our defense area" && our_side == "right") || (name == "their defense area" && our_side == "left")) {
         line = field.right_penalty_line;
         top_arc = field.top_right_penalty_arc;
         bottom_arc = field.bottom_right_penalty_arc;
         safetyMarginLine = safetyMarginLine * -1; // on the rights side of the field we need to subtract the safety margin instead of add it.
-    } else if ((name == "our defense area" && our_field_side == "left") || (name == "their defense area" && our_field_side == "right")) {
+    } else if ((name == "our defense area" && our_side == "left") || (name == "their defense area" && our_side == "right")) {
         line = field.left_penalty_line;
         top_arc = field.top_left_penalty_arc;
         bottom_arc = field.bottom_left_penalty_arc;

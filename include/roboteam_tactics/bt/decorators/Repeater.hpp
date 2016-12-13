@@ -11,6 +11,7 @@ namespace bt
 class Repeater : public Decorator
 {
 public:
+    // TODO: constructor can be updated, ask Bob
     Repeater(int limit = 0) : limit(limit) {}
 
     void Initialize() override
@@ -24,19 +25,21 @@ public:
             Node::append_status("[Repeater: executing child of type %s]", child->node_name().c_str());
             auto s = child->Tick();
 
-            if (s == Status::Running) {
-                return Status::Running;
-            }
+            // if (s == Status::Running) {
+            //     return Status::Running;
+            // }
 
-            if (s == Status::Failure) {
-                return Status::Failure;
-            }
+            // if (s == Status::Failure) {
+            //     return Status::Running;
+            // }
 
             if (limit > 0 && ++counter == limit) {
                 return Status::Success;
             }
 
-            child->Reset();
+            return Status::Running;
+
+            // child->Reset();
         }
     }
     std::string node_name() { return "Repeater"; }

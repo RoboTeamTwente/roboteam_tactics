@@ -86,7 +86,7 @@ milliseconds time_difference_milliseconds(time_point start, time_point end);
 
 std::string describe_status(bt::Node::Status status);
 
-std::string get_our_field_side();
+std::string get_our_side();
 roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);

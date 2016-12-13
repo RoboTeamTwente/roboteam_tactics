@@ -20,8 +20,7 @@ bt::Node::Status IsBallInZone::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 	roboteam_utils::Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
-	std::string our_field_side;
-	n.getParam("our_field_side", our_field_side);
+	std::string our_side = get_our_side();
 	
 	int zone=int(private_bb->GetDouble("zone"));
 	
@@ -38,7 +37,7 @@ bt::Node::Status IsBallInZone::Update() {
 	double zone2y2=-3.0;
 	
 	if(zone == 1){
-		if(our_field_side == "right"){
+		if(our_side == "right"){
 			if(ballPos.x < zone1x1 && ballPos.x > zone1x2 && ballPos.y < zone1y1 && ballPos.y > zone1y2){
 				return Status::Success;
 			}
@@ -50,7 +49,7 @@ bt::Node::Status IsBallInZone::Update() {
 		
 		}
 	} else if(zone == 2){
-		if(our_field_side == "right"){
+		if(our_side == "right"){
 			if(ballPos.x < zone2x1 && ballPos.x > zone2x2 && ballPos.y < zone2y1 && ballPos.y > zone2y2){
 				return Status::Success;
 			}

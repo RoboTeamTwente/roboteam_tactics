@@ -27,11 +27,10 @@ bt::Node::Status CanSeeTheirGoal::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 
-	std::string our_field_side;
-	n.getParam("our_field_side", our_field_side);
+	std::string our_side = get_our_side();
 
 	roboteam_utils::Vector2 goalPos;
-	if(our_field_side == "left"){
+	if(our_side == "left"){
 		goalPos = roboteam_utils::Vector2(field.field_length/2.0, 0);
 	} else {
 		goalPos = roboteam_utils::Vector2(field.field_length/-2.0, 0);

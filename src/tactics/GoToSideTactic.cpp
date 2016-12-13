@@ -38,9 +38,8 @@ void GoToSideTactic::Initialize() {
     }
 
     int mod = 1;
-    std::string our_field_side = "left";
-    ros::param::get("our_field_side", our_field_side);
-    if (our_field_side == "left") {
+    std::string our_side = get_our_side();
+    if (our_side == "left") {
         mod = -1;
     }
 

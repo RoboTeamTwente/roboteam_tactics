@@ -1,6 +1,6 @@
 <launch>
 	
-
+	<include file="$(find roboteam_utils)/mini.launch" />
 	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="SimpleAttackerStrategy" output="screen" /> 
 
 	<param name="role_iterations_per_second" type="int" value="40" />
