@@ -23,23 +23,13 @@ public:
     {
         while (1) {
             Node::append_status("[Repeater: executing child of type %s]", child->node_name().c_str());
-            auto s = child->Tick();
-
-            // if (s == Status::Running) {
-            //     return Status::Running;
-            // }
-
-            // if (s == Status::Failure) {
-            //     return Status::Running;
-            // }
+            child->Tick();
 
             if (limit > 0 && ++counter == limit) {
                 return Status::Success;
             }
 
             return Status::Running;
-
-            // child->Reset();
         }
     }
     std::string node_name() { return "Repeater"; }
