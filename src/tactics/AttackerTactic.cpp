@@ -39,20 +39,20 @@ void AttackerTactic::Initialize() {
 
     // This tactic directs two robots
     int primaryAttacker;
-    // int secondaryAttacker;
+    int secondaryAttacker;
 
     std::vector<int> robots = RobotDealer::get_available_robots();
     
     primaryAttacker = get_robot_closest_to_ball(robots);
     delete_from_vector(robots, primaryAttacker);
     
-    // secondaryAttacker = get_robot_closest_to_their_goal(robots);
-    // delete_from_vector(robots, secondaryAttacker);
+    secondaryAttacker = get_robot_closest_to_their_goal(robots);
+    delete_from_vector(robots, secondaryAttacker);
 
-    claim_robots({primaryAttacker});
-    // claim_robots({primaryAttacker, secondaryAttacker});
+    // claim_robots({primaryAttacker});
+    claim_robots({primaryAttacker, secondaryAttacker});
 
-    // RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
+    RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -68,11 +68,11 @@ void AttackerTactic::Initialize() {
         bb.SetString("GetBall_B_AimAt", "theirgoal");
 
         // If you can't see the goal, check if you can see the other attacker, aim to him
-        // bb.SetBool("CanSeeRobot_B_our_team", true);
-        // bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);
-        // bb.SetBool("AimAt_B_setRosParam", true);
-        // bb.SetString("AimAt_B_At", "robot");
-        // bb.SetInt("AimAt_B_AtRobot", secondaryAttacker);
+        bb.SetBool("CanSeeRobot_B_our_team", true);
+        bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);
+        bb.SetBool("AimAt_B_setRosParam", true);
+        bb.SetString("AimAt_B_At", "robot");
+        bb.SetInt("AimAt_B_AtRobot", secondaryAttacker);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
@@ -89,40 +89,40 @@ void AttackerTactic::Initialize() {
         pub.publish(wd);
     }
 
-    // {
-    //     // Fill blackboard with relevant info
-    //     bt::Blackboard bb;
-    //     // Attacker 2
-    //     bb.SetInt("ROBOT_ID", secondaryAttacker);
+    {
+        // Fill blackboard with relevant info
+        bt::Blackboard bb;
+        // Attacker 2
+        bb.SetInt("ROBOT_ID", secondaryAttacker);
 
-    //     // Make sure you stand free to receive the ball
-    //     bb.SetInt("StandFree_A_theirID", primaryAttacker);
-    //     bb.SetBool("StandFree_A_setRosParam", true);
-    //     bb.SetString("StandFree_A_whichTeam", "us");
-    //     bb.SetDouble("StandFree_A_distanceFromPoint", 0.3);
+        // Make sure you stand free to receive the ball
+        bb.SetInt("StandFree_A_theirID", primaryAttacker);
+        bb.SetBool("StandFree_A_setRosParam", true);
+        bb.SetString("StandFree_A_whichTeam", "us");
+        bb.SetDouble("StandFree_A_distanceFromPoint", 0.3);
 
-    //     // Receive the ball
-    //     bb.SetBool("GetBall_A_intercept", true);
-    //     bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
+        // Receive the ball
+        bb.SetBool("GetBall_A_intercept", true);
+        bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
 
-    //     // Aim at goal
-    //     bb.SetBool("AimAt_B_setRosParam", false);
-    //     bb.SetString("AimAt_B_At", "theirgoal");
+        // Aim at goal
+        bb.SetBool("AimAt_B_setRosParam", false);
+        bb.SetString("AimAt_B_At", "theirgoal");
 
-    //     // Create message
-    //     roboteam_msgs::RoleDirective wd;
-    //     wd.robot_id = secondaryAttacker;
-    //     wd.tree = "BasicAttacker2";
-    //     wd.blackboard = bb.toMsg();
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.robot_id = secondaryAttacker;
+        wd.tree = "BasicAttacker2";
+        wd.blackboard = bb.toMsg();
 
-    //     // Add random token and save it for later
-    //     boost::uuids::uuid token = unique_id::fromRandom();
-    //     tokens.push_back(token);
-    //     wd.token = unique_id::toMsg(token);
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
 
-    //     // Send to rolenode
-    //     pub.publish(wd);
-    // }
+        // Send to rolenode
+        pub.publish(wd);
+    }
 
     start = rtt::now();
 }
