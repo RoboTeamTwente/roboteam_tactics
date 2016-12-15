@@ -49,6 +49,14 @@ bt::Node::Status Kick::Update() {
     oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");
+    double kickVel;
+    if (HasDouble("kickVel")) {
+    	ROS_INFO_STREAM("setting kickVel to " << kickVel);
+    	kickVel = GetDouble("kickVel");
+    } else {
+    	kickVel = 4;
+    }
+
 	// ROS_INFO_STREAM("name: " << name << " " << robotID);
 	roboteam_msgs::WorldBall ball = world.ball;
 
@@ -75,7 +83,7 @@ bt::Node::Status Kick::Update() {
 			command.dribbler = false;
 			command.kicker = true;
 			command.kicker_forced = true;
-			command.kicker_vel = 5;
+			command.kicker_vel = kickVel;
 			command.x_vel = 0.0;
 			command.y_vel = 0.0;
 			command.w = 0.0;

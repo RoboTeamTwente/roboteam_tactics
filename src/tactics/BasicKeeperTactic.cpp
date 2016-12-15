@@ -28,6 +28,7 @@ void BasicKeeperTactic::Initialize() {
     bt::Blackboard bb;
 
     bb.SetInt("ROBOT_ID", ROBOT_ID);
+    bb.SetDouble("Kick_A_kickVel", 2.5);
 
     // Create message
     roboteam_msgs::RoleDirective wd;

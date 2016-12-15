@@ -67,6 +67,8 @@ void AttackerTactic::Initialize() {
         bb.SetBool("GetBall_B_intercept", false);
         bb.SetString("GetBall_B_AimAt", "theirgoal");
 
+        bb.SetDouble("Kick_B_kickVel", 2.5);
+
         // If you can't see the goal, check if you can see the other attacker, aim to him
         // bb.SetBool("CanSeeRobot_B_our_team", true);
         // bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);

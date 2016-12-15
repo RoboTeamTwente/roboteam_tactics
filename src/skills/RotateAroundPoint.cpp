@@ -182,7 +182,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			// velocity in towards and away from ball (x) and around ball (y)
 			double radiusPconstant=10;
 			double turnPconstant=5;
-			double maxv=5.0;
+			double maxv=1.0;
 			double maxrot=4.0;
 
 			
