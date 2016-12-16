@@ -52,7 +52,7 @@ void DemoTactic::Initialize() {
     claim_robots({score_bot, attack_bot, def_bot, keeper_bot});
 
     int mod = -1;
-    if (rtt::get_our_field_side() == "left") {
+    if (rtt::get_our_side() == "left") {
         mod = 1;
     }
 

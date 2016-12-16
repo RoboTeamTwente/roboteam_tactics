@@ -27,10 +27,8 @@ public:
         return params;
     }
     std::string node_name() { return "NaiveBlockGoal"; }
-private:
-	ros::NodeHandle n;
-	ros::Publisher pubNaiveBlockGoal;
 
+private:
     AvoidRobots avoidRobots;
 
 };

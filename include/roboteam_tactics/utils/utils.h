@@ -86,7 +86,7 @@ milliseconds time_difference_milliseconds(time_point start, time_point end);
 
 std::string describe_status(bt::Node::Status status);
 
-std::string get_our_field_side();
+std::string get_our_side();
 roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
@@ -96,5 +96,37 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
 
 // ros::Publisher& get_rolecommand_publisher();
 // ros::Publisher& get_roledirective_publisher();
+
+template<
+    class M
+>
+class GlobalPublisher {
+public:
+    GlobalPublisher(std::string topic, int queue = 100)
+        : actualPub(n.advertise<M>(topic, queue)) {
+        if (!GlobalPublisher<M>::pubPtr) {
+            GlobalPublisher<M>::pubPtr = &actualPub;
+        }
+    }
+
+    static ros::Publisher& get_publisher() {
+        if (!GlobalPublisher<M>::pubPtr) {
+            ROS_ERROR("Publisher requested while it was not yet initialized!");
+        }
+
+        return *GlobalPublisher<M>::pubPtr;
+    }
+
+private:
+    ros::NodeHandle n;
+    ros::Publisher actualPub;
+    static ros::Publisher *pubPtr;
+
+} ;
+
+template<
+    class M
+>
+ros::Publisher* GlobalPublisher<M>::pubPtr = nullptr;
 
 } // rtt

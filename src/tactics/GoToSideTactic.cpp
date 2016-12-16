@@ -38,9 +38,8 @@ void GoToSideTactic::Initialize() {
     }
 
     int mod = 1;
-    std::string our_field_side = "left";
-    ros::param::get("our_field_side", our_field_side);
-    if (our_field_side == "left") {
+    std::string our_side = get_our_side();
+    if (our_side == "left") {
         mod = -1;
     }
 
@@ -49,6 +48,9 @@ void GoToSideTactic::Initialize() {
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(robots.begin(), robots.end(), g);
+
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     for (auto robot : robots) {
         // Fill blackboard with relevant info
@@ -78,7 +80,7 @@ void GoToSideTactic::Initialize() {
         wd.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        directivePub.publish(wd);
+        pub.publish(wd);
     }
 }
 

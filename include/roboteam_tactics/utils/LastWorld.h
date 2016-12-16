@@ -42,12 +42,19 @@ class LastWorld {
 
 };
 
-}
-
 // Can be placed in a main() to set up the wrld and geom callbacks
 // DON'T MAKE SUBSCRIBERS PUBLISHER STATIC/GLOBAL! You'll get a weird
 // exception that's hard to debug (probably).
 
-#define RTT_CREATE_WORLD_AND_GEOM_CALLBACKS \
-    auto RTT__WORLD__SUBSCRIBER =  n.subscribe<roboteam_msgs::World> (rtt::TOPIC_WOLRD_STATE, 1, rtt::LastWorld::callback_world_state); \
-    auto RTT_GEOM_SUBSCRIBER = n.subscribe<roboteam_msgs::GeometryData> (rtt::TOPIC_GEOMETRY, 1, rtt::LastWorld::callback_geom_data);
+class WorldAndGeomCallbackCreator {
+public:
+    WorldAndGeomCallbackCreator();
+
+private:
+    ros::NodeHandle n;
+    ros::Subscriber worldSubscriber;
+    ros::Subscriber geomSubscriber;
+
+} ;
+
+}

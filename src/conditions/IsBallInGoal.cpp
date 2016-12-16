@@ -23,11 +23,10 @@ bt::Node::Status IsBallInGoal::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 	roboteam_utils::Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
-	std::string our_field_side;
-	n.getParam("our_field_side", our_field_side);
+	std::string our_side = get_our_side();
 
 	if (GetBool("our_goal")) {
-		if(our_field_side == "left"){
+		if(our_side == "left"){
 			roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(field.field_length/-2.0, 0);
 			if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
 		} else {
@@ -35,7 +34,7 @@ bt::Node::Status IsBallInGoal::Update() {
 			if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
 		}
 	} else {
-		if(our_field_side == "left"){
+		if(our_side == "left"){
 			roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(field.field_length/2.0, 0);
 			if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
 		} else {

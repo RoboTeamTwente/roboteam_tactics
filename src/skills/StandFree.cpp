@@ -83,12 +83,14 @@ bt::Node::Status StandFree::Update() {
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
         if (!(GetString("whichTeam") == "us" && currentRobot.id == theirID) && currentRobot.id != myID) {
+            // ROS_INFO_STREAM("watch out for " << i << " of our team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.them.at(i);
         if (!(GetString("whichTeam") == "them" && currentRobot.id == theirID)) {
+            // ROS_INFO_STREAM("watch out for " << i << " of their team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }
@@ -154,7 +156,7 @@ bt::Node::Status StandFree::Update() {
         nearestFreePos = nearestFreePos2;
     }
 
-    drawer.DrawPoint("nearestFreePos", nearestFreePos);
+    // drawer.DrawPoint("nearestFreePos", nearestFreePos);
 
     // kickingTheBall is here to communicate with another skill that passes the ball towards this robot. This robot 
     // will only finish this skill once kickingTheBall is set to true by the other robot

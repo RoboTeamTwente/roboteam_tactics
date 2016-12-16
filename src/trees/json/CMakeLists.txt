@@ -4,6 +4,8 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/AttackerStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicRole.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/BasicAttacker1.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/BasicAttacker2.json
     ${CMAKE_CURRENT_SOURCE_DIR}/BounceBall.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolRole.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolTree.json

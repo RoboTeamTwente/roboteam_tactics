@@ -19,8 +19,6 @@ RTT_REGISTER_SKILL(Chip);
 
 Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
-
-    	pubChip = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 void Chip::Initialize() {
@@ -76,7 +74,7 @@ bt::Node::Status Chip::Update() {
 			command.y_vel = 0.0;
 			command.w = 0.0;
 
-			pubChip.publish(command);
+            rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
 			ros::spinOnce();
 			ROS_INFO("Triggered the chipper!");
 			return Status::Running;

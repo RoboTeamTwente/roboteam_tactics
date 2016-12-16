@@ -35,7 +35,6 @@ private:
     enum FPState { COMPUTE, GOTO, CHECK };
 
 	ros::NodeHandle n;
-	ros::Publisher pub;
 	ros::ServiceClient client;
 	std::vector<roboteam_msgs::Vector2f> points;
 

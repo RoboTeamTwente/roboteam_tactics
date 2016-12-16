@@ -49,13 +49,13 @@ void AttackerTactic::Initialize() {
     secondaryAttacker = get_robot_closest_to_their_goal(robots);
     delete_from_vector(robots, secondaryAttacker);
 
+    // claim_robots({primaryAttacker});
     claim_robots({primaryAttacker, secondaryAttacker});
 
     RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
 
-    // auto pub = get_roledirective_publisher();
-    ros::NodeHandle n;
-    auto pub = n.advertise<roboteam_msgs::RoleDirective>(TOPIC_ROLE_DIRECTIVE, 100);
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     {
         // Fill blackboard with relevant info
@@ -90,7 +90,6 @@ void AttackerTactic::Initialize() {
     }
 
     {
-
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         // Attacker 2

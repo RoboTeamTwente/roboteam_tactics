@@ -24,7 +24,9 @@ public:
     Status Update();
 private:
     ros::NodeHandle n;
+	ros::Publisher debugPub;
 	AvoidRobots avoidRobots;
+	ros::Publisher debugPubPoint;
     Draw drawer;
 };
     

@@ -289,10 +289,10 @@ std::string describe_status(bt::Node::Status status) {
     }
 }
 
-std::string get_our_field_side() {
-    std::string our_field_side = "right";
-    ros::param::get("our_field_side", our_field_side);
-    return our_field_side;
+std::string get_our_side() {
+    std::string tgt;
+    get_PARAM_OUR_SIDE(tgt, false);
+    return tgt;
 }
 
 bool is_digits(const std::string &str) {

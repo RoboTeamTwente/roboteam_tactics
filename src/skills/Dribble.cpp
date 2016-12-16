@@ -24,13 +24,12 @@ RTT_REGISTER_SKILL(Dribble);
 Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
             : Skill(name, blackboard)
             , rotateAroundPoint("", private_bb) { 
-        pubDribble = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
         pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
         ROS_INFO("Dribbling");
 	}
 
 void Dribble::stoprobot(int robotID) {
-	pubDribble.publish(stop_command(robotID));
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(stop_command(robotID));
 }
 roboteam_utils::Vector2 Dribble::worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
     roboteam_utils::Vector2 robotRequiredv;
@@ -203,6 +202,7 @@ bt::Node::Status Dribble::Update() {
 		
 	}
 	rotateAroundPoint.Update();
+    // TODO: Wtf is this :p ^^
 	sleep(0.1);
 	return Status::Running;
 }

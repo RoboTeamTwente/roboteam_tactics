@@ -10,11 +10,15 @@
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
+#include "roboteam_msgs/BtDebugInfo.h"
+#include "roboteam_msgs/BtStatus.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_utils/constants.h"
+#include "roboteam_tactics/utils/BtDebug.h"
+
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
@@ -51,7 +55,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         reset_tree();
 
         // Stop the robot in its tracks
-        // auto pub = rtt::get_robotcommand_publisher();
         pub.publish(rtt::stop_command(ROBOT_ID));
 
         return;
@@ -83,6 +86,8 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     currentToken = msg->token;
 
     RTT_DEBUG("Robot ID: %i. Executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
+
+    RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
@@ -106,8 +111,13 @@ int main(int argc, char *argv[]) {
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
     RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
+
+    // Create global robot command publisher
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
+    CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
     
-    RTT_CREATE_WORLD_AND_GEOM_CALLBACKS;
+    // Create world & geom callbacks
+    rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
 
     // For receiving trees
@@ -138,6 +148,10 @@ int main(int argc, char *argv[]) {
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;
 
+            roboteam_msgs::Blackboard bb;
+
+            // TODO: Maybe implement bt rqt feedback here as well?
+
             if (status == bt::Node::Status::Success) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
                 feedbackPub.publish(feedback);
@@ -153,7 +167,6 @@ int main(int argc, char *argv[]) {
             currentTree = nullptr;
             
             // Stop the robot in its tracks
-            // auto pub = rtt::get_robotcommand_publisher();
             pub.publish(rtt::stop_command(ROBOT_ID));
         }
     }

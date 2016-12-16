@@ -32,7 +32,6 @@ RTT_REGISTER_SKILL(GetBall);
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , avoidRobots("", private_bb) {
-    pubGetBall = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
     hasBall = whichRobotHasBall();
     set_PARAM_KICKING(false);
 }
@@ -141,7 +140,6 @@ int GetBall::GetSign(double number) {
 }
 
 bt::Node::Status GetBall::Update (){
-	ROS_INFO("in getball");
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	
@@ -232,7 +230,7 @@ bt::Node::Status GetBall::Update (){
 		command.y_vel = 0.0;
 		command.w = 0.0;
 		command.dribbler = true;
-		pubGetBall.publish(command);
+        rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
 		ros::spinOnce();
 
 		RTT_DEBUG("GetBall skill completed.");

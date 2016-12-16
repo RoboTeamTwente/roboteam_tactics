@@ -14,7 +14,6 @@ BasicAttackTactic::BasicAttackTactic(std::string name, bt::Blackboard::Ptr black
 
 bt::Node::Status BasicAttackTactic::Update() {
     std::cout << "Picking BasicAttackTactic!\n";
-    // pickedTactic = std::make_shared<BasicAttackTactic>();
     return bt::Node::Status::Success;
 }
 

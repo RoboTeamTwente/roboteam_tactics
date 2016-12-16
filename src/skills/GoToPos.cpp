@@ -19,7 +19,6 @@ RTT_REGISTER_SKILL(GoToPos);
 
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
 }
 
 bt::Node::Status GoToPos::Update (){
@@ -99,6 +98,8 @@ bt::Node::Status GoToPos::Update (){
     } else {
         command.dribbler = false;
     }
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     
     if (posError.length() < 0.05) {
     //     if (dribbler) {

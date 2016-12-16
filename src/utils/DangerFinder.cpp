@@ -7,6 +7,7 @@
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
+#include "roboteam_utils/constants.h"
 
 #define reason(msg, ...) if (reasoning != nullptr) { \
 char buf[100]; \
@@ -225,10 +226,9 @@ boost::optional<Robot> charging_bot() {
 }
 
 bool we_are_left() {
-    std::string our_field_side = "left";
-    ros::param::get("our_field_side", our_field_side);
-
-    return our_field_side == "left";
+    std::string tgt;
+    get_PARAM_OUR_SIDE(tgt, false);
+    return tgt == "left";
 }
 
 std::vector<Vector> our_goal() {

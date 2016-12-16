@@ -23,8 +23,6 @@ public:
 
     std::string node_name() { return "Chip"; }
 private:
-    ros::NodeHandle n;
-    ros::Publisher pubChip;
     int robotID;
 
     roboteam_utils::Vector2 oldBallVel;

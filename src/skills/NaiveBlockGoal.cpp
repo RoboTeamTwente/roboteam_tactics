@@ -29,7 +29,7 @@ const double GOAL_AREA_LENGTH = 0.5;
 bool isBallInGoalArea() {
     Vector2 ballPos(LastWorld::get().ball.pos);
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
-    if (get_our_field_side() == "left") {
+    if (get_our_side() == "left") {
         if (ballPos.x > -FIELD_LENGTH / 2
                 && ballPos.x < -FIELD_LENGTH / 2 + GOAL_AREA_LENGTH
                 && ballPos.y > -GOAL_AREA_WIDTH / 2
@@ -52,9 +52,7 @@ RTT_REGISTER_SKILL(NaiveBlockGoal);
 
 NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) {
-        	pubNaiveBlockGoal = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
-}
+        , avoidRobots("", private_bb) { }
 
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
@@ -65,20 +63,20 @@ bt::Node::Status NaiveBlockGoal::Update() {
     Vector2 goalPos = LastWorld::get_our_goal_center();
     Vector2 minVec;
 
-    // if (our_field_side == "left") {
+    // if (our_side == "left") {
         // goalPos = Vector2(FIELD_LENGTH / -2, 0);
     // } else {
         // goalPos = Vector2(FIELD_LENGTH / 2, 0);
     // }
 
-    std::string our_field_side = get_our_field_side();
+    std::string our_side = get_our_side();
     auto ballVec = ballPos - goalPos;
 
     double padding = 0.10;
-    if (our_field_side == "left" && ballPos.x <= -FIELD_LENGTH / 2) {
+    if (our_side == "left" && ballPos.x <= -FIELD_LENGTH / 2) {
         minVec.x = -FIELD_LENGTH / 2 + padding;
         minVec.y = ballPos.y;
-    } else if (our_field_side == "right" && ballPos.x >= FIELD_LENGTH / 2) {
+    } else if (our_side == "right" && ballPos.x >= FIELD_LENGTH / 2) {
         minVec.x = FIELD_LENGTH / 2 - padding;
         minVec.y = ballPos.y;
     } else if (isBallInGoalArea()) {
@@ -115,7 +113,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
 
         // If not real, stand in the center of the goal
         if (!minVec.real()) {
-            if (our_field_side == "left") {
+            if (our_side == "left") {
                 minVec.x = -FIELD_LENGTH / 2;
             } else {
                 minVec.x = FIELD_LENGTH / 2;

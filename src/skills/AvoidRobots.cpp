@@ -22,9 +22,7 @@ namespace rtt {
 RTT_REGISTER_SKILL(AvoidRobots);
 
 AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) {
-	pub = n.advertise<roboteam_msgs::RobotCommand>(TOPIC_COMMANDS, 1000);
-}
+        : Skill(name, blackboard) { }
 
 // Simple proportional rotation controller
 double AvoidRobots::RotationController(double angleError) {
@@ -168,19 +166,19 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
     }
 
     roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
-    std::string our_field_side;
-    ros::param::get("our_field_side", our_field_side);
+    std::string our_side;
+    ros::param::get("our_side", our_side);
 
     roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
     roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
 
-    if (our_field_side == "left") {
+    if (our_side == "left") {
         if (newTargetPos.x < 0.0 && distToOurDefenseArea.x > 0.0) {
             newTargetPos = newTargetPos + distToOurDefenseArea;
         } else if (newTargetPos.x > 0.0 && distToTheirDefenseArea.x < 0.0) {
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
-    } else if (our_field_side == "right") {
+    } else if (our_side == "right") {
         if (newTargetPos.x < 0.0 && distToTheirDefenseArea.x > 0.0) {
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         } else if (newTargetPos.x > 0.0 && distToOurDefenseArea.x < 0.0) {
@@ -207,10 +205,10 @@ bt::Node::Status AvoidRobots::Update () {
 
     // Checking inputs
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
-    drawer.DrawPoint("targetPos", targetPos);
+    // drawer.DrawPoint("targetPos", targetPos);
     targetPos = CheckTargetPos(targetPos); // TODO: this does not need to be done every Update, only when the goal position changes
     drawer.SetColor(0, 0, 255);
-    drawer.DrawPoint("newTargetPos", targetPos);
+    // drawer.DrawPoint("newTargetPos", targetPos);
     drawer.SetColor(0, 0, 0);
     angleGoal = cleanAngle(angleGoal);
     
@@ -228,6 +226,9 @@ bt::Node::Status AvoidRobots::Update () {
     bb2->SetDouble("y_coor", yGoal);
     bb2->SetBool("check_move", true);
     
+    // Get global robot command publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+
     // If you can see the end point, just go towards it
     CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
