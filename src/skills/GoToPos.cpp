@@ -90,9 +90,7 @@ bt::Node::Status GoToPos::Update (){
     // If finished, return success, otherwise keep sending commands
     roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 posError = goalPos - robotPos;
-    
-    prevWorld = world;
-    
+        
     if (dribbler) {
         command.dribbler = true;
     } else {
