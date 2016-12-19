@@ -44,7 +44,6 @@ set(CMAKE_CXX_FLAGS "\
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES roboteam_tactics_movement
 )
 
 include_directories(
@@ -176,35 +175,6 @@ if (BUILD_STRATEGYNODE)
         )
 
 endif (BUILD_STRATEGYNODE)
-
-add_library(roboteam_tactics_movement
-	src/skills/GoToPos.cpp
-    # src/skills/AvoidRobots.cpp
-
-    # src/conditions/IHaveBall.cpp
-
-    # src/utils/Cone.cpp
-   	# src/utils/DangerFinder.cpp
-    # src/utils/Draw.cpp
-    # src/utils/FeedbackCollector.cpp
-    src/utils/LastWorld.cpp
-    # src/utils/LastRef.cpp
-    # src/utils/Math.cpp
-    # src/utils/RobotDealer.cpp
-    # src/utils/utils.cpp
-    # src/utils/BTRunner.cpp
-    src/utils/BtDebug.cpp
-
-    src/utils/nasty_roboteam_input_patch.cpp
-
-	)
-add_dependencies(roboteam_tactics_movement
-        ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        ${catkin_EXPORTED_TARGETS}
-        )
-target_link_libraries(roboteam_tactics_movement
-        ${catkin_LIBRARIES}
-        )	
 
 ### Test executables ###
 # Disables tests on bob's desktop
