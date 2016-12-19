@@ -1,6 +1,8 @@
 #include "roboteam_tactics/tactics/BasicKeeperTactic.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/Math.h"
 
 #define RTT_CURRENT_DEBUG_TAG BasicKeeperTactic
 
@@ -20,6 +22,9 @@ void BasicKeeperTactic::Initialize() {
     // Assign the remaining robots the secondary keeper role
     std::vector<int> robots = RobotDealer::get_available_robots();
 
+    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+    roboteam_utils::Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+
     // Claim the keeper
     const int ROBOT_ID = RobotDealer::get_keeper();
     claim_robots({ROBOT_ID});
@@ -28,6 +33,18 @@ void BasicKeeperTactic::Initialize() {
     bt::Blackboard bb;
 
     bb.SetInt("ROBOT_ID", ROBOT_ID);
+    bb.SetDouble("Kick_A_kickVel", 2.5);
+
+    bb.SetBool("GetBall_A_intercept", false);
+    bb.SetBool("GetBall_A_isKeeper", true);
+
+    bb.SetDouble("GetBall_B_getBallAtX", keeperPos.x);
+    bb.SetDouble("GetBall_B_getBallAtY", keeperPos.y);
+    bb.SetDouble("GetBall_B_getBallAtTime", 5.0);
+    bb.SetBool("GetBall_B_intercept", true);
+    bb.SetDouble("GetBall_B_acceptableDeviation", 0.45);
+    bb.SetBool("GetBall_B_isKeeper", true);
+
 
     // Create message
     roboteam_msgs::RoleDirective wd;
