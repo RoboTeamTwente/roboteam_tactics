@@ -4,6 +4,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 
+
 #include <cmath>
 
 namespace rtt {
@@ -19,6 +20,15 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 	}
 	side1 = (center-start).rotate(angle);
 	side2 = (center-start).rotate(-angle);
+}
+
+Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 side1, roboteam_utils::Vector2 side2) {
+	this->start = startPoint;
+	this->side1 = side1.scale(2 / side1.length());
+	this->side2 = side2.scale(2 / side2.length());
+	this->angle = CleanAngle(this->side1.angle() - this->side2.angle());
+	this->center = this->side2.rotate(0.5*angle) + this->start;
+	this->radius = (this->center - this->side1).length();
 }
 
 double Cone::CleanAngle(double cleanangle) {
@@ -37,6 +47,9 @@ double Cone::CleanAngle(double cleanangle) {
 bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
+	// ROS_INFO_STREAM("vectorToPoint: " << vectorToPoint.x << " " << vectorToPoint.y);
+	// ROS_INFO_STREAM("vectorToCenter: " << vectorToCenter.x << " " << vectorToCenter.y);
+	// ROS_INFO_STREAM("vectorToPoint angle " << vectorToPoint.angle() << " vectorToCenter angle " << vectorToCenter.angle() << " angle " << angle);
 	if (fabs(CleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < angle) {
 		return true;
 	} else {

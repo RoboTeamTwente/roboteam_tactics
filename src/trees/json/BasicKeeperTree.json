@@ -105,17 +105,6 @@
         "35ca0114-f04b-4532-a71c-4a8bfaad3e1a"
       ]
     },
-    "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a": {
-      "id": "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a",
-      "name": "NaiveBlockGoal",
-      "title": "NaiveBlockGoal_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 864,
-        "y": 120
-      }
-    },
     "3360157c-b17b-4858-8ebc-14f7a8fa8f27": {
       "id": "3360157c-b17b-4858-8ebc-14f7a8fa8f27",
       "name": "ParallelSequence",
@@ -149,7 +138,7 @@
       },
       "children": [
         "06cf4fa4-1797-4bd1-87e1-88e481b4b04e",
-        "7d29be7c-5e31-4504-8f82-cd3d5fa82e7a"
+        "8708fb17-eee1-41b1-ac07-e9f388b5bd37"
       ]
     },
     "1f558064-3589-4ccb-8d38-0c5acd9dbbbc": {
@@ -190,17 +179,28 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 168,
+        "x": 240,
         "y": -228
       },
       "child": "bc69a869-8a57-4785-8807-9826ad781b51"
+    },
+    "8708fb17-eee1-41b1-ac07-e9f388b5bd37": {
+      "id": "8708fb17-eee1-41b1-ac07-e9f388b5bd37",
+      "name": "GetBall",
+      "title": "GetBall_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 852,
+        "y": 132
+      }
     }
   },
   "display": {
-    "camera_x": 322.80499999967105,
-    "camera_y": 512.8350000003411,
+    "camera_x": -46.575000000580985,
+    "camera_y": 423.4350000003287,
     "camera_z": 1,
-    "x": 12,
+    "x": 108,
     "y": -228
   },
   "custom_nodes": [
@@ -532,6 +532,13 @@
       "name": "IsRefStage",
       "category": "condition",
       "title": "IsRefStage",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ShootAtGoal",
+      "category": "action",
+      "title": "ShootAtGoal_B",
       "description": null,
       "properties": {}
     }

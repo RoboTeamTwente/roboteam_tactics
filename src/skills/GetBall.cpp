@@ -142,7 +142,10 @@ int GetBall::GetSign(double number) {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
-	
+	if (HasDouble("acceptableDeviation")) {
+		acceptableDeviation = GetDouble("acceptableDeviation");
+	}
+
 	while (world.us.size() == 0) {
 		return Status::Running;
 	}
@@ -240,6 +243,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
+        private_bb->SetBool("isKeeper", GetBool("isKeeper"));
         
         avoidRobots.Update();
 		prevTargetPos = roboteam_utils::Vector2(targetPos.x, targetPos.y);

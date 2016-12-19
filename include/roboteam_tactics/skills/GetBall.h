@@ -45,7 +45,7 @@ private:
 	int GetSign(double number);
 	int whichRobotHasBall();
 	int hasBall;
-	double acceptableDeviation = 0.2;
+	double acceptableDeviation = 0.4;
 	roboteam_utils::Vector2 prevTargetPos;
 	double prevTargetAngle;
 	roboteam_msgs::RobotCommand prevCommand;

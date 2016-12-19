@@ -29,6 +29,7 @@ void Kick::Initialize() {
 }
 
 bt::Node::Status Kick::Update() {
+	// ROS_INFO_STREAM("in kick, cycleCounter: " << cycleCounter);
     cycleCounter++;
     if (cycleCounter > 20) {
         RTT_DEBUG("Failed to kick!\n");
@@ -39,11 +40,10 @@ bt::Node::Status Kick::Update() {
 	
 	
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
-
-    if ((currentBallVel - oldBallVel).length() >= 0.03) {
+    
+    if ((currentBallVel - oldBallVel).length() > 0.001) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
-
     }
 
     oldBallVel = currentBallVel;
@@ -51,7 +51,6 @@ bt::Node::Status Kick::Update() {
     int robotID = blackboard->GetInt("ROBOT_ID");
     double kickVel;
     if (HasDouble("kickVel")) {
-    	ROS_INFO_STREAM("setting kickVel to " << kickVel);
     	kickVel = GetDouble("kickVel");
     } else {
     	kickVel = 4;
