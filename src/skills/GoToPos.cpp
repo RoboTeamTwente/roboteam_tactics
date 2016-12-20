@@ -4,13 +4,13 @@
 
 #include "ros/ros.h"
 
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
+// #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/GoToPos.h"
+// #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
@@ -46,7 +46,7 @@ bt::Node::Status GoToPos::Update (){
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
     double pGain=3;
-    double maxSpeed=1.0;
+    double maxSpeed=3.0;
     requiredSpeed.x=(xGoal-robotPos.x)*pGain;
     requiredSpeed.y=(yGoal-robotPos.y)*pGain;
     if (requiredSpeed.length() > maxSpeed){
@@ -62,7 +62,7 @@ bt::Node::Status GoToPos::Update (){
     // Proportional rotation controller
     double requiredRotSpeed;
     double pGainRot=6.0;
-    double maxRotSpeed=3.0;
+    double maxRotSpeed=10.0;
     double rotError=wGoal-wCurrent;
 
     if (rotError < M_PI) {rotError += 2*M_PI;}
@@ -90,9 +90,7 @@ bt::Node::Status GoToPos::Update (){
     // If finished, return success, otherwise keep sending commands
     roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
     roboteam_utils::Vector2 posError = goalPos - robotPos;
-    
-    prevWorld = world;
-    
+        
     if (dribbler) {
         command.dribbler = true;
     } else {

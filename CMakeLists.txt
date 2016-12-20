@@ -42,7 +42,9 @@ set(CMAKE_CXX_FLAGS "\
 -g \
 ")
 
-catkin_package()
+catkin_package(
+  INCLUDE_DIRS include
+)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}

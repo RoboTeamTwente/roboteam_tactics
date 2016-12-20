@@ -16,19 +16,8 @@
         "getBallAtTime": ""
       },
       "display": {
-        "x": -72,
+        "x": -120,
         "y": -84
-      }
-    },
-    "c78aef73-73fe-4734-9dc2-54a3bb17bd2f": {
-      "id": "c78aef73-73fe-4734-9dc2-54a3bb17bd2f",
-      "name": "Kick",
-      "title": "Kick_B",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": -72,
-        "y": 204
       }
     },
     "e427bf0e-c806-4bdf-8ca8-6546b342c106": {
@@ -38,11 +27,11 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": -132,
+        "x": -180,
         "y": 0
       },
       "children": [
-        "24eeb9dd-63a3-4f7e-bd97-44d475d647ba",
+        "871a9842-54c5-4fce-9d7a-399461be5ff2",
         "11a15123-42d1-4f67-9d08-2d0368d5b04a"
       ]
     },
@@ -53,8 +42,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 60,
-        "y": -24
+        "x": 120,
+        "y": 0
       }
     },
     "11a15123-42d1-4f67-9d08-2d0368d5b04a": {
@@ -64,12 +53,13 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": -36,
-        "y": 60
+        "x": -48,
+        "y": 144
       },
       "children": [
         "e4a89447-5fba-4611-841e-c2a33483117c",
-        "ce757864-d6a5-4b9e-825a-f4f6390cec30"
+        "ce757864-d6a5-4b9e-825a-f4f6390cec30",
+        "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa"
       ]
     },
     "e4a89447-5fba-4611-841e-c2a33483117c": {
@@ -79,8 +69,8 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 120,
-        "y": 60
+        "x": 108,
+        "y": 144
       }
     },
     "ce757864-d6a5-4b9e-825a-f4f6390cec30": {
@@ -92,8 +82,8 @@
         "At": ""
       },
       "display": {
-        "x": 120,
-        "y": 120
+        "x": 108,
+        "y": 204
       }
     },
     "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e": {
@@ -108,15 +98,51 @@
       },
       "children": [
         "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
-        "e427bf0e-c806-4bdf-8ca8-6546b342c106",
-        "c78aef73-73fe-4734-9dc2-54a3bb17bd2f"
+        "e427bf0e-c806-4bdf-8ca8-6546b342c106"
       ]
+    },
+    "871a9842-54c5-4fce-9d7a-399461be5ff2": {
+      "id": "871a9842-54c5-4fce-9d7a-399461be5ff2",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -60,
+        "y": 0
+      },
+      "children": [
+        "24eeb9dd-63a3-4f7e-bd97-44d475d647ba",
+        "622050dd-3930-4823-b481-5d6601cc52e5"
+      ]
+    },
+    "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa": {
+      "id": "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa",
+      "name": "Kick",
+      "title": "Kick_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 108,
+        "y": 276
+      }
+    },
+    "622050dd-3930-4823-b481-5d6601cc52e5": {
+      "id": "622050dd-3930-4823-b481-5d6601cc52e5",
+      "name": "Kick",
+      "title": "Kick_C",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 108,
+        "y": 60
+      }
     }
   },
   "display": {
-    "camera_x": 756.9399999972775,
-    "camera_y": 268,
-    "camera_z": 0.75,
+    "camera_x": 815.9399999972775,
+    "camera_y": 228.65999999828637,
+    "camera_z": 1,
     "x": -456,
     "y": -84
   },
@@ -505,6 +531,20 @@
       "name": "OneRobotGetsBallTactic",
       "category": "action",
       "title": "OneRobotGetsBallTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DribbleCurve",
+      "category": "action",
+      "title": "DribbleCurve",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ShootAtGoal",
+      "category": "action",
+      "title": "ShootAtGoal_B",
       "description": null,
       "properties": {}
     }
