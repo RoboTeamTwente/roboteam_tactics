@@ -144,6 +144,88 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
     return forceVector;
 }
 
+/// TODO: working here
+
+Vector2 ApplyNoGoZones(roboteam_utils::Vector2 sumOfForces, roboteam_utils::Vector2 Pos){
+	ROS_INFO("in apply no go zone");
+	
+	double xGoal = Pos.x;
+    double yGoal = Pos.y;
+    
+    double safetyMarginGoalAreas = 0.2;
+    double marginOutsideField = 0.0; // meter
+
+    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
+        marginOutsideField = 0.0; // we should not go outside the field close to the goal areas.
+    }
+    
+    if (xGoal > field.field_length/2+marginOutsideField){
+    	ROS_INFO("going outside of field");
+    	// out side of the field to the right.
+    	Vector2 intofield(-1,0);    	
+    	float componentIntoField = sumOfForces.dot(intofield);
+		if (componentIntoField < 0.0){ // if pointing out of field, neutrualize that component.
+			sumOfForces=sumOfForces-intofield*componentIntoField*5;	
+		}
+    }
+    if (xGoal < -field.field_length/2-marginOutsideField) {
+    	ROS_INFO("going outside of field");
+        Vector2 intofield(1,0);
+        float componentIntoField = sumOfForces.dot(intofield);
+		if (componentIntoField < 0.0){ // if pointing out of field, neutrualize that component.
+			sumOfForces=sumOfForces-intofield*componentIntoField*5;	
+		}
+        
+    }
+    if (yGoal > field.field_width/2+marginOutsideField){
+    	ROS_INFO("going outside of field");
+    	Vector2 intofield(0,-1);
+    	float componentIntoField = sumOfForces.dot(intofield);
+		if (componentIntoField < 0.0){ // if pointing out of field, neutrualize that component.
+			sumOfForces=sumOfForces-intofield*componentIntoField*5;	
+		}
+    }
+    if (yGoal < -field.field_width/2-marginOutsideField) {
+    	ROS_INFO("going outside of field");
+        Vector2 intofield(0,1);
+        float componentIntoField = sumOfForces.dot(intofield);
+		if (componentIntoField < 0.0){ // if pointing out of field, neutrualize that component.
+			sumOfForces=sumOfForces-intofield*componentIntoField*20;	
+		}
+    }
+    
+    ROS_INFO("sumOfForces: x:%f y:%f",sumOfForces.x,sumOfForces.y);
+	
+	
+	/*
+    roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
+    std::string our_side;
+    ros::param::get("our_side", our_side);
+
+    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+    roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+
+    if (!GetBool("isKeeper")) {
+        if (our_side == "left") {
+            if (newTargetPos.x < 0.0 && distToOurDefenseArea.x > 0.0) {
+                newTargetPos = newTargetPos + distToOurDefenseArea;
+            } else if (newTargetPos.x > 0.0 && distToTheirDefenseArea.x < 0.0) {
+                newTargetPos = newTargetPos + distToTheirDefenseArea;
+            }
+        } else if (our_side == "right") {
+            if (newTargetPos.x < 0.0 && distToTheirDefenseArea.x > 0.0) {
+                newTargetPos = newTargetPos + distToTheirDefenseArea;
+            } else if (newTargetPos.x > 0.0 && distToOurDefenseArea.x < 0.0) {
+                newTargetPos = newTargetPos + distToOurDefenseArea;
+            }
+        }
+    }
+	*/
+	return sumOfForces;
+	
+}
+
 roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
@@ -192,6 +274,7 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
 }
 
 bt::Node::Status AvoidRobots::Update () {
+	ROS_INFO("update");
     // Get the latest world state
 	roboteam_msgs::World world = LastWorld::get();
     if (world.us.size() == 0) {
@@ -209,7 +292,7 @@ bt::Node::Status AvoidRobots::Update () {
     // Checking inputs
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xGoal, yGoal);
     // drawer.DrawPoint("targetPos", targetPos);
-    targetPos = CheckTargetPos(targetPos); // TODO: this does not need to be done every Update, only when the goal position changes
+    //targetPos = CheckTargetPos(targetPos); // TODO: this does not need to be done every Update, only when the goal position changes
     drawer.SetColor(0, 0, 255);
     // drawer.DrawPoint("newTargetPos", targetPos);
     drawer.SetColor(0, 0, 0);
@@ -232,8 +315,10 @@ bt::Node::Status AvoidRobots::Update () {
     // Get global robot command publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 
+	
     // If you can see the end point, just go towards it
-    CanSeePoint canSeePoint("", bb2);
+    // TODO: disabled so the no go zones still work
+	/*CanSeePoint canSeePoint("", bb2);
     if (canSeePoint.Update() == Status::Success) {
         roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
         pub.publish(command);
@@ -242,7 +327,7 @@ bt::Node::Status AvoidRobots::Update () {
         } else {
             return Status::Running;
         }
-    }
+    }*/
 
     // For each robot, compute the 'force' it exerts on us, and add these forces
     roboteam_utils::Vector2 sumOfForces(0.0, 0.0);
@@ -271,7 +356,9 @@ bt::Node::Status AvoidRobots::Update () {
             sumOfForces = roboteam_utils::Vector2(0.0, 0.0);
         }
     }
-
+	
+	sumOfForces=ApplyNoGoZones(sumOfForces, myPos);
+	
     // Rotate from robot frame to world frame
     double requiredRotSpeed = RotationController(angleError);
     roboteam_msgs::RobotCommand command = VelocityController(sumOfForces, requiredRotSpeed, posError);  
