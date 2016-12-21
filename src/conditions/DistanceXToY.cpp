@@ -135,17 +135,19 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     Vector2 distToLine = distPointToLine(line, point, safetyMarginLine);
     Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
     Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
+	
+	//float minimum=std::min(distToLine.length(),distToTopArc.length(),distToBottomArc.length());
 
-    Vector2 shortestDistance(100.0, 100.0);
-    if (distToLine.length() < shortestDistance.length()) {
-        shortestDistance = distToLine;
-    }
+	
+    Vector2 shortestDistance = distToLine;
+    
     if (distToTopArc.length() < shortestDistance.length()) {
         shortestDistance = distToTopArc;
     }
     if (distToBottomArc.length() < shortestDistance.length()) {
         shortestDistance = distToBottomArc;
     }
+ 
     return shortestDistance;
 }
 
