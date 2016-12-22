@@ -14,7 +14,7 @@ class BTBuilder {
 public:
     BTBuilder();
     ~BTBuilder();
-    std::string build(nlohmann::json);
+    std::string build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces);
 private:
     std::map<std::string, nlohmann::json> nodes;
     std::stringstream out;

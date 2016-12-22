@@ -48,13 +48,8 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
-} // anonymous namespace
 
-int main(int argc, char** argv) {
-    std::vector<std::string> args(argv + 1, argv + argc);
-
-    if (cmdOptionExists(args, "-h") || cmdOptionExists(args, "--help")) {
-        std::cout << R"V0G0N(
+std::string helpStr = R"V0G0N(
 [Converter]
 
 Description:
@@ -83,7 +78,14 @@ Options:
         Indicates that the declaration of the implementation (forward declaration of the function) should be generated.
 
 )V0G0N";
-        
+
+} // anonymous namespace
+
+int main(int argc, char** argv) {
+    std::vector<std::string> args(argv + 1, argv + argc);
+
+    if (cmdOptionExists(args, "-h") || cmdOptionExists(args, "--help")) {
+        std::cout << helpStr;
         return 0;
     }
 
