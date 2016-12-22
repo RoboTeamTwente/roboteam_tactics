@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
         }
 
         if (doNamespace) {
-            ss << "}\n";
+            ss << "} // " << baseNamespace << "\n";
         }
 
         if (toStdOut) {
