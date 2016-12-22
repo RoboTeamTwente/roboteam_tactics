@@ -33,6 +33,21 @@ std::string readFileFromStdIn() {
     return input;
 }
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss;
+    ss.str(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, elems);
+    return elems;
+}
+
 } // anonymous namespace
 
 int main(int argc, char** argv) {
@@ -46,6 +61,12 @@ Description:
     Generates c++ functions from json files that can construct behavior trees.
 
 Options:
+    -namespace [namespace]
+        Specifies the base namespace to put everything in. Is not included in the creation string.
+    -f [folder]
+        Indicates in which "folder" the tree needs to be put. Let's say the folder is "bobe/trees", and we're compile CoolTree.
+        The functions will then end up in base_namespace::bobe::trees, ending up like base_namespace::bobe::trees::CoolTree(), and it's creation string (for nodefactory et al.)
+        will be "bobe/trees/CoolTree".
     -i [input file]
         Uses [input file] to read json
     -o [output file]
@@ -72,6 +93,21 @@ Options:
     bool doImpl = cmdOptionExists(args, "-impl");
     bool doDecl = cmdOptionExists(args, "-decl");
 
+    bool doNamespace = cmdOptionExists(args, "-namespace");
+    bool doFolder = cmdOptionExists(args, "-f");
+
+    std::string baseNamespace;
+    if (doNamespace) {
+        baseNamespace = getCmdOption(args, "-namespace");
+    }
+
+    std::string folder;
+    if (doFolder) {
+        folder = getCmdOption(args, "-f");
+    }
+
+    std::vector<std::string> namespaces = split(folder, '/');
+
     std::string input;
     nlohmann::json info;
 
@@ -94,7 +130,7 @@ Options:
         rtt::BTBuilder builder;
 
         std::stringstream ss;
-        ss << builder.build(info);
+        ss << builder.build(info, baseNamespace, namespaces);
 
         if (toStdOut) {
             std::cout << ss.str();
@@ -115,7 +151,28 @@ Options:
         // Function definition
         
         std::stringstream ss;
+
+        if (doNamespace) {
+            ss << "namespace " << baseNamespace << " {\n";
+        }
+
+        for (auto ns : namespaces) {
+            ss << "namespace " << ns << " { ";
+        }
+
+        ss << "\n";
+
         ss << "bt::BehaviorTree make_" << info["title"].get<std::string>() << "(bt::Blackboard* blackboard = nullptr);\n";
+
+        for (auto ns : namespaces) {
+            ss << "} ";
+        }
+
+        ss << "\n";
+
+        if (doNamespace) {
+            ss << "}\n";
+        }
 
         if (toStdOut) {
             std::cout << ss.str();

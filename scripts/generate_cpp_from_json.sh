@@ -59,7 +59,7 @@ assert_tactics_root
     # And append them to the sourc and header files
     for filepath in src/trees/json/*.json; do
         # Generate implementations
-        rosrun roboteam_tactics converter -impl -i "$filepath" -o "$treeSource"
+        rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource"
         printf "\n" >> $treeSource
 
         # Generated header declarations
