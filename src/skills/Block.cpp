@@ -20,7 +20,7 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     } else if (type ==  block_type_names.at(BlockType::CIRCLE)) {
         pos = new CircleBlock(GetDouble("block_arg"));
     } else if (type ==  block_type_names.at(BlockType::GOALAREA)) {
-        pos = new GoalareaBlock(GetDouble("block_arg"));
+        pos = new GoalareaBlock(GetString("block_arg"));
     }else if (type ==  block_type_names.at(BlockType::COVER)) {
         pos = new CloseCover();
     } else {
@@ -33,7 +33,7 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     tgt_id = blackboard->GetInt("TGT_ID");
     // TODO: ERROR! block_id is unsigned and can never be less than zero!
     block_id = blackboard->GetInt("BLOCK_ID");
-    constant = block_id < 0;
+    constant = blackboard->HasDouble("block_x") && blackboard->HasDouble("block_y");
     invert = blackboard->GetBool("invert_direction");
 }
 
@@ -48,7 +48,7 @@ void normalize(Position& pos) {
         pos.y = -4;
 }
 
-bt::Node::Status Block::Update() {
+bt::Node::Status Block::Update() {ROS_INFO("update");
     roboteam_msgs::WorldRobot me, tgt;
 
     {
@@ -66,7 +66,7 @@ bt::Node::Status Block::Update() {
         
     if (block_id == BLOCK_BALL_ID) {
         block = Vector(LastWorld::get().ball.pos);
-    } else if (!constant) {
+    } else if (constant) {
         block = Vector(GetDouble("block_x"), GetDouble("block_y"));
     } else {
         roboteam_msgs::WorldRobot blk;

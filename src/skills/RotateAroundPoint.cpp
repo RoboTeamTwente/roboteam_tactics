@@ -65,6 +65,11 @@ bt::Node::Status RotateAroundPoint::Update (){
 	// double:faceTowardsPosx=				//
 	// double:faceTowardsPosy=				//
 	// double:w= (rotation speed (pick 2))	//
+
+
+	// -- extra ---
+
+	// bool:faceoutward=true
 	//**************************************//
 	
 	
@@ -159,7 +164,16 @@ bt::Node::Status RotateAroundPoint::Update (){
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double targetAngle=computeAngle(robotPos, faceTowardsPos);
 
-	roboteam_utils::Vector2 worldposDiff = center-robotPos;;
+	bool faceoutward=false;
+	if(HasBool("faceoutward") && GetBool("faceoutward")){
+		faceoutward=true;
+		targetAngle=cleanAngle(targetAngle+M_PI);
+	}
+
+
+	
+
+	roboteam_utils::Vector2 worldposDiff = center-robotPos;
 
 
 	
@@ -219,8 +233,13 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			// rotation controller (w)
 			double rotPconstant=20;
-			
+
 			double reqRobotrot=worldposDiff.angle();
+
+			if(faceoutward){
+				reqRobotrot=reqRobotrot+M_PI;
+			}
+
 			double robotrot=robot.angle;
 			double reqRobotrotDiff=cleanAngle(reqRobotrot-robotrot);
 		   	        
