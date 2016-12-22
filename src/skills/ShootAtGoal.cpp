@@ -86,6 +86,7 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
     roboteam_utils::Vector2 targetPos;
     if (watchOutForTheseBots.size() > 1) {
     	ROS_INFO("more than one robot blocking the goal, I don't know what to do aaaah");
+    	targetPos = theirGoalCenter;
     } else if (watchOutForTheseBots.size() == 0) {
     	targetPos = theirGoalCenter;
     } else {

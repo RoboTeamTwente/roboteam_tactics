@@ -19,7 +19,9 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
         pos = new RelativeBlock(GetDouble("block_arg"));
     } else if (type ==  block_type_names.at(BlockType::CIRCLE)) {
         pos = new CircleBlock(GetDouble("block_arg"));
-    } else if (type ==  block_type_names.at(BlockType::COVER)) {
+    } else if (type ==  block_type_names.at(BlockType::GOALAREA)) {
+        pos = new GoalareaBlock(GetDouble("block_arg"));
+    }else if (type ==  block_type_names.at(BlockType::COVER)) {
         pos = new CloseCover();
     } else {
         char err[30];

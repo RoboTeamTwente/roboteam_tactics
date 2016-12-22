@@ -2,7 +2,7 @@
 
 {
   "id": "e17eb865-d4ea-41db-85f3-aa445ad39d93",
-  "title": "TestBallInZone",
+  "title": "ZoneDefender",
   "description": "",
   "root": "f667f950-4bbe-42ca-8bc5-740df284fdc9",
   "properties": {},
@@ -53,7 +53,7 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": 384,
+        "x": 372,
         "y": -312
       },
       "child": "01158d10-1380-43ee-8c67-6609abb53746"
@@ -96,7 +96,7 @@
         "zone": 1
       },
       "display": {
-        "x": 432,
+        "x": 444,
         "y": -24
       }
     },
@@ -138,11 +138,11 @@
     }
   },
   "display": {
-    "camera_x": 777.5,
-    "camera_y": 631.5,
+    "camera_x": 756.5,
+    "camera_y": 601.5,
     "camera_z": 1,
     "x": -384,
-    "y": -156
+    "y": -168
   },
   "custom_nodes": [
     {

@@ -18,8 +18,8 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideTestTree.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/TestBallInZone.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/SimpleFieldPlayer.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/ZoneDefender.json
+	${CMAKE_CURRENT_SOURCE_DIR}/SimpleFieldPlayer.json
     )
 
 set(JSON_FILES

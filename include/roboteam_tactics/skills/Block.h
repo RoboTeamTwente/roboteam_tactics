@@ -4,6 +4,7 @@
 
 #include "ros/ros.h"
 
+#include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
@@ -17,12 +18,13 @@ namespace rtt {
 using Vector = roboteam_utils::Vector2;
 using Position = roboteam_utils::Position;
 
-enum class BlockType { RELATIVE, CIRCLE, COVER };
+enum class BlockType { RELATIVE, CIRCLE, COVER, GOALAREA };
 
 const std::map<BlockType, const char*> block_type_names {
     { BlockType::RELATIVE, "RELATIVE" },
     { BlockType::CIRCLE, "CIRCLE" },
-    { BlockType::COVER, "COVER" }
+    { BlockType::COVER, "COVER" },
+    { BlockType::GOALAREA, "GOALAREA" }
 };
 
 /**
@@ -110,6 +112,51 @@ public:
         double scalar = radius / dist;
         norm = norm.scale(scalar) + to_block;
         return Position(norm.x, norm.y, angle);
+    }  
+private:
+    double radius;
+    RelativeBlock fallback;
+};
+
+/**
+ * @class GoalareaBlock
+ * @brief Blocks at the line surrounding the goal area
+ */
+
+class GoalareaBlock : public BlockPos {
+public:
+    GoalareaBlock(double radius) : radius(radius), fallback(RelativeBlock(.5)) {}
+    Position block_pos(const Position& current,
+                             const Vector& opponent,
+                             const Vector& to_block) const {
+        
+        Vector2 point(current.x,current.y);;
+        
+        float safetyMarginGoalAreas=0.0;
+        roboteam_utils::Vector2 newTargetPos = to_block;
+    
+        std::string our_side;
+		ros::param::get("our_side", our_side);
+
+		roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
+		roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
+		ROS_INFO("distToOurDefensArea: x:%f, y:%f",distToOurDefenseArea.x,distToOurDefenseArea.y);
+		
+		Vector togoalarea;
+        if ((newTargetPos.x < 0.0 && our_side == "left") || 
+        	(newTargetPos.x > 0.0 && our_side == "right")) {
+            togoalarea= distToOurDefenseArea;
+        } else {
+            togoalarea= distToTheirDefenseArea;
+	  	}
+	  	
+	  	newTargetPos = newTargetPos + togoalarea;
+	  	Vector fromgoalarea=togoalarea.scale(-1); // point vector the other way;
+	  	
+	  	
+		Position targetpospos(newTargetPos.x, newTargetPos.y, fromgoalarea.angle());
+		ROS_INFO("new target: x: %f, y: %f",targetpospos.x,targetpospos.y);
+        return targetpospos;
     }  
 private:
     double radius;
