@@ -232,17 +232,17 @@ bt::Node::Status AvoidRobots::Update () {
     // Get global robot command publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 
-    // If you can see the end point, just go towards it
-    CanSeePoint canSeePoint("", bb2);
-    if (canSeePoint.Update() == Status::Success) {
-        roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
-        pub.publish(command);
-        if (success) {
-            return Status::Success;
-        } else {
-            return Status::Running;
-        }
-    }
+    // // If you can see the end point, just go towards it
+    // CanSeePoint canSeePoint("", bb2);
+    // if (canSeePoint.Update() == Status::Success) {
+    //     roboteam_msgs::RobotCommand command = PositionController(posError, angleError, myAngle);
+    //     pub.publish(command);
+    //     if (success) {
+    //         return Status::Success;
+    //     } else {
+    //         return Status::Running;
+    //     }
+    // }
 
     // For each robot, compute the 'force' it exerts on us, and add these forces
     roboteam_utils::Vector2 sumOfForces(0.0, 0.0);
@@ -263,14 +263,30 @@ bt::Node::Status AvoidRobots::Update () {
     // Add an attractive force towards the target
     sumOfForces = sumOfForces + posError*attractiveForceWhenClose;
 
+
+    // Add a repulsive force from the goal areas
+    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.4);
+    ROS_INFO_STREAM("distToOurDefenseArea: " << distToOurDefenseArea.x << " " << distToOurDefenseArea.y);
+    ROS_INFO_STREAM("force our defense: " << distToOurDefenseArea.scale(1 / (distToOurDefenseArea.length() * distToOurDefenseArea.length())).x << " " << distToOurDefenseArea.scale(1 / (distToOurDefenseArea.length() * distToOurDefenseArea.length())).y);
+    if (distToOurDefenseArea.length() < 1.0) {
+        sumOfForces = sumOfForces - distToOurDefenseArea.scale(1 / (distToOurDefenseArea.length() * distToOurDefenseArea.length()));
+    }
+    roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", myPos, 0.4);
+    if (distToTheirDefenseArea.length() < 1.0) {
+        sumOfForces = sumOfForces - distToTheirDefenseArea.scale(1 / (distToTheirDefenseArea.length() * distToTheirDefenseArea.length()));
+    }
+
+
+
     // Slow down once we get close to the goal, other go at maximum speed
-    if (posError.length() > 0.2) {
+    if (posError.length() > 0.5) {
         if (sumOfForces.length() > 0) {
             sumOfForces = sumOfForces.scale(1/sumOfForces.length() * maxSpeed);
         } else {
             sumOfForces = roboteam_utils::Vector2(0.0, 0.0);
         }
     }
+
 
     // Rotate from robot frame to world frame
     double requiredRotSpeed = RotationController(angleError);
