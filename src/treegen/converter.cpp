@@ -111,7 +111,6 @@ int main(int argc, char** argv) {
     std::vector<std::string> namespaces = split(folder, '/');
 
     std::string input;
-    nlohmann::json info;
 
     if (fromStdIn) {
         input = readFileFromStdIn();
@@ -124,15 +123,40 @@ int main(int argc, char** argv) {
         input = buffer.str();
     }
 
-    info = nlohmann::json::parse(input);
+    nlohmann::json info = nlohmann::json::parse(input);
+
+    bool isTree = false;
+    bool isProject = false;
+
+    if (info.find("nodes") != info.end()) {
+        isTree = true;
+    } else if (info.find("data")  != info.end()) {
+        isProject = true;
+    } else {
+        std::cerr << "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project. Aborting.\n";
+        return 1;
+    }
+
+    nlohmann::json allTrees = nlohmann::json::array();
+
+    if (isTree) {
+        allTrees.push_back(info);
+    } else if (isProject) {
+        allTrees = info["data"]["trees"];
+    } else {
+        std::cerr << "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project. Aborting.\n";
+        return 1;
+    }
 
     if (doImpl) {
         // Function implementation 
         
-        rtt::BTBuilder builder;
-
         std::stringstream ss;
-        ss << builder.build(info, baseNamespace, namespaces);
+        for (auto& jsonTree : allTrees) {
+            rtt::BTBuilder builder;
+            ss << builder.build(jsonTree, baseNamespace, namespaces);
+            ss << "\n";
+        }
 
         if (toStdOut) {
             std::cout << ss.str();
@@ -155,22 +179,30 @@ int main(int argc, char** argv) {
         std::stringstream ss;
 
         if (doNamespace) {
-            ss << "namespace " << baseNamespace << " {\n";
+            ss << "namespace " << baseNamespace << " {\n\n";
         }
 
-        for (auto ns : namespaces) {
-            ss << "namespace " << ns << " { ";
+        if (namespaces.size() > 0) {
+            for (auto ns : namespaces) {
+                ss << "namespace " << ns << " { ";
+            }
+
+            ss << "\n\n";
+        }
+
+        for (auto& jsonTree : allTrees) {
+            ss << "bt::BehaviorTree make_" << jsonTree["title"].get<std::string>() << "(bt::Blackboard* blackboard = nullptr);\n";
         }
 
         ss << "\n";
 
-        ss << "bt::BehaviorTree make_" << info["title"].get<std::string>() << "(bt::Blackboard* blackboard = nullptr);\n";
+        if (namespaces.size() > 0) {
+            for (int i = namespaces.size() - 1; i > -1; --i) {
+                ss << "} /* " << namespaces.at(i) << " */ ";
+            }
 
-        for (auto ns : namespaces) {
-            ss << "} ";
+            ss << "\n\n";
         }
-
-        ss << "\n";
 
         if (doNamespace) {
             ss << "}\n";
