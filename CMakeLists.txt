@@ -98,6 +98,7 @@ add_custom_command(
     DEPENDS
         ${JSON_FILES}
         converter
+        ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     COMMENT "Generating C++ from JSON files"
     )

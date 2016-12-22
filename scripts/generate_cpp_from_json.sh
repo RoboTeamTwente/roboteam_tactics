@@ -59,12 +59,12 @@ assert_tactics_root
     # And append them to the sourc and header files
     for filepath in src/trees/json/*.json; do
         # Generate implementations
-        cat $filepath | rosrun roboteam_tactics converter impl >> $treeSource
+        rosrun roboteam_tactics converter -impl -i "$filepath" -o "$treeSource"
         printf "\n" >> $treeSource
 
         # Generated header declarations
         printf "\t" >> $treeHeader
-        cat $filepath | rosrun roboteam_tactics converter decl >> $treeHeader
+        rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader"
     done
 
     # Closing brackets :D
