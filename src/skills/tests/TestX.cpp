@@ -47,7 +47,14 @@ int main(int argc, char **argv) {
 
     auto bb = std::make_shared<bt::Blackboard>();
 
+    rtt::factories::print_all<bt::BehaviorTree>("json trees");
+
     std::vector<std::string> arguments(argv + 1, argv + argc);
+
+    if (arguments.size() == 0) {
+        std::cout << "No arguments supplied. Aborting.";
+        return 0;
+    }
 
     if (arguments.at(0) == "help") {
         std::string msg = R"###(

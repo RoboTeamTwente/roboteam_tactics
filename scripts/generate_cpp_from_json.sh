@@ -56,5 +56,5 @@ for filepath in src/trees/json/*.json; do
     printf "\n" >> $treeHeader
 done
 
-mkdir -p generated
-touch generated/generate_cpp_from_json.stamp
+# mkdir -p generated
+# touch generated/generate_cpp_from_json.stamp

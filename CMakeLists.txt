@@ -91,41 +91,94 @@ endif (BUILD_TESTX)
 #### Stupid stuff to get the json files to be converted ####
 ############################################################
 
+# 23/12/2016
+# I left the stamp stuff commented because I might use it in the next
+# week or so. I'm not sure if the current approach works consistently enough.
+
+set(alltrees_output_file
+    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+    )
+
 add_custom_command(
     OUTPUT
-        ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+        ${alltrees_output_file}
     COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
     DEPENDS
         ${JSON_FILES}
         converter
         ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating C++ from JSON files"
+    WORKING_DIRECTORY 
+        ${PROJECT_SOURCE_DIR}
+    COMMENT 
+        "Generating C++ from JSON files"
     )
 add_custom_target(generate_json_t
     ALL
     DEPENDS
-        ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+        ${alltrees_output_file}
     )
+
+# Generated files from json trees
+set(GENERATED_FILES
+    ${GENERATED_FILES}
+    ${PROJECT_SOURCE_DIR}/include/roboteam_tactics/generated/alltrees.h
+    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+    ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+    )
+
+foreach(json_project ${JSON_PROJECTS})
+
+    get_filename_component(project_basename ${json_project} NAME_WE)
+
+    set(timestamp_file ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json_project_${project_basename}.stamp)
+
+    set(output_files
+        ${PROJECT_SOURCE_DIR}/include/roboteam_tactics/generated/${project_basename}_trees.h
+        ${PROJECT_SOURCE_DIR}/src/trees/${project_basename}_trees.cpp
+        )
+
+    add_custom_command(
+        OUTPUT
+            # ${timestamp_file}
+            ${output_files}
+        COMMAND
+            ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json_project.sh ${json_project}
+        DEPENDS
+            ${json_project}
+            converter
+            ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json_project.sh
+        WORKING_DIRECTORY
+            ${PROJECT_SOURCE_DIR}
+        COMMENT
+            "Generating C++ from B3 project \"${project_basename}\""
+        )
+
+    add_custom_target(generate_json_project_${project_basename}_t
+        ALL
+        DEPENDS
+            # ${timestamp_file}
+            ${output_files}
+        )
+
+    MESSAGE("Project files for " ${basename} ": " ${output_files})
+
+    set(GENERATED_FILES
+        ${GENERATED_FILES}
+        # ${timestamp_file}
+        # ${PROJECT_SOURCE_DIR}/include/roboteam_tactics/generated/${project_basename}_trees.h
+        # ${PROJECT_SOURCE_DIR}/src/trees/${project_basename}_trees.cpp
+        ${output_files}
+        )
+
+endforeach(json_project)
+
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_FILES})
 
 #############################
 #### End of stupid stuff ####
 #############################
-
-# Hooks that delete all generated files
-file(GLOB GENERATED_FILES
-    "include/roboteam_tactics/generated/*.h"
-    )
-set(GENERATED_FILES
-    ${GENERATED_FILES}
-    ${PROJECT_SOURCE_DIR}/generated/generate_debug_directives.stamp
-    ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
-    ${PROJECT_SOURCE_DIR}/generated/generate_all_leafs.stamp
-    )
-
-
-set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_FILES})
-# End of hooks
 
 catkin_add_gtest(tactics_test
     test/main.cpp

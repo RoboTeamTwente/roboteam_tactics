@@ -1,12 +1,33 @@
 add_subdirectory(json)
+add_subdirectory(projects)
+
+foreach(json_project ${JSON_PROJECTS})
+
+    get_filename_component(project_basename ${json_project} NAME_WE)
+
+    set(project_sources
+        ${project_sources}
+        ${project_basename}_trees.cpp
+        )
+
+    set(project_targets
+        ${project_targets}
+        generate_json_project_${project_basename}_t
+        )
+
+    MESSAGE("Added project " ${project_basename} " to sources & targets.")
+
+endforeach(json_project)
 
 add_library(alltrees OBJECT
-    alltrees.cpp
+    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+    ${project_sources}
     )
 add_dependencies(alltrees
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
     generate_json_t
+    ${project_targets}
     )
 
 set(JSON_FILES

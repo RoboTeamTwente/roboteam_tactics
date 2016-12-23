@@ -1,5 +1,7 @@
 set(JSON_PROJECTS
     ${CMAKE_CURRENT_SOURCE_DIR}/rtt_bob.b3
+    ${CMAKE_CURRENT_SOURCE_DIR}/bad_trees.b3
+    ${CMAKE_CURRENT_SOURCE_DIR}/awesome_trees.b3
     )
 
 set(JSON_PROJECTS
