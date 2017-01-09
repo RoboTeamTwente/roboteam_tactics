@@ -140,13 +140,10 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
 
     if (!GetBool("isKeeper")) {
         if (isWithinDefenseArea("our defense area", newTargetPos)) {
-            ROS_INFO_STREAM("is within our defense area");
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         if (isWithinDefenseArea("their defense area", newTargetPos)) {
-
-            ROS_INFO_STREAM("is within their defense area");
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
     }
