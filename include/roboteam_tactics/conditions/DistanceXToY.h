@@ -7,6 +7,7 @@
 namespace rtt {
 
 roboteam_utils::Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
+bool isWithinDefenseArea(std::string whichArea, Vector2 point);
 
 /**
  * Checks if measured distance from X to Y is more, less,

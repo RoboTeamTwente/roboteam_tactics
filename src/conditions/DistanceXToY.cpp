@@ -103,7 +103,7 @@ Vector2 distPointToArc(FieldCircularArc arc, Vector2 point, double safetyMargin)
 Vector2 distPointToLine(FieldLineSegment line, Vector2 point, double safetyMarginLine) {
     Vector2 vector(line.end.x - line.begin.x, line.end.y - line.begin.y);
     Vector2 start(line.begin.x, line.begin.y);
-    start.x = start.x + safetyMarginLine;
+    // start.x = start.x + safetyMarginLine;
 
     Vector2 closestPointOnVector = vector.closestPointOnVector(start, point);
     Vector2 posDiff = closestPointOnVector - point;
@@ -125,7 +125,7 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
         line = field.right_penalty_line;
         top_arc = field.top_right_penalty_arc;
         bottom_arc = field.bottom_right_penalty_arc;
-        safetyMarginLine = safetyMarginLine * -1; // on the rights side of the field we need to subtract the safety margin instead of add it.
+        // safetyMarginLine = safetyMarginLine * -1; // on the right side of the field we need to subtract the safety margin instead of add it.
     } else if ((name == "our defense area" && our_side == "left") || (name == "their defense area" && our_side == "right")) {
         line = field.left_penalty_line;
         top_arc = field.top_left_penalty_arc;
@@ -136,11 +136,7 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
     Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
 	
-	//float minimum=std::min(distToLine.length(),distToTopArc.length(),distToBottomArc.length());
-
-	
     Vector2 shortestDistance = distToLine;
-    
     if (distToTopArc.length() < shortestDistance.length()) {
         shortestDistance = distToTopArc;
     }
@@ -149,6 +145,55 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     }
  
     return shortestDistance;
+}
+
+bool isWithinDefenseArea(std::string whichArea, Vector2 point) {
+    GeometryFieldSize field = LastWorld::get_field();
+    std::string our_side;
+    ros::param::get("our_side", our_side);
+    Vector2 distToDefenseArea = getDistToDefenseArea(whichArea, point, 0.0);
+    if (whichArea == "our defense area") {   
+        if (our_side == "left") {
+            if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+            else return false;
+        }
+        if (our_side == "right") {
+            if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
+            else return false;
+        }
+    }
+    if (whichArea == "their defense area") {
+        ROS_INFO_STREAM("distToDefenseArea: " << distToDefenseArea.x << " " << distToDefenseArea.y);
+        ROS_INFO_STREAM("point: " << point.x << " " << point.y);
+        if (our_side == "left") {
+            if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
+            else return false;
+        }
+        if (our_side == "right") {
+            if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+            else return false;
+        }
+    }
+    ROS_WARN("DistanceXToY/isWithinDefenseArea you probably entered a wrong name");
+    return false;
+}
+
+double getDistToSide(std::string name, Vector2 point, double marginOutsideField) {
+    GeometryFieldSize field = LastWorld::get_field();
+    if (name == "top") {
+        return (field.field_width/2 + marginOutsideField - point.y);
+    }
+    if (name == "bottom") {
+        return (-(field.field_width/2 + marginOutsideField) - point.y);
+    }
+    if (name == "left") {
+        return (-(field.field_length/2 + marginOutsideField) - point.x);
+    }
+    if (name == "right") {
+        return (field.field_length/2 + marginOutsideField - point.x);        
+    }
+    ROS_WARN("getDistToSide: no valid name given");
+    return 0.0;
 }
 
 
