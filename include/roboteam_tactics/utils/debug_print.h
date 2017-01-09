@@ -10,7 +10,7 @@
 static const bool PRINT_ ## tag ## _MESSAGES = status
 
 #define RTT_DEBUG_TAG(tag, format, ...) \
-if (RTT_PASTER3(rtt::PRINT, tag, MESSAGES)) { \
+if (RTT_PASTER3(::rtt::PRINT, tag, MESSAGES)) { \
     printf("[" RTT_xstr(tag) "] " format, ##__VA_ARGS__); \
 }
 
