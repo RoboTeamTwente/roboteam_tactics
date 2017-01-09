@@ -275,7 +275,7 @@ bt::Node::Status AvoidRobots::Update () {
     // Draw the velocity vector acting on the robots
     drawer.DrawLine("sumOfForces", myPos, sumOfForces);
 
-    if (posError.length() < 0.05 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
         roboteam_msgs::RobotCommand command = stopCommand(robotID);
         pub.publish(command);
         return Status::Success;
