@@ -55,10 +55,10 @@ public:
         params["ROBOT_ID"] = BBArgumentType::Int;
         params["TGT_ID"] = BBArgumentType::Int;
         params["BLOCK_ID"] = BBArgumentType::Int;
-        params["block_x"] = BBArgumentType::Double;
-        params["block_y"] = BBArgumentType::Double;
+        //params["block_x"] = BBArgumentType::Double;
+        //params["block_y"] = BBArgumentType::Double;
         params["block_type"] = BBArgumentType::String; // must be an element of BlockType
-        params["block_arg"] = BBArgumentType::Double; // ignored for CloseCover
+        //params["block_arg"] = BBArgumentType::Double; // ignored for CloseCover
         params["invert_direction"] = BBArgumentType::Bool;
         return params;
     }
@@ -125,12 +125,14 @@ private:
 
 class GoalareaBlock : public BlockPos {
 public:
-    GoalareaBlock(double radius) : radius(radius), fallback(RelativeBlock(.5)) {}
+    GoalareaBlock(string block_arg) : block_arg(block_arg), fallback(RelativeBlock(.5)) {}
     Position block_pos(const Position& current,
                              const Vector& opponent,
                              const Vector& to_block) const {
         
-        Vector2 point(current.x,current.y);;
+        ROS_INFO("block arg was: %s",block_arg.c_str());
+
+        Vector2 point(current.x,current.y);;    
         
         float safetyMarginGoalAreas=0.0;
         roboteam_utils::Vector2 newTargetPos = to_block;
@@ -159,7 +161,7 @@ public:
         return targetpospos;
     }  
 private:
-    double radius;
+    string block_arg;
     RelativeBlock fallback;
 };
 
