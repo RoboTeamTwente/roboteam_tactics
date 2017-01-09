@@ -80,7 +80,7 @@ class Tactic : public Leaf {
     virtual void Terminate(Status s) {
         auto robots = get_claimed_robots();
 
-        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+        auto& pub = GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
         roboteam_msgs::RoleDirective directive;
         directive.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
@@ -131,4 +131,4 @@ class Tactic : public Leaf {
 // Make sure sources that include this are not troubled by the def
 #undef RTT_CURRENT_DEBUG_TAG
 
-}
+} // rtt
