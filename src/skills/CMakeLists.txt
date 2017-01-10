@@ -20,6 +20,7 @@ set(SKILL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Chip.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Failer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Runner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DefendGoalarea.cpp
     )
 set(SKILL_SOURCES
     ${SKILL_SOURCES}

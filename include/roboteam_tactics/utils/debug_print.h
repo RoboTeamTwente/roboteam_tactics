@@ -41,6 +41,7 @@ SET_DEBUG_FOR(GetBall, false);
 SET_DEBUG_FOR(Kick, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(Runner, true);
+SET_DEBUG_FOR(DefendGoalarea, true);
 
 // Conditions
 SET_DEBUG_FOR(ParamCheck, false);
