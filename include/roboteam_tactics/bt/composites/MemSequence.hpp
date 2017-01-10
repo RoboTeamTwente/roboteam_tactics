@@ -39,7 +39,7 @@ public:
         }
     }
     
-    std::string node_name() { return "MemSequence"; }
+    std::string node_name() override { return "MemSequence"; }
     
     using Ptr = std::shared_ptr<MemSequence>;
 };

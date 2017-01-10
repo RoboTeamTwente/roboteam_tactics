@@ -5,6 +5,11 @@
 namespace bt
 {
 
+    // TODO: These and MemSequence are not consistent; ATM Sequence
+    // behaves like a MemSequence and MemSequence is broken afaict.
+    // When the time is right we need to fix that
+    // Preferably without breaking all the trees.
+
 /*
     The Sequence composite ticks each child node in order.
     If a child fails or runs, the sequence returns the same status.

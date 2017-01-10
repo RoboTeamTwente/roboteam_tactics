@@ -14,13 +14,13 @@ public:
     ParallelTactic(bool successOnAll = true, bool failOnAll = true) : useSuccessFailPolicy(true), successOnAll(successOnAll), failOnAll(failOnAll) {}
     ParallelTactic(int minSuccess, int minFail) : minSuccess(minSuccess), minFail(minFail) {}
 
-    std::vector<bt::Node::Status> lastStatus;
+    std::vector<bool> failedOrSucceeded;
 
     void Initialize() override {
         RTT_DEBUGLN("Initializing Parallel Tactic");
-        lastStatus.clear();
+        failedOrSucceeded.clear();
         for (auto child : children) {
-            lastStatus.push_back(bt::Node::Status::Running);
+            failedOrSucceeded.push_back(false);
         }
     }
 
@@ -50,20 +50,25 @@ public:
 
         int i = 0;
         for (auto &child : children) {
-            // Only run the child if it has not finished yet
-            if (lastStatus.at(i) == bt::Node::Status::Running) {
-                lastStatus.at(i) = child->Tick();
-            } 
+            if (!failedOrSucceeded.at(i)) {
+                child->Tick();
+            }
 
-            if (lastStatus.at(i) == Status::Success) {
+            Node::Status s = child->getStatus();
+
+            if (s != Status::Running) {
+                failedOrSucceeded.at(i) = true;
+            }
+
+            if (s == Status::Success) {
                 totalSuccess++;
             }
 
-            if (lastStatus.at(i) == Status::Failure) {
+            if (s == Status::Failure) {
                 totalFail++;
             }
 
-            if (lastStatus.at(i) == Status::Invalid) {
+            if (s == Status::Invalid) {
                 encounteredAnInvalid = true;
             }
 
@@ -71,31 +76,28 @@ public:
         }
 
         if (encounteredAnInvalid) {
-            CallLeftoverTerminators();
             return Status::Failure;
         }
 
         if (totalSuccess >= minimumSuccess) {
-            CallLeftoverTerminators();
             return Status::Success;
         }
         if (totalFail >= minimumFail) {
-            CallLeftoverTerminators();
             return Status::Failure;
         }
 
         return Status::Running;
     }
 
-    void CallLeftoverTerminators() {
-        int i = 0;
+    void Terminate(Status s) override {
         for (auto &child : children) {
-            if (lastStatus.at(i) == Status::Running) {
+            if (child->getStatus() == Status::Running) {
                 child->Terminate(Status::Running);
-                child->Reset();
             }
+        }
 
-            ++i;
+        if (s == Status::Running) {
+            setStatus(Status::Failure);
         }
 
         return;
