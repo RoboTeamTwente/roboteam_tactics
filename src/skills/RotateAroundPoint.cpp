@@ -26,7 +26,7 @@ RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr black
         : Skill(name, blackboard),
         goto_bb(std::make_shared<bt::Blackboard>()), 
         avoidRobots("", goto_bb) {
-}
+	}
 
 void RotateAroundPoint::stoprobot(int robotID) {
 
