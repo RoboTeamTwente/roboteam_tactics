@@ -380,13 +380,26 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             }
 
             if (property.second.is_number()) {
+                std::cout << "Number: " << property.second << "\n";
+
+                std::string propertyType = "Double";
+                if (property.second.is_number_integer()) {
+                    propertyType = "Int";
+                }
+
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetDouble(\""
+                    << "->private_bb->Set" << propertyType << "(\""
                     << property.first
-                    << "\", "
-                    << property.second.get<double>()
-                    << ");\n";
+                    << "\", ";
+
+                if (property.second.is_number_integer()) {
+                    out << (int) property.second.get<double>();
+                } else {
+                    out << property.second.get<double>();
+                }
+                
+                out << ");\n";
             }
 
             if (property.second.is_boolean()) {
