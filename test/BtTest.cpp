@@ -202,5 +202,95 @@ TEST(BehaviorTreeTest, BehaviorTreeWithOneLeaf) {
 /////////////////////////////////////////////
 
 TEST(BehaviorTreeTest, BehaviorTreeWithSequencesAndCounters) {
-    
+    {
+        bt::Leaf::Ptr counterA = std::make_shared<Counter>("A", 2);
+        bt::Leaf::Ptr counterB = std::make_shared<Counter>("B", 2);
+        bt::MemSequence::Ptr memSeq = std::make_shared<bt::MemSequence>();
+        memSeq->AddChild(counterA);
+        memSeq->AddChild(counterB);
+        bt::BehaviorTree bt(memSeq);
+
+        traces.clear();
+        bt.Tick();
+        bt.Tick();
+        bt.Tick();
+        
+        std::vector<std::string> expectedTrace = {
+            "Initialize: Counter-A",
+            "Update: Counter-A",
+            "Update: Counter-A",
+            "Terminate: Counter-A",
+            "Initialize: Counter-B",
+            "Update: Counter-B",
+            "Update: Counter-B",
+            "Terminate: Counter-B"
+        };
+
+        ASSERT_EQ(expectedTrace, traces);
+        ASSERT_EQ(bt.getStatus(), bt::Node::Status::Success);
+    }
+
+    {
+        bt::Leaf::Ptr counterA = std::make_shared<Counter>("A", 2);
+        bt::Leaf::Ptr counterB = std::make_shared<Counter>("B", 2);
+        bt::Sequence::Ptr seq = std::make_shared<bt::Sequence>();
+        seq->AddChild(counterA);
+        seq->AddChild(counterB);
+        bt::BehaviorTree bt(seq);
+
+        traces.clear();
+        bt.Tick();
+        bt.Tick();
+        bt.Tick();
+        bt.Tick();
+        
+        std::vector<std::string> expectedTrace = {
+            "Initialize: Counter-A",
+            "Update: Counter-A",
+            "Update: Counter-A",
+            "Terminate: Counter-A",
+            "Initialize: Counter-B",
+            "Update: Counter-B",
+            "Initialize: Counter-A",
+            "Update: Counter-A",
+            "Update: Counter-A",
+            "Terminate: Counter-A",
+            "Update: Counter-B",
+            "Terminate: Counter-B"
+        };
+
+        ASSERT_EQ(expectedTrace, traces);
+        ASSERT_EQ(bt.getStatus(), bt::Node::Status::Success);
+    }
+
+    {
+        bt::Leaf::Ptr counterA = std::make_shared<Counter>("A", 2);
+        bt::Leaf::Ptr counterB = std::make_shared<Counter>("B", 2);
+        bt::Sequence::Ptr seq = std::make_shared<bt::Sequence>();
+        seq->AddChild(counterA);
+        seq->AddChild(counterB);
+        bt::BehaviorTree bt(seq);
+
+        traces.clear();
+        bt.Tick();
+        bt.Tick();
+        bt.Tick();
+        bt.Terminate(bt.getStatus());
+
+        std::vector<std::string> expectedTrace = {
+            "Initialize: Counter-A",
+            "Update: Counter-A",
+            "Update: Counter-A",
+            "Terminate: Counter-A",
+            "Initialize: Counter-B",
+            "Update: Counter-B",
+            "Initialize: Counter-A",
+            "Update: Counter-A",
+            "Terminate: Counter-A",
+            "Terminate: Counter-B"
+        };
+
+        ASSERT_EQ(expectedTrace, traces);
+        ASSERT_EQ(bt.getStatus(), bt::Node::Status::Failure);
+    }
 }
