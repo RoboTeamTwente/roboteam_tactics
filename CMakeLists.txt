@@ -230,6 +230,12 @@ if (BUILD_STRATEGYNODE)
 
 endif (BUILD_STRATEGYNODE)
 
+catkin_add_gtest(BtTest
+    test/main.cpp
+    test/BtTest.cpp
+)
+target_link_libraries(BtTest ${catkin_LIBRARIES})
+
 ### Test executables ###
 # Disables tests on bob's desktop
 site_name(computername)
@@ -316,12 +322,12 @@ site_name(computername)
     # )
     # target_link_libraries(VerificationTest ${catkin_LIBRARIES})
 
-    # catkin_add_gtest(ConditionsTest
+    # catkin_add_gtest(conditionstest
         # test/main.cpp
-        # test/ConditionsTest.cpp
+        # test/conditionstest.cpp
     # )
-    # target_link_libraries(ConditionsTest
-        # ${catkin_LIBRARIES}
+    # target_link_libraries(conditionstest
+        # ${catkin_libraries}
         # )
 
     # add_dependencies(KickTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -16,9 +16,12 @@ public:
     Status Update() override { return root->Tick(); }
 
     void Terminate(Status s) override {
-        if (s == Node::Status::Running || s == Node::Status::Invalid) {
+        if (root->getStatus() == Status::Running) {
             root->Terminate(root->getStatus());
-            s = Node::Status::Failure;
+        }
+
+        if (s == Node::Status::Running) {
+            setStatus(Node::Status::Failure);
         }
     }
     
