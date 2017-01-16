@@ -1,5 +1,6 @@
 add_library(utils OBJECT
     Cone.cpp
+    ComputePassPoint.cpp
     DangerFinder.cpp
     Draw.cpp
     FeedbackCollector.cpp

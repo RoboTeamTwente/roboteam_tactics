@@ -35,13 +35,13 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
-        std::cout << "Received a feedback on token " << uuid << ": failure.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
-        std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
-        std::cout << "Received a feedback on token " << uuid << ": success.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
@@ -59,6 +59,12 @@ int main(int argc, char *argv[]) {
     // f::print_all<bt::BehaviorTree>("bt::BehaviorTree");
 
     ros::Rate rate(60);
+
+    ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
+        rtt::TOPIC_ROLE_FEEDBACK,
+        10,
+        &feedbackCallback
+        );
 
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
 
@@ -135,7 +141,8 @@ int main(int argc, char *argv[]) {
 
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);
-            RTT_DEBUG("Strategy result: %s. Starting again.\n", statusStr.c_str());
+            RTT_DEBUG("Strategy result: %s. Shutting down.\n", statusStr.c_str());
+            break;
         }
 
         rate.sleep();
