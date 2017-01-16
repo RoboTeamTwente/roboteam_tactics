@@ -12,7 +12,7 @@ namespace rtt {
 class PassToTactic : public Tactic {
     public:
     PassToTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-
+    
     void Initialize();
 
     Status Update();

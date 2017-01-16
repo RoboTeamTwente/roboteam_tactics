@@ -24,17 +24,11 @@ public:
 	double computePassPointScore(roboteam_utils::Vector2 testPosition);
 	double computeBestPassPoint();
 private:
-	// double distToGoalWeight = 1.0;
-	// double distToOppWeight = 0.2;
-	// double distToBallWeight = 0.3;
-	// double viewOfGoalWeight = 2.0;
-	// double distOppToBallTrajWeight = 20.0;
-
-	double distToGoalWeight = 0.0;
-	double distToOppWeight = 0.0;
-	double distToBallWeight = 0.0;
-	double viewOfGoalWeight = 1.0;
-	double distOppToBallTrajWeight = 0.0;
+	double distToGoalWeight;
+	double distToOppWeight;
+	double distToBallWeight;
+	double viewOfGoalWeight;
+	double distOppToBallTrajWeight;
 
 	Draw drawer;
 };

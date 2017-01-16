@@ -3,9 +3,21 @@
 #include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
 
+#include <iostream>
+#include <fstream>
+
 namespace rtt {
 
-PassPoint::PassPoint() {}
+PassPoint::PassPoint() {
+	std::fstream myfile("src/roboteam_tactics/src/utils/passpoint_weights.txt", std::ios_base::in);
+	myfile >> distToGoalWeight >> distToOppWeight >> distToBallWeight >> viewOfGoalWeight >> distOppToBallTrajWeight;
+
+	ROS_INFO_STREAM("distToGoalWeight: " << distToGoalWeight);
+	ROS_INFO_STREAM("distToOppWeight: " << distToOppWeight);
+	ROS_INFO_STREAM("distToBallWeight: " << distToBallWeight);
+	ROS_INFO_STREAM("viewOfGoalWeight: " << viewOfGoalWeight);
+	ROS_INFO_STREAM("distOppToBallTrajWeight: " << distOppToBallTrajWeight);
+}
 
 double PassPoint::calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
@@ -41,12 +53,16 @@ std::vector<Cone> PassPoint::combineOverlappingRobots(std::vector<Cone> robotCon
 			if (i!=j) {
 				Cone cone2 = robotCones.at(j);
 				if (cone1.DoConesOverlap(cone2)) {
-					ROS_INFO_STREAM("cones " << i << " and " << j << " overlap!");
 					Cone newCone = cone1.MergeCones(cone2);
-					robotCones.erase(robotCones.begin()+i);
-					robotCones.erase(robotCones.begin()+j);
-					robotCones.push_back(newCone);
-					return robotCones;
+
+					std::vector<Cone> newRobotCones;
+					newRobotCones.push_back(newCone);
+					for (size_t k = 0; k < robotCones.size(); k++) {
+						if (k!=i && k!=j) {
+							newRobotCones.push_back(robotCones.at(k));
+						}
+					}
+					return newRobotCones;
 				}
 			}
 		}
@@ -71,52 +87,13 @@ double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_
 		}
 	}
 
-	// ROS_INFO_STREAM("amount of robots in the way: " << robotCones.size());
-
 	std::vector<Cone> combinedRobotCones = combineOverlappingRobots(robotCones);
-	// combinedRobotCones = combineOverlappingRobots(combinedRobotCones);
-	// while (combinedRobotCones.size() != robotCones.size()) {
-	// 	ROS_INFO_STREAM("old size: " << combinedRobotCones.size());
-	// 	robotCones = combinedRobotCones;
-	// 	combinedRobotCones = combineOverlappingRobots(robotCones);
-	// 	ROS_INFO_STREAM("new size: " << combinedRobotCones.size());
-	// }
-
-	if (combinedRobotCones.size() == 1) {
-		drawer.SetColor(255, 255, 0);
-		drawer.DrawLine("line1", testPosition, combinedRobotCones.at(0).side1);
-		drawer.DrawLine("line2", testPosition, combinedRobotCones.at(0).side2);
-		drawer.RemoveLine("line11");
-		drawer.RemoveLine("line12");
-		drawer.RemoveLine("line21");
-		drawer.RemoveLine("line22");
-	}
-	if (combinedRobotCones.size() == 2) {
-		drawer.SetColor(255, 255, 0);
-		drawer.DrawLine("line1", testPosition, combinedRobotCones.at(0).side1);
-		drawer.DrawLine("line2", testPosition, combinedRobotCones.at(0).side2);
-		drawer.SetColor(255, 0, 0);
-		drawer.DrawLine("line11", testPosition, combinedRobotCones.at(1).side1);
-		drawer.DrawLine("line12", testPosition, combinedRobotCones.at(1).side2);
-		drawer.RemoveLine("line21");
-		drawer.RemoveLine("line22");
-	}
-	if (combinedRobotCones.size() == 3) {
-		drawer.SetColor(255, 255, 0);
-		drawer.DrawLine("line1", testPosition, combinedRobotCones.at(0).side1);
-		drawer.DrawLine("line2", testPosition, combinedRobotCones.at(0).side2);
-		drawer.SetColor(255, 0, 0);
-		drawer.DrawLine("line11", testPosition, combinedRobotCones.at(1).side1);
-		drawer.DrawLine("line12", testPosition, combinedRobotCones.at(1).side2);
-		drawer.SetColor(255, 0, 255);
-		drawer.DrawLine("line21", testPosition, combinedRobotCones.at(2).side1);
-		drawer.DrawLine("line22", testPosition, combinedRobotCones.at(2).side2);
-	}
+	combinedRobotCones = combineOverlappingRobots(combinedRobotCones);
 
 	double viewOfGoal = cleanAngle(vecToGoalSide1.angle() - vecToGoalSide2.angle());
-	for (size_t i = 0; i < robotCones.size(); i++) {
+	for (size_t i = 0; i < combinedRobotCones.size(); i++) {
 
-		Cone robotCone = robotCones.at(i);
+		Cone robotCone = combinedRobotCones.at(i);
 
 		double robotSide1Angle = cleanAngle(robotCone.side1.angle());
 		double robotSide2Angle = cleanAngle(robotCone.side2.angle());
@@ -125,10 +102,10 @@ double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_
 
 		if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide1Angle) && isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // robotCone completely within goalCone
 			double blockedAngle = fabs(cleanAngle(robotSide1Angle - robotSide2Angle));
-			// ROS_INFO_STREAM("blockedAngle: " << blockedAngle);
 			viewOfGoal -= blockedAngle;
 		} else if (isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide1Angle) && isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide2Angle)) { // goalCone completely within robotCone
 			viewOfGoal = 0;
+			break;
 		} else if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // only on the left side 
 			double blockedAngle = cleanAngle(goalCone.side1.angle() - robotCone.side2.angle());
 			viewOfGoal -= blockedAngle;
@@ -151,10 +128,10 @@ double PassPoint::computePassPointScore(roboteam_utils::Vector2 testPosition) {
 	}
 	roboteam_utils::Vector2 ballPos(world.ball.pos);
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
-	double distToOpp = calcDistToClosestOpp(testPosition, world);
+	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
 	double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-	double viewOfGoal = sqrt(sqrt(calcViewOfGoal(testPosition, world) / 0.336)); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world) / 0.336); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
 
 	double score = -distToGoal*distToGoalWeight + distToOpp*distToOppWeight - distToBall*distToBallWeight + viewOfGoal*viewOfGoalWeight + distOppToBallTraj*distOppToBallTrajWeight;
 	return score;

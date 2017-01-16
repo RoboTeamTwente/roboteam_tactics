@@ -141,8 +141,8 @@ int main(int argc, char *argv[]) {
 
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);
-            RTT_DEBUG("Strategy result: %s. Shutting down.\n", statusStr.c_str());
-            break;
+            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            ros::shutdown();
         }
 
         rate.sleep();

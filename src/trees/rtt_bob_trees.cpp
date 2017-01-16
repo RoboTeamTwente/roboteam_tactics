@@ -124,8 +124,8 @@
         auto AimAt_A = std::make_shared<AimAt>("AimAt_A", bb);
         AimAt_A->private_bb->SetString("At", "");
         auto Kick_A = std::make_shared<Kick>("Kick_A", bb);
-        Parallel_A_2->private_bb->SetDouble("minSuccess", 2);
-        Parallel_A_2->private_bb->SetDouble("minFail", 1);
+        Parallel_A_2->private_bb->SetInt("minSuccess", 2);
+        Parallel_A_2->private_bb->SetInt("minFail", 1);
         auto Parallel_B_0 = std::make_shared<bt::ParallelSequence>(2, 1);
         auto Distance_me_to_ball_B = std::make_shared<DistanceXToY>("Distance_me_to_ball_B", bb);
         Distance_me_to_ball_B->private_bb->SetString("mode", "geq");
@@ -136,8 +136,8 @@
         GetBall_B->private_bb->SetString("getBallAtY", "");
         GetBall_B->private_bb->SetString("getBallAtTime", "");
         GetBall_B->private_bb->SetString("getBallAtX", "");
-        Parallel_B_0->private_bb->SetDouble("minSuccess", 2);
-        Parallel_B_0->private_bb->SetDouble("minFail", 1);
+        Parallel_B_0->private_bb->SetInt("minSuccess", 2);
+        Parallel_B_0->private_bb->SetInt("minFail", 1);
         Repeat_1->SetChild(Priority_3);
         Priority_3->AddChild(Parallel_A_2);
         Parallel_A_2->AddChild(Sequence_4);
@@ -161,6 +161,38 @@
     namespace {
 
     rtt::factories::TreeRegisterer rtt_BasicKeeperTree_registerer("rtt_bob/BasicKeeperTree", &rtt::rtt_bob::make_BasicKeeperTree);
+
+    } // anonymous namespace
+
+    // Used skills: 
+    #include "roboteam_tactics/skills/Kick.h"
+    // Used conditions: 
+    // Used tactics: 
+
+    namespace rtt {
+
+    namespace rtt_bob { 
+
+    bt::BehaviorTree make_VarTestTree(bt::Blackboard* blackboard) {
+        bt::BehaviorTree tree;
+        auto bb = tree.GetBlackboard();
+        if(blackboard) merge_blackboards(bb, std::make_shared<bt::Blackboard>(*blackboard));
+        auto Kick_VARS = std::make_shared<Kick>("Kick_VARS", bb);
+        Kick_VARS->private_bb->SetString("DefinitelyADouble", "#3.0");
+        Kick_VARS->private_bb->SetInt("AnotherInt", 5);
+        Kick_VARS->private_bb->SetInt("AnInt", 13000);
+        Kick_VARS->private_bb->SetDouble("ADouble", 3.5);
+        tree.SetRoot(Kick_VARS);
+        return tree;
+    }
+
+    } /* rtt_bob */ 
+
+    } // rtt
+
+    namespace {
+
+    rtt::factories::TreeRegisterer rtt_VarTestTree_registerer("rtt_bob/VarTestTree", &rtt::rtt_bob::make_VarTestTree);
 
     } // anonymous namespace
 

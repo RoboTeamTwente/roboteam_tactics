@@ -4,6 +4,7 @@
 #include <random>
 #include <limits>
 
+
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"
@@ -16,6 +17,9 @@
 #include "roboteam_tactics/conditions/IsBallInGoal.h"
 #include "roboteam_utils/Vector2.h"
 
+#include "roboteam_utils/grSim_Packet.pb.h"
+#include "roboteam_utils/grSim_Replacement.pb.h"
+
 #define RTT_CURRENT_DEBUG_TAG PassToTactic
 
 namespace rtt {
@@ -26,12 +30,13 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
+
 void PassToTactic::Initialize() {
     tokens.clear();
 
     RTT_DEBUG("Initializing\n");
     
-    if (RobotDealer::get_available_robots().size() < 4) {
+    if (RobotDealer::get_available_robots().size() < 2) {
         RTT_DEBUG("Not enough robots, cannot initialize.\n");
         // TODO: Want to pass failure here as well!
         return;
@@ -125,7 +130,6 @@ void PassToTactic::Initialize() {
 
 bt::Node::Status PassToTactic::Update() {
     bool allSucceeded = true;
-    // bool oneSucceeded = false;
     bool oneFailed = false;
     bool oneInvalid = false;
 
@@ -133,12 +137,7 @@ bt::Node::Status PassToTactic::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
 
-            if (status == bt::Node::Status::Success) {
-                // ROS_INFO("something succeeded!");
-            }
-
             allSucceeded &= status == bt::Node::Status::Success;
-            // oneSucceeded |= status == bt::Node::Status::Success;
             oneFailed |= status == bt::Node::Status::Failure;
             oneInvalid |= status == bt::Node::Status::Invalid;
         } else {
@@ -151,14 +150,13 @@ bt::Node::Status PassToTactic::Update() {
     } else if (oneInvalid) {
         return bt::Node::Status::Invalid;
     } else if (allSucceeded) {
-        ROS_INFO("yay, all succeeded!");
         return bt::Node::Status::Success;
     }
 
     auto duration = time_difference_seconds(start, now());
-    // if (duration.count() >= 8) {
-    //     return Status::Failure;
-    // }
+    if (duration.count() >= 20) {
+        return Status::Failure;
+    }
 
     return bt::Node::Status::Running;
 }

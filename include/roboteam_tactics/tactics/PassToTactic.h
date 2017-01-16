@@ -1,6 +1,7 @@
 #pragma once
 
 #include "unique_id/unique_id.h"
+// #include <QtNetwork>
 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/Parts.h"
@@ -12,9 +13,8 @@ namespace rtt {
 class PassToTactic : public Tactic {
     public:
     PassToTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-
+    // void ResetBall();
     void Initialize();
-
     Status Update();
 
     ros::NodeHandle n;
@@ -22,6 +22,7 @@ class PassToTactic : public Tactic {
     private:
     std::vector<boost::uuids::uuid> tokens;
 
+	// QUdpSocket udpsocket;
     time_point start;
 } ;
 
