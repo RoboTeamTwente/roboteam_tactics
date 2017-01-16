@@ -1,0 +1,8 @@
+set(JSON_PROJECTS
+    ${CMAKE_CURRENT_SOURCE_DIR}/rtt_bob.b3
+    )
+
+set(JSON_PROJECTS
+    ${JSON_PROJECTS}
+    PARENT_SCOPE
+    )

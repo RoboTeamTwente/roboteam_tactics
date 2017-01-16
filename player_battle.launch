@@ -1,16 +1,19 @@
 <launch>
 	<group ns="blue">
-		<param name="our_color" value="blue" type="str" />
-		<param name="our_side" value="right" type="str" />
-		<include file="$(find roboteam_tactics)/strat_role.launch" />
+		<include file="$(find roboteam_tactics)/strat_role.launch">
+            <arg name="our_side_arg" value="right" />
+            <arg name="our_color_arg" value="blue" />
+        </include>
+
 		<node name="demoref" pkg="roboteam_demoref" type="roboteam_demoref" output="screen" />
 		<node name="rqt_view" pkg="roboteam_rqt_view" type="run_world_view.py" />
 	</group>
 
 	<group ns="yellow">
-		<param name="our_color" value="yellow" type="str" />
-		<param name="our_side" value="left" type="str" />
 		<include file="$(find roboteam_utils)/mini.launch" />
-		<include file="$(find roboteam_input)/roboteam_input.launch" />
+		<include file="$(find roboteam_input)/roboteam_input.launch"> 
+            <arg name="our_side_arg" value="left" />
+            <arg name="our_color_arg" value="yellow" />
+        </include>
 	</group>
 </launch>

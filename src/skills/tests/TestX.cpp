@@ -42,12 +42,30 @@ void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
-	ros::NodeHandle n;
-
-    auto bb = std::make_shared<bt::Blackboard>();
-
     std::vector<std::string> arguments(argv + 1, argv + argc);
+
+    if (arguments.size() == 0) {
+        arguments.push_back("help");
+    }
+
+    if (arguments.at(0) == "show") {
+        if (arguments.at(1) == "skills") {
+            rtt::factories::print_all<rtt::Skill>("skills");
+        } else if (arguments.at(1) == "conditions") {
+            rtt::factories::print_all<rtt::Condition>("conditions");
+        } else if (arguments.at(1) == "tactics") {
+            rtt::factories::print_all<rtt::Tactic>("tactics");
+        } else if (arguments.at(1) == "trees") {
+            rtt::factories::print_all<bt::BehaviorTree>("trees");
+        } else if (arguments.at(1) == "all") {
+            rtt::factories::print_all<rtt::Skill>("skills");
+            rtt::factories::print_all<rtt::Condition>("conditions");
+            rtt::factories::print_all<rtt::Tactic>("tactics");
+            rtt::factories::print_all<bt::BehaviorTree>("trees");
+        }
+
+        return 0;
+    }
 
     if (arguments.at(0) == "help") {
         std::string msg = R"###(
@@ -66,12 +84,19 @@ How to use:
   If the type is string the value should be surrounded by quotes (e.g. "This is a string value!").
   A double value has a decimal point (not a comma).
   A bool is "true" or "false" without quotes.
+- To display all skills, conditions, tactics, or trees:
+  rosrun roboteam_tactics TestX show [skills/conditions/tactics/trees/all]
 - To display this help:
   "rosrun roboteam_tactics TestX help"
 )###";
         std::cout << msg << "\n";
         return 0;
     }
+
+	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
+	ros::NodeHandle n;
+
+    auto bb = std::make_shared<bt::Blackboard>();
 
     std::string testClass = arguments.at(0);
     std::cout << "Test class: " << testClass << "\n";

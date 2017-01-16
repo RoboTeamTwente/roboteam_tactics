@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 #include <stack>
 #include <string>
 #include <unordered_map>
@@ -20,6 +21,7 @@ BTBuilder::BTBuilder() {}
 BTBuilder::~BTBuilder() {}
 
 namespace {
+
     std::vector<std::string> get_all(std::string category) {
         bf::path categoryPath("src/" + category);
 
@@ -41,9 +43,10 @@ namespace {
             return {};
         }
     }
-}
 
-std::string BTBuilder::build(nlohmann::json json) {
+} // Anonymous namespace
+
+std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
 
     // namespace f = rtt::factories;
 
@@ -137,7 +140,20 @@ std::string BTBuilder::build(nlohmann::json json) {
     out << "\n";
 
     // Create constructor function
-    out << INDENT << "namespace rtt {\n\n";
+    if (!baseNamespace.empty()) {
+        out << INDENT << "namespace " << baseNamespace << " {\n\n";
+    }
+    
+    if (namespaces.size() > 0) {
+        out << INDENT;
+
+        for (auto ns : namespaces) {
+            out << "namespace " << ns << " { ";
+        }
+
+        out << "\n\n";
+    }
+
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
         << "(bt::Blackboard* blackboard) {"
@@ -153,16 +169,71 @@ std::string BTBuilder::build(nlohmann::json json) {
     out << DINDENT << "tree.SetRoot(" << root["title"].get<std::string>() << ");" << std::endl;
     out << DINDENT << "return tree;" << std::endl;
     out << INDENT << "}\n\n";
-    out << INDENT << "} // rtt\n\n";
+
+    if (namespaces.size() > 0) {
+        out << INDENT;
+
+        for (int i = namespaces.size() - 1; i > -1; --i) {
+            out << "} /* " << namespaces.at(i) << " */ ";
+        }
+
+        out << "\n\n";
+    }
+    
+    if (!baseNamespace.empty()) {
+        out << INDENT << "} // " << baseNamespace << "\n\n";
+    }
+
+    std::string treeName = json["title"].get<std::string>();
+
+    std::string namespacedFunction;
+    {
+        auto nss = namespaces;
+        nss.push_back("make_" + treeName);
+
+        namespacedFunction = 
+        "&"
+        + std::accumulate(
+            nss.begin(),
+            nss.end(),
+            baseNamespace,
+            [](std::string l, std::string r) {
+                if (l.empty()) {
+                    return r;
+                }
+
+                return l + "::" + r;
+            }
+            );
+    }
+
+    std::string creationString;
+    {
+        auto nss = namespaces;
+        nss.push_back(treeName);
+
+        creationString = std::accumulate(
+            nss.begin(), 
+            nss.end(), 
+            std::string(""), 
+            [](std::string l, std::string r) {
+                if (l.empty()) {
+                    return r;
+                }
+
+                return l + "/" + r;
+            }
+            );
+    }
 
     out << INDENT << "namespace {\n\n";
     out << INDENT
         << "rtt::factories::TreeRegisterer rtt_"
-        << json["title"].get<std::string>()
+        << treeName
         << "_registerer(\""
-        << json["title"].get<std::string>()
-        << "\", &rtt::make_"
-        << json["title"].get<std::string>()
+        << creationString
+        << "\", "
+        << namespacedFunction
         << ");\n\n";
     out << INDENT << "} // anonymous namespace\n";
 
@@ -309,13 +380,24 @@ void BTBuilder::defines(nlohmann::json jsonData) {
             }
 
             if (property.second.is_number()) {
+                std::string propertyType = "Double";
+                if (property.second.is_number_integer()) {
+                    propertyType = "Int";
+                }
+
                 out << DINDENT
                     << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetDouble(\""
+                    << "->private_bb->Set" << propertyType << "(\""
                     << property.first
-                    << "\", "
-                    << property.second.get<double>()
-                    << ");\n";
+                    << "\", ";
+
+                if (property.second.is_number_integer()) {
+                    out << (int) property.second.get<double>();
+                } else {
+                    out << property.second.get<double>();
+                }
+                
+                out << ");\n";
             }
 
             if (property.second.is_boolean()) {

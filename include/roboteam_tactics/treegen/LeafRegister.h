@@ -52,6 +52,12 @@ public:
     }
 } ;
 
+/**
+ * How to use:
+ * print_all<bt::BehaviorTree>("json trees");
+ * or
+ * print_all<rtt::Skill>("skills");
+ */
 template<
     class L
 >

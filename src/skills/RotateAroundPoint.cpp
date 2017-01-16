@@ -23,8 +23,10 @@ namespace rtt {
 RTT_REGISTER_SKILL(RotateAroundPoint);
 
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) {
-}
+        : Skill(name, blackboard),
+        goto_bb(std::make_shared<bt::Blackboard>()), 
+        avoidRobots("", goto_bb) {
+	}
 
 void RotateAroundPoint::stoprobot(int robotID) {
 
@@ -46,60 +48,7 @@ void RotateAroundPoint::stoprobot(int robotID) {
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(cmd);
 }
 
-bt::Node::Status RotateAroundPoint::Update (){
-	//**************************************//
-	// NEEDS BLACKBOARD ARGUMENTS: 			//
-	// int:ROBOT_ID=
-	// string:center="ball"					//
-	// double:faceTowardsPosx=				//
-	// double:faceTowardsPosy=				//
-	// double:w= (rotation speed (pick 3)	//
-	
-	// -- or --
-	
-	// int:ROBOT_ID=
-	// string:center="point"				//
-	// double:centerx=
-	// double:centery=
-	// double:radius=
-	// double:faceTowardsPosx=				//
-	// double:faceTowardsPosy=				//
-	// double:w= (rotation speed (pick 2))	//
-
-
-	// -- extra ---
-
-	// bool:faceoutward=true
-	//**************************************//
-	
-	
-	// int robotID2 = GetInt("ROBOT_ID");
-
-	// check and set ROBOT_ID
-	if(blackboard->HasInt("ROBOT_ID")){ 
-		robotID = blackboard->GetInt("ROBOT_ID");
-	}
-	else {
-		ROS_INFO("No int:ROBOT_ID specified"); 
-		return Status::Failure;
-	}
-
-	// get world, robot and ball
-	roboteam_msgs::World world = LastWorld::get();
-	
-	if (world.us.size() == 0){
-
-		return Status::Running;
-	}
-	if (world.header.seq==prevworldseq and !firstworld){
-		return Status::Running;
-	}
-	else {
-		firstworld=false;
-		prevworldseq=world.header.seq;
-	}
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	roboteam_msgs::WorldBall ball = world.ball;
+bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 	
 	
 	// check and set other settings
@@ -158,8 +107,71 @@ bt::Node::Status RotateAroundPoint::Update (){
 		ROS_INFO("no string:center choice specified ball|point"); 
 		return Status::Failure;
 	}
-	 
+
+	return Status::Running;
+
+}
+
+bt::Node::Status RotateAroundPoint::Update (){
+	//**************************************//
+	// NEEDS BLACKBOARD ARGUMENTS: 			//
+	// int:ROBOT_ID=
+	// string:center="ball"					//
+	// double:faceTowardsPosx=				//
+	// double:faceTowardsPosy=				//
+	// double:w= (rotation speed (pick 3)	//
 	
+	// -- or --
+	
+	// int:ROBOT_ID=
+	// string:center="point"				//
+	// double:centerx=
+	// double:centery=
+	// double:radius=
+	// double:faceTowardsPosx=				//
+	// double:faceTowardsPosy=				//
+	// double:w= (rotation speed (pick 2))	//
+
+
+	// -- extra ---
+
+	// bool:faceoutward=true
+	//**************************************//
+	
+	
+	// int robotID2 = GetInt("ROBOT_ID");
+
+	// check and set ROBOT_ID
+	if(blackboard->HasInt("ROBOT_ID")){
+		robotID = blackboard->GetInt("ROBOT_ID");
+	}
+	else {
+		ROS_INFO("No int:ROBOT_ID specified"); 
+		return Status::Failure;
+	}
+
+	// get world, robot and ball
+	roboteam_msgs::World world = LastWorld::get();
+	
+	if (world.us.size() == 0){
+
+		return Status::Running;
+	}
+	if (world.header.seq==prevworldseq and !firstworld){
+		return Status::Running;
+	}
+	else {
+		firstworld=false;
+		prevworldseq=world.header.seq;
+	}
+	robot = world.us.at(robotID);
+	ball = world.ball;
+
+	Status status = checkAndSetArguments();
+	if(status != Status::Running){
+		return status;
+	}
+
 	// vector calculations
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
 	double targetAngle=computeAngle(robotPos, faceTowardsPos);
@@ -170,13 +182,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 		targetAngle=cleanAngle(targetAngle+M_PI);
 	}
 
-
-	
-
 	roboteam_utils::Vector2 worldposDiff = center-robotPos;
-
-
-	
 
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
@@ -298,8 +304,21 @@ bt::Node::Status RotateAroundPoint::Update (){
                 << ", color: "
                 << our_color
                 << ": not close enough to turn circle (center+radius)");
-		stoprobot(robotID);
-		return Status::Failure;
+
+		if(HasBool("drivetocircle") && GetBool("drivetocircle")){
+			ROS_INFO("driving to circle");
+			goto_bb->SetInt("ROBOT_ID", robotID);
+			goto_bb->SetDouble("xGoal", center.x);
+			goto_bb->SetDouble("angleGoal", targetAngle);
+			goto_bb->SetDouble("yGoal", center.y);
+			goto_bb->SetBool("dribbler",false);
+			avoidRobots.Update();
+			return Status::Running;
+		}
+		else {
+			stoprobot(robotID);
+			return Status::Failure;
+		}
 	}
 }
 

@@ -31,6 +31,11 @@ bt::Node::Status GoToPos::Update (){
     bool endPoint = GetBool("endPoint");
     bool dribbler = GetBool("dribbler");
 
+    double maxSpeed=2.0;
+    if (HasDouble("maxspeed")){
+        maxSpeed=GetDouble("maxspeed");
+    } 
+
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 
 	// is called before the first world state update
 	if (world.us.size() == 0) {
@@ -46,9 +51,12 @@ bt::Node::Status GoToPos::Update (){
     // Proportional position controller
     roboteam_utils::Vector2 requiredSpeed;
     double pGain=3;
-    double maxSpeed=3.0;
+    
     requiredSpeed.x=(xGoal-robotPos.x)*pGain;
     requiredSpeed.y=(yGoal-robotPos.y)*pGain;
+
+    ROS_INFO("requiredspeed length: %f",requiredSpeed.length());
+
     if (requiredSpeed.length() > maxSpeed){
         requiredSpeed.x=requiredSpeed.x/requiredSpeed.length()*maxSpeed;
         requiredSpeed.y=requiredSpeed.y/requiredSpeed.length()*maxSpeed;
@@ -58,6 +66,7 @@ bt::Node::Status GoToPos::Update (){
             requiredSpeed.y=requiredSpeed.y/requiredSpeed.length()*maxSpeed;
         }
     }
+    ROS_INFO("requiredspeed length after adjustment: %f",requiredSpeed.length());
 
     // Proportional rotation controller
     double requiredRotSpeed;
