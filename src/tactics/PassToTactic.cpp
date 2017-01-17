@@ -37,11 +37,11 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
 
     RTT_DEBUG("Initializing\n");
     
-    if (RobotDealer::get_available_robots().size() < 2) {
-        RTT_DEBUG("Not enough robots, cannot initialize.\n");
-        // TODO: Want to pass failure here as well!
-        return;
-    }
+    // if (RobotDealer::get_available_robots().size() < 2) {
+    //     RTT_DEBUG("Not enough robots, cannot initialize.\n");
+    //     // TODO: Want to pass failure here as well!
+    //     return;
+    // }
 
     // This tactic directs two robots
     int PASSER_ID = 1;

@@ -12,10 +12,41 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_msgs/RoleFeedback.h"
 
+#include <cmath>
+
 bool worldCallBack = false;
 bool tacticSucces = false;
 QUdpSocket udpsocket;
 
+// Place a robot in a specified position and orientation
+void placeRobot(uint id, bool yellow_team, roboteam_utils::Vector2 pos, double dir) {
+	grSim_Packet packet;
+
+	grSim_Replacement* replace = packet.mutable_replacement();
+	grSim_RobotReplacement* robot = replace->add_robots();
+
+	robot->set_x(pos.x);
+	robot->set_y(pos.y);
+	robot->set_dir(dir);
+	robot->set_id(id);
+	robot->set_yellowteam(yellow_team);
+
+	QByteArray dgram;
+    dgram.resize(packet.ByteSize());
+    packet.SerializeToArray(dgram.data(), dgram.size());
+
+    QUdpSocket udpsocket;
+
+    // Send to IP address and port specified in grSim
+    std::string grsim_ip = "127.0.0.1";
+    int grsim_port = 20011;
+    ros::param::get("grsim/ip", grsim_ip);
+    ros::param::get("grsim/port", grsim_port);
+    udpsocket.writeDatagram(dgram, QHostAddress(QString::fromStdString(grsim_ip)), grsim_port);
+}
+
+
+// Place the ball in a specified position
 void placeBall(roboteam_utils::Vector2 pos) {
     grSim_Packet packet;
 
@@ -41,6 +72,7 @@ void placeBall(roboteam_utils::Vector2 pos) {
     udpsocket.writeDatagram(dgram, QHostAddress(QString::fromStdString(grsim_ip)), grsim_port);
 }
 
+// Callback function for the feedback coming from the role nodes. This feedback is used in the tactic file (PassToTactic.cpp)
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
     auto uuid = unique_id::fromMsg(msg->token);
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
@@ -96,7 +128,9 @@ int main(int argc, char **argv) {
 		if (tacticSucces) {
 
 			ROS_INFO_STREAM("ComputePassPointTest done, shutting down");
-			// placeBall(roboteam_utils::Vector2(0.0, 0.0));
+			placeBall(roboteam_utils::Vector2(-2.2, 0.0));
+			placeRobot(1, true, roboteam_utils::Vector2(-2.0, -0.0), M_PI);
+			placeRobot(2, true, roboteam_utils::Vector2(-3.0, 2.0), 0.0);
 			// passToTactic.Initialize(passTo);
 			// tacticSucces = false;
 			return 0;

@@ -22,7 +22,7 @@ public:
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
 	double calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world);
 	double computePassPointScore(roboteam_utils::Vector2 testPosition);
-	double computeBestPassPoint();
+	roboteam_utils::Vector2 computeBestPassPoint();
 private:
 	double distToGoalWeight;
 	double distToOppWeight;

@@ -19,6 +19,7 @@ PassPoint::PassPoint() {
 	ROS_INFO_STREAM("distOppToBallTrajWeight: " << distOppToBallTrajWeight);
 }
 
+// Calculates the distance between the closest opponent and the testPosition
 double PassPoint::calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
 	for (size_t i = 1; i < world.them.size(); i++) {
@@ -30,6 +31,7 @@ double PassPoint::calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, rob
 	return shortestDistance;
 }
 
+// Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
 double PassPoint::calcDistOppToBallTraj(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
 	roboteam_utils::Vector2 ballPos(world.ball.pos);
 	roboteam_utils::Vector2 ballTraj = testPosition - ballPos;
@@ -46,6 +48,8 @@ double PassPoint::calcDistOppToBallTraj(roboteam_utils::Vector2 testPosition, ro
 	return shortestDistance;
 }
 
+// If multiple robots are blocking the view of the goal, and two of these robots are (partly) covering
+// the same part of the goal, this functions combines these two robot cones into one cone
 std::vector<Cone> PassPoint::combineOverlappingRobots(std::vector<Cone> robotCones) {
 	for (size_t i = 0; i < robotCones.size(); i++) {
 		Cone cone1 = robotCones.at(i);
@@ -70,6 +74,8 @@ std::vector<Cone> PassPoint::combineOverlappingRobots(std::vector<Cone> robotCon
 	return robotCones;
 }
 
+// Calculale the angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
+// the view, are taken into account
 double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
 	roboteam_utils::Vector2 theirGoal = LastWorld::get_their_goal_center();
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
@@ -120,6 +126,7 @@ double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_
 	return viewOfGoal;
 }
 
+// Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
 double PassPoint::computePassPointScore(roboteam_utils::Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
 	while(world.us.size() == 0) {
@@ -137,7 +144,9 @@ double PassPoint::computePassPointScore(roboteam_utils::Vector2 testPosition) {
 	return score;
 }
 
-double PassPoint::computeBestPassPoint() {
+// Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
+// also draws a 'heat map' in rqt_view
+roboteam_utils::Vector2 PassPoint::computeBestPassPoint() {
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	int x_steps = 27;
 	int y_steps = 18;
@@ -180,7 +189,9 @@ double PassPoint::computeBestPassPoint() {
 		drawer.SetColor(255 - relScore, 0, relScore);
 		drawer.DrawPoint(names.at(i), passPoints.at(i));
 	}
-	return maxScore;
+
+	roboteam_utils::Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	return bestPosition;
 }
 
 } // rtt
