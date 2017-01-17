@@ -1,5 +1,5 @@
 <launch>
-	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="PassToPointStrategy" output="screen" /> 
+	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="" output="screen" /> 
 
 	<param name="role_iterations_per_second" type="int" value="30" />
 	<param name="num_role_nodes" type="int" value="2" />

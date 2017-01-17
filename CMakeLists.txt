@@ -238,8 +238,8 @@ if (BUILD_STRATEGYNODE)
 
 endif (BUILD_STRATEGYNODE)
 
-   add_executable(ComputePassPointTest
-        src/utils/tests/ComputePassPointTest.cpp
+   add_executable(ComputePassPointTrain
+        src/utils/tests/ComputePassPointTrain.cpp
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:skills>
@@ -247,13 +247,13 @@ endif (BUILD_STRATEGYNODE)
         $<TARGET_OBJECTS:tactics>
         $<TARGET_OBJECTS:utils>
         )
-    add_dependencies(ComputePassPointTest
+    add_dependencies(ComputePassPointTrain
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         
         generate_json_t
         )
-    target_link_libraries(ComputePassPointTest
+    target_link_libraries(ComputePassPointTrain
         ${catkin_LIBRARIES}
 	${QT_LIBRARIES}
         )

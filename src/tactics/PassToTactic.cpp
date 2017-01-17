@@ -16,6 +16,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/conditions/IsBallInGoal.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/constants.h"
 
 #include "roboteam_utils/grSim_Packet.pb.h"
 #include "roboteam_utils/grSim_Replacement.pb.h"
@@ -31,7 +32,7 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
         {}
 
 
-void PassToTactic::Initialize() {
+void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
     tokens.clear();
 
     RTT_DEBUG("Initializing\n");
@@ -42,24 +43,10 @@ void PassToTactic::Initialize() {
         return;
     }
 
-    roboteam_msgs::World world = rtt::LastWorld::get();
-
-    roboteam_utils::Vector2 passToPoint(2.0, 0.0);
-
     // This tactic directs two robots
-    int PASSER_ID = 0;
-    int RECEIVER_ID = 1;
-
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    int PASSER_ID = 1;
+    int RECEIVER_ID = 2;
     
-    delete_from_vector(robots, PASSER_ID);
-    delete_from_vector(robots, RECEIVER_ID);
-
-    claim_robots({PASSER_ID, RECEIVER_ID});
-
-    // Get the default roledirective publisher
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
     {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
@@ -84,7 +71,6 @@ void PassToTactic::Initialize() {
         bb.SetDouble("Kick_B_kickVel", 5.0);
 
         // Create message
-        roboteam_msgs::RoleDirective passer;
         passer.robot_id = PASSER_ID;
         passer.tree = "Passer";
         passer.blackboard = bb.toMsg();
@@ -111,7 +97,6 @@ void PassToTactic::Initialize() {
         bb.SetDouble("GetBall_B_getBallAtTime", 10.0);
 
         // Create message
-        roboteam_msgs::RoleDirective receiver;
         receiver.robot_id = RECEIVER_ID;
         receiver.tree = "Receiver";
         receiver.blackboard = bb.toMsg();
@@ -128,35 +113,48 @@ void PassToTactic::Initialize() {
     start = rtt::now();
 }
 
+
 bt::Node::Status PassToTactic::Update() {
-    bool allSucceeded = true;
+    // RTT_DEBUG("Updating\n");
     bool oneFailed = false;
     bool oneInvalid = false;
+    bool passerSucces = false;
+    bool receiverSucces = false;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
+            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Success) {
+                passerSucces = true;
+            }
+            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Success) {
+                receiverSucces = true;
+            }
 
-            allSucceeded &= status == bt::Node::Status::Success;
             oneFailed |= status == bt::Node::Status::Failure;
             oneInvalid |= status == bt::Node::Status::Invalid;
-        } else {
-            allSucceeded = false;
         }
+    }
+
+    if (passerSucces && receiverSucces) {
+        RTT_DEBUG("PassToTactic Succes, shutting down the role nodes!\n");
+        passer.tree = passer.STOP_EXECUTING_TREE;
+        receiver.tree = receiver.STOP_EXECUTING_TREE;
+        pub.publish(passer);
+        pub.publish(receiver);
+        return bt::Node::Status::Success;
     }
 
     if (oneFailed) {
         return bt::Node::Status::Failure;
     } else if (oneInvalid) {
         return bt::Node::Status::Invalid;
-    } else if (allSucceeded) {
-        return bt::Node::Status::Success;
     }
 
-    auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 20) {
-        return Status::Failure;
-    }
+    // auto duration = time_difference_seconds(start, now());
+    // if (duration.count() >= 20) {
+    //     return Status::Failure;
+    // }
 
     return bt::Node::Status::Running;
 }
