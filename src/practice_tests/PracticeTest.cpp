@@ -4,20 +4,26 @@ namespace rtt {
 
 namespace practice {
 
+namespace b = boost;
+
 PracticeTest::~PracticeTest() {
 
 }
 
-Config PracticeTest::getConfig() {
-    return Config();
+b::optional<Config> PracticeTest::getConfig(
+    Side side, 
+    std::vector<int> ourRobots, 
+    roboteam_msgs::GeometryFieldSize fieldGeom
+    ) {
+    return b::none;
 }
 
 void beforeTest(roboteam_msgs::World const & world) {
 
 }
 
-Result check(roboteam_msgs::World const & world) {
-
+Result check(roboteam_msgs::World const & world, Side side, roboteam_msgs::GeometryFieldSize const & fieldGeom) {
+    
 }
 
 void afterTest(roboteam_msgs::World const & world) {

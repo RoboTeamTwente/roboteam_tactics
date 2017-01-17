@@ -27,6 +27,7 @@ namespace rtt {
 // Top level nodes
 SET_DEBUG_FOR(StrategyNode, true);
 SET_DEBUG_FOR(RoleNode, true);
+SET_DEBUG_FOR(PracticeTest, true);
 
 // Building blocks
 SET_DEBUG_FOR(RobotDealer, true);
