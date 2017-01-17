@@ -174,7 +174,6 @@ double PassPoint::computeBestPassPoint() {
 
 	double maxScore = *max_element(scores.begin(), scores.end());
 	double minScore = *min_element(scores.begin(), scores.end());
-	double avgScore = (maxScore + minScore) / 2;
 
 	for (size_t i = 0; i < passPoints.size(); i++) {
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
