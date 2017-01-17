@@ -32,7 +32,6 @@ bt::Node::Status AimAt::Update (){
 	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
 	// is called before the first world state update
 	if (world.us.size() == 0) {
-		//ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
 	
@@ -52,7 +51,6 @@ bt::Node::Status AimAt::Update (){
         passTo = LastWorld::get_our_goal_center();
 	}
 	
-	// ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetString("center", "ball");
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
@@ -63,14 +61,12 @@ bt::Node::Status AimAt::Update (){
     Status result = rotateAroundPoint.Update();
 	if (result == Status::Success) {
 		if (setRosParam) {
-			ROS_INFO_STREAM("setting the param to true");
 			set_PARAM_KICKING(true);
 		}
 		return Status::Success;
 	} else if (result == Status::Failure) {
 		ROS_INFO_STREAM("AimAt failed :(");
 		return Status::Failure;
-		// return result;
 	} else {
 		return Status::Running;
 	}

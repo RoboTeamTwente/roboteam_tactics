@@ -34,6 +34,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         , avoidRobots("", private_bb) {
     hasBall = whichRobotHasBall();
     set_PARAM_KICKING(false);
+    ros::param::set("ready_to_pass", false);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -154,6 +155,7 @@ bt::Node::Status GetBall::Update (){
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
 	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	double robotAngle = robot.angle;
 	double distanceToBall = (ballPos-robotPos).length();
 	bool intercept = GetBool("intercept");
 	roboteam_utils::Vector2 targetPos;
@@ -185,7 +187,16 @@ bt::Node::Status GetBall::Update (){
 				ROS_ERROR("This is probably not a valid intercept position...");
 				return Status::Failure;
 			}
-				
+
+			roboteam_utils::Vector2 posError = targetPos - robotPos;
+			double angleError = targetAngle - robotAngle;
+			if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
+				// Set a rosparam so that another shooting the ball to us knows that we're ready to receive the ball
+				ros::param::set("ready_to_pass", true);
+				// ROS_INFO_STREAM("true!!" << posError.length());
+			} else {
+				// ROS_INFO_STREAM("false!!" << posError.length());
+			}
 		} else { // If we are close enough to the ball we can drive towards it and turn on the dribbler
 			roboteam_utils::Vector2 posDiff = ballPos - robotPos;
 			roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
@@ -225,6 +236,9 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetInt("me", robotID);
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
+
+	
+	
 
 	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
 		roboteam_msgs::RobotCommand command;

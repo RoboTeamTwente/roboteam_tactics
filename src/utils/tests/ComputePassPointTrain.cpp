@@ -99,6 +99,10 @@ void fieldCallback(const roboteam_msgs::GeometryDataConstPtr& geometry) {
     rtt::LastWorld::set_field(geometry->field);
 }
 
+double evaluatePass() {
+
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "ComputePassPointTrain");
 	ros::NodeHandle n;
@@ -128,12 +132,13 @@ int main(int argc, char **argv) {
 		if (tacticSucces) {
 
 			ROS_INFO_STREAM("ComputePassPointTest done, shutting down");
-			placeBall(roboteam_utils::Vector2(-2.2, 0.0));
-			placeRobot(1, true, roboteam_utils::Vector2(-2.0, -0.0), M_PI);
+			placeBall(roboteam_utils::Vector2(0.0, 0.0));
+			placeRobot(1, true, roboteam_utils::Vector2(-0.2, -0.0), M_PI);
 			placeRobot(2, true, roboteam_utils::Vector2(-3.0, 2.0), 0.0);
-			// passToTactic.Initialize(passTo);
-			// tacticSucces = false;
-			return 0;
+			ros::spinOnce();
+			passToTactic.Initialize(passTo);
+			tacticSucces = false;
+			// return 0;
 		}
 	}
 	return 0;
