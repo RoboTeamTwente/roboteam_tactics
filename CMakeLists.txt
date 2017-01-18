@@ -51,7 +51,10 @@ set(CMAKE_CXX_FLAGS "\
 ")
 
 catkin_package(
-  INCLUDE_DIRS include
+    INCLUDE_DIRS 
+        include
+    LIBRARIES
+        roboteam_tactics_analysis
 )
 
 include_directories(
