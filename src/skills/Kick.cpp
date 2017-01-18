@@ -29,8 +29,21 @@ void Kick::Initialize() {
 }
 
 bt::Node::Status Kick::Update() {
-	// ROS_INFO_STREAM("in kick, cycleCounter: " << cycleCounter);
+  	
+    if (HasBool("wait_for_signal")) {
+    	if (GetBool("wait_for_signal")) {
+    		bool readyToPass = false;
+    		ros::param::get("ready_to_pass", readyToPass);
+    		if (!readyToPass) {
+    			return Status::Running;
+    		}
+    	}
+    }
+
+    ROS_INFO_STREAM("ok, kicking now...");
+
     cycleCounter++;
+
     if (cycleCounter > 20) {
         RTT_DEBUG("Failed to kick!\n");
         return bt::Node::Status::Failure;

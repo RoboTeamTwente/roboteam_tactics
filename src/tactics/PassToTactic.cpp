@@ -4,7 +4,6 @@
 #include <random>
 #include <limits>
 
-
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"
@@ -34,14 +33,7 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
 
 void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
     tokens.clear();
-
     RTT_DEBUG("Initializing\n");
-    
-    // if (RobotDealer::get_available_robots().size() < 2) {
-    //     RTT_DEBUG("Not enough robots, cannot initialize.\n");
-    //     // TODO: Want to pass failure here as well!
-    //     return;
-    // }
 
     // This tactic directs two robots
     int PASSER_ID = 1;
@@ -63,12 +55,13 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
         // Check if you can see the other attacker, and aim to him
         bb.SetBool("CanSeeRobot_B_our_team", true);
         bb.SetInt("CanSeeRobot_B_targetID", RECEIVER_ID);
-        bb.SetBool("AimAt_B_setRosParam", true);
+        bb.SetBool("AimAt_B_setRosParam", false);
         bb.SetString("AimAt_B_At", "robot");
         bb.SetInt("AimAt_B_AtRobot", RECEIVER_ID);
 
         // Set the kick velocity
         bb.SetDouble("Kick_B_kickVel", 5.0);
+        bb.SetBool("Kick_B_wait_for_signal", true);
 
         // Create message
         passer.robot_id = PASSER_ID;
@@ -126,9 +119,24 @@ bt::Node::Status PassToTactic::Update() {
             Status status = feedbacks.at(token);
             if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Success) {
                 passerSucces = true;
+                ROS_INFO("PassToTactic passer Success");
             }
+            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Failure) {
+                ROS_WARN("PassToTactic passer Failure");
+            }
+            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Invalid) {
+                ROS_WARN("PassToTactic passer Invalid");
+            }
+
             if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Success) {
                 receiverSucces = true;
+                ROS_INFO("PassToTactic receiver Success");
+            }
+            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Failure) {
+                ROS_WARN("PassToTactic reveiver Failure");
+            }
+            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Invalid) {
+                ROS_WARN("PassToTactic receiver Invalid");
             }
 
             oneFailed |= status == bt::Node::Status::Failure;
