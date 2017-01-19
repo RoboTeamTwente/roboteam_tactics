@@ -3,6 +3,8 @@
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
+#include "roboteam_tactics/utils/Math.h"
+
 
 
 #include <cmath>
@@ -14,48 +16,65 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 centerPoi
 	center = centerPoint;
 	radius = distance;
 	if (radius > 0) {
-		angle = 2 * asin((0.5*radius) / (center-start).length());
+		angle = 2 * asin((radius) / (center-start).length());
 	} else {
 		ROS_WARN("radius for cone invalid!");
 	}
-	side1 = (center-start).rotate(angle);
-	side2 = (center-start).rotate(-angle);
+	side1 = (center-start).rotate(0.5*angle);
+	side2 = (center-start).rotate(-0.5*angle);
 }
 
 Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 side1, roboteam_utils::Vector2 side2) {
 	this->start = startPoint;
-	this->side1 = side1.scale(2 / side1.length());
-	this->side2 = side2.scale(2 / side2.length());
-	this->angle = CleanAngle(this->side1.angle() - this->side2.angle());
-	this->center = this->side2.rotate(0.5*angle) + this->start;
-	this->radius = (this->center - this->side1).length();
+	roboteam_utils::Vector2 tempSide1 = side1.scale(2 / side1.length());
+	roboteam_utils::Vector2 tempSide2 = side2.scale(2 / side2.length());
+	this->angle = cleanAngle(tempSide1.angle() - tempSide2.angle());
+	this->center = tempSide2.rotate(0.5*angle) + this->start;
+	this->radius = (this->center - tempSide1).length();
+
+	this->side1 = (center-start).rotate(0.5*angle);
+	this->side2 = (center-start).rotate(-0.5*angle);
 }
 
-double Cone::CleanAngle(double cleanangle) {
-	if (cleanangle <= M_PI && cleanangle >= -M_PI) {
-		return cleanangle;
-	} else if (cleanangle > M_PI) {
-		cleanangle -= 2*M_PI;
-		return CleanAngle(cleanangle);
-	} else if (cleanangle < M_PI) {
-		cleanangle += 2*M_PI;
-		return CleanAngle(cleanangle);
-	}
-	return 0.0;
-}
+// double Cone::CleanAngle(double cleanangle) {
+// 	if (cleanangle <= M_PI && cleanangle >= -M_PI) {
+// 		return cleanangle;
+// 	} else if (cleanangle > M_PI) {
+// 		cleanangle -= 2*M_PI;
+// 		return CleanAngle(cleanangle);
+// 	} else if (cleanangle < M_PI) {
+// 		cleanangle += 2*M_PI;
+// 		return CleanAngle(cleanangle);
+// 	}
+// 	return 0.0;
+// }
 
 bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
+	// ROS_INFO_STREAM("point: " << point.x << " " << point.y);
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
 	// ROS_INFO_STREAM("vectorToPoint: " << vectorToPoint.x << " " << vectorToPoint.y);
 	// ROS_INFO_STREAM("vectorToCenter: " << vectorToCenter.x << " " << vectorToCenter.y);
 	// ROS_INFO_STREAM("vectorToPoint angle " << vectorToPoint.angle() << " vectorToCenter angle " << vectorToCenter.angle() << " angle " << angle);
-	if (fabs(CleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < angle) {
+	if (fabs(cleanAngle(vectorToPoint.angle() - vectorToCenter.angle())) <= 0.5*angle) {
 		return true;
 	} else {
 		return false;
 	}
 }
+
+bool Cone::IsWithinCone(roboteam_utils::Vector2 point, double marginRadius) {
+	roboteam_utils::Vector2 vectorToPoint = point-start;
+	roboteam_utils::Vector2 vectorToCenter = center-start;
+	double extraAngle = atan(marginRadius / vectorToPoint.length());
+
+	if (fabs(cleanAngle(vectorToPoint.angle()-vectorToCenter.angle())) < (0.5*angle + extraAngle)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 bool Cone::IsWithinField(roboteam_utils::Vector2 point) {
  	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
@@ -98,7 +117,7 @@ roboteam_utils::Vector2 Cone::SecondClosestPointOnSide(roboteam_utils::Vector2 p
 	}
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
-	double pointAngle = CleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
+	double pointAngle = cleanAngle(vectorToPoint.angle()-vectorToCenter.angle());
 	roboteam_utils::Vector2 option1 = vectorToCenter.rotate(angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 	roboteam_utils::Vector2 option2 = vectorToCenter.rotate(-angle).scale(vectorToPoint.length() / vectorToCenter.length()) + start;
 
@@ -161,13 +180,7 @@ roboteam_utils::Vector2 Cone::LineIntersection(roboteam_utils::Vector2 line1Star
 }
 
 bool Cone::DoConesOverlap(Cone otherCone) {
-	double angleDiff1 = side1.angle() - otherCone.side2.angle();
-	double angleDiff2 = side2.angle() - otherCone.side1.angle();
-	if (angleDiff1 > 0 && angleDiff2 > 0) {
-		return false;
-	} else if (angleDiff1 < 0 && angleDiff2 < 0) {
-		return false;
-	} else if ((fabs(angleDiff1) < 2*angle && fabs(angleDiff1 < 2*otherCone.angle)) || (fabs(angleDiff2) < 2*angle && fabs(angleDiff2 < 2*otherCone.angle))) {
+	if (this->IsWithinCone(otherCone.side1 + otherCone.start) || this->IsWithinCone(otherCone.side2 + otherCone.start) || otherCone.IsWithinCone(side1 + start) || otherCone.IsWithinCone(side2 + start)) {
 		return true;
 	} else {
 		return false;
@@ -180,31 +193,26 @@ Cone Cone::MergeCones(Cone otherCone) {
 		return *this;
 	}
 
-	double angleDiff1 = side1.angle() - otherCone.side2.angle();
-	double angleDiff2 = side2.angle() - otherCone.side1.angle();
+	if (this->IsWithinCone(otherCone.side1 + otherCone.start) && this->IsWithinCone(otherCone.side2 + otherCone.start)) {
+		// ROS_INFO_STREAM("2 in 1");
+		return *this;
+	}
+	if (otherCone.IsWithinCone(side1 + start) && otherCone.IsWithinCone(side2 + start)) {
+		// ROS_INFO_STREAM("1 in 2");
+		return otherCone;
 
-	if (angle > otherCone.angle) {
-		if (otherCone.side2.angle() > side2.angle() && otherCone.side1.angle() < side1.angle()) {
-			return *this;
-		}
-	} else {
-		if (side2.angle() > otherCone.side2.angle() && side1.angle() < otherCone.side1.angle()) {
-			return otherCone;
-		}
 	}
 
-	roboteam_utils::Vector2 newCenter;
-	double newRadius;
-	if (fabs(angleDiff1) > fabs(angleDiff2)) {
-		newCenter = otherCone.side2.rotate(0.5*angleDiff1) + start;
-		newRadius = (otherCone.side2 - (newCenter-start)).length();
-	} else {
-		newCenter = otherCone.side1.rotate(0.5*angleDiff2) + start;
-		newRadius = (otherCone.side1 - (newCenter-start)).length();
-	}
+	double angleDiff1 = fabs(cleanAngle(side1.angle() - otherCone.side2.angle()));
+	double angleDiff2 = fabs(cleanAngle(side2.angle() - otherCone.side1.angle()));
 
-	Cone newCone(start, newCenter, newRadius);
-	return newCone;
+	// ROS_INFO_STREAM("angleDiff1: " << angleDiff1 << " angleDiff2 " << angleDiff2);
+
+	if (angleDiff1 > angleDiff2) {
+		return Cone(start, side1, otherCone.side2);
+	} else {
+		return Cone(start, otherCone.side1, side2);
+	}
 }
 
 Cone::~Cone(){}

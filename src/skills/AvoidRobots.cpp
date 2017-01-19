@@ -150,40 +150,40 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
     return newTargetPos;
 }
 
-roboteam_utils::Vector2 AvoidRobots::springDamperForce(roboteam_utils::Vector2 distToOurDefenseArea, roboteam_utils::Vector2 sumOfForces) {
-    roboteam_msgs::World world = LastWorld::get();
-    roboteam_utils::Vector2 myVel(me.vel);
-    roboteam_utils::Vector2 myPos(me.pos);
+// roboteam_utils::Vector2 AvoidRobots::springDamperForce(roboteam_utils::Vector2 distToOurDefenseArea, roboteam_utils::Vector2 sumOfForces) {
+//     roboteam_msgs::World world = LastWorld::get();
+//     roboteam_utils::Vector2 myVel(me.vel);
+//     roboteam_utils::Vector2 myPos(me.pos);
 
-    if (distToOurDefenseArea.length() < 1.0) {
-        roboteam_utils::Vector2 shortestDistanceUnit = distToOurDefenseArea.scale(1 / distToOurDefenseArea.length());
+//     if (distToOurDefenseArea.length() < 1.0) {
+//         roboteam_utils::Vector2 shortestDistanceUnit = distToOurDefenseArea.scale(1 / distToOurDefenseArea.length());
 
-        double dot = shortestDistanceUnit.dot(myVel);
-        roboteam_utils::Vector2 damperForce;
-        if (dot > 0) {
-            double dotUnit = shortestDistanceUnit.dot(myVel.normalize());
-            double factor = 0.0 / (distToOurDefenseArea.length());
-            damperForce = Vector2() - shortestDistanceUnit*sumOfForces.length()*dotUnit*factor;
-            drawer.SetColor(0, 0, 255);
-            drawer.DrawLine("damping", myPos, damperForce);
-        } else {
-            drawer.RemoveLine("damping");
-        }
+//         double dot = shortestDistanceUnit.dot(myVel);
+//         roboteam_utils::Vector2 damperForce;
+//         if (dot > 0) {
+//             double dotUnit = shortestDistanceUnit.dot(myVel.normalize());
+//             double factor = 0.0 / (distToOurDefenseArea.length());
+//             damperForce = Vector2() - shortestDistanceUnit*sumOfForces.length()*dotUnit*factor;
+//             drawer.SetColor(0, 0, 255);
+//             drawer.DrawLine("damping", myPos, damperForce);
+//         } else {
+//             drawer.RemoveLine("damping");
+//         }
 
-        roboteam_utils::Vector2 springForce;
-        if (distToOurDefenseArea.length() < 1.0) {
-            double factor = 10 / (distToOurDefenseArea.length() * distToOurDefenseArea.length());
-            springForce = Vector2() - shortestDistanceUnit.scale(factor);
-            drawer.SetColor(255, 0, 0);
-            drawer.DrawLine("spring", myPos, springForce);
-        } else {
-            drawer.RemoveLine("spring");
-        } 
+//         roboteam_utils::Vector2 springForce;
+//         if (distToOurDefenseArea.length() < 1.0) {
+//             double factor = 10 / (distToOurDefenseArea.length() * distToOurDefenseArea.length());
+//             springForce = Vector2() - shortestDistanceUnit.scale(factor);
+//             drawer.SetColor(255, 0, 0);
+//             drawer.DrawLine("spring", myPos, springForce);
+//         } else {
+//             drawer.RemoveLine("spring");
+//         } 
           
-        return damperForce + springForce;
-    }
-    return Vector2();
-}
+//         return damperForce + springForce;
+//     }
+//     return Vector2();
+// }
 
 bt::Node::Status AvoidRobots::Update () {
     // Get the latest world state
@@ -273,9 +273,9 @@ bt::Node::Status AvoidRobots::Update () {
     }
 
     // Draw the velocity vector acting on the robots
-    drawer.DrawLine("sumOfForces", myPos, sumOfForces);
+    // drawer.DrawLine("sumOfForces", myPos, sumOfForces);
 
-    if (posError.length() < 0.05 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
         roboteam_msgs::RobotCommand command = stopCommand(robotID);
         pub.publish(command);
         return Status::Success;

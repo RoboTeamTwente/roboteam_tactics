@@ -14,6 +14,14 @@ find_package(catkin REQUIRED COMPONENTS
   unique_id
 )
 
+# This part actually makes sure the network interface
+# of Qt4 is included! So while rqt uses Qt5, for our
+# networking purposes we use Qt4.
+# RoboTeam Twente works in mysterious ways.
+set(QT_USE_QTNETWORK TRUE)
+find_package(Qt REQUIRED)
+include(${QT_USE_FILE})
+
 # Only enable this one if you're just testing one skill
 set(BUILD_TESTX TRUE)
 
@@ -43,7 +51,10 @@ set(CMAKE_CXX_FLAGS "\
 ")
 
 catkin_package(
-  INCLUDE_DIRS include
+    INCLUDE_DIRS 
+        include
+    LIBRARIES
+        roboteam_tactics_analysis
 )
 
 include_directories(
@@ -229,6 +240,27 @@ if (BUILD_STRATEGYNODE)
         )
 
 endif (BUILD_STRATEGYNODE)
+
+   add_executable(ComputePassPointTrain
+        src/utils/tests/ComputePassPointTrain.cpp
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:alltrees>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        )
+    add_dependencies(ComputePassPointTrain
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        
+        generate_json_t
+        )
+    target_link_libraries(ComputePassPointTrain
+        ${catkin_LIBRARIES}
+	${QT_LIBRARIES}
+        )
+
 
 ### Test executables ###
 # Disables tests on bob's desktop

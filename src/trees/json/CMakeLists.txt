@@ -11,6 +11,9 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/DemoStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToPosTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/Passer.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/PassToPointStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/Receiver.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SimpleSideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json

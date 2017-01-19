@@ -25,7 +25,7 @@ public:
     roboteam_msgs::RobotCommand VelocityController(roboteam_utils::Vector2 velTarget, double wTarget, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 GetForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 CheckTargetPos(roboteam_utils::Vector2 targetPos);
-    roboteam_utils::Vector2 springDamperForce(roboteam_utils::Vector2 distToPoint, roboteam_utils::Vector2 attractionForce);
+    // roboteam_utils::Vector2 springDamperForce(roboteam_utils::Vector2 distToPoint, roboteam_utils::Vector2 attractionForce);
     Status Update();
     
     static VerificationMap required_params() {
