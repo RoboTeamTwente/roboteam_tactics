@@ -9,13 +9,11 @@ namespace rtt {
 
 namespace practice {
 
-namespace b = boost;
-
 class KeeperTest : public PracticeTest {
 public:
     time_point testStart;
 
-    b::optional<Config> getConfig(
+    boost::optional<Config> getConfig(
         Side side, 
         std::vector<int> ourRobots, 
         roboteam_msgs::GeometryFieldSize fieldGeom

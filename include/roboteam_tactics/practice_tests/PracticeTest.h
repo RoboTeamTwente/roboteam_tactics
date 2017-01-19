@@ -15,14 +15,13 @@ namespace rtt {
 namespace practice {
 
 using ::roboteam_utils::Vector2;
-namespace b = boost;
 
 struct Robot {
     Vector2 pos;
     Vector2 speed;
     double angle;
 
-    b::optional<roboteam_msgs::RoleDirective> directive;
+    boost::optional<roboteam_msgs::RoleDirective> directive;
 } ;
 
 struct Config {
@@ -45,7 +44,7 @@ class PracticeTest {
 public:
     virtual ~PracticeTest();
 
-    virtual b::optional<Config> getConfig(
+    virtual boost::optional<Config> getConfig(
             Side side, 
             std::vector<int> ourRobots, 
             roboteam_msgs::GeometryFieldSize fieldGeom

@@ -7,6 +7,7 @@
 #include "roboteam_tactics/utils/utils.h"
 
 using namespace rtt::practice;
+namespace b = boost;
 
 b::optional<Config> KeeperTest::getConfig(
     Side side, 

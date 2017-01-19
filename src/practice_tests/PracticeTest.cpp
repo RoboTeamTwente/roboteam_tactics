@@ -18,15 +18,15 @@ b::optional<Config> PracticeTest::getConfig(
     return b::none;
 }
 
-void beforeTest(roboteam_msgs::World const & world) {
+void PracticeTest::beforeTest(roboteam_msgs::World const & world) {
 
 }
 
-Result check(roboteam_msgs::World const & world, Side side, roboteam_msgs::GeometryFieldSize const & fieldGeom) {
+Result PracticeTest::check(roboteam_msgs::World const & world, Side side, roboteam_msgs::GeometryFieldSize const & fieldGeom) {
     
 }
 
-void afterTest(roboteam_msgs::World const & world) {
+void PracticeTest::afterTest(roboteam_msgs::World const & world) {
 
 }
 
