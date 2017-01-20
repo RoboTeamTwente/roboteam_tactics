@@ -36,6 +36,11 @@ void callback_geom_data(const roboteam_msgs::GeometryDataConstPtr& geometry) {
     receivedGeom = true;
 }
 
+std::string const redText = "\e[38;2;255;0;0m";
+std::string const greenText = "\e[38;2;0;255;0m";
+std::string const yellowText = "\e[38;2;255;255;0m";
+std::string const resetText = "\e[0m";
+
 void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed, bool usIsYellow) {
     // Create new packet
     grSim_Packet packet;
@@ -68,6 +73,9 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
     if (applySpeed) {
         ballReplacement->set_vx(conf.ballSpeed.x);
         ballReplacement->set_vy(conf.ballSpeed.y);
+    } else {
+        ballReplacement->set_vx(0);
+        ballReplacement->set_vy(0);
     }
 
     // Convert the packet
@@ -83,12 +91,40 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
     sock.writeDatagram(dgram, QHostAddress(QString::fromStdString(grsim_ip)), grsim_port);
 }
 
+void resetAllRobots(QUdpSocket & sock, bool usIsYellow, roboteam_msgs::GeometryFieldSize) {
+    Config conf;
+
+    for (int i = 0; i < 6; ++i) {
+        for (int t = -1; t < 2; t += 2) {
+            Robot r;
+            r.angle = 0;
+            r.speed = Vector2(0, 0);
+            r.pos = Vector2((i + 1) * t, -4.8);
+
+            roboteam_msgs::RoleDirective rd;
+            rd.robot_id = i;
+            rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+
+            r.directive = rd;
+
+            if (t == -1) {
+                conf.us[i] = r;
+            } else {
+                conf.them[i] = r;
+            }
+        }
+    }
+
+    placeRobotsAndBall(sock, conf, false, usIsYellow);
+}
+
 } // anonymous namespace
 
 int main(int argc, char *argv[]) {
     using rtt::practice::KeeperTest;
     using rtt::practice::PracticeTest;
 
+	ros::init(argc, argv, "PracticeTest", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
     auto worldSubscriber = n.subscribe(rtt::TOPIC_WORLD_STATE, 1, callback_world_state);
@@ -97,7 +133,7 @@ int main(int argc, char *argv[]) {
     ros::Rate rate(60);
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
 
-    int const numNodes = 6;
+    int const numNodes = 2;
     RTT_DEBUGLN("Waiting for %i robot nodes to come online", numNodes);
    
     while ((int) directivePub.getNumSubscribers() < numNodes) {
@@ -124,6 +160,10 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<PracticeTest> keeperTest(new KeeperTest());
 
     std::vector<int> robots = {0, 1, 2, 3, 4, 5};
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(robots.begin(), robots.end(), g);
+
     b::optional<Config> confOpt = keeperTest->getConfig(Side::RIGHT, robots, fieldGeom);
 
     if (confOpt) {
@@ -138,6 +178,9 @@ int main(int argc, char *argv[]) {
     // Create UDP socket
     QUdpSocket sock;
 
+    // Reset the entire game
+    resetAllRobots(sock, true, fieldGeom);
+
     // Place robots at correct positions
     // Place ball at correct position
     placeRobotsAndBall(sock, conf, false, true);
@@ -151,7 +194,9 @@ int main(int argc, char *argv[]) {
 
     // Send roledirectives
     for (auto robot : conf.us) {
-        directivePub.publish(robot.second.directive);
+        if (robot.second.directive) {
+            directivePub.publish(*robot.second.directive);
+        }
     }
 
     // Set speeds for robot & ball
@@ -160,12 +205,28 @@ int main(int argc, char *argv[]) {
     // Loop on check at 60fps
     ros::Rate fps(60);
     Result res = Result::RUNNING;;
+    bool noAbort = true;
     do {
         fps.sleep();
         ros::spinOnce();   
         res = keeperTest->check(world, Side::LEFT, fieldGeom);
+
+        if (!ros::ok()) {
+            noAbort = false;
+            break;
+        }
     } while (res == Result::RUNNING);
     
+    if (!noAbort) {
+        std::cout << yellowText << "Test aborted!\n";
+    } else if (res == Result::SUCCESS) {
+        std::cout << greenText << "Test succeeded!\n";
+    } else {
+        std::cout << redText << "Test failed!\n";
+    }
+
+    std::cout << resetText;
+
     // Clean up!
     keeperTest->afterTest(world);
 
