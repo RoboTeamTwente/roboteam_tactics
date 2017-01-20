@@ -153,7 +153,6 @@ int main(int argc, char *argv[]) {
             // TODO: Maybe implement bt rqt feedback here as well?
 
             if (status == bt::Node::Status::Success) {
-                ROS_INFO_STREAM("sending feedback success!");
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Invalid) {

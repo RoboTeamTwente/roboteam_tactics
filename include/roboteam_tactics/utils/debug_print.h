@@ -38,7 +38,7 @@ SET_DEBUG_FOR(AimAt, false);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(GetBall, false);
-SET_DEBUG_FOR(Kick, false);
+SET_DEBUG_FOR(Kick, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(DefendGoalarea, true);
@@ -57,5 +57,10 @@ SET_DEBUG_FOR(AttackerTactic, true);
 SET_DEBUG_FOR(BasicDefenseTactic, true);
 SET_DEBUG_FOR(BasicKeeperTactic, true);
 SET_DEBUG_FOR(PassToTactic, true);
+
+// Other
+SET_DEBUG_FOR(ComputePassPoint, true);
+SET_DEBUG_FOR(Learner, true);
+
 
 } // rtt

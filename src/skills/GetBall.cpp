@@ -141,6 +141,7 @@ int GetBall::GetSign(double number) {
 }
 
 bt::Node::Status GetBall::Update (){
+
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
@@ -162,32 +163,34 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 	if (intercept) {
-		if (distanceToBall > acceptableDeviation) {
-			double getBallAtX;
-			double getBallAtY;
-			if (GetBool("getBallAtCurrentPos")) {
-				getBallAtX = robotPos.x;
-				getBallAtY = robotPos.y;
-			} else {
-				getBallAtX = GetDouble("getBallAtX");
-				getBallAtY = GetDouble("getBallAtY");
-			}
-			
-			double getBallAtTime = GetDouble("getBallAtTime");
 
-			InterceptPose interceptPose = GetInterceptPos(getBallAtX, getBallAtY, getBallAtTime);
-			roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
-			double interceptAngle = interceptPose.interceptAngle;
+		double getBallAtX;
+		double getBallAtY;
+		if (GetBool("getBallAtCurrentPos")) {
+			getBallAtX = robotPos.x;
+			getBallAtY = robotPos.y;
+		} else {
+			getBallAtX = GetDouble("getBallAtX");
+			getBallAtY = GetDouble("getBallAtY");
+		}
+		
+		double getBallAtTime = GetDouble("getBallAtTime");
 
-			roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
-			if (IsPointInCircle(getBallAtPos, acceptableDeviation, interceptPos)) {
-				targetPos = interceptPos;
-				targetAngle = interceptAngle;
-			} else {
-				ROS_ERROR("This is probably not a valid intercept position...");
-				return Status::Failure;
-			}
+		InterceptPose interceptPose = GetInterceptPos(getBallAtX, getBallAtY, getBallAtTime);
+		roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
+		double interceptAngle = interceptPose.interceptAngle;
 
+		roboteam_utils::Vector2 getBallAtPos = roboteam_utils::Vector2(getBallAtX, getBallAtY);
+		if (IsPointInCircle(getBallAtPos, acceptableDeviation, interceptPos)) {
+			targetPos = interceptPos;
+			targetAngle = interceptAngle;
+		} else {
+			ROS_ERROR("This is probably not a valid intercept position...");
+			return Status::Failure;
+		}
+
+		roboteam_utils::Vector2 posError = targetPos - robotPos;
+		if (distanceToBall > acceptableDeviation || posError.length() > acceptableDeviation) {
 			roboteam_utils::Vector2 posError = targetPos - robotPos;
 			double angleError = targetAngle - robotAngle;
 			if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
@@ -236,9 +239,6 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetInt("me", robotID);
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
-
-	
-	
 
 	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
 		roboteam_msgs::RobotCommand command;

@@ -2,7 +2,7 @@
   "id": "24b55629-a01e-4b1e-8a60-a8658e8e0e28",
   "title": "Passer",
   "description": "",
-  "root": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e",
+  "root": "e8cbd472-b16a-4315-8883-2e092ca8cd69",
   "properties": {},
   "nodes": {
     "6c419ef7-fe5f-4f29-aaa1-e8db880377fb": {
@@ -16,8 +16,8 @@
         "getBallAtTime": ""
       },
       "display": {
-        "x": -120,
-        "y": -84
+        "x": 252,
+        "y": -48
       }
     },
     "11a15123-42d1-4f67-9d08-2d0368d5b04a": {
@@ -31,6 +31,7 @@
         "y": 24
       },
       "children": [
+        "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
         "e4a89447-5fba-4611-841e-c2a33483117c",
         "ce757864-d6a5-4b9e-825a-f4f6390cec30",
         "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa"
@@ -60,21 +61,6 @@
         "y": 84
       }
     },
-    "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e": {
-      "id": "9a575fe0-a5cb-46c6-8612-a3d1ec4dbd3e",
-      "name": "Sequence",
-      "title": "Sequence",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": -276,
-        "y": -84
-      },
-      "children": [
-        "6c419ef7-fe5f-4f29-aaa1-e8db880377fb",
-        "e8cbd472-b16a-4315-8883-2e092ca8cd69"
-      ]
-    },
     "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa": {
       "id": "7fdd92f2-fd2e-48ef-857b-f45a4f87b3aa",
       "name": "Kick",
@@ -102,8 +88,8 @@
     }
   },
   "display": {
-    "camera_x": 753.8799999972798,
-    "camera_y": 345.88999999826774,
+    "camera_x": 869.7749999976013,
+    "camera_y": 216.8199999983599,
     "camera_z": 1,
     "x": -456,
     "y": -84
@@ -451,6 +437,13 @@
       "name": "IsBallInZone",
       "category": "condition",
       "title": "IsBallInZone",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "PassToTactic",
+      "category": "action",
+      "title": "PassToTactic",
       "description": null,
       "properties": {}
     }

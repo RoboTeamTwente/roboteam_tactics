@@ -286,7 +286,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				// TODO: maybe instead call position controller
 				
 				stoprobot(robotID);
-				ROS_INFO("finished");
+				ROS_INFO("RotateAroudPoint finished");
 				return Status::Success;
 			}
 		}

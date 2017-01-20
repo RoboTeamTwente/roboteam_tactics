@@ -2,9 +2,12 @@
 
 #include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 #include <iostream>
 #include <fstream>
+
+#define RTT_CURRENT_DEBUG_TAG ComputePassPoint
 
 namespace rtt {
 
@@ -12,11 +15,11 @@ PassPoint::PassPoint() {
 	std::fstream myfile("src/roboteam_tactics/src/utils/passpoint_weights.txt", std::ios_base::in);
 	myfile >> distToGoalWeight >> distToOppWeight >> distToBallWeight >> viewOfGoalWeight >> distOppToBallTrajWeight;
 
-	ROS_INFO_STREAM("distToGoalWeight: " << distToGoalWeight);
-	ROS_INFO_STREAM("distToOppWeight: " << distToOppWeight);
-	ROS_INFO_STREAM("distToBallWeight: " << distToBallWeight);
-	ROS_INFO_STREAM("viewOfGoalWeight: " << viewOfGoalWeight);
-	ROS_INFO_STREAM("distOppToBallTrajWeight: " << distOppToBallTrajWeight);
+	RTT_DEBUG("distToGoalWeight: %f \n", distToGoalWeight);
+	RTT_DEBUG("distToOppWeight: %f \n", distToOppWeight);
+	RTT_DEBUG("distToBallWeight: %f \n", distToBallWeight);
+	RTT_DEBUG("viewOfGoalWeight: %f \n", viewOfGoalWeight);
+	RTT_DEBUG("distOppToBallTrajWeight: %f \n", distOppToBallTrajWeight);
 }
 
 // Calculates the distance between the closest opponent and the testPosition

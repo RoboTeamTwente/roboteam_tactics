@@ -11,11 +11,15 @@
 #include "roboteam_utils/grSim_Replacement.pb.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_msgs/RoleFeedback.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 #include <cmath>
+#include <iostream>
 
-bool worldCallBack = false;
-bool tacticSucces = false;
+#define RTT_CURRENT_DEBUG_TAG Learner
+
+bool firstWorldCallBack = false;
+bool tacticSucces = true;
 QUdpSocket udpsocket;
 
 // Place a robot in a specified position and orientation
@@ -92,19 +96,23 @@ void worldCallback(const roboteam_msgs::WorldConstPtr& world, rtt::PassPoint* pa
 	}
 	if (tacticStatus == bt::Node::Status::Running) {
 	}
-	if (!worldCallBack) worldCallBack = true;
+	if (!firstWorldCallBack) firstWorldCallBack = true;
 }
 
 void fieldCallback(const roboteam_msgs::GeometryDataConstPtr& geometry) {
     rtt::LastWorld::set_field(geometry->field);
 }
 
-double evaluatePass() {
-
+double evaluatePass(rtt::time_point start, rtt::time_point finish) {
+	auto duration = rtt::time_difference_milliseconds(start, finish);
+    RTT_DEBUG("Tactic took %ld ms to execute \n", duration.count());
+    // std::cout << duration.count();
+    // ROS_INFO_STREAM("duration " << duration.count());
+	return 0.0;
 }
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "ComputePassPointTrain");
+	ros::init(argc, argv, "Learner");
 	ros::NodeHandle n;
 
 	rtt::PassPoint passPoint;
@@ -114,31 +122,44 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, boost::bind(&worldCallback, _1, &passPoint, &passToTactic));
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
-	ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10, &feedbackCallback);
+	ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 0, &feedbackCallback);
 
 	roboteam_utils::Vector2 passTo(2.0, 0.0);
 	placeBall(roboteam_utils::Vector2(0.0, 0.0));	
 	// double bestScore = passPoint.computeBestPassPoint();
+
+	rtt::time_point start = rtt::now();
 	
-	while (!worldCallBack) {
+	while (!firstWorldCallBack) {
 		ros::spinOnce();
 	}
-
-	passToTactic.Initialize(passTo);
 
 	while (ros::ok()) {
 		ros::spinOnce();
 
-		if (tacticSucces) {
 
-			ROS_INFO_STREAM("ComputePassPointTest done, shutting down");
+		if (tacticSucces) {
+			rtt::time_point finish = rtt::now();
+			double a = evaluatePass(start, finish);
+
+			// RTT_DEBUG("Cycle completed, starting next\n");
 			placeBall(roboteam_utils::Vector2(0.0, 0.0));
-			placeRobot(1, true, roboteam_utils::Vector2(-0.2, -0.0), M_PI);
-			placeRobot(2, true, roboteam_utils::Vector2(-3.0, 2.0), 0.0);
-			ros::spinOnce();
+			placeRobot(1, true, roboteam_utils::Vector2(0.5, 0.0), M_PI);
+			placeRobot(2, true, roboteam_utils::Vector2(-3.0, 1.0), M_PI);
+
+			// Wait for the world to realize that positions have changed...
+			firstWorldCallBack = false;
+			while (!firstWorldCallBack) {
+				ros::spinOnce();
+			}
+
+			// Choose a point to test
+			roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
+			
+			// Initialize the tactic with the chosen passPoint
+			start = rtt::now();
 			passToTactic.Initialize(passTo);
 			tacticSucces = false;
-			// return 0;
 		}
 	}
 	return 0;

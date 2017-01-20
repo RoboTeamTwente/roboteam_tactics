@@ -40,8 +40,6 @@ bt::Node::Status Kick::Update() {
     	}
     }
 
-    ROS_INFO_STREAM("ok, kicking now...");
-
     cycleCounter++;
 
     if (cycleCounter > 20) {
@@ -54,7 +52,8 @@ bt::Node::Status Kick::Update() {
 	
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
     
-    if ((currentBallVel - oldBallVel).length() > 0.001) {
+    RTT_DEBUG("Velocity difference is %f", (currentBallVel - oldBallVel).length());
+    if ((currentBallVel - oldBallVel).length() > 0.1) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
     }
