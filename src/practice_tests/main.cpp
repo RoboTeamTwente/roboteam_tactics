@@ -91,7 +91,7 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
     sock.writeDatagram(dgram, QHostAddress(QString::fromStdString(grsim_ip)), grsim_port);
 }
 
-void resetAllRobots(QUdpSocket & sock, bool usIsYellow, roboteam_msgs::GeometryFieldSize) {
+void resetAllRobots(ros::Publisher directivePub, QUdpSocket & sock, bool usIsYellow, roboteam_msgs::GeometryFieldSize) {
     Config conf;
 
     for (int i = 0; i < 6; ++i) {
@@ -101,11 +101,9 @@ void resetAllRobots(QUdpSocket & sock, bool usIsYellow, roboteam_msgs::GeometryF
             r.speed = Vector2(0, 0);
             r.pos = Vector2((i + 1) * t, -4.8);
 
-            roboteam_msgs::RoleDirective rd;
-            rd.robot_id = i;
-            rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
-
-            r.directive = rd;
+            // roboteam_msgs::RoleDirective rd;
+            // rd.robot_id = i;
+            // rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
 
             if (t == -1) {
                 conf.us[i] = r;
@@ -116,6 +114,11 @@ void resetAllRobots(QUdpSocket & sock, bool usIsYellow, roboteam_msgs::GeometryF
     }
 
     placeRobotsAndBall(sock, conf, false, usIsYellow);
+
+    roboteam_msgs::RoleDirective rd;
+    rd.robot_id = roboteam_msgs::RoleDirective::ALL_ROBOTS;
+    rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+    directivePub.publish(rd);
 }
 
 } // anonymous namespace
@@ -162,14 +165,14 @@ int main(int argc, char *argv[]) {
     std::vector<int> robots = {0, 1, 2, 3, 4, 5};
     std::random_device rd;
     std::mt19937 g(rd());
-    std::shuffle(robots.begin(), robots.end(), g);
+    // std::shuffle(robots.begin(), robots.end(), g);
 
     b::optional<Config> confOpt = keeperTest->getConfig(Side::RIGHT, robots, fieldGeom);
 
     if (confOpt) {
-        RTT_DEBUGLN("Running test %s\n", keeperTest->testName().c_str());
+        RTT_DEBUGLN("Running test %s", keeperTest->testName().c_str());
     } else {
-        RTT_DEBUGLN("Cannot run test %s\n", keeperTest->testName().c_str());
+        RTT_DEBUGLN("Cannot run test %s", keeperTest->testName().c_str());
         return 1;
     }
 
@@ -179,7 +182,7 @@ int main(int argc, char *argv[]) {
     QUdpSocket sock;
 
     // Reset the entire game
-    resetAllRobots(sock, true, fieldGeom);
+    resetAllRobots(directivePub, sock, true, fieldGeom);
 
     // Place robots at correct positions
     // Place ball at correct position
@@ -195,6 +198,9 @@ int main(int argc, char *argv[]) {
     // Send roledirectives
     for (auto robot : conf.us) {
         if (robot.second.directive) {
+            RTT_DEBUGLN("Sending directive...");
+            auto directive = *robot.second.directive;
+            std::cout << "Tree: " << directive.tree << "\n";
             directivePub.publish(*robot.second.directive);
         }
     }
@@ -229,6 +235,8 @@ int main(int argc, char *argv[]) {
 
     // Clean up!
     keeperTest->afterTest(world);
+
+    resetAllRobots(directivePub, sock, true, fieldGeom);
 
     return 0;
 }

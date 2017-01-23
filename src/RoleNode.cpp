@@ -37,7 +37,11 @@ void reset_tree() {
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
+    std::cout << ROBOT_ID << ": Got message!\n";
+
     std::string name = ros::this_node::getName();
+
+    std::cout << "Message: " << *msg << "\n";
     
     // Some control statements to regulate starting and stopping of rolenodes
     if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
@@ -51,25 +55,38 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     ros::NodeHandle n;
 
+    std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
+
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
 
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
 
+        std::cout << ROBOT_ID << ": Stop executing tree!\n";
+
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
         reset_tree();
         ignoring_strategy_instructions = true;
+
+        std::cout << "Ignoring strategy instructions!\n";
+
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
         ignoring_strategy_instructions = false;
+        std::cout << "Ignoring strategy instructions no!\n";
         return;
     }
 
+    std::cout << "Ignoring strategy?\n";
+
     if (ignoring_strategy_instructions) {
+        std::cout << "Yes!\n";
         return;
     }
+
+    std::cout << "No!\n";
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);

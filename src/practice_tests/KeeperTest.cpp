@@ -36,7 +36,9 @@ b::optional<Config> KeeperTest::getConfig(
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", ourRobots.at(0));
         rd.blackboard = bb.toMsg();
-        
+
+        keeper.directive = rd;
+
         conf.us[ourRobots.at(0)] = keeper;
     }
 
@@ -45,7 +47,7 @@ b::optional<Config> KeeperTest::getConfig(
     double const r = 2.3;
     // TODO: Get field width normally here
     conf.ballPos = Vector2(4.5 + std::cos(rad) * r, std::sin(rad) * r);
-    conf.ballSpeed = (Vector2(4.5, 0) - conf.ballPos).normalize() * 3;
+    conf.ballSpeed = (Vector2(4.5, 0) - conf.ballPos).normalize() * 2;
 
     return conf;
 }
@@ -59,8 +61,10 @@ Result KeeperTest::check(roboteam_msgs::World const & world, Side side, roboteam
 
     Vector2 ballPos(world.ball.pos);
 
+    std::cout << ballPos.x << "\n";
+
     // TODO: Basde on side & geom
-    if (ballPos.x > 4500) {
+    if (ballPos.x > 4.5) {
         return Result::FAILURE;
     }
 
