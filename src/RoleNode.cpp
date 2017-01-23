@@ -91,6 +91,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 }
 
 int main(int argc, char *argv[]) {
+
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
@@ -131,19 +132,22 @@ int main(int argc, char *argv[]) {
 
     while (ros::ok()) {
         ros::spinOnce();
-
+        
         sleeprate.sleep();
 
         if (!currentTree){
             continue;
         }
 
+        // if (ROBOT_ID == 1) RTT_DEBUGLN("Updating");
         bt::Node::Status status = currentTree->Update();
+        // if (ROBOT_ID == 1) RTT_DEBUGLN("Done updating");
 
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
             RTT_DEBUGLN("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
+
 
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;

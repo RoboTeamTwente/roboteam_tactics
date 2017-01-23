@@ -141,13 +141,13 @@ int GetBall::GetSign(double number) {
 }
 
 bt::Node::Status GetBall::Update (){
-
+	
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
-
+	// if (robotID == 1) ROS_INFO_STREAM("GetBall Update");
 	while (world.us.size() == 0) {
 		return Status::Running;
 	}
@@ -248,7 +248,6 @@ bt::Node::Status GetBall::Update (){
 		command.w = 0.0;
 		command.dribbler = true;
         rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
-		ros::spinOnce();
 
 		RTT_DEBUG("GetBall skill completed.");
 		return Status::Success;

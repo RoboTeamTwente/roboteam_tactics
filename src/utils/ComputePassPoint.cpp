@@ -15,11 +15,12 @@ PassPoint::PassPoint() {
 	std::fstream myfile("src/roboteam_tactics/src/utils/passpoint_weights.txt", std::ios_base::in);
 	myfile >> distToGoalWeight >> distToOppWeight >> distToBallWeight >> viewOfGoalWeight >> distOppToBallTrajWeight;
 
-	RTT_DEBUG("distToGoalWeight: %f \n", distToGoalWeight);
-	RTT_DEBUG("distToOppWeight: %f \n", distToOppWeight);
-	RTT_DEBUG("distToBallWeight: %f \n", distToBallWeight);
-	RTT_DEBUG("viewOfGoalWeight: %f \n", viewOfGoalWeight);
-	RTT_DEBUG("distOppToBallTrajWeight: %f \n", distOppToBallTrajWeight);
+	RTT_DEBUG("Initializing PassPoint and loading weights \n");
+	// RTT_DEBUG("distToGoalWeight: %f \n", distToGoalWeight);
+	// RTT_DEBUG("distToOppWeight: %f \n", distToOppWeight);
+	// RTT_DEBUG("distToBallWeight: %f \n", distToBallWeight);
+	// RTT_DEBUG("viewOfGoalWeight: %f \n", viewOfGoalWeight);
+	// RTT_DEBUG("distOppToBallTrajWeight: %f \n", distOppToBallTrajWeight);
 }
 
 // Calculates the distance between the closest opponent and the testPosition

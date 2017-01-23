@@ -28,7 +28,8 @@ public:
 
     virtual Status Update() = 0;
     virtual void Initialize() {}
-    virtual void Terminate(Status s) {}
+    virtual void Terminate(Status s) {
+    }
 
     virtual Status Tick()
     {

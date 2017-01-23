@@ -29,7 +29,7 @@ void Kick::Initialize() {
 }
 
 bt::Node::Status Kick::Update() {
-  	
+  	// ROS_INFO_STREAM("Kick Update");
     if (HasBool("wait_for_signal")) {
     	if (GetBool("wait_for_signal")) {
     		bool readyToPass = false;

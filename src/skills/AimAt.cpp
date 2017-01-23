@@ -23,10 +23,12 @@ AimAt::AimAt(std::string name, bt::Blackboard::Ptr blackboard)
 }
 
 bt::Node::Status AimAt::Update (){
+
 	roboteam_msgs::World world = LastWorld::get();
 	bool setRosParam = GetBool("setRosParam");
 
 	int robotID = blackboard->GetInt("ROBOT_ID");
+	// if (robotID == 1) ROS_INFO_STREAM("AimAt Update"); 
 	std::string destination = GetString("At");
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
@@ -65,7 +67,7 @@ bt::Node::Status AimAt::Update (){
 		}
 		return Status::Success;
 	} else if (result == Status::Failure) {
-		ROS_INFO_STREAM("AimAt failed :(");
+		// ROS_INFO_STREAM("AimAt failed :(");
 		return Status::Failure;
 	} else {
 		return Status::Running;
