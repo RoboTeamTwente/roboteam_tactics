@@ -370,13 +370,33 @@ void BTBuilder::defines(nlohmann::json jsonData) {
     if (properties.size() > 0) {
         for (auto property : properties) {
             if (property.second.is_string()) {
-                out << DINDENT
-                    << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetString(\""
-                    << property.first
-                    << "\", \""
-                    << property.second.get<std::string>()
-                    << "\");\n";
+                std::string value = property.second.get<std::string>();
+
+                if (value == "true") {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetBool(\""
+                        << property.first
+                        << "\", "
+                        << property.second.get<std::string>()
+                        << ");\n";
+                } else if (value == "false") {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetBool(\""
+                        << property.first
+                        << "\", "
+                        << property.second.get<std::string>()
+                        << ");\n";
+                } else {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetString(\""
+                        << property.first
+                        << "\", \""
+                        << property.second.get<std::string>()
+                        << "\");\n";
+                }
             }
 
             if (property.second.is_number()) {

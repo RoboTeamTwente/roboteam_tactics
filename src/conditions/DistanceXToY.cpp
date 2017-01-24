@@ -254,7 +254,7 @@ bt::Node::Status DistanceXToY::Update() {
         return Status::Failure;
     }
 
-    std::cout << "Dist: " << dist << ", result: " << result << "\n";
+    RTT_DEBUGLN("%s => Dist: %f, result: %d", name.c_str(), dist, result);
 
     if (result) {
         return Status::Success;

@@ -24,7 +24,7 @@ b::optional<Config> KeeperTest::getConfig(
         // TODO: Calculate position & angle in front of goal based on side & fieldGeom
         
         Robot keeper;
-        keeper.angle = 0;
+        keeper.angle = M_PI;
         keeper.pos = Vector2(4.3, 0);
 
         roboteam_msgs::RoleDirective rd;
@@ -47,7 +47,7 @@ b::optional<Config> KeeperTest::getConfig(
     double const r = 2.3;
     // TODO: Get field width normally here
     conf.ballPos = Vector2(4.5 + std::cos(rad) * r, std::sin(rad) * r);
-    conf.ballSpeed = (Vector2(4.5, 0) - conf.ballPos).normalize() * 2;
+    conf.ballSpeed = (Vector2(4.5, 0) - conf.ballPos).normalize() * 3;
 
     return conf;
 }
