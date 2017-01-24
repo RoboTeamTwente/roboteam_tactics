@@ -246,8 +246,11 @@ void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr ext
     }
 
 }
-static std::random_device rd;
-static std::mt19937 rng(rd());
+
+namespace {
+    thread_local std::random_device rd;
+    thread_local std::mt19937 rng(rd());
+}
 
 int get_rand_int(int max) {
     return get_rand_int(0, max);
@@ -317,19 +320,17 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+int get_robot_closest_to_point(const std::vector<int>& robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
-
-    roboteam_utils::Vector2 ball_pos(world.ball.pos);
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
         roboteam_utils::Vector2 pos(worldRobot.pos);
 
-        if ((pos - ball_pos).length() < closest_robot_ds) {
+        if ((pos - point).length() < closest_robot_ds) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
                 closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
+                closest_robot_ds = (pos - point).length();
             }
         }
     }
@@ -337,22 +338,16 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
     return closest_robot;
 }
 
-int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int side = LastWorld::get_our_goal_center().x;
+int get_robot_closest_to_ball(const std::vector<int>& robots, const roboteam_msgs::World &world) {
+    return get_robot_closest_to_point(robots, world, roboteam_utils::Vector2(world.ball.pos));
+}
 
-    int furthest_robot = -1;
-    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
-        if (this_robot_side_dist > furthest_robot_side_dist) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                furthest_robot = worldRobot.id;
-                furthest_robot_side_dist = this_robot_side_dist;
-            }
-        }
-    }
+int get_robot_closest_to_their_goal(const std::vector<int>& robots, const roboteam_msgs::World &world) {
+    return get_robot_closest_to_point(robots, world, LastWorld::get_their_goal_center());
+}
 
-    return furthest_robot;
+int get_robot_closest_to_our_goal(const std::vector<int>& robots, const roboteam_msgs::World &world) {
+    return get_robot_closest_to_point(robots, world, LastWorld::get_our_goal_center());
 }
 
 } // rtt

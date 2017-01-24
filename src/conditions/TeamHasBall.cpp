@@ -20,7 +20,7 @@ bt::Node::Status TeamHasBall::Update() {ROS_INFO("called teamhasball");
     bt::Blackboard::Ptr tmp_ptr = std::make_shared<bt::Blackboard>(tmp);
     std::string tmp_name = "tmp_ihb";
     for (const auto& bot : bots) {
-        tmp.SetInt("me", bot.id);
+        tmp_ptr->SetInt("me", bot.id);
         IHaveBall ihb(tmp_name, tmp_ptr);
         if (ihb.Update() == Status::Failure)
             return Status::Failure;

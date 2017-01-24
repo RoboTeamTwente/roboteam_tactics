@@ -75,6 +75,14 @@ float get_rand_real(float max);
  */
 float get_rand_real(float min, float max);
 
+template<typename T, typename Container>
+boost::optional<T> get_rand_element(const Container&);
+template<typename T, typename Sequence>
+boost::optional<T> get_rand_element_seq(const Sequence&);
+
+template<typename T, typename Sequence>
+bool sequence_contains(const Sequence& seq, T element);
+
 using time_point = std::chrono::steady_clock::time_point;
 using seconds = std::chrono::seconds;
 using milliseconds = std::chrono::milliseconds;
@@ -91,8 +99,10 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
 
-int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world = LastWorld::get());
+int get_robot_closest_to_point(const std::vector<int>& robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point);
+int get_robot_closest_to_their_goal(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
+int get_robot_closest_to_our_goal(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
+int get_robot_closest_to_ball(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
 
 // ros::Publisher& get_rolecommand_publisher();
 // ros::Publisher& get_roledirective_publisher();
@@ -130,3 +140,5 @@ template<
 ros::Publisher* GlobalPublisher<M>::pubPtr = nullptr;
 
 } // rtt
+
+#include "roboteam_tactics/utils/utils.tcc"

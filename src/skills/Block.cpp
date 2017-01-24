@@ -48,7 +48,7 @@ void normalize(Position& pos) {
         pos.y = -4;
 }
 
-bt::Node::Status Block::Update() {ROS_INFO("update");
+bt::Node::Status Block::Update() {
     roboteam_msgs::WorldRobot me, tgt;
 
     {
@@ -94,6 +94,11 @@ bt::Node::Status Block::Update() {ROS_INFO("update");
     private_bb->SetDouble("angleGoal", goal.rot);
     private_bb->SetBool("endPoint", true);
     private_bb->SetBool("dribbler", false);
+    
+    ROS_INFO("Block Internal ");
+    std::stringstream ss;
+    print_blackboard(private_bb, ss);
+    ROS_INFO("%s\n", ss.str().c_str());
     
     avoidBots = std::make_unique<AvoidRobots>("", private_bb);
     

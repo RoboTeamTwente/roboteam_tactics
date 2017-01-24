@@ -97,7 +97,7 @@ class Tactic : public Leaf {
         claimed_robots.clear();
     }
 
-    void claim_robot(int id) {
+    virtual void claim_robot(int id) {
         if (claimed_robots.find(id) != claimed_robots.end()) {
             ROS_ERROR("Robot %d is already claimed by this tactic!\n", id);
             for (const int ROBOT_ID : claimed_robots) {
@@ -110,23 +110,65 @@ class Tactic : public Leaf {
         RobotDealer::claim_robot(id);
     }
 
-    void claim_robots(std::vector<int> ids) {
+    virtual void claim_robots(std::vector<int> ids) {
         for (int id : ids) {
             claim_robot(id);
         }
     }
 
-    std::vector<int> get_claimed_robots() {
+    virtual std::vector<int> get_claimed_robots() {
         return std::vector<int>(claimed_robots.begin(), claimed_robots.end());
     }
 
-    bool is_claimed(int id) {
+    virtual bool is_claimed(int id) {
         return claimed_robots.find(id) != claimed_robots.end();
     }
 
     private:
     std::set<int> claimed_robots;
 } ;
+
+class SingleBotTactic : public Tactic {
+    public:
+    SingleBotTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
+            : Tactic(name, blackboard), bot(-1)
+            {}
+    virtual ~SingleBotTactic() {}
+    
+    void claim_robot(int id) final override {
+        if (bot == -1) {
+            bot = id;
+            Tactic::claim_robot(id);
+        } else {
+            ROS_ERROR("SingleBotTactic %s tried to claim bot %d, but it has already claimed %d.",
+                name.c_str(), id, bot);
+            throw std::logic_error("SingleBotTactic multi-claim");
+        }
+    }
+    void claim_robots(std::vector<int> ids) final override {
+        if (ids.size() == 0) return;
+        if (ids.size() == 1) {
+            claim_robot(ids.at(0));
+        }
+        ROS_ERROR("SingleBotTactic %s tried to claim multiple bots in one go.", name.c_str());
+        throw std::logic_error("SingleBotTactic multi-claim");
+    }
+    
+    std::vector<int> get_claimed_robots() final override {
+        return bot == -1 ? std::vector<int>() : std::vector<int>({bot});
+    }
+    
+    int get_claimed_robot() const {
+        return bot;
+    }
+    
+    bool is_claimed(int id) final override {
+        return id == bot;
+    }
+        
+    private:
+    int bot;
+};
 
 // Make sure sources that include this are not troubled by the def
 #undef RTT_CURRENT_DEBUG_TAG

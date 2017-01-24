@@ -193,7 +193,14 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_F
 
 catkin_add_gtest(tactics_test
     test/main.cpp
-	test/SimpleTest.cpp
+    test/SimpleTest.cpp
+    test/ConditionsTest.cpp
+    test/LeafTest.cpp
+    test/VerificationTest.cpp
+    test/ChipCalcTest.cpp
+    $<TARGET_OBJECTS:conditions>
+    $<TARGET_OBJECTS:tactics>
+    $<TARGET_OBJECTS:utils>
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
 

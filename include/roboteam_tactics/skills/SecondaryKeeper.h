@@ -14,7 +14,7 @@ class SecondaryKeeper : public KeeperBlock {
     std::string node_name() { return "SecondaryKeeper"; }
     static VerificationMap required_params() {
         VerificationMap params;
-        params["keeper"] = BBArgumentType::Int;
+        params["ROBOT_ID"] = BBArgumentType::Int;
         return params;
     }
 };
