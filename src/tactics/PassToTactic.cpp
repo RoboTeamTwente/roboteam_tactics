@@ -106,6 +106,12 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
     start = rtt::now();
 }
 
+void PassToTactic::ShutdownRoles() {
+    passer.tree = passer.STOP_EXECUTING_TREE;
+    receiver.tree = receiver.STOP_EXECUTING_TREE;
+    pub.publish(passer);
+    pub.publish(receiver);
+}
 
 bt::Node::Status PassToTactic::Update() {
     // RTT_DEBUG("Updating Tactic\n");
@@ -131,35 +137,20 @@ bt::Node::Status PassToTactic::Update() {
     }
 
     if (passerSucces && receiverSucces) {
-        // RTT_DEBUG("PassToTactic Succes, shutting down the role nodes!\n");
-        passer.tree = passer.STOP_EXECUTING_TREE;
-        receiver.tree = receiver.STOP_EXECUTING_TREE;
-        pub.publish(passer);
-        pub.publish(receiver);
-        ros::spinOnce();
+        ShutdownRoles();
         return bt::Node::Status::Success;
     }
 
     if (oneFailed) {
-        RTT_DEBUGLN("One of the roles failed...");
-        passer.tree = passer.STOP_EXECUTING_TREE;
-        receiver.tree = receiver.STOP_EXECUTING_TREE;
-        pub.publish(passer);
-        pub.publish(receiver);
-        ros::spinOnce();
+        ShutdownRoles();
         return bt::Node::Status::Failure;
     } else if (oneInvalid) {
         return bt::Node::Status::Invalid;
     }
 
     auto duration = time_difference_milliseconds(start, now());
-    // RTT_DEBUG("tactic duration: %ld \n", duration.count());
     if (duration.count() >= 20000) {
-        passer.tree = passer.STOP_EXECUTING_TREE;
-        receiver.tree = receiver.STOP_EXECUTING_TREE;
-        pub.publish(passer);
-        pub.publish(receiver);
-        ros::spinOnce();
+        ShutdownRoles();
         return Status::Failure;
     }
 

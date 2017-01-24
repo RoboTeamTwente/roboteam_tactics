@@ -1,7 +1,6 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/KeeperBlock.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
-//#include "roboteam_tactics/utils/SkillFactory.h"
 #include "roboteam_tactics/utils/utils.h"
 #include <sstream>
 

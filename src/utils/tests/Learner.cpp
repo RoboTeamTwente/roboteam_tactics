@@ -20,8 +20,6 @@
 #define RTT_CURRENT_DEBUG_TAG Learner
 
 bool firstWorldCallBack = false;
-bool tacticSucces = true;
-bool tacticFailure = false;
 QUdpSocket udpsocket;
 
 // Place a robot in a specified position and orientation
@@ -104,13 +102,29 @@ double evaluatePass(rtt::time_point start, uint epoch, bool succeeded, bool scor
 	auto duration = rtt::time_difference_milliseconds(start, finish);
     
 	if (succeeded) {
-		RTT_DEBUG("Epoch %d succeeded in %ld ms \n", epoch, duration.count());
+		if (scored) {
+			RTT_DEBUG("Epoch %d succeeded, and we scored after %ld ms! \n", epoch, duration.count());
+		} else {
+			RTT_DEBUG("Epoch %d succeeded, but we didn't score :(", epoch);
+		}
 	} else {
-		RTT_DEBUG("Epoch %d failed after %ld ms \n", epoch, duration.count());
+		RTT_DEBUG("Epoch %d failed after %ld ms :( \n", epoch, duration.count());
 	}
 	
     roboteam_msgs::World world = rtt::LastWorld::get();
 	return 0.0;
+}
+
+bool didWeScore() {
+	auto bb = std::make_shared<bt::Blackboard>();
+	bb->SetBool("our_goal", false);
+	rtt::IsBallInGoal isBallInGoal("", bb);
+
+	if (isBallInGoal.Update() == bt::Node::Status::Success) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -118,16 +132,16 @@ int main(int argc, char **argv) {
 	RTT_DEBUG("Initializing Learner \n");
 	ros::init(argc, argv, "Learner");
 	ros::NodeHandle n;
-
-	RTT_DEBUGLN("Starting the tactic");
 	ros::Rate rate(60);	
 
+	// PassPoint, for the functions for calculating the best pass point and adapting the weights
 	rtt::PassPoint passPoint;
 
-	RTT_DEBUGLN("Initializing new passToTactic");
+	// PassToTactic, for executing the tactic that controls two robots to test the pass
 	auto bb = std::make_shared<bt::Blackboard>();
 	rtt::PassToTactic passToTactic("", bb);	
 
+	// Subscribers
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
 	ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 0, &feedbackCallback);
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, &worldCallback);
@@ -140,30 +154,74 @@ int main(int argc, char **argv) {
 
 	// Choose a point to test
 	roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
-	// passToTactic.Initialize(passTo);
+	rtt::time_point start_time;
+	rtt::time_point finish_time;
+	rtt::time_point succes_time;
+	uint epoch = 0;
 
+	// Some control booleans
+	bool tacticSucces = true;
+	bool tacticFailure = false;
+	bool justFinishedTactic = false;
+	bool scored = false;
+	bool waitForGoal = false;
 	
+	// Main program loop
 	while (ros::ok()) {
 
 		if (!tacticSucces && !tacticFailure) {
-			bt::Node::Status status = passToTactic.Update();	
+			bt::Node::Status status = passToTactic.Update();
+
+			// If the tactic succeeds or fails, change some control booleans so we take the correct next step, otherwise just keep spinnin'
 			if (status == bt::Node::Status::Success) {
-				RTT_DEBUGLN("Succes!");
 				tacticSucces = true;
+				succes_time = rtt::now();
+				waitForGoal = true; 
 			}
 			if (status == bt::Node::Status::Failure) {
-				RTT_DEBUGLN("Failure!");
 				tacticFailure = true;
+				// finish_time = rtt::now();
 			}
-		} else {
-			placeBall(roboteam_utils::Vector2(0.0, 0.0));
-			placeRobot(1, true, roboteam_utils::Vector2(0.5, 0.0), M_PI);
-			placeRobot(2, true, roboteam_utils::Vector2(-3.0, 1.0), M_PI);
-			passToTactic.Initialize(passTo);
 
-			tacticSucces = false;
-			tacticFailure = false;
+		} else {
+
+			// Because the tactic succeeded we´d like to wait for a while to see if it results in a goal, but not too long in case it doesn't (max 5 seconds)
+			if (waitForGoal) {
+				if (!scored && (rtt::time_difference_milliseconds(rtt::now(), succes_time).count() < 5000)) {
+					if (didWeScore()) {
+						scored = true;
+						waitForGoal = false;
+					}
+				}
+
+			} else {
+
+				// This means we're done, now we can evaluate what happened this epoch, for this we look at the time it took to complete the epoch, as well
+				// as whether the tactic succeeded, and whether it resulted in a goal
+				bool succeeded;
+				if (tacticSucces) {succeeded = true;}
+				if (tacticFailure) {succeeded = false;}
+
+				if (epoch >= 1) {
+					evaluatePass(start_time, epoch, succeeded, scored);
+				}
+
+				// Reset the field and the control booleans and start a new epoch
+				placeBall(roboteam_utils::Vector2(0.0, 0.0));
+				placeRobot(1, true, roboteam_utils::Vector2(0.5, 0.0), M_PI);
+				placeRobot(2, true, roboteam_utils::Vector2(-3.0, 1.0), M_PI);
+				passToTactic.Initialize(passTo);
+
+				tacticSucces = false;
+				tacticFailure = false;
+				scored = false;
+
+				epoch++;
+				start_time = rtt::now();
+			}
 		}
+
+		// Spin ROS at the specified rate
 		ros::spinOnce();
 		rate.sleep();
 	}

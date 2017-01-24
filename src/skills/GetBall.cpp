@@ -141,7 +141,8 @@ int GetBall::GetSign(double number) {
 }
 
 bt::Node::Status GetBall::Update (){
-	
+    RTT_DEBUGLN("GetBalL::Update");
+
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
@@ -231,7 +232,7 @@ bt::Node::Status GetBall::Update (){
 		if (posDiff > 0.3 || fabs(angleDiff) > 0.2*M_PI) {
 			targetPos = ballPos + roboteam_utils::Vector2(0.2, 0.0).rotate(targetAngle + M_PI);
 		} else {
-			targetPos = ballPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
+			targetPos = ballPos + roboteam_utils::Vector2(0.06, 0.0).rotate(targetAngle + M_PI);
 		}
 	}
 
@@ -249,7 +250,7 @@ bt::Node::Status GetBall::Update (){
 		command.dribbler = true;
         rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
 
-		RTT_DEBUG("GetBall skill completed.");
+		RTT_DEBUGLN("GetBall skill completed.");
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);

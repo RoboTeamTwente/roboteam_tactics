@@ -14,7 +14,6 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/verifier.h"
-// #include "roboteam_tactics/Aggregator.h"
 #include "roboteam_tactics/Leaf.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
