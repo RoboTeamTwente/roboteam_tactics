@@ -2,9 +2,7 @@ add_library(utils OBJECT
     Cone.cpp
     ComputePassPoint.cpp
     DangerFinder.cpp
-    Draw.cpp
     FeedbackCollector.cpp
-    Math.cpp
     RobotDealer.cpp
     utils.cpp
     BTRunner.cpp

@@ -7,7 +7,7 @@
 
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_tactics/skills/Kick.h"
-#include "roboteam_tactics/utils/Draw.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
 

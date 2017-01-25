@@ -12,7 +12,7 @@
 #include "roboteam_tactics/utils/Cone.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include <boost/optional.hpp>
-#include "roboteam_tactics/utils/Draw.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
     

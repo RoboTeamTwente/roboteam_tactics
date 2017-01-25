@@ -1,7 +1,7 @@
 #pragma once
 
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Draw.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
 
