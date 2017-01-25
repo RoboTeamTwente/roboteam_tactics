@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/skills/StandFree.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/Cone.h"
 #include "roboteam_tactics/utils/utils.h"

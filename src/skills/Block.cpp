@@ -7,6 +7,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/world_analysis.h"
 
 namespace rtt {
 
@@ -59,11 +60,11 @@ bt::Node::Status Block::Update() {ROS_INFO("update");
         me = *maybeMe;
         tgt = *maybeTgt;
     }
-    
+
     Position mypos(me.pos.x, me.pos.y, me.angle);
     Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
     Vector block;
-        
+
     if (block_id == BLOCK_BALL_ID) {
         block = Vector(LastWorld::get().ball.pos);
     } else if (constant) {
@@ -77,26 +78,26 @@ bt::Node::Status Block::Update() {ROS_INFO("update");
         }
         block = Vector(blk.pos);
     }
-    
+
     if (block.dist(tgtpos.location()) < .4) return bt::Node::Status::Failure;
-    
+
     Position goal = pos->block_pos(mypos, tgtpos.location(), block);
     normalize(goal);
     if (invert)
         goal.rot -= M_PI;
     //if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
-    
+
     if (!goal.real()) return bt::Node::Status::Running;
-    
+
     private_bb->SetInt("ROBOT_ID", my_id);
     private_bb->SetDouble("xGoal", goal.x);
     private_bb->SetDouble("yGoal", goal.y);
     private_bb->SetDouble("angleGoal", goal.rot);
     private_bb->SetBool("endPoint", true);
     private_bb->SetBool("dribbler", false);
-    
+
     avoidBots = std::make_unique<AvoidRobots>("", private_bb);
-    
+
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     bt::Node::Status avoid_status = avoidBots->Update();
     if (avoid_status != bt::Node::Status::Running) {
@@ -105,11 +106,11 @@ bt::Node::Status Block::Update() {ROS_INFO("update");
     }
     return avoid_status == bt::Node::Status::Invalid || avoid_status == bt::Node::Status::Failure ? avoid_status : bt::Node::Status::Running;
 }
-    
+
 void Block::extra_update() {
     if (avoidBots) {
         avoidBots->Update();
     }
-}    
-    
+}
+
 }

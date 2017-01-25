@@ -9,13 +9,14 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 
 namespace rtt {
 
@@ -72,7 +73,7 @@ roboteam_msgs::RobotCommand AvoidRobots::VelocityController(roboteam_utils::Vect
     // double wCommand = wTarget + wControllerI * wIGain;
     double wCommand = wTarget;
 
-    roboteam_utils::Vector2 requiredSpeed;  
+    roboteam_utils::Vector2 requiredSpeed;
     double myAngle = world.us.at(robotID).angle;
     requiredSpeed = worldToRobotFrame(velCommand, myAngle);
 
@@ -94,7 +95,7 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
     roboteam_utils::Vector2 posDiff = otherRobotPos - myPos;
     roboteam_utils::Vector2 closestPointOnPath = posError.closestPointOnVector(myPos, otherRobotPos);
     roboteam_utils::Vector2 distanceFromPath = otherRobotPos - closestPointOnPath;
-                
+
     roboteam_utils::Vector2 forceVector(0.0, 0.0);
     if (posDiff.length() < lookingDistance) {
         double scalingNumber1; // scalingNumber1 represents the weight placed on the perpendicular distance between the robot and our path
@@ -108,14 +109,14 @@ roboteam_utils::Vector2 AvoidRobots::GetForceVectorFromRobot(roboteam_utils::Vec
         double scalingNumber2 = 1/(posDiff.length()*posDiff.length()*20); // scalingNumber2 represents the weight placed on the actual distance between the other robot's pos and our pos
         roboteam_utils::Vector2 distanceFromPathUnit = distanceFromPath.scale(1/distanceFromPath.length());
         forceVector = distanceFromPathUnit.scale(scalingNumber1+scalingNumber2*2);
-    } 
+    }
     return forceVector;
 }
 
 roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
-    
+
     double safetyMarginGoalAreas = 0.2;
     double marginOutsideField = 0.2; // meter
 
@@ -123,7 +124,7 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
     if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
         marginOutsideField = 0.0; // we should not go outside the field close to the goal areas.
     }
-    
+
     if (xGoal > (field.field_length/2+marginOutsideField) || xGoal < (-field.field_length/2-marginOutsideField)) {
         xGoal = signum(xGoal)*(field.field_length/2+marginOutsideField);
     }
@@ -178,8 +179,8 @@ roboteam_utils::Vector2 AvoidRobots::CheckTargetPos(roboteam_utils::Vector2 targ
 //             drawer.DrawLine("spring", myPos, springForce);
 //         } else {
 //             drawer.RemoveLine("spring");
-//         } 
-          
+//         }
+
 //         return damperForce + springForce;
 //     }
 //     return Vector2();
@@ -215,7 +216,7 @@ bt::Node::Status AvoidRobots::Update () {
     drawer.DrawPoint("newTargetPos", targetPos);
     drawer.SetColor(0, 0, 0);
     angleGoal = cleanAngle(angleGoal);
-    
+
     roboteam_utils::Vector2 myPos(me.pos);
     roboteam_utils::Vector2 myVel(me.vel);
     roboteam_utils::Vector2 posError = targetPos - myPos;
@@ -230,7 +231,7 @@ bt::Node::Status AvoidRobots::Update () {
     bb2->SetDouble("x_coor", xGoal);
     bb2->SetDouble("y_coor", yGoal);
     bb2->SetBool("check_move", true);
-    
+
     // Get global robot command publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 
@@ -280,10 +281,10 @@ bt::Node::Status AvoidRobots::Update () {
         pub.publish(command);
         return Status::Success;
     }
-	
+
     // Rotate from robot frame to world frame
     double requiredRotSpeed = RotationController(angleError);
-    roboteam_msgs::RobotCommand command = VelocityController(sumOfForces, requiredRotSpeed, posError);  
+    roboteam_msgs::RobotCommand command = VelocityController(sumOfForces, requiredRotSpeed, posError);
     if (dribbler) {command.dribbler = true;}
     pub.publish(command);
     return Status::Running;

@@ -1,8 +1,9 @@
 #include "roboteam_tactics/conditions/DistanceXToY.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/Math.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/FieldCircularArc.h"
 #include "roboteam_msgs/FieldLineSegment.h"
@@ -26,7 +27,7 @@ Vector2 getPointOfInterest(std::string name) {
         // Get the side of the field
         std::string our_side = "right";
         get_PARAM_OUR_SIDE(our_side);
-        
+
         // Get the length of the field
         double field_length = LastWorld::get_field().field_length;
 
@@ -135,7 +136,7 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     Vector2 distToLine = distPointToLine(line, point, safetyMarginLine);
     Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
     Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
-	
+
     Vector2 shortestDistance = distToLine;
     if (distToTopArc.length() < shortestDistance.length()) {
         shortestDistance = distToTopArc;
@@ -143,7 +144,7 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     if (distToBottomArc.length() < shortestDistance.length()) {
         shortestDistance = distToBottomArc;
     }
- 
+
     return shortestDistance;
 }
 
@@ -152,7 +153,7 @@ bool isWithinDefenseArea(std::string whichArea, Vector2 point) {
     std::string our_side;
     ros::param::get("our_side", our_side);
     Vector2 distToDefenseArea = getDistToDefenseArea(whichArea, point, 0.0);
-    if (whichArea == "our defense area") {   
+    if (whichArea == "our defense area") {
         if (our_side == "left") {
             if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
             else return false;
@@ -188,7 +189,7 @@ double getDistToSide(std::string name, Vector2 point, double marginOutsideField)
         return (-(field.field_length/2 + marginOutsideField) - point.x);
     }
     if (name == "right") {
-        return (field.field_length/2 + marginOutsideField - point.x);        
+        return (field.field_length/2 + marginOutsideField - point.x);
     }
     ROS_WARN("getDistToSide: no valid name given");
     return 0.0;

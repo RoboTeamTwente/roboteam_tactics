@@ -12,7 +12,7 @@
 #include "roboteam_msgs/Vector2f.h"
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"

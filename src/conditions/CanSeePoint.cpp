@@ -5,7 +5,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 
 #include "roboteam_tactics/conditions/CanSeePoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 

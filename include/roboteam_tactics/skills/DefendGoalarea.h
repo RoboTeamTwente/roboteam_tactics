@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 

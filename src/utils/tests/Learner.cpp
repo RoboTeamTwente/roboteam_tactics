@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "roboteam_tactics/utils/ComputePassPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/Draw.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"

@@ -16,7 +16,7 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
