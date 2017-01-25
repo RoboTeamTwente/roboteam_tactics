@@ -7,7 +7,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Draw.h"
-#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_utils/Cone.h"
 
 #include <vector>
 #include <string>

@@ -9,7 +9,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/Vector2f.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_utils/Cone.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include <boost/optional.hpp>
 #include "roboteam_utils/Draw.h"

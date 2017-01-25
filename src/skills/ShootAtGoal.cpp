@@ -8,7 +8,7 @@
 #include "roboteam_tactics/skills/ShootAtGoal.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_utils/Math.h"
-#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_utils/Cone.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
