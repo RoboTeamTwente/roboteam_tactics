@@ -4,7 +4,6 @@ add_library(utils OBJECT
     DangerFinder.cpp
     Draw.cpp
     FeedbackCollector.cpp
-    LastRef.cpp
     Math.cpp
     RobotDealer.cpp
     utils.cpp

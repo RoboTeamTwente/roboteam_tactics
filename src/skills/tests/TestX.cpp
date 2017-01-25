@@ -11,7 +11,7 @@
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_utils/LastWorld.h"
-#include "roboteam_tactics/utils/LastRef.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RefereeData.h"
