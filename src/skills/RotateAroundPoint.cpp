@@ -296,6 +296,8 @@ bt::Node::Status RotateAroundPoint::Update (){
 			return Status::Failure;
 		}
 	} else {
+
+		return Status::Failure;
         std::string our_color = "yellow";
         get_PARAM_OUR_COLOR(our_color);
 		ROS_INFO_STREAM(

@@ -44,6 +44,7 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	roboteam_utils::Vector2 theirGoalCenter = LastWorld::get_their_goal_center();
+    return theirGoalCenter;
 	double goalWidth = field.goal_width;
 	roboteam_utils::Vector2 theirGoalLeft = Vector2(theirGoalCenter.x, theirGoalCenter.y + 0.5*goalWidth*signum(theirGoalCenter.x));
 	roboteam_utils::Vector2 theirGoalRight = Vector2(theirGoalCenter.x, theirGoalCenter.y - 0.5*goalWidth*signum(theirGoalCenter.x));

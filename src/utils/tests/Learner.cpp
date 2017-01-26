@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
 				placeBall(roboteam_utils::Vector2(0.0, 0.0));
 				placeRobot(1, true, roboteam_utils::Vector2(0.5, 0.0), M_PI);
 				placeRobot(2, true, roboteam_utils::Vector2(-3.0, 1.0), M_PI);
-				passToTactic.Initialize(passTo);
+				passToTactic.Initialize(); // arg: passTo
 
 				tacticSucces = false;
 				tacticFailure = false;

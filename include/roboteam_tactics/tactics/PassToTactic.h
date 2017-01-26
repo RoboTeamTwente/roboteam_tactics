@@ -16,7 +16,7 @@ namespace rtt {
 class PassToTactic : public Tactic {
     public:
     PassToTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-    void Initialize(roboteam_utils::Vector2 passTo);
+    void Initialize();
     void ShutdownRoles();
     Status Update();
     

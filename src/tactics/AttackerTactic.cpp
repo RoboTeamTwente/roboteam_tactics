@@ -29,68 +29,68 @@ void AttackerTactic::Initialize() {
 
     RTT_DEBUG("Initializing\n");
     
-    if (RobotDealer::get_available_robots().size() < 4) {
-        RTT_DEBUG("Not enough robots, cannot initialize.\n");
-        // TODO: Want to pass failure here as well!
-        return;
-    }
+    // if (RobotDealer::get_available_robots().size() < 4) {
+    //     RTT_DEBUG("Not enough robots, cannot initialize.\n");
+    //     // TODO: Want to pass failure here as well!
+    //     return;
+    // }
 
     roboteam_msgs::World world = rtt::LastWorld::get();
 
     // This tactic directs two robots
-    int primaryAttacker;
-    int secondaryAttacker;
+    // int primaryAttacker = 0;
+    int secondaryAttacker = 1;
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    // std::vector<int> robots = RobotDealer::get_available_robots();
     
-    primaryAttacker = get_robot_closest_to_ball(robots);
-    delete_from_vector(robots, primaryAttacker);
+    // primaryAttacker = get_robot_closest_to_ball(robots);
+    // delete_from_vector(robots, primaryAttacker);
     
-    secondaryAttacker = get_robot_closest_to_their_goal(robots);
-    delete_from_vector(robots, secondaryAttacker);
+    // secondaryAttacker = get_robot_closest_to_their_goal(robots);
+    // delete_from_vector(robots, secondaryAttacker);
 
     // claim_robots({primaryAttacker});
-    claim_robots({primaryAttacker, secondaryAttacker});
+    // claim_robots({primaryAttacker, secondaryAttacker});
 
-    RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
+    // RTT_DEBUG("primaryAttacker: %i, secondaryAttacker:%i\n", primaryAttacker, secondaryAttacker);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        // Attacker 1
-        bb.SetInt("ROBOT_ID", primaryAttacker);
+    // {
+    //     // Fill blackboard with relevant info
+    //     bt::Blackboard bb;
+    //     // Attacker 1
+    //     bb.SetInt("ROBOT_ID", primaryAttacker);
 
-        // Get the ball!
-        bb.SetBool("GetBall_B_intercept", false);
-        bb.SetString("GetBall_B_AimAt", "theirgoal");
-        bb.SetBool("GetBall_B_isKeeper", false);
+    //     // Get the ball!
+    //     bb.SetBool("GetBall_B_intercept", false);
+    //     bb.SetString("GetBall_B_AimAt", "theirgoal");
+    //     bb.SetBool("GetBall_B_isKeeper", false);
 
-        bb.SetDouble("Kick_B_kickVel", 2.5);
+    //     bb.SetDouble("Kick_B_kickVel", 5.0);
 
-        // If you can't see the goal, check if you can see the other attacker, aim to him
-        bb.SetBool("CanSeeRobot_B_our_team", true);
-        bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);
-        bb.SetBool("AimAt_B_setRosParam", true);
-        bb.SetString("AimAt_B_At", "robot");
-        bb.SetInt("AimAt_B_AtRobot", secondaryAttacker);
+    //     // If you can't see the goal, check if you can see the other attacker, aim to him
+    //     bb.SetBool("CanSeeRobot_B_our_team", true);
+    //     bb.SetInt("CanSeeRobot_B_targetID", secondaryAttacker);
+    //     bb.SetBool("AimAt_B_setRosParam", true);
+    //     bb.SetString("AimAt_B_At", "robot");
+    //     bb.SetInt("AimAt_B_AtRobot", secondaryAttacker);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = primaryAttacker;
-        wd.tree = "BasicAttacker1";
-        wd.blackboard = bb.toMsg();
+    //     // Create message
+    //     roboteam_msgs::RoleDirective wd;
+    //     wd.robot_id = primaryAttacker;
+    //     wd.tree = "BasicAttacker1";
+    //     wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        wd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        pub.publish(wd);
-    }
+    //     // Send to rolenode
+    //     pub.publish(wd);
+    // }
 
     {
         // Fill blackboard with relevant info
@@ -99,13 +99,13 @@ void AttackerTactic::Initialize() {
         bb.SetInt("ROBOT_ID", secondaryAttacker);
 
         // Make sure you stand free to receive the ball
-        bb.SetInt("StandFree_A_theirID", primaryAttacker);
-        bb.SetBool("StandFree_A_setRosParam", true);
-        bb.SetString("StandFree_A_whichTeam", "us");
-        bb.SetDouble("StandFree_A_distanceFromPoint", 0.3);
+        // bb.SetInt("StandFree_A_theirID", primaryAttacker);
+        // bb.SetBool("StandFree_A_setRosParam", true);
+        // bb.SetString("StandFree_A_whichTeam", "us");
+        // bb.SetDouble("StandFree_A_distanceFromPoint", 0.3);
 
         // Receive the ball
-        bb.SetBool("GetBall_A_intercept", true);
+        bb.SetBool("GetBall_A_intercept", false);
         bb.SetBool("GetBall_A_getBallAtCurrentPos", true);
 
         // Aim at goal
@@ -148,30 +148,30 @@ bt::Node::Status AttackerTactic::Update() {
         }
     }
 
-    if (oneFailed) {
-        return bt::Node::Status::Failure;
-    } else if (oneInvalid) {
-        return bt::Node::Status::Invalid;
-    } else if (oneSucceeded) {
-        return bt::Node::Status::Success;
-    }
+    // if (oneFailed) {
+    //     return bt::Node::Status::Failure;
+    // } else if (oneInvalid) {
+    //     return bt::Node::Status::Invalid;
+    // } else if (oneSucceeded) {
+    //     return bt::Node::Status::Success;
+    // }
 
     auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 8) {
+    if (duration.count() >= 12) {
         return Status::Failure;
     }
 
     return bt::Node::Status::Running;
 
-    // auto bb2 = std::make_shared<bt::Blackboard>();
-    // bb2->SetBool("our_goal", false);
-    // IsBallInGoal isBallInGoal("", bb2);
+    auto bb2 = std::make_shared<bt::Blackboard>();
+    bb2->SetBool("our_goal", false);
+    IsBallInGoal isBallInGoal("", bb2);
 
-    // if (isBallInGoal.Update() == bt::Node::Status::Success) {
-    //     return bt::Node::Status::Success;
-    // } else {
-    //     return bt::Node::Status::Running;
-    // }
+    if (isBallInGoal.Update() == bt::Node::Status::Success) {
+        return bt::Node::Status::Success;
+    } else {
+        return bt::Node::Status::Running;
+    }
 
 }
 

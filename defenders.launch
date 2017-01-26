@@ -1,20 +1,18 @@
 <launch>
+	<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+
 	<include file="$(find roboteam_utils)/mini.launch" />
 	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="DefenderStrategy" output="screen" /> 
 
-	<param name="role_iterations_per_second" type="int" value="40" />
-	<param name="num_role_nodes" type="int" value="4" />
+	<param name="role_iterations_per_second" type="int" value="30" />
+	<param name="num_role_nodes" type="int" value="1" />
 
-    <arg name="our_side_arg" default="right" />
-    <arg name="our_color_arg" default="yellow" />
+        <arg name="our_side_arg" default="right" />
+        <arg name="our_color_arg" default="yellow" />
 
-    <param name="our_side" type="str" value="$(arg our_side_arg)" />
-    <param name="our_color" type="str" value="$(arg our_color_arg)" />
+        <param name="our_side" type="str" value="$(arg our_side_arg)" />
+        <param name="our_color" type="str" value="$(arg our_color_arg)" />
 
-	<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" /> 
-	<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	
+
 </launch>

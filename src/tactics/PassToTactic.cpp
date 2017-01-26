@@ -31,7 +31,8 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
         {}
 
 
-void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
+void PassToTactic::Initialize() {
+    roboteam_utils::Vector2 passToPoint(2.0, 1.0);
     tokens.clear();
     // RTT_DEBUG("Initializing Tactic\n");
 
@@ -88,6 +89,8 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
         bb.SetDouble("GetBall_B_getBallAtX", passToPoint.x);
         bb.SetDouble("GetBall_B_getBallAtY", passToPoint.y);
         bb.SetDouble("GetBall_B_getBallAtTime", 10.0);
+
+        bb.SetString("AimAt_B_At", "theirgoal");
 
         // Create message
         receiver.robot_id = RECEIVER_ID;
