@@ -1,6 +1,6 @@
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_tactics/utils/debug_print.h"
 

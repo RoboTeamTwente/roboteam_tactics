@@ -3,9 +3,9 @@
 #include "actionlib/client/simple_action_client.h"
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/skills/AvoidRobots.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/Parts.h"

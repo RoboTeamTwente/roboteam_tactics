@@ -4,10 +4,10 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/Math.h"
-#include "roboteam_tactics/utils/Draw.h"
-#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Math.h"
+#include "roboteam_utils/Draw.h"
+#include "roboteam_utils/Cone.h"
 
 #include <vector>
 #include <string>
