@@ -38,13 +38,13 @@ public:
     std::string node_name() { return "AvoidRobots"; }
     
 private:
-    bool success = false;
+    bool success;
 
     // Control variables
-    double maxSpeed = 2.0;
-    double attractiveForce = 10.0;
-    double attractiveForceWhenClose = 3.0;
-    double repulsiveForce = 20.0;
+    double maxSpeed;
+    double attractiveForce;
+    double attractiveForceWhenClose;
+    double repulsiveForce;
 
     double xGoal;
     double yGoal;
