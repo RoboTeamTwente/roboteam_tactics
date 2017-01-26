@@ -50,7 +50,7 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
         grSim_RobotReplacement* replacement = packet.mutable_replacement()->add_robots();
         replacement->set_x(robot.second.pos.x);
         replacement->set_y(robot.second.pos.y);
-        replacement->set_dir(robot.second.angle);
+        replacement->set_dir(robot.second.angle / M_PI * 180);
         replacement->set_id(robot.first);
         replacement->set_yellowteam(usIsYellow);
     }
@@ -60,7 +60,7 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
         grSim_RobotReplacement* replacement = packet.mutable_replacement()->add_robots();
         replacement->set_x(robot.second.pos.x);
         replacement->set_y(robot.second.pos.y);
-        replacement->set_dir(robot.second.angle);
+        replacement->set_dir(robot.second.angle / M_PI * 180);
         replacement->set_id(robot.first);
         replacement->set_yellowteam(!usIsYellow);
     }
@@ -101,10 +101,11 @@ void resetAllRobots(ros::Publisher directivePub, QUdpSocket & sock, bool usIsYel
             r.speed = Vector2(0, 0);
             r.pos = Vector2((i + 1) * t, -4.8);
 
-            // roboteam_msgs::RoleDirective rd;
-            // rd.robot_id = i;
-            // rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
-
+            roboteam_msgs::RoleDirective rd;
+            rd.robot_id = i;
+            rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+            r.directive = rd;
+            
             if (t == -1) {
                 conf.us[i] = r;
             } else {
@@ -200,7 +201,6 @@ int main(int argc, char *argv[]) {
         if (robot.second.directive) {
             RTT_DEBUGLN("Sending directive...");
             auto directive = *robot.second.directive;
-            std::cout << "Tree: " << directive.tree << "\n";
             directivePub.publish(*robot.second.directive);
         }
     }
