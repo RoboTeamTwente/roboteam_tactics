@@ -23,7 +23,15 @@ namespace rtt {
 RTT_REGISTER_SKILL(AvoidRobots);
 
 AvoidRobots::AvoidRobots(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) { }
+        : Skill(name, blackboard)
+        
+        // Rest of the members
+        , success(false)
+        , maxSpeed(2.0)
+        , attractiveForce(10.0)
+        , attractiveForceWhenClose(3.0)
+        , repulsiveForce(20.0)
+        {}
 
 roboteam_msgs::RobotCommand AvoidRobots::stopCommand(uint id) {
     roboteam_msgs::RobotCommand command;
