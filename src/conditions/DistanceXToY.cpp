@@ -236,6 +236,7 @@ bt::Node::Status DistanceXToY::Update() {
         dist = vecX.dist(vecY);
     }
 
+
     bool result = false;
 
     if (mode == "lt") {
@@ -252,6 +253,8 @@ bt::Node::Status DistanceXToY::Update() {
         ROS_ERROR_STREAM("Unknown mode given to DistanceXToY: " << mode << ". Name: " << name);
         return Status::Failure;
     }
+
+    RTT_DEBUGLN("%s => Dist: %f, result: %d", name.c_str(), dist, result);
 
     if (result) {
         return Status::Success;
