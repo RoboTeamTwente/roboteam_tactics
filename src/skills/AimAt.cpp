@@ -52,7 +52,9 @@ bt::Node::Status AimAt::Update (){
         passTo = LastWorld::get_their_goal_center();
 	} else if(destination=="ourgoal"){
         passTo = LastWorld::get_our_goal_center();
-	}
+	} else if (destination == "position") {
+        passTo = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    }
 
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetString("center", "ball");
