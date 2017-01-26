@@ -8,9 +8,9 @@
 
 namespace rtt {
 
-class solo_attacker_tactic : public Tactic {
+class SoloDefenderTactic : public Tactic {
     public:
-    solo_attacker_tactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    SoloDefenderTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
     Status Update();
     ros::NodeHandle n;

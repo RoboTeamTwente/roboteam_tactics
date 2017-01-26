@@ -1,6 +1,5 @@
 set(JSON_PROJECTS
     ${CMAKE_CURRENT_SOURCE_DIR}/rtt_bob.b3
-    ${CMAKE_CURRENT_SOURCE_DIR}/jim.b3
     ${CMAKE_CURRENT_SOURCE_DIR}/qualification.b3
     )
 

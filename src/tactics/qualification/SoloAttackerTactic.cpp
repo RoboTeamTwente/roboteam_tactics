@@ -6,24 +6,24 @@
 
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
-#include "roboteam_tactics/tactics/solo_attacker_tactic.h"
+#include "roboteam_tactics/tactics/SoloAttackerTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
-#define RTT_CURRENT_DEBUG_TAG solo_attacker_tactic
+#define RTT_CURRENT_DEBUG_TAG SoloAttackerTactic
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC(AttackerTactic);
+RTT_REGISTER_TACTIC(SoloAttackerTactic);
 
-solo_attacker_tactic::solo_attacker_tactic(std::string name, bt::Blackboard::Ptr blackboard)
+SoloAttackerTactic::SoloAttackerTactic(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-void solo_attacker_tactic::Initialize() {
+void SoloAttackerTactic::Initialize() {
     tokens.clear();
 
     RTT_DEBUG("Initializing Solo Attacker Tactic \n");
@@ -38,7 +38,7 @@ void solo_attacker_tactic::Initialize() {
     
     // int attackerID = 0;
     uint attackerID = get_robot_closest_to_ball(robots);
-    delete_from_vector(robots, attackerID);
+    // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
 
     roboteam_msgs::World world = LastWorld::get();
@@ -61,7 +61,7 @@ void solo_attacker_tactic::Initialize() {
 
         // Create message
         roboteam_msgs::RoleDirective wd;
-        wd.robot_id = secondaryAttacker;
+        wd.robot_id = attackerID;
         wd.tree = "solo_attacker_role";
         wd.blackboard = bb.toMsg();
 
@@ -77,7 +77,7 @@ void solo_attacker_tactic::Initialize() {
     start = rtt::now();
 }
 
-bt::Node::Status solo_attacker_tactic::Update() {
+bt::Node::Status SoloAttackerTactic::Update() {
     bool treeSucceeded;
     bool treeFailed;
     bool treeInvalid;

@@ -58,6 +58,8 @@ SET_DEBUG_FOR(AttackerTactic, true);
 SET_DEBUG_FOR(BasicDefenseTactic, true);
 SET_DEBUG_FOR(BasicKeeperTactic, true);
 SET_DEBUG_FOR(PassToTactic, true);
+SET_DEBUG_FOR(SoloAttackerTactic, true);
+SET_DEBUG_FOR(SoloDefenderTactic, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
