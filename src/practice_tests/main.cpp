@@ -7,6 +7,7 @@
 #include "roboteam_tactics/practice_tests/Side.h"
 #include "roboteam_tactics/practice_tests/KeeperTest.h"
 
+#include "roboteam_utils/TeamRobot.h"
 #include "roboteam_utils/grSim_Packet.pb.h"
 #include "roboteam_utils/grSim_Commands.pb.h"
 #include "roboteam_utils/grSim_Replacement.pb.h"
@@ -50,7 +51,7 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
         grSim_RobotReplacement* replacement = packet.mutable_replacement()->add_robots();
         replacement->set_x(robot.second.pos.x);
         replacement->set_y(robot.second.pos.y);
-        replacement->set_dir(robot.second.angle);
+        replacement->set_dir(robot.second.pos.rot);
         replacement->set_id(robot.first);
         replacement->set_yellowteam(usIsYellow);
     }
@@ -60,7 +61,7 @@ void placeRobotsAndBall(QUdpSocket & sock, Config const & conf, bool applySpeed,
         grSim_RobotReplacement* replacement = packet.mutable_replacement()->add_robots();
         replacement->set_x(robot.second.pos.x);
         replacement->set_y(robot.second.pos.y);
-        replacement->set_dir(robot.second.angle);
+        replacement->set_dir(robot.second.pos.rot);
         replacement->set_id(robot.first);
         replacement->set_yellowteam(!usIsYellow);
     }
@@ -97,9 +98,8 @@ void resetAllRobots(ros::Publisher directivePub, QUdpSocket & sock, bool usIsYel
     for (int i = 0; i < 6; ++i) {
         for (int t = -1; t < 2; t += 2) {
             Robot r;
-            r.angle = 0;
-            r.speed = Vector2(0, 0);
-            r.pos = Vector2((i + 1) * t, -4.8);
+            r.speed = Position(0, 0, 0);
+            r.pos = Position((i + 1) * t, -4.8, 0);
 
             // roboteam_msgs::RoleDirective rd;
             // rd.robot_id = i;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 
     std::unique_ptr<PracticeTest> keeperTest(new KeeperTest());
 
-    std::vector<int> robots = {0, 1, 2, 3, 4, 5};
+    std::vector<::rtt::RobotID> robots = {0, 1, 2, 3, 4, 5};
     std::random_device rd;
     std::mt19937 g(rd());
     // std::shuffle(robots.begin(), robots.end(), g);

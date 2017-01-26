@@ -12,7 +12,7 @@ PracticeTest::~PracticeTest() {
 
 b::optional<Config> PracticeTest::getConfig(
     Side side, 
-    std::vector<int> ourRobots, 
+    std::vector<RobotID> ourRobots, 
     roboteam_msgs::GeometryFieldSize fieldGeom
     ) {
     return b::none;
