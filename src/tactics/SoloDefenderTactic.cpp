@@ -8,6 +8,7 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/SoloDefenderTactic.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/Math.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
@@ -26,7 +27,7 @@ SoloDefenderTactic::SoloDefenderTactic(std::string name, bt::Blackboard::Ptr bla
 void SoloDefenderTactic::Initialize() {
     tokens.clear();
 
-    RTT_DEBUG("Initializing Solo Defender Tactic \n");
+    // RTT_DEBUG("Initializing Solo Defender Tactic \n");
     
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -35,16 +36,12 @@ void SoloDefenderTactic::Initialize() {
     }
     
     std::vector<int> robots = RobotDealer::get_available_robots();
-    
-    uint defenderID = 0;
-    // uint defenderID = get_robot_closest_to_ball(robots);
-    // delete_from_vector(robots, defenderID);
-    claim_robots({defenderID});
 
-    roboteam_msgs::World world = LastWorld::get();
-    roboteam_utils::Vector2 ballPos(world.ball.pos);
-    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-    double targetAngle = (theirGoalPos - ballPos).angle();
+    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+    roboteam_utils::Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+    
+    int defenderID = 0;
+    claim_robots({defenderID});
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -56,13 +53,23 @@ void SoloDefenderTactic::Initialize() {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", defenderID);
 
-        // Set the targetAngle to face the goal when we get the ball
-        bb.SetDouble("GetBall_A_targetAngle", targetAngle);
+        bb.SetBool("GetBall_A_intercept", false);
+        bb.SetBool("GetBall_A_isKeeper", true);
+        bb.SetString("GetBall_A_AimAt", "fieldcenter");
+
+        bb.SetDouble("GetBall_B_getBallAtX", keeperPos.x);
+        bb.SetDouble("GetBall_B_getBallAtY", keeperPos.y);
+        bb.SetDouble("GetBall_B_getBallAtTime", 12.0);
+        bb.SetBool("GetBall_B_intercept", true);
+        bb.SetDouble("GetBall_B_acceptableDeviation", 0.45);
+        bb.SetBool("GetBall_B_isKeeper", true);
+
+        bb.SetDouble("Kick_A_kickVel", 2.5);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = defenderID;
-        wd.tree = "solo_attacker_role";
+        wd.tree = "qualification/SoloDefenderRole";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -73,31 +80,30 @@ void SoloDefenderTactic::Initialize() {
         // Send to rolenode
         pub.publish(wd);
     }
-
-    start = rtt::now();
 }
 
 bt::Node::Status SoloDefenderTactic::Update() {
-    bool treeSucceeded;
-    bool treeFailed;
-    bool treeInvalid;
-    for (auto token : tokens) {
-        if (feedbacks.find(token) != feedbacks.end()) {
-            Status status = feedbacks.at(token);
-            treeSucceeded &= status == bt::Node::Status::Success;
-            treeFailed &= status == bt::Node::Status::Failure;
-            treeInvalid &= status == bt::Node::Status::Invalid;
-        }
-    }
+    // bool treeSucceeded = false;
+    // bool treeFailed = false;
+    // bool treeInvalid = false;
 
-    if (treeSucceeded) return bt::Node::Status::Success;
-    if (treeFailed) return bt::Node::Status::Failure;
-    if (treeInvalid) return bt::Node::Status::Invalid;
+    // for (auto token : tokens) {
+    //     if (feedbacks.find(token) != feedbacks.end()) {
+    //         Status status = feedbacks.at(token);
+    //         treeSucceeded &= status == bt::Node::Status::Success;
+    //         treeFailed &= status == bt::Node::Status::Failure;
+    //         treeInvalid &= status == bt::Node::Status::Invalid;
+    //     }
+    // }
 
-    auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 12) {
-        return Status::Failure;
-    }
+    // if (treeSucceeded) return bt::Node::Status::Success;
+    // if (treeFailed) return bt::Node::Status::Failure;
+    // if (treeInvalid) return bt::Node::Status::Invalid;
+
+    // auto duration = time_difference_seconds(start, now());
+    // if (duration.count() >= 12) {
+    //     return Status::Failure;
+    // }
 
     return bt::Node::Status::Running;
 }

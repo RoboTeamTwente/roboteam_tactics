@@ -36,26 +36,9 @@ Cone::Cone(roboteam_utils::Vector2 startPoint, roboteam_utils::Vector2 side1, ro
 	this->side2 = (center-start).rotate(-0.5*angle);
 }
 
-// double Cone::CleanAngle(double cleanangle) {
-// 	if (cleanangle <= M_PI && cleanangle >= -M_PI) {
-// 		return cleanangle;
-// 	} else if (cleanangle > M_PI) {
-// 		cleanangle -= 2*M_PI;
-// 		return CleanAngle(cleanangle);
-// 	} else if (cleanangle < M_PI) {
-// 		cleanangle += 2*M_PI;
-// 		return CleanAngle(cleanangle);
-// 	}
-// 	return 0.0;
-// }
-
 bool Cone::IsWithinCone(roboteam_utils::Vector2 point) {
-	// ROS_INFO_STREAM("point: " << point.x << " " << point.y);
 	roboteam_utils::Vector2 vectorToPoint = point-start;
 	roboteam_utils::Vector2 vectorToCenter = center-start;
-	// ROS_INFO_STREAM("vectorToPoint: " << vectorToPoint.x << " " << vectorToPoint.y);
-	// ROS_INFO_STREAM("vectorToCenter: " << vectorToCenter.x << " " << vectorToCenter.y);
-	// ROS_INFO_STREAM("vectorToPoint angle " << vectorToPoint.angle() << " vectorToCenter angle " << vectorToCenter.angle() << " angle " << angle);
 	if (fabs(cleanAngle(vectorToPoint.angle() - vectorToCenter.angle())) <= 0.5*angle) {
 		return true;
 	} else {

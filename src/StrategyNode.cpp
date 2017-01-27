@@ -15,6 +15,7 @@
 #include "roboteam_msgs/StrategyIgnoreRobot.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
+#include "roboteam_tactics/generated/qualification_trees.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
@@ -132,7 +133,7 @@ int main(int argc, char *argv[]) {
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
-    RTT_DEBUGLN("More than one robot found. Starting...");
+    RTT_DEBUGLN("More than one robot found. Starting!");
 
     while (ros::ok()) {
         ros::spinOnce();

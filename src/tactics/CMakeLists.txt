@@ -6,8 +6,8 @@ set(TACTIC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/DemoTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTactic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PassToTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/qualification/SoloAttackerTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/qualification/SoloDefenderTactic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SoloAttackerTactic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SoloDefenderTactic.cpp
     )
 set(TACTIC_SOURCES
     ${TACTIC_SOURCES}

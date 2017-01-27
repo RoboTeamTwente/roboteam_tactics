@@ -72,19 +72,19 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		roboteam_utils::Vector2 ballTrajectory = ballPosThen - ballPosNow;
 		roboteam_utils::Vector2 ballToCenter = getBallAtPos - ballPosNow;
 
-		double ballTrajectoryMagn = ballTrajectory.length();
-		ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
-		double projectionOnBallTrajectory = ballToCenter.dot(ballTrajectory);
-		roboteam_utils::Vector2 closestPoint = ballPosNow + ballTrajectory*projectionOnBallTrajectory;
+		// double ballTrajectoryMagn = ballTrajectory.length();
+		// ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
+		// double projectionOnBallTrajectory = ballToCenter.dot(ballTrajectory);
+		// roboteam_utils::Vector2 closestPoint = ballPosNow + ballTrajectory*projectionOnBallTrajectory;
 
-		if (ballTrajectoryMagn > 0.1 && (closestPoint - getBallAtPos).length() < acceptableDeviation) {
-			interceptPos = closestPoint;
-			interceptAngle = (ballPosNow-ballPosThen).angle();
-		} else {
+		// if (ballTrajectoryMagn > 0.1 && (closestPoint - getBallAtPos).length() < acceptableDeviation) {
+		// 	interceptPos = closestPoint;
+		// 	interceptAngle = (ballPosNow-ballPosThen).angle();
+		// } else {
 			interceptPos.x = getBallAtX;
 			interceptPos.y = getBallAtY;
 			interceptAngle = (ballPosNow - getBallAtPos).angle();
-		}
+		// }
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
 		
@@ -92,7 +92,7 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 
 	} else {
 
-		// Predict intercept pos by looking at the robot that has the bal
+		// Predict intercept pos by looking at the robot that has the ball
 		roboteam_msgs::WorldRobot otherRobot;
 		if (our_team) {
 			otherRobot = world.us.at(hasBall);
@@ -122,6 +122,8 @@ InterceptPose GetBall::GetInterceptPos(double getBallAtX, double getBallAtY, dou
 		}
 		interceptPose.interceptPos = interceptPos; 
 		interceptPose.interceptAngle = interceptAngle;
+
+
 		
 		return interceptPose;
 	}
@@ -142,6 +144,7 @@ int GetBall::GetSign(double number) {
 
 bt::Node::Status GetBall::Update (){
     RTT_DEBUGLN("GetBalL::Update");
+
 
 	roboteam_msgs::World world = LastWorld::get();
 	int robotID = blackboard->GetInt("ROBOT_ID");
@@ -164,6 +167,7 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 	if (intercept) {
+
 
 		double getBallAtX;
 		double getBallAtY;
@@ -208,6 +212,8 @@ bt::Node::Status GetBall::Update (){
 			targetAngle = posDiff.angle();
 			private_bb->SetBool("dribbler", true);
 		}
+
+
 	} else { // If we need not intercept the ball, then just drive towards it
 		if (HasString("AimAt")) {
 			targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
@@ -215,6 +221,8 @@ bt::Node::Status GetBall::Update (){
 			targetAngle = (ballPos - robotPos).angle();
 		}
 		targetAngle = cleanAngle(targetAngle);
+
+
 			
 		// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 		// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 

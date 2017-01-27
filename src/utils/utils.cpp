@@ -70,6 +70,11 @@ double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, 
         return 0.0;
     }
 
+    if (target == "fieldcenter") {
+        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - roboteam_utils::Vector2(robot.pos);
+        return posDiff.angle();
+    }
+
     if (target == "theirgoal") {
         roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         double targetAngle = (theirGoalPos - roboteam_utils::Vector2(robot.pos)).angle();

@@ -26,7 +26,7 @@ SoloAttackerTactic::SoloAttackerTactic(std::string name, bt::Blackboard::Ptr bla
 void SoloAttackerTactic::Initialize() {
     tokens.clear();
 
-    RTT_DEBUG("Initializing Solo Attacker Tactic \n");
+    // RTT_DEBUG("Initializing SoloAttackerTactic \n");
     
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -36,15 +36,9 @@ void SoloAttackerTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     
-    // int attackerID = 0;
-    uint attackerID = get_robot_closest_to_ball(robots);
+    int attackerID = 0;
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
-
-    roboteam_msgs::World world = LastWorld::get();
-    roboteam_utils::Vector2 ballPos(world.ball.pos);
-    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-    double targetAngle = (theirGoalPos - ballPos).angle();
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -56,13 +50,10 @@ void SoloAttackerTactic::Initialize() {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", attackerID);
 
-        // Set the targetAngle to face the goal when we get the ball
-        bb.SetDouble("GetBall_A_targetAngle", targetAngle);
-
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = attackerID;
-        wd.tree = "solo_attacker_role";
+        wd.tree = "qualification/SoloAttackerRole";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -78,9 +69,10 @@ void SoloAttackerTactic::Initialize() {
 }
 
 bt::Node::Status SoloAttackerTactic::Update() {
-    bool treeSucceeded;
-    bool treeFailed;
-    bool treeInvalid;
+    bool treeSucceeded = false;
+    bool treeFailed = false;
+    bool treeInvalid = false;
+
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
@@ -90,9 +82,18 @@ bt::Node::Status SoloAttackerTactic::Update() {
         }
     }
 
-    if (treeSucceeded) return bt::Node::Status::Success;
-    if (treeFailed) return bt::Node::Status::Failure;
-    if (treeInvalid) return bt::Node::Status::Invalid;
+    if (treeSucceeded) {
+        // RTT_DEBUGLN("SoloAttackerTactic Succeeded!");
+        return bt::Node::Status::Success;
+    }
+    if (treeFailed) {
+        // RTT_DEBUGLN("SoloAttackerTactic Failed!");
+        return bt::Node::Status::Failure;
+    }
+    if (treeInvalid) {
+        // RTT_DEBUGLN("SoloAttackerTactic Invalid!");
+        return bt::Node::Status::Invalid;
+    }
 
     auto duration = time_difference_seconds(start, now());
     if (duration.count() >= 12) {

@@ -1,3 +1,0 @@
-<launch>
-	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="SimpleAttackerStrategy" output="screen" /> 
-</launch>

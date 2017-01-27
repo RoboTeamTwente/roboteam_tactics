@@ -30,7 +30,7 @@ SET_DEBUG_FOR(RoleNode, true);
 SET_DEBUG_FOR(PracticeTest, true);
 
 // Building blocks
-SET_DEBUG_FOR(RobotDealer, true);
+SET_DEBUG_FOR(RobotDealer, false);
 SET_DEBUG_FOR(ParallelTactic, false);
 SET_DEBUG_FOR(Tactic, false);
 
