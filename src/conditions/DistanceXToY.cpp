@@ -1,6 +1,9 @@
+#include <limits>
+
 #include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/world_analysis.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
@@ -16,10 +19,16 @@ namespace rtt {
 using namespace roboteam_utils;
 using namespace roboteam_msgs;
 
-
-Vector2 getPointOfInterest(std::string name) {
+Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
     if (name.empty()) {
         ROS_ERROR("getPointOfInterest: name was empty");
+        return Vector2(0, 0);
+    } else if (name == "me") {
+        if (auto bot = lookup_our_bot(ROBOT_ID)) {
+            return bot->pos;   
+        }
+        
+        // Error!
         return Vector2(0, 0);
     } else if (name == "ball") {
         return Vector2(LastWorld::get().ball.pos);
@@ -44,6 +53,29 @@ Vector2 getPointOfInterest(std::string name) {
             return Vector2(field_length / -2 / mod, 0);
         }
     } else if (name == "center dot") {
+        return Vector2(0, 0);
+    } else if (name == "closest opponent") {
+        auto const world = LastWorld::get();
+
+        if (auto myBotOpt = lookup_bot(ROBOT_ID, true, &world)) {
+            double minDist = std::numeric_limits<double>::max();
+            Vector2 minPos(0, 0);
+
+            auto myBot = *myBotOpt;
+            Vector2 myPos = myBot.pos;
+
+            for (auto const & robot : world.them) {
+                double dist = Vector2(robot.pos).dist2(myPos);
+                if (dist < minDist) {
+                    minDist = dist;
+                    minPos = robot.pos;
+                }
+            }
+
+            return minPos;
+        }
+        
+        // Error! myBot could not be found!
         return Vector2(0, 0);
     }
 
@@ -212,20 +244,8 @@ bt::Node::Status DistanceXToY::Update() {
 
     RTT_DEBUGLN("Checking distance from %s to %s...", X.c_str(), Y.c_str());
 
-    Vector2 vecX;
-    Vector2 vecY;
-
-    if (X == "me") {
-        vecX = getPointOfInterest(std::to_string(ROBOT_ID));
-    } else {
-        vecX = getPointOfInterest(X);
-    }
-
-    if (Y == "me") {
-        vecY = getPointOfInterest(std::to_string(ROBOT_ID));
-    } else {
-        vecY = getPointOfInterest(Y);
-    }
+    auto vecX = getPointOfInterest(X, ROBOT_ID);
+    auto vecY = getPointOfInterest(Y, ROBOT_ID);
 
     double dist;
 
