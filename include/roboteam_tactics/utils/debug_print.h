@@ -48,7 +48,7 @@ SET_DEBUG_FOR(DefendGoalarea, true);
 SET_DEBUG_FOR(ParamCheck, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
-SET_DEBUG_FOR(DistanceXToY, false);
+SET_DEBUG_FOR(DistanceXToY, true);
 SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(IsRefCommand, true);
 
