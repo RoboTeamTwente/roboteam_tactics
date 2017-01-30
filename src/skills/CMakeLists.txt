@@ -7,7 +7,7 @@ set(SKILL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Block.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FollowPath.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GoToPos.cpp
-    
+    ${CMAKE_CURRENT_SOURCE_DIR}/ReceiveBall.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/Dribble.cpp
 

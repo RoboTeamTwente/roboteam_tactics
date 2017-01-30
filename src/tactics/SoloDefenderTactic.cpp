@@ -8,9 +8,9 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/SoloDefenderTactic.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
@@ -57,12 +57,10 @@ void SoloDefenderTactic::Initialize() {
         bb.SetBool("GetBall_A_isKeeper", true);
         bb.SetString("GetBall_A_AimAt", "fieldcenter");
 
-        bb.SetDouble("GetBall_B_getBallAtX", keeperPos.x);
-        bb.SetDouble("GetBall_B_getBallAtY", keeperPos.y);
-        bb.SetDouble("GetBall_B_getBallAtTime", 12.0);
-        bb.SetBool("GetBall_B_intercept", true);
-        bb.SetDouble("GetBall_B_acceptableDeviation", 0.45);
-        bb.SetBool("GetBall_B_isKeeper", true);
+        bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
+        bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
+        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
+        bb.SetBool("ReceiveBall_A_isKeeper", true);
 
         bb.SetDouble("Kick_A_kickVel", 2.5);
 
@@ -83,28 +81,8 @@ void SoloDefenderTactic::Initialize() {
 }
 
 bt::Node::Status SoloDefenderTactic::Update() {
-    // bool treeSucceeded = false;
-    // bool treeFailed = false;
-    // bool treeInvalid = false;
-
-    // for (auto token : tokens) {
-    //     if (feedbacks.find(token) != feedbacks.end()) {
-    //         Status status = feedbacks.at(token);
-    //         treeSucceeded &= status == bt::Node::Status::Success;
-    //         treeFailed &= status == bt::Node::Status::Failure;
-    //         treeInvalid &= status == bt::Node::Status::Invalid;
-    //     }
-    // }
-
-    // if (treeSucceeded) return bt::Node::Status::Success;
-    // if (treeFailed) return bt::Node::Status::Failure;
-    // if (treeInvalid) return bt::Node::Status::Invalid;
-
-    // auto duration = time_difference_seconds(start, now());
-    // if (duration.count() >= 12) {
-    //     return Status::Failure;
-    // }
-
+    
+    // Keep defending until stopped by the strategy
     return bt::Node::Status::Running;
 }
 

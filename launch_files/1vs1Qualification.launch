@@ -1,5 +1,5 @@
 <launch>
-	
+
 	<group ns="blue">
 		<param name="role_iterations_per_second" type="int" value="60" />
 		<param name="num_role_nodes" type="int" value="1" />

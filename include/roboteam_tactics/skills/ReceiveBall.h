@@ -18,11 +18,15 @@
 #include <vector>
 
 namespace rtt {
-	
 
-class GetBall : public Skill {
+typedef struct {
+	roboteam_utils::Vector2 interceptPos;
+	double interceptAngle;
+} InterceptPose;
+
+class ReceiveBall : public Skill {
 public:
-    GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
     
     static VerificationMap required_params() {
@@ -34,12 +38,13 @@ public:
         return params;
     }
     
-    std::string node_name() { return "GetBall"; }
+    std::string node_name() { return "ReceiveBall"; }
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
-	// roboteam_utils::Vector2 computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel);
-
+	InterceptPose deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY);
+	InterceptPose deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY);
+	
 	int robotID;
 	int hasBall;
 	bool our_team;
@@ -48,6 +53,6 @@ private:
 	AvoidRobots avoidRobots;
 };
 
-extern factories::LeafRegisterer<GetBall, Skill> GetBall_registerer;
+extern factories::LeafRegisterer<ReceiveBall, Skill> ReceiveBall_registerer;
 
 } // rtt

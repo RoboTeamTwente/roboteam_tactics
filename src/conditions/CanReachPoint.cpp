@@ -1,6 +1,7 @@
 #include "roboteam_tactics/conditions/CanReachPoint.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
@@ -8,198 +9,67 @@ namespace rtt {
 RTT_REGISTER_CONDITION(CanReachPoint);
 
 CanReachPoint::CanReachPoint(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
-    
+
 }
 
-roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, roboteam_utils::Vector2 maxAcc) {
-	double a = maxAcc.x;
-	double b = maxAcc.y;
-	angle = 0.5*M_PI - angle;
-	double c = a - (a*a/(b * tan(angle) + a));
-	double d = a / (tan(angle) + (a/b));
-	roboteam_utils::Vector2 maxAccInDirection = roboteam_utils::Vector2(c, d);
-	return maxAccInDirection;
-}
+// roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, roboteam_utils::Vector2 maxAcc) {
+// 	double a = maxAcc.x;
+// 	double b = maxAcc.y;
+// 	angle = 0.5*M_PI - angle;
+// 	double c = a - (a*a/(b * tan(angle) + a));
+// 	double d = a / (tan(angle) + (a/b));
+// 	roboteam_utils::Vector2 maxAccInDirection = roboteam_utils::Vector2(c, d);
+// 	return maxAccInDirection;
+// }
 
-double CanReachPoint::cleanAngle(double angle) {
-	if (angle <= M_PI && angle >= -M_PI) {
-		return angle;
-	} else if (angle > M_PI) {
-		angle -= 2*M_PI;
-		return cleanAngle(angle);
-	} else if (angle < -M_PI) {
-		angle += 2*M_PI;
-		return cleanAngle(angle);
+double CanReachPoint::estimateTimeToPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel, roboteam_utils::Vector2 targetPos) {
+	roboteam_utils::Vector2 posDiff = targetPos - currentPos;
+
+	roboteam_utils::Vector2 targetVel = posDiff.normalize().scale(posPGain);
+	roboteam_utils::Vector2 velDiff = targetVel - currentVel;
+	double timeToReachVel = velDiff.length() / maxAcc; 
+	double distanceToReachVel = velDiff.length()/2 * timeToReachVel;
+
+	double timeToStop = decelerationDistance / (targetVel.length()/2); // deceleration time = deceleration distance / average speed during deceleration
+
+	if (posDiff.length() < (distanceToReachVel + decelerationDistance)) {
+		ROS_INFO_STREAM("hmm, distance too short");
+		return -1.0;
+	} else {
+		double distAtMaxVel = posDiff.length() - (distanceToReachVel + decelerationDistance);
+		double timeAtMaxVel = distAtMaxVel / maxVel;
+		return (timeToReachVel + timeToStop + timeAtMaxVel);
 	}
-	ROS_WARN("yo, whatcha doin' here");
-	return 0.0;
 }
 
 bt::Node::Status CanReachPoint::Update() {
-	
-	// Set max velocities etc.. 
-	double time = 0.0;
-	double speed = 0.0;
-	double travelledDistance = 0.0;
-	double timeStep = 0.001;
-	double maxRotSpeed = 3.0; // real: 6.3
-	double maxSpeed = 1.33;
-	roboteam_utils::Vector2 maxAcc = roboteam_utils::Vector2(1.5, 1.5);
-	double maxDec = 1.5;
-
-
-	// Get world and blackboard information
 	roboteam_msgs::World world = LastWorld::get();
-	int myID = GetInt("ROBOT_ID");
-	bool shouldStop = GetBool("shouldStop");
-	double xTarget = GetDouble("xGoal");
-	double yTarget = GetDouble("yGoal");
-	double angleGoal = GetDouble("angleGoal");
-	double timeLimit = GetDouble("timeLimit");
+	int ROBOT_ID = GetInt("ROBOT_ID");
+	double xGoal = GetDouble("xGoal");
+	double yGoal = GetDouble("yGoal");
 
-	roboteam_utils::Vector2 myPos;
-	double myAngle;
-	if (GetString("whichTeam") == "us") {
-		myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
-		myAngle = world.us.at(myID).angle;
-	} else if (GetString("whichTeam") == "them") {
-		myPos = roboteam_utils::Vector2(world.them.at(myID).pos.x, world.them.at(myID).pos.y); 
-		myAngle = world.them.at(myID).angle;
-	} else {
-		ROS_WARN("No team specified...");
-	}
-	roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(xTarget, yTarget);
-	roboteam_utils::Vector2 differenceVector = targetPos - myPos;
-	
-	
-	// Calculate our orientation with respect to the direction we have to move
-	double angleDiff = differenceVector.angle() - myAngle;
-	if (angleDiff < M_PI) {angleDiff += 2*M_PI;}
-	if (angleDiff > M_PI) {angleDiff -= 2*M_PI;}
-
-	if (fabs(angleDiff) >= 0.5*M_PI) {  // In this case driving backwards is faster
-		if (myAngle > 0) {myAngle -= M_PI;}
-		if (myAngle <= 0) {myAngle += M_PI;}
+	// Wait for the first world message
+	while (world.us.size() == 0) {
+		return Status::Running;
 	}
 
+	roboteam_utils::Vector2 currentPos(world.us.at(ROBOT_ID).pos);
+	roboteam_utils::Vector2 currentVel(world.us.at(ROBOT_ID).vel);
+	roboteam_utils::Vector2 targetPos(xGoal, yGoal);
 
-	// See how many iterations it takes before the required distance is travelled with the maximum acceleration
-	while (travelledDistance < differenceVector.length()) {
-		double angleDiff = differenceVector.angle() - myAngle;
-		angleDiff = cleanAngle(angleDiff);
-		roboteam_utils::Vector2 maxAccInDirection = ComputeMaxAcceleration(fabs(angleDiff), maxAcc);
-		speed += maxAccInDirection.length()*timeStep;
-		if (speed > maxSpeed) {speed = maxSpeed;}
-		travelledDistance += speed*timeStep;
-		
-		// Rotate towards your goal, so you get maximum acceleration
-		if (fabs(angleDiff) > maxRotSpeed*timeStep) {
-			if (angleDiff > 0) {
- 				myAngle += maxRotSpeed*timeStep;
-			} else {
-				myAngle -= maxRotSpeed*timeStep;
-			}
-		} else {
-			myAngle = differenceVector.angle();
-		}
+	double estimatedTimeToPoint = estimateTimeToPoint(currentPos, currentVel, targetPos);
 
-		time += timeStep;
-		if (time > 5.0) {break;} // Stop before it becomes an endless loop
-
-		// How much time and distance (given our current speed) would it take to rotate to our target angle?
-		myAngle = cleanAngle(myAngle);
-		double angleError = angleGoal - myAngle;
-		angleError = cleanAngle(angleError);
-		double rotationTime = angleError / maxRotSpeed;
-		double rotationDistance = rotationTime * speed;
-
-		if (shouldStop) { // If we should take into account deceleration time and distance
-			double decelerationTime = speed / maxDec;
-			double decelerationDistance = 0.5 * maxDec * decelerationTime*decelerationTime;
-			if (travelledDistance + rotationDistance + decelerationDistance >= differenceVector.length()) {
-				time += (decelerationTime + rotationTime);
-				// ROS_INFO_STREAM("time: " << time << " distance " << travelledDistance + rotationDistance + decelerationDistance);
-				break;
-			}
-		} else {
-			if (travelledDistance + rotationDistance >= differenceVector.length()) {
-				time += rotationTime;
-				// ROS_INFO_STREAM("time: " << time << " distance " << travelledDistance+rotationDistance);
-				break;
-			}
-		}
-	}
-	double timeWithRotation = time;
-
-
-	// See how many iterations it takes without rotation towards the goal, this may be faster when
-	// the robot is already close to the goal
-	if (GetString("whichTeam") == "us") {
-		myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y); 
-		myAngle = world.us.at(myID).angle;
-	} else if (GetString("whichTeam") == "them") {
-		myPos = roboteam_utils::Vector2(world.them.at(myID).pos.x, world.them.at(myID).pos.y); 
-		myAngle = world.them.at(myID).angle;
-	} else {
-		ROS_WARN("No team specified...");
-	}
-
-	time = 0.0;
-	speed = 0.0;
-	travelledDistance = 0.0;
-	while (travelledDistance < differenceVector.length()) {
-		double angleDiff = differenceVector.angle() - myAngle;
-		angleDiff = cleanAngle(angleDiff);
-		roboteam_utils::Vector2 maxAccInDirection = ComputeMaxAcceleration(fabs(angleDiff), maxAcc);
-		speed += maxAccInDirection.length()*timeStep;
-		if (speed > maxSpeed) {speed = maxSpeed;}
-		travelledDistance += speed*timeStep;
-		
-		time += timeStep;
-		if (time > 5.0) {break;} // Stop before it becomes an endless loop
-
-		// How much time and distance (given our current speed) would it take to rotate to our target angle?
-		myAngle = cleanAngle(myAngle);
-		double angleError = angleGoal - myAngle;
-		angleError = cleanAngle(angleError);
-		double rotationTime = angleError / maxRotSpeed;
-		double rotationDistance = rotationTime * speed;
-
-		if (shouldStop) { // If we should take into account deceleration time and distance
-			double decelerationTime = speed / maxDec;
-			double decelerationDistance = 0.5 * maxDec * decelerationTime*decelerationTime;
-			if (travelledDistance + rotationDistance + decelerationDistance >= differenceVector.length()) {
-				time += (decelerationTime + rotationTime);
-				// ROS_INFO_STREAM("time: " << time << " distance " << travelledDistance + rotationDistance + decelerationDistance);
-				break;
-			}
-		} else {
-			if (travelledDistance + rotationDistance >= differenceVector.length()) {
-				time += rotationTime;
-				// ROS_INFO_STREAM("time: " << time << " distance " << travelledDistance+rotationDistance);
-				break;
-			}
-		}
-	}
-
-
-	ROS_INFO_STREAM("timeWithRotation: " << timeWithRotation << ", timeWithoutRotation: " << time);
-
-
-	// If this time without rotation is larger, use the time with rotation
-	if (time > timeWithRotation) {
-		time = timeWithRotation;
-	}
-
-	
-
-	// If the calculated time is less than the given limit, return succes
-	if (time < timeLimit) {
-		return Status::Success;
-	} else {
+	if (estimatedTimeToPoint < 0.0) {
+		ROS_INFO_STREAM("hmm, distance too short");
 		return Status::Failure;
+	} else {
+		double timeLimit = GetDouble("timeLimit");
+		if (estimatedTimeToPoint < timeLimit) {
+			return Status::Success;
+		} else {
+			return Status::Failure;
+		}
 	}
-	return Status::Invalid;
 }
 
 } // rtt 
