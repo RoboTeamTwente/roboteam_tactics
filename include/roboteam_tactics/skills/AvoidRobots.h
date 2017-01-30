@@ -9,10 +9,10 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Draw.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
 
@@ -38,13 +38,13 @@ public:
     std::string node_name() { return "AvoidRobots"; }
     
 private:
-    bool success = false;
+    bool success;
 
     // Control variables
-    double maxSpeed = 2.0;
-    double attractiveForce = 10.0;
-    double attractiveForceWhenClose = 2.0;
-    double repulsiveForce = 20.0;
+    double maxSpeed;
+    double attractiveForce;
+    double attractiveForceWhenClose;
+    double repulsiveForce;
 
     double xGoal;
     double yGoal;

@@ -2,7 +2,7 @@
 #include <cmath>
 
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/NaiveBlockGoal.h"
@@ -13,6 +13,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
 #define RTT_CURRENT_DEBUG_TAG NaiveBlockGoal

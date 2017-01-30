@@ -13,8 +13,8 @@
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/Aggregator.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/LastRef.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 
