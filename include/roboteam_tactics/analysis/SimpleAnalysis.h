@@ -1,6 +1,12 @@
 #pragma once
 
-#include "roboteam_msgs/World.h"
+#include <ros/message_forward.h>
+
+namespace roboteam_msgs {
+
+ROS_DECLARE_MESSAGE(World);
+
+} // roboteam_msgs
 
 namespace rtt {
 

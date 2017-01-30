@@ -63,6 +63,8 @@ void DemoTactic::Initialize() {
 
     RTT_DEBUG("Attack bot: %i, score bot: %i, keeper bot: %i\n", attack_bot, score_bot, keeper_bot);
 
+    auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
     {
         // Fill blackboard with relevant info
         bt::Blackboard bb;

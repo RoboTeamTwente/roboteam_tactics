@@ -1,28 +1,26 @@
 #pragma once
 
-#include "ros/ros.h"
+#include <vector>
 
 #include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
-
-#include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
-
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
-
-#include <vector>
 
 namespace rtt {
 
-typedef struct {
+// TODO: Not sure who typed this but this is not the right way :s
+// typedef struct {
+	// roboteam_utils::Vector2 interceptPos;
+	// double interceptAngle;
+// } InterceptPose;
+
+// This is the right way:
+struct InterceptPose {
 	roboteam_utils::Vector2 interceptPos;
 	double interceptAngle;
-} InterceptPose;
+} ;
+// (I think the style is the only difference, but consistent style is important)
 
 class ReceiveBall : public Skill {
 public:
@@ -52,7 +50,5 @@ private:
 
 	AvoidRobots avoidRobots;
 };
-
-extern factories::LeafRegisterer<ReceiveBall, Skill> ReceiveBall_registerer;
 
 } // rtt

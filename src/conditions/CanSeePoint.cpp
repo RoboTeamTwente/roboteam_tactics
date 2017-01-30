@@ -4,10 +4,10 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/adaptor/filtered.hpp>
 
+#include "roboteam_msgs/World.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-
 
 namespace rtt {
     

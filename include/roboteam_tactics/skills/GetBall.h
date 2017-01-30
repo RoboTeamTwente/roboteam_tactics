@@ -1,24 +1,12 @@
 #pragma once
 
-#include "ros/ros.h"
+#include <vector>
 
 #include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 
-#include "roboteam_utils/LastWorld.h"
-#include "roboteam_utils/Vector2.h"
-
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
-
-#include <vector>
-
 namespace rtt {
-	
 
 class GetBall : public Skill {
 public:
@@ -38,7 +26,6 @@ public:
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
-	// roboteam_utils::Vector2 computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel);
 
 	int robotID;
 	int hasBall;
@@ -47,7 +34,5 @@ private:
 
 	AvoidRobots avoidRobots;
 };
-
-extern factories::LeafRegisterer<GetBall, Skill> GetBall_registerer;
 
 } // rtt
