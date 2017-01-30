@@ -1,5 +1,8 @@
 #include <string>
 
+#include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/Parts.h"
 
 namespace rtt {

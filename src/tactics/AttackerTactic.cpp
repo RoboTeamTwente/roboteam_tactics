@@ -5,7 +5,10 @@
 #include <limits>
 
 #include "unique_id/unique_id.h" 
+
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/tactics/AttackerTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"

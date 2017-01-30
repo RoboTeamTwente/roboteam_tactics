@@ -14,6 +14,7 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"

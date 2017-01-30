@@ -3,19 +3,8 @@
 #include <map>
 #include <type_traits>
 #include <vector>
-// #include <ros/ros.h>
 
-#include "roboteam_utils/constants.h"
-
-// #include "roboteam_msgs/World.h"
-// #include "roboteam_msgs/RoleDirective.h"
-
-#include "roboteam_tactics/bt.hpp"
-#include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/utils/RobotDealer.h"
-#include "roboteam_tactics/verifier.h"
-#include "roboteam_tactics/Leaf.h"
-#include "roboteam_tactics/utils/debug_print.h"
+#include <ros/message_forward.h>
 
 namespace roboteam_msgs {
 
@@ -23,6 +12,15 @@ ROS_DECLARE_MESSAGE(World);
 ROS_DECLARE_MESSAGE(RoleDirective);
 
 } // roboteam_msgs
+
+#include "roboteam_utils/constants.h"
+
+#include "roboteam_tactics/bt.hpp"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/RobotDealer.h"
+#include "roboteam_tactics/verifier.h"
+#include "roboteam_tactics/Leaf.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 namespace rtt {
 

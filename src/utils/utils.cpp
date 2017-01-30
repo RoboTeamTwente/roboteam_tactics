@@ -1,10 +1,13 @@
+#include <boost/range/join.hpp>
 #include <ros/ros.h>
+
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RobotCommand.h"
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/constants.h"
 #include "roboteam_utils/world_analysis.h"
-#include <boost/range/join.hpp>
 
 namespace rtt {
 
@@ -292,6 +295,11 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
+int get_robot_closest_to_ball(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_ball(robots, lw);
+}
+
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
@@ -310,6 +318,11 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
     }
 
     return closest_robot;
+}
+
+int get_robot_closest_to_their_goal(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_their_goal(robots, lw);
 }
 
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
