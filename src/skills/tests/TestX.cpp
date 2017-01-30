@@ -165,7 +165,9 @@ How to use:
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
+    
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
+
 
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
 
@@ -189,6 +191,9 @@ How to use:
     ros::Rate fps60(60);
 
     if (is_bt) {
+        // Notify the tree debugger that we're running a tree.
+        RTT_SEND_RQT_BT_TRACE(testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+
         rtt::BTRunner runner(*is_bt, false);
 		runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
@@ -210,7 +215,7 @@ How to use:
             fps60.sleep();
         }
 
-        std::cout << "Terminating..." << std::endl;
+        std::cout << "Terminating. Final status: " << bt::statusToString(status) << "\n";
 
         node->Terminate(status);
     }

@@ -58,8 +58,7 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 			GetDouble("faceTowardsPosx"),
 			GetDouble("faceTowardsPosy")
 		);
-	}
-	else {
+	} else {
 		ROS_INFO("No double:facetowardsPos x and y specified"); 
 		return Status::Failure;
 	}
