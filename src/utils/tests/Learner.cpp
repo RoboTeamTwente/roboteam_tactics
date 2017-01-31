@@ -1,21 +1,23 @@
-#include "ros/ros.h"
-#include "roboteam_tactics/utils/ComputePassPoint.h"
-#include "roboteam_utils/LastWorld.h"
-#include "roboteam_utils/Draw.h"
-#include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/tactics/PassToTactic.h"
-#include "roboteam_tactics/utils/utils.h"
-
 #include <QtNetwork>
-#include "roboteam_utils/grSim_Packet.pb.h"
-#include "roboteam_utils/grSim_Replacement.pb.h"
-#include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_msgs/RoleFeedback.h"
-#include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/conditions/IsBallInGoal.h"
-
+#include <ros/ros.h>
 #include <cmath>
 #include <iostream>
+
+#include "roboteam_msgs/RoleFeedback.h"
+#include "roboteam_msgs/GeometryData.h"
+
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Draw.h"
+#include "roboteam_utils/grSim_Packet.pb.h"
+#include "roboteam_utils/grSim_Replacement.pb.h"
+#include "roboteam_utils/Vector2.h"
+
+#include "roboteam_tactics/utils/ComputePassPoint.h"
+#include "roboteam_tactics/tactics/PassToTactic.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/conditions/IsBallInGoal.h"
 
 #define RTT_CURRENT_DEBUG_TAG Learner
 
@@ -153,7 +155,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Choose a point to test
-	roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
+	// roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
 	rtt::time_point start_time;
 	rtt::time_point finish_time;
 	rtt::time_point succes_time;
@@ -162,7 +164,7 @@ int main(int argc, char **argv) {
 	// Some control booleans
 	bool tacticSucces = true;
 	bool tacticFailure = false;
-	bool justFinishedTactic = false;
+	// bool justFinishedTactic = false;
 	bool scored = false;
 	bool waitForGoal = false;
 	

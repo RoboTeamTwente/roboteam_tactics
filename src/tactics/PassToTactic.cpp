@@ -5,8 +5,8 @@
 #include <limits>
 
 #include "unique_id/unique_id.h" 
-#include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"
+#include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
@@ -39,6 +39,8 @@ void PassToTactic::Initialize() {
     // This tactic directs two robots
     int PASSER_ID = 1;
     int RECEIVER_ID = 2;
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
     {
         // Fill blackboard with relevant info
@@ -112,6 +114,8 @@ void PassToTactic::Initialize() {
 void PassToTactic::ShutdownRoles() {
     passer.tree = passer.STOP_EXECUTING_TREE;
     receiver.tree = receiver.STOP_EXECUTING_TREE;
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     pub.publish(passer);
     pub.publish(receiver);
 }

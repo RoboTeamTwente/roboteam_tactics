@@ -6,18 +6,21 @@
 #include <thread>
 #include <ros/ros.h>
 
+#include "roboteam_msgs/GeometryData.h"
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RefereeData.h"
+#include "roboteam_msgs/RobotCommand.h"
+
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/constants.h"
+
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
-#include "roboteam_utils/LastWorld.h"
-#include "roboteam_utils/LastRef.h"
-#include "roboteam_msgs/GeometryData.h"
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/RefereeData.h"
-#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_utils/constants.h"
 
 static volatile bool may_update = false;
 

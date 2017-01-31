@@ -1,3 +1,5 @@
+#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/conditions/CanPassSafely.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
 #include "roboteam_utils/LastWorld.h"

@@ -6,6 +6,8 @@ add_library(utils OBJECT
     utils.cpp
     BTRunner.cpp
     BtDebug.cpp
+    Parts.cpp
+    Leaf.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

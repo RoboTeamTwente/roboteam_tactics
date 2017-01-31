@@ -1,17 +1,18 @@
-#include "roboteam_tactics/treegen/LeafRegister.h"
-#include "ros/ros.h"
-#include "roboteam_tactics/skills/StandFree.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include <vector>
+#include <string>
+#include <ros/ros.h>
+
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/WorldRobot.h"
+
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Cone.h"
+
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/skills/StandFree.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/DebugPoint.h"
-#include "roboteam_msgs/DebugLine.h"
-#include <vector>
-#include <string>
 
 namespace rtt {
 

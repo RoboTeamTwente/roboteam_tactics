@@ -1,13 +1,12 @@
 #pragma once
 
-#include "roboteam_tactics/skills/Block.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_utils/LastWorld.h"
 #include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/World.h"
-#include "ros/ros.h"
 
 namespace rtt {
+
+// Forward declare instead of including
+class Block;
     
 class KeeperBlock : public Skill {
     public:
@@ -23,7 +22,7 @@ class KeeperBlock : public Skill {
     }
 
 
-    std::string node_name() { return "KeeperBlock"; }
+    std::string node_name() override { return "KeeperBlock"; }
     protected:
     std::shared_ptr<Block> impl;
     unsigned int target;

@@ -1,6 +1,12 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include <cmath>
 
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/WorldBall.h"
+#include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
+
 #include "ros/ros.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -8,10 +14,6 @@
 #include "roboteam_tactics/skills/NaiveBlockGoal.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 #include "roboteam_tactics/utils/debug_print.h"

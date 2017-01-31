@@ -1,16 +1,20 @@
 #include <limits>
 
-#include "roboteam_tactics/conditions/DistanceXToY.h"
+#include <ros/param.h>
+
+#include "roboteam_msgs/GeometryFieldSize.h"
+#include "roboteam_msgs/FieldCircularArc.h"
+#include "roboteam_msgs/FieldLineSegment.h"
+
 #include "roboteam_utils/LastWorld.h"
-#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/world_analysis.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
-#include "roboteam_msgs/GeometryFieldSize.h"
-#include "roboteam_msgs/FieldCircularArc.h"
-#include "roboteam_msgs/FieldLineSegment.h"
+
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/conditions/DistanceXToY.h"
 
 #define RTT_CURRENT_DEBUG_TAG DistanceXToY
 

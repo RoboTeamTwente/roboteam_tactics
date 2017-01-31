@@ -1,16 +1,14 @@
 #pragma once
 
-#include "roboteam_tactics/bt.hpp"
-#include "roboteam_tactics/Aggregator.h"
+#include <boost/optional.hpp>
+
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/Leaf.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/Vector2f.h"
-#include <boost/optional.hpp>
 
 namespace rtt {
-    
+
 class IHaveBall : public Condition {
 
 
@@ -28,7 +26,7 @@ public:
     std::vector<roboteam_msgs::World> success_states() const override;
     std::vector<roboteam_msgs::World> fail_states() const override;
     
-    std::string node_name() { return "IHaveBall"; }
+    std::string node_name() override { return "IHaveBall"; }
 private:
     int me;
     bool us;
