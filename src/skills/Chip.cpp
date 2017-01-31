@@ -75,7 +75,6 @@ bt::Node::Status Chip::Update() {
 			command.w = 0.0;
 
             rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
-			ros::spinOnce();
 			ROS_INFO("Triggered the chipper!");
 			return Status::Running;
 		}

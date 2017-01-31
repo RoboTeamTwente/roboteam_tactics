@@ -5,6 +5,37 @@
 
 namespace rtt {
 
+/**
+ * Aims the robot at a certain point.
+ *
+ * Global params:
+ *  - ROBOT_ID : Int 
+ *    Id of the robot
+ * 
+ * Params:
+ * - At : String
+ *   Can be:
+ *      robot     - Aim at a robot
+ *      theirgoal - Aim at their goal 
+ *      ourgoal   - Aim at our goal
+ *      position  - Aim at a position
+ *   What thing to aim at
+ *
+ * -- IDEA: Maybe group this under "When At = position:" or something?
+ * -- Maybe readable more easily
+ * - xGoal : Double
+ *   Used when: At = position
+ *   The x coord of what to aim at.
+ *
+ * - yGoal : Double
+ *   Used when: At = position
+ *   The y coord of what to aim at.
+ *
+ * - AtRobot : Int
+ *   Used when: At = robot
+ *   The robot at which to aim.
+ */
+
 class AimAt : public Skill {
 public:
 	AimAt(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

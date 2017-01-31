@@ -9,18 +9,36 @@
 
 namespace rtt {
 
-// TODO: Not sure who typed this but this is not the right way :s
-// typedef struct {
-	// roboteam_utils::Vector2 interceptPos;
-	// double interceptAngle;
-// } InterceptPose;
+/**
+ * Receives a ball at a certain position
+ *
+ * Global params:
+ *  - ROBOT_ID : Int
+ *    Id of the robot
+ *
+ * Params:
+ *  - receiveBallAtCurrentPos : Bool
+ *    Indicates that ball should be received at the current robot position
+ *    
+ *  - receiveBallAtX : Double
+ *    X coord of position at which to receive the ball
+ *
+ *  - receiveBallAtY : Double
+ *    Y coord of position at which to receive the ball
+ *
+ *  - acceptableDeviation : Double
+ *    Used when: receiveBallAtCurrentPos = false
+ *    Radius of the acceptable deviation of point of reception.
+ *    If reception is the current position of the robot, this
+ *    does not do anything
+ *
+ *
+ */
 
-// This is the right way:
 struct InterceptPose {
 	roboteam_utils::Vector2 interceptPos;
 	double interceptAngle;
 } ;
-// (I think the style is the only difference, but consistent style is important)
 
 class ReceiveBall : public Skill {
 public:
