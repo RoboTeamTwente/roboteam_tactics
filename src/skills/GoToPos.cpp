@@ -60,6 +60,7 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
     if (posError.length() > 0.8) {
         angleGoal = posError.angle();
     }
+
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
 
@@ -68,13 +69,25 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
 }
 
 
+// Integral velocity controller
 roboteam_utils::Vector2 GoToPos::velocityController(roboteam_utils::Vector2 velTarget) {
     roboteam_msgs::World world = LastWorld::get();
     roboteam_utils::Vector2 myVel = world.us.at(ROBOT_ID).vel;
+
     roboteam_utils::Vector2 velError = velTarget - myVel;
 
-    double timeStep = 1.0/40.0;
-    velControllerI = velControllerI + velError.scale(timeStep);
+    double updateRate;
+    ros::param::get("role_iterations_per_second", updateRate);
+    double timeStep = 1 / updateRate;
+
+    // TODO: make prettier
+    if (velError.length() < 0.3) { 
+        velControllerI = velControllerI + velError.scale(timeStep);
+    } else {
+        // Velocity difference is too big, probably the robot is still accelerating, in which case it is better
+        // to not increase the velControllerI yet... And otherwise there is too much offset in the feedfoward
+        // controller anyway. But we can probably think of a better way to detect this...
+    }
 
     // Limit the influence of the I controller
     if (velControllerI.length() > 1.0) {
@@ -86,13 +99,16 @@ roboteam_utils::Vector2 GoToPos::velocityController(roboteam_utils::Vector2 velT
 }
 
 
+// Integral angular velocity controller
 double GoToPos::angularVelController(double angularVelTarget) {
     roboteam_msgs::World world = LastWorld::get();
     double myAngularVel = world.us.at(ROBOT_ID).w;
+
     double angularVelError = angularVelTarget - myAngularVel;
 
-    // TODO: Read this from the ros param
-    double timeStep = 1/40;
+    double updateRate;
+    ros::param::get("role_iterations_per_second", updateRate);
+    double timeStep = 1 / updateRate;
     angularVelControllerI += angularVelError * timeStep;
 
     double angularVelCommand = angularVelTarget + angularVelControllerI * iGainAngularVel;
@@ -100,29 +116,8 @@ double GoToPos::angularVelController(double angularVelTarget) {
 }
 
 
-roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
-    roboteam_msgs::World world = LastWorld::get();
-    roboteam_utils::Vector2 posError = targetPos - myPos;
-
-    roboteam_utils::Vector2 sumOfForces;
-    for (size_t i = 0; i < world.us.size(); i++) {
-        roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
-        if (currentRobot.id != ROBOT_ID) {
-            roboteam_utils::Vector2 otherRobotPos(currentRobot.pos);
-            roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
-            sumOfForces = sumOfForces - forceVector*repulsiveForce;
-        }
-    }
-    for (size_t i = 0; i < world.them.size(); i++) {
-        roboteam_utils::Vector2 otherRobotPos(world.them.at(i).pos);
-        roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
-        sumOfForces = sumOfForces - forceVector*repulsiveForce;
-    }
-
-    return sumOfForces;
-}
-
-
+// Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
+// TODO: improve
 roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError) {
     // Determine how far we should look ahead to avoid other robots
     double lookingDistance = 0.75;
@@ -152,6 +147,48 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
 }
 
 
+// Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
+roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
+    roboteam_msgs::World world = LastWorld::get();
+    roboteam_utils::Vector2 posError = targetPos - myPos;
+
+    roboteam_utils::Vector2 sumOfForces;
+    for (size_t i = 0; i < world.us.size(); i++) {
+        roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
+        if (currentRobot.id != ROBOT_ID) {
+            roboteam_utils::Vector2 otherRobotPos(currentRobot.pos);
+            roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
+            sumOfForces = sumOfForces - forceVector*repulsiveForce;
+        }
+    }
+    for (size_t i = 0; i < world.them.size(); i++) {
+        roboteam_utils::Vector2 otherRobotPos(world.them.at(i).pos);
+        roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
+        sumOfForces = sumOfForces - forceVector*repulsiveForce;
+    }
+
+    return sumOfForces;
+}
+
+
+// Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid the goal areas by moving only parralel to the goal area when close
+roboteam_utils::Vector2 GoToPos::avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces) {
+    roboteam_utils::Vector2 posError = targetPos - myPos;
+
+    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.2);
+    if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
+        if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
+            sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+        } else {
+            sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+        }
+    }
+
+    return sumOfForces;
+}
+
+
+// Makes sure that the given target position is not inside a goal area, or (too far) outside the field
 roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPos) {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
@@ -254,11 +291,15 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Robot avoidance
-    if (HasBool("avoidRobots")) {
-        if (GetBool("avoidRobots")) {
-            // sumOfForces = sumOfForces + avoidRobots(me, targetPos);
-        }
-    }
+    // if (HasBool("avoidRobots")) {
+        // if (GetBool("avoidRobots")) {
+            sumOfForces = sumOfForces + avoidRobots(myPos, targetPos);
+        // }
+    // }
+
+
+    // Defense area avoidance
+    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
 
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
@@ -293,11 +334,17 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Integral angular velocity controller
-    double angularVelCommand = angularVelController(angularVelTarget);
+    // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
+    // double angularVelCommand = angularVelController(angularVelTarget);
+    double angularVelCommand = angularVelTarget;
 
 
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
+
+
+    // Draw the velocity vector acting on the robots
+    drawer.DrawLine("velCommand", myPos, velCommand);  
 
 
     // Fill the command message
@@ -313,25 +360,6 @@ bt::Node::Status GoToPos::Update () {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
     return Status::Running;
-
-
-
-    
-
-    
-
-    // // Avoid the goal areas by moving only parralel to the goal area when close enough
-    // roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.2);
-    // if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
-    //     if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
-    //         sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
-    //     } else {
-    //         sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
-    //     }
-    // }
-
-    // Draw the velocity vector acting on the robots
-    // drawer.DrawLine("sumOfForces", myPos, sumOfForces);    
 };
 
 } // rtt

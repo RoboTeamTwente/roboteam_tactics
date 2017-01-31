@@ -5,11 +5,7 @@
 
 #include "ros/ros.h"
 
-// #include "roboteam_msgs/World.h"
-// #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
-// #include "roboteam_msgs/RobotCommand.h"
-// #include "roboteam_msgs/World.h"
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
@@ -26,8 +22,9 @@ public:
     double rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
     double angularVelController(double angularVelTarget);
-    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
     roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
+    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
+    roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
     roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
     Status Update();
     
@@ -47,7 +44,7 @@ private:
     double pGainPosition = 3.0;
     double pGainRotation = 6.0;
     double maxAngularVel = 3.0;
-    double iGainVelocity = 0.2;
+    double iGainVelocity = 0.5;
     double iGainAngularVel = 0.02;
 
     // Control variables

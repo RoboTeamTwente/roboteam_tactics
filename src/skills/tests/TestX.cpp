@@ -191,7 +191,9 @@ How to use:
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     
-    ros::Rate fps60(60);
+    double updateRate = 40;
+    ros::param::set("role_iterations_per_second", updateRate);
+    ros::Rate fps(updateRate);
 
     if (is_bt) {
         // Notify the tree debugger that we're running a tree.
@@ -200,7 +202,7 @@ How to use:
         rtt::BTRunner runner(*is_bt, false);
 		runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
-            fps60.sleep();
+            fps.sleep();
             return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
     } else {
@@ -215,7 +217,7 @@ How to use:
                 break;
             }
 
-            fps60.sleep();
+            fps.sleep();
         }
 
         std::cout << "Terminating. Final status: " << bt::statusToString(status) << "\n";
