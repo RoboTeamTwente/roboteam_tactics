@@ -21,8 +21,6 @@ namespace rtt {
  *      position  - Aim at a position
  *   What thing to aim at
  *
- * -- IDEA: Maybe group this under "When At = position:" or something?
- * -- Maybe readable more easily
  * - xGoal : Double
  *   Used when: At = position
  *   The x coord of what to aim at.

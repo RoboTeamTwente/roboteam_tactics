@@ -36,7 +36,7 @@ OneTwoTactic::OneTwoTactic(std::string name, bt::Blackboard::Ptr blackboard)
 
 void OneTwoTactic::Initialize() {
     tokens.clear();
-    // RTT_DEBUG("Initializing Tactic\n");
+    RTT_DEBUG("Initializing Tactic\n");
 
     // This tactic directs two robots
     auto robots = RobotDealer::get_available_robots();
@@ -60,10 +60,10 @@ void OneTwoTactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", scorer.robot_id);
 
-        // GetBall_B
-        bb.SetString("GetBall_B_AimAt", "robot");
-        bb.SetInt("GetBall_B_AimAtRobot", assistant.robot_id);
-        bb.SetBool("GetBall_B_AimAtRobotOurTeam", true);
+        // GetBall_A
+        bb.SetString("GetBall_A_AimAt", "robot");
+        bb.SetInt("GetBall_A_AimAtRobot", assistant.robot_id);
+        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
 
         // Kick_A
         // Needs no other info
@@ -75,14 +75,13 @@ void OneTwoTactic::Initialize() {
         bb.SetDouble("ReceiveBall_B_receiveBallAtY", 2);
 
         // AimAt_C
-        bb.SetString("At", "robot");
-        bb.SetInt("AtRobot", assistant.robot_id);
+        bb.SetString("AimAt_C_At", "ourgoal");
         
         // Chip_C
         // Needs no other info
         
         // GetBall_D
-        bb.SetString("GetDall_And_Look_At_Goal_At", "ourgoal");
+        bb.SetString("GetBall_And_Look_At_Goal_At", "ourgoal");
 
         // Create message
         scorer.tree = "rtt_bob/Scorer";
@@ -104,16 +103,19 @@ void OneTwoTactic::Initialize() {
 
         // ReceiveBall_A
         // TODO: Not hardcode this shit
-        bb.SetBool("receiveBallAtPos", false);
-        bb.SetDouble("receiveBallAtX", 0);
-
+        bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
+        bb.SetDouble("ReceiveBall_A_receiveBallAtX", 0);
+        bb.SetDouble("ReceiveBall_A_receiveBallAtY", 0);
 
         // AimAt_A
+        bb.SetString("AimAt_A_At", "robot");
+        bb.SetInt("AimAt_A_AtRobot", scorer.robot_id);
         
         // Kick_A
+        // No extra info here!
 
         // Create message
-        assistant.tree = "Receiver";
+        assistant.tree = "rtt_bob/Assistant";
         assistant.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -129,30 +131,30 @@ void OneTwoTactic::Initialize() {
 }
 
 void OneTwoTactic::ShutdownRoles() {
-    passer.tree = passer.STOP_EXECUTING_TREE;
-    receiver.tree = receiver.STOP_EXECUTING_TREE;
+    scorer.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+    assistant.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-    pub.publish(passer);
-    pub.publish(receiver);
+    pub.publish(scorer);
+    pub.publish(assistant);
 }
 
 bt::Node::Status OneTwoTactic::Update() {
-    // RTT_DEBUG("Updating Tactic\n");
+    // RTT_DEBUGLN("Updating Tactic");
     bool oneFailed = false;
     bool oneInvalid = false;
-    bool passerSucces = false;
-    bool receiverSucces = false;
+    bool scorerSuccess = false;
+    bool assistantSuccesss = false;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
-            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Success) {
-                passerSucces = true;
+            if (token == unique_id::fromMsg(scorer.token) && status == bt::Node::Status::Success) {
+                scorerSuccess = true;
             }
 
-            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Success) {
-                receiverSucces = true;
+            if (token == unique_id::fromMsg(assistant.token) && status == bt::Node::Status::Success) {
+                assistantSuccesss = true;
             }
 
             oneFailed |= status == bt::Node::Status::Failure;
@@ -160,7 +162,7 @@ bt::Node::Status OneTwoTactic::Update() {
         }
     }
 
-    if (passerSucces && receiverSucces) {
+    if (scorerSuccess && assistantSuccesss) {
         ShutdownRoles();
         return bt::Node::Status::Success;
     }

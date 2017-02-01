@@ -10,8 +10,11 @@ namespace rtt {
 class OneTwoTactic : public Tactic {
     public:
     OneTwoTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-    void Initialize();
-    Status Update();
+    void Initialize() override;
+    Status Update() override;
+    
+    // TODO: This should be done by the tactic automatically or not done at all!
+    void ShutdownRoles();
     
     private:
     std::vector<boost::uuids::uuid> tokens;

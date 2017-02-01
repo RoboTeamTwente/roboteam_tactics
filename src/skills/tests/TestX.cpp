@@ -10,6 +10,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/RoleDirective.h"
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/LastRef.h"
@@ -171,8 +172,8 @@ How to use:
     
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
-
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
+    rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
 
     // Create subscriber for referee messages
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
@@ -187,7 +188,29 @@ How to use:
         return 1;
     }
 
-    bt::BehaviorTree* is_bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
+    if (rtt::factories::isTactic(testClass)) {
+        std::cout << "Testing a tactic! Please ensure that 6 role nodes are available...\n";
+        std::cout << "(For example by using mini_rolenodes.launch from roboteam_utils)\n";
+        
+        auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+        ros::Rate fps60(60);
+        while ((int) directivePub.getNumSubscribers() < 6) {
+            ros::spinOnce();
+            fps60.sleep();
+
+            if (!ros::ok()) {
+                std::cout << "Interrupt received, exiting...";
+                return 0;
+            }
+        }
+
+        std::cout << "Spotted 6 role directives, carrying on!\n";
+
+        rtt::RobotDealer::initialize_robots(5, {0, 1, 2, 3, 4});
+
+        // TODO: Maybe at the end ensure that the role nodes stop the execution?
+        // And this can then be prevented with a command line switch
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     
@@ -195,16 +218,24 @@ How to use:
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
 
-    if (is_bt) {
+    if (rtt::factories::isTree(testClass)) {
         // Notify the tree debugger that we're running a tree.
         RTT_SEND_RQT_BT_TRACE(testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 
-        rtt::BTRunner runner(*is_bt, false);
+        bt::BehaviorTree* bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
+
+        bt->Initialize();
+
+        rtt::BTRunner runner(*bt, false);
 		runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
             fps.sleep();
             return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
+
+        // TODO: This is a hack, and if the thing above this is just a while loop
+        // we can terminate or tick just fine.
+        bt->Terminate(bt::Node::Status::Failure);
     } else {
         node->Initialize();
 
