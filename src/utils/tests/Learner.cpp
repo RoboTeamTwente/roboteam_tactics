@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Choose a point to test
-	roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
+	// roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
 	rtt::time_point start_time;
 	rtt::time_point finish_time;
 	rtt::time_point succes_time;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
 	// Some control booleans
 	bool tacticSucces = true;
 	bool tacticFailure = false;
-	bool justFinishedTactic = false;
+	// bool justFinishedTactic = false;
 	bool scored = false;
 	bool waitForGoal = false;
 	
