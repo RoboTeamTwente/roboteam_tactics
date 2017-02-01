@@ -17,40 +17,40 @@ ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
 
 bt::Node::Status ParamSet::Update() {
     std::string signal = "signal_" + GetString("signal");
-    std::string value = GetString("value");
-
+    std::string value;
+    
     std::string argType;
-    if (value == "true") {
-        argType = "bool";
-    } else if (value == "false") {
-        argType = "bool";
-    } else if (value.find(".") != std::string::npos) {
-        argType = "double";
-    } else if (rtt::is_digits(value)) {
-        argType = "int";
-    } else {
+    if (HasString("value")) {
+        value = GetString("value");
         argType = "string";
-    }
-
-    try {
-        if (argType == "string") {
-            ros::param::set(signal, value);
-        } else if (argType == "int") {
-            ros::param::set(signal, std::stoi(value));
-        } else if (argType == "double") {
-            ros::param::set(signal, std::stod(value));
-        } else if (argType == "bool") {
-            ros::param::set(signal, value == "true");
+        ros::param::set(signal, value);
+    } else if (HasDouble("value")) {
+        double val = GetDouble("value");
+        ros::param::set(signal, val);
+        argType = "double";
+        value = std::to_string(val);
+    } else if (HasInt("value")) {
+        int val = GetInt("value");
+        ros::param::set(signal, val);
+        argType = "value";
+        value = std::to_string(val);
+    } else if (HasBool("value")) {
+        if (GetBool("value")) {
+            value = "true";
+            ros::param::set(signal, true);
         } else {
-            std::cout << "Unknown arg type: " << argType << "\n";
+            ros::param::set(signal, false);
+            value = "false";
         }
-    } catch (...) {
-        std::string signalName = GetString("signal");
-        ROS_ERROR("Could not set signal param to value! Signal: %s, value: %s", signalName.c_str(), value.c_str());
-        return Status::Failure;
+
+        argType = "bool";
+    } else {
+        // No value is set. Simply make the param empty and exit.
+        ros::param::del(signal);
+        return Status::Success;
     }
 
-    RTT_DEBUG("Param set! Signal: %s, value: %s\n", signal.c_str(), value.c_str());
+    RTT_DEBUG("Param set! Signal: %s, value: %s, value type: %s\n", signal.c_str(), value.c_str(), argType.c_str());
 
     return Status::Success;
 }

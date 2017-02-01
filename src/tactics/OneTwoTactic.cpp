@@ -60,27 +60,43 @@ void OneTwoTactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", scorer.robot_id);
 
-        // GetBall_A
-        bb.SetString("GetBall_A_AimAt", "robot");
-        bb.SetInt("GetBall_A_AimAtRobot", assistant.robot_id);
-        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
 
-        // Kick_A
-        // Needs no other info
+        // ParamSet_A
+        // Set in tree
+        // TODO: Resetting stale values should not be needed
         
-        // ReceiveBall_B
+        // EnemyCloseToBall_B
+        // Set in tree
+        
+        // GetBall_C
+        bb.SetString("GetBall_C_AimAt", "robot");
+        bb.SetInt("GetBall_C_AimAtRobot", assistant.robot_id);
+        bb.SetBool("GetBall_C_AimAtRobotOurTeam", true);
+
+        // Kick_C
+        // Needs no other info
+
+        // GoToPos_D
         // TODO: Not hardcode these coordinates
-        bb.SetDouble("ReceiveBall_B_acceptableDeviation", 0.5);
-        bb.SetDouble("ReceiveBall_B_receiveBallAtX", 3);
-        bb.SetDouble("ReceiveBall_B_receiveBallAtY", 2);
-
-        // AimAt_C
-        bb.SetString("AimAt_C_At", "ourgoal");
+        bb.SetDouble("GoToPos_D_xGoal", 3);
+        bb.SetDouble("GoToPos_D_yGoal", 2);
+        bb.SetDouble("GoToPos_D_angleGoal", M_PI * 1.25);
+        bb.SetBool("GoToPos_D_dribbler", true);
         
-        // Chip_C
+        // ParamSet_D
+        // Set in tree
+        
+        // ReceiveBall_D
+        bb.SetDouble("ReceiveBall_D_acceptableDeviation", 0.5);
+        bb.SetBool("ReceiveBall_D_receiveBallAtCurrentPos", true);
+
+        // AimAt_D
+        bb.SetString("AimAt_D_At", "ourgoal");
+        
+        // Chip_D
         // Needs no other info
         
-        // GetBall_D
+        // GetBall_And_Look_At_Goal
         bb.SetString("GetBall_And_Look_At_Goal_At", "ourgoal");
 
         // Create message
@@ -107,11 +123,13 @@ void OneTwoTactic::Initialize() {
         bb.SetDouble("ReceiveBall_A_receiveBallAtX", 0);
         bb.SetDouble("ReceiveBall_A_receiveBallAtY", 0);
 
-        // AimAt_A
+        // ParamCheck_B
+        
+        // AimAt_B
         bb.SetString("AimAt_A_At", "robot");
         bb.SetInt("AimAt_A_AtRobot", scorer.robot_id);
         
-        // Kick_A
+        // Kick_C
         // No extra info here!
 
         // Create message

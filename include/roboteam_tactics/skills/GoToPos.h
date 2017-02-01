@@ -19,8 +19,8 @@ namespace rtt {
  * Descr: |
  *     Goes to a position
  *
- *     # @Idea isKeeper should maybe also be global?
- *     # @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
+ *     @Idea isKeeper should maybe also be global?
+ *     @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
  *
  * Global params:
  *     ROBOT_ID:
