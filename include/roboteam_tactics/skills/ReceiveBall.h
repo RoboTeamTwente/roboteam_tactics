@@ -67,6 +67,9 @@ private:
 	double acceptableDeviation = 0.4;
 
 	AvoidRobots avoidRobots;
+
+    bool touchedBall = false;
+    time_point initialBallContact;
 };
 
 } // rtt
