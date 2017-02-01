@@ -14,6 +14,41 @@
 
 namespace rtt {
 
+/**
+ * # Using the YAML multiline literal here
+ * Descr: |
+ *     Goes to a position
+ *
+ *     # @Idea isKeeper should maybe also be global?
+ *     # @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
+ *
+ * Global params:
+ *     ROBOT_ID:
+ *         Type: Int 
+ *         Descr: Id of the robot
+ * 
+ * Params:
+ *     isKeeper:
+ *         Type: Bool
+ *         Descr: Whether or not the current robot is a keeper
+ *     
+ *     angleGoal:
+ *         Type: Double
+ *         Descr: The angle of the arrival position
+ *     
+ *     xGoal:
+ *         Type: Double
+ *         Descr: The target x coordinate
+ *     
+ *     yGoal:
+ *         Type: Double
+ *         Descr: The target y coordinate
+ *     
+ *     dribbler:
+ *         Type: Bool
+ *         Descr: Turns on the dribbler if true
+ *
+ */
 class GoToPos : public Skill {
 public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
