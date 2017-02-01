@@ -16,8 +16,6 @@ namespace rtt {
  *    Id of the robot
  *
  */
-
-
 class Chip : public Skill {
 public:
     Chip(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

@@ -25,44 +25,45 @@ RTT_DEBUG(format "\n", ##__VA_ARGS__)
 namespace rtt {
 
 // Top level nodes
-SET_DEBUG_FOR(StrategyNode, true);
-SET_DEBUG_FOR(RoleNode, true);
 SET_DEBUG_FOR(PracticeTest, true);
+SET_DEBUG_FOR(RoleNode, true);
+SET_DEBUG_FOR(StrategyNode, true);
 
 // Building blocks
-SET_DEBUG_FOR(RobotDealer, false);
 SET_DEBUG_FOR(ParallelTactic, false);
+SET_DEBUG_FOR(RobotDealer, false);
 SET_DEBUG_FOR(Tactic, false);
 
 // Skills
 SET_DEBUG_FOR(AimAt, false);
-SET_DEBUG_FOR(NaiveBlockGoal, false);
-SET_DEBUG_FOR(ParamSet, false);
+SET_DEBUG_FOR(Chip, true);
+SET_DEBUG_FOR(DefendGoalarea, true);
+SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(GetBall, true);
 SET_DEBUG_FOR(InterceptBall, true);
-SET_DEBUG_FOR(ReceiveBall, true);
 SET_DEBUG_FOR(Kick, false);
-SET_DEBUG_FOR(Failer, true);
+SET_DEBUG_FOR(NaiveBlockGoal, false);
+SET_DEBUG_FOR(ParamSet, false);
+SET_DEBUG_FOR(ReceiveBall, true);
 SET_DEBUG_FOR(Runner, true);
-SET_DEBUG_FOR(DefendGoalarea, true);
 
 // Conditions
-SET_DEBUG_FOR(ParamCheck, false);
-SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(CanSeeRobot, false);
+SET_DEBUG_FOR(CanSeeTheirGoal, false);
 SET_DEBUG_FOR(DistanceXToY, false);
-SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(IsRefCommand, true);
+SET_DEBUG_FOR(IsRefStage, true);
+SET_DEBUG_FOR(ParamCheck, false);
 
 // Tactics
-SET_DEBUG_FOR(DemoTactic, true);
 SET_DEBUG_FOR(AttackerTactic, true);
 SET_DEBUG_FOR(BasicDefenseTactic, true);
 SET_DEBUG_FOR(BasicKeeperTactic, true);
+SET_DEBUG_FOR(DemoTactic, true);
+SET_DEBUG_FOR(OneTwoTactic, true);
 SET_DEBUG_FOR(PassToTactic, true);
 SET_DEBUG_FOR(SoloAttackerTactic, true);
 SET_DEBUG_FOR(SoloDefenderTactic, true);
-SET_DEBUG_FOR(OneTwoTactic, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
