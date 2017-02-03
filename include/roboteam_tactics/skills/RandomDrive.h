@@ -2,7 +2,7 @@
 
 #include "ros/ros.h"
 
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_utils/Vector2.h"
 
 namespace rtt {
@@ -25,7 +25,7 @@ private:
     // Id to add to the debug point, so that multiple of these nodes don't interfere.
     int debug_id;
 
-    AvoidRobots avoidRobots;
+    GoToPos goToPos;
 
     roboteam_utils::Vector2 goal;
     float goal_angle;

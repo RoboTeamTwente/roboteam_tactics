@@ -5,7 +5,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Cone.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_utils/Draw.h"
 
 namespace rtt {
@@ -17,7 +17,7 @@ public:
 	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
     Status Update();
 private:
-	AvoidRobots avoidRobots;
+	GoToPos goToPos;
     Draw drawer;
 };
     

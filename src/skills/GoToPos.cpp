@@ -17,6 +17,7 @@
 #include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
+#include "roboteam_utils/Cone.h"
 
 namespace rtt {
 
@@ -83,7 +84,7 @@ roboteam_utils::Vector2 GoToPos::velocityController(roboteam_utils::Vector2 velT
     // TODO: make prettier
     if (velError.length() < 0.3) { 
         velControllerI = velControllerI + velError.scale(timeStep);
-    } else {
+    } else { 
         // Velocity difference is too big, probably the robot is still accelerating, in which case it is better
         // to not increase the velControllerI yet... And otherwise there is too much offset in the feedfoward
         // controller anyway. But we can probably think of a better way to detect this...
@@ -117,54 +118,57 @@ double GoToPos::angularVelController(double angularVelTarget) {
 
 
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
-// TODO: improve
-roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError) {
-    // Determine how far we should look ahead to avoid other robots
-    double lookingDistance = 0.75;
-    if (lookingDistance > posError.length()) {
-        lookingDistance = posError.length();
-    }
-
-    roboteam_utils::Vector2 posDiff = otherRobotPos - myPos;
-    roboteam_utils::Vector2 closestPointOnPath = posError.closestPointOnVector(myPos, otherRobotPos);
-    roboteam_utils::Vector2 distanceFromPath = otherRobotPos - closestPointOnPath;
+roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+    roboteam_utils::Vector2 antenna = antennaCone.center - myPos;    
 
     roboteam_utils::Vector2 forceVector(0.0, 0.0);
-    if (posDiff.length() < lookingDistance) {
-        double scalingNumber1; // scalingNumber1 represents the weight placed on the perpendicular distance between the robot and our path
-        if (distanceFromPath.length() < 0.05) {
-            scalingNumber1 = 1.0;
-        } else if (distanceFromPath.length() > 0.2) {
-            scalingNumber1 = 0.0;
-        } else {
-            scalingNumber1 = 1.0/(distanceFromPath.length()*20);
+    if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
+        double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
+        if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            forceVector = antenna.rotate(-0.5*M_PI).scale(1 / (otherRobotPos - myPos).length());
         }
-        double scalingNumber2 = 1/(posDiff.length()*posDiff.length()*20); // scalingNumber2 represents the weight placed on the actual distance between the other robot's pos and our pos
-        roboteam_utils::Vector2 distanceFromPathUnit = distanceFromPath.scale(1/distanceFromPath.length());
-        forceVector = distanceFromPathUnit.scale(scalingNumber1+scalingNumber2*2);
-    }
+        if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            forceVector = antenna.rotate(0.5*M_PI).scale(1 / (otherRobotPos - myPos).length());
+        }
+    }    
+    drawer.SetColor(255, 0, 0);
+    drawer.DrawLine("forceVector", myPos, forceVector);
+    drawer.SetColor(0, 0, 0);
     return forceVector;
 }
 
 
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
-roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
+roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
+
+    double lookingDistance = 1;
     roboteam_utils::Vector2 posError = targetPos - myPos;
+    roboteam_utils::Vector2 antenna = roboteam_utils::Vector2(lookingDistance, 0.0).rotate(posError.angle());
+    roboteam_utils::Vector2 coneStart = myPos - antenna.scale(1.0 / antenna.length());
+    Cone antennaCone(coneStart, (antenna + myPos), 0.4);
+
+    // Draw the lines of the cone in rqt_view
+    roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     roboteam_utils::Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
         if (currentRobot.id != ROBOT_ID) {
+
             roboteam_utils::Vector2 otherRobotPos(currentRobot.pos);
-            roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
-            sumOfForces = sumOfForces - forceVector*repulsiveForce;
+            roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+            sumOfForces = sumOfForces + forceVector;
         }
     }
+
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_utils::Vector2 otherRobotPos(world.them.at(i).pos);
-        roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, posError);
-        sumOfForces = sumOfForces - forceVector*repulsiveForce;
+        roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+        sumOfForces = sumOfForces + forceVector; 
     }
 
     return sumOfForces;
@@ -291,11 +295,13 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Robot avoidance
-    // if (HasBool("avoidRobots")) {
-        // if (GetBool("avoidRobots")) {
-            sumOfForces = sumOfForces + avoidRobots(myPos, targetPos);
-        // }
-    // }
+    if (HasBool("avoidRobots")) {
+        if (GetBool("avoidRobots")) {
+            sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        }
+    } else {
+        ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
+    }
 
 
     // Defense area avoidance
@@ -344,7 +350,7 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Draw the velocity vector acting on the robots
-    drawer.DrawLine("velCommand", myPos, velCommand);  
+    // drawer.DrawLine("velCommand", myPos, velCommand);  
 
 
     // Fill the command message

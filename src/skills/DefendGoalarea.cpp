@@ -119,6 +119,7 @@ bt::Node::Status DefendGoalarea::Update() {
 		}
 		goto_bb->SetDouble("yGoal", ball.pos.y+offsetlength);
 		goto_bb->SetBool("endPoint",true);
+		goto_bb->SetBool("avoidRobots", false);
 		
 		goToPos.Update();
 	} else { // on an arc

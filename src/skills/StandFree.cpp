@@ -20,7 +20,7 @@ RTT_REGISTER_SKILL(StandFree);
 
 StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) {
+        , goToPos("", private_bb) {
             ROS_INFO_STREAM("Standing Free");
 }
 
@@ -36,7 +36,13 @@ boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldR
 
     // Make a Cone for a robot standing between me and the target, and then see whether this cone overlaps with the cones of other robots,
     // in which case they can be merged into a big cone
-    double distanceFromPoint = GetDouble("distanceFromPoint");
+    double distanceFromPoint;
+    if (HasDouble("distanceFromPoint")) {
+        distanceFromPoint = GetDouble("distanceFromPoint");
+    } else {
+        distanceFromPoint = 0.4;
+    }
+    
     for (size_t i = 0; i < robotsInTheWay.size(); i++) {
         Cone cone(targetPos, robotsInTheWay.at(i), distanceFromPoint);
         if (cone.IsWithinCone(myPos)) {
@@ -106,9 +112,9 @@ bt::Node::Status StandFree::Update() {
         nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
 
         // Draw the lines of the cone in rqt_view
-        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(cone.angle);
+        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(0.5*cone.angle);
         coneSide1 = coneSide1.scale(3/coneSide1.length());
-        roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-cone.angle);
+        roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
         coneSide2 = coneSide2.scale(3/coneSide2.length());
         drawer.DrawLine("coneRobotsSide1", cone.start, coneSide1);
         drawer.DrawLine("coneRobotsSide2", cone.start, coneSide2);
@@ -173,7 +179,8 @@ bt::Node::Status StandFree::Update() {
     private_bb->SetDouble("xGoal", nearestFreePos.x);
     private_bb->SetDouble("yGoal", nearestFreePos.y);
     private_bb->SetDouble("angleGoal", angleGoal);
-    if (avoidRobots.Update() == Status::Success && kickingTheBall) {
+    private_bb->SetBool("avoidRobots", true);
+    if (goToPos.Update() == Status::Success && kickingTheBall) {
         // Remove the lines from rqt view
         drawer.RemoveLine("coneRobotsSide1");
         drawer.RemoveLine("coneRobotsSide2");

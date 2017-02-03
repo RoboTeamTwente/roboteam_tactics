@@ -93,23 +93,23 @@ bt::Node::Status Block::Update() {ROS_INFO("update");
     private_bb->SetDouble("xGoal", goal.x);
     private_bb->SetDouble("yGoal", goal.y);
     private_bb->SetDouble("angleGoal", goal.rot);
-    private_bb->SetBool("endPoint", true);
     private_bb->SetBool("dribbler", false);
+    private_bb->SetBool("avoidRobots", true);
 
-    avoidBots = std::make_unique<AvoidRobots>("", private_bb);
+    goToPos = std::make_unique<GoToPos>("", private_bb);
 
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
-    bt::Node::Status avoid_status = avoidBots->Update();
+    bt::Node::Status avoid_status = goToPos->Update();
     if (avoid_status != bt::Node::Status::Running) {
-        avoidBots.reset();
-        avoidBots = std::unique_ptr<AvoidRobots>();
+        goToPos.reset();
+        goToPos = std::unique_ptr<GoToPos>();
     }
     return avoid_status == bt::Node::Status::Invalid || avoid_status == bt::Node::Status::Failure ? avoid_status : bt::Node::Status::Running;
 }
 
 void Block::extra_update() {
-    if (avoidBots) {
-        avoidBots->Update();
+    if (goToPos) {
+        goToPos->Update();
     }
 }
 

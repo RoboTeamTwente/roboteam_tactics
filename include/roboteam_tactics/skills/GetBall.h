@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 
@@ -32,7 +32,7 @@ private:
 	bool our_team;
 	double acceptableDeviation = 0.4;
 
-	AvoidRobots avoidRobots;
+	GoToPos goToPos;
 };
 
 } // rtt

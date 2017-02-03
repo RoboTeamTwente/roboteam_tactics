@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/ReceiveBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -29,7 +29,7 @@ RTT_REGISTER_SKILL(ReceiveBall);
 
 ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) {
+        , goToPos("", private_bb) {
     hasBall = whichRobotHasBall();
     ros::param::set("readyToReceiveBall", false);
 }
@@ -256,7 +256,8 @@ bt::Node::Status ReceiveBall::Update (){
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("isKeeper", GetBool("isKeeper"));
-    avoidRobots.Update();
+    private_bb->SetBool("avoidRobots", true);
+    goToPos.Update();
 
     return Status::Running;
 };
