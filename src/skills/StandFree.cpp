@@ -90,14 +90,12 @@ bt::Node::Status StandFree::Update() {
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
         if (!(GetString("whichTeam") == "us" && currentRobot.id == theirID) && currentRobot.id != myID) {
-            // ROS_INFO_STREAM("watch out for " << i << " of our team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.them.at(i);
         if (!(GetString("whichTeam") == "them" && currentRobot.id == theirID)) {
-            // ROS_INFO_STREAM("watch out for " << i << " of their team!");
             watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
         }
     }

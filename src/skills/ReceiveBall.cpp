@@ -171,12 +171,18 @@ bt::Node::Status ReceiveBall::Update (){
 	// Read the blackboard info about where to receive the ball 
 	double receiveBallAtX;
 	double receiveBallAtY;
-	if (GetBool("receiveBallAtCurrentPos")) {
+	if (HasBool("receiveBallAtCurrentPos") || (HasBool("receiveBallAtX") && HasBool("receiveBallAtY"))) {
+		if (GetBool("receiveBallAtCurrentPos")) {
+			receiveBallAtX = robotPos.x;
+			receiveBallAtY = robotPos.y;
+		} else {
+			receiveBallAtX = GetDouble("receiveBallAtX");
+			receiveBallAtY = GetDouble("receiveBallAtY");
+		}
+	} else {
+		ROS_WARN("ReceiveBall blackboard is probably not set well, I'll just asssume I have to receive the ball at my current position");
 		receiveBallAtX = robotPos.x;
 		receiveBallAtY = robotPos.y;
-	} else {
-		receiveBallAtX = GetDouble("receiveBallAtX");
-		receiveBallAtY = GetDouble("receiveBallAtY");
 	}
 
 

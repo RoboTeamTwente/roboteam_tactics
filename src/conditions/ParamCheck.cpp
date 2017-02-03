@@ -42,7 +42,8 @@ template<
 bt::Node::Status check_param(std::string signal, std::string mode, const T &default_val, const T &bb_value) {
     T signalValue = default_val;
     ros::param::get(signal, signalValue);
-    std::cout << "Signal: " << signalValue << "\n";
+
+    // std::cout << "Signal: " << signalValue << "\n";
     if (compare_values(mode, signalValue, bb_value)) {
         RTT_DEBUG("Success!\n");
         return bt::Node::Status::Success;
@@ -73,6 +74,7 @@ bt::Node::Status ParamCheck::Update() {
 
     // Parse type and check it
     if (valueType == "bool") {
+        ROS_INFO_STREAM("it's a bool!");
         if ((mode != "eq") && (mode != "neq")) {
             ROS_ERROR("Invalid mode supplied for type bool! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
             return Status::Failure;

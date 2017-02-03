@@ -44,16 +44,15 @@ bt::Node::Status Kick::Update() {
 
     if (cycleCounter > 20) {
         RTT_DEBUG("Failed to kick!\n");
-        return bt::Node::Status::Failure;
+        // return bt::Node::Status::Failure;
     }
 
 	roboteam_msgs::World world = LastWorld::get();
 	
-	
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
     
     RTT_DEBUG("Velocity difference is %f", (currentBallVel - oldBallVel).length());
-    if ((currentBallVel - oldBallVel).length() > 0.1) {
+    if ((currentBallVel - oldBallVel).length() > 0.05) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
     }
@@ -101,7 +100,7 @@ bt::Node::Status Kick::Update() {
 
             rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
             // TODO: Shouldn't be needed
-			ros::spinOnce();
+			// ros::spinOnce();
 
 			RTT_DEBUG("Triggered the kicker!\n");
 			return Status::Running;
