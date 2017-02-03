@@ -1,9 +1,6 @@
 #include "AimAt.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
-#include "AvoidRobots.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
-
 #include "BackUp.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

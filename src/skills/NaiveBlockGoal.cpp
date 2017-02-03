@@ -55,7 +55,7 @@ RTT_REGISTER_SKILL(NaiveBlockGoal);
 
 NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) { }
+        , goToPos("", private_bb) { }
 
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
@@ -142,8 +142,8 @@ bt::Node::Status NaiveBlockGoal::Update() {
     private_bb->SetDouble("xGoal", minVec.x);
     private_bb->SetDouble("yGoal", minVec.y);
     private_bb->SetDouble("angleGoal", angle);
-    // private_bb->SetBool("endPoint", true);
-    avoidRobots.Update();
+    private_bb->SetBool("avoidRobots", true);
+    goToPos.Update();
 
     return Status::Running;
 }

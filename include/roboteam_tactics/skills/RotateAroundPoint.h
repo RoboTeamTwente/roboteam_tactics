@@ -6,7 +6,7 @@
 
 #include "roboteam_utils/Vector2.h"
 
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/Parts.h"
 
 namespace rtt {
@@ -25,7 +25,6 @@ private:
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
-	// double targetAngle;
 	double targetAngle;
 	roboteam_msgs::WorldRobot robot;
 	roboteam_msgs::WorldBall ball;
@@ -33,7 +32,7 @@ private:
 	double rotw;
 	roboteam_utils::Vector2 center;
    	double radius=radius;
-   	AvoidRobots avoidRobots;
+   	GoToPos goToPos;
 	
 } ;
 

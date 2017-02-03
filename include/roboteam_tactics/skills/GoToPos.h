@@ -11,6 +11,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
+#include "roboteam_utils/Cone.h"
 
 namespace rtt {
 
@@ -57,8 +58,8 @@ public:
     double rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError);
     roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
     double angularVelController(double angularVelTarget);
-    roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, roboteam_utils::Vector2 posError);
-    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
+    roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
     roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
     roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
     Status Update();

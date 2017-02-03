@@ -25,7 +25,7 @@ RTT_REGISTER_SKILL(RotateAroundPoint);
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard),
         goto_bb(std::make_shared<bt::Blackboard>()), 
-        avoidRobots("", goto_bb) {
+        goToPos("", goto_bb) {
 	}
 
 void RotateAroundPoint::stoprobot(int robotID) {
@@ -312,8 +312,9 @@ bt::Node::Status RotateAroundPoint::Update (){
 			goto_bb->SetDouble("xGoal", center.x);
 			goto_bb->SetDouble("angleGoal", targetAngle);
 			goto_bb->SetDouble("yGoal", center.y);
-			goto_bb->SetBool("dribbler",false);
-			avoidRobots.Update();
+			goto_bb->SetBool("avoidRobots", true);
+			goto_bb->SetBool("dribbler", false);
+			goToPos.Update();
 			return Status::Running;
 		}
 		else {

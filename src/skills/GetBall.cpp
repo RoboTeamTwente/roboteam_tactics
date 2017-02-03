@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
@@ -30,7 +30,7 @@ RTT_REGISTER_SKILL(GetBall);
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) {
+        , goToPos("", private_bb) {
     hasBall = whichRobotHasBall();
 }
 
@@ -95,12 +95,6 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 
-	// if (ballVel.length() > 0.1) {
-	// 	targetPos = computeInterceptPoint(robotPos, robotVel);
-	// 	targetAngle = (ballPos - robotPos).angle();
-	// }
-
-
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
@@ -148,8 +142,9 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
+        private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("isKeeper", GetBool("isKeeper"));
-        avoidRobots.Update();
+        goToPos.Update();
 		return Status::Running;
 	}
 }
