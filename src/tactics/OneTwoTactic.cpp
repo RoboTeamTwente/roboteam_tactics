@@ -126,8 +126,8 @@ void OneTwoTactic::Initialize() {
         // ParamCheck_B
         
         // AimAt_B
-        bb.SetString("AimAt_A_At", "robot");
-        bb.SetInt("AimAt_A_AtRobot", scorer.robot_id);
+        bb.SetString("AimAt_B_At", "robot");
+        bb.SetInt("AimAt_B_AtRobot", scorer.robot_id);
         
         // Kick_C
         // No extra info here!

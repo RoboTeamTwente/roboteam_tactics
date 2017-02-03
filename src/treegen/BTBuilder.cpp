@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 namespace bf = boost::filesystem;
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
@@ -44,9 +45,12 @@ namespace {
         }
     }
 
+    std::string current_tree;
+    bool encountered_error = false;
+
 } // Anonymous namespace
 
-std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
+boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
 
     // namespace f = rtt::factories;
 
@@ -143,16 +147,22 @@ std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std
     if (!baseNamespace.empty()) {
         out << INDENT << "namespace " << baseNamespace << " {\n\n";
     }
+
+    std::string stringified_namespaces = "";
     
     if (namespaces.size() > 0) {
         out << INDENT;
 
         for (auto ns : namespaces) {
             out << "namespace " << ns << " { ";
+
+            stringified_namespaces += ns + "/";
         }
 
         out << "\n\n";
     }
+
+    current_tree = stringified_namespaces + json["title"].get<std::string>();
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
@@ -237,8 +247,17 @@ std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std
         << ");\n\n";
     out << INDENT << "} // anonymous namespace\n";
 
-    return out.str();
+    if (!encountered_error) {
+        return out.str();
+    } else {
+        return boost::none;
+    }
 }
+
+namespace {
+    std::string const RED_BOLD_COLOR = "\e[1;31m";
+    std::string const END_COLOR = "\e[0m";
+} // anonymous namespace
 
 std::string BTBuilder::get_parallel_params_from_properties(json properties) {
     if (properties.find("minSuccess") != properties.end()
@@ -250,8 +269,16 @@ std::string BTBuilder::get_parallel_params_from_properties(json properties) {
             + std::to_string(minFail);
     } else if (properties.find("successOnAll") != properties.end()
             && properties.find("failOnAll") != properties.end()) {
-        std::string successOnAll = properties["successOnAll"].get<bool>() ? "true" : "false";
-        std::string failOnAll = properties["failOnAll"].get<bool>() ? "true" : "false";
+        std::string successOnAll = properties["successOnAll"].get<std::string>();
+        std::string failOnAll = properties["failOnAll"].get<std::string>();
+
+        if ((successOnAll != "true" && successOnAll != "false") 
+                && (failOnAll != "true" && failOnAll != "false")) {
+            std::cerr << "[----] " << RED_BOLD_COLOR << "failOnAll & successOnAll of tree " << current_tree << " are not nice booleans!" << END_COLOR << "\n";
+            encountered_error = true;
+            return "true, false";
+        }
+        
         return successOnAll + ", " + failOnAll;
     } else {
         return "true, false";

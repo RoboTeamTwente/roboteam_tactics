@@ -42,8 +42,6 @@ template<
 bt::Node::Status check_param(std::string signal, std::string mode, const T &default_val, const T &bb_value) {
     T signalValue = default_val;
     ros::param::get(signal, signalValue);
-
-    // std::cout << "Signal: " << signalValue << "\n";
     if (compare_values(mode, signalValue, bb_value)) {
         RTT_DEBUG("Success!\n");
         return bt::Node::Status::Success;
@@ -56,66 +54,20 @@ bt::Node::Status check_param(std::string signal, std::string mode, const T &defa
 bt::Node::Status ParamCheck::Update() {
     std::string signal = "signal_" + GetString("signal");
     std::string mode = GetString("mode");
-    std::string value = GetString("value");
 
-    // Determine type
-    std::string valueType = "";
-    if (value == "true") {
-        valueType = "bool";
-    } else if (value == "false") {
-        valueType = "bool";
-    } else if (value.find(".") != std::string::npos) {
-        valueType = "double";
-    } else if (is_digits(value)) {
-        valueType = "int";
+    std::string argType;
+    if (HasString("value")) {
+        return check_param(signal, mode, std::string(""), GetString("value"));
+    } else if (HasDouble("value")) {
+        return check_param(signal, mode, 0.0, GetDouble("value"));
+    } else if (HasInt("value")) {
+        return check_param(signal, mode, 0, GetInt("value"));
+    } else if (HasBool("value")) {
+        return check_param(signal, mode, false, GetBool("value"));
     } else {
-        valueType = "string";
+        // If no param is set we cannot properly check the ros param. Hence, we fail.
+        return bt::Node::Status::Failure;
     }
-
-    // Parse type and check it
-    if (valueType == "bool") {
-        ROS_INFO_STREAM("it's a bool!");
-        if ((mode != "eq") && (mode != "neq")) {
-            ROS_ERROR("Invalid mode supplied for type bool! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
-            return Status::Failure;
-        }
-
-        bool boolValue = value == "true" ? true : false;
-
-        return check_param(signal, mode, false, boolValue);
-    } else if (valueType == "double") {
-        double doubleValue;
-        try {
-            doubleValue = std::stod(value);
-        } catch (...) {
-            ROS_ERROR("Could not parse signal value into double! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
-            return Status::Failure;
-        }
-
-        return check_param(signal, mode, 0.0, doubleValue);
-    } else if (valueType == "int") {
-        int intValue;
-        try {
-            intValue = std::stoi(value);
-        } catch (...) {
-            ROS_ERROR("Could not parse signal value into double! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
-            return Status::Failure;
-        }
-
-        return check_param(signal, mode, 0, intValue);
-    } else { // valueType == "string"
-        if ((mode != "eq") && (mode != "neq")) {
-            ROS_ERROR("[ParamCheck] Invalid mode supplied for type string! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
-            return Status::Failure;
-        }
-
-        return check_param(signal, mode, std::string(""), value);
-    }
-
-    // In case of programmer error return failure
-    ROS_ERROR("None of the types matched: error! Value: %s, mode: %s, signal: %s", value.c_str(), mode.c_str(), signal.c_str());
-
-    return Status::Failure;
 }
 
 } // rtt
