@@ -154,8 +154,15 @@ int main(int argc, char** argv) {
         std::stringstream ss;
         for (auto& jsonTree : allTrees) {
             rtt::BTBuilder builder;
-            ss << builder.build(jsonTree, baseNamespace, namespaces);
-            ss << "\n";
+
+            auto resultOp = builder.build(jsonTree, baseNamespace, namespaces);
+
+            if (resultOp) {
+                ss << *resultOp;
+                ss << "\n";
+            } else {
+                return 1;
+            }
         }
 
         if (toStdOut) {
@@ -224,4 +231,6 @@ int main(int argc, char** argv) {
             ofs << ss.str();
         }
     }
+
+    return 0;
 }
