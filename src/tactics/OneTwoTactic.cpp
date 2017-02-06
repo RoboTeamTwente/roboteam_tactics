@@ -22,6 +22,7 @@
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
 
 #define RTT_CURRENT_DEBUG_TAG OneTwoTactic
 
@@ -60,7 +61,6 @@ void OneTwoTactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", scorer.robot_id);
 
-
         // ParamSet_A
         // Set in tree
         // TODO: Resetting stale values should not be needed
@@ -69,35 +69,44 @@ void OneTwoTactic::Initialize() {
         // Set in tree
         
         // GetBall_C
-        bb.SetString("GetBall_C_AimAt", "robot");
-        bb.SetInt("GetBall_C_AimAtRobot", assistant.robot_id);
-        bb.SetBool("GetBall_C_AimAtRobotOurTeam", true);
+        ScopedBB(bb, "GetBall_C")
+            .setString("AimAt", "robot")
+            .setInt("AimAtRobot", assistant.robot_id)
+            .setBool("AimAtRobotOurTeam", true)
+            ;
 
         // Kick_C
         // Needs no other info
 
         // GoToPos_D
         // TODO: Not hardcode these coordinates
-        bb.SetDouble("GoToPos_D_xGoal", 3);
-        bb.SetDouble("GoToPos_D_yGoal", 2);
-        bb.SetDouble("GoToPos_D_angleGoal", M_PI * 1.25);
-        bb.SetBool("GoToPos_D_dribbler", true);
+        ScopedBB(bb, "GoToPos_D")
+            .setDouble("xGoal", 3)
+            .setDouble("yGoal", 2)
+            .setDouble("angleGoal", M_PI * 1.25)
+            .setBool("dribbler", true)
+            ;
         
         // ParamSet_D
         // Set in tree
         
         // ReceiveBall_D
-        bb.SetDouble("ReceiveBall_D_acceptableDeviation", 0.5);
-        bb.SetBool("ReceiveBall_D_receiveBallAtCurrentPos", true);
+        ScopedBB(bb, "ReceiveBall_D")
+            .setDouble("acceptableDeviation", 0.5)
+            .setBool("receiveBallAtCurrentPos", true)
+            ;
 
         // AimAt_D
-        bb.SetString("AimAt_D_At", "ourgoal");
+        ScopedBB(bb, "AimAt_D")
+            .setString("At", "ourgoal");
         
         // Chip_D
         // Needs no other info
         
         // GetBall_And_Look_At_Goal
-        bb.SetString("GetBall_And_Look_At_Goal_At", "ourgoal");
+        ScopedBB(bb, "GetBall_And_Look_At_Goal")
+            .setString("At", "ourgoal")
+            ;
 
         // Create message
         scorer.tree = "rtt_bob/Scorer";
@@ -119,15 +128,19 @@ void OneTwoTactic::Initialize() {
 
         // ReceiveBall_A
         // TODO: Not hardcode this shit
-        bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
-        bb.SetDouble("ReceiveBall_A_receiveBallAtX", 0);
-        bb.SetDouble("ReceiveBall_A_receiveBallAtY", 0);
+        ScopedBB(bb, "ReceiveBall_A")
+            .setBool("receiveBallAtCurrentPos", false)
+            .setDouble("receiveBallAtX", 0)
+            .setDouble("receiveBallAtY", 0)
+            ;
 
         // ParamCheck_B
         
         // AimAt_B
-        bb.SetString("AimAt_B_At", "robot");
-        bb.SetInt("AimAt_B_AtRobot", scorer.robot_id);
+        ScopedBB(bb, "AimAt_B")
+            .setString("At", "robot")
+            .setInt("AtRobot", scorer.robot_id)
+            ;
         
         // Kick_C
         // No extra info here!

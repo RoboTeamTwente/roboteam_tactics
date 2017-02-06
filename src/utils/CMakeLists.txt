@@ -8,6 +8,7 @@ add_library(utils OBJECT
     BtDebug.cpp
     Parts.cpp
     Leaf.cpp
+    ScopedBB.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
