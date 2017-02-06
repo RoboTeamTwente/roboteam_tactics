@@ -52,6 +52,7 @@ void OneTwoTactic::Initialize() {
     // Just pick the first two
     scorer.robot_id = robots.at(0);
     assistant.robot_id = robots.at(1);
+    int const KEEPER_ID = RobotDealer::get_keeper();
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
@@ -60,6 +61,7 @@ void OneTwoTactic::Initialize() {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", scorer.robot_id);
+        bb.SetInt("KEEPER_ID", KEEPER_ID);
 
         // ParamSet_A
         // Set in tree
@@ -85,6 +87,7 @@ void OneTwoTactic::Initialize() {
             .setDouble("yGoal", 2)
             .setDouble("angleGoal", M_PI * 1.25)
             .setBool("dribbler", true)
+            .setBool("avoidRobots", true)
             ;
         
         // ParamSet_D
@@ -125,6 +128,7 @@ void OneTwoTactic::Initialize() {
         // Fill blackboard with relevant info
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", assistant.robot_id);
+        bb.SetInt("KEEPER_ID", KEEPER_ID);
 
         // ReceiveBall_A
         // TODO: Not hardcode this shit

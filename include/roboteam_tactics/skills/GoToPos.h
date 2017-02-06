@@ -49,6 +49,10 @@ namespace rtt {
  *         Type: Bool
  *         Descr: Turns on the dribbler if true
  *
+ *     avoidRobots:
+ *         Type: Bool
+ *         Descr: Indicates whether or not other robots should be avoided
+ *
  */
 class GoToPos : public Skill {
 public:
