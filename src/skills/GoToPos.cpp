@@ -132,7 +132,7 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
         }
     }    
     drawer.SetColor(255, 0, 0);
-    drawer.DrawLine("forceVector", myPos, forceVector);
+    // drawer.DrawLine("forceVector", myPos, forceVector);
     drawer.SetColor(0, 0, 0);
     return forceVector;
 }
@@ -151,8 +151,8 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
     // Draw the lines of the cone in rqt_view
     roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    // drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    // drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     roboteam_utils::Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {
