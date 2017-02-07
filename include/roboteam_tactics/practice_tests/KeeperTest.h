@@ -15,8 +15,8 @@ public:
 
     boost::optional<Config> getConfig(
         Side side, 
-        std::vector<int> ourRobots, 
-        roboteam_msgs::GeometryFieldSize fieldGeom
+        std::vector<RobotID> const & ourRobots, 
+        roboteam_msgs::GeometryFieldSize const & fieldGeom
         ) override;
 
     void beforeTest(roboteam_msgs::World const & world) override;

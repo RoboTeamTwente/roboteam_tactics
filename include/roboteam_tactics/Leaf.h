@@ -82,20 +82,21 @@ public:
             bool this_valid = true;
             switch (pair.second) {
                 case BBArgumentType::Int:
-                    this_valid = blackboard->HasInt(key);
+                    this_valid = blackboard->HasInt(key) || blackboard->HasInt(pair.first);
                     break;
                 case BBArgumentType::Float:
-                    this_valid = blackboard->HasFloat(key);
+                    this_valid = blackboard->HasFloat(key) || blackboard->HasFloat(pair.first);
                     break;
                 case BBArgumentType::Double:
-                    this_valid = blackboard->HasDouble(key);
+                    this_valid = blackboard->HasDouble(key) || blackboard->HasDouble(pair.first);
                     break;
                 case BBArgumentType::Bool:
-                    this_valid = blackboard->HasBool(key);
+                    this_valid = blackboard->HasBool(key) || blackboard->HasBool(pair.first);
                     break;
                 case BBArgumentType::String: {
-                    this_valid = blackboard->HasString(key);
-                    boost::optional<std::string> error = valid_string_opt<Impl>({key, blackboard->GetString(key)});
+                    this_valid = blackboard->HasString(key) || blackboard->HasString(pair.first);
+                    std::string val = blackboard->HasString(key) ? blackboard->GetString(key) : blackboard->GetString(pair.first);
+                    boost::optional<std::string> error = valid_string_opt<Impl>({key, val});
                     if ((bool) error) {
                         this_valid = false;
                         fprintf(stderr, "%s", error->c_str());

@@ -46,6 +46,7 @@ SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(ReceiveBall, true);
 SET_DEBUG_FOR(Runner, true);
+SET_DEBUG_FOR(KeeperBlock, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
@@ -62,6 +63,9 @@ SET_DEBUG_FOR(BasicKeeperTactic, true);
 SET_DEBUG_FOR(DemoTactic, true);
 SET_DEBUG_FOR(OneTwoTactic, true);
 SET_DEBUG_FOR(PassToTactic, true);
+SET_DEBUG_FOR(InterceptorsTactic, true);
+SET_DEBUG_FOR(SecondaryKeeperTactic, true);
+SET_DEBUG_FOR(FreeKickDefenceTactic, true);
 SET_DEBUG_FOR(SoloAttackerTactic, true);
 SET_DEBUG_FOR(SoloDefenderTactic, true);
 SET_DEBUG_FOR(TwoAttackersTactic, true);
@@ -69,6 +73,5 @@ SET_DEBUG_FOR(TwoAttackersTactic, true);
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
 SET_DEBUG_FOR(Learner, true);
-
 
 } // rtt

@@ -9,17 +9,19 @@
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Position.h"
+#include "roboteam_utils/TeamRobot.h"
 
 namespace rtt {
 
 namespace practice {
 
 using ::roboteam_utils::Vector2;
+using ::roboteam_utils::Position;
 
 struct Robot {
-    Vector2 pos;
-    Vector2 speed;
-    double angle;
+    Position pos;
+    Position speed;
 
     boost::optional<roboteam_msgs::RoleDirective> directive;
 } ;
@@ -28,9 +30,9 @@ struct Config {
     Vector2 ballPos;
     Vector2 ballSpeed;
 
-    std::map<int, Robot> us;
-    std::map<int, Robot> them;
-} ;
+    std::map<RobotID, Robot> us;
+    std::map<RobotID, Robot> them;
+};
 
 enum class Result {
     RUNNING,
@@ -46,8 +48,8 @@ public:
 
     virtual boost::optional<Config> getConfig(
             Side side, 
-            std::vector<int> ourRobots, 
-            roboteam_msgs::GeometryFieldSize fieldGeom
+            std::vector<RobotID> const & ourRobots, 
+            roboteam_msgs::GeometryFieldSize const & fieldGeom
             );
 
     virtual void beforeTest(roboteam_msgs::World const & world);
@@ -55,6 +57,8 @@ public:
     virtual void afterTest(roboteam_msgs::World const & world);
 
     virtual std::string testName() = 0;
+    
+    static bool awaitWorld();
 } ;
 
 } // namespace practice

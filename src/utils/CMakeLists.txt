@@ -6,6 +6,7 @@ add_library(utils OBJECT
     utils.cpp
     BTRunner.cpp
     BtDebug.cpp
+    BBParser.cpp
     Parts.cpp
     Leaf.cpp
     ScopedBB.cpp

@@ -4,6 +4,7 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_utils/Vector2.h"
+#include <sstream>
 #include "roboteam_utils/Math.h"
 
 #define RTT_CURRENT_DEBUG_TAG BasicKeeperTactic
@@ -20,6 +21,9 @@ void BasicKeeperTactic::Initialize() {
     tokens.clear();
 
     RTT_DEBUG("Initializing\n");
+    std::stringstream ss;
+    print_blackboard(blackboard, ss);
+    RTT_DEBUGLN("%s\n", ss.str().c_str());
     
     // Assign the remaining robots the secondary keeper role
     std::vector<int> robots = RobotDealer::get_available_robots();

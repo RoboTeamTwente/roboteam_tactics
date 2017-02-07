@@ -13,6 +13,9 @@
 #include "DemoTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "FreeKickDefenceTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "GoToSideTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

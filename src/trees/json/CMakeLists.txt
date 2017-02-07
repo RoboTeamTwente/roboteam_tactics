@@ -21,6 +21,9 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideTestTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/FreeKickDefenceStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/SecondaryKeeperTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/InterceptorTree.json
 #    ${CMAKE_CURRENT_SOURCE_DIR}/ZoneDefender.json
 #    ${CMAKE_CURRENT_SOURCE_DIR}/SimpleFieldPlayer.json
     )

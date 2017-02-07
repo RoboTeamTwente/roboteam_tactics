@@ -3,6 +3,9 @@
 #include "roboteam_tactics/skills/KeeperBlock.h"
 #include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_tactics/utils/utils.h"
+#include <sstream>
+
+#define RTT_CURRENT_DEBUG_TAG KeeperBlock
 
 namespace rtt {
     
@@ -12,6 +15,9 @@ KeeperBlock::KeeperBlock(std::string name, bt::Blackboard::Ptr blackboard) : Ski
     assert_valid<KeeperBlock>(name);
     target = -1;
     cover_dist = .4;
+    std::stringstream ss;
+    print_blackboard(blackboard, ss);
+    RTT_DEBUGLN("Building KeeperBlock, bb: %s\n", ss.str().c_str());
     reevaluate_target();
 }
 

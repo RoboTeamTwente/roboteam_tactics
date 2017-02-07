@@ -105,24 +105,18 @@ double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, 
 }
 
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
-    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
-    bb->SetBool("our_team", true);
+    const auto& ball = LastWorld::get().ball;
     for (auto& bot : LastWorld::get().us) {
-        bb->SetInt("me", bot.id);
-        IHaveBall ihb("", bb);
-        if (ihb.Update() == bt::Node::Status::Success) {
+        if (bot_has_ball(bot, ball)) {
             return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, true));
         }
     }
-    bb->SetBool("our_team", false);
     for (auto& bot : LastWorld::get().them) {
-        bb->SetInt("me", bot.id);
-        IHaveBall ihb("", bb);
-        if (ihb.Update() == bt::Node::Status::Success) {
+        if (bot_has_ball(bot, ball)) {
             return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, false));
         }
     }
-    return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>();
+    return boost::none;
 }
 
 
@@ -187,6 +181,37 @@ roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double sec
 }
 
 
+boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
+    const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
+    auto vec = our_team ? w.us : w.them;
+    for (const auto& bot : vec) {
+        if (bot.id == id) {
+            return boost::optional<roboteam_msgs::WorldRobot>(bot);
+        }
+    }
+    return boost::optional<roboteam_msgs::WorldRobot>();
+}
+
+boost::optional<roboteam_msgs::WorldRobot> lookup_our_bot(unsigned int id, const roboteam_msgs::World* world) {
+    return lookup_bot(id, true, world);
+}
+
+boost::optional<roboteam_msgs::WorldRobot> lookup_their_bot(unsigned int id, const roboteam_msgs::World* world) {
+    return lookup_bot(id, false, world);
+}
+
+
+bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
+    roboteam_utils::Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
+    roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
+
+    double dist = ball_norm.length();
+    double angle = ball_norm.angle();
+
+    // Within 10.5 cm and .2 radians (of center of dribbler)
+    return dist <= .2 && fabs(angle - bot.angle) <= .3;
+}
+
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
     out << "Blackboard:\n";
     for (const auto& pair : bb->getBools()) {
@@ -224,8 +249,11 @@ void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr ext
     }
 
 }
-static std::random_device rd;
-static std::mt19937 rng(rd());
+
+namespace {
+    thread_local std::random_device rd;
+    thread_local std::mt19937 rng(rd());
+}
 
 int get_rand_int(int max) {
     return get_rand_int(0, max);
@@ -295,29 +323,32 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        roboteam_utils::Vector2 pos(worldRobot.pos);
+
+        if ((pos - point).length() < closest_robot_ds) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                closest_robot = worldRobot.id;
+                closest_robot_ds = (pos - point).length();
+            }
+        }
+    }
+
+    return closest_robot;
+}
+
 int get_robot_closest_to_ball(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_ball(robots, lw);
 }
 
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int closest_robot = -1;
-    double closest_robot_ds = std::numeric_limits<double>::max();
-
     roboteam_utils::Vector2 ball_pos(world.ball.pos);
-
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos);
-
-        if ((pos - ball_pos).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
-            }
-        }
-    }
-
-    return closest_robot;
+    return get_robot_closest_to_point(robots, world, ball_pos);
 }
 
 int get_robot_closest_to_their_goal(std::vector<int> robots) {

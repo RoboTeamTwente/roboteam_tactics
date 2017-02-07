@@ -62,13 +62,58 @@ class Tactic : public Leaf {
     virtual Status Update();
     virtual void Terminate(Status s);
 
-    void claim_robot(int id);
-    void claim_robots(std::vector<int> ids);
-    std::vector<int> get_claimed_robots();
-    bool is_claimed(int id);
+    virtual void claim_robot(int id);
+    virtual void claim_robots(std::vector<int> ids);
+    virtual std::vector<int> get_claimed_robots();
+    virtual bool is_claimed(int id);
 
     private:
     std::set<int> claimed_robots;
 } ;
+
+class SingleBotTactic : public Tactic {
+    public:
+    SingleBotTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
+            : Tactic(name, blackboard), bot(-1)
+            {}
+    virtual ~SingleBotTactic() {}
+    
+    void claim_robot(int id) final override {
+        if (bot == -1) {
+            bot = id;
+            Tactic::claim_robot(id);
+        } else {
+            ROS_ERROR("SingleBotTactic %s tried to claim bot %d, but it has already claimed %d.",
+                name.c_str(), id, bot);
+            throw std::logic_error("SingleBotTactic multi-claim");
+        }
+    }
+    void claim_robots(std::vector<int> ids) final override {
+        if (ids.size() == 0) return;
+        if (ids.size() == 1) {
+            claim_robot(ids.at(0));
+        }
+        ROS_ERROR("SingleBotTactic %s tried to claim multiple bots in one go.", name.c_str());
+        throw std::logic_error("SingleBotTactic multi-claim");
+    }
+    
+    std::vector<int> get_claimed_robots() final override {
+        return bot == -1 ? std::vector<int>() : std::vector<int>({bot});
+    }
+    
+    int get_claimed_robot() const {
+        return bot;
+    }
+    
+    bool is_claimed(int id) final override {
+        return id == bot;
+    }
+        
+    private:
+    int bot;
+};
+
+// Make sure sources that include this are not troubled by the def
+#undef RTT_CURRENT_DEBUG_TAG
 
 } // rtt

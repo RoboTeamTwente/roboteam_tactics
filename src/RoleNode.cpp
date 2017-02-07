@@ -36,7 +36,7 @@ std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
-bool ignoring_strategy_instructions = false;
+bool ignoring_strategy_instructions = true;
 
 void reset_tree() {
     currentToken = uuid_msgs::UniqueID();
@@ -44,12 +44,8 @@ void reset_tree() {
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
-    // std::cout << ROBOT_ID << ": Got message!\n";
 
     std::string name = ros::this_node::getName();
-
-    // std::cout << "Message: " << *msg << "\n";
-    
     // Some control statements to regulate starting and stopping of rolenodes
     if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
         // Continue
