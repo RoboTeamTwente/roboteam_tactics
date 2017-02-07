@@ -22,6 +22,10 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/BtDebug.h"
 
+namespace {
+    std::string const RED_BOLD_COLOR = "\e[1;31m";
+    std::string const END_COLOR = "\e[0m";
+} // anonymous namespace
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
@@ -93,6 +97,15 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
+
+    if (!bb->HasInt("ROBOT_ID")) {
+        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+    }
+
+
+    if (!bb->HasInt("KEEPER_ID")) {
+        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+    }
 
     try {
         ros::NodeHandle n;
