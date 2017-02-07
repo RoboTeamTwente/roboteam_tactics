@@ -207,9 +207,7 @@ catkin_add_gtest(tactics_test
     test/main.cpp
     test/SimpleTest.cpp
     test/ConditionsTest.cpp
-    test/LeafTest.cpp
     test/VerificationTest.cpp
-    test/ChipCalcTest.cpp
     $<TARGET_OBJECTS:conditions>
     $<TARGET_OBJECTS:tactics>
     $<TARGET_OBJECTS:utils>

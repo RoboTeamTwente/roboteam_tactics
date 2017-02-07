@@ -12,7 +12,7 @@
 #include "roboteam_tactics/practice_tests/TestSetup.h"
 
 #include "roboteam_utils/TeamRobot.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/grSim_Packet.pb.h"
 #include "roboteam_utils/grSim_Commands.pb.h"
 #include "roboteam_utils/grSim_Replacement.pb.h"

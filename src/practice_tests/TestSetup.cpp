@@ -4,6 +4,7 @@
 #include "roboteam_utils/grSim_Commands.pb.h"
 #include "roboteam_utils/grSim_Replacement.pb.h"
 #include <QtNetwork>
+#include "ros/ros.h"
 
 namespace rtt {
 namespace practice {

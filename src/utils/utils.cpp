@@ -181,7 +181,6 @@ roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double sec
 }
 
 
-<<<<<<< HEAD
 boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
     const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     auto vec = our_team ? w.us : w.them;
@@ -213,8 +212,6 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     return dist <= .2 && fabs(angle - bot.angle) <= .3;
 }
 
-=======
->>>>>>> a11adfe3456cf697a9d6c0a719a007f344e1167b
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
     out << "Blackboard:\n";
     for (const auto& pair : bb->getBools()) {
@@ -326,6 +323,23 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        roboteam_utils::Vector2 pos(worldRobot.pos);
+
+        if ((pos - point).length() < closest_robot_ds) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                closest_robot = worldRobot.id;
+                closest_robot_ds = (pos - point).length();
+            }
+        }
+    }
+
+    return closest_robot;
+}
 
 int get_robot_closest_to_ball(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
@@ -333,23 +347,8 @@ int get_robot_closest_to_ball(std::vector<int> robots) {
 }
 
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
-    int closest_robot = -1;
-    double closest_robot_ds = std::numeric_limits<double>::max();
-
     roboteam_utils::Vector2 ball_pos(world.ball.pos);
-
-    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos);
-
-        if ((pos - ball_pos).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
-                closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
-            }
-        }
-    }
-
-    return closest_robot;
+    return get_robot_closest_to_point(robots, world, ball_pos);
 }
 
 int get_robot_closest_to_their_goal(std::vector<int> robots) {

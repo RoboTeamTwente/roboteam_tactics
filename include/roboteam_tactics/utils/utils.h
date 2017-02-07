@@ -105,6 +105,7 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
 
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point);
 int get_robot_closest_to_their_goal(std::vector<int> robots);
 int get_robot_closest_to_ball(std::vector<int> robots);
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
