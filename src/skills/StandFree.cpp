@@ -138,54 +138,11 @@ bt::Node::Status StandFree::Update() {
     goalPos.y = -field.goal_width / 2 + 0.1;
     boost::optional<Cone> coneGoal2 = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
 
-    roboteam_utils::Vector2 nearestFreePos1(100.0, 100.0);
+
     roboteam_utils::Vector2 nearestFreePos2(100.0, 100.0);
 
-    // if (coneGoal) {
-    //     Cone cone = *coneGoal;
-    //     roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-    //     if (coneRobots) {
-    //         nearestFreePos1 = cone.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
-    //     } else {
-    //         nearestFreePos1 = cone.ClosestPointOnSide(myPos, theirGoalPos);
-    //     }
-
-    //     roboteam_utils::Vector2 cone1Side1 = (cone.center-cone.start).rotate(0.5*cone.angle);
-    //     cone1Side1 = cone1Side1.scale(3/cone1Side1.length());
-    //     roboteam_utils::Vector2 cone1Side2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
-    //     cone1Side2 = cone1Side2.scale(3/cone1Side2.length());
-    //     drawer.SetColor(0, 0, 0);
-    //     drawer.DrawLine("coneGoal1Side1", cone.start, cone1Side1);
-    //     drawer.DrawLine("coneGoal1Side2", cone.start, cone1Side2);
-    // } else {
-    //     drawer.RemoveLine("coneGoal1Side1");
-    //     drawer.RemoveLine("coneGoal1Side2");
-    // }
-
-    // if (coneGoal2) {
-    //     Cone cone2 = *coneGoal2;
-    //     roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-    //     if (coneRobots) {
-    //         nearestFreePos2 = cone2.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
-    //     } else {
-    //         nearestFreePos2 = cone2.ClosestPointOnSide(myPos, theirGoalPos);
-    //     }
-
-    //     roboteam_utils::Vector2 cone2Side1 = (cone2.center-cone2.start).rotate(0.5*cone2.angle);
-    //     cone2Side1 = cone2Side1.scale(3/cone2Side1.length());
-    //     roboteam_utils::Vector2 cone2Side2 = (cone2.center-cone2.start).rotate(-0.5*cone2.angle);
-    //     cone2Side2 = cone2Side2.scale(3/cone2Side2.length());
-    //     drawer.SetColor(255,0,0);
-    //     drawer.DrawLine("coneGoal2Side1", cone2.start, cone2Side1);
-    //     drawer.DrawLine("coneGoal2Side2", cone2.start, cone2Side2);
-    // } else {
-    //     drawer.RemoveLine("coneGoal2Side1");
-    //     drawer.RemoveLine("coneGoal2Side2");
-    // }
-
-
-
     if (coneGoal && coneGoal2) {
+
         Cone cone = *coneGoal;
         roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         
@@ -194,13 +151,13 @@ bt::Node::Status StandFree::Update() {
         } else {
             nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
         }
-        
+
         Cone cone2 = *coneGoal2;
         if (coneRobots) {
             nearestFreePos2 = cone2.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
         } else {
             nearestFreePos2 = cone2.ClosestPointOnSide(myPos, theirGoalPos);
-        }
+        }        
 
 
         // Draw the lines in rqt_view
@@ -226,26 +183,11 @@ bt::Node::Status StandFree::Update() {
         drawer.RemoveLine("coneGoal2Side2");
     }
 
-    if (nearestFreePos1.length() < 100 && nearestFreePos2.length() < 100) {
-        nearestFreePos = nearestFreePos1;
-        if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
-            nearestFreePos = nearestFreePos2;
-        }
+
+    if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
+        nearestFreePos = nearestFreePos2;
     }
 
-
-
-
-    // Check which of the two options is closer
-    // if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
-    //     nearestFreePos = nearestFreePos2;
-    // }
-    // if ((nearestFreePos1 - myPos).length() < (nearestFreePos - myPos).length()) {
-    //     nearestFreePos = nearestFreePos1;
-    // }
-    // if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
-    //     nearestFreePos = nearestFreePos2;
-    // }
 
     // Fill the goToPos blackboard and send the command
     double angleGoal = (theirPos-myPos).angle();
