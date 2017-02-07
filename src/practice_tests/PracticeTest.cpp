@@ -1,5 +1,5 @@
 #include "roboteam_tactics/practice_tests/PracticeTest.h"
-
+#include "roboteam_tactics/utils/LastWorld.h"
 namespace rtt {
 
 namespace practice {
@@ -12,8 +12,8 @@ PracticeTest::~PracticeTest() {
 
 b::optional<Config> PracticeTest::getConfig(
     Side side, 
-    std::vector<int> ourRobots, 
-    roboteam_msgs::GeometryFieldSize fieldGeom
+    std::vector<RobotID> const & ourRobots, 
+    roboteam_msgs::GeometryFieldSize const &  fieldGeom
     ) {
     return b::none;
 }
@@ -28,6 +28,15 @@ Result PracticeTest::check(roboteam_msgs::World const & world, Side side, robote
 
 void PracticeTest::afterTest(roboteam_msgs::World const & world) {
 
+}
+
+bool PracticeTest::awaitWorld() {
+    auto world = LastWorld::get();
+    while (ros::ok() && world.us.size() == 0 && world.them.size() == 0) {
+        ros::spinOnce();
+        world = LastWorld::get();
+    }
+    return ros::ok();
 }
 
 } // namespace practice

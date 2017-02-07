@@ -193,7 +193,14 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_F
 
 catkin_add_gtest(tactics_test
     test/main.cpp
-	test/SimpleTest.cpp
+    test/SimpleTest.cpp
+    test/ConditionsTest.cpp
+    test/LeafTest.cpp
+    test/VerificationTest.cpp
+    test/ChipCalcTest.cpp
+    $<TARGET_OBJECTS:conditions>
+    $<TARGET_OBJECTS:tactics>
+    $<TARGET_OBJECTS:utils>
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
 
@@ -241,8 +248,8 @@ if (BUILD_STRATEGYNODE)
 
 endif (BUILD_STRATEGYNODE)
 
-   add_executable(ComputePassPointTrain
-        src/utils/tests/ComputePassPointTrain.cpp
+   add_executable(Learner
+        src/utils/tests/Learner.cpp
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:skills>
@@ -250,13 +257,13 @@ endif (BUILD_STRATEGYNODE)
         $<TARGET_OBJECTS:tactics>
         $<TARGET_OBJECTS:utils>
         )
-    add_dependencies(ComputePassPointTrain
+    add_dependencies(Learner
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         
         generate_json_t
         )
-    target_link_libraries(ComputePassPointTrain
+    target_link_libraries(Learner
         ${catkin_LIBRARIES}
 	${QT_LIBRARIES}
         )
@@ -267,6 +274,8 @@ if (BUILD_PRACTICE_TESTS)
         ./src/practice_tests/main.cpp
         ./src/practice_tests/PracticeTest.cpp
         ./src/practice_tests/KeeperTest.cpp
+	./src/practice_tests/TestSetup.cpp
+        ./src/practice_tests/FreeKickTest.cpp
 
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>

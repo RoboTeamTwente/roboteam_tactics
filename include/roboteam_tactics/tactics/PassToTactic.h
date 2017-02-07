@@ -17,6 +17,7 @@ class PassToTactic : public Tactic {
     public:
     PassToTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize(roboteam_utils::Vector2 passTo);
+    void ShutdownRoles();
     Status Update();
     
     ros::NodeHandle n;

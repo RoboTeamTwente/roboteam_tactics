@@ -2,7 +2,7 @@
   "id": "bd7e0a3d-fc1c-43b8-899b-236527e8fa0a",
   "title": "Receiver",
   "description": "",
-  "root": "49d0ee49-924f-4b75-89e0-f18eb65301b2",
+  "root": "2f204885-41b7-4747-8d3d-be3f8d924a32",
   "properties": {},
   "nodes": {
     "49d0ee49-924f-4b75-89e0-f18eb65301b2": {
@@ -12,16 +12,56 @@
       "description": "",
       "properties": {},
       "display": {
-        "x": -96,
+        "x": 144,
         "y": -96
       }
+    },
+    "7861cf67-21cf-4192-bb34-1aaf475c263c": {
+      "id": "7861cf67-21cf-4192-bb34-1aaf475c263c",
+      "name": "ShootAtGoal",
+      "title": "ShootAtGoal_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": -36
+      }
+    },
+    "2f204885-41b7-4747-8d3d-be3f8d924a32": {
+      "id": "2f204885-41b7-4747-8d3d-be3f8d924a32",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": -192,
+        "y": -96
+      },
+      "child": "4b8f69ed-29ff-449f-a9f3-4d46178c0a03"
+    },
+    "4b8f69ed-29ff-449f-a9f3-4d46178c0a03": {
+      "id": "4b8f69ed-29ff-449f-a9f3-4d46178c0a03",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -24,
+        "y": -96
+      },
+      "children": [
+        "49d0ee49-924f-4b75-89e0-f18eb65301b2",
+        "7861cf67-21cf-4192-bb34-1aaf475c263c"
+      ]
     }
   },
   "display": {
     "camera_x": 683,
     "camera_y": 339,
     "camera_z": 1,
-    "x": -276,
+    "x": -360,
     "y": -96
   },
   "custom_nodes": [
@@ -367,6 +407,13 @@
       "name": "IsBallInZone",
       "category": "condition",
       "title": "IsBallInZone",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "PassToTactic",
+      "category": "action",
+      "title": "PassToTactic",
       "description": null,
       "properties": {}
     }

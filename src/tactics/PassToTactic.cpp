@@ -33,7 +33,7 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
 
 void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
     tokens.clear();
-    RTT_DEBUG("Initializing\n");
+    // RTT_DEBUG("Initializing Tactic\n");
 
     // This tactic directs two robots
     int PASSER_ID = 1;
@@ -106,9 +106,15 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
     start = rtt::now();
 }
 
+void PassToTactic::ShutdownRoles() {
+    passer.tree = passer.STOP_EXECUTING_TREE;
+    receiver.tree = receiver.STOP_EXECUTING_TREE;
+    pub.publish(passer);
+    pub.publish(receiver);
+}
 
 bt::Node::Status PassToTactic::Update() {
-    // RTT_DEBUG("Updating\n");
+    // RTT_DEBUG("Updating Tactic\n");
     bool oneFailed = false;
     bool oneInvalid = false;
     bool passerSucces = false;
@@ -119,24 +125,10 @@ bt::Node::Status PassToTactic::Update() {
             Status status = feedbacks.at(token);
             if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Success) {
                 passerSucces = true;
-                ROS_INFO("PassToTactic passer Success");
-            }
-            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Failure) {
-                ROS_WARN("PassToTactic passer Failure");
-            }
-            if (token == unique_id::fromMsg(passer.token) && status == bt::Node::Status::Invalid) {
-                ROS_WARN("PassToTactic passer Invalid");
             }
 
             if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Success) {
                 receiverSucces = true;
-                ROS_INFO("PassToTactic receiver Success");
-            }
-            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Failure) {
-                ROS_WARN("PassToTactic reveiver Failure");
-            }
-            if (token == unique_id::fromMsg(receiver.token) && status == bt::Node::Status::Invalid) {
-                ROS_WARN("PassToTactic receiver Invalid");
             }
 
             oneFailed |= status == bt::Node::Status::Failure;
@@ -145,24 +137,22 @@ bt::Node::Status PassToTactic::Update() {
     }
 
     if (passerSucces && receiverSucces) {
-        RTT_DEBUG("PassToTactic Succes, shutting down the role nodes!\n");
-        passer.tree = passer.STOP_EXECUTING_TREE;
-        receiver.tree = receiver.STOP_EXECUTING_TREE;
-        pub.publish(passer);
-        pub.publish(receiver);
+        ShutdownRoles();
         return bt::Node::Status::Success;
     }
 
     if (oneFailed) {
+        ShutdownRoles();
         return bt::Node::Status::Failure;
     } else if (oneInvalid) {
         return bt::Node::Status::Invalid;
     }
 
-    // auto duration = time_difference_seconds(start, now());
-    // if (duration.count() >= 20) {
-    //     return Status::Failure;
-    // }
+    auto duration = time_difference_milliseconds(start, now());
+    if (duration.count() >= 20000) {
+        ShutdownRoles();
+        return Status::Failure;
+    }
 
     return bt::Node::Status::Running;
 }

@@ -11,6 +11,7 @@ add_library(utils OBJECT
     utils.cpp
     BTRunner.cpp
     BtDebug.cpp
+    BBParser.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -30,6 +31,7 @@ add_library(utils_lib
     utils.cpp
     BTRunner.cpp
     BtDebug.cpp
+    BBParser.cpp
     )
 add_dependencies(utils_lib
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

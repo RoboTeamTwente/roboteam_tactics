@@ -28,6 +28,7 @@ public:
         // Keep going until a child behavior says it's running.
         while (1) {
             auto &child = children.at(index);
+
             Node::append_status("[Sequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
             
@@ -35,7 +36,6 @@ public:
             if (status != Status::Success) {
                 return status;
             }
-
             // Hit the end of the array, job done!
             if (++index == children.size()) {
                 return Status::Success;
