@@ -171,7 +171,7 @@ bt::Node::Status ReceiveBall::Update (){
 	// Read the blackboard info about where to receive the ball 
 	double receiveBallAtX;
 	double receiveBallAtY;
-	if (HasBool("receiveBallAtCurrentPos") || (HasBool("receiveBallAtX") && HasBool("receiveBallAtY"))) {
+	if (HasBool("receiveBallAtCurrentPos") || (HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		if (GetBool("receiveBallAtCurrentPos")) {
 			receiveBallAtX = robotPos.x;
 			receiveBallAtY = robotPos.y;

@@ -31,7 +31,7 @@ boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldR
     std::vector<roboteam_utils::Vector2> robotsInTheWay;
     for (size_t i = 0; i < watchOutForTheseBots.size(); i++) {
         roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(watchOutForTheseBots.at(i).pos.x, watchOutForTheseBots.at(i).pos.y);
-        if ((robotPos - targetPos).length() < (myPos-targetPos).length()) {
+        if ((robotPos - targetPos).length() < (myPos-targetPos).length()*2) {
             robotsInTheWay.push_back(robotPos);
         }
     }
@@ -73,7 +73,6 @@ bt::Node::Status StandFree::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	unsigned int myID = blackboard->GetInt("ROBOT_ID");
 	unsigned int theirID = GetInt("theirID");
-    // bool setRosParam = GetBool("setRosParam");
 
 
     // Store some variables for easy access
@@ -133,9 +132,9 @@ bt::Node::Status StandFree::Update() {
     // Make a Cover Cone for the robots standing between me and the goal
     roboteam_utils::Vector2 goalPos = LastWorld::get_their_goal_center();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-    goalPos.y = field.goal_width / 2 - 0.1;
+    goalPos.y = field.goal_width / 2;
     boost::optional<Cone> coneGoal = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
-    goalPos.y = -field.goal_width / 2 + 0.1;
+    goalPos.y = -field.goal_width / 2;
     boost::optional<Cone> coneGoal2 = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
 
 
@@ -144,49 +143,48 @@ bt::Node::Status StandFree::Update() {
     if (coneGoal && coneGoal2) {
 
         Cone cone = *coneGoal;
-        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-        
-        if (coneRobots) {
-            nearestFreePos = cone.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
-        } else {
-            nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
-        }
-
         Cone cone2 = *coneGoal2;
-        if (coneRobots) {
-            nearestFreePos2 = cone2.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos);
-        } else {
-            nearestFreePos2 = cone2.ClosestPointOnSide(myPos, theirGoalPos);
-        }        
+        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
 
 
         // Draw the lines in rqt_view
-        roboteam_utils::Vector2 cone1Side1 = (cone.center-cone.start).rotate(0.5*cone.angle);
-        cone1Side1 = cone1Side1.scale(3/cone1Side1.length());
         roboteam_utils::Vector2 cone1Side2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
         cone1Side2 = cone1Side2.scale(3/cone1Side2.length());
         roboteam_utils::Vector2 cone2Side1 = (cone2.center-cone2.start).rotate(0.5*cone2.angle);
         cone2Side1 = cone2Side1.scale(3/cone2Side1.length());
-        roboteam_utils::Vector2 cone2Side2 = (cone2.center-cone2.start).rotate(-0.5*cone2.angle);
-        cone2Side2 = cone2Side2.scale(3/cone2Side2.length());
-        drawer.SetColor(0, 0, 0);
-        drawer.DrawLine("coneGoal1Side1", cone.start, cone1Side1);
-        drawer.DrawLine("coneGoal1Side2", cone.start, cone1Side2);
-        drawer.SetColor(255,0,0);
-        drawer.DrawLine("coneGoal2Side1", cone2.start, cone2Side1);
-        drawer.DrawLine("coneGoal2Side2", cone2.start, cone2Side2);
+
+        roboteam_utils::Vector2 newConeStart = Cone::LineIntersection(cone.start, cone1Side2, cone2.start, cone2Side1);
+        Cone newCone(newConeStart, cone2Side1, cone1Side2);
+
+        roboteam_utils::Vector2 newConeSide1 = (newCone.center-newCone.start).rotate(-0.5*newCone.angle);
+        roboteam_utils::Vector2 newConeSide2 = (newCone.center-newCone.start).rotate(0.5*newCone.angle);
+
+        drawer.DrawLine("newConeSide1", newCone.start, newConeSide1);
+        drawer.DrawLine("newConeSide2", newCone.start, newConeSide2);
+
+        if (coneRobots) {
+            std::vector<std::string> names;
+            names.push_back("goalCone1option1");
+            names.push_back("goalCone1option2");
+            names.push_back("goalCone1option3");
+            names.push_back("goalCone1option4");
+            nearestFreePos = newCone.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos, drawer, names);
+        } else {
+            nearestFreePos = newCone.ClosestPointOnSide(myPos, theirGoalPos);
+        }        
     } else {
-        
-        drawer.RemoveLine("coneGoal1Side1");
-        drawer.RemoveLine("coneGoal1Side2");
-        drawer.RemoveLine("coneGoal2Side1");
-        drawer.RemoveLine("coneGoal2Side2");
+        drawer.RemoveLine("newConeSide1");
+        drawer.RemoveLine("newConeSide2");
     }
 
 
     if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
         nearestFreePos = nearestFreePos2;
     }
+
+    drawer.SetColor(255,0,0);
+    drawer.DrawPoint("nearestFreePos", nearestFreePos);
+    drawer.SetColor(0,0,0);
 
 
     // Fill the goToPos blackboard and send the command

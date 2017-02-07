@@ -56,6 +56,11 @@ void TwoAttackersTactic::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", firstAttackerID);
+        bb.SetInt("KEEPER_ID", 5);
+
+        bb.SetString("GetBall_A_AimAt", "robot");
+        bb.SetInt("GetBall_A_AimAtRobot", secondAttackerID);
+        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
 
         bb.SetString("AimAt_secondAttacker_At", "robot");
         bb.SetInt("AimAt_secondAttacker_AtRobot", secondAttackerID);
@@ -86,6 +91,7 @@ void TwoAttackersTactic::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", secondAttackerID);
+        bb.SetInt("KEEPER_ID", 5);
 
         bb.SetDouble("GoToPos_closeToGoal_xGoal", 3.0);
         bb.SetDouble("GoToPos_closeToGoal_yGoal", 1.0);

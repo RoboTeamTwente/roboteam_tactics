@@ -52,6 +52,7 @@ void SoloDefenderTactic::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", defenderID);
+        bb.SetInt("KEEPER_ID", defenderID);
 
         bb.SetBool("GetBall_A_intercept", false);
         bb.SetBool("GetBall_A_isKeeper", true);

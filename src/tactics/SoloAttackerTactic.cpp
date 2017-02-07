@@ -49,6 +49,7 @@ void SoloAttackerTactic::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", attackerID);
+        bb.SetInt("KEEPER_ID", 5);
 
         // Create message
         roboteam_msgs::RoleDirective wd;

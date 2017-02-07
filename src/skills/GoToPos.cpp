@@ -123,7 +123,7 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
 
     roboteam_utils::Vector2 forceVector(0.0, 0.0);
     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
-        double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
+        // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
             forceVector = antenna.rotate(-0.5*M_PI).scale(1 / (otherRobotPos - myPos).length());
         }
@@ -149,8 +149,8 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
     Cone antennaCone(coneStart, (antenna + myPos), 0.4);
 
     // Draw the lines of the cone in rqt_view
-    roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
-    roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    // roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    // roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
     // drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
     // drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
