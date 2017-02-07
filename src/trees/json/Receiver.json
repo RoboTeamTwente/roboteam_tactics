@@ -16,17 +16,6 @@
         "y": -96
       }
     },
-    "7861cf67-21cf-4192-bb34-1aaf475c263c": {
-      "id": "7861cf67-21cf-4192-bb34-1aaf475c263c",
-      "name": "ShootAtGoal",
-      "title": "ShootAtGoal_B",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 144,
-        "y": -36
-      }
-    },
     "2f204885-41b7-4747-8d3d-be3f8d924a32": {
       "id": "2f204885-41b7-4747-8d3d-be3f8d924a32",
       "name": "RepeatUntilSuccess",
@@ -53,8 +42,31 @@
       },
       "children": [
         "49d0ee49-924f-4b75-89e0-f18eb65301b2",
-        "7861cf67-21cf-4192-bb34-1aaf475c263c"
+        "5edfc53d-5e82-4b91-8c41-8b433232201c",
+        "3835777a-d731-4302-8f7f-9d8b188691c3"
       ]
+    },
+    "5edfc53d-5e82-4b91-8c41-8b433232201c": {
+      "id": "5edfc53d-5e82-4b91-8c41-8b433232201c",
+      "name": "AimAt",
+      "title": "AimAt_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": -36
+      }
+    },
+    "3835777a-d731-4302-8f7f-9d8b188691c3": {
+      "id": "3835777a-d731-4302-8f7f-9d8b188691c3",
+      "name": "Kick",
+      "title": "Kick_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": 24
+      }
     }
   },
   "display": {

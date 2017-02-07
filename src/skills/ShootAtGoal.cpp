@@ -1,21 +1,23 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Math.h"
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/skills/ShootAtGoal.h"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/utils/Math.h"
-#include "roboteam_tactics/utils/Cone.h"
+#include "roboteam_utils/Math.h"
+#include "roboteam_utils/Cone.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 
 
 
@@ -29,8 +31,8 @@ ShootAtGoal::ShootAtGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , rotateBB(std::make_shared<bt::Blackboard>())
         , kickBB(std::make_shared<bt::Blackboard>())
-        , rotateAroundPoint("", rotateBB) 
-        , kick("", kickBB) { 
+        , rotateAroundPoint("", rotateBB)
+        , kick("", kickBB) {
 
 	robotID = blackboard->GetInt("ROBOT_ID");
 	rotateBB->SetInt("ROBOT_ID", robotID);
@@ -44,6 +46,7 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	roboteam_utils::Vector2 theirGoalCenter = LastWorld::get_their_goal_center();
+    return theirGoalCenter;
 	double goalWidth = field.goal_width;
 	roboteam_utils::Vector2 theirGoalLeft = Vector2(theirGoalCenter.x, theirGoalCenter.y + 0.5*goalWidth*signum(theirGoalCenter.x));
 	roboteam_utils::Vector2 theirGoalRight = Vector2(theirGoalCenter.x, theirGoalCenter.y - 0.5*goalWidth*signum(theirGoalCenter.x));
@@ -68,11 +71,11 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 		} else {
 			currentRobot = me;
 		}
-		
+
 		if (currentRobot.id != me.id) {
 			if (goalCone.IsWithinCone(Vector2(currentRobot.pos))) {
 				watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
-			}  
+			}
 		}
     }
 
@@ -80,7 +83,7 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 		roboteam_msgs::WorldRobot currentRobot = world.them.at(i);
 		if (goalCone.IsWithinCone(Vector2(currentRobot.pos))) {
 			watchOutForTheseBots.insert(watchOutForTheseBots.end(), currentRobot);
-		}  
+		}
     }
 
     roboteam_utils::Vector2 targetPos;
@@ -116,7 +119,7 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 bt::Node::Status ShootAtGoal::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(robotID, true, &world);
-	
+
 	if (bot) {
 		me = *bot;
 	} else {
@@ -137,7 +140,7 @@ bt::Node::Status ShootAtGoal::Update() {
 
     rotateBB->SetDouble("faceTowardsPosx", targetPos.x);
     rotateBB->SetDouble("faceTowardsPosy", targetPos.y);
-    
+
     if (resultRotate != Status::Success) {
     	resultRotate = rotateAroundPoint.Update();
     }

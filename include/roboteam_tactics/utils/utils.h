@@ -6,16 +6,32 @@
 #include <vector>
 #include <iostream>
 
-#include "roboteam_tactics/bt.hpp"
-#include "roboteam_msgs/RobotCommand.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/World.h"
-#include "roboteam_utils/Vector2.h"
+#include <ros/message_forward.h>
+
+namespace roboteam_msgs {
+
+ROS_DECLARE_MESSAGE(RobotCommand);
+ROS_DECLARE_MESSAGE(WorldRobot);
+ROS_DECLARE_MESSAGE(WorldBall);
+ROS_DECLARE_MESSAGE(World);
+
+} // roboteam_msgs
+
+
 #include "roboteam_utils/constants.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
+
+#include "roboteam_tactics/bt.hpp"
+
+namespace roboteam_utils {
+
+// Forward declare s.t. we don't have to include it
+class Vector2;
+
+} // roboteam_utils
 
 namespace rtt {
+
 
 template<typename T>
 void delete_from_vector(std::vector<T> &items, const T &item) {
@@ -40,17 +56,7 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
 roboteam_utils::Vector2 predictBallPos(double seconds);
 roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
 
-/**
- * Looks up the given bot on the given team in the given world, and returns an optional WorldRobot.
- * If you don't pass a pointer to world, the function will get a world through LastWorld.
- */
-boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world = nullptr);
-boost::optional<roboteam_msgs::WorldRobot> lookup_our_bot(unsigned int id, const roboteam_msgs::World* world = nullptr);
-boost::optional<roboteam_msgs::WorldRobot> lookup_their_bot(unsigned int id, const roboteam_msgs::World* world = nullptr);
 
-bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball);
-
-static bool bot_has_ball(unsigned int id, bool our_team, const roboteam_msgs::WorldBall& ball) { return bot_has_ball(*lookup_bot(id, our_team), ball); }
 
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out = std::cout);
 void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras);
@@ -99,13 +105,10 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
 
-int get_robot_closest_to_point(const std::vector<int>& robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point);
-int get_robot_closest_to_their_goal(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
-int get_robot_closest_to_our_goal(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
-int get_robot_closest_to_ball(const std::vector<int>& robots, const roboteam_msgs::World &world = LastWorld::get());
-
-// ros::Publisher& get_rolecommand_publisher();
-// ros::Publisher& get_roledirective_publisher();
+int get_robot_closest_to_their_goal(std::vector<int> robots);
+int get_robot_closest_to_ball(std::vector<int> robots);
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world);
 
 template<
     class M

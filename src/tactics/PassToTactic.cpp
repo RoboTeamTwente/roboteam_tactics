@@ -5,11 +5,11 @@
 #include <limits>
 
 #include "unique_id/unique_id.h" 
-#include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"
+#include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -31,13 +31,16 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
         {}
 
 
-void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
+void PassToTactic::Initialize() {
+    roboteam_utils::Vector2 passToPoint(2.0, 1.0);
     tokens.clear();
     // RTT_DEBUG("Initializing Tactic\n");
 
     // This tactic directs two robots
     int PASSER_ID = 1;
     int RECEIVER_ID = 2;
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
     {
         // Fill blackboard with relevant info
@@ -89,6 +92,8 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
         bb.SetDouble("GetBall_B_getBallAtY", passToPoint.y);
         bb.SetDouble("GetBall_B_getBallAtTime", 10.0);
 
+        bb.SetString("AimAt_B_At", "theirgoal");
+
         // Create message
         receiver.robot_id = RECEIVER_ID;
         receiver.tree = "Receiver";
@@ -109,6 +114,8 @@ void PassToTactic::Initialize(roboteam_utils::Vector2 passToPoint) {
 void PassToTactic::ShutdownRoles() {
     passer.tree = passer.STOP_EXECUTING_TREE;
     receiver.tree = receiver.STOP_EXECUTING_TREE;
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     pub.publish(passer);
     pub.publish(receiver);
 }

@@ -1,8 +1,12 @@
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
+
 #include "roboteam_utils/Vector2.h"
 
 #include "roboteam_tactics/tactics/BasicDefenseTactic.h"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG BasicDefenseTactic

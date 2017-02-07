@@ -1,7 +1,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Math.h"
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/DefendGoalarea.h"
@@ -119,6 +119,7 @@ bt::Node::Status DefendGoalarea::Update() {
 		}
 		goto_bb->SetDouble("yGoal", ball.pos.y+offsetlength);
 		goto_bb->SetBool("endPoint",true);
+		goto_bb->SetBool("avoidRobots", false);
 		
 		goToPos.Update();
 	} else { // on an arc

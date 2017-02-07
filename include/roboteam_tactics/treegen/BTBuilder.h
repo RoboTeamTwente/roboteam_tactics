@@ -1,8 +1,10 @@
-#include "json.hpp"
+#include <boost/optional.hpp>
 #include <string>
 #include <map>
 #include <set>
 #include <sstream>
+
+#include "json.hpp"
 
 namespace rtt {
 
@@ -14,7 +16,9 @@ class BTBuilder {
 public:
     BTBuilder();
     ~BTBuilder();
-    std::string build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces);
+
+    boost::optional<std::string> build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces);
+
 private:
     std::map<std::string, nlohmann::json> nodes;
     std::stringstream out;

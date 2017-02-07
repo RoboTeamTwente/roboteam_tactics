@@ -5,8 +5,8 @@
 #include "ros/ros.h"
 
 #include "roboteam_tactics/conditions/DistanceXToY.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Position.h"
@@ -65,7 +65,7 @@ public:
     std::string node_name() override { return "Block"; }
 private:
     BlockPos* pos;
-    std::unique_ptr<AvoidRobots> avoidBots;
+    std::unique_ptr<GoToPos> goToPos;
  
     unsigned int my_id, tgt_id, block_id;
     bool constant, invert;

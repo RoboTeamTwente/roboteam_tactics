@@ -1,9 +1,13 @@
+#include <boost/range/join.hpp>
 #include <ros/ros.h>
+
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RobotCommand.h"
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/constants.h"
-#include <boost/range/join.hpp>
+#include "roboteam_utils/world_analysis.h"
 
 namespace rtt {
 
@@ -68,6 +72,11 @@ double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, 
     else {
         ROS_WARN("utils/GetTargetAngle: cannot find robot");
         return 0.0;
+    }
+
+    if (target == "fieldcenter") {
+        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - roboteam_utils::Vector2(robot.pos);
+        return posDiff.angle();
     }
 
     if (target == "theirgoal") {
@@ -172,6 +181,7 @@ roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double sec
 }
 
 
+<<<<<<< HEAD
 boost::optional<roboteam_msgs::WorldRobot> lookup_bot(unsigned int id, bool our_team, const roboteam_msgs::World* world) {
     const roboteam_msgs::World w = world == nullptr ? LastWorld::get() : *world;
     auto vec = our_team ? w.us : w.them;
@@ -203,6 +213,8 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     return dist <= .2 && fabs(angle - bot.angle) <= .3;
 }
 
+=======
+>>>>>>> a11adfe3456cf697a9d6c0a719a007f344e1167b
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
     out << "Blackboard:\n";
     for (const auto& pair : bb->getBools()) {
@@ -314,17 +326,25 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-int get_robot_closest_to_point(const std::vector<int>& robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
+
+int get_robot_closest_to_ball(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_ball(robots, lw);
+}
+
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
+
+    roboteam_utils::Vector2 ball_pos(world.ball.pos);
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
         roboteam_utils::Vector2 pos(worldRobot.pos);
 
-        if ((pos - point).length() < closest_robot_ds) {
+        if ((pos - ball_pos).length() < closest_robot_ds) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
                 closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - point).length();
+                closest_robot_ds = (pos - ball_pos).length();
             }
         }
     }
@@ -332,16 +352,27 @@ int get_robot_closest_to_point(const std::vector<int>& robots, const roboteam_ms
     return closest_robot;
 }
 
-int get_robot_closest_to_ball(const std::vector<int>& robots, const roboteam_msgs::World &world) {
-    return get_robot_closest_to_point(robots, world, roboteam_utils::Vector2(world.ball.pos));
+int get_robot_closest_to_their_goal(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_their_goal(robots, lw);
 }
 
-int get_robot_closest_to_their_goal(const std::vector<int>& robots, const roboteam_msgs::World &world) {
-    return get_robot_closest_to_point(robots, world, LastWorld::get_their_goal_center());
-}
+int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
+    int side = LastWorld::get_our_goal_center().x;
 
-int get_robot_closest_to_our_goal(const std::vector<int>& robots, const roboteam_msgs::World &world) {
-    return get_robot_closest_to_point(robots, world, LastWorld::get_our_goal_center());
+    int furthest_robot = -1;
+    double furthest_robot_side_dist = -std::numeric_limits<double>::max();
+    for (roboteam_msgs::WorldRobot worldRobot : world.us) {
+        double this_robot_side_dist = std::abs(worldRobot.pos.x - side);
+        if (this_robot_side_dist > furthest_robot_side_dist) {
+            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+                furthest_robot = worldRobot.id;
+                furthest_robot_side_dist = this_robot_side_dist;
+            }
+        }
+    }
+
+    return furthest_robot;
 }
 
 } // rtt

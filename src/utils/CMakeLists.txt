@@ -1,17 +1,15 @@
 add_library(utils OBJECT
-    Cone.cpp
     ComputePassPoint.cpp
     DangerFinder.cpp
-    Draw.cpp
     FeedbackCollector.cpp
-    LastWorld.cpp
-    LastRef.cpp
-    Math.cpp
     RobotDealer.cpp
     utils.cpp
     BTRunner.cpp
     BtDebug.cpp
     BBParser.cpp
+    Parts.cpp
+    Leaf.cpp
+    ScopedBB.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

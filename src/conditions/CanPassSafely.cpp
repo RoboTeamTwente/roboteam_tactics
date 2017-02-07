@@ -1,6 +1,8 @@
+#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/conditions/CanPassSafely.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 

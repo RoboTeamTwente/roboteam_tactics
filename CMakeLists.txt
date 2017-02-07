@@ -3,6 +3,14 @@ project(roboteam_tactics)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
+# Colors for everyone to use!
+if(NOT WIN32)
+    string(ASCII 27 Esc)
+    set(BLUE_TEXT "${Esc}[34m")
+    set(BOLD_TEXT  "${Esc}[1m")
+    set(RESET_TEXT "${Esc}[0m")
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roboteam_utils
@@ -173,7 +181,11 @@ foreach(json_project ${JSON_PROJECTS})
             ${output_files}
         )
 
-    MESSAGE("Project files for " ${basename} ": " ${output_files})
+    MESSAGE("-- Project files for " ${BLUE_TEXT} ${BOLD_TEXT} ${project_basename} ${RESET_TEXT} ": ")
+    
+    foreach(output_file ${output_files})
+        MESSAGE("--     - ${output_file}")
+    endforeach(output_file)
 
     set(GENERATED_FILES
         ${GENERATED_FILES}

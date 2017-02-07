@@ -1,15 +1,16 @@
-#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <string>
 #include <math.h>
+#include <ros/ros.h>
 
-#include "ros/ros.h"
-
-#include "roboteam_tactics/skills/RandomDrive.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/DebugPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_msgs/World.h"
+
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/skills/RandomDrive.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/utils.h"
-
 
 namespace rtt {
 
@@ -17,7 +18,7 @@ RTT_REGISTER_SKILL(RandomDrive);
 
 RandomDrive::RandomDrive(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) {
+        , goToPos("", private_bb) {
 	debug_pub = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
 
     // Generate a random id for this RandomDriver.
@@ -61,8 +62,9 @@ bt::Node::Status RandomDrive::Update() {
     private_bb->SetDouble("xGoal", goal.x);
     private_bb->SetDouble("yGoal", goal.y);
     private_bb->SetDouble("angleGoal", goal_angle);
+    private_bb->SetBool("avoidRobots", true);
 
-    if (avoidRobots.Update() == Status::Success) {
+    if (goToPos.Update() == Status::Success) {
         pick_new_goal = true;
     }
 

@@ -2,11 +2,11 @@
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Position.h"
-#include "roboteam_tactics/skills/Dribble.h"
-#include "roboteam_msgs/RobotCommand.h"
-#include "ros/ros.h"
 
 namespace rtt {
+
+// Forward declare skill
+class Dribble;
     
 class BackUp : public Skill {
 
@@ -14,7 +14,7 @@ class BackUp : public Skill {
     BackUp(std::string name = "", bt::Blackboard::Ptr bb = nullptr);
     Status Update() override;
     
-    std::string node_name() { return "BackUp"; }
+    std::string node_name() override { return "BackUp"; }
     
     static VerificationMap required_params() {
         VerificationMap params;

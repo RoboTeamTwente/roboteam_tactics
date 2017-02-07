@@ -1,6 +1,6 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/conditions/WeHaveBall.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {

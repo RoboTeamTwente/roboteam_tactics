@@ -2,9 +2,6 @@
 
 #include "roboteam_tactics/Leaf.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/utils.h"
 
@@ -24,13 +21,16 @@ class CanSeePoint : public Condition {
     
     CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard);
     Status Update() override;
-    std::string node_name() { return "CanSeePoint"; }
+    std::string node_name() override { return "CanSeePoint"; }
     
     protected:
     double threshold_dist;
     
 };
 
+// TODO: If anyone is using this class at some point, please factor it into
+// it's own source + header file. At this moment using skills like this is
+// not possible (i.e. will cause build errors probably)
 class CanSeeGoal : public CanSeePoint {
     public:
     CanSeeGoal(std::string name, bt::Blackboard::Ptr blackboard) : CanSeePoint(name, blackboard) {

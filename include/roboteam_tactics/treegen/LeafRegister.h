@@ -87,6 +87,11 @@ std::vector<std::string> get_entry_names() {
     return entries;
 }
 
+bool isTactic(std::string tactic);
+bool isSkill(std::string skill);
+bool isCondition(std::string condition);
+bool isTree(std::string tree);
+
 } // factories
 
 } // rtt

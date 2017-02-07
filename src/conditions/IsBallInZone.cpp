@@ -1,14 +1,16 @@
-#include "ros/ros.h"
-#include "roboteam_tactics/conditions/TeamHasBall.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
+#include <vector>
+
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
+
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
+
+#include "roboteam_tactics/conditions/TeamHasBall.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/IsBallInZone.h"
-
-#include <vector>
 
 namespace rtt {
 

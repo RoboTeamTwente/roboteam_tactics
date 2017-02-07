@@ -1,20 +1,15 @@
 #pragma once
 #include <cstdint>
 
-#include "ros/ros.h"
-
-#include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/Parts.h"
+
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
+
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/Parts.h"
 
 namespace rtt {
-
-
 
 class RotateAroundPoint : public Skill {
 public:
@@ -30,7 +25,6 @@ private:
 	uint32_t prevworldseq;
 	bool firstworld=true;
 	int robotID;
-	// double targetAngle;
 	double targetAngle;
 	roboteam_msgs::WorldRobot robot;
 	roboteam_msgs::WorldBall ball;
@@ -38,7 +32,7 @@ private:
 	double rotw;
 	roboteam_utils::Vector2 center;
    	double radius=radius;
-   	AvoidRobots avoidRobots;
+   	GoToPos goToPos;
 	
 } ;
 

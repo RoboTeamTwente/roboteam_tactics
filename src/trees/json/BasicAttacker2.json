@@ -5,17 +5,6 @@
   "root": "2ea46c48-bbea-4625-906e-da6d57200860",
   "properties": {},
   "nodes": {
-    "966bdcad-ec20-4248-829f-4ceb622fa5e5": {
-      "id": "966bdcad-ec20-4248-829f-4ceb622fa5e5",
-      "name": "StandFree",
-      "title": "StandFree_A",
-      "description": "",
-      "properties": {},
-      "display": {
-        "x": 0,
-        "y": -132
-      }
-    },
     "bd3e489a-1d05-4138-be42-da33cb216246": {
       "id": "bd3e489a-1d05-4138-be42-da33cb216246",
       "name": "GetBall",
@@ -49,7 +38,6 @@
         "y": 24
       },
       "children": [
-        "966bdcad-ec20-4248-829f-4ceb622fa5e5",
         "87689268-8e44-4955-a126-3f1423c83756",
         "dda7b71f-4674-427d-8381-a654e787cb71",
         "82e07d04-bd25-4d32-8440-c7fbfab3646c"
@@ -82,7 +70,7 @@
     }
   },
   "display": {
-    "camera_x": 577.5649999999769,
+    "camera_x": 644.1499999999396,
     "camera_y": 306.1999999999989,
     "camera_z": 1,
     "x": -264,
@@ -396,6 +384,48 @@
       "name": "OneRobotGetsBallTactic",
       "category": "action",
       "title": "OneRobotGetsBallTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DribbleCurve",
+      "category": "action",
+      "title": "DribbleCurve",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsRefCommand",
+      "category": "condition",
+      "title": "IsRefCommand",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsRefStage",
+      "category": "condition",
+      "title": "IsRefStage",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ShootAtGoal",
+      "category": "action",
+      "title": "ShootAtGoal_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsBallInZone",
+      "category": "condition",
+      "title": "IsBallInZone",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "PassToTactic",
+      "category": "action",
+      "title": "PassToTactic",
       "description": null,
       "properties": {}
     }

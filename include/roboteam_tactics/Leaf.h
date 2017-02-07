@@ -1,13 +1,20 @@
 #pragma once
 
+#include <cstdio>
 #include <boost/optional.hpp>
-#include <ros/ros.h>
+
+#include <ros/message_forward.h>
+
+namespace roboteam_msgs {
+
+ROS_DECLARE_MESSAGE(BtDebugInfo);
+ROS_DECLARE_MESSAGE(BtStatus);
+
+}
 
 #include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/verifier.h"
-#include "roboteam_msgs/BtDebugInfo.h"
-#include "roboteam_msgs/BtStatus.h"
 
 namespace rtt {
 
@@ -23,41 +30,7 @@ constexpr BlackboardPolicy DEFAULT_BB_POLICY = BlackboardPolicy::GLOBAL_FIRST;
 class Leaf : public bt::Leaf {
 public:
 
-    Status Tick() {
-        // Logic to, if enabled, send tree traces to the debug gui
-        #ifdef RTT_ENABLE_BT_RQT_TRACE
-
-        Status previousStatus = status;
-
-        Status newStatus = bt::Leaf::Tick();
-
-        roboteam_msgs::Blackboard bb;
-
-        if (newStatus != bt::Node::Status::Running) {
-            roboteam_msgs::BtDebugInfo::_type_type msgStatus;
-
-            if (newStatus == bt::Node::Status::Success) {
-                msgStatus = roboteam_msgs::BtStatus::SUCCESS;
-            } else if (newStatus == bt::Node::Status::Failure) {
-                msgStatus = roboteam_msgs::BtStatus::FAILURE;
-            } else if (newStatus == bt::Node::Status::Invalid) {
-                msgStatus = roboteam_msgs::BtStatus::INVALID;
-            }
-
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
-        } else if (newStatus != previousStatus) {
-            roboteam_msgs::BtDebugInfo::_type_type msgStatus = roboteam_msgs::BtStatus::STARTUP;
-            RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
-        }
-
-        return newStatus;
-
-        #else
-
-        return bt::Leaf::Tick();
-
-        #endif
-    }
+    virtual Status Tick();
 
     template<typename Impl>
     static boost::optional<std::string> valid_string_opt(typename std::enable_if<HasStringOptions<Impl>::value,
@@ -126,7 +99,7 @@ public:
                     boost::optional<std::string> error = valid_string_opt<Impl>({key, val});
                     if ((bool) error) {
                         this_valid = false;
-                        ROS_ERROR("%s", error->c_str());
+                        fprintf(stderr, "%s", error->c_str());
                     }
                     break;
                 }
@@ -134,7 +107,7 @@ public:
                 throw std::logic_error("Incomplete switch statement in rtt::Leaf::validate_blackboard.");
             }
             if (!this_valid) {
-                ROS_ERROR("Blackboard verification error: no %s of type %s in blackboard \"%s\"", key.c_str(),
+                fprintf(stderr, "Blackboard verification error: no %s of type %s in blackboard \"%s\"", key.c_str(),
                     bbArgTypeName(pair.second), name.c_str());
                 valid = false;
             }
@@ -150,38 +123,18 @@ public:
                                               std::string name = "") {
 
         if (blackboard == nullptr) {
-            ROS_ERROR("Blackboard verification error: blackboard is null");
+            fprintf(stderr, "Blackboard verification error: blackboard is null");
         }
         return blackboard != nullptr;
     }
 
 
-    static const char* bbArgTypeName(BBArgumentType arg) {
-        switch (arg) {
-        case BBArgumentType::Int:
-            return "int";
-        case BBArgumentType::Float:
-            return "float";
-        case BBArgumentType::Double:
-            return "double";
-        case BBArgumentType::Bool:
-            return "bool";
-        case BBArgumentType::String:
-            return "string";
-        default:
-            return "<<missing>>";
-        }
-    }
+    static const char* bbArgTypeName(BBArgumentType arg);
 
-    Leaf(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr)
-            : bt::Leaf(blackboard)
-            , name{name}
-            {}
-    virtual ~Leaf() {}
+    Leaf(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    virtual ~Leaf();
 
-    virtual Status Update() {
-        return Status::Invalid;
-    }
+    virtual Status Update();
 
     const std::string name;
 
@@ -222,54 +175,28 @@ public:
 
     public:
     // Proxies that prefix an id for lookups in the global table.
-    inline void SetBool(std::string key, bool value) { blackboard->SetBool(getPrefixedId(key), value); }
-    inline bool GetBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) {
-        return GetVar<bool, &bt::Blackboard::HasBool, &bt::Blackboard::GetBool>(key, policy);
-    }
+    void SetBool(std::string key, bool value);
+    bool GetBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
 
-    inline bool HasBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const {
-        return HasVar<bool, &bt::Blackboard::HasBool>(key, policy);
-    }
+    bool HasBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
-    inline void SetInt(std::string key, int value)  { blackboard->SetInt(getPrefixedId(key), value); }
-    inline int GetInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) {
-        return GetVar<int, &bt::Blackboard::HasInt, &bt::Blackboard::GetInt>(key, policy);
-    }
-    inline int HasInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const {
-        return HasVar<int, &bt::Blackboard::HasInt>(key, policy);
-    }
+    void SetInt(std::string key, int value) ;
+    int GetInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    int HasInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
-    inline void SetFloat(std::string key, float value)  { blackboard->SetFloat(getPrefixedId(key), value); }
-    inline float GetFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) {
-        return GetVar<float, &bt::Blackboard::HasFloat, &bt::Blackboard::GetFloat>(key, policy);
-    }
-    inline float HasFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const {
-        return HasVar<float, &bt::Blackboard::HasFloat>(key, policy);
-    }
+    void SetFloat(std::string key, float value) ;
+    float GetFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    float HasFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
-    inline void SetDouble(std::string key, double value)  { blackboard->SetDouble(getPrefixedId(key), value); }
-    inline double GetDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) {
-        return GetVar<double, &bt::Blackboard::HasDouble, &bt::Blackboard::GetDouble>(key, policy);
-    }
-    inline bool HasDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const {
-        return HasVar<double, &bt::Blackboard::HasDouble>(key, policy);
-    }
+    void SetDouble(std::string key, double value) ;
+    double GetDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    bool HasDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
-    inline void SetString(std::string key, std::string value)  { blackboard->SetString(getPrefixedId(key), value); }
-    inline std::string GetString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) {
-        return GetVar<std::string, &bt::Blackboard::HasString, &bt::Blackboard::GetString>(key, policy);
-    }
-    inline bool HasString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const {
-        return HasVar<std::string, &bt::Blackboard::HasString>(key, policy);
-    }
+    void SetString(std::string key, std::string value) ;
+    std::string GetString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    bool HasString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
-    std::string getPrefixedId(std::string id) const {
-        if (name.empty()) {
-            return id;
-        }
-
-        return name + "_" + id;
-    }
+    std::string getPrefixedId(std::string id) const;
 
     protected:
 
