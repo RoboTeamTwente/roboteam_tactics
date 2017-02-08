@@ -13,7 +13,7 @@ void SecondaryKeeperTactic::Initialize() {
         return;
     }
     
-    int bot = get_robot_closest_to_our_goal(bots);
+    int bot = 1;//get_robot_closest_to_our_goal(bots);
     assert(bot > -1);
     claim_robot(bot);
     

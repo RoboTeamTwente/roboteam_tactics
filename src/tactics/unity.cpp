@@ -19,7 +19,13 @@
 #include "GoToSideTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "InterceptorsTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "PassToTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "SecondaryKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "SoloAttackerTactic.cpp"
