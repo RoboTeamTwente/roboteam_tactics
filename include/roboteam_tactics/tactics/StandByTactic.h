@@ -8,9 +8,9 @@
 
 namespace rtt {
 
-class TwoAttackersTactic : public Tactic {
+class StandByTactic : public Tactic {
     public:
-    TwoAttackersTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    StandByTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
     Status Update();
     ros::NodeHandle n;
@@ -18,12 +18,6 @@ class TwoAttackersTactic : public Tactic {
     private:
     std::vector<boost::uuids::uuid> tokens;
     time_point start;
-
-    bool isThisYourFirstTimeHere = true;
-    time_point finishTime;
-
-    roboteam_msgs::RoleDirective firstAttacker;
-    roboteam_msgs::RoleDirective secondAttacker;
 };
 
 }

@@ -41,8 +41,6 @@ void TwoAttackersTactic::Initialize() {
     int secondAttackerID = 1;
     firstAttacker.robot_id = firstAttackerID;
     secondAttacker.robot_id = secondAttackerID;
-
-    ros::param::set("signal_readyToReceiveBall", "nope");
     
     // delete_from_vector(robots, attackerID);
     claim_robots({firstAttackerID, secondAttackerID});
@@ -70,8 +68,6 @@ void TwoAttackersTactic::Initialize() {
         bb.SetString("ParamCheck_canIShoot_value", "ready");
 
         // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.robot_id = firstAttackerID;
         firstAttacker.tree = "qualification/TwoAttackersFirstRole";
         firstAttacker.blackboard = bb.toMsg();
 
@@ -93,22 +89,22 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("ROBOT_ID", secondAttackerID);
         bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetDouble("GoToPos_closeToGoal_xGoal", 3.0);
-        bb.SetDouble("GoToPos_closeToGoal_yGoal", 1.0);
-        bb.SetDouble("GoToPos_closeToGoal_angleGoal", -0.5*M_PI);
-        bb.SetBool("GoToPos_closeToGoal_avoidRobots", true);
+        bb.SetString("ParamSet_default_signal", "readyToReceiveBall");
+        bb.SetString("ParamSet_default_value", "nope");
 
         bb.SetInt("StandFree_A_theirID", firstAttackerID);
         bb.SetString("StandFree_A_whichTeam", "us");
+        bb.SetDouble("StandFree_A_xGoal", -3.0);
+        bb.SetDouble("StandFree_A_yGoal", 1.0);
 
         bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
         bb.SetString("ParamSet_readyToReceive_value", "ready");
 
+        bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+
         bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
 
         // Create message
-        // roboteam_msgs::RoleDirective wd;
-        // wd.robot_id = secondAttackerID;
         secondAttacker.tree = "qualification/TwoAttackersSecondRole";
         secondAttacker.blackboard = bb.toMsg();
 
@@ -121,6 +117,7 @@ void TwoAttackersTactic::Initialize() {
         pub.publish(secondAttacker);
     }
 
+    isThisYourFirstTimeHere = true;
     start = rtt::now();
 }
 
@@ -155,8 +152,21 @@ bt::Node::Status TwoAttackersTactic::Update() {
     }
 
     if (firstAttackerSucceeded && secondAttackerSucceeded) {
-        RTT_DEBUGLN("Both roles succeeded, so tactic succeeded");
-        return bt::Node::Status::Success;
+
+        if (isThisYourFirstTimeHere) {
+            finishTime = now();
+            RTT_DEBUGLN("Both roles succeeded, so tactic succeeded, but let's just wait a coupla seconds before restarting for dramatic effect");
+            isThisYourFirstTimeHere = false;
+
+            return Status::Running;
+        } else {
+            if (time_difference_milliseconds(finishTime, now()).count() > 100) {
+                RTT_DEBUGLN("Okayy, ready to restart");
+                return Status::Success;
+            } else {
+                return Status::Running;
+            }            
+        }
     }
 
     if (oneFailed) {

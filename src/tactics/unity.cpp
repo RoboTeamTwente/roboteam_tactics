@@ -34,6 +34,9 @@
 #include "SoloDefenderTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "StandByTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "OneTwoTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

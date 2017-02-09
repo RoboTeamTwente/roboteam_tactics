@@ -364,7 +364,11 @@ bt::Node::Status GoToPos::Update () {
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
     command.w = angularVelCommand;
-    if (GetBool("dribbler")) command.dribbler = true;
+    if (GetBool("dribbler")) {
+        command.dribbler = true;
+    } else {
+        command.dribbler = false;
+    }
 
 
     // Get global robot command publisher, and publish the command
