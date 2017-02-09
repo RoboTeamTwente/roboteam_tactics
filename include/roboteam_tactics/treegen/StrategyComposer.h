@@ -6,9 +6,9 @@
 
 
 namespace rtt {
-    
-static constexpr const char* UNSET = "<<TODO>>";    
 
+static constexpr const char* UNSET = "<<TODO>>";
+    
 class StrategyComposer {
 private:
     StrategyComposer() = delete;

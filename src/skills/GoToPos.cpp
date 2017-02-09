@@ -125,15 +125,12 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(-0.5*M_PI).scale(1 / (otherRobotPos - myPos).length());
+            forceVector = antenna.rotate(-0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
         }
         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(0.5*M_PI).scale(1 / (otherRobotPos - myPos).length());
+            forceVector = antenna.rotate(0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
         }
     }    
-    drawer.SetColor(255, 0, 0);
-    // drawer.DrawLine("forceVector", myPos, forceVector);
-    drawer.SetColor(0, 0, 0);
     return forceVector;
 }
 
@@ -142,17 +139,21 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
 roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
-    double lookingDistance = 1;
     roboteam_utils::Vector2 posError = targetPos - myPos;
+    double lookingDistance = 0.7; // default
+    if (lookingDistance > posError.length()) {
+        lookingDistance = posError.length();
+    }
+    
     roboteam_utils::Vector2 antenna = roboteam_utils::Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    roboteam_utils::Vector2 coneStart = myPos - antenna.scale(1.0 / antenna.length());
-    Cone antennaCone(coneStart, (antenna + myPos), 0.4);
+    roboteam_utils::Vector2 coneStart = myPos - antenna;
+    Cone antennaCone(coneStart, (antenna + myPos), 0.3);
 
     // Draw the lines of the cone in rqt_view
-    // roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
-    // roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    // drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    // drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     roboteam_utils::Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {

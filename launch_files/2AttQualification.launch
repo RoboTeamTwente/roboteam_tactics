@@ -1,3 +1,17 @@
 <launch>
-	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/TwoAttackersStrat" output="screen" /> 
+
+	<group ns="blue">
+		<param name="role_iterations_per_second" type="int" value="30" />
+		<param name="num_role_nodes" type="int" value="1" />
+
+		<arg name="our_side_arg" default="left" />
+		<arg name="our_color_arg" default="blue" />
+
+		<param name="our_side" type="str" value="$(arg our_side_arg)" />
+		<param name="our_color" type="str" value="$(arg our_color_arg)" />
+
+		<include file="$(find roboteam_tactics)/launch_files/RTTCore.launch" />
+		<include file="$(find roboteam_tactics)/launch_files/TwoAttackers.launch" />
+	</group>
+
 </launch>

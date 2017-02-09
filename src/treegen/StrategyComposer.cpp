@@ -7,8 +7,6 @@ namespace rtt {
 bool StrategyComposer::initialized = false;    
 bt::BehaviorTree StrategyComposer::mainStrategy;
 
-// using UNSET = StrategyComposer::UNSET;
-
 /*
  * This is a mapping of Ref states to the appropriate strategies.
  * Please do not remove the comments.
