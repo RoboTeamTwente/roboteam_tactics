@@ -1,7 +1,7 @@
 <launch>
 
 	<group ns="blue">
-		<param name="role_iterations_per_second" type="int" value="60" />
+		<param name="role_iterations_per_second" type="int" value="30" />
 		<param name="num_role_nodes" type="int" value="1" />
 
 		<arg name="our_side_arg" default="left" />
@@ -15,7 +15,7 @@
 	</group>
 
 	<group ns="yellow">
-		<param name="role_iterations_per_second" type="int" value="60" />
+		<param name="role_iterations_per_second" type="int" value="30" />
 		<param name="num_role_nodes" type="int" value="1" />
 
 		<arg name="our_side_arg" default="right" />

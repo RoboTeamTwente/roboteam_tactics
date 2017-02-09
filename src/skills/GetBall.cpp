@@ -143,7 +143,6 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
-        private_bb->SetBool("isKeeper", GetBool("isKeeper"));
         goToPos.Update();
 		return Status::Running;
 	}

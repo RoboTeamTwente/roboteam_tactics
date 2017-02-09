@@ -61,7 +61,6 @@ void SoloDefenderTactic::Initialize() {
         bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
         bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
         bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
-        bb.SetBool("ReceiveBall_A_isKeeper", true);
 
         bb.SetDouble("Kick_A_kickVel", 2.5);
 

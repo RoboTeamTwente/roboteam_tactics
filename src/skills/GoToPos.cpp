@@ -215,8 +215,9 @@ roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPo
     roboteam_utils::Vector2 newTargetPos(xGoal, yGoal);
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
-    if (!GetBool("isKeeper")) {
 
+    if (!(GetInt("ROBOT_ID") == GetInt("KEEPER_ID"))) {
+        
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea("our defense area", newTargetPos)) {
             roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
@@ -305,7 +306,10 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Defense area avoidance
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    if (!(GetInt("ROBOT_ID") == GetInt("KEEPER_ID"))) {
+        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    }
+    
 
 
     // Rotation controller to make sure the robot has and keeps the correct orientation

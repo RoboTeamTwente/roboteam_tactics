@@ -36,7 +36,7 @@ void SoloAttackerTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     
-    int attackerID = 0;
+    int attackerID = 1;
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
 

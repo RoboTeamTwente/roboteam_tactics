@@ -7,6 +7,8 @@
 
 namespace rtt {
     
+static constexpr const char* UNSET = "<<TODO>>";    
+
 class StrategyComposer {
 private:
     StrategyComposer() = delete;
@@ -15,7 +17,6 @@ private:
     static bool initialized;
     
     static constexpr unsigned int CASE_COUNT = 19;
-    static constexpr const char* UNSET = "<<TODO>>";
     
     // SET THIS IN StrategyComposer.cpp !!
     static const std::array<const char*, CASE_COUNT> MAPPING;

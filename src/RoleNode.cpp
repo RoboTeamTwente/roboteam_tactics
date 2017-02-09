@@ -36,7 +36,7 @@ std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
-bool ignoring_strategy_instructions = true;
+bool ignoring_strategy_instructions = false;
 
 void reset_tree() {
     currentToken = uuid_msgs::UniqueID();
@@ -44,6 +44,8 @@ void reset_tree() {
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
+
+    // ROS_INFO_STREAM("role directive callback!");
 
     std::string name = ros::this_node::getName();
     // Some control statements to regulate starting and stopping of rolenodes
@@ -58,7 +60,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     ros::NodeHandle n;
 
-    // std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
+    std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
@@ -66,30 +68,30 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
 
-        // std::cout << ROBOT_ID << ": Stop executing tree!\n";
+        std::cout << ROBOT_ID << ": Stop executing tree!\n";
 
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
         reset_tree();
         ignoring_strategy_instructions = true;
 
-        // std::cout << "Ignoring strategy instructions!\n";
+        std::cout << "Ignoring strategy instructions!\n";
 
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
         ignoring_strategy_instructions = false;
-        // std::cout << "Ignoring strategy instructions no!\n";
+        std::cout << "Ignoring strategy instructions no!\n";
         return;
     }
 
-    // std::cout << "Ignoring strategy? ";
+    std::cout << "Ignoring strategy? ";
 
     if (ignoring_strategy_instructions) {
-        // std::cout << "Yes!\n";
+        std::cout << "Yes!\n";
         return;
     }
 
-    // std::cout << "No!\n";
+    std::cout << "No!\n";
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
