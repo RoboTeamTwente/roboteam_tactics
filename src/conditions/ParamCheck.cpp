@@ -52,7 +52,7 @@ bt::Node::Status check_param(std::string signal, std::string mode, const T &defa
 }
 
 bt::Node::Status ParamCheck::Update() {
-    std::string signal = "signal_" + GetString("signal");
+    std::string signal = "/signal_" + GetString("signal");
     std::string mode = GetString("mode");
 
     std::string argType;

@@ -16,7 +16,7 @@ ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) { }
 
 bt::Node::Status ParamSet::Update() {
-    std::string signal = "signal_" + GetString("signal");
+    std::string signal = "/signal_" + GetString("signal");
     std::string value;
     
     std::string argType;

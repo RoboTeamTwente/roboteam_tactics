@@ -36,11 +36,20 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
 
 void GoToPos::sendStopCommand(uint id) {
+
+    ROS_INFO("sending stop command!");
     roboteam_msgs::RobotCommand command;
     command.id = id;
     command.x_vel = 0.0;
     command.y_vel = 0.0;
     command.w = 0.0;
+    if (GetBool("dribbler")) {
+        ROS_INFO("turning on dribbler!");
+        command.dribbler = true;
+    } else {
+        ROS_INFO("turning off dribbler!");
+        command.dribbler = false;
+    }
 
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -364,11 +373,7 @@ bt::Node::Status GoToPos::Update () {
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
     command.w = angularVelCommand;
-    if (GetBool("dribbler")) {
-        command.dribbler = true;
-    } else {
-        command.dribbler = false;
-    }
+    command.dribbler = GetBool("dribbler");
 
 
     // Get global robot command publisher, and publish the command

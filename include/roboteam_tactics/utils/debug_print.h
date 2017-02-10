@@ -41,7 +41,7 @@ SET_DEBUG_FOR(DefendGoalarea, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(GetBall, false);
 SET_DEBUG_FOR(InterceptBall, true);
-SET_DEBUG_FOR(Kick, false);
+SET_DEBUG_FOR(Kick, true);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(ReceiveBall, false);

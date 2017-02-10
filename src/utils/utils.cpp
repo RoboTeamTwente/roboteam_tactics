@@ -313,7 +313,7 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 	cmd.y_vel = 0.0;
 	cmd.w = 0.0;
 
-	cmd.dribbler=true;
+	cmd.dribbler=false;
 	cmd.kicker=false;
 	cmd.kicker_vel=0.0;
 	cmd.kicker_forced=false;

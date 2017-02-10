@@ -36,7 +36,7 @@ void SoloAttackerTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     
-    int attackerID = 1;
+    int attackerID = 0;
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
 
@@ -77,27 +77,31 @@ bt::Node::Status SoloAttackerTactic::Update() {
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
-            treeSucceeded &= status == bt::Node::Status::Success;
-            treeFailed &= status == bt::Node::Status::Failure;
-            treeInvalid &= status == bt::Node::Status::Invalid;
+            if (status == bt::Node::Status::Success) {
+                treeSucceeded = true;
+            }
+            if (status == bt::Node::Status::Failure) {
+                treeFailed = true;
+            }
+            if (status == bt::Node::Status::Invalid) {
+                treeInvalid = true;
+            }
         }
     }
 
     if (treeSucceeded) {
-        // RTT_DEBUGLN("SoloAttackerTactic Succeeded!");
         return bt::Node::Status::Success;
     }
     if (treeFailed) {
-        // RTT_DEBUGLN("SoloAttackerTactic Failed!");
         return bt::Node::Status::Failure;
     }
     if (treeInvalid) {
-        // RTT_DEBUGLN("SoloAttackerTactic Invalid!");
         return bt::Node::Status::Invalid;
     }
 
     auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 12) {
+    if (duration.count() >= 25) {
+        RTT_DEBUGLN("Tactic failed because it took too long");
         return Status::Failure;
     }
 

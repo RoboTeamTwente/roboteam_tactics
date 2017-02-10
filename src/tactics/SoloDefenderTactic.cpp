@@ -54,13 +54,13 @@ void SoloDefenderTactic::Initialize() {
         bb.SetInt("ROBOT_ID", defenderID);
         bb.SetInt("KEEPER_ID", defenderID);
 
-        bb.SetBool("GetBall_A_intercept", false);
-        bb.SetBool("GetBall_A_isKeeper", true);
-        bb.SetString("GetBall_A_AimAt", "fieldcenter");
-
         bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
         bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
         bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
+
+        bb.SetString("AimAt_fieldCenter_AimAt", "position");
+        bb.SetDouble("AimAt_fieldCenter_xGoal", 0.0);
+        bb.SetDouble("AimAt_fieldCenter_yGoal", 0.0);
 
         bb.SetDouble("Kick_A_kickVel", 2.5);
 
@@ -78,10 +78,31 @@ void SoloDefenderTactic::Initialize() {
         // Send to rolenode
         pub.publish(wd);
     }
+
+    start = now();
 }
 
 bt::Node::Status SoloDefenderTactic::Update() {
     
+    bool allSucceeded = true;
+
+    for (auto token : tokens) {
+        if (feedbacks.find(token) != feedbacks.end()) {
+            Status status = feedbacks.at(token);
+            allSucceeded &= status == bt::Node::Status::Success;
+        } else {
+            allSucceeded = false;
+        }
+    }
+
+    if (allSucceeded) return Status::Success;
+
+    auto duration = time_difference_seconds(start, now());
+    if (duration.count() >= 25) {
+        RTT_DEBUGLN("Tactic failed because it took too long");
+        return Status::Failure;
+    }
+
     // Keep defending until stopped by the strategy
     return bt::Node::Status::Running;
 }

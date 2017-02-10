@@ -152,21 +152,8 @@ bt::Node::Status TwoAttackersTactic::Update() {
     }
 
     if (firstAttackerSucceeded && secondAttackerSucceeded) {
-
-        if (isThisYourFirstTimeHere) {
-            finishTime = now();
-            RTT_DEBUGLN("Both roles succeeded, so tactic succeeded, but let's just wait a coupla seconds before restarting for dramatic effect");
-            isThisYourFirstTimeHere = false;
-
-            return Status::Running;
-        } else {
-            if (time_difference_milliseconds(finishTime, now()).count() > 100) {
-                RTT_DEBUGLN("Okayy, ready to restart");
-                return Status::Success;
-            } else {
-                return Status::Running;
-            }            
-        }
+        RTT_DEBUGLN("Both roles succeeded, so tactic succeeded");
+        return bt::Node::Status::Success;
     }
 
     if (oneFailed) {
