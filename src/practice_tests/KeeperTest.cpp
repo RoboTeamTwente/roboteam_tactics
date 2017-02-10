@@ -7,8 +7,12 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/practice_tests/TestSetup.h"
 
+
+
 using namespace rtt::practice;
 namespace b = boost;
+
+RTT_REGISTER_TEST(KeeperTest);
 
 b::optional<Config> KeeperTest::getConfig(
     Side side, 

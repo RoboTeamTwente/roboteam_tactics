@@ -11,6 +11,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Position.h"
 #include "roboteam_utils/TeamRobot.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
 

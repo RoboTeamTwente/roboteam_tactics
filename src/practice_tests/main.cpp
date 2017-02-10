@@ -1,4 +1,5 @@
 #include <memory>
+#include <functional>
 #include <ros/ros.h>
 
 #include "roboteam_msgs/GeometryData.h"
@@ -10,6 +11,7 @@
 #include "roboteam_tactics/practice_tests/KeeperTest.h"
 #include "roboteam_tactics/practice_tests/FreeKickTest.h"
 #include "roboteam_tactics/practice_tests/TestSetup.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include "roboteam_utils/TeamRobot.h"
 #include "roboteam_utils/LastWorld.h"
@@ -50,9 +52,22 @@ std::string const resetText = "\e[0m";
 
 } // anonymous namespace
 
+std::shared_ptr<PracticeTest> buildTest(const std::string& name) {
+    using namespace rtt::factories;
+    auto& factory = getRepo<TestFactory>();
+    auto& ctor = factory[name];
+    return ctor();
+}
+
 int main(int argc, char *argv[]) {
 	ros::init(argc, argv, "PracticeTest", ros::init_options::AnonymousName);
     ros::NodeHandle n;
+    
+    if (argc <= 1) {
+        ROS_ERROR("PracticeTest must have an argument: the test name");
+        return 1;
+    }
+    std::string testName(argv[1]);
 
     auto worldSubscriber = n.subscribe(rtt::TOPIC_WORLD_STATE, 1, callback_world_state);
     auto geomSubscriber = n.subscribe(rtt::TOPIC_GEOMETRY, 1, callback_geom_data);
@@ -85,19 +100,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::unique_ptr<PracticeTest> keeperTest(new FreeKickTest());
+    auto tester = buildTest(testName);
 
     std::vector<::rtt::RobotID> robots = {0, 1, 2, 3, 4, 5};
     std::random_device rd;
     std::mt19937 g(rd());
     // std::shuffle(robots.begin(), robots.end(), g);
 
-    b::optional<Config> confOpt = keeperTest->getConfig(Side::RIGHT, robots, fieldGeom);
+    b::optional<Config> confOpt = tester->getConfig(Side::RIGHT, robots, fieldGeom);
 
     if (confOpt) {
-        RTT_DEBUGLN("Running test %s", keeperTest->testName().c_str());
+        RTT_DEBUGLN("Running test %s", tester->testName().c_str());
     } else {
-        RTT_DEBUGLN("Cannot run test %s", keeperTest->testName().c_str());
+        RTT_DEBUGLN("Cannot run test %s", tester->testName().c_str());
         return 1;
     }
 
@@ -118,7 +133,7 @@ int main(int argc, char *argv[]) {
         ros::Rate fps2(2);
         fps2.sleep();
     }
-    keeperTest->beforeTest(world);
+    tester->beforeTest(world);
 
     // Send roledirectives
     for (auto robot : conf.us) {
@@ -139,7 +154,7 @@ int main(int argc, char *argv[]) {
     do {
         fps.sleep();
         ros::spinOnce();   
-        res = keeperTest->check(world, Side::LEFT, fieldGeom);
+        res = tester->check(world, Side::LEFT, fieldGeom);
 
         if (!ros::ok()) {
             noAbort = false;
@@ -158,7 +173,7 @@ int main(int argc, char *argv[]) {
     std::cout << resetText;
 
     // Clean up!
-    keeperTest->afterTest(world);
+    tester->afterTest(world);
 
     send_setup_to_grsim(SetupBuilder::reset());
 
