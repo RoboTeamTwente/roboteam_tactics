@@ -133,7 +133,9 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
 
-	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
+	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();	
+
+	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05 && ballSpeed < 0.1) {
 		publishStopCommand();
 		RTT_DEBUGLN("GetBall skill completed.");
 		return Status::Success;
@@ -143,7 +145,6 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
-        private_bb->SetBool("isKeeper", GetBool("isKeeper"));
         goToPos.Update();
 		return Status::Running;
 	}

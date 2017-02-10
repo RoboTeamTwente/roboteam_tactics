@@ -76,16 +76,26 @@ bt::Node::Status StandFree::Update() {
 
 
     // Store some variables for easy access
-	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos);
-	roboteam_utils::Vector2 theirPos;
-	if (GetString("whichTeam") == "us") {
-		theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos); 
-	} else if (GetString("whichTeam") == "them") {
-		theirPos = roboteam_utils::Vector2(world.them.at(theirID).pos); 
-	} else {
-		ROS_WARN("No team specified...");
+    roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos);
+    roboteam_utils::Vector2 theirPos;
+    if (GetString("whichTeam") == "us") {
         theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos); 
-	}
+    } else if (GetString("whichTeam") == "them") {
+        theirPos = roboteam_utils::Vector2(world.them.at(theirID).pos); 
+    } else {
+        ROS_WARN("No team specified...");
+        theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos); 
+    }
+
+
+    roboteam_utils::Vector2 targetPos;
+    if (HasDouble("xGoal") && HasDouble("yGoal")) {
+        double xGoal = GetDouble("xGoal");
+        double yGoal = GetDouble("yGoal");
+        targetPos = roboteam_utils::Vector2(xGoal, yGoal);
+    } else {
+        targetPos = myPos;
+    }
 
 
     // Fill a vector containing all the robots except me and the one I'm looking at
@@ -104,19 +114,19 @@ bt::Node::Status StandFree::Update() {
     }
 
 
-    // Default result is my current position
-    roboteam_utils::Vector2 nearestFreePos = myPos;
+    // Default result is the target position
+    roboteam_utils::Vector2 nearestFreePos = targetPos;
 
 
     // Make a Cover Cone for the robots standing between me and the target
-    boost::optional<Cone> coneRobots = MakeCoverCone(watchOutForTheseBots, myPos, theirPos);
+    boost::optional<Cone> coneRobots = MakeCoverCone(watchOutForTheseBots, targetPos, theirPos);
 
     // If the Cover Cone exists, determine the point closest to me on the edge of the cone
     if (coneRobots) {
         Cone cone = *coneRobots;
         roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         // Find the closest point to me on the side of the cone, and preferably close to their goal position
-        nearestFreePos = cone.ClosestPointOnSide(myPos, theirGoalPos);
+        nearestFreePos = cone.ClosestPointOnSide(targetPos, theirGoalPos);
 
         // Draw the lines of the cone in rqt_view
         roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(0.5*cone.angle);
@@ -133,9 +143,9 @@ bt::Node::Status StandFree::Update() {
     roboteam_utils::Vector2 goalPos = LastWorld::get_their_goal_center();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     goalPos.y = field.goal_width / 2;
-    boost::optional<Cone> coneGoal = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
+    boost::optional<Cone> coneGoal = MakeCoverCone(watchOutForTheseBots, targetPos, goalPos);
     goalPos.y = -field.goal_width / 2;
-    boost::optional<Cone> coneGoal2 = MakeCoverCone(watchOutForTheseBots, myPos, goalPos);
+    boost::optional<Cone> coneGoal2 = MakeCoverCone(watchOutForTheseBots, targetPos, goalPos);
 
 
     roboteam_utils::Vector2 nearestFreePos2(100.0, 100.0);
@@ -168,9 +178,9 @@ bt::Node::Status StandFree::Update() {
             names.push_back("goalCone1option2");
             names.push_back("goalCone1option3");
             names.push_back("goalCone1option4");
-            nearestFreePos = newCone.ClosestPointOnSideTwoCones(*coneRobots, myPos, theirGoalPos, drawer, names);
+            nearestFreePos = newCone.ClosestPointOnSideTwoCones(*coneRobots, targetPos, theirGoalPos, drawer, names);
         } else {
-            nearestFreePos = newCone.ClosestPointOnSide(myPos, theirGoalPos);
+            nearestFreePos = newCone.ClosestPointOnSide(targetPos, theirGoalPos);
         }        
     } else {
         drawer.RemoveLine("newConeSide1");
@@ -178,7 +188,7 @@ bt::Node::Status StandFree::Update() {
     }
 
 
-    if ((nearestFreePos2 - myPos).length() < (nearestFreePos - myPos).length()) {
+    if ((nearestFreePos2 - targetPos).length() < (nearestFreePos - targetPos).length()) {
         nearestFreePos = nearestFreePos2;
     }
 
@@ -188,7 +198,7 @@ bt::Node::Status StandFree::Update() {
 
 
     // Fill the goToPos blackboard and send the command
-    double angleGoal = (theirPos-myPos).angle();
+    double angleGoal = (theirPos-targetPos).angle();
     private_bb->SetInt("ROBOT_ID", myID);
     private_bb->SetDouble("xGoal", nearestFreePos.x);
     private_bb->SetDouble("yGoal", nearestFreePos.y);

@@ -11,7 +11,4 @@
 
         <param name="our_side" type="str" value="$(arg our_side_arg)" />
         <param name="our_color" type="str" value="$(arg our_color_arg)" />
-
-	
-
 </launch>

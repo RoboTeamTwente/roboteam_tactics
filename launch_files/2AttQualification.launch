@@ -1,13 +1,11 @@
 <launch>
 
-	
+	<group ns="blue">
 		
+	</group>
 
-		
-		
-	
-		
-		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/TwoAttackersStrat" output="screen" /> 
-	
+	<group ns="yellow">
+		<include file="$(find roboteam_tactics)/launch_files/TwoAttackers.launch" />
+	</group>
 
 </launch>

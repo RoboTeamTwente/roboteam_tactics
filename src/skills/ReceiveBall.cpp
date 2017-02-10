@@ -233,39 +233,22 @@ bt::Node::Status ReceiveBall::Update (){
 	bb3->SetInt("me", robotID);
 	bb3->SetBool("our_team", true);
 	IHaveBall iHaveBall2("", bb3);
-    bool doIHaveBall = iHaveBall2.Update() == Status::Success;
 
-    // @Hack this feels like a one-off fix (since this does not always affect ReceiveBall)
-    // If I have the ball and I touched it before
-    if (doIHaveBall && touchedBall) {
-        bool enoughTimeHasPassed = time_difference_milliseconds(initialBallContact, now()).count() > 100;
+	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
-        // if the angle is 👍 and 100 ms have passed we got the ball!
-        if (fabs(targetAngle - robot.angle) < 0.05 && enoughTimeHasPassed) {
-            publishStopCommand();
-            RTT_DEBUGLN("ReceiveBall skill completed.");
-            return Status::Success;
-        };
-
-        // else keep avoiding the robots and receiving the ball
-    } else if (doIHaveBall && !touchedBall) {
-        // If I have the ball but I haven't touched it before
-        touchedBall = true;
-        initialBallContact = now();
-        // It probbaly just arrived, so keep receiving the ball for a bit longer to make
-        // sure we really got it.
-    }
-
-    // @Incomplete Maybe the result of avoidrobots should be taken into account?
-    private_bb->SetInt("ROBOT_ID", robotID);
-    private_bb->SetDouble("xGoal", targetPos.x);
-    private_bb->SetDouble("yGoal", targetPos.y);
-    private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("isKeeper", GetBool("isKeeper"));
-    private_bb->SetBool("avoidRobots", true);
-    goToPos.Update();
-
-    return Status::Running;
+    if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
+		publishStopCommand();
+		RTT_DEBUGLN("GetBall skill completed.");
+		return Status::Success;
+	} else {
+        private_bb->SetInt("ROBOT_ID", robotID);
+        private_bb->SetDouble("xGoal", targetPos.x);
+        private_bb->SetDouble("yGoal", targetPos.y);
+        private_bb->SetDouble("angleGoal", targetAngle);
+        private_bb->SetBool("avoidRobots", true);
+        goToPos.Update();
+		return Status::Running;
+	}
 };
 
 } // rtt

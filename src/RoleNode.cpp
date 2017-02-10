@@ -36,7 +36,7 @@ std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
-bool ignoring_strategy_instructions = true;
+bool ignoring_strategy_instructions = false;
 
 void reset_tree() {
     currentToken = uuid_msgs::UniqueID();
@@ -44,6 +44,8 @@ void reset_tree() {
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
+
+    // ROS_INFO_STREAM("role directive callback!");
 
     std::string name = ros::this_node::getName();
     // Some control statements to regulate starting and stopping of rolenodes
@@ -95,12 +97,12 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bb->fromMsg(msg->blackboard);
 
     if (!bb->HasInt("ROBOT_ID")) {
-        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
     }
 
 
     if (!bb->HasInt("KEEPER_ID")) {
-        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
     }
 
     try {
