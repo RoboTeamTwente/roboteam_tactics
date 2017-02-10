@@ -11,6 +11,10 @@
 
 namespace rtt {
 
+namespace practice {
+class PracticeTest;
+}
+    
 namespace factories {
 
 template <
@@ -19,10 +23,13 @@ template <
 using Repo = std::map<std::string, T>;
 
 using TreeConstructor = std::function<bt::BehaviorTree(bt::Blackboard*)>;
+
 template <
     class T
 >
 using Factory = std::function<std::shared_ptr<T>(std::string name, bt::Blackboard::Ptr)>;
+
+using TestFactory = std::function<std::shared_ptr<practice::PracticeTest>()>;
 
 template <
     class T
@@ -49,6 +56,16 @@ public:
         };
 
         getRepo<Factory<Parent>>()[name] = leafFactory;
+    }
+} ;
+
+template <
+    class T
+>
+class TestRegisterer {
+public:
+    TestRegisterer(const std::string &name) {
+        getRepo<TestFactory>()[name] = [=]() { return std::make_shared<T>(); };
     }
 } ;
 
@@ -103,6 +120,11 @@ bool isTree(std::string tree);
     ::rtt::factories::LeafRegisterer<leafName, typeName> leafName ## _registerer(#leafName); \
     }
 
+#define RTT_REGISTER_TEST(testName) \
+    namespace { \
+    ::rtt::factories::TestRegisterer<testName> testName ## _registerer(#testName); \
+    }
+    
 #define RTT_REGISTER_SKILL(skillName) RTT_REGISTER_LEAF(skillName, Skill)
 #define RTT_REGISTER_CONDITION(conditionName) RTT_REGISTER_LEAF(conditionName, Condition)
 #define RTT_REGISTER_TACTIC(tacticName) RTT_REGISTER_LEAF(tacticName, Tactic)

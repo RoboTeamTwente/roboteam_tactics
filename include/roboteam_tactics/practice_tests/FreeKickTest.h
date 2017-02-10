@@ -4,7 +4,9 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/tactics/FreeKickDefenceTactic.h"
 
+
 namespace rtt {
+    
 namespace practice {
 
 class FreeKickTest : public PracticeTest {
@@ -28,6 +30,7 @@ private:
     FreeKickDefenceTactic tactic;
     
 };
+
 
 }
 }

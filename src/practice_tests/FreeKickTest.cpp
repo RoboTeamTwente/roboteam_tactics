@@ -2,8 +2,12 @@
 #include "roboteam_tactics/practice_tests/TestSetup.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 
+
+
 namespace rtt {
 namespace practice {
+
+RTT_REGISTER_TEST(FreeKickTest);
     
 FreeKickTest::FreeKickTest() : tactic("tactic", nullptr) {}
     
