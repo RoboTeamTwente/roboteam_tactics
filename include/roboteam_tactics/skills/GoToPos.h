@@ -99,6 +99,7 @@ private:
     double yGoal;
     double angleGoal;
     uint   ROBOT_ID;
+    uint   KEEPER_ID = 10;
     bool   dribbler;
     roboteam_msgs::WorldRobot me;
 

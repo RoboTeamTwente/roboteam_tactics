@@ -37,17 +37,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
 void GoToPos::sendStopCommand(uint id) {
 
-    ROS_INFO("sending stop command!");
     roboteam_msgs::RobotCommand command;
     command.id = id;
     command.x_vel = 0.0;
     command.y_vel = 0.0;
     command.w = 0.0;
     if (GetBool("dribbler")) {
-        ROS_INFO("turning on dribbler!");
         command.dribbler = true;
     } else {
-        ROS_INFO("turning off dribbler!");
         command.dribbler = false;
     }
 
@@ -189,12 +186,21 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
 roboteam_utils::Vector2 GoToPos::avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces) {
     roboteam_utils::Vector2 posError = targetPos - myPos;
 
-    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.2);
+    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.0);
     if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
         if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
             sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
         } else {
             sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+        }
+    }
+
+    roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", myPos, 0.0);
+    if (fabs(distToTheirDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToTheirDefenseArea) > 0) {
+        if (sumOfForces.dot(distToTheirDefenseArea.rotate(0.5*M_PI)) > 0) {
+            sumOfForces = distToTheirDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
+        } else {
+            sumOfForces = distToTheirDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
         }
     }
 
@@ -226,7 +232,7 @@ roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPo
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
 
-    if (!(GetInt("ROBOT_ID") == GetInt("KEEPER_ID"))) {
+    if (ROBOT_ID != KEEPER_ID) {
         
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea("our defense area", newTargetPos)) {
@@ -257,6 +263,13 @@ bt::Node::Status GoToPos::Update () {
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    if (blackboard->HasInt("KEEPER_ID")) {
+        KEEPER_ID = blackboard->GetInt("KEEPER_ID");
+    } else {
+        KEEPER_ID = 10;
+    }
+    
+
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     angleGoal = cleanAngle(GetDouble("angleGoal"));
 
@@ -316,8 +329,12 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Defense area avoidance
-    if (!(GetInt("ROBOT_ID") == GetInt("KEEPER_ID"))) {
+    // ROS_INFO_STREAM("keeperID: " << blackboard->GetInt("KEEPER_ID"));
+    if (ROBOT_ID != KEEPER_ID) {
+        // ROS_INFO_STREAM("robot " << ROBOT_ID << " should avoid the defense area");
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    } else {
+        ROS_INFO_STREAM("it's okay, I'm a keeper");
     }
     
 
