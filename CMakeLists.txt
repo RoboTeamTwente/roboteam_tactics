@@ -29,6 +29,22 @@ set(QT_USE_QTNETWORK TRUE)
 find_package(Qt REQUIRED)
 include(${QT_USE_FILE})
 
+# Of what we use, only filesystem requires linking
+# and is therefore mentoined as component. Mostly
+# everything else is header only, and thus doesn't
+# need to be mentioned here.
+# Dennis and Bob had some linking problems with newer
+# versions of boost (>= 1.63.0, some boost::filesystem
+# code produced strange segfaults), so that's why we
+# fixed it here to get a clear error when the version
+# changes.
+find_package(Boost
+    1.58.0 EXACT
+    REQUIRED
+    COMPONENTS
+        filesystem
+    )
+
 # Only enable this one if you're just testing one skill
 set(BUILD_TESTX TRUE)
 
