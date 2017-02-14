@@ -25,7 +25,7 @@ private:
 
     void define_seq(std::string name, std::string nodeType, json properties);
     void define_sel(std::string name);
-    void define_dec(std::string name, std::string type);
+    void define_dec(std::string name, std::string type, json data);
     void define_nod(std::string name, std::string type);
 
     void add_to_composite(std::string comp, std::string child);

@@ -255,8 +255,27 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 }
 
 namespace {
-    std::string const RED_BOLD_COLOR = "\e[1;31m";
-    std::string const END_COLOR = "\e[0m";
+
+std::string const RED_BOLD_COLOR = "\e[1;31m";
+std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
+std::string const END_COLOR = "\e[0m";
+
+void cmakeErr(std::string msg) {
+    std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeErrTree(std::string msg) {
+    cmakeErr("Tree \"" + current_tree + "\": " + msg);
+}
+
+void cmakeWarn(std::string msg) {
+    std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeWarnTree(std::string msg) {
+    cmakeWarn("Tree \"" + current_tree + "\": " + msg);
+}
+
 } // anonymous namespace
 
 std::string BTBuilder::get_parallel_params_from_properties(json properties) {
@@ -274,7 +293,9 @@ std::string BTBuilder::get_parallel_params_from_properties(json properties) {
 
         if ((successOnAll != "true" && successOnAll != "false") 
                 && (failOnAll != "true" && failOnAll != "false")) {
-            std::cerr << "[----] " << RED_BOLD_COLOR << "failOnAll & successOnAll of tree " << current_tree << " are not nice booleans!" << END_COLOR << "\n";
+
+            cmakeErrTree("failOnAll & successOnAll are not nice booleans!");
+
             encountered_error = true;
             return "true, false";
         }
@@ -289,7 +310,7 @@ void BTBuilder::define_seq(std::string name, std::string nodeType, json properti
     std::string type = "bt::Sequence";
     std::string params = "";
 
-    if (nodeType == "MemSequence") {
+        if (nodeType == "MemSequence") {
         // It's a mem sequence
         type = "bt::MemSequence";
     } else if (nodeType == "ParallelSequence") {
@@ -312,11 +333,27 @@ void BTBuilder::define_sel(std::string name) {
     out << DINDENT << "auto " << name << " = std::make_shared<bt::Selector>();" << std::endl;
 }
 
-void BTBuilder::define_dec(std::string name, std::string type) {
+void BTBuilder::define_dec(std::string name, std::string type, json data) {
     std::string params = "";
 
     if (type == "Repeat") {
         type = "bt::Repeater";
+
+        auto it = data.find("properties");
+        if (it != data.end()) {
+            auto properties = *it;
+            auto limitIt = properties.find("limit");
+            if (limitIt != properties.end()) {
+                if (limitIt->is_number_integer()) {
+                    params = std::to_string(limitIt->get<int>());
+                } else {
+                    if (!(limitIt->is_string() && limitIt->get<std::string>().empty())) {
+                        cmakeErrTree("limit property of repeat node is not an integer.");
+                        encountered_error = true;
+                    }
+                }
+            }
+        } 
     } else if (type == "RepeatUntilFailure") {
         type = "bt::UntilFail";
     } else if (type == "RepeatUntilSuccess") {
@@ -383,7 +420,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         }
         break;
     case DECORATOR: {
-        define_dec(jsonData["title"], jsonData["name"]);
+        define_dec(jsonData["title"], jsonData["name"], jsonData);
         auto child = jsonData["child"];
         defines(nodes[jsonData["child"]]);
         break; }
