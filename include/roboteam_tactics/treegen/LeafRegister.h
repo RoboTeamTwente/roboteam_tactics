@@ -128,3 +128,4 @@ bool isTree(std::string tree);
 #define RTT_REGISTER_SKILL(skillName) RTT_REGISTER_LEAF(skillName, Skill)
 #define RTT_REGISTER_CONDITION(conditionName) RTT_REGISTER_LEAF(conditionName, Condition)
 #define RTT_REGISTER_TACTIC(tacticName) RTT_REGISTER_LEAF(tacticName, Tactic)
+#define RTT_REGISTER_TACTIC_F(folders, tacticName) RTT_REGISTER_LEAF(folders "/" tacticName, Tactic)
