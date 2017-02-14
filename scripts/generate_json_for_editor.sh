@@ -24,6 +24,7 @@ allNodes=()
 # $2 Category
 # $3 properties
 function entry {
+    #printf "Registering: $1\n"
     node=$(printf "    {
         \"name\": \"$1\",
         \"category\": \"$2\",
@@ -33,6 +34,7 @@ function entry {
     }")
 
     allNodes+=("$node")
+
 }
 
 
@@ -62,11 +64,26 @@ function getProperties {
     done < $1
 }
 
+# Find all tactics recursively
+for f in $(find ./include/roboteam_tactics/tactics -depth); do
+    if [ -f $f ]; then
+        # Figure out name & group/folder
+        name=$(basename $f .h)
+        group=$(dirname ${f#./include/roboteam_tactics/tactics/})
 
-for f in ./include/roboteam_tactics/skills/*.h; do
-    name=$(basename "$f" .h)
-    getProperties $f
-	entry $name action "$properties"
+        # Decide whether or not the group is there
+        entryName=""
+        if [ "$group" != "." ]
+        then
+            entryName="$group/$name"
+        else
+            entryName="$name"
+        fi
+
+        # Get the properties and save the entry
+        getProperties $f
+        entry "$entryName" action "$properties"
+    fi
 done
 
 for f in ./include/roboteam_tactics/conditions/*.h; do
