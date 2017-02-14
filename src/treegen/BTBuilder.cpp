@@ -23,55 +23,55 @@ BTBuilder::~BTBuilder() {}
 
 namespace {
 
-    std::string folderConcat(std::string left, std::string right) {
-        if (left.empty()) {
-            return right;
-        } else if (right.empty()) {
-            return left;
-        } else {
-            return left + "/" + right;
-        }
+std::string folderConcat(std::string left, std::string right) {
+    if (left.empty()) {
+        return right;
+    } else if (right.empty()) {
+        return left;
+    } else {
+        return left + "/" + right;
     }
+}
 
-    std::vector<std::string> get_all_recursively(std::string category, std::string folders, bool recurse = true) {
-        bf::path categoryPath(folderConcat("src/" + category, folders));
+std::vector<std::string> get_all_recursively(std::string category, std::string folders, bool recurse = true) {
+    bf::path categoryPath(folderConcat("src/" + category, folders));
 
-        std::vector<std::string> xs;
-        try {
-            if (exists(categoryPath)) {
-                for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
-                    auto p = de.path();
+    std::vector<std::string> xs;
+    try {
+        if (exists(categoryPath)) {
+            for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
+                auto p = de.path();
 
-                    if (bf::is_directory(p) && recurse) {
-                        // Get the foldername
-                        auto deeperFolder = p.stem().string();
-                        // Create the new folder path to the deeper folder
-                        auto newFolders = folderConcat(folders, deeperFolder);
-                        // Find the deeper elements
-                        auto deeperElements = get_all_recursively(category, newFolders, recurse);
-                        // Insert the newly found elements in xs
-                        xs.insert(xs.end(), deeperElements.begin(), deeperElements.end());
-                    } else if (p.extension().string() == ".cpp") {
-                        xs.push_back(folderConcat(folders, de.path().stem().string()));
-                    }
+                if (bf::is_directory(p) && recurse) {
+                    // Get the foldername
+                    auto deeperFolder = p.stem().string();
+                    // Create the new folder path to the deeper folder
+                    auto newFolders = folderConcat(folders, deeperFolder);
+                    // Find the deeper elements
+                    auto deeperElements = get_all_recursively(category, newFolders, recurse);
+                    // Insert the newly found elements in xs
+                    xs.insert(xs.end(), deeperElements.begin(), deeperElements.end());
+                } else if (p.extension().string() == ".cpp") {
+                    xs.push_back(folderConcat(folders, de.path().stem().string()));
                 }
-            } else {
-                std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
-                return {};
             }
-
-            return xs;
-        } catch (const bf::filesystem_error& ex) {
+        } else {
+            std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
             return {};
         }
-    }
 
-    std::vector<std::string> get_all(std::string category, bool recurse = true) {
-        return get_all_recursively(category, "", recurse);
+        return xs;
+    } catch (const bf::filesystem_error& ex) {
+        return {};
     }
+}
 
-    std::string current_tree;
-    bool encountered_error = false;
+std::vector<std::string> get_all(std::string category, bool recurse = true) {
+    return get_all_recursively(category, "", recurse);
+}
+
+std::string current_tree;
+bool encountered_error = false;
 
 } // Anonymous namespace
 
@@ -86,6 +86,16 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     allskills_list = get_all("skills");
     allconditions_list = get_all("conditions");
     alltactics_list = get_all("tactics");
+
+    // Test code to print all the tactics
+    if (false) {
+        auto allTactics = get_all("tactics");
+
+        std::cout << "-- Listing tactics\n";
+        for (auto tactic : allTactics) {
+            std::cout << "Tactic: " << tactic << "\n";
+        }
+    }
 
     // To turn every list into a set and clear the previous sets
     auto initializeSet = [](std::set<std::string> &theSet, std::vector<std::string> &theVector) {

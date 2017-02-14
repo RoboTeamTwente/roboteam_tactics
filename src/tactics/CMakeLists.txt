@@ -1,3 +1,5 @@
+add_subdirectory(rtt_bob)
+
 set(TACTIC_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/AttackerTactic.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/BasicAttackTactic.cpp
