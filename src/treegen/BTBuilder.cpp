@@ -23,15 +23,36 @@ BTBuilder::~BTBuilder() {}
 
 namespace {
 
-    std::vector<std::string> get_all(std::string category) {
-        bf::path categoryPath("src/" + category);
+    std::string folderConcat(std::string left, std::string right) {
+        if (left.empty()) {
+            return right;
+        } else if (right.empty()) {
+            return left;
+        } else {
+            return left + "/" + right;
+        }
+    }
+
+    std::vector<std::string> get_all_recursively(std::string category, std::string folders, bool recurse = true) {
+        bf::path categoryPath(folderConcat("src/" + category, folders));
 
         std::vector<std::string> xs;
         try {
             if (exists(categoryPath)) {
                 for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
-                    if (de.path().extension().string() == ".cpp") {
-                        xs.push_back(de.path().stem().string());
+                    auto p = de.path();
+
+                    if (bf::is_directory(p) && recurse) {
+                        // Get the foldername
+                        auto deeperFolder = p.stem().string();
+                        // Create the new folder path to the deeper folder
+                        auto newFolders = folderConcat(folders, deeperFolder);
+                        // Find the deeper elements
+                        auto deeperElements = get_all_recursively(category, newFolders, recurse);
+                        // Insert the newly found elements in xs
+                        xs.insert(xs.end(), deeperElements.begin(), deeperElements.end());
+                    } else if (p.extension().string() == ".cpp") {
+                        xs.push_back(folderConcat(folders, de.path().stem().string()));
                     }
                 }
             } else {
@@ -43,6 +64,10 @@ namespace {
         } catch (const bf::filesystem_error& ex) {
             return {};
         }
+    }
+
+    std::vector<std::string> get_all(std::string category, bool recurse = true) {
+        return get_all_recursively(category, "", recurse);
     }
 
     std::string current_tree;
