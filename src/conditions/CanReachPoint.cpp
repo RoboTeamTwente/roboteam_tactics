@@ -34,6 +34,8 @@ double CanReachPoint::estimateTimeToPoint(roboteam_utils::Vector2 currentPos, ro
 
 	double timeToStop = decelerationDistance / (targetVel.length()/2); // deceleration time = deceleration distance / average speed during deceleration
 
+	ROS_INFO_STREAM("distanceToReachVel: " << distanceToReachVel << " decelerationDistance: " << decelerationDistance);
+
 	if (posDiff.length() < (distanceToReachVel + decelerationDistance)) {
 		ROS_INFO_STREAM("hmm, distance too short");
 		return -1.0;

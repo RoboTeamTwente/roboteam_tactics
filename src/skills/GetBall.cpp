@@ -50,22 +50,29 @@ void GetBall::publishStopCommand() {
 	command.y_vel = 0.0;
 	command.w = 0.0;
 	command.dribbler = true;
-    rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+
+	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    pub.publish(command);
+
+    ros::spinOnce();
+    ros::spinOnce();
 }
 
 // roboteam_utils::Vector2 GetBall::computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel) {
 
-// 	auto bb3 = std::make_shared<bt::Blackboard>();
-// 	CanReachPoint canReachPoint("", bb3);
-// 	double estimatedTimeToPoint = 0.6;
-// 	double testTime = 0.5;
-// 	roboteam_utils::Vector2 interceptPos;
+// 	// auto bb3 = std::make_shared<bt::Blackboard>();
+// 	// CanReachPoint canReachPoint("", bb3);
+// 	// double estimatedTimeToPoint = 0.6;
+// 	// double testTime = 0.1;
 
-// 	while (estimatedTimeToPoint > testTime) {
-// 		interceptPos = LastWorld::predictBallPos(testTime);
-// 		double estimatedTimeToPoint = canReachPoint.estimateTimeToPoint(currentPos, currentVel, interceptPos);
-// 		testTime = testTime + 0.5;
-// 	}
+// 	// roboteam_utils::Vector2 distanceToBall = 
+// 	// roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(testTime);
+
+// 	// while (estimatedTimeToPoint > testTime) {
+		
+// 		// double estimatedTimeToPoint = canReachPoint.estimateTimeToPoint(currentPos, currentVel, interceptPos);
+// 		// testTime = testTime + 0.1;
+// 	// }
 
 // 	ROS_INFO_STREAM("calculated intercept pos and found: " << interceptPos.x << " " << interceptPos.y);
 // 	return interceptPos;
@@ -74,7 +81,7 @@ void GetBall::publishStopCommand() {
 bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
-	int robotID = blackboard->GetInt("ROBOT_ID");
+	robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -94,37 +101,64 @@ bt::Node::Status GetBall::Update (){
 	roboteam_utils::Vector2 targetPos;
 	double targetAngle;
 
+	// roboteam_utils::Vector2 interceptPos;
+	// if (ballVel.length() > 1.0) {
+	// 	interceptPos = computeInterceptPoint(robotPos, robotVel);
+	// } else {
+	// 	interceptPos = ballPos;
+	// }
+
+
+	double distanceToBall = (robotPos - ballPos).length();
+	roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(0.2*distanceToBall);
+	
+
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else {
-		targetAngle = (ballPos - robotPos).angle();
+		targetAngle = (interceptPos - robotPos).angle();
 	}
 	targetAngle = cleanAngle(targetAngle);
+
+
 		
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
-	double angleDiff = (targetAngle - (ballPos - robotPos).angle());
+	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
 
 	if (angleDiff > 0.5*M_PI) {
-		targetAngle = (ballPos - robotPos).rotate(0.5*M_PI).angle();
+		targetAngle = (interceptPos - robotPos).rotate(0.5*M_PI).angle();
 	} else if (angleDiff < -0.5*M_PI) {
-		targetAngle = (ballPos - robotPos).rotate(-0.5*M_PI).angle();
+		targetAngle = (interceptPos - robotPos).rotate(-0.5*M_PI).angle();
 	}
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	double posDiff = (ballPos - robotPos).length();
+	double posDiff = (interceptPos - robotPos).length();
 	if (posDiff > 0.3 || fabs(angleDiff) > 0.2*M_PI) {
-		targetPos = ballPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
-		targetPos = ballPos + roboteam_utils::Vector2(0.06, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + roboteam_utils::Vector2(0.06, 0.0).rotate(targetAngle + M_PI);
 	}
+
+
+
+	// Just for testing the intercept functionality... Should not be in final version
+	// if (HasBool("intercept") && GetBool("intercept")) {
+	// 	if (ballVel.length() < 0.5 && waiting) {
+	// 		return Status::Running;
+	// 	} else {
+	// 		waiting = false;
+	// 		targetPos = computeInterceptPoint(robotPos, robotVel);
+	// 		private_bb->SetBool("dribbler", true);
+	// 	}
+	// }
 
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
@@ -145,6 +179,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
+        private_bb->SetBool("dribbler", true);
         goToPos.Update();
 		return Status::Running;
 	}

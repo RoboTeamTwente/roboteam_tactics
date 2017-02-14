@@ -135,7 +135,7 @@ bt::Node::Status ReceiveBall::Update (){
 
     // Get the last world information and some blackboard info
 	roboteam_msgs::World world = LastWorld::get();
-	int robotID = blackboard->GetInt("ROBOT_ID");
+	robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -191,7 +191,8 @@ bt::Node::Status ReceiveBall::Update (){
 	if (hasBall == -1) {
 		interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	} else {
-		interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
+		// interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
+		interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	}
 	roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
@@ -212,7 +213,8 @@ bt::Node::Status ReceiveBall::Update (){
 
 	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
 	roboteam_utils::Vector2 posError = targetPos - robotPos;
-	if (distanceToBall > acceptableDeviation || posError.length() > acceptableDeviation) {
+	double acceptableDeviation2 = 0.5;
+	if (distanceToBall > acceptableDeviation2 || posError.length() > acceptableDeviation2) {
 		double angleError = targetAngle - robotAngle;
 		if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
 			// Set a rosparam to let other robots know that we are ready to receive the ball

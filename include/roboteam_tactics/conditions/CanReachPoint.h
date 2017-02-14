@@ -22,7 +22,7 @@ private:
 	double maxVel = 2;
 	// double maxAngAcc = 10;
 	// double maxAngVel = 4;
-	double posPGain = 3.0;
+	double posPGain = 2.0;
 	double decelerationDistance = 0.2; // 
     
 };

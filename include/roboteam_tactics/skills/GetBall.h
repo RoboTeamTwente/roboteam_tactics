@@ -26,11 +26,13 @@ public:
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
+    // roboteam_utils::Vector2 computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel);
 
 	int robotID;
 	int hasBall;
 	bool our_team;
 	double acceptableDeviation = 0.4;
+    bool waiting = true;
 
 	GoToPos goToPos;
 };
