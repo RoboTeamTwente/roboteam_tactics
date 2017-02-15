@@ -73,6 +73,26 @@ std::vector<std::string> get_all(std::string category, bool recurse = true) {
 std::string current_tree;
 bool encountered_error = false;
 
+std::string const RED_BOLD_COLOR = "\e[1;31m";
+std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
+std::string const END_COLOR = "\e[0m";
+
+void cmakeErr(std::string msg) {
+    std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeErrTree(std::string msg) {
+    cmakeErr("Tree \"" + current_tree + "\": " + msg);
+}
+
+void cmakeWarn(std::string msg) {
+    std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeWarnTree(std::string msg) {
+    cmakeWarn("Tree \"" + current_tree + "\": " + msg);
+}
+
 } // Anonymous namespace
 
 boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
@@ -102,7 +122,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         theSet.clear();
         theSet.insert(theVector.begin(), theVector.end());
     };
-    
+
     initializeSet(allskills_set, allskills_list);
     initializeSet(allconditions_set, allconditions_list);
     initializeSet(alltactics_set, alltactics_list);
@@ -124,10 +144,18 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 
         if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
             usedSkills.insert(element["name"].get<std::string>());
+
+            if (allskills_set.find(title) != allskills_set.end()) {
+                cmakeErrTree("Skill \"" + title + "\" has the same name as the skill type. Please use a leaf name different from the skill name (e.g. " + title + "_A, " + title + "_1)");
+            }
         }
 
         if (allconditions_set.find(element["name"].get<std::string>()) != allconditions_set.end()) {
             usedConditions.insert(element["name"].get<std::string>());
+
+            if (allconditions_set.find(title) != allconditions_set.end()) {
+                cmakeErrTree("Condition \"" + title + "\" has the same name as the condition type. Please use a leaf name different from the condition name (e.g. " + title + "_A, " + title + "_1)");
+            }
         }
 
         if (alltactics_set.find(element["name"].get<std::string>()) != alltactics_set.end()) {
@@ -184,7 +212,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     }
 
     std::string stringified_namespaces = "";
-    
+
     if (namespaces.size() > 0) {
         out << INDENT;
 
@@ -288,30 +316,6 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         return boost::none;
     }
 }
-
-namespace {
-
-std::string const RED_BOLD_COLOR = "\e[1;31m";
-std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
-std::string const END_COLOR = "\e[0m";
-
-void cmakeErr(std::string msg) {
-    std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
-}
-
-void cmakeErrTree(std::string msg) {
-    cmakeErr("Tree \"" + current_tree + "\": " + msg);
-}
-
-void cmakeWarn(std::string msg) {
-    std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
-}
-
-void cmakeWarnTree(std::string msg) {
-    cmakeWarn("Tree \"" + current_tree + "\": " + msg);
-}
-
-} // anonymous namespace
 
 std::string BTBuilder::get_parallel_params_from_properties(json properties) {
     if (properties.find("minSuccess") != properties.end()
