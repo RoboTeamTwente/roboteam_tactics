@@ -66,7 +66,8 @@ function getProperties {
 
 # Find all tactics recursively
 for f in $(find ./include/roboteam_tactics/tactics -depth); do
-    if [ -f $f ]; then
+    # Only look at paths that are files and that end in .h
+    if [ -f $f ] && [[ $f == *.h ]] ; then
         # Figure out name & group/folder
         name=$(basename $f .h)
         group=$(dirname ${f#./include/roboteam_tactics/tactics/})
