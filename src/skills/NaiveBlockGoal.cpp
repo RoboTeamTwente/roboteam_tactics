@@ -1,18 +1,21 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include <cmath>
 
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/WorldBall.h"
+#include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
+
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/NaiveBlockGoal.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
 #define RTT_CURRENT_DEBUG_TAG NaiveBlockGoal
@@ -52,7 +55,7 @@ RTT_REGISTER_SKILL(NaiveBlockGoal);
 
 NaiveBlockGoal::NaiveBlockGoal(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , avoidRobots("", private_bb) { }
+        , goToPos("", private_bb) { }
 
 bt::Node::Status NaiveBlockGoal::Update() {
     using namespace roboteam_utils;
@@ -139,8 +142,8 @@ bt::Node::Status NaiveBlockGoal::Update() {
     private_bb->SetDouble("xGoal", minVec.x);
     private_bb->SetDouble("yGoal", minVec.y);
     private_bb->SetDouble("angleGoal", angle);
-    // private_bb->SetBool("endPoint", true);
-    avoidRobots.Update();
+    private_bb->SetBool("avoidRobots", true);
+    goToPos.Update();
 
     return Status::Running;
 }

@@ -12,11 +12,11 @@
 #include "roboteam_msgs/Vector2f.h"
 #include "roboteam_msgs/SteeringAction.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/Math.h"
+#include "roboteam_utils/Math.h"
 
 namespace rtt {
 	
@@ -25,8 +25,8 @@ RTT_REGISTER_SKILL(RotateAroundPoint);
 RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard),
         goto_bb(std::make_shared<bt::Blackboard>()), 
-        avoidRobots("", goto_bb) {
-}
+        goToPos("", goto_bb) {
+	}
 
 void RotateAroundPoint::stoprobot(int robotID) {
 
@@ -58,8 +58,7 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 			GetDouble("faceTowardsPosx"),
 			GetDouble("faceTowardsPosy")
 		);
-	}
-	else {
+	} else {
 		ROS_INFO("No double:facetowardsPos x and y specified"); 
 		return Status::Failure;
 	}
@@ -286,7 +285,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				// TODO: maybe instead call position controller
 				
 				stoprobot(robotID);
-				ROS_INFO("finished");
+				// ROS_INFO("RotateAroudPoint finished");
 				return Status::Success;
 			}
 		}
@@ -296,6 +295,8 @@ bt::Node::Status RotateAroundPoint::Update (){
 			return Status::Failure;
 		}
 	} else {
+
+		return Status::Failure;
         std::string our_color = "yellow";
         get_PARAM_OUR_COLOR(our_color);
 		ROS_INFO_STREAM(
@@ -311,12 +312,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 			goto_bb->SetDouble("xGoal", center.x);
 			goto_bb->SetDouble("angleGoal", targetAngle);
 			goto_bb->SetDouble("yGoal", center.y);
-			goto_bb->SetBool("dribbler",false);
-			avoidRobots.Update();
+			goto_bb->SetBool("avoidRobots", true);
+			goto_bb->SetBool("dribbler", false);
+			goToPos.Update();
 			return Status::Running;
 		}
 		else {
 			stoprobot(robotID);
+			// ROS_INFO_STREAM("RotateAroudPoint failing...");
 			return Status::Failure;
 		}
 	}

@@ -2,7 +2,7 @@
 
 #include "actionlib/server/simple_action_server.h"
 #include "roboteam_tactics/Aggregator.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_msgs/World.h"

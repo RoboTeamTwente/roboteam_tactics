@@ -12,13 +12,20 @@
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_msgs/BtDebugInfo.h"
 #include "roboteam_msgs/BtStatus.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_msgs/RobotCommand.h"
+
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/constants.h"
+
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_utils/constants.h"
 #include "roboteam_tactics/utils/BtDebug.h"
 
+namespace {
+    std::string const RED_BOLD_COLOR = "\e[1;31m";
+    std::string const END_COLOR = "\e[0m";
+} // anonymous namespace
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
 
@@ -37,8 +44,10 @@ void reset_tree() {
 }
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
+
+    // ROS_INFO_STREAM("role directive callback!");
+
     std::string name = ros::this_node::getName();
-    
     // Some control statements to regulate starting and stopping of rolenodes
     if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
         // Continue
@@ -51,28 +60,50 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     ros::NodeHandle n;
 
+    // std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
+
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
 
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
 
+        // std::cout << ROBOT_ID << ": Stop executing tree!\n";
+
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
         reset_tree();
         ignoring_strategy_instructions = true;
+
+        // std::cout << "Ignoring strategy instructions!\n";
+
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
         ignoring_strategy_instructions = false;
+        // std::cout << "Ignoring strategy instructions no!\n";
         return;
     }
 
+    // std::cout << "Ignoring strategy? ";
+
     if (ignoring_strategy_instructions) {
+        // std::cout << "Yes!\n";
         return;
     }
+
+    // std::cout << "No!\n";
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
+
+    if (!bb->HasInt("ROBOT_ID")) {
+        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+    }
+
+
+    if (!bb->HasInt("KEEPER_ID")) {
+        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+    }
 
     try {
         ros::NodeHandle n;
@@ -85,12 +116,13 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     currentToken = msg->token;
 
-    RTT_DEBUG("Robot ID: %i. Executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
+    RTT_DEBUG("Robot %i starts executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
 
     RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
+
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
@@ -131,19 +163,22 @@ int main(int argc, char *argv[]) {
 
     while (ros::ok()) {
         ros::spinOnce();
-
+        
         sleeprate.sleep();
 
         if (!currentTree){
             continue;
         }
 
+        // if (ROBOT_ID == 1) RTT_DEBUGLN("Updating");
         bt::Node::Status status = currentTree->Update();
+        // if (ROBOT_ID == 1) RTT_DEBUGLN("Done updating");
 
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
             RTT_DEBUGLN("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
+
 
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;

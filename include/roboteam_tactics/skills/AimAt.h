@@ -1,17 +1,38 @@
 #pragma once
 
-#include "ros/ros.h"
-
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
-#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_utils/Vector2.h"
 
 namespace rtt {
+
+/**
+ * Aims the robot at a certain point.
+ *
+ * Global params:
+ *  - ROBOT_ID : Int 
+ *    Id of the robot
+ * 
+ * Params:
+ * - At : String
+ *   Can be:
+ *      robot     - Aim at a robot
+ *      theirgoal - Aim at their goal 
+ *      ourgoal   - Aim at our goal
+ *      position  - Aim at a position
+ *   What thing to aim at
+ *
+ * - xGoal : Double
+ *   Used when: At = position
+ *   The x coord of what to aim at.
+ *
+ * - yGoal : Double
+ *   Used when: At = position
+ *   The y coord of what to aim at.
+ *
+ * - AtRobot : Int
+ *   Used when: At = robot
+ *   The robot at which to aim.
+ */
 
 class AimAt : public Skill {
 public:

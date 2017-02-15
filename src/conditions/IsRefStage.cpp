@@ -1,8 +1,8 @@
 #include <inttypes.h>
 
 #include "roboteam_tactics/conditions/IsRefStage.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/utils/LastRef.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_msgs/RefereeStage.h"

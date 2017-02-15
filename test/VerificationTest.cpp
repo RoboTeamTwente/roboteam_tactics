@@ -3,7 +3,7 @@
 #include "roboteam_tactics/bt.hpp"
 
 // What the f is this :p
-std::string bt::Node::status_desc;
+// std::string bt::Node::status_desc;
 
 namespace rtt {
 

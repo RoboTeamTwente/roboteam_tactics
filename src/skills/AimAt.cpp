@@ -8,9 +8,10 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_tactics/skills/AimAt.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/world_analysis.h"
 #include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
@@ -23,21 +24,22 @@ AimAt::AimAt(std::string name, bt::Blackboard::Ptr blackboard)
 }
 
 bt::Node::Status AimAt::Update (){
+
 	roboteam_msgs::World world = LastWorld::get();
 	bool setRosParam = GetBool("setRosParam");
 
 	int robotID = blackboard->GetInt("ROBOT_ID");
+	// if (robotID == 1) ROS_INFO_STREAM("AimAt Update");
 	std::string destination = GetString("At");
 
-	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update 
+	// Check is world contains a sensible message. Otherwise wait, it might the case that AimAt::Update
 	// is called before the first world state update
 	if (world.us.size() == 0) {
-		//ROS_INFO("No information about the world state :(");
 		return Status::Running;
 	}
-	
+
 	roboteam_utils::Vector2 passTo;
-	
+
 	if (destination=="robot"){
         int AtRobotID = GetInt("AtRobot");
         auto possibleBot = lookup_our_bot(AtRobotID);
@@ -50,9 +52,10 @@ bt::Node::Status AimAt::Update (){
         passTo = LastWorld::get_their_goal_center();
 	} else if(destination=="ourgoal"){
         passTo = LastWorld::get_our_goal_center();
-	}
-	
-	// ROS_INFO("passto: x:%f, y:%f",passTo.x, passTo.y);
+	} else if (destination == "position") {
+        passTo = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    }
+
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetString("center", "ball");
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
@@ -63,14 +66,12 @@ bt::Node::Status AimAt::Update (){
     Status result = rotateAroundPoint.Update();
 	if (result == Status::Success) {
 		if (setRosParam) {
-			ROS_INFO_STREAM("setting the param to true");
 			set_PARAM_KICKING(true);
 		}
 		return Status::Success;
 	} else if (result == Status::Failure) {
-		ROS_INFO_STREAM("AimAt failed :(");
+		// ROS_INFO_STREAM("AimAt failed :(");
 		return Status::Failure;
-		// return result;
 	} else {
 		return Status::Running;
 	}

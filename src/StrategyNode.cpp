@@ -15,8 +15,9 @@
 #include "roboteam_msgs/StrategyIgnoreRobot.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
+#include "roboteam_tactics/generated/qualification_trees.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -35,13 +36,13 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
-        std::cout << "Received a feedback on token " << uuid << ": failure.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
-        std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
-        std::cout << "Received a feedback on token " << uuid << ": success.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
@@ -59,6 +60,12 @@ int main(int argc, char *argv[]) {
     // f::print_all<bt::BehaviorTree>("bt::BehaviorTree");
 
     ros::Rate rate(60);
+
+    ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
+        rtt::TOPIC_ROLE_FEEDBACK,
+        10,
+        &feedbackCallback
+        );
 
     auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
 
@@ -126,7 +133,7 @@ int main(int argc, char *argv[]) {
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
-    RTT_DEBUGLN("More than one robot found. Starting...");
+    RTT_DEBUGLN("More than one robot found. Starting!");
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -135,9 +142,9 @@ int main(int argc, char *argv[]) {
 
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);
-            RTT_DEBUG("Strategy result: %s. Starting again.\n", statusStr.c_str());
+            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            break;
         }
-
         rate.sleep();
     }
 

@@ -1,0 +1,11 @@
+<launch>
+
+	<group ns="blue">
+		
+	</group>
+
+	<group ns="yellow">
+		<include file="$(find roboteam_tactics)/launch_files/TwoAttackers.launch" />
+	</group>
+
+</launch>

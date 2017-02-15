@@ -1,27 +1,12 @@
 #pragma once
 
-#include "ros/ros.h"
-
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
-#include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
-#include "roboteam_tactics/utils/LastWorld.h"
-#include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
-#include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/treegen/LeafRegister.h"
-
 #include <vector>
 
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/Parts.h"
+
 namespace rtt {
-
-
-typedef struct {
-	roboteam_utils::Vector2 interceptPos;
-	double interceptAngle;
-} InterceptPose;
 
 class GetBall : public Skill {
 public:
@@ -39,22 +24,15 @@ public:
     
     std::string node_name() { return "GetBall"; }
 private:
-	InterceptPose GetInterceptPos(double getBallAtX, double getBallAtY, double getBallAtTime);
-	// std::vector<roboteam_utils::Vector2> CircleIntersections(roboteam_utils::Vector2 center, double radius, roboteam_utils::Vector2 startLine, roboteam_utils::Vector2 endLine);
-	bool IsPointInCircle(roboteam_utils::Vector2 center, double radius, roboteam_utils::Vector2 point);
-	int GetSign(double number);
 	int whichRobotHasBall();
-	int hasBall;
-	double acceptableDeviation = 0.4;
-	roboteam_utils::Vector2 prevTargetPos;
-	double prevTargetAngle;
-	roboteam_msgs::RobotCommand prevCommand;
-	AvoidRobots avoidRobots;
-	// GoToPos goToPos;
-	int robotID;
-	bool our_team;
-};
+	void publishStopCommand();
 
-extern factories::LeafRegisterer<GetBall, Skill> GetBall_registerer;
+	int robotID;
+	int hasBall;
+	bool our_team;
+	double acceptableDeviation = 0.4;
+
+	GoToPos goToPos;
+};
 
 } // rtt

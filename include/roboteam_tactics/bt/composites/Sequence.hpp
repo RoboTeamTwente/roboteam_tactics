@@ -33,7 +33,7 @@ public:
         return Status::Success;
     }
     
-    std::string node_name() { return "Sequence"; }
+    std::string node_name() override { return "Sequence"; }
     
     using Ptr = std::shared_ptr<Sequence>;
 };

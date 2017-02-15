@@ -1,10 +1,7 @@
+# If you want to add a tactic, please do that in unity.cpp
+
 set(TACTIC_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/AttackerTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/BasicAttackTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/BasicDefenseTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GoToSideTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DemoTactic.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTactic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/unity.cpp
     )
 set(TACTIC_SOURCES
     ${TACTIC_SOURCES}

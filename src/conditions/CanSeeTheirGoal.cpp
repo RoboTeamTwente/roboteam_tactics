@@ -1,15 +1,18 @@
-#include "roboteam_tactics/conditions/TeamHasBall.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
+#include <vector>
+
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
+
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
+
+#include "roboteam_tactics/conditions/TeamHasBall.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/utils/debug_print.h"
-
-#include <vector>
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG CanSeeTheirGoal

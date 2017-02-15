@@ -4,12 +4,15 @@
 #include <random>
 #include <limits>
 
-#include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/World.h"
+
+#include "unique_id/unique_id.h" 
+#include "roboteam_utils/LastWorld.h"
+
 #include "roboteam_tactics/tactics/DemoTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_tactics/utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
@@ -59,6 +62,8 @@ void DemoTactic::Initialize() {
     roboteam_utils::Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
 
     RTT_DEBUG("Attack bot: %i, score bot: %i, keeper bot: %i\n", attack_bot, score_bot, keeper_bot);
+
+    auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     {
         // Fill blackboard with relevant info

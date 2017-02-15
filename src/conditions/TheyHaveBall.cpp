@@ -1,5 +1,5 @@
 #include "roboteam_tactics/conditions/TheyHaveBall.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 

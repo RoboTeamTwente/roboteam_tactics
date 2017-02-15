@@ -1,9 +1,13 @@
+#include <boost/range/join.hpp>
 #include <ros/ros.h>
+
+#include "roboteam_msgs/World.h"
+#include "roboteam_msgs/RobotCommand.h"
 
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/constants.h"
-#include <boost/range/join.hpp>
+#include "roboteam_utils/world_analysis.h"
 
 namespace rtt {
 
@@ -70,6 +74,11 @@ double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, 
         return 0.0;
     }
 
+    if (target == "fieldcenter") {
+        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - roboteam_utils::Vector2(robot.pos);
+        return posDiff.angle();
+    }
+
     if (target == "theirgoal") {
         roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         double targetAngle = (theirGoalPos - roboteam_utils::Vector2(robot.pos)).angle();
@@ -96,24 +105,18 @@ double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, 
 }
 
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
-    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
-    bb->SetBool("our_team", true);
+    const auto& ball = LastWorld::get().ball;
     for (auto& bot : LastWorld::get().us) {
-        bb->SetInt("me", bot.id);
-        IHaveBall ihb("", bb);
-        if (ihb.Update() == bt::Node::Status::Success) {
+        if (bot_has_ball(bot, ball)) {
             return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, true));
         }
     }
-    bb->SetBool("our_team", false);
     for (auto& bot : LastWorld::get().them) {
-        bb->SetInt("me", bot.id);
-        IHaveBall ihb("", bb);
-        if (ihb.Update() == bt::Node::Status::Success) {
+        if (bot_has_ball(bot, ball)) {
             return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>(std::make_pair(bot, false));
         }
     }
-    return boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>>();
+    return boost::none;
 }
 
 
@@ -206,7 +209,7 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     double angle = ball_norm.angle();
 
     // Within 10.5 cm and .2 radians (of center of dribbler)
-    return dist <= .105 && fabs(angle - bot.angle) <= .2;
+    return dist <= .11 && fabs(angle - bot.angle) <= .3;
 }
 
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
@@ -246,8 +249,11 @@ void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr ext
     }
 
 }
-static std::random_device rd;
-static std::mt19937 rng(rd());
+
+namespace {
+    thread_local std::random_device rd;
+    thread_local std::mt19937 rng(rd());
+}
 
 int get_rand_int(int max) {
     return get_rand_int(0, max);
@@ -307,7 +313,7 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 	cmd.y_vel = 0.0;
 	cmd.w = 0.0;
 
-	cmd.dribbler=true;
+	cmd.dribbler=false;
 	cmd.kicker=false;
 	cmd.kicker_vel=0.0;
 	cmd.kicker_forced=false;
@@ -317,24 +323,37 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
-
-    roboteam_utils::Vector2 ball_pos(world.ball.pos);
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
         roboteam_utils::Vector2 pos(worldRobot.pos);
 
-        if ((pos - ball_pos).length() < closest_robot_ds) {
+        if ((pos - point).length() < closest_robot_ds) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
                 closest_robot = worldRobot.id;
-                closest_robot_ds = (pos - ball_pos).length();
+                closest_robot_ds = (pos - point).length();
             }
         }
     }
 
     return closest_robot;
+}
+
+int get_robot_closest_to_ball(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_ball(robots, lw);
+}
+
+int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+    roboteam_utils::Vector2 ball_pos(world.ball.pos);
+    return get_robot_closest_to_point(robots, world, ball_pos);
+}
+
+int get_robot_closest_to_their_goal(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    return get_robot_closest_to_their_goal(robots, lw);
 }
 
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {

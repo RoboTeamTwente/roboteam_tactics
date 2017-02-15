@@ -3,6 +3,14 @@ project(roboteam_tactics)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
+# Colors for everyone to use!
+if(NOT WIN32)
+    string(ASCII 27 Esc)
+    set(BLUE_TEXT "${Esc}[34m")
+    set(BOLD_TEXT  "${Esc}[1m")
+    set(RESET_TEXT "${Esc}[0m")
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roboteam_utils
@@ -14,12 +22,36 @@ find_package(catkin REQUIRED COMPONENTS
   unique_id
 )
 
+# This part actually makes sure the network interface
+# of Qt4 is included! So while rqt uses Qt5, for our
+# networking purposes we use Qt4.
+set(QT_USE_QTNETWORK TRUE)
+find_package(Qt REQUIRED)
+include(${QT_USE_FILE})
+
+# Of what we use, only filesystem requires linking
+# and is therefore mentoined as component. Mostly
+# everything else is header only, and thus doesn't
+# need to be mentioned here.
+# Dennis and Bob had some linking problems with newer
+# versions of boost (>= 1.63.0, some boost::filesystem
+# code produced strange segfaults), so that's why we
+# fixed it here to get a clear error when the version
+# changes.
+find_package(Boost
+    1.58.0 EXACT
+    REQUIRED
+    COMPONENTS
+        filesystem
+    )
+
 # Only enable this one if you're just testing one skill
 set(BUILD_TESTX TRUE)
 
 # Enable these if you're also testing strategies
 set(BUILD_STRATEGYNODE TRUE)
 set(BUILD_ROBOTNODE TRUE)
+set(BUILD_PRACTICE_TESTS TRUE)
 
 # Interesting debug feedback features
 set(ENABLE_BT_TRACE TRUE)
@@ -43,7 +75,10 @@ set(CMAKE_CXX_FLAGS "\
 ")
 
 catkin_package(
-  INCLUDE_DIRS include
+    INCLUDE_DIRS 
+        include
+    LIBRARIES
+        roboteam_tactics_analysis
 )
 
 include_directories(
@@ -162,7 +197,11 @@ foreach(json_project ${JSON_PROJECTS})
             ${output_files}
         )
 
-    MESSAGE("Project files for " ${basename} ": " ${output_files})
+    MESSAGE("-- Project files for " ${BLUE_TEXT} ${BOLD_TEXT} ${project_basename} ${RESET_TEXT} ": ")
+    
+    foreach(output_file ${output_files})
+        MESSAGE("--     - ${output_file}")
+    endforeach(output_file)
 
     set(GENERATED_FILES
         ${GENERATED_FILES}
@@ -182,7 +221,12 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_F
 
 catkin_add_gtest(tactics_test
     test/main.cpp
-	test/SimpleTest.cpp
+    test/SimpleTest.cpp
+    test/ConditionsTest.cpp
+    test/VerificationTest.cpp
+    $<TARGET_OBJECTS:conditions>
+    $<TARGET_OBJECTS:tactics>
+    $<TARGET_OBJECTS:utils>
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
 
@@ -236,180 +280,50 @@ catkin_add_gtest(BtTest
 )
 target_link_libraries(BtTest ${catkin_LIBRARIES})
 
-### Test executables ###
-# Disables tests on bob's desktop
-site_name(computername)
+add_executable(Learner
+    src/utils/tests/Learner.cpp
+    $<TARGET_OBJECTS:treegen>
+    $<TARGET_OBJECTS:alltrees>
+    $<TARGET_OBJECTS:skills>
+    $<TARGET_OBJECTS:conditions>
+    $<TARGET_OBJECTS:tactics>
+    $<TARGET_OBJECTS:utils>
+    )
+add_dependencies(Learner
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    generate_json_t
+    )
+target_link_libraries(Learner
+    ${catkin_LIBRARIES}
+${QT_LIBRARIES}
+    )
 
-# if(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU" OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"))
+if (BUILD_PRACTICE_TESTS)
 
-    # add_executable(brain
-        # src/main.cpp
-    # )
-    # add_dependencies(brain ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(brain
-        # ${catkin_LIBRARIES}
-        # )
+    add_executable(PracticeTests
+        ./src/practice_tests/main.cpp
+        ./src/practice_tests/PracticeTest.cpp
+        ./src/practice_tests/KeeperTest.cpp
+	./src/practice_tests/TestSetup.cpp
+        ./src/practice_tests/FreeKickTest.cpp
 
-    # add_executable(KickAtGoal
-        # src/role_tests/KickAtGoal.cpp
-    # )
-    # add_dependencies(KickAtGoal ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
-    # target_link_libraries(KickAtGoal
-        # ${catkin_LIBRARIES}
-        # )
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:alltrees>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        )
+    add_dependencies(PracticeTests
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        generate_json_t
+        )
+    target_link_libraries(PracticeTests
+        ${catkin_LIBRARIES}
+        # For networking
+        ${QT_LIBRARIES}
+        )
 
-    # add_executable(Keeper
-        # src/role_tests/Keeper.cpp
-    # )
-    # add_dependencies(Keeper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} generate_json_t)
-    # target_link_libraries(Keeper
-        # ${catkin_LIBRARIES}
-        # )
-        
-    # add_executable(RotateAroundPoint
-        # src/skills/tests/RotateAroundPointTest.cpp
-    # )
-    # add_dependencies(RotateAroundPoint ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(RotateAroundPoint
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(GoToPosTest
-        # src/skills/tests/GoToPosTest.cpp
-    # )
-    # add_dependencies(GoToPosTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(GoToPosTest
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(GetBallTest
-        # src/skills/tests/GetBallTest.cpp
-    # )
-    # add_dependencies(GetBallTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(GetBallTest
-        # ${catkin_LIBRARIES}
-        # )
-
-	# add_executable(DribbleTest
-        # src/skills/tests/DribbleTest.cpp
-    # )
-    # add_dependencies(DribbleTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(DribbleTest
-        # ${catkin_LIBRARIES}
-        # )
-
-
-    # add_executable(KickTest
-        # src/skills/tests/KickTest.cpp
-    # )
-    # add_dependencies(KickTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(KickTest
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(IcptTest
-        # src/conditions/CanInterceptBall.cpp
-    # )
-    # add_dependencies(IcptTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(IcptTest
-        # ${catkin_LIBRARIES}
-        # )
-    # target_compile_options(IcptTest PRIVATE "-DDEBUG_ICPT")
-
-    # catkin_add_gtest(VerificationTest
-        # test/main.cpp
-        # test/VerificationTest.cpp
-    # )
-    # target_link_libraries(VerificationTest ${catkin_LIBRARIES})
-
-    # catkin_add_gtest(conditionstest
-        # test/main.cpp
-        # test/conditionstest.cpp
-    # )
-    # target_link_libraries(conditionstest
-        # ${catkin_libraries}
-        # )
-
-    # add_dependencies(KickTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(KickTest ${catkin_LIBRARIES})
-
-    # add_executable(FollowPathTest
-        # src/skills/tests/FollowPathTest.cpp
-    # )
-    # add_dependencies(FollowPathTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(FollowPathTest
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(AvoidRobotsTest
-        # src/skills/tests/AvoidRobotsTest.cpp
-    # )
-    # add_dependencies(AvoidRobotsTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(AvoidRobotsTest
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(CanPassSafelyTest
-        # src/conditions/tests/CanPassSafelyTest.cpp
-    # )
-    # add_dependencies(CanPassSafelyTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-    # target_link_libraries(CanPassSafelyTest
-        # ${catkin_LIBRARIES}
-        # )
-
-    # add_executable(CanReachPointTest
-        # src/conditions/tests/CanReachPointTest.cpp
-    # )
-    # add_dependencies(CanReachPointTest
-        # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        # ${catkin_EXPORTED_TARGETS}
-        # )
-    # target_link_libraries(CanReachPointTest
-        # ${catkin_LIBRARIES}
-        # )
-
-# add_executable(ConeTest
-        # src/utils/tests/ConeTest.cpp
-    # )
-    # add_dependencies(ConeTest
-        # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        # ${catkin_EXPORTED_TARGETS}
-        # )
-    # target_link_libraries(ConeTest
-        # ${catkin_LIBRARIES}
-        # )
-
-# add_executable(CanSeeRobotTest
-        # src/conditions/tests/CanSeeRobotTest.cpp
-    # )
-    # add_dependencies(CanSeeRobotTest
-        # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        # ${catkin_EXPORTED_TARGETS}
-        # )
-    # target_link_libraries(CanSeeRobotTest
-        # ${catkin_LIBRARIES}
-        # )
-
-# add_executable(AttackTactic
-        # src/role_tests/AttackTactic.cpp
-    # )
-    # add_dependencies(AttackTactic
-        # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        # ${catkin_EXPORTED_TARGETS}
-        # )
-    # target_link_libraries(AttackTactic
-        # ${catkin_LIBRARIES}
-        # )
-
-# add_executable(StandFreeTest
-        # src/skills/tests/StandFreeTest.cpp
-    # )
-    # add_dependencies(StandFreeTest
-        # ${${PROJECT_NAME}_EXPORTED_TARGETS}
-        # ${catkin_EXPORTED_TARGETS}
-        # )
-    # target_link_libraries(StandFreeTest
-        # ${catkin_LIBRARIES}
-        # )
-
-# endif(NOT (computername STREQUAL "lapbobe" OR computername STREQUAL "W-LENOVO-UBUNTU" OR computername STREQUAL "jim-SATELLITE-L50-B-2E4"))
+endif (BUILD_PRACTICE_TESTS)

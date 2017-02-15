@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 namespace bf = boost::filesystem;
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
@@ -22,31 +23,59 @@ BTBuilder::~BTBuilder() {}
 
 namespace {
 
-    std::vector<std::string> get_all(std::string category) {
-        bf::path categoryPath("src/" + category);
+std::string folderConcat(std::string left, std::string right) {
+    if (left.empty()) {
+        return right;
+    } else if (right.empty()) {
+        return left;
+    } else {
+        return left + "/" + right;
+    }
+}
 
-        std::vector<std::string> xs;
-        try {
-            if (exists(categoryPath)) {
-                for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
-                    if (de.path().extension().string() == ".cpp") {
-                        xs.push_back(de.path().stem().string());
-                    }
+std::vector<std::string> get_all_recursively(std::string category, std::string folders, bool recurse = true) {
+    bf::path categoryPath(folderConcat("src/" + category, folders));
+
+    std::vector<std::string> xs;
+    try {
+        if (exists(categoryPath)) {
+            for (bf::directory_entry& de : bf::directory_iterator(categoryPath)) {
+                auto p = de.path();
+
+                if (bf::is_directory(p) && recurse) {
+                    // Get the foldername
+                    auto deeperFolder = p.stem().string();
+                    // Create the new folder path to the deeper folder
+                    auto newFolders = folderConcat(folders, deeperFolder);
+                    // Find the deeper elements
+                    auto deeperElements = get_all_recursively(category, newFolders, recurse);
+                    // Insert the newly found elements in xs
+                    xs.insert(xs.end(), deeperElements.begin(), deeperElements.end());
+                } else if (p.extension().string() == ".cpp") {
+                    xs.push_back(folderConcat(folders, de.path().stem().string()));
                 }
-            } else {
-                std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
-                return {};
             }
-
-            return xs;
-        } catch (const bf::filesystem_error& ex) {
+        } else {
+            std::cerr << "Path " << categoryPath << " does not exist. Aborting.\n";
             return {};
         }
+
+        return xs;
+    } catch (const bf::filesystem_error& ex) {
+        return {};
     }
+}
+
+std::vector<std::string> get_all(std::string category, bool recurse = true) {
+    return get_all_recursively(category, "", recurse);
+}
+
+std::string current_tree;
+bool encountered_error = false;
 
 } // Anonymous namespace
 
-std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
+boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
 
     // namespace f = rtt::factories;
 
@@ -57,6 +86,16 @@ std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std
     allskills_list = get_all("skills");
     allconditions_list = get_all("conditions");
     alltactics_list = get_all("tactics");
+
+    // Test code to print all the tactics
+    if (false) {
+        auto allTactics = get_all("tactics");
+
+        std::cout << "-- Listing tactics\n";
+        for (auto tactic : allTactics) {
+            std::cout << "Tactic: " << tactic << "\n";
+        }
+    }
 
     // To turn every list into a set and clear the previous sets
     auto initializeSet = [](std::set<std::string> &theSet, std::vector<std::string> &theVector) {
@@ -143,16 +182,22 @@ std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std
     if (!baseNamespace.empty()) {
         out << INDENT << "namespace " << baseNamespace << " {\n\n";
     }
+
+    std::string stringified_namespaces = "";
     
     if (namespaces.size() > 0) {
         out << INDENT;
 
         for (auto ns : namespaces) {
             out << "namespace " << ns << " { ";
+
+            stringified_namespaces += ns + "/";
         }
 
         out << "\n\n";
     }
+
+    current_tree = stringified_namespaces + json["title"].get<std::string>();
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
@@ -237,8 +282,36 @@ std::string BTBuilder::build(nlohmann::json json, std::string baseNamespace, std
         << ");\n\n";
     out << INDENT << "} // anonymous namespace\n";
 
-    return out.str();
+    if (!encountered_error) {
+        return out.str();
+    } else {
+        return boost::none;
+    }
 }
+
+namespace {
+
+std::string const RED_BOLD_COLOR = "\e[1;31m";
+std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
+std::string const END_COLOR = "\e[0m";
+
+void cmakeErr(std::string msg) {
+    std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeErrTree(std::string msg) {
+    cmakeErr("Tree \"" + current_tree + "\": " + msg);
+}
+
+void cmakeWarn(std::string msg) {
+    std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeWarnTree(std::string msg) {
+    cmakeWarn("Tree \"" + current_tree + "\": " + msg);
+}
+
+} // anonymous namespace
 
 std::string BTBuilder::get_parallel_params_from_properties(json properties) {
     if (properties.find("minSuccess") != properties.end()
@@ -250,8 +323,18 @@ std::string BTBuilder::get_parallel_params_from_properties(json properties) {
             + std::to_string(minFail);
     } else if (properties.find("successOnAll") != properties.end()
             && properties.find("failOnAll") != properties.end()) {
-        std::string successOnAll = properties["successOnAll"].get<bool>() ? "true" : "false";
-        std::string failOnAll = properties["failOnAll"].get<bool>() ? "true" : "false";
+        std::string successOnAll = properties["successOnAll"].get<std::string>();
+        std::string failOnAll = properties["failOnAll"].get<std::string>();
+
+        if ((successOnAll != "true" && successOnAll != "false") 
+                && (failOnAll != "true" && failOnAll != "false")) {
+
+            cmakeErrTree("failOnAll & successOnAll are not nice booleans!");
+
+            encountered_error = true;
+            return "true, false";
+        }
+        
         return successOnAll + ", " + failOnAll;
     } else {
         return "true, false";
@@ -262,7 +345,7 @@ void BTBuilder::define_seq(std::string name, std::string nodeType, json properti
     std::string type = "bt::Sequence";
     std::string params = "";
 
-    if (nodeType == "MemSequence") {
+        if (nodeType == "MemSequence") {
         // It's a mem sequence
         type = "bt::MemSequence";
     } else if (nodeType == "ParallelSequence") {
@@ -285,11 +368,27 @@ void BTBuilder::define_sel(std::string name) {
     out << DINDENT << "auto " << name << " = std::make_shared<bt::Selector>();" << std::endl;
 }
 
-void BTBuilder::define_dec(std::string name, std::string type) {
+void BTBuilder::define_dec(std::string name, std::string type, json data) {
     std::string params = "";
 
     if (type == "Repeat") {
         type = "bt::Repeater";
+
+        auto it = data.find("properties");
+        if (it != data.end()) {
+            auto properties = *it;
+            auto limitIt = properties.find("limit");
+            if (limitIt != properties.end()) {
+                if (limitIt->is_number_integer()) {
+                    params = std::to_string(limitIt->get<int>());
+                } else {
+                    if (!(limitIt->is_string() && limitIt->get<std::string>().empty())) {
+                        cmakeErrTree("limit property of repeat node is not an integer.");
+                        encountered_error = true;
+                    }
+                }
+            }
+        } 
     } else if (type == "RepeatUntilFailure") {
         type = "bt::UntilFail";
     } else if (type == "RepeatUntilSuccess") {
@@ -356,7 +455,7 @@ void BTBuilder::defines(nlohmann::json jsonData) {
         }
         break;
     case DECORATOR: {
-        define_dec(jsonData["title"], jsonData["name"]);
+        define_dec(jsonData["title"], jsonData["name"], jsonData);
         auto child = jsonData["child"];
         defines(nodes[jsonData["child"]]);
         break; }
@@ -370,13 +469,33 @@ void BTBuilder::defines(nlohmann::json jsonData) {
     if (properties.size() > 0) {
         for (auto property : properties) {
             if (property.second.is_string()) {
-                out << DINDENT
-                    << jsonData["title"].get<std::string>()
-                    << "->private_bb->SetString(\""
-                    << property.first
-                    << "\", \""
-                    << property.second.get<std::string>()
-                    << "\");\n";
+                std::string value = property.second.get<std::string>();
+
+                if (value == "true") {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetBool(\""
+                        << property.first
+                        << "\", "
+                        << property.second.get<std::string>()
+                        << ");\n";
+                } else if (value == "false") {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetBool(\""
+                        << property.first
+                        << "\", "
+                        << property.second.get<std::string>()
+                        << ");\n";
+                } else {
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetString(\""
+                        << property.first
+                        << "\", \""
+                        << property.second.get<std::string>()
+                        << "\");\n";
+                }
             }
 
             if (property.second.is_number()) {

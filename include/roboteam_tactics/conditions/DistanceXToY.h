@@ -31,6 +31,7 @@ class DistanceXToY : public Condition {
         // "our goal"
         // "their goal"
         // "center dot"
+        // "closest opponent"
         // An integer (robot on our team)
         // An integer followed by a T (robot on their team)
         // TODO: For later: be able to input an arbitrary vector (2, 2)

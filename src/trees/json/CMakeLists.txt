@@ -10,7 +10,10 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolRole.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CoolTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/DemoStrategy.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/GoToPosTree.json
+#    ${CMAKE_CURRENT_SOURCE_DIR}/GoToPosTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/Passer.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/PassToPointStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/Receiver.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SimpleSideSideStrategy.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SuperCoolTree.json
@@ -18,8 +21,11 @@ set(JSON_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/BasicKeeperTree.json
     ${CMAKE_CURRENT_SOURCE_DIR}/CheckParamTest.json
     ${CMAKE_CURRENT_SOURCE_DIR}/SideSideTestTree.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/ZoneDefender.json
-	${CMAKE_CURRENT_SOURCE_DIR}/SimpleFieldPlayer.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/FreeKickDefenceStrategy.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/SecondaryKeeperTree.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/InterceptorTree.json
+#    ${CMAKE_CURRENT_SOURCE_DIR}/ZoneDefender.json
+#    ${CMAKE_CURRENT_SOURCE_DIR}/SimpleFieldPlayer.json
     )
 
 set(JSON_FILES

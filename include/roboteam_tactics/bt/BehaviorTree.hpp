@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "Node.hpp"
 #include "Blackboard.hpp"
 
@@ -10,8 +11,9 @@ class BehaviorTree : public Node
 {
 public:
     BehaviorTree() : blackboard(std::make_shared<Blackboard>()) {}
-    BehaviorTree(const Node::Ptr &rootNode) : BehaviorTree() { root = rootNode; }
-    BehaviorTree(const Blackboard::Ptr &shared) : BehaviorTree() { sharedBlackboard = shared; }
+    ~BehaviorTree() {}
+    BehaviorTree(const Node::Ptr &rootNode) : BehaviorTree() { root = rootNode;}
+    BehaviorTree(const Blackboard::Ptr &shared) : BehaviorTree() { sharedBlackboard = shared;}
     
     Status Update() override { return root->Tick(); }
 

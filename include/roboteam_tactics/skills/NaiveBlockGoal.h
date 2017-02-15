@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/AvoidRobots.h"
+#include "roboteam_tactics/skills/GoToPos.h"
 
 namespace rtt {
 
@@ -29,7 +29,7 @@ public:
     std::string node_name() { return "NaiveBlockGoal"; }
 
 private:
-    AvoidRobots avoidRobots;
+    GoToPos goToPos;
 
 };
 

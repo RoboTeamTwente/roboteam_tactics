@@ -1,0 +1,433 @@
+{
+  "id": "bd7e0a3d-fc1c-43b8-899b-236527e8fa0a",
+  "title": "Receiver",
+  "description": "",
+  "root": "2f204885-41b7-4747-8d3d-be3f8d924a32",
+  "properties": {},
+  "nodes": {
+    "49d0ee49-924f-4b75-89e0-f18eb65301b2": {
+      "id": "49d0ee49-924f-4b75-89e0-f18eb65301b2",
+      "name": "GetBall",
+      "title": "GetBall_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": -96
+      }
+    },
+    "2f204885-41b7-4747-8d3d-be3f8d924a32": {
+      "id": "2f204885-41b7-4747-8d3d-be3f8d924a32",
+      "name": "RepeatUntilSuccess",
+      "title": "Repeat Until Success",
+      "description": "",
+      "properties": {
+        "maxLoop": -1
+      },
+      "display": {
+        "x": -192,
+        "y": -96
+      },
+      "child": "4b8f69ed-29ff-449f-a9f3-4d46178c0a03"
+    },
+    "4b8f69ed-29ff-449f-a9f3-4d46178c0a03": {
+      "id": "4b8f69ed-29ff-449f-a9f3-4d46178c0a03",
+      "name": "Sequence",
+      "title": "Sequence",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": -24,
+        "y": -96
+      },
+      "children": [
+        "49d0ee49-924f-4b75-89e0-f18eb65301b2",
+        "5edfc53d-5e82-4b91-8c41-8b433232201c",
+        "3835777a-d731-4302-8f7f-9d8b188691c3"
+      ]
+    },
+    "5edfc53d-5e82-4b91-8c41-8b433232201c": {
+      "id": "5edfc53d-5e82-4b91-8c41-8b433232201c",
+      "name": "AimAt",
+      "title": "AimAt_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": -36
+      }
+    },
+    "3835777a-d731-4302-8f7f-9d8b188691c3": {
+      "id": "3835777a-d731-4302-8f7f-9d8b188691c3",
+      "name": "Kick",
+      "title": "Kick_B",
+      "description": "",
+      "properties": {},
+      "display": {
+        "x": 144,
+        "y": 24
+      }
+    }
+  },
+  "display": {
+    "camera_x": 683,
+    "camera_y": 339,
+    "camera_z": 1,
+    "x": -360,
+    "y": -96
+  },
+  "custom_nodes": [
+    {
+      "name": "BallOnOurSide",
+      "category": "condition",
+      "title": "BallOnOurSide",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicAttackTactic",
+      "category": "action",
+      "title": "BasicAttackTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicDefenseTactic",
+      "category": "action",
+      "title": "BasicDefenseTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Repeat",
+      "category": "decorator",
+      "title": "Repeat",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToPos",
+      "category": "action",
+      "title": "GoToPos",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RotateAroundPoint",
+      "category": "action",
+      "title": "RotateAroundPoint_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IHaveBall",
+      "category": "condition",
+      "title": "IHaveBall_A",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GetBall",
+      "category": "action",
+      "title": "GetBall_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "StandFree",
+      "category": "action",
+      "title": "StandFree_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AimAt",
+      "category": "action",
+      "title": "AimAt_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Kick",
+      "category": "action",
+      "title": "Kick_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeeTheirGoal",
+      "category": "condition",
+      "title": "CanSeeTheirGoal_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeeRobot",
+      "category": "condition",
+      "title": "CanSeeRobot_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "GoToSideTactic",
+      "category": "action",
+      "title": "GoToSideTactic",
+      "description": null,
+      "properties": {
+        "left": "true"
+      }
+    },
+    {
+      "name": "AvoidRobots",
+      "category": "action",
+      "title": "AvoidRobots",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParallelSequence",
+      "category": "composite",
+      "title": "ParallelSequence",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParallelTactic",
+      "category": "composite",
+      "title": "ParallelTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DemoTactic",
+      "category": "action",
+      "title": "DemoTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "KeeperBlock",
+      "category": "action",
+      "title": "KeeperBlock",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DistanceXToY",
+      "category": "condition",
+      "title": "DistanceToBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "NaiveBlockGoal",
+      "category": "action",
+      "title": "NaiveBlockGoal",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParamCheck",
+      "category": "condition",
+      "title": "ParamCheck",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ParamSet",
+      "category": "action",
+      "title": "ParamSet",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "AttackerTactic",
+      "category": "action",
+      "title": "AttackerTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BasicKeeperTactic",
+      "category": "action",
+      "title": "BasicKeeperTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BackUp",
+      "category": "action",
+      "title": "BackUp",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Block",
+      "category": "action",
+      "title": "Block",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Chip",
+      "category": "action",
+      "title": "Chip",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Dribble",
+      "category": "action",
+      "title": "Dribble",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "FollowPath",
+      "category": "action",
+      "title": "FollowPath",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "RandomDrive",
+      "category": "action",
+      "title": "RandomDrive",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "SecondaryKeeper",
+      "category": "action",
+      "title": "SecondaryKeeper",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "Sleep",
+      "category": "action",
+      "title": "Sleep",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanInterceptBall",
+      "category": "condition",
+      "title": "CanInterceptBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanPassSafely",
+      "category": "condition",
+      "title": "CanPassSafely",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanReachPoint",
+      "category": "condition",
+      "title": "CanReachPoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "CanSeePoint",
+      "category": "condition",
+      "title": "CanSeePoint",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsBallInGoal",
+      "category": "condition",
+      "title": "IsBallInGoal",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TeamHasBall",
+      "category": "condition",
+      "title": "TeamHasBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "TheyHaveBall",
+      "category": "condition",
+      "title": "TheyHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "WeHaveBall",
+      "category": "condition",
+      "title": "WeHaveBall",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BallInsideField",
+      "category": "condition",
+      "title": "BallInsideField",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "BallOutsideField",
+      "category": "condition",
+      "title": "BallOutsideField",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "OneRobotGetsBallTactic",
+      "category": "action",
+      "title": "OneRobotGetsBallTactic",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "DribbleCurve",
+      "category": "action",
+      "title": "DribbleCurve",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsRefCommand",
+      "category": "condition",
+      "title": "IsRefCommand",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsRefStage",
+      "category": "condition",
+      "title": "IsRefStage",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "ShootAtGoal",
+      "category": "action",
+      "title": "ShootAtGoal_B",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "IsBallInZone",
+      "category": "condition",
+      "title": "IsBallInZone",
+      "description": null,
+      "properties": {}
+    },
+    {
+      "name": "PassToTactic",
+      "category": "action",
+      "title": "PassToTactic",
+      "description": null,
+      "properties": {}
+    }
+  ]
+}

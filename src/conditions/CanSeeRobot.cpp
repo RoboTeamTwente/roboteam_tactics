@@ -3,7 +3,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/CanSeeRobot.h"
 #include "roboteam_tactics/utils/debug_print.h"
@@ -23,6 +23,8 @@ CanSeeRobot::CanSeeRobot(std::string name, bt::Blackboard::Ptr blackboard) : Con
 
 bt::Node::Status CanSeeRobot::Update() {
 	RTT_DEBUG("called CanSeeRobot");
+	int robotID = GetInt("ROBOT_ID");
+	// ROS_INFO_STREAM("CanSeeRobot Update, id: " << robotID);
 
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::WorldRobot me = world.us.at(blackboard->GetInt("ROBOT_ID"));

@@ -15,7 +15,7 @@ foreach(json_project ${JSON_PROJECTS})
         generate_json_project_${project_basename}_t
         )
 
-    MESSAGE("Added project " ${project_basename} " to sources & targets.")
+    MESSAGE("-- Added project '" ${BLUE_TEXT} ${BOLD_TEXT} ${project_basename} ${RESET_TEXT} "' to sources & targets.")
 
 endforeach(json_project)
 

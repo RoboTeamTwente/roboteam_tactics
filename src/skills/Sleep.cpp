@@ -2,7 +2,7 @@
 #include <chrono>
 
 #include "ros/ros.h"
-#include "roboteam_tactics/utils/LastWorld.h"
+#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Sleep.h"
 
@@ -22,7 +22,7 @@ Sleep::Sleep(std::string name, bt::Blackboard::Ptr blackboard)
 void Sleep::Initialize() {
     int duration = GetInt("ms");
     start = now();
-    std::cout << "Sleeping for approx. " << duration << "ms...\n";
+    // std::cout << "Sleeping for approx. " << duration << "ms...\n";
 }
 
 bt::Node::Status Sleep::Update() {

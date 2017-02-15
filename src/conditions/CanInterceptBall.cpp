@@ -1,3 +1,5 @@
+#include "roboteam_msgs/World.h"
+
 #include "roboteam_tactics/conditions/CanInterceptBall.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
