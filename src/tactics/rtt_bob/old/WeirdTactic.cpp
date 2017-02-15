@@ -13,6 +13,7 @@ void WeirdTactic::Initialize() {
 }
 
 bt::Node::Status WeirdTactic::Update() {
+    return Status::Failure;
 }
 
 } // rtt

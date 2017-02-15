@@ -10,9 +10,11 @@ BestTactic::BestTactic(std::string name, bt::Blackboard::Ptr blackboard)
         {}
 
 void BestTactic::Initialize() {
+    return;
 }
 
 bt::Node::Status BestTactic::Update() {
+    return Status::Failure;
 }
 
 } // rtt
