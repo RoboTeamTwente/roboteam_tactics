@@ -130,7 +130,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     std::stack<std::string> stack;
     stack.push(json["root"]);
 
-    std::set<std::string> usedSkills, usedConditions, usedTactics;
+    std::set<std::string> usedSkills, usedConditions, usedTactics, usedTitles;
 
     // auto& skillRepo = getRepo<Factory<Skill>>();
     // auto& conditionRepo = getRepo<Factory<Condition>>();
@@ -141,6 +141,10 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     int ctr = 0;
     for (auto& element : json["nodes"]) {
         std::string title = element["title"];
+
+        if (usedTitles.find(title) != usedTitles.end()) {
+            cmakeErrTree("Nodename \"" + title + "\" appears more than once in the tree. Please use unique names, or the nodes might be unaddressable.");
+        }
 
         if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
             usedSkills.insert(element["name"].get<std::string>());
@@ -174,6 +178,8 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         });
         // Put it back
         element["title"] = title;
+
+        usedTitles.insert(title);
     }
 
     while (!stack.empty()) {
