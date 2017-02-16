@@ -81,14 +81,17 @@ void OneTwoTactic::Initialize() {
         // Needs no other info
 
         // GoToPos_D
-        // TODO: Not hardcode these coordinates
-        ScopedBB(bb, "GoToPos_D")
-            .setDouble("xGoal", 3)
-            .setDouble("yGoal", 2)
-            .setDouble("angleGoal", M_PI * 1.25)
-            .setBool("dribbler", true)
-            .setBool("avoidRobots", true)
-            ;
+        {
+            double xGoal = get_rand_real(1, 3);
+            double yGoal = get_rand_real(-2, 2);
+            ScopedBB(bb, "GoToPos_D")
+                .setDouble("xGoal", xGoal)
+                .setDouble("yGoal", yGoal)
+                .setDouble("angleGoal", M_PI * 1.25)
+                .setBool("dribbler", true)
+                .setBool("avoidRobots", true)
+                ;
+        }
         
         // ParamSet_D
         // Set in tree
@@ -108,7 +111,7 @@ void OneTwoTactic::Initialize() {
         
         // GetBall_And_Look_At_Goal
         ScopedBB(bb, "GetBall_And_Look_At_Goal")
-            .setString("At", "ourgoal")
+            .setString("At", "theirGoal")
             ;
 
         // Create message
@@ -131,12 +134,15 @@ void OneTwoTactic::Initialize() {
         bb.SetInt("KEEPER_ID", KEEPER_ID);
 
         // ReceiveBall_A
-        // TODO: Not hardcode this shit
-        ScopedBB(bb, "ReceiveBall_A")
-            .setBool("receiveBallAtCurrentPos", false)
-            .setDouble("receiveBallAtX", 0)
-            .setDouble("receiveBallAtY", 0)
-            ;
+        {
+            double xGoal = get_rand_real(-1, 1);
+            double yGoal = get_rand_real(-1, 1);
+            ScopedBB(bb, "ReceiveBall_A")
+                .setBool("receiveBallAtCurrentPos", false)
+                .setDouble("receiveBallAtX", xGoal)
+                .setDouble("receiveBallAtY", yGoal)
+                ;
+        }
 
         // ParamCheck_B
         
@@ -175,6 +181,8 @@ void OneTwoTactic::ShutdownRoles() {
 }
 
 bt::Node::Status OneTwoTactic::Update() {
+    if (!canRun) return Status::Failure;
+
     // RTT_DEBUGLN("Updating Tactic");
     bool oneFailed = false;
     bool oneInvalid = false;
