@@ -20,6 +20,8 @@ ROS_DECLARE_MESSAGE(World);
 
 #include "roboteam_utils/constants.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/TeamRobot.h"
+#include "roboteam_msgs/World.h"
 
 #include "roboteam_tactics/bt.hpp"
 
@@ -46,6 +48,10 @@ std::string getMyNamespace();
 double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, bool target_our_team);
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
+                                                    const roboteam_utils::Vector2& point,
+                                                    const roboteam_msgs::World* world_ptr = nullptr,
+                                                    bool sight_only = false);
+std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector2& bot_pos,
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
@@ -142,6 +148,9 @@ template<
     class M
 >
 ros::Publisher* GlobalPublisher<M>::pubPtr = nullptr;
+
+std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& world = LastWorld::get());
+std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world = LastWorld::get());
 
 } // rtt
 

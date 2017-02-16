@@ -62,6 +62,7 @@ public:
         if (!validated) {
             assertValid();
         }
+        validated = true;
         return children.at((int) LastRef::get().command.command)->Update();
     }
     
