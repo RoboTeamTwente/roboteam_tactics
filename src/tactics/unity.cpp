@@ -1,3 +1,7 @@
+// First include all subdirs
+#include "rtt_bob/unity.cpp"
+
+// Then all top-level tactics
 #include "AttackerTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

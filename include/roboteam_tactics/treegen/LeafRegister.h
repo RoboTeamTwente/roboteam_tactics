@@ -12,8 +12,10 @@
 namespace rtt {
 
 namespace practice {
+
 class PracticeTest;
-}
+
+} // anonymous namespace
     
 namespace factories {
 
@@ -24,6 +26,7 @@ using Repo = std::map<std::string, T>;
 
 using TreeConstructor = std::function<bt::BehaviorTree(bt::Blackboard*)>;
 
+// TODO: @Inconsistent maybe rename Factory to LeafFactory?
 template <
     class T
 >
@@ -120,6 +123,11 @@ bool isTree(std::string tree);
     ::rtt::factories::LeafRegisterer<leafName, typeName> leafName ## _registerer(#leafName); \
     }
 
+#define RTT_REGISTER_LEAF_F(folders, leafName, typeName) \
+    namespace { \
+    ::rtt::factories::LeafRegisterer<leafName, typeName> leafName ## _registerer(#folders "/" #leafName); \
+    }
+
 #define RTT_REGISTER_TEST(testName) \
     namespace { \
     ::rtt::factories::TestRegisterer<testName> testName ## _registerer(#testName); \
@@ -128,3 +136,4 @@ bool isTree(std::string tree);
 #define RTT_REGISTER_SKILL(skillName) RTT_REGISTER_LEAF(skillName, Skill)
 #define RTT_REGISTER_CONDITION(conditionName) RTT_REGISTER_LEAF(conditionName, Condition)
 #define RTT_REGISTER_TACTIC(tacticName) RTT_REGISTER_LEAF(tacticName, Tactic)
+#define RTT_REGISTER_TACTIC_F(folders, tacticName) RTT_REGISTER_LEAF_F(folders, tacticName, Tactic)
