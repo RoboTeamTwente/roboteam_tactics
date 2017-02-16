@@ -36,7 +36,7 @@ public:
         "NORMAL_PLAY=18"
     };
     
-    RefStateSwitch() : validated(false) {}
+    RefStateSwitch() : validated(false), last(-1) {}
     
     bool isValid() const {
         return children.size() == EXPECTED_CHILDREN.size();
@@ -63,12 +63,20 @@ public:
             assertValid();
         }
         validated = true;
-        return children.at((int) LastRef::get().command.command)->Update();
+        int cmd = (int) LastRef::get().command.command;
+        auto child = children.at(cmd);
+        if (last != cmd) {
+            children.at(last)->Terminate();
+            child->Initialize();
+            last = cmd;
+        }
+        return child->Update();
     }
     
     std::string node_name() override { return "RefStateSwitch"; }
 private:
     bool validated;
+    int last;
 };
     
 }
