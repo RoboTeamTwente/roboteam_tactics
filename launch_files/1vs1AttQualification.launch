@@ -1,0 +1,5 @@
+<launch>
+
+	<include file="$(find roboteam_tactics)/launch_files/SoloAttacker2.launch" />
+	
+</launch>

@@ -52,7 +52,7 @@ bt::Node::Status Kick::Update() {
     roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
     
     RTT_DEBUG("Velocity difference is %f", (currentBallVel - oldBallVel).length());
-    if ((currentBallVel - oldBallVel).length() > 0.05) {
+    if ((currentBallVel - oldBallVel).length() > 0.01) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
     }

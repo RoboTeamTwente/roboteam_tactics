@@ -251,14 +251,15 @@ roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPo
 }
 
 
-bt::Node::Status GoToPos::Update () {
+// bt::Node::Status GoToPos::Update() {
+roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
-    if (world.us.size() == 0) {
-        ROS_INFO("No information about the world state :(");
-        return Status::Running;
-    }
+    // if (world.us.size() == 0) {
+    //     ROS_INFO("No information about the world state :(");
+    //     return Status::Running;
+    // }
 
 
     // Get blackboard info
@@ -304,10 +305,10 @@ bt::Node::Status GoToPos::Update () {
 
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
-        sendStopCommand(ROBOT_ID);
-        return Status::Success;
-    }
+    // if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
+    //     sendStopCommand(ROBOT_ID);
+    //     return Status::Success;
+    // }
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -329,12 +330,8 @@ bt::Node::Status GoToPos::Update () {
 
 
     // Defense area avoidance
-    // ROS_INFO_STREAM("keeperID: " << blackboard->GetInt("KEEPER_ID"));
     if (ROBOT_ID != KEEPER_ID) {
-        // ROS_INFO_STREAM("robot " << ROBOT_ID << " should avoid the defense area");
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    } else {
-        ROS_INFO_STREAM("it's okay, I'm a keeper");
     }
     
 
@@ -396,7 +393,51 @@ bt::Node::Status GoToPos::Update () {
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
+    // return Status::Running;
+    return command;
+}
+
+bt::Node::Status GoToPos::Update() {
+
+    // Get the latest world state
+    roboteam_msgs::World world = LastWorld::get();
+    if (world.us.size() == 0) {
+        ROS_INFO("No information about the world state :(");
+        return Status::Running;
+    }
+
+
+    // Find the robot with the specified ID
+    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
+    if (findBot) {
+        me = *findBot;
+    } else {
+        ROS_WARN("GoToPos: robot with this ID not found");
+    }
+
+    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    angleGoal = cleanAngle(GetDouble("angleGoal"));
+
+
+    // Store some variables for easy access
+    roboteam_utils::Vector2 myPos(me.pos);
+    roboteam_utils::Vector2 myVel(me.vel);
+    roboteam_utils::Vector2 posError = targetPos - myPos;
+    double myAngle = me.angle;
+    double angleError = angleGoal - myAngle;
+
+
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
+        sendStopCommand(ROBOT_ID);
+        return Status::Success;
+    }
+
+
+    roboteam_msgs::RobotCommand command = getVelCommand();
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    pub.publish(command);
     return Status::Running;
-};
+}
 
 } // rtt
