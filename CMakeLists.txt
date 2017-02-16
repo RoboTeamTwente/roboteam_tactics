@@ -105,6 +105,7 @@ if (BUILD_TESTX)
 
     add_executable(TestX
         src/skills/tests/TestX.cpp
+        $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:tactics>
@@ -224,6 +225,8 @@ catkin_add_gtest(tactics_test
     test/SimpleTest.cpp
     test/ConditionsTest.cpp
     test/VerificationTest.cpp
+    test/SpaceTest.cpp
+    $<TARGET_OBJECTS:analysis>
     $<TARGET_OBJECTS:conditions>
     $<TARGET_OBJECTS:tactics>
     $<TARGET_OBJECTS:utils>
@@ -234,6 +237,7 @@ if (BUILD_ROBOTNODE)
 
     add_executable(RoleNode
         src/RoleNode.cpp
+        $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:skills>
@@ -256,6 +260,7 @@ if (BUILD_STRATEGYNODE)
 
     add_executable(StrategyNode
         src/StrategyNode.cpp
+        $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:skills>
@@ -294,6 +299,7 @@ endif (BUILD_STRATEGYNODE)
 #	${QT_LIBRARIES}
 #        )
 
+
 if (BUILD_PRACTICE_TESTS)
 
     add_executable(PracticeTests
@@ -303,6 +309,7 @@ if (BUILD_PRACTICE_TESTS)
 	./src/practice_tests/TestSetup.cpp
         ./src/practice_tests/FreeKickTest.cpp
 
+        $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
         $<TARGET_OBJECTS:skills>

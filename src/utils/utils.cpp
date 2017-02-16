@@ -118,14 +118,18 @@ boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
     }
     return boost::none;
 }
-
-
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
                                                     const roboteam_utils::Vector2& point,
                                                     const roboteam_msgs::World* world_ptr,
                                                     bool sight_only) {
+    return getObstacles(roboteam_utils::Vector2(bot.pos.x, bot.pos.y), point, world_ptr, sight_only);
+}
+
+std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector2& bot_pos,
+                                                    const roboteam_utils::Vector2& point,
+                                                    const roboteam_msgs::World* world_ptr,
+                                                    bool sight_only) {
     const roboteam_msgs::World world = world_ptr == nullptr ? LastWorld::get() : *world_ptr;
-    const roboteam_utils::Vector2 bot_pos(bot.pos.x, bot.pos.y);
     const auto all_bots = boost::join(world.us, world.them);
 
     double threshold = sight_only ? .15 : .35;
@@ -372,6 +376,24 @@ int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs
     }
 
     return furthest_robot;
+}
+
+std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& world) {
+    std::vector<roboteam_msgs::WorldRobot> bots;
+    bots.insert(bots.end(), world.us.begin(), world.us.end());
+    bots.insert(bots.end(), world.them.begin(), world.them.end());
+    return bots;
+}
+
+std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world) {
+    std::vector<TeamRobot> bots;
+    for (const auto& bot : world.us) {
+        bots.push_back({bot.id, true});
+    }
+    for (const auto& bot : world.them) {
+        bots.push_back({bot.id, false});
+    }
+    return bots;
 }
 
 } // rtt

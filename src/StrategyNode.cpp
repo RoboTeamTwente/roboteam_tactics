@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     RTT_DEBUGLN("More than one robot found. Starting!");
-
+    
     while (ros::ok()) {
         ros::spinOnce();
 
