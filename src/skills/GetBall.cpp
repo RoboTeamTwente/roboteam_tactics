@@ -126,12 +126,12 @@ bt::Node::Status GetBall::Update (){
 
 	// double distanceToBall = (robotPos - ballPos).length();
 	// roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(distanceToBall*10);
-	roboteam_utils::Vector2 interceptPos = ballPos;
+	roboteam_utils::Vector2 interceptPos = ballPos + ballVel.scale(0.0);
 
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
-		targetAngle = GetTargetAngle(robotID, true, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else {
 		targetAngle = (interceptPos - robotPos).angle();
 	}
@@ -149,6 +149,10 @@ bt::Node::Status GetBall::Update (){
 	} else if (angleDiff < -0.5*M_PI) {
 		targetAngle = (interceptPos - robotPos).rotate(-0.5*M_PI).angle();
 	}
+
+	// if (ballVel.length() > 0.5) {
+	// 	targetAngle = cleanAngle(ballVel.angle() + M_PI);
+	// }
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
@@ -157,7 +161,7 @@ bt::Node::Status GetBall::Update (){
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
 		targetPos = interceptPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
-		targetPos = interceptPos + roboteam_utils::Vector2(0.06, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
@@ -168,37 +172,49 @@ bt::Node::Status GetBall::Update (){
 	IHaveBall iHaveBall("", bb2);
 
 
-
+	// if (iHaveBall.Update() == Status::Success) {
 	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
 		publishStopCommand();
 		RTT_DEBUGLN("GetBall skill completed.");
 		return Status::Success;
 	} else {
 
-		roboteam_utils::Vector2 posControlVel = goToPos.positionController(robotPos, targetPos);
-		double rotControlVel = goToPos.rotationController(robot.angle, targetAngle, (targetPos - robotPos));
+		// roboteam_utils::Vector2 posControlVel = goToPos.positionController(robotPos, targetPos);
+		// double rotControlVel = goToPos.rotationController(robot.angle, targetAngle, (targetPos - robotPos));
 
-		roboteam_utils::Vector2 targetVel = posControlVel + ballVel;
-		targetVel = worldToRobotFrame(targetVel, robot.angle);
-
-		ROS_INFO_STREAM("targetVel: " << targetVel.x << " " << targetVel.y);
-
-
-	    // Get global robot command publisher, and publish the command
-	    
+		// roboteam_utils::Vector2 targetVel = posControlVel + ballVel;
+		// targetVel = worldToRobotFrame(targetVel, robot.angle);
 
         private_bb->SetInt("ROBOT_ID", robotID);
+        private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("dribbler", false);
         roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
-        command.x_vel = command.x_vel + ballVel.x*1.2;
-        command.y_vel = command.y_vel + ballVel.y*1.2;
+        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle);
+        roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 3.0) {
+        	newVelCommand.scale(3.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
+        if (robotID == 2) {
+        	command.x_vel = ballVel.x;
+        	command.y_vel = ballVel.y;
+        }
+        
 
+
+        // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    pub.publish(command);
+	    // if (GetString("AimAt") == "theirgoal") {
+	    	// publishStopCommand();
+	    // } else {
+	    	pub.publish(command);	
+	    // }
+	    
 
         // goToPos.Update();
 		return Status::Running;

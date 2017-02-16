@@ -63,7 +63,6 @@ void SoloAttacker2Tactic::Initialize() {
         
         bb.SetString("GetBall_B_AimAt", "theirgoal");
 
-
         bb.SetDouble("Kick_B_kickVel", 4.0);
 
 

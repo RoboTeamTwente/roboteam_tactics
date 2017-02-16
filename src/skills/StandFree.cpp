@@ -200,6 +200,7 @@ bt::Node::Status StandFree::Update() {
     // Fill the goToPos blackboard and send the command
     double angleGoal = (theirPos-targetPos).angle();
     private_bb->SetInt("ROBOT_ID", myID);
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", nearestFreePos.x);
     private_bb->SetDouble("yGoal", nearestFreePos.y);
     private_bb->SetDouble("angleGoal", angleGoal);

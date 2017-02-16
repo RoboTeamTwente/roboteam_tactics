@@ -64,39 +64,39 @@ std::string getMyNamespace() {
     return ns;
 }
 
-double GetTargetAngle(int myID, bool our_team, std::string target, int theirID, bool target_our_team) {
+double GetTargetAngle(roboteam_utils::Vector2 startPos, std::string target, int theirID, bool target_our_team) {
     roboteam_msgs::World w = LastWorld::get();
-    boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(myID, our_team, &w);
-    roboteam_msgs::WorldRobot robot;
-    if (bot) {robot = *bot;}
-    else {
-        ROS_WARN("utils/GetTargetAngle: cannot find robot");
-        return 0.0;
-    }
+    // boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(myID, our_team, &w);
+    // roboteam_msgs::WorldRobot robot;
+    // if (bot) {robot = *bot;}
+    // else {
+    //     ROS_WARN("utils/GetTargetAngle: cannot find robot");
+    //     return 0.0;
+    // }
 
     if (target == "fieldcenter") {
-        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - roboteam_utils::Vector2(robot.pos);
+        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - startPos;
         return posDiff.angle();
     }
 
     if (target == "theirgoal") {
         roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
-        double targetAngle = (theirGoalPos - roboteam_utils::Vector2(robot.pos)).angle();
+        double targetAngle = (theirGoalPos - startPos).angle();
         return targetAngle;
     }
     if (target == "ourgoal") {
         roboteam_utils::Vector2 ourGoalPos = LastWorld::get_our_goal_center();
-        double targetAngle = (ourGoalPos - roboteam_utils::Vector2(robot.pos)).angle();
+        double targetAngle = (ourGoalPos - startPos).angle();
         return targetAngle;
     }
     if (target == "robot") {
         if (target_our_team) {
             roboteam_utils::Vector2 theirPos = w.us.at(theirID).pos;
-            double targetAngle = (theirPos - roboteam_utils::Vector2(robot.pos)).angle();
+            double targetAngle = (theirPos - startPos).angle();
             return targetAngle;
         } else {
             roboteam_utils::Vector2 theirPos = w.them.at(theirID).pos;
-            double targetAngle = (theirPos - roboteam_utils::Vector2(robot.pos)).angle();
+            double targetAngle = (theirPos - startPos).angle();
             return targetAngle;
         }
     }

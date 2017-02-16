@@ -64,7 +64,7 @@ roboteam_utils::Vector2 GoToPos::positionController(roboteam_utils::Vector2 myPo
 
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError) {
-    if (posError.length() > 0.8) {
+    if (posError.length() > 1.5) {
         angleGoal = posError.angle();
     }
 
@@ -256,20 +256,17 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
-    // if (world.us.size() == 0) {
-    //     ROS_INFO("No information about the world state :(");
-    //     return Status::Running;
-    // }
-
+    
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
+        ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
     }
-    
+
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     angleGoal = cleanAngle(GetDouble("angleGoal"));
@@ -280,7 +277,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (findBot) {
         me = *findBot;
     } else {
-        ROS_WARN("GoToPos: robot with this ID not found");
+        ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
     }
 
 
@@ -302,13 +299,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
-
-
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    // if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
-    //     sendStopCommand(ROBOT_ID);
-    //     return Status::Success;
-    // }
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -333,7 +323,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (ROBOT_ID != KEEPER_ID) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     }
-    
 
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
@@ -375,8 +364,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
-
-
     // Draw the velocity vector acting on the robots
     // drawer.DrawLine("velCommand", myPos, velCommand);  
 
@@ -392,7 +379,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-    pub.publish(command);
+    // pub.publish(command);
     // return Status::Running;
     return command;
 }
@@ -408,12 +395,14 @@ bt::Node::Status GoToPos::Update() {
 
 
     // Find the robot with the specified ID
+    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
     if (findBot) {
         me = *findBot;
     } else {
-        ROS_WARN("GoToPos: robot with this ID not found");
+        ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
     }
+
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     angleGoal = cleanAngle(GetDouble("angleGoal"));

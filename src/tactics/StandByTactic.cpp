@@ -47,7 +47,7 @@ void StandByTactic::Initialize() {
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
     roboteam_utils::Vector2 firstRobotGoalPos(-4.4, -1.0);
-    roboteam_utils::Vector2 secondRobotGoalPos(-4.4, -1.3);
+    roboteam_utils::Vector2 secondRobotGoalPos(-4.4, -1.5);
     if (ourSide == "right") {
         firstRobotGoalPos.y = firstRobotGoalPos.y * -1;
         secondRobotGoalPos.y = secondRobotGoalPos.y * -1;
@@ -133,7 +133,10 @@ bt::Node::Status StandByTactic::Update() {
         }
     }
 
-    if (allSucceeded) return Status::Success;
+    if (allSucceeded) {
+        RTT_DEBUGLN("Tactic success!");
+        return Status::Success;
+    }
 
     auto duration = time_difference_seconds(start, now());
     if (duration.count() >= 25) {
