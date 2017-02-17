@@ -95,11 +95,11 @@ bt::Node::Status Kick::Update() {
 	rotDiff = cleanAngle(rotDiff);
     double const rotDiffErr = 0.2;
 
-	if (posDiff.length() < 0.105) { // ball is close
+	if (posDiff.length() < 0.11) { // ball is close
 		if(rotDiff < rotDiffErr and rotDiff > -rotDiffErr){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
-			command.dribbler = false;
+			command.dribbler = true;
 			command.kicker = true;
 			command.kicker_forced = true;
 			command.kicker_vel = kickVel;

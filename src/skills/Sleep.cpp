@@ -20,9 +20,7 @@ Sleep::Sleep(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) { }
 
 void Sleep::Initialize() {
-    int duration = GetInt("ms");
     start = now();
-    // std::cout << "Sleeping for approx. " << duration << "ms...\n";
 }
 
 bt::Node::Status Sleep::Update() {

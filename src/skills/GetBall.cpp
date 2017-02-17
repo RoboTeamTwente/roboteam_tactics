@@ -90,6 +90,7 @@ bt::Node::Status GetBall::Update (){
 
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
+    // TODO: @Hack need lookupbot here!
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 ballPos(ball.pos);
 	roboteam_utils::Vector2 ballVel(ball.vel);
