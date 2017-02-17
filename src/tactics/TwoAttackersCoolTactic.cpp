@@ -59,6 +59,7 @@ void TwoAttackersCoolTactic::Initialize() {
         bb.SetDouble("GoToPos_A_xGoal", -1.0);
         bb.SetDouble("GoToPos_A_yGoal", 0.0);
         bb.SetDouble("GoToPos_A_angleGoal", M_PI);
+        bb.SetBool("GoToPos_A_avoidRobots", true);
 
         bb.SetString("AimAt_A_At", "position");
         bb.SetDouble("AimAt_A_xGoal", -4.5);
@@ -92,6 +93,7 @@ void TwoAttackersCoolTactic::Initialize() {
         bb.SetDouble("GoToPos_A_xGoal", -1.0);
         bb.SetDouble("GoToPos_A_yGoal", 1.0);
         bb.SetDouble("GoToPos_A_angleGoal", M_PI);
+        bb.SetBool("GoToPos_A_avoidRobots", true);
 
         bb.SetString("GetBall_A_AimAt", "theirgoal");
         
