@@ -60,9 +60,7 @@ bt::Node::Status Block::Update() {
         me = *maybeMe;
         tgt = *maybeTgt;
     }
-
-    ROS_INFO_STREAM("Robot " << my_id << " blocking");
-
+    
     Position mypos(me.pos.x, me.pos.y, me.angle);
     Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
     Vector block;

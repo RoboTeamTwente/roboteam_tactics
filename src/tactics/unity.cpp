@@ -49,3 +49,6 @@
 
 #include "TwoAttackersTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "TwoAttackersCoolTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

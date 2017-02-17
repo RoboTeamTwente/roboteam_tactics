@@ -165,7 +165,7 @@ bt::Node::Status GetBall::Update (){
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
 		targetPos = interceptPos + roboteam_utils::Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
-		targetPos = interceptPos + roboteam_utils::Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + roboteam_utils::Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
@@ -197,7 +197,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("dribbler", false);
         roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
-        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(2);
+        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle);
         roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
         if (newVelCommand.length() > 3.0) {
         	newVelCommand.scale(3.0 / newVelCommand.length());
