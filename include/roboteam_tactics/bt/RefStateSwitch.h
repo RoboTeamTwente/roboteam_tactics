@@ -66,7 +66,7 @@ public:
         int cmd = (int) LastRef::get().command.command;
         auto child = children.at(cmd);
         if (last != cmd) {
-            // children.at(last)->Terminate();
+            children.at(last)->Terminate(bt::Node::Status::Invalid);
             child->Initialize();
             last = cmd;
         }

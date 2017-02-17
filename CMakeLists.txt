@@ -321,6 +321,7 @@ if (BUILD_PRACTICE_TESTS)
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         generate_json_t
+	utils
         )
     target_link_libraries(PracticeTests
         ${catkin_LIBRARIES}
