@@ -5,7 +5,7 @@
 	</group>
 
 	<group ns="yellow">
-		<include file="$(find roboteam_tactics)/launch_files/SoloAttacker2.launch" />
+		
 	</group>
 	
 </launch>

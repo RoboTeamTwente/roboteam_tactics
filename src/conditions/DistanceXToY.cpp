@@ -251,6 +251,9 @@ bt::Node::Status DistanceXToY::Update() {
     auto vecX = getPointOfInterest(X, ROBOT_ID);
     auto vecY = getPointOfInterest(Y, ROBOT_ID);
 
+    ROS_INFO_STREAM("X pos: " << vecX.x << " " << vecX.y);
+    ROS_INFO_STREAM("Y pos: " << vecY.x << " " << vecY.y);
+
     double dist;
 
     if ((X == "our defense area" || X == "their defense area") && X != Y) {

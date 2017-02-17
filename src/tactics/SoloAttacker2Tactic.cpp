@@ -61,12 +61,7 @@ void SoloAttacker2Tactic::Initialize() {
         bb.SetDouble("Block_A_block_x", theirGoalPos.x);
         bb.SetDouble("Block_A_block_y", theirGoalPos.y);
 
-        bb.SetString("GetBall_A_AimAt", "robot");
-        bb.SetInt("GetBall_A_AimAtRobot", 1);
-        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
-
-        bb.SetString("AimAt_A_At", "robot");
-        bb.SetInt("AimAt_A_AtRobot", 1.5);
+        bb.SetDouble("GetBall_A_targetAngle", 0.5*M_PI);
 
         bb.SetDouble("Kick_A_kickVel", 1.5);
         

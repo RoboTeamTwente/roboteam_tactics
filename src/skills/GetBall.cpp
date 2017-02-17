@@ -133,7 +133,11 @@ bt::Node::Status GetBall::Update (){
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else {
-		targetAngle = (interceptPos - robotPos).angle();
+		if (HasDouble("targetAngle")) {
+			targetAngle = GetDouble("targetAngle");
+		} else {
+			targetAngle = (interceptPos - robotPos).angle();	
+		}
 	}
 	targetAngle = cleanAngle(targetAngle);
 
