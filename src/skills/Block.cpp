@@ -61,6 +61,8 @@ bt::Node::Status Block::Update() {
         tgt = *maybeTgt;
     }
 
+    ROS_INFO_STREAM("Robot " << my_id << " blocking");
+
     Position mypos(me.pos.x, me.pos.y, me.angle);
     Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
     Vector block;
@@ -90,6 +92,7 @@ bt::Node::Status Block::Update() {
     if (!goal.real()) return bt::Node::Status::Running;
 
     private_bb->SetInt("ROBOT_ID", my_id);
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", goal.x);
     private_bb->SetDouble("yGoal", goal.y);
     private_bb->SetDouble("angleGoal", goal.rot);

@@ -12,6 +12,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_utils/Vector2.h"
 
 #define RTT_CURRENT_DEBUG_TAG SoloAttacker2Tactic
 
@@ -37,6 +38,7 @@ void SoloAttacker2Tactic::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
     
     int attackerID = 0;
+    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
 
@@ -51,6 +53,13 @@ void SoloAttacker2Tactic::Initialize() {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", attackerID);
         bb.SetInt("KEEPER_ID", 5);
+
+        bb.SetInt("Block_A_TGT_ID", 0);
+        bb.SetInt("Block_A_BLOCK_ID", 2); // not used, but required for bb-verification
+        bb.SetString("Block_A_block_type", "COVER");
+        bb.SetBool("Block_A_invert_direction", true);
+        bb.SetDouble("Block_A_block_x", theirGoalPos.x);
+        bb.SetDouble("Block_A_block_y", theirGoalPos.y);
 
         bb.SetString("GetBall_A_AimAt", "robot");
         bb.SetInt("GetBall_A_AimAtRobot", 1);
