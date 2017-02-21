@@ -83,7 +83,8 @@ private:
 
     // Control gains
     double pGainPosition = 3.0;
-    double pGainRotation = 6.0;
+    double pGainRotation = 15.0;
+    // double iGainRotation = 50.0;
     double maxAngularVel = 3.0;
     double iGainVelocity = 0.5;
     double iGainAngularVel = 0.02;
@@ -107,6 +108,7 @@ private:
     roboteam_utils::Vector2 prevTargetPos;
     roboteam_utils::Vector2 velControllerI;
     double angularVelControllerI;
+    // double rotationControllerI = 0;
     // double wControllerI;
 
     Draw drawer;

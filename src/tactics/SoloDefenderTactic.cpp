@@ -28,6 +28,7 @@ void SoloDefenderTactic::Initialize() {
     tokens.clear();
 
     // RTT_DEBUG("Initializing Solo Defender Tactic \n");
+    // ROS_INFO("Initializing SoloDefenderTactic");
     
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -41,7 +42,7 @@ void SoloDefenderTactic::Initialize() {
     roboteam_utils::Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
     
     int defenderID = 0;
-    claim_robots({defenderID});
+    // claim_robots({defenderID});
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -83,6 +84,14 @@ void SoloDefenderTactic::Initialize() {
 }
 
 bt::Node::Status SoloDefenderTactic::Update() {
+
+    // ROS_INFO("SoloDefenderTactic Update");
+    // ROS_INFO_STREAM("SoloDefenderTactic time: " << time_difference_milliseconds(lastUpdate, now()).count());
+
+    if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
+        ROS_INFO("SoloDefenderTactic Update too long ago");
+        Initialize();
+    }
     
     bool allSucceeded = true;
 
@@ -102,6 +111,8 @@ bt::Node::Status SoloDefenderTactic::Update() {
         RTT_DEBUGLN("Tactic failed because it took too long");
         return Status::Failure;
     }
+
+    lastUpdate = now();
 
     // Keep defending until stopped by the strategy
     return bt::Node::Status::Running;

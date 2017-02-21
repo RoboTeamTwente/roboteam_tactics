@@ -70,6 +70,10 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
 
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
+    // double timeStep = 1.0/30.0;
+    // rotationControllerI += angleError * timeStep;
+    // rotationControllerI = 0.9*rotationControllerI + angleError * timeStep;
+    // ROS_INFO_STREAM("angleError: " << angleError << ", I effect: " << (rotationControllerI * iGainRotation) << ", P effect: " << (angleError * pGainRotation));
 
     double angularVelTarget = angleError * pGainRotation;    
     return angularVelTarget;

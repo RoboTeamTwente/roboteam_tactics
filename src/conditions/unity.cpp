@@ -1,6 +1,9 @@
 #include "BallOnOurSide.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "BallOnTheirSide.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "CanInterceptBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

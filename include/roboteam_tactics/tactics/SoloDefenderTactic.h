@@ -15,6 +15,7 @@ class SoloDefenderTactic : public Tactic {
     private:
     std::vector<boost::uuids::uuid> tokens;
     time_point start;
+    time_point lastUpdate;
 } ;
 
 }

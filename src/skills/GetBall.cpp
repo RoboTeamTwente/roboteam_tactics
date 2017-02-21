@@ -100,31 +100,6 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 
-	// if (robotID == 2) {
-	// 	// Fill the command message
-	//     roboteam_msgs::RobotCommand command;
-	//     command.id = robotID;
-	//     command.x_vel = ballVel.x;
-	//     command.y_vel = ballVel.y;
-	//     command.w = 0;
-	//     command.dribbler = GetBool("dribbler");
-
-
-	//     // Get global robot command publisher, and publish the command
-	//     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	//     pub.publish(command);
-	//     return Status::Running;
-	// }
-	
-
-
-	// roboteam_utils::Vector2 interceptPos;
-	// if (ballVel.length() > 1.0) {
-		// interceptPos = computeInterceptPoint(robotPos, robotVel);
-	// } else {
-		// interceptPos = ballPos;
-	// }
-
 	// double distanceToBall = (robotPos - ballPos).length();
 	// roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(distanceToBall*10);
 	roboteam_utils::Vector2 interceptPos = ballPos + ballVel.scale(0.0);
@@ -132,7 +107,8 @@ bt::Node::Status GetBall::Update (){
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
-		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		targetAngle = GetTargetAngle(ballPos+ballVel.scale(1.25), GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		// targetAngle = (roboteam_utils::Vector2(-4.5, 0.0) - robotPos).angle();
 	} else {
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
@@ -147,6 +123,7 @@ bt::Node::Status GetBall::Update (){
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
 	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
+
 	angleDiff = cleanAngle(angleDiff);
 
 	if (angleDiff > 0.5*M_PI) {
@@ -176,19 +153,31 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
 
+	// ROS_INFO_STREAM("targetAngle: " << targetAngle << " robotAngle: " << robot.angle);
+	roboteam_utils::Vector2 aimDir = roboteam_utils::Vector2(1.0, 0.0).rotate(targetAngle);	
+	drawer.DrawLine("aimDir", robotPos, robotPos+aimDir);
+	// ROS_INFO_STREAM("angleError: " << targetAngle - robot.angle);
 
-	// if (iHaveBall.Update() == Status::Success) {
-	if (iHaveBall.Update() == Status::Success && fabs(targetAngle - robot.angle) < 0.05) {
+	bt::Node::Status stat = iHaveBall.Update();
+	if (stat == Status::Success && fabs(targetAngle - robot.angle) < 0.1) {
+		// publishStopCommand();
+
+		if (GetBool("passOn")) {
+			roboteam_msgs::RobotCommand command;
+			command.id = robotID;
+			command.kicker = true;
+			command.kicker_forced = true;
+			command.kicker_vel = 5.0;
+
+			// Get global robot command publisher, and publish the command
+	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+		    pub.publish(command);	
+		}
+
 		publishStopCommand();
 		RTT_DEBUGLN("GetBall skill completed.");
 		return Status::Success;
 	} else {
-
-		// roboteam_utils::Vector2 posControlVel = goToPos.positionController(robotPos, targetPos);
-		// double rotControlVel = goToPos.rotationController(robot.angle, targetAngle, (targetPos - robotPos));
-
-		// roboteam_utils::Vector2 targetVel = posControlVel + ballVel;
-		// targetVel = worldToRobotFrame(targetVel, robot.angle);
 
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
@@ -198,30 +187,19 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("dribbler", false);
         roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
-        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(2.0);
         roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
         if (newVelCommand.length() > 3.0) {
         	newVelCommand.scale(3.0 / newVelCommand.length());
         }
         command.x_vel = newVelCommand.x;
         command.y_vel = newVelCommand.y;
-        if (robotID == 2) {
-        	command.x_vel = ballVel.x;
-        	command.y_vel = ballVel.y;
-        }
-        
 
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    // if (GetString("AimAt") == "theirgoal") {
-	    	// publishStopCommand();
-	    // } else {
-	    	pub.publish(command);	
-	    // }
-	    
+	    pub.publish(command);	
 
-        // goToPos.Update();
 		return Status::Running;
 	}
 

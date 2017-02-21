@@ -6,6 +6,8 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 
+#include "roboteam_utils/Draw.h"
+
 namespace rtt {
 
 class GetBall : public Skill {
@@ -35,6 +37,7 @@ private:
     bool waiting = true;
 
 	GoToPos goToPos;
+    Draw drawer;
 };
 
 } // rtt

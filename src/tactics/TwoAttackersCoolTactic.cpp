@@ -65,7 +65,7 @@ void TwoAttackersCoolTactic::Initialize() {
         bb.SetDouble("AimAt_A_xGoal", -4.5);
         bb.SetDouble("AimAt_A_yGoal", 3.0);
 
-        bb.SetDouble("Kick_A_kickVel", 2.0);
+        bb.SetDouble("Kick_A_kickVel", 3.0);
 
         // Create message
         firstAttacker.tree = "qualification/TwoAttackersCoolFirstRole";
@@ -96,8 +96,9 @@ void TwoAttackersCoolTactic::Initialize() {
         bb.SetBool("GoToPos_A_avoidRobots", true);
 
         bb.SetString("GetBall_A_AimAt", "theirgoal");
+        bb.SetBool("GetBall_A_passOn", true);
         
-        bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+        bb.SetDouble("Kick_A_kickVel", 5.0);
         
 
         // Create message

@@ -1,6 +1,6 @@
 #include "roboteam_msgs/World.h"
 
-#include "roboteam_tactics/conditions/BallOnOurSide.h"
+#include "roboteam_tactics/conditions/BallOnTheirSide.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 #include "roboteam_utils/LastWorld.h"
@@ -10,12 +10,12 @@
 
 namespace rtt {
 
-RTT_REGISTER_CONDITION(BallOnOurSide);
+RTT_REGISTER_CONDITION(BallOnTheirSide);
 
-BallOnOurSide::BallOnOurSide(std::string name, bt::Blackboard::Ptr blackboard)
+BallOnTheirSide::BallOnTheirSide(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}
 
-bt::Node::Status BallOnOurSide::Update() {
+bt::Node::Status BallOnTheirSide::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_utils::Vector2 ballPos(world.ball.pos);
 	
@@ -23,19 +23,19 @@ bt::Node::Status BallOnOurSide::Update() {
     ros::param::get("our_side", ourSide);
     if (ourSide == "left") {
         if (ballPos.x < 0) {
-            // ROS_INFO("BallOnOurSide true");
-            return Status::Success;
-        } else {
-            // ROS_INFO("BallOnOurSide false");
+            // ROS_INFO("BallOnTheirSide false");
             return Status::Failure;
+        } else {
+            // ROS_INFO("BallOnTheirSide true");
+            return Status::Success;
         }
     } else if (ourSide == "right") {
         if (ballPos.x > 0) {
-            // ROS_INFO("BallOnOurSide true");
-            return Status::Success;
-        } else {
-            // ROS_INFO("BallOnOurSide false");
+            // ROS_INFO("BallOnTheirSide false");
             return Status::Failure;
+        } else {
+            // ROS_INFO("BallOnTheirSide true");
+            return Status::Success;
         }
     }
 }
