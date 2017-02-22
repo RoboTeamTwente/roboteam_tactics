@@ -28,6 +28,9 @@
 #include "GoToPos.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Harass.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "KeeperBlock.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

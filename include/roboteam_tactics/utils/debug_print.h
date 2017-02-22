@@ -47,6 +47,7 @@ SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
+SET_DEBUG_FOR(Harass, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
@@ -72,6 +73,7 @@ SET_DEBUG_FOR(SoloDefenderTactic, true);
 SET_DEBUG_FOR(StandByTactic, true);
 SET_DEBUG_FOR(TwoAttackersTactic, true);
 SET_DEBUG_FOR(TwoAttackersCoolTactic, true);
+SET_DEBUG_FOR(TwoVTwoDefenseTactic, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
