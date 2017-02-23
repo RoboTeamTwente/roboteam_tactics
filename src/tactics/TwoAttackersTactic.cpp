@@ -49,9 +49,9 @@ void TwoAttackersTactic::Initialize() {
     std::string ourSide;
     ros::param::get("our_side", ourSide);
     if (ourSide == "left") {
-        standFreePos = roboteam_utils::Vector2(2.25, 1.5);
+        standFreePos = roboteam_utils::Vector2(1.5, 1.5);
     } else if (ourSide == "right") {
-        standFreePos = roboteam_utils::Vector2(-2.25, -1.5);
+        standFreePos = roboteam_utils::Vector2(-1.5, -1.5);
     } else {
         ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
     }
