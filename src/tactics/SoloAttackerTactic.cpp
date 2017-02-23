@@ -100,7 +100,7 @@ bt::Node::Status SoloAttackerTactic::Update() {
     }
 
     auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 25) {
+    if (duration.count() >= 60) {
         RTT_DEBUGLN("Tactic failed because it took too long");
         return Status::Failure;
     }

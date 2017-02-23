@@ -32,7 +32,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , attractiveForce(10.0)
         , attractiveForceWhenClose(3.0)
         , repulsiveForce(20.0)
-        {}
+        {print_blackboard(blackboard);}
 
 
 void GoToPos::sendStopCommand(uint id) {
@@ -70,6 +70,10 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
 
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
+    // double timeStep = 1.0/30.0;
+    // rotationControllerI += angleError * timeStep;
+    // rotationControllerI = 0.9*rotationControllerI + angleError * timeStep;
+    // ROS_INFO_STREAM("angleError: " << angleError << ", I effect: " << (rotationControllerI * iGainRotation) << ", P effect: " << (angleError * pGainRotation));
 
     double angularVelTarget = angleError * pGainRotation;    
     return angularVelTarget;
@@ -259,9 +263,9 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     
 
     // Get blackboard info
-    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    if (blackboard->HasInt("KEEPER_ID")) {
-        KEEPER_ID = blackboard->GetInt("KEEPER_ID");
+    ROBOT_ID = GetInt("ROBOT_ID");
+    if (HasInt("KEEPER_ID")) {
+        KEEPER_ID = GetInt("KEEPER_ID");
     } else {
         ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
@@ -395,7 +399,7 @@ bt::Node::Status GoToPos::Update() {
 
 
     // Find the robot with the specified ID
-    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    ROBOT_ID = GetInt("ROBOT_ID");
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
     if (findBot) {
         me = *findBot;

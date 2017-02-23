@@ -191,8 +191,8 @@ bt::Node::Status ReceiveBall::Update (){
 	if (hasBall == -1) {
 		interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	} else {
-		// interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
-		interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
+		interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
+		// interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	}
 	roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;

@@ -142,7 +142,7 @@ void FreeKickDefenceTactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", harasser);
         roboteam_msgs::RoleDirective wd;
-        wd.robot_id = defender;
+        wd.robot_id = harasser;
         wd.tree = "HarasserTree";
         wd.blackboard = bb.toMsg();
         boost::uuids::uuid token = unique_id::fromRandom();
