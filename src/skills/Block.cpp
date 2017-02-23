@@ -53,6 +53,7 @@ void normalize(Position& pos) {
 }
 
 bt::Node::Status Block::Update() {
+    ROS_INFO("Block Update");
     roboteam_msgs::WorldRobot me, tgt;
 
     {

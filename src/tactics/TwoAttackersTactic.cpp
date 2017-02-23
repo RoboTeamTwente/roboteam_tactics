@@ -49,9 +49,9 @@ void TwoAttackersTactic::Initialize() {
     std::string ourSide;
     ros::param::get("our_side", ourSide);
     if (ourSide == "left") {
-        standFreePos = roboteam_utils::Vector2(2.25, 1.5);
+        standFreePos = roboteam_utils::Vector2(1.5, 1.5);
     } else if (ourSide == "right") {
-        standFreePos = roboteam_utils::Vector2(-2.25, -1.5);
+        standFreePos = roboteam_utils::Vector2(-1.5, -1.5);
     } else {
         ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
     }
@@ -139,10 +139,10 @@ bt::Node::Status TwoAttackersTactic::Update() {
 
     // ROS_INFO_STREAM("TwoAttackersTactic time: " << time_difference_milliseconds(now(), lastUpdate).count());
 
-    if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
-        ROS_INFO("TwoAttackersTactic Update too long ago");
-        Initialize();
-    }
+    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
+    //     ROS_INFO("TwoAttackersTactic Update too long ago");
+    //     Initialize();
+    // }
     
 
     bool firstAttackerSucceeded = false;
