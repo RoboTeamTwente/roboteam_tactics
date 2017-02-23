@@ -88,10 +88,10 @@ bt::Node::Status SoloDefenderTactic::Update() {
     // ROS_INFO("SoloDefenderTactic Update");
     // ROS_INFO_STREAM("SoloDefenderTactic time: " << time_difference_milliseconds(lastUpdate, now()).count());
 
-    if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
-        ROS_INFO("SoloDefenderTactic Update too long ago");
-        Initialize();
-    }
+    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
+    //     ROS_INFO("SoloDefenderTactic Update too long ago");
+    //     Initialize();
+    // }
     
     bool allSucceeded = true;
 
@@ -107,7 +107,7 @@ bt::Node::Status SoloDefenderTactic::Update() {
     if (allSucceeded) return Status::Success;
 
     auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 25) {
+    if (duration.count() >= 60) {
         RTT_DEBUGLN("Tactic failed because it took too long");
         return Status::Failure;
     }
