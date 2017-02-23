@@ -139,10 +139,10 @@ bt::Node::Status TwoAttackersTactic::Update() {
 
     // ROS_INFO_STREAM("TwoAttackersTactic time: " << time_difference_milliseconds(now(), lastUpdate).count());
 
-    if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
-        ROS_INFO("TwoAttackersTactic Update too long ago");
-        Initialize();
-    }
+    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
+    //     ROS_INFO("TwoAttackersTactic Update too long ago");
+    //     Initialize();
+    // }
     
 
     bool firstAttackerSucceeded = false;

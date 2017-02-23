@@ -190,12 +190,14 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
 roboteam_utils::Vector2 GoToPos::avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces) {
     roboteam_utils::Vector2 posError = targetPos - myPos;
 
-    roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.0);
-    if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
-        if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
-            sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
-        } else {
-            sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+    if (ROBOT_ID != KEEPER_ID) {
+        roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.0);
+        if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
+            if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
+                sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+            } else {
+                sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+            }
         }
     }
 
@@ -263,9 +265,9 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     
 
     // Get blackboard info
-    ROBOT_ID = GetInt("ROBOT_ID");
-    if (HasInt("KEEPER_ID")) {
-        KEEPER_ID = GetInt("KEEPER_ID");
+    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    if (blackboard->HasInt("KEEPER_ID")) {
+        KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
         ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
@@ -324,10 +326,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
 
     // Defense area avoidance
-    if (ROBOT_ID != KEEPER_ID) {
-        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    }
-
+    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
@@ -399,7 +399,7 @@ bt::Node::Status GoToPos::Update() {
 
 
     // Find the robot with the specified ID
-    ROBOT_ID = GetInt("ROBOT_ID");
+    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
     if (findBot) {
         me = *findBot;
