@@ -64,12 +64,14 @@ roboteam_utils::Vector2 GoToPos::positionController(roboteam_utils::Vector2 myPo
 
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError) {
-    if (posError.length() > 1.5) {
+    if (posError.length() > 0.1) {
         angleGoal = posError.angle();
     }
 
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
+
+
     // double timeStep = 1.0/30.0;
     // rotationControllerI += angleError * timeStep;
     // rotationControllerI = 0.9*rotationControllerI + angleError * timeStep;
@@ -326,7 +328,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
 
     // Defense area avoidance
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    // sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
@@ -353,11 +355,18 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Integral velocity controller (use only if not too close to the target, to prevent overshoot)
     roboteam_utils::Vector2 velCommand;
-    if (posError.length() < 0.5) {
-        velCommand = sumOfForces;
-    } else {
-        velCommand = velocityController(sumOfForces);
+    // if (posError.length() < 0.5) {
+    //     velCommand = sumOfForces;
+    // } else {
+    //     velCommand = velocityController(sumOfForces);
+    // }
+
+    // For now, only drive forward in combination with an angular velocity
+    velCommand = roboteam_utils::Vector2(0.0, posError.length());
+    if (velCommand.length() > 1.0) {
+        velCommand = velCommand.scale(1 / velCommand.length());
     }
+
 
 
     // Integral angular velocity controller
@@ -367,7 +376,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
 
     // Rotate the commands from world frame to robot frame 
-    velCommand = worldToRobotFrame(velCommand, myAngle);
+    // velCommand = worldToRobotFrame(velCommand, myAngle);
     // Draw the velocity vector acting on the robots
     // drawer.DrawLine("velCommand", myPos, velCommand);  
 
