@@ -28,9 +28,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         // Rest of the members
         , success(false)
-        , maxSpeed(GetDouble("maxSpeed"))
+        // TODO: @Bug Cannot ask potentially private blackboard because private bb is initialized later than the constructor!
+        // , maxSpeed(GetDouble("maxSpeed"))
+        , maxSpeed(2.0)
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(1.0)
+        , attractiveForceWhenClose(5.0)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -306,7 +308,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     roboteam_utils::Vector2 myVel(me.vel);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
-    ROS_INFO_STREAM("robotAngle: " << myAngle);
+    ROS_INFO_STREAM("robotAngle: " << (cleanAngle(myAngle) / M_PI * 180));
     double angleError = angleGoal - myAngle;
 
     // QUALIFICATION HACK!!!!!:
@@ -372,29 +374,41 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // }
     // For now, only drive forward in combination with an angular velocity
     double driveSpeed;
-    if (fabs(angleError) > (0.4 / maxSpeed)) {
-        driveSpeed = 0.4 / fabs(angleError);
+    if (fabs(angleError) > (1.0 / maxSpeed)) {
+        driveSpeed = 1.0 / fabs(angleError);
     } else {
         driveSpeed = maxSpeed;
     }
+
+    std::cout << "maxSpeed: " << maxSpeed << "\n";
+    std::cout << "sumOfForces.length() " << sumOfForces.length() << "\n";
 
     if (sumOfForces.length() < driveSpeed) {
         driveSpeed = sumOfForces.length();
     }
 
     roboteam_utils::Vector2 velCommand;
+    std::cout << "drive == " << GetBool("drive") << "\n";
     if (GetBool("drive")) {
         velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
     } else {
         velCommand = roboteam_utils::Vector2(0.0, 0.0);
     }
 
+    std::cout << "velCommand.length() == " << velCommand.length() << "\n";
+    std::cout << "driveSpeed == " << driveSpeed << "\n";
+
+    if (angularVelTarget > 0.01) {
+        std::cout << "DO TURNING LEFT!\n";
+    } else if (angularVelTarget < -0.01) {
+        std::cout << "DO TURNING RIGHT!\n";
+    }
 
 
     // Integral angular velocity controller
     // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
     // double angularVelCommand = angularVelController(angularVelTarget);
-    double angularVelCommand = angularVelTarget;
+    double angularVelCommand = angularVelTarget + (-10 / 512 * 2 * M_PI);
 
 
     // QUALIFICATION HACK!!!!!:
@@ -459,7 +473,7 @@ bt::Node::Status GoToPos::Update() {
     }
 
     // QUALICATION HACK!!!!:
-    if (posError.length() < 0.1) {
+    if (posError.length() < 0.2) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
