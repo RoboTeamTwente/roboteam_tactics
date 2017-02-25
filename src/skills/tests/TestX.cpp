@@ -214,7 +214,7 @@ How to use:
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     
-    double updateRate = 40;
+    double updateRate = 30;
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
 
@@ -242,6 +242,7 @@ How to use:
         bt::Node::Status status;
         while (ros::ok()) {
             ros::spinOnce();
+
             status = node->Update();
 
             if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
