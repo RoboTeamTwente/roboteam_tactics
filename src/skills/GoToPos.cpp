@@ -369,6 +369,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     roboteam_utils::Vector2 myVel(me.vel);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
+    ROS_INFO_STREAM("robotAngle: " << myAngle);
     double angleError = angleGoal - myAngle;
 
     // QUALIFICATION HACK!!!!!:
@@ -459,7 +460,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     roboteam_utils::Vector2 velCommand;
     if (GetBool("drive")) {
-        velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+        velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
     } else {
         velCommand = roboteam_utils::Vector2(0.5, 0.0);
     }
