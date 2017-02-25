@@ -1,5 +1,6 @@
 #include "roboteam_tactics/skills/Harass.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
@@ -35,20 +36,34 @@ Harass::Harass(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
 }
 
 bt::Node::Status Harass::Update() {
+    auto world = LastWorld::get();
+    auto ball = world.ball;
+    roboteam_utils::Vector2 ballPos(ball.pos);
+    roboteam_utils::Vector2 myPos(lookup_bot(blackboard->GetInt("ROBOT_ID"), true, &world)->pos);
     if (bot_has_ball(target, false, LastWorld::get().ball)) {
-        ROS_INFO("Bot %d preventing %d from kicking", GetInt("ROBOT_ID"), GetInt("TGT_ID"));
+        ROS_INFO("Bot %d preventing %d from kicking", blackboard->GetInt("ROBOT_ID"), blackboard->GetInt("TGT_ID"));
         bt::Node::Status s = block_kick->Update();
         if (s == bt::Node::Status::Failure) {
             ROS_ERROR("Failure");
-            return bt::Node::Status::Running;
+            return bt::Node::Status::Failure;
         }
-    }    
+        return s;
+    }
+    if (ballPos.dist2(myPos) <= .2) {
+        ROS_INFO("Bot %d fetching ball", blackboard->GetInt("ROBOT_ID"));
+        if (!get_ball) {
+            std::string nodeName = (name == "" ? "" : name + "_") + "Get_Ball";
+            get_ball = std::make_unique<GetBall>(nodeName, blackboard);
+        }
+        return get_ball->Update();
+    }
     ROS_INFO("Bot %d preventing %d from receiving", GetInt("ROBOT_ID"), GetInt("TGT_ID"));
-        bt::Node::Status s = block_get->Update();
-        if (s == bt::Node::Status::Failure) {
-            ROS_ERROR("Failure");
-            return bt::Node::Status::Running;
-        }
+    bt::Node::Status s = block_get->Update();
+    if (s == bt::Node::Status::Failure) {
+        ROS_ERROR("Failure");
+        return bt::Node::Status::Failure;
+    }
+    return s;
 }
     
 }
