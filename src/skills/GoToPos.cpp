@@ -28,9 +28,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         // Rest of the members
         , success(false)
-        , maxSpeed(1.0)
+        , maxSpeed(GetDouble("maxSpeed"))
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(3.0)
+        , attractiveForceWhenClose(1.0)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -64,12 +64,15 @@ roboteam_utils::Vector2 GoToPos::positionController(roboteam_utils::Vector2 myPo
 
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError) {
-    if (posError.length() > 1.5) {
-        angleGoal = posError.angle();
-    }
+    // TODO: find out where this is for?
+    //if (posError.length() > 0.1) {
+    //    angleGoal = posError.angle();
+    //}
 
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
+
+
     // double timeStep = 1.0/30.0;
     // rotationControllerI += angleError * timeStep;
     // rotationControllerI = 0.9*rotationControllerI + angleError * timeStep;
@@ -145,6 +148,24 @@ roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2
 }
 
 
+// Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
+double GoToPos::getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+    roboteam_utils::Vector2 antenna = antennaCone.center - myPos;    
+
+    double angle;
+    if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
+        // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
+        if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            angle = antenna.angle()-0.1*M_PI;
+        }
+        if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            angle = antenna.angle()+0.1*M_PI;
+        }
+    }    
+    return angle;
+}
+
+
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
 roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
@@ -183,6 +204,50 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
     }
 
     return sumOfForces;
+}
+
+// Computes an angle for the robot to avoid other robots, asumes robot will ride forward
+double GoToPos::avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos){
+
+    roboteam_msgs::World world = LastWorld::get();
+
+    roboteam_utils::Vector2 posError = targetPos - myPos;
+    double lookingDistance = 0.7; // default
+    if (lookingDistance > posError.length()) {
+        lookingDistance = posError.length();
+    }
+    
+    roboteam_utils::Vector2 antenna = roboteam_utils::Vector2(lookingDistance, 0.0).rotate(posError.angle());
+    roboteam_utils::Vector2 coneStart = myPos - antenna;
+    Cone antennaCone(coneStart, (antenna + myPos), 0.3);
+
+    // Draw the lines of the cone in rqt_view
+    roboteam_utils::Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    roboteam_utils::Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+
+    roboteam_utils::Vector2 sumOfForces;
+    double sumOfAngles;
+
+    for (size_t i = 0; i < world.us.size(); i++) {
+        roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
+        if (currentRobot.id != ROBOT_ID) {
+
+            roboteam_utils::Vector2 otherRobotPos(currentRobot.pos);
+            double angle = getAngleFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+            sumOfAngles = sumOfAngles + angle;
+        }
+    }
+
+    for (size_t i = 0; i < world.them.size(); i++) {
+        roboteam_utils::Vector2 otherRobotPos(world.them.at(i).pos);
+        double angle = getAngleFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+        sumOfAngles = sumOfAngles + angle; 
+    }
+
+    return sumOfAngles;
+
 }
 
 
@@ -269,14 +334,14 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
-        ROS_WARN("GoToPos, KEEPER_ID not set");
+        // ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
     }
 
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    angleGoal = cleanAngle(GetDouble("angleGoal"));
-
+    angleGoal = cleanAngle(GetDouble("angleGoal"));    
+    
 
     // Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
@@ -304,7 +369,15 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     roboteam_utils::Vector2 myVel(me.vel);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
+    ROS_INFO_STREAM("robotAngle: " << myAngle);
     double angleError = angleGoal - myAngle;
+
+    // QUALIFICATION HACK!!!!!:
+    // For now, angleGoal is towards targetPos:
+    if (posError.length() > 0.1) {
+        angleGoal = posError.angle();
+    }
+    angleError = cleanAngle(angleGoal - myAngle);
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -321,17 +394,30 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
             sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         }
     } else {
-        ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
+        // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
+    }
+
+    // Robot avoidance
+    if (HasBool("avoidRobotsForward")) {
+        if (GetBool("avoidRobotsForward")) {
+            double avoidAngle = avoidRobotsForward(myPos, myVel, targetPos);
+            std::cout << "avoidAngle: " << avoidAngle << std::endl;
+            angleGoal=angleGoal+avoidAngle;
+        }
+    } else {
+        // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
     }
 
 
+
     // Defense area avoidance
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    // sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
 
+    std::cout << "angularVelTarget: " << angularVelTarget << std::endl;
 
     // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
     // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
@@ -351,13 +437,34 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     }
 
 
+
+    // QUALIFICATION HACK!!!!!:
     // Integral velocity controller (use only if not too close to the target, to prevent overshoot)
-    roboteam_utils::Vector2 velCommand;
-    if (posError.length() < 0.5) {
-        velCommand = sumOfForces;
+    // roboteam_utils::Vector2 velCommand;
+    // if (posError.length() < 0.5) {
+    //     velCommand = sumOfForces;
+    // } else {
+    //     velCommand = velocityController(sumOfForces);
+    // }
+    // For now, only drive forward in combination with an angular velocity
+    double driveSpeed;
+    if (fabs(angleError) > (0.4 / maxSpeed)) {
+        driveSpeed = 0.4 / fabs(angleError);
     } else {
-        velCommand = velocityController(sumOfForces);
+        driveSpeed = maxSpeed;
     }
+
+    if (sumOfForces.length() < driveSpeed) {
+        driveSpeed = sumOfForces.length();
+    }
+
+    roboteam_utils::Vector2 velCommand;
+    if (GetBool("drive")) {
+        velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
+    } else {
+        velCommand = roboteam_utils::Vector2(0.5, 0.0);
+    }
+
 
 
     // Integral angular velocity controller
@@ -366,8 +473,9 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     double angularVelCommand = angularVelTarget;
 
 
+    // QUALIFICATION HACK!!!!!:
     // Rotate the commands from world frame to robot frame 
-    velCommand = worldToRobotFrame(velCommand, myAngle);
+    // velCommand = worldToRobotFrame(velCommand, myAngle);
     // Draw the velocity vector acting on the robots
     // drawer.DrawLine("velCommand", myPos, velCommand);  
 
@@ -422,6 +530,12 @@ bt::Node::Status GoToPos::Update() {
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
+        sendStopCommand(ROBOT_ID);
+        return Status::Success;
+    }
+
+    // QUALICATION HACK!!!!:
+    if (posError.length() < 0.1) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }

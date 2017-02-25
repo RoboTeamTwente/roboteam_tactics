@@ -187,7 +187,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("dribbler", false);
         roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
-        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(2.0);
+        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
         roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
         if (newVelCommand.length() > 3.0) {
         	newVelCommand.scale(3.0 / newVelCommand.length());
