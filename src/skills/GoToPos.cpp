@@ -28,9 +28,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         // Rest of the members
         , success(false)
-        , maxSpeed(1.0)
+        , maxSpeed(GetDouble("maxSpeed"))
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(3.0)
+        , attractiveForceWhenClose(1.0)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -271,14 +271,14 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
-        ROS_WARN("GoToPos, KEEPER_ID not set");
+        // ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
     }
 
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    angleGoal = cleanAngle(GetDouble("angleGoal"));
-
+    angleGoal = cleanAngle(GetDouble("angleGoal"));    
+    
 
     // Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
@@ -308,6 +308,13 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
+    // QUALIFICATION HACK!!!!!:
+    // For now, angleGoal is towards targetPos:
+    if (posError.length() > 0.1) {
+        angleGoal = posError.angle();
+    }
+    angleError = cleanAngle(angleGoal - myAngle);
+
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     roboteam_utils::Vector2 sumOfForces(0.0, 0.0);
@@ -323,7 +330,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
             sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         }
     } else {
-        ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
+        // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
     }
 
 
@@ -353,18 +360,32 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     }
 
 
+
+    // QUALIFICATION HACK!!!!!:
     // Integral velocity controller (use only if not too close to the target, to prevent overshoot)
-    roboteam_utils::Vector2 velCommand;
+    // roboteam_utils::Vector2 velCommand;
     // if (posError.length() < 0.5) {
     //     velCommand = sumOfForces;
     // } else {
     //     velCommand = velocityController(sumOfForces);
     // }
-
     // For now, only drive forward in combination with an angular velocity
-    velCommand = roboteam_utils::Vector2(0.0, posError.length());
-    if (velCommand.length() > 1.0) {
-        velCommand = velCommand.scale(1 / velCommand.length());
+    double driveSpeed;
+    if (fabs(angleError) > (0.4 / maxSpeed)) {
+        driveSpeed = 0.4 / fabs(angleError);
+    } else {
+        driveSpeed = maxSpeed;
+    }
+
+    if (sumOfForces.length() < driveSpeed) {
+        driveSpeed = sumOfForces.length();
+    }
+
+    roboteam_utils::Vector2 velCommand;
+    if (GetBool("drive")) {
+        velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+    } else {
+        velCommand = roboteam_utils::Vector2(0.0, 0.0);
     }
 
 
@@ -375,6 +396,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     double angularVelCommand = angularVelTarget;
 
 
+    // QUALIFICATION HACK!!!!!:
     // Rotate the commands from world frame to robot frame 
     // velCommand = worldToRobotFrame(velCommand, myAngle);
     // Draw the velocity vector acting on the robots
@@ -431,6 +453,12 @@ bt::Node::Status GoToPos::Update() {
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
+        sendStopCommand(ROBOT_ID);
+        return Status::Success;
+    }
+
+    // QUALICATION HACK!!!!:
+    if (posError.length() < 0.1) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
