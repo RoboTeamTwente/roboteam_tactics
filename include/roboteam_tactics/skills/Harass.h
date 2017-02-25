@@ -2,6 +2,7 @@
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Block.h"
+#include "roboteam_tactics/skills/GetBall.h"
 
 namespace rtt {
 
@@ -36,6 +37,7 @@ class Harass : public Skill {
     
     private:
     std::unique_ptr<Block> block_get, block_kick;
+    std::unique_ptr<GetBall> get_ball;
     int target;
 
 };

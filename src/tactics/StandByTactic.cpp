@@ -46,8 +46,8 @@ void StandByTactic::Initialize() {
 
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
-    roboteam_utils::Vector2 firstRobotGoalPos(-4.4, -1.0);
-    roboteam_utils::Vector2 secondRobotGoalPos(-4.4, -1.5);
+    roboteam_utils::Vector2 firstRobotGoalPos(-4.4, -2.0);
+    roboteam_utils::Vector2 secondRobotGoalPos(-4.4, -2.5);
     if (ourSide == "right") {
         firstRobotGoalPos.y = firstRobotGoalPos.y * -1;
         secondRobotGoalPos.y = secondRobotGoalPos.y * -1;

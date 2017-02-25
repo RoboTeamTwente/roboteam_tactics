@@ -117,6 +117,8 @@ int get_robot_closest_to_ball(std::vector<int> robots);
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world);
 
+bool robotIsWithinBounds(const TeamRobot& bot, const roboteam_msgs::World& world);
+
 template<
     class M
 >
