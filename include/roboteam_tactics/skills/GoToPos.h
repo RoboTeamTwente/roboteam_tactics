@@ -87,9 +87,9 @@ private:
 
     // Control gains
     double pGainPosition = 3.0;
-    double pGainRotation = 0.5;
+    double pGainRotation = 0.7;
     // double iGainRotation = 50.0;
-    double maxAngularVel = 1.0;
+    double maxAngularVel = 0.8;
     double iGainVelocity = 0.5;
     double iGainAngularVel = 0.02;
 

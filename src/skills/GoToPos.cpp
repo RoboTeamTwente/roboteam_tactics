@@ -30,7 +30,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
         // TODO: @Bug Cannot ask potentially private blackboard because private bb is initialized later than the constructor!
         // , maxSpeed(GetDouble("maxSpeed"))
-        , maxSpeed(2.0)
         , attractiveForce(10.0)
         , attractiveForceWhenClose(5.0)
         , repulsiveForce(20.0)
@@ -352,7 +351,10 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
-    
+
+    maxSpeed = GetDouble("maxSpeed");
+    // TODO: @Temporary
+    maxSpeed = 2;
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
@@ -426,7 +428,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (HasBool("avoidRobotsForward")) {
         if (GetBool("avoidRobotsForward")) {
             double avoidAngle = avoidRobotsForward(myPos, myVel, targetPos);
-            std::cout << "avoidAngle: " << avoidAngle << std::endl;
             angleGoal=angleGoal+avoidAngle;
         }
     } else {
@@ -473,22 +474,20 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // }
     // For now, only drive forward in combination with an angular velocity
     double driveSpeed;
-    if (fabs(angleError) > (1.0 / maxSpeed)) {
-        driveSpeed = 1.0 / fabs(angleError);
+    // if (fabs(angleError) > (1.0 / maxSpeed)) {
+    if (fabs(angleError) > 1) {
+        // driveSpeed = 1.0 / fabs(angleError);
+        driveSpeed = 1 / fabs(angleError) * maxSpeed;
     } else {
         driveSpeed = maxSpeed;
     }
-
-    std::cout << "maxSpeed: " << maxSpeed << "\n";
-    std::cout << "sumOfForces.length() " << sumOfForces.length() << "\n";
 
     if (sumOfForces.length() < driveSpeed) {
         driveSpeed = sumOfForces.length();
     }
 
     roboteam_utils::Vector2 velCommand;
-    std::cout << "drive == " << GetBool("drive") << "\n";
-    if (GetBool("drive")) {
+    if (GetBool("drive") || true) {
         auto mode = getMode();
 
         if (mode == Mode::GRSIM) {
@@ -500,28 +499,16 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
         velCommand = roboteam_utils::Vector2(0.5, 0.0);
     }
 
-    std::cout << "velCommand.length() == " << velCommand.length() << "\n";
-    std::cout << "driveSpeed == " << driveSpeed << "\n";
-
-    if (angularVelTarget > 0.01) {
-        std::cout << "DO TURNING LEFT!\n";
-    } else if (angularVelTarget < -0.01) {
-        std::cout << "DO TURNING RIGHT!\n";
-    }
-
-
     // Integral angular velocity controller
     // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
     // double angularVelCommand = angularVelController(angularVelTarget);
-    double angularVelCommand = angularVelTarget + (-10 / 512 * 2 * M_PI);
-
+    double angularVelCommand = angularVelTarget + (-14 / 512.0 * 2 * M_PI);
 
     // QUALIFICATION HACK!!!!!:
     // Rotate the commands from world frame to robot frame 
     // velCommand = worldToRobotFrame(velCommand, myAngle);
     // Draw the velocity vector acting on the robots
     // drawer.DrawLine("velCommand", myPos, velCommand);  
-
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
@@ -531,6 +518,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     command.w = angularVelCommand;
     command.dribbler = GetBool("dribbler");
 
+    std::cout << "command.w == " << command.w << "\n";
 
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
