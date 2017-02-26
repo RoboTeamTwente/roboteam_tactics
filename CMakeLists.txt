@@ -226,10 +226,12 @@ catkin_add_gtest(tactics_test
     test/ConditionsTest.cpp
     test/VerificationTest.cpp
     test/SpaceTest.cpp
+    test/ParamsStressTest.cpp
     $<TARGET_OBJECTS:analysis>
     $<TARGET_OBJECTS:conditions>
     $<TARGET_OBJECTS:tactics>
     $<TARGET_OBJECTS:utils>
+    $<TARGET_OBJECTS:skills>
 )
 target_link_libraries(tactics_test ${catkin_LIBRARIES})
 

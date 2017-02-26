@@ -63,7 +63,11 @@ public:
     roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
     double angularVelController(double angularVelTarget);
     roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    double getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    
     roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
+    double avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
+    
     roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
     roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
     roboteam_msgs::RobotCommand getVelCommand();
@@ -83,7 +87,7 @@ private:
 
     // Control gains
     double pGainPosition = 3.0;
-    double pGainRotation = 2.0;
+    double pGainRotation = 0.5;
     // double iGainRotation = 50.0;
     double maxAngularVel = 1.0;
     double iGainVelocity = 0.5;
