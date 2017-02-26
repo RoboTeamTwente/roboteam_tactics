@@ -492,14 +492,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     }
 
     roboteam_utils::Vector2 velCommand;
-<<<<<<< HEAD
-    // if (GetBool("drive")) {
-    velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
-    // } else {
-        // velCommand = roboteam_utils::Vector2(0.0, 0.0);
-    // }
 
-=======
     std::cout << "drive == " << GetBool("drive") << "\n";
     if (GetBool("drive")) {
         auto mode = getMode();
@@ -512,7 +505,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     } else {
         velCommand = roboteam_utils::Vector2(0.5, 0.0);
     }
->>>>>>> e5af90607aacb337d3611d903ee07a9a8b2dfeb4
 
     std::cout << "velCommand.length() == " << velCommand.length() << "\n";
     std::cout << "driveSpeed == " << driveSpeed << "\n";
