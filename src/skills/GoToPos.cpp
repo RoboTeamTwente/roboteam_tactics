@@ -28,9 +28,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         // Rest of the members
         , success(false)
-        , maxSpeed(GetDouble("maxSpeed"))
+        , maxSpeed(1.0)
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(1.0)
+        , attractiveForceWhenClose(0.5)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -275,6 +275,11 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
         KEEPER_ID = 10;
     }
 
+    if (HasDouble("maxSpeed")) {
+        maxSpeed = GetDouble("maxSpeed");
+    }
+    
+
 
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     angleGoal = cleanAngle(GetDouble("angleGoal"));    
@@ -306,12 +311,11 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     roboteam_utils::Vector2 myVel(me.vel);
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
-    ROS_INFO_STREAM("robotAngle: " << myAngle);
     double angleError = angleGoal - myAngle;
 
     // QUALIFICATION HACK!!!!!:
     // For now, angleGoal is towards targetPos:
-    if (posError.length() > 0.1) {
+    if (posError.length() > 0.12) {
         angleGoal = posError.angle();
     }
     angleError = cleanAngle(angleGoal - myAngle);
@@ -323,7 +327,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
-
+    ROS_INFO_STREAM("sumOfForces length:" << sumOfForces.length());
 
     // Robot avoidance
     if (HasBool("avoidRobots")) {
@@ -353,6 +357,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
             sumOfForces = roboteam_utils::Vector2(0.0, 0.0);
         }
     }
+    
 
 
     // Limit the angular velocity target
@@ -383,11 +388,11 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     }
 
     roboteam_utils::Vector2 velCommand;
-    if (GetBool("drive")) {
-        velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
-    } else {
-        velCommand = roboteam_utils::Vector2(0.0, 0.0);
-    }
+    // if (GetBool("drive")) {
+    velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+    // } else {
+        // velCommand = roboteam_utils::Vector2(0.0, 0.0);
+    // }
 
 
 
@@ -395,6 +400,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
     // double angularVelCommand = angularVelController(angularVelTarget);
     double angularVelCommand = angularVelTarget;
+
 
 
     // QUALIFICATION HACK!!!!!:
@@ -453,13 +459,13 @@ bt::Node::Status GoToPos::Update() {
 
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
-        sendStopCommand(ROBOT_ID);
-        return Status::Success;
-    }
+    // if (posError.length() < 0.01 && fabs(angleError) < 0.1) {
+    //     sendStopCommand(ROBOT_ID);
+    //     return Status::Success;
+    // }
 
     // QUALICATION HACK!!!!:
-    if (posError.length() < 0.1) {
+    if (posError.length() < 0.1 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
