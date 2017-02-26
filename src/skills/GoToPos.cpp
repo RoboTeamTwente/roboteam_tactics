@@ -323,6 +323,29 @@ roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPo
     return newTargetPos;
 }
 
+namespace {
+
+// TODO: @Hack probably needs to be removed once the robots function properly
+
+enum Mode {
+    SERIAL,
+    GRSIM,
+    GAZEBO
+} ;
+
+Mode getMode() {
+    std::string robot_output_target = "grsim";
+    ros::param::getCached("robot_output_target", robot_output_target);
+    if (robot_output_target == "grsim") {
+        return Mode::GRSIM;
+    } else if (robot_output_target == "serial") {
+        return Mode::SERIAL;
+    } else {
+        return Mode::GAZEBO;
+    }
+}
+
+} // anonymous namespace
 
 // bt::Node::Status GoToPos::Update() {
 roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
@@ -469,12 +492,27 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     }
 
     roboteam_utils::Vector2 velCommand;
+<<<<<<< HEAD
     // if (GetBool("drive")) {
     velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
     // } else {
         // velCommand = roboteam_utils::Vector2(0.0, 0.0);
     // }
 
+=======
+    std::cout << "drive == " << GetBool("drive") << "\n";
+    if (GetBool("drive")) {
+        auto mode = getMode();
+
+        if (mode == Mode::GRSIM) {
+            velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+        } else {
+            velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
+        }
+    } else {
+        velCommand = roboteam_utils::Vector2(0.5, 0.0);
+    }
+>>>>>>> e5af90607aacb337d3611d903ee07a9a8b2dfeb4
 
     std::cout << "velCommand.length() == " << velCommand.length() << "\n";
     std::cout << "driveSpeed == " << driveSpeed << "\n";
