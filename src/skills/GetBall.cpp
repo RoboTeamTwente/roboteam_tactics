@@ -192,8 +192,8 @@ bt::Node::Status GetBall::Update (){
         if (newVelCommand.length() > 3.0) {
         	newVelCommand.scale(3.0 / newVelCommand.length());
         }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;
+        // command.x_vel = newVelCommand.x;
+        // command.y_vel = newVelCommand.y;
 
 
         // Get global robot command publisher, and publish the command
