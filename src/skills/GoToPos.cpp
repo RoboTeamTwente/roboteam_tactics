@@ -31,7 +31,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         // TODO: @Bug Cannot ask potentially private blackboard because private bb is initialized later than the constructor!
         // , maxSpeed(GetDouble("maxSpeed"))
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(2.0)
+        , attractiveForceWhenClose(5.0)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -352,9 +352,14 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
 
-    maxSpeed = GetDouble("maxSpeed");
+    if (HasDouble("maxSpeed")) {
+        maxSpeed = GetDouble("maxSpeed");
+    } else {
+        maxSpeed = 3;
+    }
+    
     // TODO: @Temporary
-    maxSpeed = 2;
+    
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
@@ -363,6 +368,10 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     } else {
         // ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
+    }
+    
+    if (HasDouble("pGainRotation")) {
+        pGainRotation = GetDouble("pGainRotation");
     }
     
 
@@ -411,28 +420,28 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
 
     // @HACK: Make oh so smooth qualification turns
-    if (HasDouble("angleGoal") && !driveBackwards) {
-        if (fabs(angleError) > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
-            attractiveForceWhenClose = 6.0;
-            double endAngleGoal = GetDouble("angleGoal");
-            // ROS_INFO_STREAM("angleGoal GoToPos: " << endAngleGoal);
-            double angleToTargetPos = posError.angle();
-            double angleDiff = cleanAngle(endAngleGoal - angleToTargetPos);
-            double distanceFromTarget = posError.length()*0.75;
-            if (distanceFromTarget > 1.0) distanceFromTarget = 1.0;
-            // ROS_INFO_STREAM("distanceFromTarget: " << distanceFromTarget);
-            roboteam_utils::Vector2 firstStop = roboteam_utils::Vector2(distanceFromTarget, 0.0).rotate(cleanAngle(endAngleGoal+M_PI));
-            firstStop = firstStop.rotate(-0.8*angleDiff);
-            firstStop = firstStop + targetPos;
-            drawer.SetColor(255, 0, 255);
-            drawer.DrawPoint("firstStop2", firstStop);
-            targetPos = firstStop;
-            posError = targetPos - myPos;
-        } else {
-            attractiveForceWhenClose = 3.0;
-            drawer.RemovePoint("firstStop2");
-        }
-    }
+    // if (HasDouble("angleGoal") && !driveBackwards) {
+    //     if (fabs(angleError) > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
+    //         attractiveForceWhenClose = 10.0;
+    //         double endAngleGoal = GetDouble("angleGoal");
+    //         // ROS_INFO_STREAM("angleGoal GoToPos: " << endAngleGoal);
+    //         double angleToTargetPos = posError.angle();
+    //         double angleDiff = cleanAngle(endAngleGoal - angleToTargetPos);
+    //         double distanceFromTarget = posError.length()*0.75;
+    //         if (distanceFromTarget > 1.0) distanceFromTarget = 1.0;
+    //         // ROS_INFO_STREAM("distanceFromTarget: " << distanceFromTarget);
+    //         roboteam_utils::Vector2 firstStop = roboteam_utils::Vector2(distanceFromTarget, 0.0).rotate(cleanAngle(endAngleGoal+M_PI));
+    //         firstStop = firstStop.rotate(-0.8*angleDiff);
+    //         firstStop = firstStop + targetPos;
+    //         drawer.SetColor(255, 0, 255);
+    //         drawer.DrawPoint("firstStop2", firstStop);
+    //         targetPos = firstStop;
+    //         posError = targetPos - myPos;
+    //     } else {
+    //         attractiveForceWhenClose = 10.0;
+    //         drawer.RemovePoint("firstStop2");
+    //     }
+    // }
 
 
 
@@ -506,11 +515,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     
 
 
-    // Limit the angular velocity target
-    if (fabs(angularVelTarget) > maxAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
-    }
 
+    
 
 
     // QUALIFICATION HACK!!!!!:
@@ -524,9 +530,9 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // For now, only drive forward in combination with an angular velocity
     double driveSpeed;
     // if (fabs(angleError) > (1.0 / maxSpeed)) {
-    if (fabs(angleError) > 0.2) {
+    if (fabs(angleError) > 0.8) {
         // driveSpeed = 1.0 / fabs(angleError);
-        driveSpeed = 1 / (fabs(angleError)*fabs(angleError)) * maxSpeed;
+        driveSpeed = 0.8 / (fabs(angleError)) * maxSpeed;
         // driveSpeed = 0;
     } else {
         driveSpeed = maxSpeed;
@@ -534,6 +540,10 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     if (sumOfForces.length() < driveSpeed) {
         driveSpeed = sumOfForces.length();
+    }
+
+    if (HasBool("dontDrive") && GetBool("dontDrive")) {
+        driveSpeed = 0;
     }
 
     roboteam_utils::Vector2 velCommand;
@@ -570,12 +580,24 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // Draw the velocity vector acting on the robots
     // drawer.DrawLine("velCommand", myPos, velCommand);  
 
+    // if (velCommand.length() > 1.0) {
+    //     angularVelCommand = 0.0;
+    // }
+
+    maxAngularVel = 0.75 + velCommand.length();
+
+    // Limit the angular velocity target
+    if (fabs(angularVelTarget) > maxAngularVel) {
+        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
+    }
+
+
     // Fill the command message
     roboteam_msgs::RobotCommand command;
     command.id = ROBOT_ID;
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
-    command.w = angularVelCommand;
+    command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
 
     std::cout << "command.w == " << command.w << "\n";
@@ -627,7 +649,7 @@ bt::Node::Status GoToPos::Update() {
 
     // QUALICATION HACK!!!!:
 
-    if (posError.length() < 0.05 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.2) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
