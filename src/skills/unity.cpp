@@ -43,6 +43,9 @@
 #include "ParamSet.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "QualKeeper.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "RandomDrive.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

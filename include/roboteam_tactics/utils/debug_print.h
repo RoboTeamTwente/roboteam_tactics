@@ -45,6 +45,7 @@ SET_DEBUG_FOR(KeeperBlock, true);
 SET_DEBUG_FOR(Kick, false);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
+SET_DEBUG_FOR(QualKeeper, false);
 SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(Harass, true);

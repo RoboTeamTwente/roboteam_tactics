@@ -115,6 +115,8 @@ private:
     // double rotationControllerI = 0;
     // double wControllerI;
 
+    // bool hasReachedFirstStop = false;
+
     Draw drawer;
 };
 

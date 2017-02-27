@@ -108,6 +108,7 @@ bt::Node::Status GetBall::Update (){
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(ballPos+ballVel.scale(1.25), GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		// ROS_INFO_STREAM("targetAngle: " << targetAngle);
 		// targetAngle = (roboteam_utils::Vector2(-4.5, 0.0) - robotPos).angle();
 	} else {
 		if (HasDouble("targetAngle")) {
@@ -125,12 +126,12 @@ bt::Node::Status GetBall::Update (){
 	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
 
 	angleDiff = cleanAngle(angleDiff);
-
-	if (angleDiff > 0.5*M_PI) {
-		targetAngle = (interceptPos - robotPos).rotate(0.5*M_PI).angle();
-	} else if (angleDiff < -0.5*M_PI) {
-		targetAngle = (interceptPos - robotPos).rotate(-0.5*M_PI).angle();
-	}
+	// @HACK: qualification, something like this is done in GoToPos now
+	// if (angleDiff > 0.5*M_PI) {
+	// 	targetAngle = (interceptPos - robotPos).rotate(0.5*M_PI).angle();
+	// } else if (angleDiff < -0.5*M_PI) {
+	// 	targetAngle = (interceptPos - robotPos).rotate(-0.5*M_PI).angle();
+	// }
 
 	// if (ballVel.length() > 0.5) {
 	// 	targetAngle = cleanAngle(ballVel.angle() + M_PI);
@@ -155,7 +156,7 @@ bt::Node::Status GetBall::Update (){
 
 	// ROS_INFO_STREAM("targetAngle: " << targetAngle << " robotAngle: " << robot.angle);
 	roboteam_utils::Vector2 aimDir = roboteam_utils::Vector2(1.0, 0.0).rotate(targetAngle);	
-	drawer.DrawLine("aimDir", robotPos, robotPos+aimDir);
+	// drawer.DrawLine("aimDir", robotPos, robotPos+aimDir);
 	// ROS_INFO_STREAM("angleError: " << targetAngle - robot.angle);
 
 	bt::Node::Status stat = iHaveBall.Update();
@@ -183,8 +184,9 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
+        // ROS_INFO_STREAM("targetAngle in GoToPos: " << targetAngle);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", true);
+        private_bb->SetBool("avoidRobots", false);
         private_bb->SetBool("dribbler", false);
         roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
         roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);

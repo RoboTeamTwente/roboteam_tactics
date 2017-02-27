@@ -389,6 +389,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
 
     // Draw the target position in RQT-view
+    drawer.SetColor(0, 0, 0);
     drawer.DrawPoint("targetPos", targetPos);
 
 
@@ -399,12 +400,50 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
-    // QUALIFICATION HACK!!!!!:
-    // For now, angleGoal is towards targetPos:
-    if (posError.length() > 0.12) {
-        angleGoal = posError.angle();
+    // @HACK: Make oh so smooth qualification turns
+    if (HasDouble("angleGoal")) {
+        if (angleError > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
+            attractiveForceWhenClose = 5.0;
+            double endAngleGoal = GetDouble("angleGoal");
+            ROS_INFO_STREAM("angleGoal GoToPos: " << endAngleGoal);
+            double angleToTargetPos = posError.angle();
+            double angleDiff = cleanAngle(endAngleGoal - angleToTargetPos);
+            double distanceFromTarget = posError.length()*0.75;
+            if (distanceFromTarget > 1.0) distanceFromTarget = 1.0;
+            ROS_INFO_STREAM("distanceFromTarget: " << distanceFromTarget);
+            roboteam_utils::Vector2 firstStop = roboteam_utils::Vector2(distanceFromTarget, 0.0).rotate(cleanAngle(endAngleGoal+M_PI));
+            firstStop = firstStop.rotate(-0.8*angleDiff);
+            firstStop = firstStop + targetPos;
+            drawer.SetColor(255, 0, 255);
+            drawer.DrawPoint("firstStop2", firstStop);
+            targetPos = firstStop;
+            posError = targetPos - myPos;
+            attractiveForceWhenClose = 5.0;
+        } else {
+            attractiveForceWhenClose = 2.0;
+            drawer.RemovePoint("firstStop2");
+        }
     }
-    angleError = cleanAngle(angleGoal - myAngle);
+
+
+    // QUALIFICATION HACK!!!!!:
+    // For now, always orient towards our targetPos, and only rotate once we get there
+    bool driveBackwards = false;
+    if (posError.length() > 0.1) {  
+
+        angleGoal = posError.angle();
+        angleError = cleanAngle(angleGoal - myAngle);
+
+        // If we are close to the target we can also drive backwards if that's easier
+        // if (posError.length() < 1.0) {
+        //     if (fabs(cleanAngle(cleanAngle(posError.angle() + M_PI) - myAngle)) < angleError) {
+        //         angleGoal = cleanAngle(posError.angle() + M_PI);
+        //         angleError = cleanAngle(angleGoal - myAngle);
+        //         driveBackwards = true;
+        //     }
+        // }
+
+    }
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -478,8 +517,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // if (fabs(angleError) > (1.0 / maxSpeed)) {
     if (fabs(angleError) > 0.2) {
         // driveSpeed = 1.0 / fabs(angleError);
-        driveSpeed = 1 / fabs(angleError) * maxSpeed;
-        driveSpeed = 0;
+        driveSpeed = 1 / (fabs(angleError)*fabs(angleError)) * maxSpeed;
+        // driveSpeed = 0;
     } else {
         driveSpeed = maxSpeed;
     }
@@ -494,9 +533,19 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     auto mode = getMode();
 
     if (mode == Mode::GRSIM) {
-        velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+        
+        if (driveBackwards) {
+            velCommand = roboteam_utils::Vector2(-1.0, 0.0).scale(driveSpeed);
+        } else {
+            velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+        }
     } else {
-        velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
+        if (driveBackwards) {
+            velCommand = roboteam_utils::Vector2(0.0, -1.0).scale(driveSpeed);
+        } else {
+            velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
+        }
+        
     }
 
     // Integral angular velocity controller
@@ -569,7 +618,7 @@ bt::Node::Status GoToPos::Update() {
 
     // QUALICATION HACK!!!!:
 
-    if (posError.length() < 0.1 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.05 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
