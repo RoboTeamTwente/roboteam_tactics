@@ -400,17 +400,27 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
+    // @HACK: drive backwards if possible wheeeeeeh
+    bool driveBackwards = false;
+    if (fabs(cleanAngle(posError.angle()+M_PI - myAngle)) < 0.4 && posError.length() < 1.0) {
+        // myAngle = cleanAngle(myAngle + M_PI);
+
+        driveBackwards = true;
+        ROS_INFO_STREAM("driveBackwards GOO!");
+    }
+
+
     // @HACK: Make oh so smooth qualification turns
-    if (HasDouble("angleGoal")) {
-        if (angleError > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
-            attractiveForceWhenClose = 5.0;
+    if (HasDouble("angleGoal") && !driveBackwards) {
+        if (fabs(angleError) > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
+            attractiveForceWhenClose = 6.0;
             double endAngleGoal = GetDouble("angleGoal");
-            ROS_INFO_STREAM("angleGoal GoToPos: " << endAngleGoal);
+            // ROS_INFO_STREAM("angleGoal GoToPos: " << endAngleGoal);
             double angleToTargetPos = posError.angle();
             double angleDiff = cleanAngle(endAngleGoal - angleToTargetPos);
             double distanceFromTarget = posError.length()*0.75;
             if (distanceFromTarget > 1.0) distanceFromTarget = 1.0;
-            ROS_INFO_STREAM("distanceFromTarget: " << distanceFromTarget);
+            // ROS_INFO_STREAM("distanceFromTarget: " << distanceFromTarget);
             roboteam_utils::Vector2 firstStop = roboteam_utils::Vector2(distanceFromTarget, 0.0).rotate(cleanAngle(endAngleGoal+M_PI));
             firstStop = firstStop.rotate(-0.8*angleDiff);
             firstStop = firstStop + targetPos;
@@ -418,18 +428,17 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
             drawer.DrawPoint("firstStop2", firstStop);
             targetPos = firstStop;
             posError = targetPos - myPos;
-            attractiveForceWhenClose = 5.0;
         } else {
-            attractiveForceWhenClose = 2.0;
+            attractiveForceWhenClose = 3.0;
             drawer.RemovePoint("firstStop2");
         }
     }
 
 
+
     // QUALIFICATION HACK!!!!!:
     // For now, always orient towards our targetPos, and only rotate once we get there
-    bool driveBackwards = false;
-    if (posError.length() > 0.1) {  
+    if (posError.length() > 0.1 && !driveBackwards) {  
 
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
@@ -442,8 +451,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
         //         driveBackwards = true;
         //     }
         // }
-
     }
+
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -452,7 +461,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
-    ROS_INFO_STREAM("sumOfForces length:" << sumOfForces.length());
+    // ROS_INFO_STREAM("sumOfForces length:" << sumOfForces.length());
 
     // Robot avoidance
     if (HasBool("avoidRobots")) {
