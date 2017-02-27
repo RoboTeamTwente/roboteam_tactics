@@ -354,7 +354,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     maxSpeed = GetDouble("maxSpeed");
     // TODO: @Temporary
-    maxSpeed = 1;
+    maxSpeed = 2;
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
