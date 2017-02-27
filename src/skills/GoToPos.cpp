@@ -365,9 +365,9 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
         KEEPER_ID = 10;
     }
 
-    if (HasDouble("maxSpeed")) {
-        maxSpeed = GetDouble("maxSpeed");
-    }
+    // if (HasDouble("maxSpeed")) {
+        // maxSpeed = GetDouble("maxSpeed");
+    // }
     
 
 
