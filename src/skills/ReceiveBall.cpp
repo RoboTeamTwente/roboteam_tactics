@@ -229,6 +229,9 @@ bt::Node::Status ReceiveBall::Update (){
 		private_bb->SetBool("dribbler", true);
 	}
 
+	// @HACK; Quafilication hack to make the keeper drive only forwards and backwards
+	targetAngle = 0.5*M_PI;
+
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
 	auto bb3 = std::make_shared<bt::Blackboard>();

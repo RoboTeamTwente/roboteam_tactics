@@ -31,7 +31,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         // TODO: @Bug Cannot ask potentially private blackboard because private bb is initialized later than the constructor!
         // , maxSpeed(GetDouble("maxSpeed"))
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(5.0)
+        , attractiveForceWhenClose(2.0)
         , repulsiveForce(20.0)
         {print_blackboard(blackboard);}
 
@@ -354,7 +354,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
 
     maxSpeed = GetDouble("maxSpeed");
     // TODO: @Temporary
-    maxSpeed = 2;
+    maxSpeed = 1;
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
@@ -363,10 +363,6 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     } else {
         // ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 10;
-    }
-
-    if (HasDouble("maxSpeed")) {
-        maxSpeed = GetDouble("maxSpeed");
     }
     
 
@@ -480,9 +476,10 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // For now, only drive forward in combination with an angular velocity
     double driveSpeed;
     // if (fabs(angleError) > (1.0 / maxSpeed)) {
-    if (fabs(angleError) > 1) {
+    if (fabs(angleError) > 0.2) {
         // driveSpeed = 1.0 / fabs(angleError);
         driveSpeed = 1 / fabs(angleError) * maxSpeed;
+        driveSpeed = 0;
     } else {
         driveSpeed = maxSpeed;
     }
@@ -505,7 +502,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // Integral angular velocity controller
     // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
     // double angularVelCommand = angularVelController(angularVelTarget);
-    double angularVelCommand = angularVelTarget + (-14 / 512.0 * 2 * M_PI);
+    // double angularVelCommand = angularVelTarget + (-14 / 512.0 * 2 * M_PI);
+    double angularVelCommand = angularVelTarget;
 
 
     // QUALIFICATION HACK!!!!!:
@@ -571,7 +569,7 @@ bt::Node::Status GoToPos::Update() {
 
     // QUALICATION HACK!!!!:
 
-    if (posError.length() < 0.2) {
+    if (posError.length() < 0.1 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
