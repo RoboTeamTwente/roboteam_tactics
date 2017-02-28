@@ -13,6 +13,8 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_utils/Cone.h"
 
+#include "roboteam_tactics/utils/utils.h"
+
 namespace rtt {
 
 /**
@@ -88,7 +90,8 @@ private:
     // Control gains
     double pGainPosition = 3.0;
     double pGainRotation = 1.0;
-    // double iGainRotation = 50.0;
+    double iGainRotation = 0.5;
+    double dGainRotation = 0.2;
     double maxAngularVel = 3.0;
     double iGainVelocity = 0.5;
     double iGainAngularVel = 0.02;
@@ -112,13 +115,18 @@ private:
     roboteam_utils::Vector2 prevTargetPos;
     roboteam_utils::Vector2 velControllerI;
     double angularVelControllerI;
-    // double rotationControllerI = 0;
+    double rotationControllerI = 0;
+    // double* rotationHistory;
+    // int historyIndex = 0;
     // double wControllerI;
+    double prevAngularVelTarget;
 
     // bool hasReachedFirstStop = false;
     bool startUpRotation = false;
     int startUpRotationCounter = 0;
     double prevCommandW = 0;
+
+    time_point start;
 
     Draw drawer;
 };

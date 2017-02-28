@@ -33,7 +33,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , attractiveForce(10.0)
         , attractiveForceWhenClose(5.0)
         , repulsiveForce(20.0)
-        {print_blackboard(blackboard);}
+        {
+            print_blackboard(blackboard);
+            start = now();
+            // rotationHistory = (double*) calloc(10,sizeof(double));
+        }
 
 
 void GoToPos::sendStopCommand(uint id) {
@@ -73,13 +77,46 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
 
+    if (fabs(angleError) < 0.5) {
+        rotationControllerI = 0;
+    }
 
-    // double timeStep = 1.0/30.0;
+    double timeStep = 1.0/30.0;
     // rotationControllerI += angleError * timeStep;
-    // rotationControllerI = 0.9*rotationControllerI + angleError * timeStep;
-    // ROS_INFO_STREAM("angleError: " << angleError << ", I effect: " << (rotationControllerI * iGainRotation) << ", P effect: " << (angleError * pGainRotation));
+    rotationControllerI = 0.99*rotationControllerI + angleError * timeStep;
+    
+    ROS_INFO_STREAM("angleError: " << angleError << ", P gain: " << (pGainRotation));
+
+    // double avgHistory = 0;
+    // for (int i = 0; i < 10; i++) {
+    //     avgHistory += rotationHistory[i];
+    // }
+    // avgHistory /= (10.0 * 30.0);
 
     double angularVelTarget = angleError * pGainRotation;    
+    // ROS_INFO_STREAM("I effect: " << (rotationControllerI * iGainRotation) << ", P effect: " << (angleError * pGainRotation) << " D effect: " << (prevAngularVelTarget * -dGainRotation));
+
+
+
+    maxAngularVel = 1.0;
+    if (HasDouble("maxAngularVel")) {
+        maxAngularVel = GetDouble("maxAngularVel");
+    }
+
+    // Limit the angular velocity target
+    if (fabs(angularVelTarget) > maxAngularVel) {
+        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
+    }
+
+
+    // rotationHistory[historyIndex] = angularVelTarget;
+    // historyIndex = (historyIndex + 1) % 10;
+    prevAngularVelTarget = angularVelTarget;
+    
+
+
+
+    // ROS_INFO_STREAM("rotationHistory: " << avgHistory);
     return angularVelTarget;
 }
 
@@ -373,6 +410,14 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (HasDouble("pGainRotation")) {
         pGainRotation = GetDouble("pGainRotation");
     }
+
+    if (HasDouble("iGainRotation")) {
+        iGainRotation = GetDouble("iGainRotation");
+    }
+
+    if (HasDouble("dGainRotation")) {
+        dGainRotation = GetDouble("dGainRotation");
+    }
     
 
 
@@ -417,7 +462,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
         // myAngle = cleanAngle(myAngle + M_PI);
 
         driveBackwards = true;
-        ROS_INFO_STREAM("driveBackwards GOO!");
+        // ROS_INFO_STREAM("driveBackwards GOO!");
     }
 
 
@@ -502,7 +547,12 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
 
-    std::cout << "angularVelTarget: " << angularVelTarget << std::endl;
+    if (time_difference_milliseconds(start, now()).count() < 2000) {
+        angularVelTarget = 0;
+        ROS_INFO_STREAM("not rotating");
+    }
+
+    // std::cout << "angularVelTarget: " << angularVelTarget << std::endl;
 
     // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
     // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
@@ -530,15 +580,16 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     //     velCommand = velocityController(sumOfForces);
     // }
     // For now, only drive forward in combination with an angular velocity
-    double driveSpeed;
+    double driveSpeed = maxSpeed + fabs(angularVelTarget);
     // if (fabs(angleError) > (1.0 / maxSpeed)) {
-    if (fabs(angleError) > 0.8) {
-        // driveSpeed = 1.0 / fabs(angleError);
-        driveSpeed = 0.8 / (fabs(angleError)) * maxSpeed;
-        // driveSpeed = 0;
-    } else {
-        driveSpeed = maxSpeed;
-    }
+    // if (fabs(angleError) > 0.8) {
+    //     // driveSpeed = 1.0 / fabs(angleError);
+    //     // driveSpeed = 0.8 / (fabs(angleError)) * maxSpeed;
+    //     driveSpeed = maxSpeed;
+    //     // driveSpeed = 0;
+    // } else {
+    //     driveSpeed = maxSpeed;
+    // }
 
     if (sumOfForces.length() < driveSpeed) {
         driveSpeed = sumOfForces.length();
@@ -547,6 +598,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     if (HasBool("dontDrive") && GetBool("dontDrive")) {
         driveSpeed = 0;
     }
+
+    // ROS_INFO_STREAM("driveSpeed: " << driveSpeed);
 
     roboteam_utils::Vector2 velCommand;
 
@@ -573,7 +626,7 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     // TODO: there is not yet an estimation of angular velocities in our world, so this cannot be used yet
     // double angularVelCommand = angularVelController(angularVelTarget);
     // double angularVelCommand = angularVelTarget + (-14 / 512.0 * 2 * M_PI);
-    double angularVelCommand = angularVelTarget;
+    // double angularVelCommand = angularVelTarget;
 
 
     // QUALIFICATION HACK!!!!!:
@@ -586,12 +639,18 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     //     angularVelCommand = 0.0;
     // }
 
-    maxAngularVel = 0.75 + velCommand.length();
+    // maxAngularVel = 0.75 + velCommand.length();
+    // maxAngularVel = 1.0;
+    // if (HasDouble("maxAngularVel")) {
+    //     maxAngularVel = GetDouble("maxAngularVel");
+    // }
 
-    // Limit the angular velocity target
-    if (fabs(angularVelTarget) > maxAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
-    }
+    // // Limit the angular velocity target
+    // if (fabs(angularVelTarget) > maxAngularVel) {
+    //     angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
+    // }
+
+
 
 
     // Fill the command message
@@ -603,23 +662,24 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     command.dribbler = GetBool("dribbler");
 
     // @HACK: start up the rotation
-    int signRotation = signum(command.w);
-    if (fabs(command.w) >= 0.5 && fabs(prevCommandW) < 0.5) {
-        startUpRotation = true;
-    }
+    // int signRotation = signum(command.w);
+    // if (fabs(command.w) >= 0.5 && fabs(prevCommandW) < 0.5) {
+    //     startUpRotation = true;
+    // }
 
-    if (startUpRotation) {
-        command.w = 3 * signRotation;
-        startUpRotationCounter++;
-        if (startUpRotationCounter > 4) {
-            startUpRotation = false;
-            startUpRotationCounter = 0;
-        }
-    }
+    // if (startUpRotation) {
+    //     ROS_INFO_STREAM("startUpRotation");
+    //     command.w = 5 * signRotation;
+    //     startUpRotationCounter++;
+    //     if (startUpRotationCounter > 4) {
+    //         startUpRotation = false;
+    //         startUpRotationCounter = 0;
+    //     }
+    // }
 
     prevCommandW = command.w;
 
-    std::cout << "command.w == " << command.w << "\n";
+    // std::cout << "command.w == " << command.w << "\n";
 
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
