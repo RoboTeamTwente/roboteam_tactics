@@ -116,6 +116,9 @@ private:
     // double wControllerI;
 
     // bool hasReachedFirstStop = false;
+    bool startUpRotation = false;
+    int startUpRotationCounter = 0;
+    double prevCommandW = 0;
 
     Draw drawer;
 };

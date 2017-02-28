@@ -376,6 +376,8 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     
 
 
+
+
     roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     angleGoal = cleanAngle(GetDouble("angleGoal"));    
     
@@ -599,6 +601,23 @@ roboteam_msgs::RobotCommand GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
+
+    // @HACK: start up the rotation
+    int signRotation = signum(command.w);
+    if (fabs(command.w) >= 0.5 && fabs(prevCommandW) < 0.5) {
+        startUpRotation = true;
+    }
+
+    if (startUpRotation) {
+        command.w = 3 * signRotation;
+        startUpRotationCounter++;
+        if (startUpRotationCounter > 4) {
+            startUpRotation = false;
+            startUpRotationCounter = 0;
+        }
+    }
+
+    prevCommandW = command.w;
 
     std::cout << "command.w == " << command.w << "\n";
 
