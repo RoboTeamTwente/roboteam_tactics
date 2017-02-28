@@ -127,6 +127,7 @@ double GoToPos::angularVelController(double angularVelTarget) {
     angularVelControllerI += angularVelError * timeStep;
 
     double angularVelCommand = angularVelTarget + angularVelControllerI * iGainAngularVel;
+    angularVelCommand *= .75;
     return angularVelCommand;
 }
 
