@@ -50,21 +50,20 @@ public:
     virtual double minDistanceToBall(const TeamRobot&) const;
 };
 
-#define DEFINE_REF_RULE_HEADER(name) \
+#define DEFINE_REF_RULE_HEADER(name, state) \
   private: \
     constexpr name() {} \
     static const RefRule* SINGLETON; \
   public: \
-    constexpr RefState getState() const final override; \
+    constexpr RefState getState() const final override { return state; } \
     static const RefRule* get();
     
-#define DEFINE_REF_RULE_IMPL(name, state) \
+#define DEFINE_REF_RULE_IMPL(name) \
     const RefRule* name::SINGLETON = new name(); \
-    constexpr RefState name::getState() const { return state; } \
     const RefRule* name::get() { return SINGLETON; }
 
-class NormalPlayRule : public RefRule {
-    DEFINE_REF_RULE_HEADER(NormalPlayRule)
+class NormalPlayRule final : public RefRule {
+    DEFINE_REF_RULE_HEADER(NormalPlayRule, RefState::NORMAL_PLAY)
 };
  
 extern const std::map<RefState, const RefRule*> RULES;
