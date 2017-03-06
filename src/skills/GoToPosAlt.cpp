@@ -11,7 +11,7 @@
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/GoToPosAlt.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
@@ -21,11 +21,20 @@
 
 namespace rtt {
 
-RTT_REGISTER_SKILL(GoToPos);
+RTT_REGISTER_SKILL(GoToPosAlt);
 
-GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
+GoToPosAlt::GoToPosAlt(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
+        
+        // Rest of the members
         , success(false)
+        , maxSpeed(1.0)
+        , attractiveForce(10.0)
+        , attractiveForceWhenClose(10.0)
+        , repulsiveForce(20.0)
+        , safetyMarginGoalAreas(0.2)
+        , marginOutsideField(0.2)
+        , angleErrorInt(0.0)
 
         // Control gains
         , pGainPosition(3.0)
@@ -36,25 +45,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
 
-        // Rest of the members
-        , maxSpeed(1.0)
-        , attractiveForce(10.0)
-        , attractiveForceWhenClose(5.0)
-        , repulsiveForce(20.0)
-        , safetyMarginGoalAreas(0.2)
-        , marginOutsideField(0.2)
-        , angleErrorIntegral(0.0)
-        , historyIndex(0)
-
         {
             print_blackboard(blackboard);
             start = now();
             angleErrorHistory = (double*) calloc(10,sizeof(double));
-            succeeded = false;
         }
 
 
-void GoToPos::sendStopCommand(uint id) {
+void GoToPosAlt::sendStopCommand(uint id) {
 
     roboteam_msgs::RobotCommand command;
     command.id = id;
@@ -74,7 +72,7 @@ void GoToPos::sendStopCommand(uint id) {
 
 
 // Proportional position controller
-roboteam_utils::Vector2 GoToPos::positionController(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
+roboteam_utils::Vector2 GoToPosAlt::positionController(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
     roboteam_utils::Vector2 posError = targetPos - myPos;
     roboteam_utils::Vector2 velTarget = posError*attractiveForceWhenClose;
     return velTarget;
@@ -82,11 +80,7 @@ roboteam_utils::Vector2 GoToPos::positionController(roboteam_utils::Vector2 myPo
 
 
 // Proportional rotation controller
-double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError) {
-
-    if (posError.length() > 1.0) {
-        angleGoal = posError.angle();
-    }
+double GoToPosAlt::rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError) {
 
     // Proportional term
     double angleError = angleGoal - myAngle;
@@ -96,7 +90,7 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
     // double updateRate;
     // ros::param::get("role_iterations_per_second", updateRate);
     // double timeStep = 1 / updateRate;
-    // angleErrorIntegral += angleError * timeStep;
+    // angleErrorInt += angleError * timeStep;
     
     // // Differential term (UNTESTED!)
     // angleErrorHistory[historyIndex] = angleError;
@@ -123,27 +117,26 @@ double GoToPos::rotationController(double myAngle, double angleGoal, roboteam_ut
 
 
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
-// TODO: fix the problem that if there are two robots in the way on both sides of the cone, our robot tries to push through them regardless
-// of whether he hits them or not (maybe use the commented variable distanceToCenter to accomplish this)
-roboteam_utils::Vector2 GoToPos::getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+double GoToPosAlt::getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
     roboteam_utils::Vector2 antenna = antennaCone.center - myPos;    
 
-    roboteam_utils::Vector2 forceVector(0.0, 0.0);
+    double angle;
     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(-0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
+            angle = antenna.angle()-0.1*M_PI;
         }
         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
+            angle = antenna.angle()+0.1*M_PI;
         }
     }    
-    return forceVector;
+    return angle;
 }
 
 
-// Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
-roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos) {
+// Computes an angle for the robot to avoid other robots, assumes robot will ride forward
+double GoToPosAlt::avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos){
+
     roboteam_msgs::World world = LastWorld::get();
 
     roboteam_utils::Vector2 posError = targetPos - myPos;
@@ -163,28 +156,30 @@ roboteam_utils::Vector2 GoToPos::avoidRobots(roboteam_utils::Vector2 myPos, robo
     drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     roboteam_utils::Vector2 sumOfForces;
+    double sumOfAngles;
+
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
         if (currentRobot.id != ROBOT_ID) {
 
             roboteam_utils::Vector2 otherRobotPos(currentRobot.pos);
-            roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
-            sumOfForces = sumOfForces + forceVector;
+            double angle = getAngleFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+            sumOfAngles = sumOfAngles + angle;
         }
     }
 
     for (size_t i = 0; i < world.them.size(); i++) {
         roboteam_utils::Vector2 otherRobotPos(world.them.at(i).pos);
-        roboteam_utils::Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
-        sumOfForces = sumOfForces + forceVector; 
+        double angle = getAngleFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
+        sumOfAngles = sumOfAngles + angle; 
     }
 
-    return sumOfForces;
+    return sumOfAngles;
 }
 
 
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid the goal areas by moving only parralel to the goal area when close
-roboteam_utils::Vector2 GoToPos::avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces) {
+roboteam_utils::Vector2 GoToPosAlt::avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces) {
     roboteam_utils::Vector2 posError = targetPos - myPos;
 
     if (ROBOT_ID != KEEPER_ID) {
@@ -212,7 +207,7 @@ roboteam_utils::Vector2 GoToPos::avoidDefenseAreas(roboteam_utils::Vector2 myPos
 
 
 // Makes sure that the given target position is not inside a goal area, or (too far) outside the field. "Too far" is specified by the class variable marginOutsideField
-roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPos) {
+roboteam_utils::Vector2 GoToPosAlt::checkTargetPos(roboteam_utils::Vector2 targetPos) {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
     double xGoal = targetPos.x;
@@ -252,38 +247,11 @@ roboteam_utils::Vector2 GoToPos::checkTargetPos(roboteam_utils::Vector2 targetPo
     return newTargetPos;
 }
 
-namespace {
 
-// TODO: @Hack probably needs to be removed once the robots function properly
-enum Mode {
-    SERIAL,
-    GRSIM,
-    GAZEBO
-} ;
-
-Mode getMode() {
-    std::string robot_output_target = "grsim";
-    ros::param::getCached("robot_output_target", robot_output_target);
-    if (robot_output_target == "grsim") {
-        return Mode::GRSIM;
-    } else if (robot_output_target == "serial") {
-        return Mode::SERIAL;
-    } else {
-        return Mode::GAZEBO;
-    }
-}
-
-} // anonymous namespace
-
-
-boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
+roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
-
-    if (HasDouble("maxSpeed")) {
-        maxSpeed = GetDouble("maxSpeed");
-    }
     
 
     // Get blackboard info
@@ -293,7 +261,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
-        // ROS_WARN("GoToPos, KEEPER_ID not set");
+        // ROS_WARN("GoToPosAlt, KEEPER_ID not set");
         KEEPER_ID = 100;
     }
     
@@ -303,8 +271,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (findBot) {
         me = *findBot;
     } else {
-        ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
-    }  
+        ROS_WARN_STREAM("GoToPosAlt: robot with this ID not found, ID: " << ROBOT_ID);
+    }
 
 
     // Checking inputs
@@ -327,15 +295,48 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     roboteam_utils::Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
+    
 
 
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
-        sendStopCommand(ROBOT_ID);
-        succeeded = true;
-        roboteam_msgs::RobotCommand command;
-        return boost::none;
+    // If we are close to the target we can also drive backwards if that's easier
+    bool driveBackwards = false;
+    if (posError.length() < 1.0) {
+        if (fabs(cleanAngle(cleanAngle(posError.angle() + M_PI) - myAngle)) < 0.5) {
+            angleGoal = cleanAngle(posError.angle() + M_PI);
+            angleError = cleanAngle(angleGoal - myAngle);
+            driveBackwards = true;
+        }
     }
+
+
+    // @HACK: Make oh so smooth qualification turns
+    if (HasDouble("angleGoal") && !driveBackwards) {
+        if (fabs(angleError) > 0.2 || fabs(posError.angle()-myAngle) > 0.2 || posError.length() > 0.8) {
+            // double endAngleGoal = GetDouble("angleGoal");
+            double angleToTargetPos = posError.angle();
+            double angleDiff = cleanAngle(angleGoal - angleToTargetPos);
+            
+            double distanceFromTarget = posError.length()*0.75;
+            if (distanceFromTarget > 1.0) distanceFromTarget = 1.0;
+            
+            roboteam_utils::Vector2 firstStop = roboteam_utils::Vector2(distanceFromTarget, 0.0).rotate(cleanAngle(angleGoal+M_PI));
+            firstStop = firstStop.rotate(-0.8*angleDiff);
+            firstStop = firstStop + targetPos;
+            targetPos = firstStop;
+            posError = targetPos - myPos;
+
+            // Draw the target position in RQT-view
+            drawer.SetColor(255, 255, 0);
+            drawer.DrawPoint("targetPos2", targetPos);
+        } else {
+            drawer.RemovePoint("targetPos2");
+        }
+    }
+
+
+    // Always face towards the target position
+    angleGoal = posError.angle();
+    angleError = angleGoal - myAngle;
 
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -349,15 +350,16 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Robot avoidance
     if (HasBool("avoidRobots")) {
         if (GetBool("avoidRobots")) {
-            sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+            double avoidAngle = avoidRobotsForward(myPos, myVel, targetPos);
+            angleGoal=angleGoal+avoidAngle;
         }
     } else {
-        // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
+        // ROS_WARN("You did not set the boolean avoidRobots in GoToPosAlt");
     }
 
 
     // Defense area avoidance
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    // sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
 
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
@@ -376,12 +378,32 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-    roboteam_utils::Vector2 velCommand = sumOfForces;
-    // Draw the velocity vector acting on the robots
-    drawer.DrawLine("velCommand", myPos, velCommand);  
-    // Rotate the commands from world frame to robot frame 
-    velCommand = worldToRobotFrame(velCommand, myAngle);
-    
+    // For now, only drive forward in combination with an angular velocity
+    double driveSpeed = maxSpeed;
+    if (fabs(angleError) > 1.0) {
+        driveSpeed = 1.0 / (fabs(angleError)) * maxSpeed;
+    }
+
+
+    roboteam_utils::Vector2 velCommand;
+
+
+    // TODO: @Hack Maybe remove this at some point
+    auto mode = getMode();
+    if (mode == Mode::GRSIM) { 
+        if (driveBackwards) {
+            velCommand = roboteam_utils::Vector2(-1.0, 0.0).scale(driveSpeed);
+        } else {
+            velCommand = roboteam_utils::Vector2(1.0, 0.0).scale(driveSpeed);
+        }
+    } else {
+        if (driveBackwards) {
+            velCommand = roboteam_utils::Vector2(0.0, -1.0).scale(driveSpeed);
+        } else {
+            velCommand = roboteam_utils::Vector2(0.0, 1.0).scale(driveSpeed);
+        }
+    }
+
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
@@ -395,17 +417,48 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 }
 
 
-bt::Node::Status GoToPos::Update() {
+bt::Node::Status GoToPosAlt::Update() {
 
-    // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
-    boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
-    if (command) {
-        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-        pub.publish(*command);
+    // Get the latest world state
+    roboteam_msgs::World world = LastWorld::get();
+    if (world.us.size() == 0) {
+        ROS_INFO("No information about the world state :(");
         return Status::Running;
+    }
+
+
+    // Find the robot with the specified ID
+    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
+    if (findBot) {
+        me = *findBot;
     } else {
+        ROS_WARN_STREAM("GoToPosAlt: robot with this ID not found, ID: " << ROBOT_ID);
+    }
+
+
+    // Get Blackboard info
+    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    angleGoal = cleanAngle(GetDouble("angleGoal"));
+    
+
+    // Store some variables for easy access
+    roboteam_utils::Vector2 myPos(me.pos);
+    roboteam_utils::Vector2 posError = targetPos - myPos;
+    double myAngle = me.angle;
+    double angleError = angleGoal - myAngle;
+
+
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < 0.2 && fabs(angleError) < 0.2) {
+        sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
+
+    roboteam_msgs::RobotCommand command = getVelCommand();
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    pub.publish(command);
+    return Status::Running;
 }
 
 } // rtt

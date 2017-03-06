@@ -56,22 +56,22 @@ namespace rtt {
  *         Descr: Indicates whether or not other robots should be avoided
  *
  */
-class GoToPos : public Skill {
+class GoToPosAlt : public Skill {
 public:
-    GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    GoToPosAlt(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void sendStopCommand(uint id);
     roboteam_utils::Vector2 positionController(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
     double rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError);
     // roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
     // double angularVelController(double angularVelTarget);
-    roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    // double getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
-    // double avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
+    // roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    double getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    // roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
+    double avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
     
     roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
     roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
-    boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
+    roboteam_msgs::RobotCommand getVelCommand();
     Status Update();
     
     static VerificationMap required_params() {
@@ -81,10 +81,9 @@ public:
         params["yGoal"] = BBArgumentType::Double;
         return params;
     }
-    std::string node_name() { return "GoToPos"; }
+    std::string node_name() { return "GoToPosAlt"; }
     
 private:
-
     bool success;
 
     // Control gains
@@ -116,10 +115,9 @@ private:
     roboteam_utils::Vector2 prevTargetPos;
     // roboteam_utils::Vector2 velControllerI;
     // double angularVelControllerI;
-    double angleErrorIntegral;
+    double angleErrorInt;
     double* angleErrorHistory;
-    int historyIndex;
-    bool succeeded;
+    int historyIndex = 0;
     // double wControllerI;
     // double prevAngularVelTarget;
 
