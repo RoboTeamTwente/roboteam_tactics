@@ -25,16 +25,7 @@ RTT_REGISTER_SKILL(GoToPosAlt);
 
 GoToPosAlt::GoToPosAlt(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        
-        // Rest of the members
         , success(false)
-        , maxSpeed(1.0)
-        , attractiveForce(10.0)
-        , attractiveForceWhenClose(10.0)
-        , repulsiveForce(20.0)
-        , safetyMarginGoalAreas(0.2)
-        , marginOutsideField(0.2)
-        , angleErrorInt(0.0)
 
         // Control gains
         , pGainPosition(3.0)
@@ -44,6 +35,15 @@ GoToPosAlt::GoToPosAlt(std::string name, bt::Blackboard::Ptr blackboard)
         , maxAngularVel(3.0)
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
+        
+        // Rest of the members
+        , maxSpeed(1.0)
+        , attractiveForce(10.0)
+        , attractiveForceWhenClose(10.0)
+        , repulsiveForce(20.0)
+        , safetyMarginGoalAreas(0.2)
+        , marginOutsideField(0.2)
+        , angleErrorInt(0.0)
 
         {
             print_blackboard(blackboard);
@@ -419,46 +419,15 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
 
 bt::Node::Status GoToPosAlt::Update() {
 
-    // Get the latest world state
-    roboteam_msgs::World world = LastWorld::get();
-    if (world.us.size() == 0) {
-        ROS_INFO("No information about the world state :(");
+    // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
+    boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
+    if (command) {
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        pub.publish(*command);
         return Status::Running;
-    }
-
-
-    // Find the robot with the specified ID
-    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
-    if (findBot) {
-        me = *findBot;
     } else {
-        ROS_WARN_STREAM("GoToPosAlt: robot with this ID not found, ID: " << ROBOT_ID);
-    }
-
-
-    // Get Blackboard info
-    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    angleGoal = cleanAngle(GetDouble("angleGoal"));
-    
-
-    // Store some variables for easy access
-    roboteam_utils::Vector2 myPos(me.pos);
-    roboteam_utils::Vector2 posError = targetPos - myPos;
-    double myAngle = me.angle;
-    double angleError = angleGoal - myAngle;
-
-
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.2 && fabs(angleError) < 0.2) {
-        sendStopCommand(ROBOT_ID);
         return Status::Success;
     }
-
-    roboteam_msgs::RobotCommand command = getVelCommand();
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-    pub.publish(command);
-    return Status::Running;
 }
 
 } // rtt
