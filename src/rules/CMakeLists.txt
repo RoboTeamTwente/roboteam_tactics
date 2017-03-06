@@ -5,6 +5,8 @@ add_library(roboteam_tactics_rules
     FreeKickUsRule.cpp
     FreeKickThemRule.cpp
     KickoffRule.cpp
+    TimeoutRule.cpp
+    StartRules.cpp
     )
 add_library(rules OBJECT
     Rules.cpp
@@ -13,6 +15,8 @@ add_library(rules OBJECT
     FreeKickUsRule.cpp
     FreeKickThemRule.cpp
     KickoffRule.cpp
+    TimeoutRule.cpp
+    StartRules.cpp
     )
 add_dependencies(roboteam_tactics_rules
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

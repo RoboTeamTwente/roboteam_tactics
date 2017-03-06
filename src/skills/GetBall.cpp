@@ -57,7 +57,6 @@ void GetBall::publishStopCommand() {
     pub.publish(command);
 }
 
-
 bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -133,7 +132,6 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetInt("me", robotID);
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
-
 
 	bt::Node::Status stat = iHaveBall.Update();
 	if (stat == Status::Success && fabs(targetAngle - robot.angle) < 0.1) {

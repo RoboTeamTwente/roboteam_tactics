@@ -23,7 +23,7 @@ CanSeeRobot::CanSeeRobot(std::string name, bt::Blackboard::Ptr blackboard) : Con
 
 bt::Node::Status CanSeeRobot::Update() {
 	RTT_DEBUG("called CanSeeRobot");
-	int robotID = GetInt("ROBOT_ID");
+	// int robotID = GetInt("ROBOT_ID");
 	// ROS_INFO_STREAM("CanSeeRobot Update, id: " << robotID);
 
 	roboteam_msgs::World world = LastWorld::get();

@@ -65,7 +65,6 @@ Polygon clippedPoly(const Cell& cell, const std::vector<VPoint> points) {
     std::vector<PPoint> resultPoints;
     const Edge* firstEdge = cell.incident_edge();
     const Edge* currentEdge = firstEdge;
-    bool finite = true;
     do {
         PPoint p0, p1;
         if (currentEdge->is_finite()) {

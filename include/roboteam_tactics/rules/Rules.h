@@ -2,33 +2,12 @@
 
 #include "roboteam_utils/TeamRobot.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/LastRef.h"
 #include "boost/optional.hpp"
 #include <map>
 
 namespace rtt {
     
-enum class RefState {
-    HALT = 0,
-    STOP,
-    NORMAL_START,
-    FORCED_START,
-    PREPARE_KICKOFF_US,
-    PREPARE_KICKOFF_THEM,
-    PREPARE_PENALTY_US,
-    PREPARE_PENALTY_THEM,
-    DIRECT_FREE_US,
-    DIRECT_FREE_THEM,
-    INDIRECT_FREE_US,
-    INDIRECT_FREE_THEM,
-    TIMEOUT_US,
-    TIMEOUT_THEM,
-    GOAL_US,
-    GOAL_THEM,
-    BALL_PLACEMENT_US,
-    BALL_PLACEMENT_THEM,
-    NORMAL_PLAY
-};
-  
 class RefRule {
 public:  
     virtual constexpr RefState getState() const = 0;
@@ -69,5 +48,6 @@ class NormalPlayRule final : public RefRule {
 };
  
 extern const std::map<RefState, const RefRule*> RULES;
+const RefRule* getCurrentRuleSet();
   
 }
