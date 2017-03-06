@@ -34,6 +34,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
 }
 
+
 int GetBall::whichRobotHasBall() {
     auto holder = getBallHolder();
     if (!holder) {
@@ -42,6 +43,7 @@ int GetBall::whichRobotHasBall() {
     our_team = holder->second;
     return holder->first.id;
 }
+
 
 void GetBall::publishStopCommand() {
 	roboteam_msgs::RobotCommand command;
@@ -55,6 +57,7 @@ void GetBall::publishStopCommand() {
     pub.publish(command);
 }
 
+<<<<<<< HEAD
 roboteam_utils::Vector2 GetBall::computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel) {
 
 	auto bb3 = std::make_shared<bt::Blackboard>();
@@ -74,6 +77,8 @@ roboteam_utils::Vector2 GetBall::computeInterceptPoint(roboteam_utils::Vector2 c
 	ROS_INFO_STREAM("calculated intercept pos and found: " << interceptPos.x << " " << interceptPos.y);
 	return interceptPos;
 }
+=======
+>>>>>>> c2e2626ff600d392a6c59f7c0855c0e4270dfb0f
 
 bt::Node::Status GetBall::Update (){
 
@@ -83,15 +88,25 @@ bt::Node::Status GetBall::Update (){
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
 
+
 	// Wait for the first world message
 	while (world.us.size() == 0) {
 		return Status::Running;
 	}
 
+
+	// Find the robot with the specified ID
+    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(robotID, true, &world);
+    roboteam_msgs::WorldRobot robot;
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
+    }  
+
+
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
-    // TODO: @Hack need lookupbot here!
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
 	roboteam_utils::Vector2 ballPos(ball.pos);
 	roboteam_utils::Vector2 ballVel(ball.vel);
 	roboteam_utils::Vector2 robotPos(robot.pos);
@@ -100,8 +115,6 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 
-	// double distanceToBall = (robotPos - ballPos).length();
-	// roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(distanceToBall*10);
 	roboteam_utils::Vector2 interceptPos = ballPos + ballVel.scale(0.0);
 
 
@@ -124,18 +137,7 @@ bt::Node::Status GetBall::Update (){
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
 	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
-
 	angleDiff = cleanAngle(angleDiff);
-	// @HACK: qualification, something like this is done in GoToPos now
-	// if (angleDiff > 0.5*M_PI) {
-	// 	targetAngle = (interceptPos - robotPos).rotate(0.5*M_PI).angle();
-	// } else if (angleDiff < -0.5*M_PI) {
-	// 	targetAngle = (interceptPos - robotPos).rotate(-0.5*M_PI).angle();
-	// }
-
-	// if (ballVel.length() > 0.5) {
-	// 	targetAngle = cleanAngle(ballVel.angle() + M_PI);
-	// }
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
@@ -154,15 +156,11 @@ bt::Node::Status GetBall::Update (){
 	bb2->SetBool("our_team", true);
 	IHaveBall iHaveBall("", bb2);
 
-	// ROS_INFO_STREAM("targetAngle: " << targetAngle << " robotAngle: " << robot.angle);
-	// roboteam_utils::Vector2 aimDir = roboteam_utils::Vector2(1.0, 0.0).rotate(targetAngle);	
-	// drawer.DrawLine("aimDir", robotPos, robotPos+aimDir);
-	// ROS_INFO_STREAM("angleError: " << targetAngle - robot.angle);
-
 	bt::Node::Status stat = iHaveBall.Update();
 	if (stat == Status::Success && fabs(targetAngle - robot.angle) < 0.1) {
-		// publishStopCommand();
 
+		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
+		// in the situation when the ball is rolling and we are catching up
 		if (GetBool("passOn")) {
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
@@ -184,19 +182,25 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
-        // ROS_INFO_STREAM("targetAngle in GoToPos: " << targetAngle);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", false);
         private_bb->SetBool("dribbler", false);
-        roboteam_msgs::RobotCommand command = goToPos.getVelCommand();
+
+        boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+        roboteam_msgs::RobotCommand command;
+        if (commandPtr) {
+        	command = *commandPtr;
+        } else {
+        	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
+        }
+
         roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
         roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 3.0) {
-        	newVelCommand.scale(3.0 / newVelCommand.length());
+        if (newVelCommand.length() > 2.0) {
+        	newVelCommand.scale(2.0 / newVelCommand.length());
         }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
-
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -204,8 +208,6 @@ bt::Node::Status GetBall::Update (){
 
 		return Status::Running;
 	}
-
-	
 }
 
 } // rtt
