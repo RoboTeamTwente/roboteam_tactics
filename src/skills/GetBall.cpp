@@ -57,29 +57,6 @@ void GetBall::publishStopCommand() {
     pub.publish(command);
 }
 
-<<<<<<< HEAD
-roboteam_utils::Vector2 GetBall::computeInterceptPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel) {
-
-	auto bb3 = std::make_shared<bt::Blackboard>();
-	CanReachPoint canReachPoint("", bb3);
-	double estimatedTimeToPoint = 0.6;
-	double testTime = 0.1;
-
-	// roboteam_utils::Vector2 distanceToBall = 
-	roboteam_utils::Vector2 interceptPos = LastWorld::predictBallPos(testTime);
-
-	while (estimatedTimeToPoint > testTime) {
-		
-		//double estimatedTimeToPoint = canReachPoint.estimateTimeToPoint(currentPos, currentVel, interceptPos);
-		testTime = testTime + 0.1;
-	}
-
-	ROS_INFO_STREAM("calculated intercept pos and found: " << interceptPos.x << " " << interceptPos.y);
-	return interceptPos;
-}
-=======
->>>>>>> c2e2626ff600d392a6c59f7c0855c0e4270dfb0f
-
 bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
