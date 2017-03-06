@@ -1,6 +1,6 @@
 #pragma once
 
-#import "Rules.h"
+#include "Rules.h"
 
 namespace rtt {
     
@@ -14,7 +14,7 @@ private:
     constexpr KickoffRule() {}
 };
 
-class KickoffRule::Us : public RefRule {
+class KickoffRule::Us : public KickoffRule {
 public:
     double minDistanceToBall(const TeamRobot&) const override;
     constexpr RefState getState() const { return RefState::PREPARE_KICKOFF_THEM; }
@@ -24,7 +24,7 @@ private:
     static const RefRule* SINGLETON;
 };
 
-class KickoffRule::Them : public RefRule {
+class KickoffRule::Them : public KickoffRule {
 public:
     double minDistanceToBall(const TeamRobot&) const override;
     constexpr RefState getState() const { return RefState::PREPARE_KICKOFF_THEM; }

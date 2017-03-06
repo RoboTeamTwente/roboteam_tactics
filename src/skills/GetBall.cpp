@@ -67,7 +67,7 @@ roboteam_utils::Vector2 GetBall::computeInterceptPoint(roboteam_utils::Vector2 c
 
 	while (estimatedTimeToPoint > testTime) {
 		
-		double estimatedTimeToPoint = canReachPoint.estimateTimeToPoint(currentPos, currentVel, interceptPos);
+		//double estimatedTimeToPoint = canReachPoint.estimateTimeToPoint(currentPos, currentVel, interceptPos);
 		testTime = testTime + 0.1;
 	}
 
@@ -155,7 +155,7 @@ bt::Node::Status GetBall::Update (){
 	IHaveBall iHaveBall("", bb2);
 
 	// ROS_INFO_STREAM("targetAngle: " << targetAngle << " robotAngle: " << robot.angle);
-	roboteam_utils::Vector2 aimDir = roboteam_utils::Vector2(1.0, 0.0).rotate(targetAngle);	
+	// roboteam_utils::Vector2 aimDir = roboteam_utils::Vector2(1.0, 0.0).rotate(targetAngle);	
 	// drawer.DrawLine("aimDir", robotPos, robotPos+aimDir);
 	// ROS_INFO_STREAM("angleError: " << targetAngle - robot.angle);
 

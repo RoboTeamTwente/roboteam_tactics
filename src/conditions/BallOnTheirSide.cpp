@@ -38,6 +38,7 @@ bt::Node::Status BallOnTheirSide::Update() {
             return Status::Success;
         }
     }
+    return Status::Invalid;
 }
 
 } // rtt

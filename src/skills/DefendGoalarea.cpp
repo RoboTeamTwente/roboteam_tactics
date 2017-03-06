@@ -96,7 +96,7 @@ bt::Node::Status DefendGoalarea::Update() {
 	if (ball.pos.y < 0.25 && ball.pos.y > -0.25 && 
 		(ball.pos.y+offsetlength > 0.25 || ball.pos.y+offsetlength < -0.25)){
 		double straightpart=abs(ball.pos.y-0.25);
-		double anglepart=offsetlength-straightpart;
+		//double anglepart=offsetlength-straightpart;
 		offsetangle=straightpart/offsetlength*offsetangle;
 
 		forceonarc=true;
