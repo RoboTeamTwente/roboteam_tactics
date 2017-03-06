@@ -4,7 +4,6 @@
 #include "roboteam_tactics/bt.hpp"
 #include <array>
 
-
 namespace rtt {
 
 static constexpr const char* UNSET = "<<TODO>>";
