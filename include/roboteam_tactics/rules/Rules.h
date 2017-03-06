@@ -43,6 +43,8 @@ public:
     
     virtual bool canChip(const TeamRobot&) const;
     
+    virtual bool canScore(const TeamRobot&) const;
+    
     virtual bool canBeOnOpponentSide(const TeamRobot&) const;
     
     virtual double maxSpeed(const TeamRobot&) const;
