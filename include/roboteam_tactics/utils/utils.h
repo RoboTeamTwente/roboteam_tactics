@@ -45,22 +45,22 @@ void delete_from_vector(std::vector<T> &items, const T &item) {
 
 std::vector<std::string> getNodesSubscribedTo(std::string topic);
 std::string getMyNamespace();
-double GetTargetAngle(roboteam_utils::Vector2 startPos, std::string target, int theirID, bool target_our_team);
+double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool target_our_team);
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
-                                                    const roboteam_utils::Vector2& point,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
-std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector2& bot_pos,
-                                                    const roboteam_utils::Vector2& point,
+std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
 
 /**
  * Predict the ball or robot position in the future based on the current velocity
  */
-roboteam_utils::Vector2 predictBallPos(double seconds);
-roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
+Vector2 predictBallPos(double seconds);
+Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
 
 
 
@@ -111,7 +111,7 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
 bool is_digits(const std::string &str);
 
-int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point);
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
 int get_robot_closest_to_their_goal(std::vector<int> robots);
 int get_robot_closest_to_ball(std::vector<int> robots);
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);

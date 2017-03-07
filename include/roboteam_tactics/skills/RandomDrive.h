@@ -27,7 +27,7 @@ private:
 
     GoToPos goToPos;
 
-    roboteam_utils::Vector2 goal;
+    Vector2 goal;
     float goal_angle;
     bool pick_new_goal;
 };

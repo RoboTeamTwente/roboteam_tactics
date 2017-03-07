@@ -13,11 +13,11 @@ public:
 	Dribble(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update();
 	void stoprobot(int RobotID);
-	double computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos);
+	double computeAngle(Vector2 robotPos, Vector2 faceTowardsPos);
 
 	double cleanAngle(double angle);
-    roboteam_utils::Vector2 worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation);
-    roboteam_utils::Vector2 saveDribbleDeceleration(roboteam_utils::Vector2 reqspeed);
+    Vector2 worldToRobotFrame(Vector2 requiredv, double rotation);
+    Vector2 saveDribbleDeceleration(Vector2 reqspeed);
     
     /*
     static VerificationMap required_params() {
@@ -34,9 +34,9 @@ private:
 	ros::NodeHandle n;
 	ros::Publisher pubDebugpoints;
 	int robotID;
-	roboteam_utils::Vector2 robotvtogoal=roboteam_utils::Vector2(0.0,0.0);
+	Vector2 robotvtogoal=Vector2(0.0,0.0);
 	RotateAroundPoint rotateAroundPoint;
-	roboteam_utils::Vector2 prevspeed=roboteam_utils::Vector2(0.0,0.0);
+	Vector2 prevspeed=Vector2(0.0,0.0);
 };
 
 

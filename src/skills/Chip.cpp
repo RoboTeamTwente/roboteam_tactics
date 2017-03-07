@@ -26,7 +26,7 @@ Chip::Chip(std::string name, bt::Blackboard::Ptr blackboard)
 
 void Chip::Initialize() {
     auto vel = LastWorld::get().ball.vel;
-    oldBallVel = roboteam_utils::Vector2(vel.x, vel.y);
+    oldBallVel = Vector2(vel.x, vel.y);
     cycleCounter = 0;
 }
 
@@ -39,7 +39,7 @@ bt::Node::Status Chip::Update() {
 
 	roboteam_msgs::World world = LastWorld::get();
 
-    roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+    Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
     if ((currentBallVel - oldBallVel).length() >= 0.1) {
         RTT_DEBUGLN("Velocity difference was enough");
@@ -59,9 +59,9 @@ bt::Node::Status Chip::Update() {
 	}
 
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	roboteam_utils::Vector2 posDiff = ballPos-robotPos;
+	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 posDiff = ballPos-robotPos;
 
 	double rotDiff = posDiff.angle() - robot.angle;
 	rotDiff = cleanAngle(rotDiff);

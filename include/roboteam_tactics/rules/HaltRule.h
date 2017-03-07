@@ -7,10 +7,10 @@ class HaltRule final : public RefRule {
     DEFINE_REF_RULE_HEADER(HaltRule, RefState::HALT)
     
     bool canMove(const TeamRobot&) const override;
-    bool canMove(const TeamRobot&, const roboteam_utils::Vector2&) const override;
+    bool canMove(const TeamRobot&, const Vector2&) const override;
 
     bool canDribble(const TeamRobot&) const override;
-    bool canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const override;
+    bool canDribble(const TeamRobot&, const Vector2&) const override;
     
     bool canKick(const TeamRobot&) const override;
     

@@ -7,10 +7,10 @@ namespace rtt {
 class TimeoutRule : public RefRule {
 public:
     bool canMove(const TeamRobot&) const final override;
-    bool canMove(const TeamRobot&, const roboteam_utils::Vector2&) const final override;
+    bool canMove(const TeamRobot&, const Vector2&) const final override;
 
     bool canDribble(const TeamRobot&) const final override;
-    bool canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const final override;
+    bool canDribble(const TeamRobot&, const Vector2&) const final override;
     
     bool canKick(const TeamRobot&) const final override;
     

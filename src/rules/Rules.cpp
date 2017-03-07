@@ -10,9 +10,9 @@
 namespace rtt {
     
 bool RefRule::canMove(const TeamRobot&) const { return true; }
-bool RefRule::canMove(const TeamRobot&, const roboteam_utils::Vector2&) const { return true; }
+bool RefRule::canMove(const TeamRobot&, const Vector2&) const { return true; }
 bool RefRule::canDribble(const TeamRobot&) const { return true; }
-bool RefRule::canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const { return true; }
+bool RefRule::canDribble(const TeamRobot&, const Vector2&) const { return true; }
 bool RefRule::canKick(const TeamRobot&) const { return true; }
 bool RefRule::canScore(const TeamRobot&) const { return true; }
 bool RefRule::canChip(const TeamRobot&) const { return true; }

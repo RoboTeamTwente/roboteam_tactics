@@ -14,13 +14,13 @@ namespace rtt {
 class ShootAtGoal : public Skill {
 public:
 	ShootAtGoal(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-    roboteam_utils::Vector2 DetermineTarget();
+    Vector2 DetermineTarget();
 	Status Update();
 
 private:
     roboteam_msgs::WorldRobot me;
 	int robotID;
-    roboteam_utils::Vector2 myPos;
+    Vector2 myPos;
 
     bt::Blackboard::Ptr rotateBB;
     bt::Blackboard::Ptr kickBB;

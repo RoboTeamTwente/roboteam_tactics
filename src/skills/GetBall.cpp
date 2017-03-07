@@ -84,22 +84,22 @@ bt::Node::Status GetBall::Update (){
 
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
-	roboteam_utils::Vector2 ballPos(ball.pos);
-	roboteam_utils::Vector2 ballVel(ball.vel);
-	roboteam_utils::Vector2 robotPos(robot.pos);
-	roboteam_utils::Vector2 robotVel(robot.vel);
-	roboteam_utils::Vector2 targetPos;
+	Vector2 ballPos(ball.pos);
+	Vector2 ballVel(ball.vel);
+	Vector2 robotPos(robot.pos);
+	Vector2 robotVel(robot.vel);
+	Vector2 targetPos;
 	double targetAngle;
 
 
-	roboteam_utils::Vector2 interceptPos = ballPos + ballVel.scale(0.0);
+	Vector2 interceptPos = ballPos + ballVel.scale(0.0);
 
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(ballPos+ballVel.scale(1.25), GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 		// ROS_INFO_STREAM("targetAngle: " << targetAngle);
-		// targetAngle = (roboteam_utils::Vector2(-4.5, 0.0) - robotPos).angle();
+		// targetAngle = (Vector2(-4.5, 0.0) - robotPos).angle();
 	} else {
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
@@ -121,9 +121,9 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
-		targetPos = interceptPos + roboteam_utils::Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
 	} else {
-		targetPos = interceptPos + roboteam_utils::Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
@@ -171,8 +171,8 @@ bt::Node::Status GetBall::Update (){
         	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
         }
 
-        roboteam_utils::Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        roboteam_utils::Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
         if (newVelCommand.length() > 2.0) {
         	newVelCommand.scale(2.0 / newVelCommand.length());
         }

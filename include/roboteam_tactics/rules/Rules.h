@@ -13,10 +13,10 @@ public:
     virtual constexpr RefState getState() const = 0;
     
     virtual bool canMove(const TeamRobot&) const;
-    virtual bool canMove(const TeamRobot&, const roboteam_utils::Vector2&) const;
+    virtual bool canMove(const TeamRobot&, const Vector2&) const;
 
     virtual bool canDribble(const TeamRobot&) const;
-    virtual bool canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const;
+    virtual bool canDribble(const TeamRobot&, const Vector2&) const;
     
     virtual bool canKick(const TeamRobot&) const;
     

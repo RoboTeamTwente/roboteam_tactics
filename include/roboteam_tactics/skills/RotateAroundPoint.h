@@ -28,9 +28,9 @@ private:
 	double targetAngle;
 	roboteam_msgs::WorldRobot robot;
 	roboteam_msgs::WorldBall ball;
-	roboteam_utils::Vector2 faceTowardsPos;
+	Vector2 faceTowardsPos;
 	double rotw;
-	roboteam_utils::Vector2 center;
+	Vector2 center;
    	double radius=radius;
    	GoToPos goToPos;
 	

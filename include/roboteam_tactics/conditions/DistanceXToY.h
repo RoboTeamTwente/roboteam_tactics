@@ -6,7 +6,7 @@
 
 namespace rtt {
 
-roboteam_utils::Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
+Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
 bool isWithinDefenseArea(std::string whichArea, Vector2 point);
 
 /**

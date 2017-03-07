@@ -14,8 +14,8 @@
 
 namespace rtt {
     
-using Vector = roboteam_utils::Vector2;    
-using Position = roboteam_utils::Position;    
+using Vector = Vector2;    
+using Position = Position;    
 using Robot = roboteam_msgs::WorldRobot;
 
 typedef std::function<double(const Robot&, std::string*)> DangerFactor;

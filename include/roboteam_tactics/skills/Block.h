@@ -15,8 +15,8 @@ namespace rtt {
 
 #define BLOCK_BALL_ID 987654
     
-using Vector = roboteam_utils::Vector2;
-using Position = roboteam_utils::Position;
+using Vector = Vector2;
+using Position = Position;
 
 enum class BlockType { RELATIVE, CIRCLE, COVER, GOALAREA };
 
@@ -135,13 +135,13 @@ public:
         Vector2 point(current.x,current.y);;    
         
         float safetyMarginGoalAreas=0.0;
-        roboteam_utils::Vector2 newTargetPos = to_block;
+        Vector2 newTargetPos = to_block;
     
         std::string our_side;
 		ros::param::get("our_side", our_side);
 
-		roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
-		roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
+		Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
+		Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
 		ROS_INFO("distToOurDefensArea: x:%f, y:%f",distToOurDefenseArea.x,distToOurDefenseArea.y);
 		
 		Vector togoalarea;

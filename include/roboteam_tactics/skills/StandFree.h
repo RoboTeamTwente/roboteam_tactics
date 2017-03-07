@@ -14,7 +14,7 @@ class StandFree : public Skill {
 
 public:
     StandFree(std::string name, bt::Blackboard::Ptr blackboard);  
-	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
+	boost::optional<Cone> MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, Vector2 myPos, Vector2 targetPos);
     Status Update();
 private:
 	GoToPos goToPos;

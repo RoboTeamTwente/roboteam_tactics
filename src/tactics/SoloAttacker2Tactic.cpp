@@ -38,7 +38,7 @@ void SoloAttacker2Tactic::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
     
     int attackerID = 0;
-    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+    Vector2 theirGoalPos = LastWorld::get_their_goal_center();
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID});
 

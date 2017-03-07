@@ -5,10 +5,10 @@ namespace rtt {
 DEFINE_REF_RULE_IMPL(HaltRule)
     
 bool HaltRule::canMove(const TeamRobot&) const { return false; }
-bool HaltRule::canMove(const TeamRobot&, const roboteam_utils::Vector2&) const { return false; }
+bool HaltRule::canMove(const TeamRobot&, const Vector2&) const { return false; }
 
 bool HaltRule::canDribble(const TeamRobot&) const { return false; }
-bool HaltRule::canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const { return false; }
+bool HaltRule::canDribble(const TeamRobot&, const Vector2&) const { return false; }
    
 bool HaltRule::canKick(const TeamRobot&) const { return false; }
     

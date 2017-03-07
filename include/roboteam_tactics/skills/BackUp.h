@@ -23,8 +23,8 @@ class BackUp : public Skill {
     }
     
     private:
-    roboteam_utils::Position original_pos;
-    roboteam_utils::Position target_pos;
+    Position original_pos;
+    Position target_pos;
     std::shared_ptr<Dribble> dribble;
 }; 
     

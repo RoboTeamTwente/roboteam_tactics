@@ -14,9 +14,9 @@ typedef boost::polygon::polygon_data<double> Polygon;
     
 typedef struct Territory {
     TeamRobot bot;
-    roboteam_utils::Position botPos;
+    Position botPos;
     Polygon poly;
-    roboteam_utils::Vector2 center;
+    Vector2 center;
     double area;
 } Territory;
    
@@ -26,8 +26,8 @@ std::vector<Territory> territoriesBySize(const roboteam_msgs::World& world = Las
     
 void drawVoronoi(const roboteam_msgs::World& world = LastWorld::get(), bool opponentsOnly = true);
 
-double totalDistanceToOpponents(const roboteam_utils::Vector2& point, const roboteam_msgs::World& world = LastWorld::get());
+double totalDistanceToOpponents(const Vector2& point, const roboteam_msgs::World& world = LastWorld::get());
 
-roboteam_utils::Vector2 freePositionNear(const roboteam_utils::Vector2& center, double radius, const roboteam_msgs::World& world = LastWorld::get());
+Vector2 freePositionNear(const Vector2& center, double radius, const roboteam_msgs::World& world = LastWorld::get());
     
 }

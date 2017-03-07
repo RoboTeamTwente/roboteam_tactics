@@ -27,8 +27,8 @@ TEST(SpaceAnalysisTests, testTerritory) {
     ASSERT_NE(territories.end(), territories.find(bot0));
     Territory t0 = territories.at({0, false});
     ASSERT_EQ(bot0, t0.bot);
-    ASSERT_EQ(roboteam_utils::Position(1, 1, 0), t0.botPos);
-    //ASSERT_EQ(roboteam_utils::Vector2(1, 1), t0.center);
+    ASSERT_EQ(Position(1, 1, 0), t0.botPos);
+    //ASSERT_EQ(Vector2(1, 1), t0.center);
     //ASSERT_DOUBLE_EQ(1.0, t0.area);
     
     drawVoronoi(world, false);
