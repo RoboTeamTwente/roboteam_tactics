@@ -16,7 +16,7 @@
 
 struct intercept_data {
     bool success;
-    Vector2 icpt_pos;
+    rtt::Vector2 icpt_pos;
     double time;
 };
 

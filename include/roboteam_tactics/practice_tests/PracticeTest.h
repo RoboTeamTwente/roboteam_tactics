@@ -17,9 +17,6 @@ namespace rtt {
 
 namespace practice {
 
-using ::Vector2;
-using ::Position;
-
 struct Robot {
     Position pos;
     Position speed;
