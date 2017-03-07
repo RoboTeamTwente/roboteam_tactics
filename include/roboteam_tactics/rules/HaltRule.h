@@ -3,6 +3,11 @@
 
 namespace rtt {
     
+/**
+ * \class HaltRule
+ * \brief RefRule for the HALT RefState.
+ * No one is allowed to move, dribble, kick or chip.
+ */
 class HaltRule final : public RefRule {
     DEFINE_REF_RULE_HEADER(HaltRule, RefState::HALT)
     

@@ -4,6 +4,11 @@
 
 namespace rtt {
     
+/**
+ * \class TimeoutRule
+ * \brief Base class for the two TIMEOUT states (US and THEM).
+ * No one is allowed to move, dribble, kick or chip.
+ */
 class TimeoutRule : public RefRule {
 public:
     bool canMove(const TeamRobot&) const final override;
@@ -24,6 +29,11 @@ private:
     constexpr TimeoutRule() {}
 };
     
+/**
+ * \class Us
+ * \brief RefRule for the TIMEOUT_US RefState.
+ * All rules are in TimeoutRule
+ */
 class TimeoutRule::Us : public TimeoutRule {
 public:
     constexpr RefState getState() const { return RefState::TIMEOUT_US; }
@@ -33,6 +43,11 @@ private:
     static const RefRule* SINGLETON;
 };
     
+/**
+ * \class Them
+ * \brief RefRule for the TIMEOUT_THEM RefState.
+ * All rules are in TimeoutRule
+ */
 class TimeoutRule::Them : public TimeoutRule {
 public:
     constexpr RefState getState() const { return RefState::TIMEOUT_THEM; }
