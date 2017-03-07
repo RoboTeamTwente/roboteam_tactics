@@ -24,7 +24,7 @@ void worldStateCallback(const roboteam_msgs::WorldConstPtr& world, bt::BehaviorT
 
     roboteam_msgs::World getworld = rtt::LastWorld::get();
     roboteam_msgs::WorldBall ball = getworld.ball;
-    roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+    Vector2 center = Vector2(ball.pos.x, ball.pos.y);
     bb2->SetDouble("RotateAroundPoint_A_centerx", center.x);
     bb2->SetDouble("RotateAroundPoint_A_centery", center.y);
 

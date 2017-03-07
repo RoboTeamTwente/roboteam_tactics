@@ -32,11 +32,11 @@ bt::Node::Status CanSeeTheirGoal::Update() {
 
 	std::string our_side = get_our_side();
 
-	roboteam_utils::Vector2 goalPos;
+	Vector2 goalPos;
 	if(our_side == "left"){
-		goalPos = roboteam_utils::Vector2(field.field_length/2.0, 0);
+		goalPos = Vector2(field.field_length/2.0, 0);
 	} else {
-		goalPos = roboteam_utils::Vector2(field.field_length/-2.0, 0);
+		goalPos = Vector2(field.field_length/-2.0, 0);
 	}
 
 	auto bb2 = std::make_shared<bt::Blackboard>();

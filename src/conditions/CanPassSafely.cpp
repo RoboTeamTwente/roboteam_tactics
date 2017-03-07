@@ -23,16 +23,16 @@ bt::Node::Status CanPassSafely::Update (){
 		return Status::Invalid;
 	}
 
-	roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);	
-	roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(world.us.at(passToRobot).pos.x, world.us.at(passToRobot).pos.y);
-	roboteam_utils::Vector2 ballTrajectory = targetPos - myPos;
+	Vector2 myPos = Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);	
+	Vector2 targetPos = Vector2(world.us.at(passToRobot).pos.x, world.us.at(passToRobot).pos.y);
+	Vector2 ballTrajectory = targetPos - myPos;
 
 	bool failure;
 	for (size_t i = 0; i < world.them.size(); i++) {
-		roboteam_utils::Vector2 theirPos = roboteam_utils::Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
+		Vector2 theirPos = Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
 		
 		// projectionOnBallTrajectory contains the point on the ball trajectory to which the opponent is closest
-		roboteam_utils::Vector2 projectionOnBallTrajectory = ballTrajectory.closestPointOnVector(myPos, theirPos);
+		Vector2 projectionOnBallTrajectory = ballTrajectory.closestPointOnVector(myPos, theirPos);
 
 		// Estimate how long it will take for the ball to get there
 		double travelDistanceToClosestPoint = (projectionOnBallTrajectory-myPos).length();

@@ -17,8 +17,8 @@ namespace rtt {
 
 namespace practice {
 
-using ::roboteam_utils::Vector2;
-using ::roboteam_utils::Position;
+using ::Vector2;
+using ::Position;
 
 struct Robot {
     Position pos;

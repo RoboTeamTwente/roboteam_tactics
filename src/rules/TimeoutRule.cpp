@@ -3,10 +3,10 @@
 namespace rtt {
     
 bool TimeoutRule::canMove(const TeamRobot&) const { return false; }
-bool TimeoutRule::canMove(const TeamRobot&, const roboteam_utils::Vector2&) const { return false; }
+bool TimeoutRule::canMove(const TeamRobot&, const Vector2&) const { return false; }
 
 bool TimeoutRule::canDribble(const TeamRobot&) const { return false; }
-bool TimeoutRule::canDribble(const TeamRobot&, const roboteam_utils::Vector2&) const { return false; }
+bool TimeoutRule::canDribble(const TeamRobot&, const Vector2&) const { return false; }
    
 bool TimeoutRule::canKick(const TeamRobot&) const { return false; }
     

@@ -25,7 +25,7 @@ bool firstWorldCallBack = false;
 QUdpSocket udpsocket;
 
 // Place a robot in a specified position and orientation
-void placeRobot(uint id, bool yellow_team, roboteam_utils::Vector2 pos, double dir) {
+void placeRobot(uint id, bool yellow_team, Vector2 pos, double dir) {
 	grSim_Packet packet;
 
 	grSim_Replacement* replace = packet.mutable_replacement();
@@ -53,7 +53,7 @@ void placeRobot(uint id, bool yellow_team, roboteam_utils::Vector2 pos, double d
 
 
 // Place the ball in a specified position
-void placeBall(roboteam_utils::Vector2 pos) {
+void placeBall(Vector2 pos) {
     grSim_Packet packet;
 
     grSim_Replacement* replace = packet.mutable_replacement();
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Choose a point to test
-	// roboteam_utils::Vector2 passTo = passPoint.computeBestPassPoint();
+	// Vector2 passTo = passPoint.computeBestPassPoint();
 	rtt::time_point start_time;
 	rtt::time_point finish_time;
 	rtt::time_point succes_time;
@@ -209,9 +209,9 @@ int main(int argc, char **argv) {
 				}
 
 				// Reset the field and the control booleans and start a new epoch
-				placeBall(roboteam_utils::Vector2(0.0, 0.0));
-				placeRobot(1, true, roboteam_utils::Vector2(0.5, 0.0), M_PI);
-				placeRobot(2, true, roboteam_utils::Vector2(-3.0, 1.0), M_PI);
+				placeBall(Vector2(0.0, 0.0));
+				placeRobot(1, true, Vector2(0.5, 0.0), M_PI);
+				placeRobot(2, true, Vector2(-3.0, 1.0), M_PI);
 				passToTactic.Initialize(); // arg: passTo
 
 				tacticSucces = false;

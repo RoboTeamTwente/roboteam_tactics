@@ -36,7 +36,7 @@ namespace rtt {
  */
 
 struct InterceptPose {
-	roboteam_utils::Vector2 interceptPos;
+	Vector2 interceptPos;
 	double interceptAngle;
 } ;
 

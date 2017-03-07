@@ -60,17 +60,17 @@ class GoToPosAlt : public Skill {
 public:
     GoToPosAlt(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void sendStopCommand(uint id);
-    roboteam_utils::Vector2 positionController(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
-    double rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError);
-    // roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
+    Vector2 positionController(Vector2 myPos, Vector2 targetPos);
+    double rotationController(double myAngle, double angleGoal, Vector2 posError);
+    // Vector2 velocityController(Vector2 velTarget);
     // double angularVelController(double angularVelTarget);
-    // roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    double getAngleFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    // roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
-    double avoidRobotsForward(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
+    // Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    double getAngleFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    // Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
+    double avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     
-    roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
-    roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
+    Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
+    Vector2 checkTargetPos(Vector2 targetPos);
     roboteam_msgs::RobotCommand getVelCommand();
     Status Update();
     
@@ -112,8 +112,8 @@ private:
     bool   dribbler;
     roboteam_msgs::WorldRobot me;
 
-    roboteam_utils::Vector2 prevTargetPos;
-    // roboteam_utils::Vector2 velControllerI;
+    Vector2 prevTargetPos;
+    // Vector2 velControllerI;
     // double angularVelControllerI;
     double angleErrorInt;
     double* angleErrorHistory;

@@ -57,21 +57,21 @@ void ReceiveBall::publishStopCommand() {
 InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY) {
 
 	InterceptPose interceptPose;
-	roboteam_utils::Vector2 interceptPos;
+	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
 	double timeToLookIntoFuture = 5.0; // in seconds
-	roboteam_utils::Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
-	roboteam_utils::Vector2 ballPosThen(LastWorld::predictBallPos(timeToLookIntoFuture));
-	roboteam_utils::Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
-	roboteam_utils::Vector2 ballTrajectory = ballPosThen - ballPosNow;
-	roboteam_utils::Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
+	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
+	Vector2 ballPosThen(LastWorld::predictBallPos(timeToLookIntoFuture));
+	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	Vector2 ballTrajectory = ballPosThen - ballPosNow;
+	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 
 	double ballTrajectoryMagn = ballTrajectory.length();
 	ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
 	double projectionOnBallTrajectory = ballToCenter.dot(ballTrajectory);
-	roboteam_utils::Vector2 closestPoint = ballPosNow + ballTrajectory*projectionOnBallTrajectory;
+	Vector2 closestPoint = ballPosNow + ballTrajectory*projectionOnBallTrajectory;
 
 	// If the ball is moving (towards us) and the computed closest point is within range, then stand on the closest point
 	bool ballMovingTowardsUs = (ballPosThen-ballPosNow).dot(receiveBallAtPos-ballPosNow) >= 0;
@@ -92,7 +92,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, dou
 InterceptPose ReceiveBall::deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY) {
 	
 	InterceptPose interceptPose;
-	roboteam_utils::Vector2 interceptPos;
+	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -105,13 +105,13 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot(double receiveBallAtX, do
 
 	// If the other robot would shoot now, use its orientation to estimate the ball trajectory, and then the closest
 	// point on this trajectory to our robot, so he can receive the ball there
-	roboteam_utils::Vector2 otherRobotLooksAt = roboteam_utils::Vector2(1, 0);
+	Vector2 otherRobotLooksAt = Vector2(1, 0);
 	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
-	roboteam_utils::Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
-	roboteam_utils::Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
-	roboteam_utils::Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
+	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
+	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 	double projectionOnBallTrajectory = ballToCenter.dot(otherRobotLooksAt);
-	roboteam_utils::Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
+	Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
 
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
 	if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
@@ -160,11 +160,11 @@ bt::Node::Status ReceiveBall::Update (){
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	double robotAngle = robot.angle;
 	double distanceToBall = (ballPos-robotPos).length();
-	roboteam_utils::Vector2 targetPos;
+	Vector2 targetPos;
 	double targetAngle;
 
 
@@ -194,14 +194,14 @@ bt::Node::Status ReceiveBall::Update (){
 		interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
 		// interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	}
-	roboteam_utils::Vector2 interceptPos = interceptPose.interceptPos;
+	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
 
 
 	// Check whether the point returned by the deduceInterceptPos... function actually returns a point that is close (less than acceptableDeviation)
 	// from the specified receiveBallAt... point. This should always be the case (maybe move this check to some test function rather than perform
 	// it in the skill update)
-	roboteam_utils::Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
 	if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos)) {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;
@@ -212,7 +212,7 @@ bt::Node::Status ReceiveBall::Update (){
 
 
 	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
-	roboteam_utils::Vector2 posError = targetPos - robotPos;
+	Vector2 posError = targetPos - robotPos;
 	double acceptableDeviation2 = 0.5;
 	if (distanceToBall > acceptableDeviation2 || posError.length() > acceptableDeviation2) {
 		double angleError = targetAngle - robotAngle;
@@ -222,8 +222,8 @@ bt::Node::Status ReceiveBall::Update (){
 		}
 	} else { 
 		// If we are close enough to the ball we can drive towards it and turn on the dribbler
-		roboteam_utils::Vector2 posDiff = ballPos - robotPos;
-		roboteam_utils::Vector2 posDiffNorm = posDiff.normalize();
+		Vector2 posDiff = ballPos - robotPos;
+		Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
 		targetAngle = posDiff.angle();
 		private_bb->SetBool("dribbler", true);

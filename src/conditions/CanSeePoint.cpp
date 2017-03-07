@@ -33,24 +33,24 @@ bt::Node::Status CanSeePoint::Update() {
         ROS_WARN("CanSeePoint::Update was unable to find a bot with id %d.", id);
         return bt::Node::Status::Invalid;
     }
-    roboteam_utils::Vector2 target = roboteam_utils::Vector2(GetDouble("x_coor"), GetDouble("y_coor"));
+    Vector2 target = Vector2(GetDouble("x_coor"), GetDouble("y_coor"));
     if (getObstacles(*me, target, &world, GetBool("check_move")).empty()) {
         return bt::Node::Status::Success;
     }
     return bt::Node::Status::Failure;
     /* 
-    roboteam_utils::Vector2 my_pos = roboteam_utils::Vector2(me->pos.x, me->pos.y);
+    Vector2 my_pos = Vector2(me->pos.x, me->pos.y);
     
     auto positions = all_bots | 
         boost::adaptors::filtered([id](roboteam_msgs::WorldRobot& bot) {
             return bot.id != id;
         }) |
         boost::adaptors::transformed([](roboteam_msgs::WorldRobot& bot) {
-            return roboteam_utils::Vector2(bot.pos.x, bot.pos.y); 
+            return Vector2(bot.pos.x, bot.pos.y); 
         });
     
-    for (const roboteam_utils::Vector2& pos : positions) {
-        roboteam_utils::Vector2 projection = pos.project(my_pos, target);
+    for (const Vector2& pos : positions) {
+        Vector2 projection = pos.project(my_pos, target);
         double proj_dist = projection.dist(pos);
         double dist_to_start = my_pos.dist(pos);
         if (proj_dist < threshold_dist && dist_to_start > .0001) {

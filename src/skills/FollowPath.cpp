@@ -24,7 +24,7 @@ FollowPath::FollowPath(std::string name, bt::Blackboard::Ptr blackboard)
         client = n.serviceClient<roboteam_msgs::navsim>(SERVICE_NAVSIM);
 }
 
-std::vector<roboteam_msgs::Vector2f> FollowPath::ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos) {
+std::vector<roboteam_msgs::Vector2f> FollowPath::ComputePath(Vector2 robotPos, Vector2 goalPos) {
 	char result = RESULT_VELOCITY_DISREGARD;
 
     // We need to calculate a new path, so contact NavSim
@@ -84,8 +84,8 @@ bt::Node::Status FollowPath::Update () {
 	}
 
 	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(xGoal, yGoal);
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 goalPos = Vector2(xGoal, yGoal);
 
     switch (state) {
 	case COMPUTE:

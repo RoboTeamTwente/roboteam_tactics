@@ -28,8 +28,8 @@ void BasicKeeperTactic::Initialize() {
     // Assign the remaining robots the secondary keeper role
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_our_goal_center();
-    roboteam_utils::Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+    Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+    Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
 
     // Claim the keeper
     const int ROBOT_ID = RobotDealer::get_keeper();

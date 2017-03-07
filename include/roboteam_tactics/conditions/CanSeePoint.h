@@ -35,7 +35,7 @@ class CanSeeGoal : public CanSeePoint {
     public:
     CanSeeGoal(std::string name, bt::Blackboard::Ptr blackboard) : CanSeePoint(name, blackboard) {
         assert_valid<CanSeeGoal>(name);
-        roboteam_utils::Vector2 a, b; //TODO: goal positions
+        Vector2 a, b; //TODO: goal positions
         std::string name_a = name + "_can_see_goal_a";
         std::string name_b = name + "_can_see_goal_b";
         blackboard->SetInt(name_a + "_me", GetInt("me"));

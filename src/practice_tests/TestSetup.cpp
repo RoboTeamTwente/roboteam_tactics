@@ -24,25 +24,25 @@ SetupBuilder* SetupBuilder::builder() {
     return new SetupBuilder();
 }
     
-SetupBuilder* SetupBuilder::with_bot(const TeamRobot& bot, const roboteam_utils::Position& pos, const roboteam_utils::Position& vel) {
+SetupBuilder* SetupBuilder::with_bot(const TeamRobot& bot, const Position& pos, const Position& vel) {
     auto& s = (bot.our_team ? setup.us : setup.them)[bot.id];
     s.pos = pos;
     s.speed = vel;
     return this;
 }
 
-SetupBuilder* SetupBuilder::with_ball(const roboteam_utils::Vector2& pos) {
+SetupBuilder* SetupBuilder::with_ball(const Vector2& pos) {
     setup.ballPos = pos;
     return this;
 }
 
-SetupBuilder* SetupBuilder::with_ball_vel(const roboteam_utils::Vector2& vel) {
+SetupBuilder* SetupBuilder::with_ball_vel(const Vector2& vel) {
     setup.ballSpeed = vel;
     return this;
 }
 
 SetupBuilder* SetupBuilder::stationary_ball() {
-    setup.ballSpeed = roboteam_utils::Vector2();
+    setup.ballSpeed = Vector2();
     return this;
 }
 
@@ -53,8 +53,8 @@ SetupBuilder* SetupBuilder::combine(const Config& other) {
     for (const auto& pair : other.them) {
         setup.them[pair.first] = pair.second;
     }
-    setup.ballPos = roboteam_utils::Vector2(other.ballPos);
-    setup.ballSpeed = roboteam_utils::Vector2(other.ballSpeed);
+    setup.ballPos = Vector2(other.ballPos);
+    setup.ballSpeed = Vector2(other.ballSpeed);
     return this;
 }
     
@@ -79,8 +79,8 @@ namespace {
     
     void add_rep(grSim_Packet& packet, const std::pair<RobotID, Robot>& entry, bool we_are_yellow, bool our_team) {
         RobotID bot = entry.first;
-        roboteam_utils::Position pos = entry.second.pos;
-        //roboteam_utils::Position vel = entry.second.speed;
+        Position pos = entry.second.pos;
+        //Position vel = entry.second.speed;
         grSim_RobotReplacement* rep = packet.mutable_replacement()->add_robots();
         rep->set_x(pos.x);
         rep->set_y(pos.y);

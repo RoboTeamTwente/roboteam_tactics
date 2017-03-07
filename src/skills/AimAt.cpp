@@ -38,13 +38,13 @@ bt::Node::Status AimAt::Update (){
 		return Status::Running;
 	}
 
-	roboteam_utils::Vector2 passTo;
+	Vector2 passTo;
 
 	if (destination=="robot"){
         int AtRobotID = GetInt("AtRobot");
         auto possibleBot = lookup_our_bot(AtRobotID);
         if (possibleBot) {
-            passTo = roboteam_utils::Vector2(possibleBot->pos);
+            passTo = Vector2(possibleBot->pos);
         } else {
             return Status::Failure;
         }

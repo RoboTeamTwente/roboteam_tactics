@@ -13,7 +13,7 @@ class GoToPos;
 class FollowPath : public Skill {
 public:
     FollowPath(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-    std::vector<roboteam_msgs::Vector2f> ComputePath(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 goalPos);
+    std::vector<roboteam_msgs::Vector2f> ComputePath(Vector2 robotPos, Vector2 goalPos);
     void CallGoToPos(roboteam_msgs::Vector2f point, double wGoal, int robotID);
 	Status Update();
 

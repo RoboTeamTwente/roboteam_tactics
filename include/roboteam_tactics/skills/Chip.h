@@ -32,7 +32,7 @@ public:
 private:
     int robotID;
 
-    roboteam_utils::Vector2 oldBallVel;
+    Vector2 oldBallVel;
     int cycleCounter;
 };
 

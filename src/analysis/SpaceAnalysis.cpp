@@ -13,8 +13,8 @@
 namespace rtt {
     
 using namespace boost::polygon;
-using Vector = roboteam_utils::Vector2;
-using Position = roboteam_utils::Position;
+using Vector = Vector2;
+using Position = Position;
 typedef point_data<double> VPoint;
 typedef polygon_traits<Polygon>::point_type PPoint;
 typedef voronoi_diagram<double> VoronoiDiagram;
@@ -278,25 +278,25 @@ std::vector<Territory> territoriesBySize(const roboteam_msgs::World& world, bool
     return ordered;
 }
 
-double totalDistanceToOpponents(const roboteam_utils::Vector2& point, const roboteam_msgs::World& world) {
+double totalDistanceToOpponents(const Vector2& point, const roboteam_msgs::World& world) {
     double total = 0.0;
     for (const auto& bot : world.them) {
-        roboteam_utils::Vector2 botPos(bot.pos);
+        Vector2 botPos(bot.pos);
         total += point.dist2(botPos);
     }
     return sqrtl(total);
 }
 
-roboteam_utils::Vector2 freePositionNear(const roboteam_utils::Vector2& center, double radius, const roboteam_msgs::World& world) {
-    const auto scoreFunc = [world] (const roboteam_utils::Vector2& vec) {
+Vector2 freePositionNear(const Vector2& center, double radius, const roboteam_msgs::World& world) {
+    const auto scoreFunc = [world] (const Vector2& vec) {
         return totalDistanceToOpponents(vec, world);
     };
     return sampleForVector(center, -radius, radius, -radius, radius, 100, scoreFunc);
 }
 
-roboteam_utils::Vector2 freePositionWithLOS(const roboteam_utils::Vector2& center, double radius,
-        const roboteam_utils::Vector2& losTarget, const roboteam_msgs::World& world) {
-    const auto scoreFunc = [world, center] (const roboteam_utils::Vector2& vec) {
+Vector2 freePositionWithLOS(const Vector2& center, double radius,
+        const Vector2& losTarget, const roboteam_msgs::World& world) {
+    const auto scoreFunc = [world, center] (const Vector2& vec) {
         if (!getObstacles(vec, center, &world, true).empty()) return -99999.9;
         return -totalDistanceToOpponents(vec, world);
     };

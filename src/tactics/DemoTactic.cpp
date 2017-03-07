@@ -59,7 +59,7 @@ void DemoTactic::Initialize() {
         mod = 1;
     }
 
-    roboteam_utils::Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
+    Vector2 passTo(3 * mod, get_rand_int(6000) / 6000.0 * 6 - 3);
 
     RTT_DEBUG("Attack bot: %i, score bot: %i, keeper bot: %i\n", attack_bot, score_bot, keeper_bot);
 

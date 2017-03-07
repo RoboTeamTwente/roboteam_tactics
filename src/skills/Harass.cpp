@@ -38,8 +38,8 @@ Harass::Harass(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
 bt::Node::Status Harass::Update() {
     auto world = LastWorld::get();
     auto ball = world.ball;
-    roboteam_utils::Vector2 ballPos(ball.pos);
-    roboteam_utils::Vector2 myPos(lookup_bot(blackboard->GetInt("ROBOT_ID"), true, &world)->pos);
+    Vector2 ballPos(ball.pos);
+    Vector2 myPos(lookup_bot(blackboard->GetInt("ROBOT_ID"), true, &world)->pos);
     if (bot_has_ball(target, false, LastWorld::get().ball)) {
         ROS_INFO("Bot %d preventing %d from kicking", blackboard->GetInt("ROBOT_ID"), blackboard->GetInt("TGT_ID"));
         bt::Node::Status s = block_kick->Update();
