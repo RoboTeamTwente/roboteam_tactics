@@ -11,9 +11,16 @@
 
 namespace rtt {
 
+/**
+ * \class RefStateSwitch
+ * \brief Top-level node which selects the correct strategy tree to use based on the current ref state.
+ */
 class RefStateSwitch : public bt::Composite {    
     
 public:
+    /**
+     * \brief The children which a RefStateSwitch should have. Mostly for error messages.
+     */
     static constexpr std::array<const char*, 19> EXPECTED_CHILDREN = {
         "HALT=0",
         "STOP=1",
@@ -38,10 +45,16 @@ public:
     
     RefStateSwitch() : validated(false), last(-1) {}
     
+    /**
+     * \brief Checks whether this RefStateSwitch has all the children it should have.
+     */
     bool isValid() const {
         return children.size() == EXPECTED_CHILDREN.size();
     }
     
+    /**
+     * \brief Asserts that this RefStateSwitch should be in a valid state, and prints an error message if it is not.
+     */
     void assertValid() const {
         if (!isValid()) {
             ROS_ERROR("Assertion Failed: RefStateSwitch expected %lu children, but got %lu. Here's a list of what it needs:",

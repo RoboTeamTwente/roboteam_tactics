@@ -10,8 +10,49 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
 bool isWithinDefenseArea(std::string whichArea, Vector2 point);
 
 /**
- * Checks if measured distance from X to Y is more, less,
- * or equal to the given distance.
+ * \class DistanceXToY
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks if measured distance from X to Y is more, less, or equal to the given distance.
+ * Params:
+ *   ROBOT_ID:
+ *     Type: Int
+ *     Descr: The robot to check for
+ *   distance:
+ *     Type: Double
+ *     Descr: The distance to compare to
+ *   mode:
+ *     Type: String
+ *     Can be:
+ *       lt: less than
+ *       gt: greater than
+ *       eq: equal to
+ *       leq: less than or equal to
+ *       geq: greater than or equal to
+ *     Descr: The comparison to use
+ *   X:
+ *     Type: String
+ *     Can be:
+ *       ball: Distance to the ball
+ *       our goal: Distance to our goal
+ *       their goal: Distance to their goal
+ *       center dot: Distance to (0, 0)
+ *       closest opponent: Distance to the closest opponent
+ *       some integer: Distance to OUR robot with that id
+ *       some integer T: As in "5T" or "0T", distance to the OPPONENT robot with that id.
+ *     Descr: The location we want to measure the distance FROM
+ *   Y:
+ *     Type: String
+ *     Can be:
+ *       ball: Distance to the ball
+ *       our goal: Distance to our goal
+ *       their goal: Distance to their goal
+ *       center dot: Distance to (0, 0)
+ *       closest opponent: Distance to the closest opponent
+ *       some integer: Distance to OUR robot with that id
+ *       some integer T: As in "5T" or "0T", distance to the OPPONENT robot with that id.
+ *     Descr: The location we want to measure the distance TO
  */
 class DistanceXToY : public Condition {
     public:
@@ -41,6 +82,7 @@ class DistanceXToY : public Condition {
         params["Y"] = BBArgumentType::String;
         return params;
     }
+    
     std::string node_name() { return "DistanceXToY"; }
 
     DistanceXToY(std::string name, bt::Blackboard::Ptr blackboard = nullptr);

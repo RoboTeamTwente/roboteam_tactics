@@ -24,7 +24,7 @@ struct intercept_data CanInterceptBall::calc_intercept() {
     Vector2 ball_pos(world.ball.pos.x, world.ball.pos.y);
     Vector2 ball_vel(world.ball.vel.x, world.ball.vel.y);
     roboteam_msgs::WorldRobot* me = nullptr;
-    unsigned int my_id = GetInt("me");
+    unsigned int my_id = GetInt("ROBOT_ID");
     for (auto& bot : world.us) {
         if (bot.id == my_id) {
             me = &bot;

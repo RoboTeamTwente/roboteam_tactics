@@ -14,14 +14,29 @@
 #define ICPT_DELTA 0.001
 #define ICPT_RADIUS 0.005
 
+/**
+ * \struct intercept_data
+ * \brief Stores data on a possible interception.
+ */
 struct intercept_data {
-    bool success;
-    rtt::Vector2 icpt_pos;
-    double time;
+    bool success;           /**< Whether or not an interception is possible */
+    rtt::Vector2 icpt_pos;  /**< The location where the interception would take place */
+    double time;            /**< The time required for the interception, in seconds */
 };
 
 namespace rtt {
 
+/**
+ * \class CanInterceptBall
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks whether a robot can intercept the ball given the current world state.
+ * Params:
+ *   ROBOT_ID:
+ *     Type: Int
+ *     Descr: The robot to check for.
+ */
 class CanInterceptBall : public Condition {
     public:
 
@@ -31,7 +46,7 @@ class CanInterceptBall : public Condition {
 
     static VerificationMap required_parameters() {
         VerificationMap params;
-        params["me"] = BBArgumentType::Int;
+        params["ROBOT_ID"] = BBArgumentType::Int;
         return params;
     }
 

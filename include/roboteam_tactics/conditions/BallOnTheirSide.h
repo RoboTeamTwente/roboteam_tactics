@@ -5,6 +5,14 @@
 
 namespace rtt {
 
+/**
+ * \class BallOnTheirSide
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks whether the ball is on their side of the field.
+ * Params: null
+ */
 class BallOnTheirSide : public Condition {
     public:
     BallOnTheirSide(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

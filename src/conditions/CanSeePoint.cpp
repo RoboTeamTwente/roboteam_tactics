@@ -21,7 +21,7 @@ CanSeePoint::CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard) : Con
 bt::Node::Status CanSeePoint::Update() {
     roboteam_msgs::WorldRobot* me = nullptr;
     roboteam_msgs::World world = LastWorld::get();
-    unsigned int id = GetInt("me");
+    unsigned int id = GetInt("ROBOT_ID");
     auto all_bots = boost::join(world.us, world.them);
     for (auto& bot : all_bots) {
         if (bot.id == id) {
