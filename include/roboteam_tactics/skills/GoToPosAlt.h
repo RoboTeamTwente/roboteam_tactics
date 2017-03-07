@@ -62,11 +62,7 @@ public:
     void sendStopCommand(uint id);
     Vector2 positionController(Vector2 myPos, Vector2 targetPos);
     double rotationController(double myAngle, double angleGoal, Vector2 posError);
-    // Vector2 velocityController(Vector2 velTarget);
-    // double angularVelController(double angularVelTarget);
-    // Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
     double getAngleFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    // Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     double avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
