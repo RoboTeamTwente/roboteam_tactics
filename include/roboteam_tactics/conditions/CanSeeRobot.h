@@ -12,12 +12,12 @@ namespace rtt {
 /*
  * Descr: Checks whether one robot can see another
  * Params:
- *   ROBOT_ID:
- *     Type: Int
- *     Descr: One of the robots
- *   targetID:
- *     Type: Int
- *     Descr: The other robot
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: One of the robots
+ *   - targetID:
+ *       Type: Int
+ *       Descr: The other robot
  */
 class CanSeeRobot : public Condition {
     public:

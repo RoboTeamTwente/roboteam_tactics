@@ -6,6 +6,10 @@
 namespace rtt {
 
 /**
+ * \class AimAt
+ * \brief See YAML
+ */
+/**
  * Aims the robot at a certain point.
  *
  * Global params:
@@ -19,19 +23,19 @@ namespace rtt {
  *      theirgoal - Aim at their goal 
  *      ourgoal   - Aim at our goal
  *      position  - Aim at a position
- *   What thing to aim at
+ *   Descr: What thing to aim at
  *
  * - xGoal : Double
  *   Used when: At = position
- *   The x coord of what to aim at.
+ *   Descr: The x coord of what to aim at.
  *
  * - yGoal : Double
  *   Used when: At = position
- *   The y coord of what to aim at.
+ *   Descr: The y coord of what to aim at.
  *
  * - AtRobot : Int
  *   Used when: At = robot
- *   The robot at which to aim.
+ *   Descr: The robot at which to aim.
  */
 
 class AimAt : public Skill {

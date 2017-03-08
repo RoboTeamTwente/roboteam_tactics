@@ -26,11 +26,11 @@ namespace rtt {
  *     (or get stale ones)
  *
  * Params:
- *     signal:
+ *     - signal:
  *         Type: String
  *         Descr: Name of the signal that needs to be checked.
  *     
- *     mode:
+ *     - mode:
  *         Type: String
  *         Descr: |
  *             In which mode to check the value against the signal.
@@ -42,7 +42,7 @@ namespace rtt {
  *             - leq (less than or equals)
  *             - geq (greater than or equals)
  *
- *     value:
+ *     - value:
  *         Type: String
  *         Descr: The value to compare to the value
  *

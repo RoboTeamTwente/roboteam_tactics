@@ -13,12 +13,12 @@ namespace rtt {
 /*
  * Descr: Checks whether one robot can pass to another with little chance of the ball being intercepted.
  * Params:
- *   ROBOT_ID:
- *     Type: Int
- *     Descr: The passing robot
- *   passToRobot:
- *     Type: Int
- *     Descr: The receiving robot
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The passing robot
+ *   - passToRobot:
+ *       Type: Int
+ *       Descr: The receiving robot
  */
 class CanPassSafely : public Condition {
 

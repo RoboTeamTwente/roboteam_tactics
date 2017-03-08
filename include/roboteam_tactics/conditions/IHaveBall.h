@@ -16,12 +16,12 @@ namespace rtt {
 /*
  * Descr: Checks whether a robot has the ball
  * Params:
- *   me:
- *     Type: Int
- *     Descr: The robot to check for
- *   our_team:
- *     Type: Bool
- *     Descr: Whether or not the robot is on our team
+ *   - me:
+ *       Type: Int
+ *       Descr: The robot to check for
+ *   - our_team:
+ *       Type: Bool
+ *       Descr: Whether or not the robot is on our team
  */
 class IHaveBall : public Condition {
 

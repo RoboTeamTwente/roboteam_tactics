@@ -33,9 +33,9 @@ namespace rtt {
 /*
  * Descr: Checks whether a robot can intercept the ball given the current world state.
  * Params:
- *   ROBOT_ID:
- *     Type: Int
- *     Descr: The robot to check for.
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The robot to check for.
  */
 class CanInterceptBall : public Condition {
     public:
