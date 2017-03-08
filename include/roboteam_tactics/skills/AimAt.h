@@ -10,32 +10,32 @@ namespace rtt {
  * \brief See YAML
  */
 /**
- * Aims the robot at a certain point.
- *
- * Global params:
- *  - ROBOT_ID : Int 
- *    Id of the robot
+ * Descr: Aims the robot at a certain point.
  * 
  * Params:
- * - At : String
- *   Can be:
- *      robot     - Aim at a robot
- *      theirgoal - Aim at their goal 
- *      ourgoal   - Aim at our goal
- *      position  - Aim at a position
- *   Descr: What thing to aim at
+ * - At :
+ *     Type: Int
+ *     Can be:
+ *        - robot:      Aim at a robot
+ *        - theirgoal:  Aim at their goal 
+ *        - ourgoal:    Aim at our goal
+ *        - position:   Aim at a position
+ *     Descr: What thing to aim at
  *
- * - xGoal : Double
- *   Used when: At = position
- *   Descr: The x coord of what to aim at.
+ * - xGoal:
+ *     Type:      Double
+ *     Used when: At = position
+ *     Descr:     The x coord of what to aim at.
  *
- * - yGoal : Double
- *   Used when: At = position
- *   Descr: The y coord of what to aim at.
+ * - yGoal:
+ *     Type: Double
+ *     Used when: At = position
+ *     Descr: The y coord of what to aim at.
  *
- * - AtRobot : Int
- *   Used when: At = robot
- *   Descr: The robot at which to aim.
+ * - AtRobot:
+ *     Type: Int
+ *     Used when: At = robot
+ *     Descr: The robot at which to aim.
  */
 
 class AimAt : public Skill {

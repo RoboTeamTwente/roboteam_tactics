@@ -8,6 +8,17 @@ namespace rtt {
 // Forward declare instead of including
 class Block;
     
+/**
+ * \class KeeperBlock
+ * \brief See YAML
+ */
+/*
+ * Descr: Skill for the keeper to stay between the ball and the goal
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the keeper
+ */
 class KeeperBlock : public Skill {
     public:
     KeeperBlock(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

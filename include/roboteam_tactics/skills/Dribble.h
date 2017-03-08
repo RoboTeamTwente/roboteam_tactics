@@ -8,6 +8,23 @@
 
 namespace rtt {
 
+/**
+ * \class Dribble
+ * \brief See YAML
+ */
+/*
+ * Descr: Goes to a position while keeping the ball
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *   - goalx:
+ *       Type: Double
+ *       Descr: The x-coordinate of the goal position
+ *   - goaly:
+ *       Type: Double
+ *       Descr: The y-coordinate of the goal position
+ */
 class Dribble : public Skill {
 public:
 	Dribble(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

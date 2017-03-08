@@ -7,6 +7,17 @@
 
 namespace rtt {
 
+/**
+ * \class RandomDrive
+ * \brief See YAML
+ */
+/*
+ * Descr: Randomly drive across the field
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ */
 class RandomDrive : public Skill {
 public:
     RandomDrive(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

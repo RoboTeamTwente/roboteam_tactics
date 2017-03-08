@@ -18,6 +18,10 @@
 namespace rtt {
 
 /**
+ * \class GoToPos
+ * \brief See YAML
+ */
+/**
  * # Using the YAML multiline literal here
  * Descr: |
  *     Goes to a position
@@ -25,33 +29,31 @@ namespace rtt {
  *     @Idea isKeeper should maybe also be global?
  *     @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
  *
- * Global params:
- *     ROBOT_ID:
+ * Params:
+ *     - ROBOT_ID:
  *         Type: Int 
  *         Descr: Id of the robot
- * 
- * Params:
- *     isKeeper:
+ *     - isKeeper:
  *         Type: Bool
  *         Descr: Whether or not the current robot is a keeper
  *     
- *     angleGoal:
+ *     - angleGoal:
  *         Type: Double
  *         Descr: The angle of the arrival position
  *     
- *     xGoal:
+ *     - xGoal:
  *         Type: Double
  *         Descr: The target x coordinate
  *     
- *     yGoal:
+ *     - yGoal:
  *         Type: Double
  *         Descr: The target y coordinate
  *     
- *     dribbler:
+ *     - dribbler:
  *         Type: Bool
  *         Descr: Turns on the dribbler if true
  *
- *     avoidRobots:
+ *     - avoidRobots:
  *         Type: Bool
  *         Descr: Indicates whether or not other robots should be avoided
  *
