@@ -2,6 +2,11 @@
 
 namespace rtt {
     
+/**
+ * \class BTRunner
+ * \brief Runs a behavior tree, printing the current state every tick.
+ * \deprecated This is no longer useful with the improved RQT view.
+ */
 class BTRunner {
     public:
     BTRunner(bt::BehaviorTree& tree, bool print_debug = false) : tree(tree), print_debug(print_debug) {}
