@@ -15,7 +15,7 @@ namespace practice {
 
 class PracticeTest;
 
-} // anonymous namespace
+}
     
 namespace factories {
 
@@ -34,6 +34,11 @@ using Factory = std::function<std::shared_ptr<T>(std::string name, bt::Blackboar
 
 using TestFactory = std::function<std::shared_ptr<practice::PracticeTest>()>;
 
+/**
+ * \brief Gets the singleton Repo instance for some type
+ * \tparam T The type for which to get the Repo
+ * \return The Repo
+ */
 template <
     class T
 >
@@ -42,11 +47,21 @@ Repo<T>& getRepo() {
     return repo;
 }
 
+/**
+ * \class TreeRegisterer
+ * \brief Registers a behavior tree in the appropriate Repo
+ */
 class TreeRegisterer {
 public:
     TreeRegisterer(const std::string &name, TreeConstructor tc);
 } ;
 
+/**
+ * \class LeafRegisterer
+ * \brief Registers a leaf in the appropriate Repo
+ * \tparam L The concrete leaf type to register
+ * \tparam Parent The Parent type; Either Skill, Condition or Tactic
+ */
 template <
     class L,
     class Parent
@@ -78,6 +93,11 @@ public:
  * or
  * print_all<rtt::Skill>("skills");
  */
+/**
+ * \brief Prints all the elements in a repo
+ * \tparam L The type of elements in the repo
+ * \param category The name of the category of the elements in the repo
+ */
 template<
     class L
 >
@@ -93,6 +113,10 @@ void print_all(std::string category) {
     }
 }
 
+/**
+ * \brief Gets the names of all entries in a repo
+ * \tparam L The type of elements in the repo
+ */
 template<
     class L
 >

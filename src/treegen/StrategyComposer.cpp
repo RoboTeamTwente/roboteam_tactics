@@ -9,30 +9,29 @@ bt::BehaviorTree StrategyComposer::mainStrategy;
 
 /*
  * This is a mapping of Ref states to the appropriate strategies.
- * Please do not remove the comments.
  * Any UNSET ref states will fall back to the NORMAL_PLAY strategy.
  * If the NORMAL_PLAY strategy is UNSET, bad things will happen.
  */
-constexpr std::array<const char*, StrategyComposer::CASE_COUNT> StrategyComposer::MAPPING = {
-        UNSET, // HALT
-        UNSET, // STOP
-        UNSET, // NORMAL_START
-        UNSET, // FORCE_START
-        UNSET, // PREPARE_KICKOFF_US
-        UNSET, // PREPARE_KICKOFF_THEM
-        UNSET, // PREPARE_PENALTY_US
-        UNSET, // PREPARE_PENALTY_THEM
-        UNSET, // DIRECT_FREE_US
-        "FreeKickDefenceStrategy", // DIRECT_FREE_THEM
-        UNSET, // INDIRECT_FREE_US
-        "FreeKickDefenceStrategy", // INDIRECT_FREE_THEM
-        UNSET, // TIMEOUT_US
-        UNSET, // TIMEOUT_THEM
-        UNSET, // GOAL_US
-        UNSET, // GOAL_THEM
-        UNSET, // BALL_PLACEMENT_US
-        UNSET, // BALL_PLACEMENT_THEM
-        "DemoStrategy" // NORMAL_PLAY
+const std::map<RefState, const char*> StrategyComposer::MAPPING = {
+        { RefState::HALT,                 UNSET },
+        { RefState::STOP,                 UNSET },
+        { RefState::NORMAL_START,         UNSET },
+        { RefState::FORCED_START,         UNSET },
+        { RefState::PREPARE_KICKOFF_US,   UNSET },
+        { RefState::PREPARE_KICKOFF_THEM, UNSET },
+        { RefState::PREPARE_PENALTY_US,   UNSET },
+        { RefState::PREPARE_PENALTY_THEM, UNSET },
+        { RefState::DIRECT_FREE_US,       UNSET },
+        { RefState::DIRECT_FREE_THEM,     "FreeKickDefenceStrategy"},
+        { RefState::INDIRECT_FREE_US,     UNSET },
+        { RefState::INDIRECT_FREE_THEM,   "FreeKickDefenceStrategy"},
+        { RefState::TIMEOUT_US,           UNSET },
+        { RefState::TIMEOUT_THEM,         UNSET },
+        { RefState::GOAL_US,              UNSET },
+        { RefState::GOAL_THEM,            UNSET },
+        { RefState::BALL_PLACEMENT_US,    UNSET },
+        { RefState::BALL_PLACEMENT_THEM,  UNSET },
+        { RefState::NORMAL_PLAY,          "DemoStrategy"}
 };
 
 bt::BehaviorTree StrategyComposer::getMainStrategy() {
@@ -50,11 +49,11 @@ void StrategyComposer::init() {
     
     auto repo = factories::getRepo<bt::BehaviorTree>();
     
-    constexpr const char* defName = MAPPING[CASE_COUNT - 1];
+    const char* defName = MAPPING.at(RefState::NORMAL_PLAY);
     bt::BehaviorTree def = repo.at(std::string(defName));
     
     for (unsigned int i = 0; i < MAPPING.size() - 1; i++) {
-        const char* strat = MAPPING[i];
+        const char* strat = MAPPING.at(static_cast<RefState>(i));
         if (strat == UNSET) {
             Forwarder fw(bb, def);
             rss->AddChild(std::make_shared<Forwarder>(fw));
