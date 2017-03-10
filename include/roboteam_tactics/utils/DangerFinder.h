@@ -14,47 +14,109 @@
 
 namespace rtt {
     
-using Vector = roboteam_utils::Vector2;    
-using Position = roboteam_utils::Position;    
 using Robot = roboteam_msgs::WorldRobot;
 
+/**
+ * \typedef DangerFactor
+ * \brief A type of function which determines how dangerous a certain robot is right now by some metric
+ */
 typedef std::function<double(const Robot&, std::string*)> DangerFactor;
+
+/**
+ * \brief DangerFactor which gives high scores to robots which have a clear line of sight to our goal
+ */
 extern const DangerFactor can_see_our_goal;
+
+/**
+ * \brief DangerFactor which gives high scores if it seems likely that an opponent might try to pass the
+ * ball to this robot from the opposite side of the field.
+ */
 extern const DangerFactor potential_cross_recipient;
+
+/**
+ * \brief DangerFactor which gives a very high score to the robot which has the ball, and low scores to all others.
+ */
 extern const DangerFactor has_ball;
+
+/**
+ * \brief DangerFactor which scores opponents relative to their distance to our goal
+ */
 extern const DangerFactor distance;
+
+/**
+ * \brief DangerFactor which scores opponents based on their orientation to our goal.
+ * An opponent facing our goal will have a high score.
+ */
 extern const DangerFactor orientation;
 
+/**
+ * \brief The DangerFactors used by default
+ */
 extern const std::vector<DangerFactor> DEFAULT_FACTORS;
 
-const std::vector<Vector> GOAL_POINTS_LEFT({
-    Vector(-4.5, .35),
-    Vector(-4.5, 0),
-    Vector(-4.5, -.35)
+/**
+ * \brief The essential coordinates of the left-side goal
+ */
+const std::vector<Vector2> GOAL_POINTS_LEFT({
+    Vector2(-4.5, .35),
+    Vector2(-4.5, 0),
+    Vector2(-4.5, -.35)
 });
   
-const std::vector<Vector> GOAL_POINTS_RIGHT({
-    Vector(4.5, .35),
-    Vector(4.5, 0),
-    Vector(4.5, -.35)
+/**
+ * \brief The essential coordinates of the right-side goal
+ */
+const std::vector<Vector2> GOAL_POINTS_RIGHT({
+    Vector2(4.5, .35),
+    Vector2(4.5, 0),
+    Vector2(4.5, -.35)
 });
 
+/**
+ * \struct DangerResult
+ * \brief The result of a single round of danger evaluation
+ */
 typedef struct {
-    boost::optional<Robot> charging;
-    boost::optional<Robot> most_dangerous;
-    boost::optional<Robot> second_most_dangerous;
-    std::vector<Robot> danger_list;
+    boost::optional<Robot> charging;                //< An optional robot with the ball, coming towards our goal
+    boost::optional<Robot> most_dangerous;          //< The most dangerous opponent, if there is any
+    boost::optional<Robot> second_most_dangerous;   //< The second most dangerous opponent, if there is more than one
+    std::vector<Robot> danger_list;                 //< All opponents, sorted from least to most dangerous
 } DangerResult;
 
+/**
+ * \class DangerFinder
+ * \brief Evaluates all robots in a background thread, determining how 'dangerous' each is according
+ * to an extendable set of metrics.
+ */
 class DangerFinder {
     public:
     DangerFinder();
     
+    /**
+     * \brief Starts the background thread.
+     * \param delay The amount of milliseconds to pause between evaluations
+     */
     void run(unsigned int delay = 100);
+    
+    /**
+     * \brief Stops the background thread. If an evaluation is currently running, it will be allowed to finish.
+     */
     void stop();
+    
+    /**
+     * \brief Checks whether or not the background thread is running
+     */
     bool is_running() const;
     
+    /**
+     * \brief Gets the most recent DangerResult. If the background thread is not running and has never run, this will be empty.
+     */
     DangerResult current_result();
+    
+    /**
+     * \brief Evaluates the current world state and returns a DangerResult. This does not affect the background
+     * thread, whether it is running or not.
+     */
     DangerResult get_immediate_update() const;
     
     private:
@@ -71,7 +133,7 @@ class DangerFinder {
 extern DangerFinder danger_finder;
 
 namespace df_impl {
-    std::vector<Vector> our_goal();
+    std::vector<Vector2> our_goal();
 
     bool we_are_left();
 
@@ -86,7 +148,7 @@ namespace df_impl {
     std::vector<Robot> sorted_opponents(const roboteam_msgs::World& world, unsigned int preferred);
 }
 
-std::vector<Vector> our_goal();
+std::vector<Vector2> our_goal();
 bool we_are_left();
 boost::optional<Robot> charging_bot();
 boost::optional<Robot> most_dangerous_bot();

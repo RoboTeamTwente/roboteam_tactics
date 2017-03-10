@@ -18,20 +18,36 @@ ROS_DECLARE_MESSAGE(BtStatus);
 
 namespace rtt {
 
+/**
+ * \enum BlackboardPolicy
+ * \brief Determines search order for blackboard queries.
+ */
 enum class BlackboardPolicy {
-    GLOBAL_FIRST,
-    PRIVATE_FIRST,
-    GLOBAL_ONLY,
-    PRIVATE_ONLY
+    GLOBAL_FIRST,  /**< Search global first, fall back to private */
+    PRIVATE_FIRST, /**< Search private first, fall back to global */
+    GLOBAL_ONLY,   /**< Search global only, ignore private */
+    PRIVATE_ONLY   /**< Search private only, ignore global */
 };
 
 constexpr BlackboardPolicy DEFAULT_BB_POLICY = BlackboardPolicy::GLOBAL_FIRST;
 
+/**
+ * \class Leaf
+ * \brief Extensions to bt::Leaf, base class for all Skills, Conditions and Tactics
+ */
 class Leaf : public bt::Leaf {
 public:
 
     virtual Status Tick();
 
+    /**
+     * \brief Checks whether a value is valid for a type of Leaf (Impl).
+     * This method can only be called if Impl supports checking string options, otherwise the overload
+     * below is called.
+     * \param key_value The (param, value) pair to check.
+     * \return  An optional containing an error message if the value is not valid for the param, or an empty
+     * optional if it is. NB: An empty optional indicates a valid value.
+     */
     template<typename Impl>
     static boost::optional<std::string> valid_string_opt(typename std::enable_if<HasStringOptions<Impl>::value,
                                                                   std::pair<std::string, std::string>>::type key_value) {
@@ -52,6 +68,11 @@ public:
         return boost::optional<std::string>();
     }
 
+    /**
+     * \brief The overload of valid_string_opt which is called if the Impl type does not support checking string values.
+     * Since no check can be performed, this method never indicates an error.
+     * \return An empty optional.
+     */
     template<typename Impl>
     static boost::optional<std::string> valid_string_opt(typename std::enable_if<!HasStringOptions<Impl>::value,
                                                                   std::pair<std::string, std::string>>::type key_value) {
@@ -59,7 +80,7 @@ public:
     }
 
     /**
-     * @brief Tests whether a certain Blackboard instance contains the required variables for a certain type of Leaf (Impl).
+     * \brief Tests whether a certain Blackboard instance contains the required variables for a certain type of Leaf (Impl).
      * Not all Leafs neccessarily have the capability to validate Blackboards, in which case only a null check will be performed.
      * To enable validation, create a function in your Leaf with this (public) signature:
      *
@@ -68,7 +89,7 @@ public:
      * This function should return name-type pairs for the variables the Leaf's constructor requires.
      * If no name parameter is passed, this function will check for variables of the names exactly as specified
      * in the VerificationMap. Otherwise, it will augment the names in the same way rtt::Leaf's GetX, HasX and SetX methods do.
-     * @return Whether or not the given Blackboard satisfies the requirements of the Leaf specified as the template parameter.
+     * \return Whether or not the given Blackboard satisfies the requirements of the Leaf specified as the template parameter.
      */
     template<typename Impl>
     static bool validate_blackboard(typename std::enable_if<CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard,
@@ -116,7 +137,7 @@ public:
     }
 
     /**
-     * @brief Overload for Leafs which do not provide a required_params() function. This only performs a null check on the Blackboard.
+     * \brief Overload for Leafs which do not provide a required_params() function. This only performs a null check on the Blackboard.
      */
     template<typename Impl>
     static bool validate_blackboard(typename std::enable_if<!CanVerify<Impl>::can_it, bt::Blackboard::Ptr>::type blackboard,
@@ -128,7 +149,9 @@ public:
         return blackboard != nullptr;
     }
 
-
+    /**
+     * \brief Gets the name of a BBArgumentType. For example, bbArgTypeName(BBArgumentType::Int) returns "int".
+     */
     static const char* bbArgTypeName(BBArgumentType arg);
 
     Leaf(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -139,6 +162,16 @@ public:
     const std::string name;
 
     private:
+    /**
+     * \brief Generic getter which implements the BlackboardPolicy
+     * \tparam T The expected return type.
+     * \tparam Checker The method which should check whether the value exists.
+     * \tparam Getter The method which actually gets the value.
+     * \param key The key to search for.
+     * \param policy The policy to employ, defaults to rtt::DEFAULT_BB_POLICY.
+     * \return The value of the parameter.
+     * \throws logic_error If no such parameter exists in the blackboards checked with the policy.
+     */
     template<typename T, bool (bt::Blackboard::*Checker)(std::string) const, T (bt::Blackboard::*Getter)(std::string)>
     T GetVar(const std::string& key, BlackboardPolicy policy) const {
         std::string global_key = getPrefixedId(key);
@@ -161,6 +194,14 @@ public:
         }
     }
 
+    /**
+     * \brief Checks for the existence of a generic parameter.
+     * \tparam T The expected parameter type.
+     * \tparam Checker The method which should check whether the value exists.
+     * \param key The key to check.
+     * \param policy The policy to employ, defaults to rtt:DEFAULT_BB_POLICY
+     * \return Whether or not the blackboards searched under the policy contain the sought value.
+     */
     template<typename T, bool (bt::Blackboard::*Checker)(std::string) const>
     bool HasVar(const std::string& key, BlackboardPolicy policy) const {
         std::string real_key = getPrefixedId(key);
@@ -201,10 +242,11 @@ public:
     protected:
 
     /**
-     * @brief Asserts that a Blackboard is valid for this Leaf. Leaf implementors are
+     * \brief Asserts that a Blackboard is valid for this Leaf. Leaf implementors are
      * encouraged to call this method from the constructor before using the Blackboard.
-     * @param name The (optional) name of the Leaf. See rtt::Leaf::validate_blackboard
+     * \param name The (optional) name of the Leaf. See rtt::Leaf::validate_blackboard
      * for details.
+     * \throws invalid_argument If if the validation failed.
      */
     template<typename Impl>
     void assert_valid(std::string name = "") const {

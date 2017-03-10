@@ -32,7 +32,7 @@ PassToTactic::PassToTactic(std::string name, bt::Blackboard::Ptr blackboard)
 
 
 void PassToTactic::Initialize() {
-    roboteam_utils::Vector2 passToPoint(2.0, 1.0);
+    Vector2 passToPoint(2.0, 1.0);
     tokens.clear();
     // RTT_DEBUG("Initializing Tactic\n");
 

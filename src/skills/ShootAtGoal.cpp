@@ -42,17 +42,17 @@ ShootAtGoal::ShootAtGoal(std::string name, bt::Blackboard::Ptr blackboard)
     kickBB->SetInt("ROBOT_ID", robotID);
 }
 
-roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
+Vector2 ShootAtGoal::DetermineTarget() {
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-	roboteam_utils::Vector2 theirGoalCenter = LastWorld::get_their_goal_center();
+	Vector2 theirGoalCenter = LastWorld::get_their_goal_center();
     return theirGoalCenter;
 	double goalWidth = field.goal_width;
-	roboteam_utils::Vector2 theirGoalLeft = Vector2(theirGoalCenter.x, theirGoalCenter.y + 0.5*goalWidth*signum(theirGoalCenter.x));
-	roboteam_utils::Vector2 theirGoalRight = Vector2(theirGoalCenter.x, theirGoalCenter.y - 0.5*goalWidth*signum(theirGoalCenter.x));
+	Vector2 theirGoalLeft = Vector2(theirGoalCenter.x, theirGoalCenter.y + 0.5*goalWidth*signum(theirGoalCenter.x));
+	Vector2 theirGoalRight = Vector2(theirGoalCenter.x, theirGoalCenter.y - 0.5*goalWidth*signum(theirGoalCenter.x));
 
-	roboteam_utils::Vector2 meToGoalLeft = theirGoalLeft - myPos;
-	roboteam_utils::Vector2 meToGoalRight = theirGoalRight - myPos;
+	Vector2 meToGoalLeft = theirGoalLeft - myPos;
+	Vector2 meToGoalRight = theirGoalRight - myPos;
 	Cone goalCone(myPos, meToGoalLeft, meToGoalRight);
 
 	drawer.SetColor(255, 0, 0);
@@ -86,14 +86,14 @@ roboteam_utils::Vector2 ShootAtGoal::DetermineTarget() {
 		}
     }
 
-    roboteam_utils::Vector2 targetPos;
+    Vector2 targetPos;
     if (watchOutForTheseBots.size() > 1) {
     	ROS_INFO("more than one robot blocking the goal, I don't know what to do aaaah");
     	targetPos = theirGoalCenter;
     } else if (watchOutForTheseBots.size() == 0) {
     	targetPos = theirGoalCenter;
     } else {
-    	roboteam_utils::Vector2 keeperPos = Vector2(watchOutForTheseBots.at(0).pos);
+    	Vector2 keeperPos = Vector2(watchOutForTheseBots.at(0).pos);
     	Cone keeperCone(myPos, keeperPos, 0.09);
 
     	drawer.SetColor(255, 0, 0);
@@ -136,7 +136,7 @@ bt::Node::Status ShootAtGoal::Update() {
 
 	myPos = Vector2(me.pos);
 
-	roboteam_utils::Vector2 targetPos = DetermineTarget();
+	Vector2 targetPos = DetermineTarget();
 
     rotateBB->SetDouble("faceTowardsPosx", targetPos.x);
     rotateBB->SetDouble("faceTowardsPosy", targetPos.y);

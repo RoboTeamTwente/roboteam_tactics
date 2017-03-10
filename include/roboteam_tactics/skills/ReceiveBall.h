@@ -10,33 +10,36 @@
 namespace rtt {
 
 /**
- * Receives a ball at a certain position
- *
- * Global params:
- *  - ROBOT_ID : Int
- *    Id of the robot
+ * Descr: Receives a ball at a certain position
  *
  * Params:
- *  - receiveBallAtCurrentPos : Bool
- *    Indicates that ball should be received at the current robot position
+ *  - ROBOT_ID: 
+ *      Type: Int
+ *      Descr: Id of the robot
+ * 
+ *  - receiveBallAtCurrentPos: 
+ *      Type: Bool
+ *      Descr: Indicates that ball should be received at the current robot position
  *    
- *  - receiveBallAtX : Double
- *    X coord of position at which to receive the ball
+ *  - receiveBallAtX:
+ *      Type: Double
+ *      Descr: X coord of position at which to receive the ball
  *
- *  - receiveBallAtY : Double
- *    Y coord of position at which to receive the ball
+ *  - receiveBallAtY:
+ *      Type: Double
+ *      Descr: Y coord of position at which to receive the ball
  *
- *  - acceptableDeviation : Double
- *    Used when: receiveBallAtCurrentPos = false
- *    Radius of the acceptable deviation of point of reception.
- *    If reception is the current position of the robot, this
- *    does not do anything
- *
- *
+ *  - acceptableDeviation:
+ *      Type: Double
+ *      Used when: receiveBallAtCurrentPos = false
+ *      Descr: |
+ *        Radius of the acceptable deviation of point of reception.
+ *        If reception is the current position of the robot, this
+ *        does not do anything
  */
 
 struct InterceptPose {
-	roboteam_utils::Vector2 interceptPos;
+	Vector2 interceptPos;
 	double interceptAngle;
 } ;
 

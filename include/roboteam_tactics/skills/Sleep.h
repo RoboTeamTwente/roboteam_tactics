@@ -8,6 +8,17 @@
 
 namespace rtt {
 
+/**
+ * \class Sleep
+ * \brief See YAML
+ */
+/*
+ * Descr: Does nothing for a set time
+ * Params:
+ *   - ms:
+ *       Type: Int
+ *       Descr: The amount of milliseconds to wait
+ */
 class Sleep : public Skill {
 public:
 	Sleep(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -16,6 +27,7 @@ public:
     
     static VerificationMap required_params() {
         VerificationMap params;
+        params["ms"] = BBArgumentType::Int;
         return params;
     }
     std::string node_name() { return "Sleep"; }

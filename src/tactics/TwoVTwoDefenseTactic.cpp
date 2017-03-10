@@ -33,8 +33,8 @@ void TwoVTwoDefenseTactic::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
     {
-        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_our_goal_center();
-        roboteam_utils::Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+        Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+        Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
     
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", keeper.robot_id);

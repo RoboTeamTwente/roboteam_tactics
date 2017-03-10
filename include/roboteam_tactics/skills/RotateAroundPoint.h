@@ -11,6 +11,44 @@
 
 namespace rtt {
 
+/**
+ * \class RotateAroundPoint
+ * \brief See YAML
+ */
+/*
+ * Descr: Rotates around a certain point
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *   - center:
+ *       Type: String
+ *       Can be:
+ *         - ball: Rotate around the ball
+ *         - point: Rotate around a given point
+ *       Descr: Determines what to rotate around
+ *   - faceTowardsPosx:
+ *       Type: Double
+ *       Descr: The x-coordinate of the point to face towards
+ *   - faceTowardsPosy:
+ *       Type: Double
+ *       Descr: The y-coordinate of the point to face towards
+ *   - w:
+ *       Type: Double
+ *       Descr: The angular velocity to maintain
+ *   - centerx:
+ *       Type: Double
+ *       Used when: center == point
+ *       Descr: The x-coordinate of the point to rotate around
+ *   - centery:
+ *       Type: Double
+ *       Used when: center == point
+ *       Descr: The y-coordinate of the point to rotate around
+ *   - radius:
+ *       Type: Double
+ *       Used when: center == point
+ *       Descr: The distance to keep from the rotation center
+ */
 class RotateAroundPoint : public Skill {
 public:
 	
@@ -28,9 +66,9 @@ private:
 	double targetAngle;
 	roboteam_msgs::WorldRobot robot;
 	roboteam_msgs::WorldBall ball;
-	roboteam_utils::Vector2 faceTowardsPos;
+	Vector2 faceTowardsPos;
 	double rotw;
-	roboteam_utils::Vector2 center;
+	Vector2 center;
    	double radius=radius;
    	GoToPos goToPos;
 	

@@ -64,7 +64,7 @@ std::string getMyNamespace() {
     return ns;
 }
 
-double GetTargetAngle(roboteam_utils::Vector2 startPos, std::string target, int theirID, bool target_our_team) {
+double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool target_our_team) {
     roboteam_msgs::World w = LastWorld::get();
     // boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(myID, our_team, &w);
     // roboteam_msgs::WorldRobot robot;
@@ -75,27 +75,27 @@ double GetTargetAngle(roboteam_utils::Vector2 startPos, std::string target, int 
     // }
 
     if (target == "fieldcenter") {
-        roboteam_utils::Vector2 posDiff = roboteam_utils::Vector2(0.0, 0.0) - startPos;
+        Vector2 posDiff = Vector2(0.0, 0.0) - startPos;
         return posDiff.angle();
     }
 
     if (target == "theirgoal") {
-        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         double targetAngle = (theirGoalPos - startPos).angle();
         return targetAngle;
     }
     if (target == "ourgoal") {
-        roboteam_utils::Vector2 ourGoalPos = LastWorld::get_our_goal_center();
+        Vector2 ourGoalPos = LastWorld::get_our_goal_center();
         double targetAngle = (ourGoalPos - startPos).angle();
         return targetAngle;
     }
     if (target == "robot") {
         if (target_our_team) {
-            roboteam_utils::Vector2 theirPos = w.us.at(theirID).pos;
+            Vector2 theirPos = w.us.at(theirID).pos;
             double targetAngle = (theirPos - startPos).angle();
             return targetAngle;
         } else {
-            roboteam_utils::Vector2 theirPos = w.them.at(theirID).pos;
+            Vector2 theirPos = w.them.at(theirID).pos;
             double targetAngle = (theirPos - startPos).angle();
             return targetAngle;
         }
@@ -119,14 +119,14 @@ boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
     return boost::none;
 }
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
-                                                    const roboteam_utils::Vector2& point,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr,
                                                     bool sight_only) {
-    return getObstacles(roboteam_utils::Vector2(bot.pos.x, bot.pos.y), point, world_ptr, sight_only);
+    return getObstacles(Vector2(bot.pos.x, bot.pos.y), point, world_ptr, sight_only);
 }
 
-std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector2& bot_pos,
-                                                    const roboteam_utils::Vector2& point,
+std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr,
                                                     bool sight_only) {
     const roboteam_msgs::World world = world_ptr == nullptr ? LastWorld::get() : *world_ptr;
@@ -136,11 +136,11 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector
 
     std::vector<std::pair<roboteam_msgs::WorldRobot, double>> obstacles;
     for (const auto& obs : all_bots) {
-        const roboteam_utils::Vector2 obs_pos(obs.pos.x, obs.pos.y);
+        const Vector2 obs_pos(obs.pos.x, obs.pos.y);
 
         if (obs_pos == bot_pos) continue;
 
-        const roboteam_utils::Vector2 proj = obs_pos.project(bot_pos, point);
+        const Vector2 proj = obs_pos.project(bot_pos, point);
         double proj_dist = proj.dist(obs_pos);
         double dist_to_start = bot_pos.dist(obs_pos);
         if (proj_dist < threshold && dist_to_start > .0001) {
@@ -161,18 +161,18 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector
     return result;
 }
 
-roboteam_utils::Vector2 predictBallPos(double seconds) {
+Vector2 predictBallPos(double seconds) {
     roboteam_msgs::World w = LastWorld::get();
-    roboteam_utils::Vector2 ballPosNow(w.ball.pos);
-    roboteam_utils::Vector2 ballVelNow(w.ball.vel);
-    roboteam_utils::Vector2 predictedBallPos = ballPosNow + ballVelNow*seconds;
+    Vector2 ballPosNow(w.ball.pos);
+    Vector2 ballVelNow(w.ball.vel);
+    Vector2 predictedBallPos = ballPosNow + ballVelNow*seconds;
     return predictedBallPos;
 }
 
-roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
+Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
     roboteam_msgs::World w = LastWorld::get();
-    roboteam_utils::Vector2 robotPosNow;
-    roboteam_utils::Vector2 robotVelNow;
+    Vector2 robotPosNow;
+    Vector2 robotVelNow;
     if (our_team) {
         robotPosNow = w.us.at(robot_id).pos;
         robotVelNow = w.us.at(robot_id).vel;
@@ -180,7 +180,7 @@ roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double sec
         robotPosNow = w.them.at(robot_id).pos;
         robotVelNow = w.them.at(robot_id).vel;
     }
-    roboteam_utils::Vector2 predictedBallPos = robotPosNow + robotVelNow*seconds;
+    Vector2 predictedBallPos = robotPosNow + robotVelNow*seconds;
     return predictedBallPos;
 }
 
@@ -206,8 +206,8 @@ boost::optional<roboteam_msgs::WorldRobot> lookup_their_bot(unsigned int id, con
 
 
 bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
-    roboteam_utils::Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
-    roboteam_utils::Vector2 ball_norm = (ball_vec - bot_vec);
+    Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
+    Vector2 ball_norm = (ball_vec - bot_vec);
 
     double dist = ball_norm.length();
     double angle = ball_norm.angle();
@@ -327,12 +327,12 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point) {
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
-        roboteam_utils::Vector2 pos(worldRobot.pos);
+        Vector2 pos(worldRobot.pos);
 
         if ((pos - point).length() < closest_robot_ds) {
             if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
@@ -351,7 +351,7 @@ int get_robot_closest_to_ball(std::vector<int> robots) {
 }
 
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
-    roboteam_utils::Vector2 ball_pos(world.ball.pos);
+    Vector2 ball_pos(world.ball.pos);
     return get_robot_closest_to_point(robots, world, ball_pos);
 }
 

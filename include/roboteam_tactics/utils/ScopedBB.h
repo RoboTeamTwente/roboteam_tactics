@@ -4,11 +4,25 @@
 
 namespace rtt {
 
+/**
+ * \class ScopedBB
+ * \brief Provides a convenient interface for building blackboards with a prefix
+ */
 class ScopedBB {
 public:
+   /**
+    * \brief Constructor.
+    * @param dataBB The blackboard to use in the background. This blackboard will store all
+    * data, and it may be modified. 
+    * @param scope The prefix to apply to all new parameters
+    */
    ScopedBB(bt::Blackboard& dataBB, std::string scope);
    // Destructor is to prevent copy constructors et al.
    ~ScopedBB();
+   
+   /*
+    * All methods below take the prefix into account
+    */
 
    ScopedBB& setBool(std::string key, bool value);
    ScopedBB& setInt(std::string key, int value);

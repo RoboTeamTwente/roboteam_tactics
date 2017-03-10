@@ -8,8 +8,16 @@
 
 namespace rtt {
 
+/**
+ * \enum NodeType
+ * \brief The different types of nodes found in behavior trees
+ */
 enum NodeType { SEQUENCE, SELECTOR, DECORATOR, LEAF };
 
+/**
+ * \class BTBuilder
+ * \brief Builds behavior trees from JSON files
+ */
 class BTBuilder {
     using json = nlohmann::json;
 
@@ -17,6 +25,14 @@ public:
     BTBuilder();
     ~BTBuilder();
 
+    /**
+     * \brief Does the actual building
+     * \param json The JSON data, encoded by the nlohmann library
+     * \param baseNamespace The namespace to put generated code in
+     * \param namespaces Additional nested namespaces to use
+     * \return An optional containing the generated code in string form if
+     * the translation succeeded, or an empty optional if some error(s) occurred.
+     */
     boost::optional<std::string> build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces);
 
 private:

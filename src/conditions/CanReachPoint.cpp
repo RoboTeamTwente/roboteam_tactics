@@ -14,21 +14,21 @@ CanReachPoint::CanReachPoint(std::string name, bt::Blackboard::Ptr blackboard) :
 
 }
 
-// roboteam_utils::Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, roboteam_utils::Vector2 maxAcc) {
+// Vector2 CanReachPoint::ComputeMaxAcceleration(double angle, Vector2 maxAcc) {
 // 	double a = maxAcc.x;
 // 	double b = maxAcc.y;
 // 	angle = 0.5*M_PI - angle;
 // 	double c = a - (a*a/(b * tan(angle) + a));
 // 	double d = a / (tan(angle) + (a/b));
-// 	roboteam_utils::Vector2 maxAccInDirection = roboteam_utils::Vector2(c, d);
+// 	Vector2 maxAccInDirection = Vector2(c, d);
 // 	return maxAccInDirection;
 // }
 
-double CanReachPoint::estimateTimeToPoint(roboteam_utils::Vector2 currentPos, roboteam_utils::Vector2 currentVel, roboteam_utils::Vector2 targetPos) {
-	roboteam_utils::Vector2 posDiff = targetPos - currentPos;
+double CanReachPoint::estimateTimeToPoint(Vector2 currentPos, Vector2 currentVel, Vector2 targetPos) {
+	Vector2 posDiff = targetPos - currentPos;
 
-	roboteam_utils::Vector2 targetVel = posDiff.normalize().scale(posPGain);
-	roboteam_utils::Vector2 velDiff = targetVel - currentVel;
+	Vector2 targetVel = posDiff.normalize().scale(posPGain);
+	Vector2 velDiff = targetVel - currentVel;
 	double timeToReachVel = velDiff.length() / maxAcc; 
 	double distanceToReachVel = velDiff.length()/2 * timeToReachVel;
 
@@ -57,9 +57,9 @@ bt::Node::Status CanReachPoint::Update() {
 		return Status::Running;
 	}
 
-	roboteam_utils::Vector2 currentPos(world.us.at(ROBOT_ID).pos);
-	roboteam_utils::Vector2 currentVel(world.us.at(ROBOT_ID).vel);
-	roboteam_utils::Vector2 targetPos(xGoal, yGoal);
+	Vector2 currentPos(world.us.at(ROBOT_ID).pos);
+	Vector2 currentVel(world.us.at(ROBOT_ID).vel);
+	Vector2 targetPos(xGoal, yGoal);
 
 	double estimatedTimeToPoint = estimateTimeToPoint(currentPos, currentVel, targetPos);
 

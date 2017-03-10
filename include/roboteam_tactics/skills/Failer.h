@@ -7,6 +7,14 @@
 
 namespace rtt {
 
+/**
+ * \class Failer
+ * \brief See YAML
+ */
+/*
+ * Descr: Utility skill which always fails.
+ * Params: null
+ */
 class Failer : public Skill {
 public:
 	Failer(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

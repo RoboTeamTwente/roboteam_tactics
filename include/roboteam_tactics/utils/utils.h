@@ -34,7 +34,10 @@ class Vector2;
 
 namespace rtt {
 
-
+/**
+ * \brief Deletes an item from a vector.
+ * \tparam T The type stored in the vector. operator== must be defined on T.
+ */
 template<typename T>
 void delete_from_vector(std::vector<T> &items, const T &item) {
     auto it = std::find(items.begin(), items.end(), item);
@@ -43,55 +46,119 @@ void delete_from_vector(std::vector<T> &items, const T &item) {
     }
 }
 
+/**
+ * \brief Gets the names of all active ROS nodes which have subscribed to a given topic
+ */
 std::vector<std::string> getNodesSubscribedTo(std::string topic);
+
+/**
+ * \brief Gets the ROS namespace the caller lives in
+ */
 std::string getMyNamespace();
-double GetTargetAngle(roboteam_utils::Vector2 startPos, std::string target, int theirID, bool target_our_team);
+
+/**
+ * \brief Calculates the target angle for GetBall. See its documentation for details.
+ */
+double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool target_our_team);
+
+/**
+ * \brief Gets the robot which currently holds the ball, if one does.
+ * \return A pair where the left element is a robot, and the right element is true if the robot is in our team.
+ */
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
+
+/**
+ * \brief Gets all robots on a line between a robot and a point.
+ * \param bot The robot to start the line at
+ * \param point The point to end the line at
+ * \param world_ptr The world where the robots exist
+ * \param sight_only False if the width of the robot should be taken into account (for moving)
+ * \return A vector of robots which are in the way
+ */
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
-                                                    const roboteam_utils::Vector2& point,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
-std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_utils::Vector2& bot_pos,
-                                                    const roboteam_utils::Vector2& point,
+                                                    
+/**
+ * \brief Gets all robots on a line between two points
+ * \param bot The point to start the line at
+ * \param point The point to end the line at
+ * \param world_ptr The world where the robots exist
+ * \param sight_only False if the width of the robot should be taken into account (for moving)
+ * \return A vector of robots which are in the way
+ */
+std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
+                                                    const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
 
 /**
- * Predict the ball or robot position in the future based on the current velocity
+ * \brief Predict the ball position in the future based on the current velocity
  */
-roboteam_utils::Vector2 predictBallPos(double seconds);
-roboteam_utils::Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
+Vector2 predictBallPos(double seconds);
 
+/**
+ * \brief Predict a robot's position in the future based on the current velocity
+ */
+Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds);
 
-
+/**
+ * \brief Prints a textual representation of the contents of a blackboard to an output stream.
+ */
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out = std::cout);
+
+/**
+ * \brief Copies the contents of the second blackboard into the first, overwriting any elements
+ * which already existed in the target.
+ */
 void merge_blackboards(bt::Blackboard::Ptr target, const bt::Blackboard::Ptr extras);
 
 /**
- * Gets a random integer in the range [0, max).
+ * \brief Gets a random integer in the range [0, max).
  */
 int get_rand_int(int max);
 
 /**
- * Gets a random integer in the range [min, max).
+ * \brief Gets a random integer in the range [min, max).
  */
 int get_rand_int(int min, int max);
 
 /**
- * Gets a random real number in the range [0, max).
+ * \brief Gets a random real number in the range [0, max).
  */
 float get_rand_real(float max);
 
 /**
- * Gets a random real number in the range [min, max).
+ * \brief Gets a random real number in the range [min, max).
  */
 float get_rand_real(float min, float max);
 
+/**
+ * \brief Gets a random element from a container
+ * \tparam T The type of element to return
+ * \tparam Container The type of the container, which must adhere to the Container C++ concept
+ * \return An optional containing a random element of the container if one exists, or an empty
+ * optional if it is empty
+ */
 template<typename T, typename Container>
 boost::optional<T> get_rand_element(const Container&);
+
+/**
+ * \brief Gets a random element from a sequence
+ * \tparam T The type of element to return
+ * \tparam Sequence The type of the sequence, which must adhere to the Sequence C++ concept
+ * \return An optional containing a random element of the sequence if one exists, or an empty
+ * optional if it is empty
+ */
 template<typename T, typename Sequence>
 boost::optional<T> get_rand_element_seq(const Sequence&);
 
+/**
+ * \brief Tests whether or not a sequene contains a specific element
+ * \tparam T The type of the element to search for
+ * \tparam Sequence The type of the sequence, which must adhere to the Sequence C++ concept
+ */
 template<typename T, typename Sequence>
 bool sequence_contains(const Sequence& seq, T element);
 
@@ -99,31 +166,101 @@ using time_point = std::chrono::steady_clock::time_point;
 using seconds = std::chrono::seconds;
 using milliseconds = std::chrono::milliseconds;
 
+/**
+ * \brief Gets the current time
+ */
 time_point now();
 
+/**
+ * \brief Calculates the difference between to time_points in seconds
+ */
 seconds time_difference_seconds(time_point start, time_point end);
+
+/**
+ * \brief Calculates the difference between to time_points in milliseconds
+ */
 milliseconds time_difference_milliseconds(time_point start, time_point end);
 
+/**
+ * \brief Returns a string with the name of a Status enum constant
+ */
 std::string describe_status(bt::Node::Status status);
 
+/**
+ * \brief Returns either "left" or "right", depending on which side is ours
+ */
 std::string get_our_side();
+
+/**
+ * \brief Constructs a stop command for a robot with the given id
+ */
 roboteam_msgs::RobotCommand stop_command(unsigned int id);
 
+/**
+ * \brief Tests whether all characters in a string are digits
+ */
 bool is_digits(const std::string &str);
 
-int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const roboteam_utils::Vector2& point);
+/**
+ * \brief Gets the id of whichever robot is closest to a given point
+ * \param robots The robots to consider
+ * \param world The world in which the robots exist
+ * \param point The point to search near
+ * \return The id of the robot closest to the point
+ */
+int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
+
+/**
+ * \brief Gets the id of whichever robot is closest to the opponents' goal
+ * \param robots The robots to consider
+ */
 int get_robot_closest_to_their_goal(std::vector<int> robots);
+
+/**
+ * \brief Gets the id of whichever robot is closest to the ball
+ * \param robots The robots to consider
+ */
 int get_robot_closest_to_ball(std::vector<int> robots);
+
+/**
+ * \brief Gets the id of whichever robot is closest to the opponents' goal
+ * \param robots The robots to consider
+ * \param world The world in which the robots exist
+ * \return The id of the robot closest to the goal
+ */
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
+
+/**
+ * \brief Gets the id of whichever robot is closest to the ball
+ * \param robots The robots to consider
+ * \param world The world in which the robots exist
+ * \return The id of the robot closest to the ball
+ */
 int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world);
 
+/**
+ * \brief Tests whether a robot is within the bounds of the field. That is:
+ *    -4.5 <= X <= 4.5
+ * and
+ *    -3.0 <= Y <= 3.0
+ */
 bool robotIsWithinBounds(const TeamRobot& bot, const roboteam_msgs::World& world);
 
+/**
+ * \class GlobalPublisher
+ * \brief Shared ros::Publisher instance of all messages of a certain type
+ * \tparam M The message type
+ */
 template<
     class M
 >
 class GlobalPublisher {
 public:
+    /**
+     * \brief Constructor.
+     * \param topic The topic on which to publish
+     * \param queue The maximum queue size for messages
+     */
     GlobalPublisher(std::string topic, int queue = 100)
         : actualPub(n.advertise<M>(topic, queue)) {
         if (!GlobalPublisher<M>::pubPtr) {
@@ -131,6 +268,9 @@ public:
         }
     }
 
+    /**
+     * \brief Gets the shared publisher
+     */
     static ros::Publisher& get_publisher() {
         if (!GlobalPublisher<M>::pubPtr) {
             ROS_ERROR("Publisher requested while it was not yet initialized!");
@@ -151,7 +291,14 @@ template<
 >
 ros::Publisher* GlobalPublisher<M>::pubPtr = nullptr;
 
+/**
+ * \brief Get all robots active in the world. This is the union of world.us and world.them
+ */
 std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Gets all robots active in the world as TeamRobot structures
+ */
 std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world = LastWorld::get());
 
 } // rtt

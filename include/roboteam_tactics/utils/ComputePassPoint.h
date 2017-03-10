@@ -17,12 +17,12 @@ namespace rtt {
 class PassPoint {
 public:
 	PassPoint();
-	double calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistOppToBallTraj(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
-	double calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world);
-	double computePassPointScore(roboteam_utils::Vector2 testPosition);
-	roboteam_utils::Vector2 computeBestPassPoint();
+	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
+	double computePassPointScore(Vector2 testPosition);
+	Vector2 computeBestPassPoint();
 private:
 	double distToGoalWeight;
 	double distToOppWeight;

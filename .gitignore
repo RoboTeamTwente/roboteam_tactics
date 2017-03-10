@@ -10,3 +10,6 @@ all_custom_nodes.json
 
 # Folder for sentinel files
 generated/
+
+# Documentation
+docs/

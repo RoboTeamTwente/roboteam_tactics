@@ -246,6 +246,7 @@ if (BUILD_ROBOTNODE)
         $<TARGET_OBJECTS:conditions>
         $<TARGET_OBJECTS:tactics>
         $<TARGET_OBJECTS:utils>
+	$<TARGET_OBJECTS:rules>
         )
     add_dependencies(RoleNode
         ${${PROJECT_NAME}_EXPORTED_TARGETS}

@@ -51,7 +51,7 @@ void FreeKickDefenceTactic::Initialize() {
     
     RTT_DEBUGLN("Running FreeKickDefence with %d additional bots", additional);
     
-    int keeper = RobotDealer::get_keeper();
+    // int keeper = RobotDealer::get_keeper();
     int defender, harasser, interceptor1 = -1, interceptor2 = -1;
     
     RTT_DEBUGLN("Self:");

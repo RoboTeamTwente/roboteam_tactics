@@ -30,14 +30,14 @@ bt::Node::Status QualKeeper::Update() {
 
     int robotID = blackboard->GetInt("ROBOT_ID");
 
-    roboteam_utils::Vector2 ballPos(world.ball.pos);
-    roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+    Vector2 ballPos(world.ball.pos);
+    Vector2 theirGoalPos = LastWorld::get_their_goal_center();
 
     double minDistanceToGoal = 0.4;
     double angleToGoal = (ballPos - theirGoalPos).angle();
     double currentDistanceToGoal = minDistanceToGoal / cos(angleToGoal);
 
-    roboteam_utils::Vector2 targetPos = roboteam_utils::Vector2(currentDistanceToGoal, 0.0).rotate(angleToGoal) + theirGoalPos;
+    Vector2 targetPos = Vector2(currentDistanceToGoal, 0.0).rotate(angleToGoal) + theirGoalPos;
     double targetAngle = 0.5*M_PI;
 
     private_bb->SetInt("ROBOT_ID", robotID);

@@ -25,8 +25,8 @@ namespace rtt {
  
 DangerFinder danger_finder;    
     
-inline Vector get_goal() {
-    return Vector(we_are_left() ? -3 : 3, 0);
+inline Vector2 get_goal() {
+    return Vector2(we_are_left() ? -3 : 3, 0);
 }
    
 inline Position get_opp(const Robot& bot) {
@@ -34,8 +34,8 @@ inline Position get_opp(const Robot& bot) {
 }   
 
 const DangerFactor can_see_our_goal = [](const Robot& bot, std::string* reasoning=nullptr) {
-    std::vector<Vector> goal_points = we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
-    for (const Vector& goal : goal_points) {
+    std::vector<Vector2> goal_points = we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
+    for (const Vector2& goal : goal_points) {
         if (getObstacles(bot, goal, nullptr, true).empty()) {
             // reason("[bot can see goal; adding 5.0]");
             return CAN_SEE_GOAL_DANGER;
@@ -56,7 +56,7 @@ const DangerFactor has_ball = [](const Robot& bot, std::string* reasoning=nullpt
 };
 
 const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullptr) {
-    Vector goal = get_goal();
+    Vector2 goal = get_goal();
     Position opp = get_opp(bot);
     double x = (opp.location().dist(goal) - 9) / DISTANCE_DENOMINATOR;
     // reason("[distance=%f; score=%f]", opp.location().dist(goal), x*x);
@@ -65,7 +65,7 @@ const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullpt
 };
 
 const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nullptr) {
-    Vector goal = get_goal();
+    Vector2 goal = get_goal();
     Position opp = get_opp(bot);
     goal = goal - opp.location();
     double tgt_angle = goal.angle();
@@ -77,7 +77,7 @@ const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nul
 
 const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string* reasoning=nullptr) {
     // TODO: incorporate chipped passes
-    //Vector goal = get_goal();
+    //Vector2 goal = get_goal();
     Position pos(bot.pos.x, bot.pos.y, bot.angle);
     auto holder = getBallHolder();
     if (!holder || holder->second) {
@@ -85,12 +85,12 @@ const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string*
         return 0.0;
     }
     const auto other = holder->first;
-    if (Vector(other.pos.x, other.pos.y) == pos.location()) {
+    if (Vector2(other.pos.x, other.pos.y) == pos.location()) {
         // Can't cross to yourself
         return 0.0;
     }
     
-    if (!getObstacles(bot, Vector(other.pos.x, other.pos.y), nullptr, true).empty()) {
+    if (!getObstacles(bot, Vector2(other.pos.x, other.pos.y), nullptr, true).empty()) {
         // Other can't see the current bot
         return 0.0;
     }
@@ -231,7 +231,7 @@ bool we_are_left() {
     return tgt == "left";
 }
 
-std::vector<Vector> our_goal() {
+std::vector<Vector2> our_goal() {
     return we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
 }
 
@@ -242,7 +242,7 @@ static inline void ensure_running() {
         danger_finder.run();
 }
 
-std::vector<Vector> our_goal() { ensure_running(); return df_impl::our_goal(); }
+std::vector<Vector2> our_goal() { ensure_running(); return df_impl::our_goal(); }
 bool we_are_left() { ensure_running(); return df_impl::we_are_left(); }
 boost::optional<Robot> charging_bot() { ensure_running(); return danger_finder.current_result().charging; }
 boost::optional<Robot> most_dangerous_bot() { ensure_running(); return danger_finder.current_result().most_dangerous; }

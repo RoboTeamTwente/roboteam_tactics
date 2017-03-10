@@ -17,7 +17,7 @@ BallOnOurSide::BallOnOurSide(std::string name, bt::Blackboard::Ptr blackboard)
 
 bt::Node::Status BallOnOurSide::Update() {
 	roboteam_msgs::World world = LastWorld::get();
-	roboteam_utils::Vector2 ballPos(world.ball.pos);
+	Vector2 ballPos(world.ball.pos);
 	
     std::string ourSide;
     ros::param::get("our_side", ourSide);
@@ -38,6 +38,7 @@ bt::Node::Status BallOnOurSide::Update() {
             return Status::Failure;
         }
     }
+    return Status::Invalid;
 }
 
 } // rtt

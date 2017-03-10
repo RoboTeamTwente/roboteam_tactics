@@ -45,13 +45,13 @@ void TwoAttackersTactic::Initialize() {
     firstAttacker.robot_id = firstAttackerID;
     secondAttacker.robot_id = secondAttackerID;
 
-    roboteam_utils::Vector2 standFreePos;
+    Vector2 standFreePos;
     std::string ourSide;
     ros::param::get("our_side", ourSide);
     if (ourSide == "left") {
-        standFreePos = roboteam_utils::Vector2(1.5, 1.5);
+        standFreePos = Vector2(1.5, 1.5);
     } else if (ourSide == "right") {
-        standFreePos = roboteam_utils::Vector2(-1.5, -1.5);
+        standFreePos = Vector2(-1.5, -1.5);
     } else {
         ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
     }
