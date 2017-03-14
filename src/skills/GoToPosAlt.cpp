@@ -19,6 +19,28 @@
 #include "roboteam_utils/world_analysis.h"
 #include "roboteam_utils/Cone.h"
 
+namespace {
+
+enum Mode {
+    SERIAL,
+    GRSIM,
+    GAZEBO
+} ;
+
+Mode getMode() {
+    std::string robot_output_target = "grsim";
+    ros::param::getCached("robot_output_target", robot_output_target);
+    if (robot_output_target == "grsim") {
+        return Mode::GRSIM;
+    } else if (robot_output_target == "serial") {
+        return Mode::SERIAL;
+    } else {
+        return Mode::GAZEBO;
+    }
+}
+
+} // anonymous namespace
+
 namespace rtt {
 
 RTT_REGISTER_SKILL(GoToPosAlt);

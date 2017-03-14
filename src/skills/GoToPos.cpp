@@ -252,30 +252,6 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     return newTargetPos;
 }
 
-namespace {
-
-// TODO: @Hack probably needs to be removed once the robots function properly
-enum Mode {
-    SERIAL,
-    GRSIM,
-    GAZEBO
-} ;
-
-Mode getMode() {
-    std::string robot_output_target = "grsim";
-    ros::param::getCached("robot_output_target", robot_output_target);
-    if (robot_output_target == "grsim") {
-        return Mode::GRSIM;
-    } else if (robot_output_target == "serial") {
-        return Mode::SERIAL;
-    } else {
-        return Mode::GAZEBO;
-    }
-}
-
-} // anonymous namespace
-
-
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Get the latest world state
