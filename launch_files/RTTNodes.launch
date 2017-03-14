@@ -1,5 +1,7 @@
 <launch>
 	<group ns="blue">
+		<param name="num_role_nodes" type="int" value="2" />
+
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
         <!--
@@ -11,6 +13,8 @@
 	</group>
 
 	<group ns="yellow">
+		<param name="num_role_nodes" type="int" value="2" />
+
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
         <!--

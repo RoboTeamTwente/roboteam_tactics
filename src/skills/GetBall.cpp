@@ -91,9 +91,7 @@ bt::Node::Status GetBall::Update (){
 	Vector2 targetPos;
 	double targetAngle;
 
-
-	Vector2 interceptPos = ballPos + ballVel.scale(0.0);
-
+	Vector2 interceptPos = ballPos; // + ballVel.scale(0.25);
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
@@ -120,10 +118,13 @@ bt::Node::Status GetBall::Update (){
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
+    bool avoidBall = false;
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
+        avoidBall = true;
 	} else {
 		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+        avoidBall = false;
 	}
 
 
@@ -161,6 +162,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", false);
+        // private_bb->SetBool("avoidBall", avoidBall);
         private_bb->SetBool("dribbler", false);
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
@@ -171,13 +173,13 @@ bt::Node::Status GetBall::Update (){
         	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
         }
 
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 2.0) {
-        	newVelCommand.scale(2.0 / newVelCommand.length());
-        }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;
+        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        // if (newVelCommand.length() > 2.0) {
+            // newVelCommand.scale(2.0 / newVelCommand.length());
+        // }
+        // command.x_vel = newVelCommand.x;
+        // command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
