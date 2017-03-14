@@ -43,7 +43,8 @@ namespace rtt {
 class GetBall : public Skill {
 public:
     GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-	Status Update();
+	Status Update() override;
+    void Initialize() override;
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -65,6 +66,7 @@ public:
     }
     
     std::string node_name() { return "GetBall"; }
+
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
@@ -77,6 +79,8 @@ private:
 
 	GoToPos goToPos;
     Draw drawer;
+
+    int ballCloseFrameCount;
 };
 
 } // rtt

@@ -28,6 +28,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
 
         // Control gains
+        // Before Bob started fiddling with it
         , pGainPosition(3.0)
         , pGainRotation(5.0)
         // , iGainRotation(0.5)
@@ -35,17 +36,17 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , maxAngularVel(3.0)
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
-
+        
         // Rest of the members
         , maxSpeed(1.0)
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(5.0)
+        , attractiveForceWhenClose(2.0) // was 5? 
         , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(0.2)
         , angleErrorIntegral(0.0)
         , historyIndex(0)
-
+        
         {
             print_blackboard(blackboard);
             start = now();
