@@ -28,9 +28,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
 
         // Control gains
-        // Before Bob started fiddling with it
         , pGainPosition(3.0)
-        , pGainRotation(5.0)
+        , pGainRotation(3.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(3.0)
