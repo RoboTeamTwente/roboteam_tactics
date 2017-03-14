@@ -237,7 +237,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			}
 			
 			// rotation controller (w)
-			double rotPconstant=20;
+			double rotPconstant=8; // Used to be 20
 
 			double reqRobotrot=worldposDiff.angle();
 
