@@ -159,8 +159,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    drawer.drawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {
@@ -317,8 +317,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
     // Draw the target position in RQT-view
-    drawer.SetColor(0, 0, 0);
-    drawer.DrawPoint("targetPos", targetPos);
+    drawer.setColor(0, 0, 0);
+    drawer.drawPoint("targetPos", targetPos);
 
 
     // Store some variables for easy access
@@ -378,7 +378,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     Vector2 velCommand = sumOfForces;
     // Draw the velocity vector acting on the robots
-    drawer.DrawLine("velCommand", myPos, velCommand);  
+    drawer.drawLine("velCommand", myPos, velCommand);  
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
     

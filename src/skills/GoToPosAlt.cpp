@@ -152,8 +152,8 @@ double GoToPosAlt::avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targ
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.DrawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.DrawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    drawer.drawLine("coneRobotsSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     double sumOfAngles;
@@ -285,8 +285,8 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
 
 
     // Draw the target position in RQT-view
-    drawer.SetColor(0, 0, 0);
-    drawer.DrawPoint("targetPos", targetPos);
+    drawer.setColor(0, 0, 0);
+    drawer.drawPoint("targetPos", targetPos);
 
 
     // Store some variables for easy access
@@ -326,10 +326,10 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
             posError = targetPos - myPos;
 
             // Draw the target position in RQT-view
-            drawer.SetColor(255, 255, 0);
-            drawer.DrawPoint("targetPos2", targetPos);
+            drawer.setColor(255, 255, 0);
+            drawer.drawPoint("targetPos2", targetPos);
         } else {
-            drawer.RemovePoint("targetPos2");
+            drawer.removePoint("targetPos2");
         }
     }
 

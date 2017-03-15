@@ -180,7 +180,7 @@ void drawVoronoi(const roboteam_msgs::World& world, bool opponentsOnly) {
     
     VoronoiDiagram* vd = buildVD(world, opponentsOnly);
     int count = 0;
-    draw.SetColor(0, 0, 0);
+    draw.setColor(0, 0, 0);
     for (auto it = vd->edges().begin(); it != vd->edges().end(); it++) {
         char buf[10];
         sprintf(buf, "Voronoi%d", count++);
@@ -201,14 +201,14 @@ void drawVoronoi(const roboteam_msgs::World& world, bool opponentsOnly) {
         clip_(v2);
         v2 = v2 - v1;
         //clip::CohenSutherlandLineClip(v1, v2);
-        draw.DrawLine(std::string(buf), v1, v2);
+        draw.drawLine(std::string(buf), v1, v2);
     }
     
-    draw.SetColor(255, 0, 0);
+    draw.setColor(255, 0, 0);
     for (auto it = vd->vertices().begin(); it != vd->vertices().end(); it++) {
         char buf[10];
         sprintf(buf, "Voronoi%d", count++);
-        draw.DrawPoint(std::string(buf), Vector(it->x() / 1000.0, it->y() / 1000.0));
+        draw.drawPoint(std::string(buf), Vector(it->x() / 1000.0, it->y() / 1000.0));
     }
 }
 

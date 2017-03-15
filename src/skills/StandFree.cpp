@@ -131,11 +131,11 @@ bt::Node::Status StandFree::Update() {
         // Draw the lines of the cone in rqt_view
         Vector2 coneSide1 = (cone.center-cone.start).rotate(0.5*cone.angle);
         Vector2 coneSide2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
-        drawer.DrawLine("coneRobotsSide1", cone.start, coneSide1); 
-        drawer.DrawLine("coneRobotsSide2", cone.start, coneSide2);
+        drawer.drawLine("coneRobotsSide1", cone.start, coneSide1); 
+        drawer.drawLine("coneRobotsSide2", cone.start, coneSide2);
     } else {
-        drawer.RemoveLine("coneRobotsSide1"); 
-        drawer.RemoveLine("coneRobotsSide2");
+        drawer.removeLine("coneRobotsSide1"); 
+        drawer.removeLine("coneRobotsSide2");
     }
 
 
@@ -169,8 +169,8 @@ bt::Node::Status StandFree::Update() {
         Vector2 newConeSide1 = (newCone.center-newCone.start).rotate(-0.5*newCone.angle);
         Vector2 newConeSide2 = (newCone.center-newCone.start).rotate(0.5*newCone.angle);
 
-        drawer.DrawLine("newConeSide1", newCone.start, newConeSide1);
-        drawer.DrawLine("newConeSide2", newCone.start, newConeSide2);
+        drawer.drawLine("newConeSide1", newCone.start, newConeSide1);
+        drawer.drawLine("newConeSide2", newCone.start, newConeSide2);
 
         if (coneRobots) {
             std::vector<std::string> names;
@@ -183,8 +183,8 @@ bt::Node::Status StandFree::Update() {
             nearestFreePos = newCone.ClosestPointOnSide(targetPos, theirGoalPos);
         }        
     } else {
-        drawer.RemoveLine("newConeSide1");
-        drawer.RemoveLine("newConeSide2");
+        drawer.removeLine("newConeSide1");
+        drawer.removeLine("newConeSide2");
     }
 
 
@@ -192,9 +192,9 @@ bt::Node::Status StandFree::Update() {
         nearestFreePos = nearestFreePos2;
     }
 
-    drawer.SetColor(255,0,0);
-    drawer.DrawPoint("nearestFreePos", nearestFreePos);
-    drawer.SetColor(0,0,0);
+    drawer.setColor(255,0,0);
+    drawer.drawPoint("nearestFreePos", nearestFreePos);
+    drawer.setColor(0,0,0);
 
 
     // Fill the goToPos blackboard and send the command
@@ -208,13 +208,13 @@ bt::Node::Status StandFree::Update() {
     if (goToPos.Update() == Status::Success) {
         
         // Remove all the lines from rqt view
-        drawer.RemoveLine("coneRobotsSide1");
-        drawer.RemoveLine("coneRobotsSide2");
-        drawer.RemoveLine("coneGoal1Side1");
-        drawer.RemoveLine("coneGoal1Side2");
-        drawer.RemoveLine("coneGoal2Side1");
-        drawer.RemoveLine("coneGoal2Side2");
-        drawer.RemovePoint("nearestFreePos");
+        drawer.removeLine("coneRobotsSide1");
+        drawer.removeLine("coneRobotsSide2");
+        drawer.removeLine("coneGoal1Side1");
+        drawer.removeLine("coneGoal1Side2");
+        drawer.removeLine("coneGoal2Side1");
+        drawer.removeLine("coneGoal2Side2");
+        drawer.removePoint("nearestFreePos");
         return Status::Success;
     }
     return Status::Running;

@@ -55,11 +55,11 @@ Vector2 ShootAtGoal::DetermineTarget() {
 	Vector2 meToGoalRight = theirGoalRight - myPos;
 	Cone goalCone(myPos, meToGoalLeft, meToGoalRight);
 
-	drawer.SetColor(255, 0, 0);
-	drawer.DrawLine("side1", goalCone.start, goalCone.side1);
-	drawer.SetColor(0, 0, 0);
-	drawer.DrawLine("side2", goalCone.start, goalCone.side2);
-	drawer.DrawPoint("center", goalCone.center);
+	drawer.setColor(255, 0, 0);
+	drawer.drawLine("side1", goalCone.start, goalCone.side1);
+	drawer.setColor(0, 0, 0);
+	drawer.drawLine("side2", goalCone.start, goalCone.side2);
+	drawer.drawPoint("center", goalCone.center);
 
 	std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots;
 
@@ -96,11 +96,11 @@ Vector2 ShootAtGoal::DetermineTarget() {
     	Vector2 keeperPos = Vector2(watchOutForTheseBots.at(0).pos);
     	Cone keeperCone(myPos, keeperPos, 0.09);
 
-    	drawer.SetColor(255, 0, 0);
-    	drawer.DrawLine("keeperside1", keeperCone.start, keeperCone.side1);
-    	drawer.SetColor(0, 0, 0);
-		drawer.DrawLine("keeperside2", keeperCone.start, keeperCone.side2);
-		drawer.DrawPoint("keepercenter", keeperCone.center);
+    	drawer.setColor(255, 0, 0);
+    	drawer.drawLine("keeperside1", keeperCone.start, keeperCone.side1);
+    	drawer.setColor(0, 0, 0);
+		drawer.drawLine("keeperside2", keeperCone.start, keeperCone.side2);
+		drawer.drawPoint("keepercenter", keeperCone.center);
 
 
     	if (fabs(goalCone.side1.angle() - keeperCone.side1.angle()) >= fabs(goalCone.side2.angle() - keeperCone.side2.angle())) {
@@ -153,12 +153,12 @@ bt::Node::Status ShootAtGoal::Update() {
     	kickBB->SetDouble("kickVel", kickVel);
     	Status resultKick = kick.Update();
     	if (resultKick == Status::Success) {
-    		drawer.RemovePoint("center");
-    		drawer.RemoveLine("side1");
-    		drawer.RemoveLine("side2");
-    		drawer.RemovePoint("keepercenter");
-    		drawer.RemoveLine("keeperside1");
-    		drawer.RemoveLine("keeperside2");
+    		drawer.removePoint("center");
+    		drawer.removeLine("side1");
+    		drawer.removeLine("side2");
+    		drawer.removePoint("keepercenter");
+    		drawer.removeLine("keeperside1");
+    		drawer.removeLine("keeperside2");
     		return Status::Success;
     	}
     } else {

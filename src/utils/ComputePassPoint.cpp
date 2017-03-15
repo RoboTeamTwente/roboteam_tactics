@@ -190,8 +190,8 @@ Vector2 PassPoint::computeBestPassPoint() {
 
 	for (size_t i = 0; i < passPoints.size(); i++) {
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-		drawer.SetColor(255 - relScore, 0, relScore);
-		drawer.DrawPoint(names.at(i), passPoints.at(i));
+		drawer.setColor(255 - relScore, 0, relScore);
+		drawer.drawPoint(names.at(i), passPoints.at(i));
 	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
