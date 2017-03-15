@@ -13,6 +13,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
 
 #define RTT_CURRENT_DEBUG_TAG TwoAttackersTactic
 
@@ -114,7 +115,11 @@ void TwoAttackersTactic::Initialize() {
         bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
         bb.SetString("ParamSet_readyToReceive_value", "ready");
 
-        bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+        // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+        
+        ScopedBB(bb, "AimAt_A")
+            .setString("At", "ourgoal")
+            ;
 
         bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
 

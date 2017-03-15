@@ -9,11 +9,16 @@
 namespace rtt {
 
 /**
- * Chips the ball.
+ * \class Chip
+ * \brief See YAML
+ */
+/**
+ * Descr: Chips the ball.
  *
- * Global params:
- *  - ROBOT_ID : Int 
- *    Id of the robot
+ * Params:
+ *  - ROBOT_ID:
+        Type: Int 
+ *      Descr: Id of the robot
  *
  */
 class Chip : public Skill {

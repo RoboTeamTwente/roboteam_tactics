@@ -13,9 +13,9 @@ namespace rtt {
 /*
  * Descr: Checks whether a certain ref command is currently active
  * Params:
- *   command:
- *     Type: String
- *     Descr: The ref command to check for. See RefLookup.h for valid values
+ *   - command:
+ *       Type: String
+ *       Descr: The ref command to check for. See RefLookup.h for valid values
  */    
 class IsRefCommand : public Condition {
 

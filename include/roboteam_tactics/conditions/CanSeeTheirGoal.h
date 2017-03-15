@@ -12,9 +12,9 @@ namespace rtt {
 /*
  * Descr: Checks whether a robot can see the opponents' goal.
  * Params:
- *   ROBOT_ID:
- *     Type: Int
- *     Descr: The robot to check for
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The robot to check for
  */
 class CanSeeTheirGoal : public Condition {
  public:

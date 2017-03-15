@@ -12,12 +12,12 @@ namespace rtt {
 /*
  * Descr: Checks whether the ball is in a defence zone
  * Params:
- *   zone:
- *     Type: Int
- *     Can Be:
- *       one: our side
- *       two: their side
- *     Descr: What zone to check
+ *   - zone:
+ *       Type: Int
+ *       Can Be:
+ *         - one: our side
+ *         - two: their side
+ *       Descr: What zone to check
  */
 class IsBallInZone : public Condition {
 public:

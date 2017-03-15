@@ -7,6 +7,24 @@
 
 namespace rtt {
 
+/**
+ * \class Kick
+ * \brief See YAML
+ */
+/*
+ * Descr: Kick the ball
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *   - wait_for_signal:
+ *       Type: Bool
+ *       Descr: If true, the robot will only kick when the ready_to_pass global ros param is true
+ *   - kickVel:
+ *       Type: Double
+ *       Descr: The velocity to kick the ball with
+ *       Default: 4.0
+ */
 class Kick : public Skill {
 public:
 	Kick(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

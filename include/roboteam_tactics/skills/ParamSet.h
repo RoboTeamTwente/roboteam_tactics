@@ -17,11 +17,11 @@ namespace rtt {
  *     Or use ROBOT_ID?
  * 
  * Params:
- *    signal:
+ *    - signal:
  *        Type: String
  *        Descr: The signal to set
  *
- *    value:
+ *    - value:
  *        Type: String/Double/Int/Bool
  *        Descr: |
  *            The value to set. If there are multiple ones set it picks the one

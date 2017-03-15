@@ -11,9 +11,9 @@ namespace rtt {
 /*
  * Descr: Checks whether a team has the ball
  * Params:
- *   our_team:
- *     Type: Bool
- *     Descr: Whether to perform the check for our team, or the opponents'
+ *   - our_team:
+ *       Type: Bool
+ *       Descr: Whether to perform the check for our team, or the opponents'
  */
 class TeamHasBall : public Condition {
 public:

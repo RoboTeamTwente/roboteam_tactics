@@ -85,7 +85,6 @@ void TwoAttackersCoolTactic::Initialize() {
     {
         bt::Blackboard bb;
 
-
         // Set the robot ID
         bb.SetInt("ROBOT_ID", secondAttackerID);
         bb.SetInt("KEEPER_ID", 5);
@@ -99,7 +98,6 @@ void TwoAttackersCoolTactic::Initialize() {
         bb.SetBool("GetBall_A_passOn", true);
         
         bb.SetDouble("Kick_A_kickVel", 5.0);
-        
 
         // Create message
         secondAttacker.tree = "qualification/TwoAttackersCoolSecondRole";

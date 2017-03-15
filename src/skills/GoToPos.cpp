@@ -29,23 +29,23 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
         // Control gains
         , pGainPosition(3.0)
-        , pGainRotation(5.0)
+        , pGainRotation(3.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(3.0)
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
-
+        
         // Rest of the members
         , maxSpeed(1.0)
         , attractiveForce(10.0)
-        , attractiveForceWhenClose(5.0)
+        , attractiveForceWhenClose(2.0) // was 5? 
         , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(0.2)
         , angleErrorIntegral(0.0)
         , historyIndex(0)
-
+        
         {
             print_blackboard(blackboard);
             start = now();
@@ -252,30 +252,6 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     return newTargetPos;
 }
 
-namespace {
-
-// TODO: @Hack probably needs to be removed once the robots function properly
-enum Mode {
-    SERIAL,
-    GRSIM,
-    GAZEBO
-} ;
-
-Mode getMode() {
-    std::string robot_output_target = "grsim";
-    ros::param::getCached("robot_output_target", robot_output_target);
-    if (robot_output_target == "grsim") {
-        return Mode::GRSIM;
-    } else if (robot_output_target == "serial") {
-        return Mode::SERIAL;
-    } else {
-        return Mode::GAZEBO;
-    }
-}
-
-} // anonymous namespace
-
-
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Get the latest world state
@@ -355,6 +331,29 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
     }
 
+    // if (HasBool("avoidBall")) {
+        // std::cout << "Avoiding ball!\n";
+        // roboteam_msgs::WorldBall ball = world.ball;
+
+        // Vector2 ballPos(ball.pos);
+        // Vector2 diff = ballPos - myPos;
+
+        // double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
+
+        // std::cout << "Theta: " << theta / M_PI * 180 << "\n";
+
+        // if (theta < (0.5 * M_PI)) {
+            // if (theta == 0) theta = 0.01;
+
+            // double force = theta / (0.5 * M_PI);
+
+            // auto projectedBall = ballPos.project(myPos, myPos + sumOfForces);
+            // auto ballForce = projectedBall - ballPos;
+
+            // std::cout << "Ballforce: " << ballForce << "\n";
+            // sumOfForces = sumOfForces + ballForce * 5;
+        // }
+    // }
 
     // Defense area avoidance
     sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);

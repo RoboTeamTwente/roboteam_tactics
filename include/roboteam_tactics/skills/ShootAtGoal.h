@@ -11,6 +11,20 @@
 
 namespace rtt {
 
+/**
+ * \class ShootAtGoal
+ * \brief See YAML
+ */
+/*
+ * Descr: Orients towards the goal, and then kicks the ball
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *   - kickVel:
+ *       Type: Double
+ *       Descr: The velocity with which the ball should be kicked
+ */
 class ShootAtGoal : public Skill {
 public:
 	ShootAtGoal(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

@@ -10,6 +10,29 @@
 
 namespace rtt {
 
+/**
+ * \class DefendGoalarea
+ * \brief See YAML
+ */
+/*
+ * Descr: Get into position just outside the goal area.
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *   - numberOfRobots:
+ *       Type: Int
+ *       Can be: 1, 2 or 3
+ *       Descr: How many robots should be executing this skill simultaneously
+ *   - position:
+ *       Type: String
+ *       Used when: numberOfRobots > 1
+ *       Can be:
+ *         - bottom: The lowest position (lowest y-coordinate)
+ *         - middle: The middle position (only when numberOfRobots == 3)
+ *         - top: The top position
+ *       Descr: Determines which position the robot should be in.
+ */
 class DefendGoalarea : public Skill {
 public:
 	DefendGoalarea(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

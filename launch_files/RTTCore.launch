@@ -10,7 +10,7 @@
 		<param name="our_color" type="str" value="$(arg our_color_arg)" />
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world"/>
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision"/>
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
 		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
 		<param name="role_iterations_per_second" type="int" value="60" />
@@ -18,6 +18,10 @@
 
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 	</group>
 
 	<group ns="yellow">
@@ -31,7 +35,7 @@
 		<param name="our_color" type="str" value="$(arg our_color_arg)" />
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world"/>
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision"/>
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
 		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
 		<param name="role_iterations_per_second" type="int" value="60" />
@@ -39,5 +43,9 @@
 
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 	</group>
 </launch>
