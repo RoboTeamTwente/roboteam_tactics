@@ -55,6 +55,7 @@ void TwoAttackersTactic::Initialize() {
         standFreePos = Vector2(-1.5, -1.5);
     } else {
         ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
+        standFreePos = Vector2(-1.5, -1.5);
     }
     
     // delete_from_vector(robots, attackerID);
