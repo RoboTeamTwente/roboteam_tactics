@@ -67,6 +67,9 @@
 #include "ShootAtGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "ShootAtGoalV2.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "Sleep.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

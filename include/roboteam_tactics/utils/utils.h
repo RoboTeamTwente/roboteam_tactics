@@ -21,6 +21,7 @@ ROS_DECLARE_MESSAGE(World);
 #include "roboteam_utils/constants.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/TeamRobot.h"
+#include "roboteam_utils/Cone.h"
 #include "roboteam_msgs/World.h"
 
 #include "roboteam_tactics/bt.hpp"
@@ -92,6 +93,15 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
+
+/**
+ * \brief Gets all robots within a conical area
+ * \param world The world where the robots exist
+ * \param cone The Cone describing the area to search
+ * \return A vector of all robots which are at least partially within the cone.
+ */                                                    
+std::vector<roboteam_msgs::WorldRobot> getRobotsInCone(const roboteam_msgs::World& world, const Cone& cone);
+
 
 /**
  * \brief Predict the ball position in the future based on the current velocity

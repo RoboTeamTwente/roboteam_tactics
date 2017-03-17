@@ -161,6 +161,21 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
     return result;
 }
 
+std::vector<roboteam_msgs::WorldRobot> getRobotsInCone(const roboteam_msgs::World& world, const Cone& cone) {
+    std::vector<roboteam_msgs::WorldRobot> vec;
+    for (const auto& bot : world.us) {
+        if (cone.IsWithinCone(Vector2(bot.pos), .9)) {
+            vec.push_back(bot);
+        }
+    }
+    for (const auto& bot : world.them) {
+        if (cone.IsWithinCone(Vector2(bot.pos), .9)) {
+            vec.push_back(bot);
+        }
+    }
+    return vec;
+}
+
 Vector2 predictBallPos(double seconds) {
     roboteam_msgs::World w = LastWorld::get();
     Vector2 ballPosNow(w.ball.pos);
