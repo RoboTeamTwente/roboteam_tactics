@@ -20,10 +20,12 @@ class TwoAttackersTactic : public Tactic {
     time_point start;
 
     bool isThisYourFirstTimeHere = true;
+    time_point lastUpdate;
     time_point finishTime;
 
     roboteam_msgs::RoleDirective firstAttacker;
     roboteam_msgs::RoleDirective secondAttacker;
+
 };
 
 }

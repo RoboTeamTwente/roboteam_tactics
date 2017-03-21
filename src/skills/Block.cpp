@@ -8,6 +8,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/world_analysis.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
 
 namespace rtt {
 
@@ -15,6 +16,8 @@ RTT_REGISTER_SKILL(Block);
 
 Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     assert_valid<Block>(name);
+    printf("Name: %s\n", name.c_str());
+    
     std::string type = GetString("block_type");
     if (type == block_type_names.at(BlockType::RELATIVE)) {
         pos = new RelativeBlock(GetDouble("block_arg"));
@@ -26,16 +29,16 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
         pos = new CloseCover();
     } else {
         char err[30];
-        sprintf(err, "Invalid block_type: %s", GetString("block_type").c_str());
+        sprintf(err, "Invalid block_type: %s\n", GetString("block_type").c_str());
         ROS_ERROR("%s", err);
         throw std::invalid_argument(err);
     }
-    my_id = blackboard->GetInt("ROBOT_ID");
-    tgt_id = blackboard->GetInt("TGT_ID");
+    my_id = GetInt("ROBOT_ID");
+    tgt_id = GetInt("TGT_ID");
     // TODO: ERROR! block_id is unsigned and can never be less than zero!
-    block_id = blackboard->GetInt("BLOCK_ID");
-    constant = blackboard->HasDouble("block_x") && blackboard->HasDouble("block_y");
-    invert = blackboard->GetBool("invert_direction");
+    block_id = GetInt("BLOCK_ID");
+    constant = HasDouble("block_x") && HasDouble("block_y");
+    invert = GetBool("invert_direction");
 }
 
 void normalize(Position& pos) {
@@ -50,6 +53,7 @@ void normalize(Position& pos) {
 }
 
 bt::Node::Status Block::Update() {
+    ROS_INFO("Block Update");
     roboteam_msgs::WorldRobot me, tgt;
 
     {
@@ -60,7 +64,7 @@ bt::Node::Status Block::Update() {
         me = *maybeMe;
         tgt = *maybeTgt;
     }
-
+    
     Position mypos(me.pos.x, me.pos.y, me.angle);
     Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
     Vector block;
@@ -89,14 +93,23 @@ bt::Node::Status Block::Update() {
 
     if (!goal.real()) return bt::Node::Status::Running;
 
+    ScopedBB(*blackboard, "")
+        .setDouble("xGoal", goal.x)
+        .setDouble("yGoal", goal.y)
+        .setDouble("angleGoal", goal.rot)
+        .setBool("dribbler", false)
+        .setBool("avoidRobots", true);
+/*
     private_bb->SetInt("ROBOT_ID", my_id);
+    private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", goal.x);
     private_bb->SetDouble("yGoal", goal.y);
     private_bb->SetDouble("angleGoal", goal.rot);
     private_bb->SetBool("dribbler", false);
     private_bb->SetBool("avoidRobots", true);
+*/    
 
-    goToPos = std::make_unique<GoToPos>("", private_bb);
+    goToPos = std::make_unique<GoToPos>("", blackboard);
 
     //ROS_INFO("Goal: (%f, %f, %f)", private_bb->GetDouble("xGoal"), private_bb->GetDouble("yGoal"), private_bb->GetDouble("angleGoal"));
     bt::Node::Status avoid_status = goToPos->Update();
@@ -104,6 +117,7 @@ bt::Node::Status Block::Update() {
         goToPos.reset();
         goToPos = std::unique_ptr<GoToPos>();
     }
+    ROS_INFO("avoid_status=%d", (int) avoid_status);
     return avoid_status == bt::Node::Status::Invalid || avoid_status == bt::Node::Status::Failure ? avoid_status : bt::Node::Status::Running;
 }
 

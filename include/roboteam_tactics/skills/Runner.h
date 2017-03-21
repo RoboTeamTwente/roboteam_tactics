@@ -7,6 +7,14 @@
 
 namespace rtt {
 
+/**
+ * \class Runner
+ * \brief See YAML
+ */
+/*
+ * Descr: Utility skill which always returns Running
+ * Params: null
+ */
 class Runner : public Skill {
 public:
 	Runner(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

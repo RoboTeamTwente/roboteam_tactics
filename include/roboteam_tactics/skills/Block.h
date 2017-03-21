@@ -15,8 +15,8 @@ namespace rtt {
 
 #define BLOCK_BALL_ID 987654
     
-using Vector = roboteam_utils::Vector2;
-using Position = roboteam_utils::Position;
+using Vector = Vector2;
+using Position = Position;
 
 enum class BlockType { RELATIVE, CIRCLE, COVER, GOALAREA };
 
@@ -28,15 +28,16 @@ const std::map<BlockType, const char*> block_type_names {
 };
 
 /**
- * @class BlockPos
- * @brief Determines where to position a blocking robot.
+ * \class BlockPos
+ * \brief Determines where to position a blocking robot.
  */
 class BlockPos {
 public:
     /**
-     * @param current The blocking robot's current position.
-     * @param opponent The location of the opponent.
-     * @param to_block The location to block the opponent from.
+     * \brief Determine the position where our robot should be.
+     * \param current The blocking robot's current position.
+     * \param opponent The location of the opponent.
+     * \param to_block The location to block the opponent from.
      */
     virtual Position block_pos(const Position& current,
                              const Vector& opponent,
@@ -44,6 +45,62 @@ public:
     virtual ~BlockPos() {}
 };
 
+/**
+ * \class Block
+ * \brief See YAML
+ */
+/*
+ * Descr: Take up position between a robot and some point, determined by parameters.
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the blocking robot
+ *   - TGT_ID:
+ *       Type: Int
+ *       Descr: The id of the opponent robot to block
+ *   - BLOCK_ID:
+ *       Type: Int
+ *       Can be:
+ *         - BLOCK_BALL_ID: (=987654) To stand between TGT_ID and the ball
+ *         - Any positive integer: To stand between TGT_ID and the opponent 
+ *       Used when: block_x and block_y are not set
+ *       Descr: When the block target is not an absolute location, this number indicates what to block
+ *   - block_x:
+ *       Type: Double
+ *       Used when: BLOCK_ID != BLOCK_BALL_ID
+ *       Descr: The x-coordinate of the location to block the target from
+ *   - block_y:
+ *       Type: Double
+ *       Used when: BLOCK_ID != BLOCK_BALL_ID
+ *       Descr: The y-coordinate of the location to block the target from
+ *   - block_type:
+ *       Type: String
+ *       Can be:
+ *         - RELATIVE: |
+ *             Block at a position a certain fraction (given by block_arg) between the two points.
+ *             For example, when block_arg is 0.5, the robot will stand halfway between the opponent
+ *             and the point it should block. By default, the robot will face the opponent.
+ *         - CIRCLE: |
+ *             Blocks along a circle centered around the opponent, with a radius given by block_arg.
+ *             By default, the robot will face the opponent.
+ *         - COVER: |
+ *             Blocks close to the opponent, trying to keep it from receiving the ball.
+ *             By default, the robot will face the location it is blocking.
+ *         - GOALAREA: |
+ *             Blocks along the line surrounding the goal. By default, the robot will face
+ *             away from the goal.
+ *        Used when: block_x and block_y are not set.
+ *        Descr: Determines how the actual block position is calculated.
+ *    - block_arg:
+ *        Type: Double
+ *        Used when: block_type is used and is either RELATIVE or CIRCLE
+ *        Descr: Parameter for the block_type. See its documentation for details.
+ *    - invert_direction:
+ *        Type: Bool
+ *        Used when: block_type is used
+ *        Descr: When true, the robot will face the direction opposite to the one it normally would given the block_type.
+ *             
+ */
 class Block : public Skill {
 public:
     Block(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -73,8 +130,8 @@ private:
 
 
 /**
- * @class RelativeBlock
- * @brief Blocks at the point a given distance between the opponent and target, facing the opponent.
+ * \class RelativeBlock
+ * \brief Blocks at the point a given distance between the opponent and target, facing the opponent.
  * For example, if the opponent is at (0, 0), the target at (0, 10) and the factor 0.4, then the block_pos
  * will be (0, 6).
  */
@@ -94,8 +151,8 @@ private:
 };
 
 /**
- * @class CircleBlock
- * @brief Blocks at a fixed distance from the target, facing the opponent.
+ * \class CircleBlock
+ * \brief Blocks at a fixed distance from the target, facing the opponent.
  */
 class CircleBlock : public BlockPos {
 public:
@@ -119,8 +176,8 @@ private:
 };
 
 /**
- * @class GoalareaBlock
- * @brief Blocks at the line surrounding the goal area
+ * \class GoalareaBlock
+ * \brief Blocks at the line surrounding the goal area
  */
 
 class GoalareaBlock : public BlockPos {
@@ -135,13 +192,13 @@ public:
         Vector2 point(current.x,current.y);;    
         
         float safetyMarginGoalAreas=0.0;
-        roboteam_utils::Vector2 newTargetPos = to_block;
+        Vector2 newTargetPos = to_block;
     
         std::string our_side;
 		ros::param::get("our_side", our_side);
 
-		roboteam_utils::Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
-		roboteam_utils::Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
+		Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
+		Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
 		ROS_INFO("distToOurDefensArea: x:%f, y:%f",distToOurDefenseArea.x,distToOurDefenseArea.y);
 		
 		Vector togoalarea;
@@ -166,8 +223,8 @@ private:
 };
 
 /**
- * @class CloseCover
- * @brief Blocks very close to the opponent, facing the target.
+ * \class CloseCover
+ * \brief Blocks very close to the opponent, facing the target.
  */
 class CloseCover : public BlockPos {
 public:

@@ -54,7 +54,7 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 	// check and set other settings
 	
 	if(HasDouble("faceTowardsPosx") and HasDouble("faceTowardsPosy")){
-		faceTowardsPos=roboteam_utils::Vector2(
+		faceTowardsPos=Vector2(
 			GetDouble("faceTowardsPosx"),
 			GetDouble("faceTowardsPosy")
 		);
@@ -73,12 +73,12 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 	
 	if(HasString("center")){
 		if(GetString("center")=="ball"){
-			center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+			center = Vector2(ball.pos.x, ball.pos.y);
 			radius = 0.1;
 		} 
 		else if(GetString("center")=="point"){
 			if(HasDouble("centerx") and HasDouble("centery")){
-				center = roboteam_utils::Vector2(
+				center = Vector2(
 					GetDouble("centerx"),
 					GetDouble("centery")
 				);
@@ -172,7 +172,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 	}
 
 	// vector calculations
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	double targetAngle=computeAngle(robotPos, faceTowardsPos);
 
 	bool faceoutward=false;
@@ -181,7 +181,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 		targetAngle=cleanAngle(targetAngle+M_PI);
 	}
 
-	roboteam_utils::Vector2 worldposDiff = center-robotPos;
+	Vector2 worldposDiff = center-robotPos;
 
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
@@ -189,14 +189,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1) // oriented towards center		
 		if(true){
 		
-			roboteam_utils::Vector2 radiusdirection=center-robotPos;
+			Vector2 radiusdirection=center-robotPos;
 			radiusdirection=radiusdirection.normalize();
-			roboteam_utils::Vector2 turndirection(radiusdirection.y, -radiusdirection.x); // perpendicular;
+			Vector2 turndirection(radiusdirection.y, -radiusdirection.x); // perpendicular;
 			turndirection=turndirection.normalize();
 			
 			
-			roboteam_utils::Vector2 robotrequiredv;
-			roboteam_utils::Vector2 worldrequiredv;
+			Vector2 robotrequiredv;
+			Vector2 worldrequiredv;
 			
 			// velocity in towards and away from ball (x) and around ball (y)
 			double radiusPconstant=10;
@@ -229,7 +229,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			// ROS_INFO("robotrequiredv x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
 			
-			roboteam_utils::Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
+			Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;
 				
 			if(robotrequiredv.length() > maxv){
@@ -237,7 +237,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			}
 			
 			// rotation controller (w)
-			double rotPconstant=20;
+			double rotPconstant=8; // Used to be 20
 
 			double reqRobotrot=worldposDiff.angle();
 

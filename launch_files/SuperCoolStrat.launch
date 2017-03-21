@@ -1,0 +1,11 @@
+<launch>
+
+	<group ns="blue">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/SuperCoolStrategy" output="screen" />
+	</group>
+
+	<group ns="yellow">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/SuperCoolStrategy" output="screen" />
+	</group>
+
+</launch>

@@ -2,25 +2,26 @@
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Block.h"
+#include "roboteam_tactics/skills/GetBall.h"
 
 namespace rtt {
 
 /*
- * Descr: >
+ * Descr: |
  *   Depending on whether or not the target opponent has the ball, this skill will either try to
  *   prevent the opponent from passing or receiving it.
  * 
  * Global params: 
- *   ROBOT_ID:
- *     Type: int
- *     Descr: ID of the harasser.
- *   TGT_ID:
- *     Type: int
- *     Descr: ID of the target.
- *   distance:
- *     Type: double
- *     Descr: Distance the harasser will keep to the target.
- *     Default: 0.4
+ *   - ROBOT_ID:
+ *       Type: int
+ *       Descr: ID of the harasser.
+ *   - TGT_ID:
+ *       Type: int
+ *       Descr: ID of the target.
+ *   - distance:
+ *       Type: double
+ *       Descr: Distance the harasser will keep to the target.
+ *       Default: 0.4
  */ 
 class Harass : public Skill {
     public:
@@ -36,6 +37,7 @@ class Harass : public Skill {
     
     private:
     std::unique_ptr<Block> block_get, block_kick;
+    std::unique_ptr<GetBall> get_ball;
     int target;
 
 };

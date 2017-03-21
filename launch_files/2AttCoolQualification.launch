@@ -1,0 +1,11 @@
+<launch>
+
+	<group ns="blue">
+		
+	</group>
+
+	<group ns="yellow">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/TwoAttackersCoolStrat" output="screen" /> 
+	</group>
+
+</launch>

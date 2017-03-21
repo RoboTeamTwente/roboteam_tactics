@@ -28,6 +28,12 @@
 #include "GoToPos.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "GoToPosAlt.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "Harass.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "KeeperBlock.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -38,6 +44,9 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "ParamSet.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "QualKeeper.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "RandomDrive.cpp"

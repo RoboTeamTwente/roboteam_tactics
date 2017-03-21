@@ -51,7 +51,7 @@ void FreeKickDefenceTactic::Initialize() {
     
     RTT_DEBUGLN("Running FreeKickDefence with %d additional bots", additional);
     
-    int keeper = RobotDealer::get_keeper();
+    // int keeper = RobotDealer::get_keeper();
     int defender, harasser, interceptor1 = -1, interceptor2 = -1;
     
     RTT_DEBUGLN("Self:");
@@ -142,7 +142,7 @@ void FreeKickDefenceTactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", harasser);
         roboteam_msgs::RoleDirective wd;
-        wd.robot_id = defender;
+        wd.robot_id = harasser;
         wd.tree = "HarasserTree";
         wd.blackboard = bb.toMsg();
         boost::uuids::uuid token = unique_id::fromRandom();

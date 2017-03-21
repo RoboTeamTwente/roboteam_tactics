@@ -35,6 +35,9 @@
 #include "SoloAttackerTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "SoloAttacker2Tactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "SoloDefenderTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -45,4 +48,10 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "TwoAttackersTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "TwoAttackersCoolTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "TwoVTwoDefenseTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

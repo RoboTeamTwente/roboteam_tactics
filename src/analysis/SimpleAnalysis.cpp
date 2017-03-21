@@ -1,4 +1,4 @@
-#include "roboteam_msgs/World.h";
+#include "roboteam_msgs/World.h"
 
 namespace rtt {
 

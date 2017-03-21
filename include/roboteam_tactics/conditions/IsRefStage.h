@@ -6,6 +6,17 @@
 
 namespace rtt {
     
+/**
+ * \class IsRefStage
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks whether a certain ref stage is currently active
+ * Params:
+ *   - stage:
+ *       Type: String
+ *       Descr: The stage to check for. See RefLookup.h for valid values.
+ */    
 class IsRefStage : public Condition {
 
 

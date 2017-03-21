@@ -24,7 +24,7 @@ PassPoint::PassPoint() {
 }
 
 // Calculates the distance between the closest opponent and the testPosition
-double PassPoint::calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
+double PassPoint::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
 	for (size_t i = 1; i < world.them.size(); i++) {
 		double testDistance = (Vector2(world.them.at(i).pos) - testPosition).length();
@@ -36,14 +36,14 @@ double PassPoint::calcDistToClosestOpp(roboteam_utils::Vector2 testPosition, rob
 }
 
 // Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
-double PassPoint::calcDistOppToBallTraj(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
-	roboteam_utils::Vector2 ballPos(world.ball.pos);
-	roboteam_utils::Vector2 ballTraj = testPosition - ballPos;
+double PassPoint::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
+	Vector2 ballPos(world.ball.pos);
+	Vector2 ballTraj = testPosition - ballPos;
 
-	roboteam_utils::Vector2 oppPos = Vector2(world.them.at(0).pos);
+	Vector2 oppPos = Vector2(world.them.at(0).pos);
 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 	for (size_t i = 1; i < world.them.size(); i++) {
-		roboteam_utils::Vector2 oppPos = Vector2(world.them.at(i).pos);
+		Vector2 oppPos = Vector2(world.them.at(i).pos);
 		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 		if (testDistance < shortestDistance) {
 			shortestDistance = testDistance;
@@ -80,12 +80,12 @@ std::vector<Cone> PassPoint::combineOverlappingRobots(std::vector<Cone> robotCon
 
 // Calculale the angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
-double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_msgs::World world) {
-	roboteam_utils::Vector2 theirGoal = LastWorld::get_their_goal_center();
+double PassPoint::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
+	Vector2 theirGoal = LastWorld::get_their_goal_center();
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	
-	roboteam_utils::Vector2 vecToGoalSide1 = theirGoal + Vector2(0, -field.goal_width/2) - testPosition;
-	roboteam_utils::Vector2 vecToGoalSide2 = theirGoal + Vector2(0, field.goal_width/2) - testPosition;
+	Vector2 vecToGoalSide1 = theirGoal + Vector2(0, -field.goal_width/2) - testPosition;
+	Vector2 vecToGoalSide2 = theirGoal + Vector2(0, field.goal_width/2) - testPosition;
 
 	Cone goalCone(testPosition, vecToGoalSide1, vecToGoalSide2);
 	
@@ -131,13 +131,13 @@ double PassPoint::calcViewOfGoal(roboteam_utils::Vector2 testPosition, roboteam_
 }
 
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
-double PassPoint::computePassPointScore(roboteam_utils::Vector2 testPosition) {
+double PassPoint::computePassPointScore(Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
 	while(world.us.size() == 0) {
 		ros::spinOnce();
 		world = LastWorld::get();
 	}
-	roboteam_utils::Vector2 ballPos(world.ball.pos);
+	Vector2 ballPos(world.ball.pos);
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
@@ -150,12 +150,12 @@ double PassPoint::computePassPointScore(roboteam_utils::Vector2 testPosition) {
 
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
-roboteam_utils::Vector2 PassPoint::computeBestPassPoint() {
+Vector2 PassPoint::computeBestPassPoint() {
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	int x_steps = 27;
 	int y_steps = 18;
 
-	std::vector<roboteam_utils::Vector2> passPoints;
+	std::vector<Vector2> passPoints;
 	std::vector<double> scores;
 	std::vector<std::string> names;
 
@@ -165,7 +165,7 @@ roboteam_utils::Vector2 PassPoint::computeBestPassPoint() {
 			double y = -field.field_width/2 + y_step*field.field_width/y_steps;
 
 			// calculate the score of this point:
-			roboteam_utils::Vector2 point(x, y);
+			Vector2 point(x, y);
 
 			if (!isWithinDefenseArea("their defense area", point)) {
 				passPoints.push_back(point);
@@ -190,11 +190,11 @@ roboteam_utils::Vector2 PassPoint::computeBestPassPoint() {
 
 	for (size_t i = 0; i < passPoints.size(); i++) {
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-		drawer.SetColor(255 - relScore, 0, relScore);
-		drawer.DrawPoint(names.at(i), passPoints.at(i));
+		drawer.setColor(255 - relScore, 0, relScore);
+		drawer.drawPoint(names.at(i), passPoints.at(i));
 	}
 
-	roboteam_utils::Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	return bestPosition;
 }
 

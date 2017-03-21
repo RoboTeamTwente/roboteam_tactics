@@ -5,6 +5,14 @@
 
 namespace rtt {
 
+/**
+ * \class TheyHaveBall
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks whether the opponents have the ball
+ * Params: null
+ */
 class TheyHaveBall : public Condition {
     public:
     TheyHaveBall(std::string name, bt::Blackboard::Ptr blackboard);

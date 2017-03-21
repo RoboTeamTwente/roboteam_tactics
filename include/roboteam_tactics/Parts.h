@@ -24,6 +24,10 @@ ROS_DECLARE_MESSAGE(RoleDirective);
 
 namespace rtt {
 
+/**
+ * \class Skill
+ * \brief Base class for all skills. Provides no additional functionality.
+ */
 class Skill : public Leaf {
 public:
 
@@ -33,6 +37,10 @@ public:
     virtual Status Update();
 } ;
 
+/**
+ * \class Condition
+ * \brief Base class for conditions.
+ */
 class Condition : public Leaf {
 	public:
 	Condition(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -41,18 +49,22 @@ class Condition : public Leaf {
     virtual Status Update();
 
     /**
-     * @brief Returns a set of world states in which this Condition should succeed.
+     * \brief Returns a set of world states in which this Condition should succeed.
      * For use in testing. See test/ConditionsTest.cpp
      */
     virtual std::vector<roboteam_msgs::World> success_states() const;
 
     /**
-     * @brief Returns a set of world states in which this Condition should fail.
+     * \brief Returns a set of world states in which this Condition should fail.
      * For use in testing. See test/ConditionsTest.cpp
      */
     virtual std::vector<roboteam_msgs::World> fail_states() const;
 } ;
 
+/**
+ * \class Tactic
+ * \brief Base class for tactics.
+ */
 class Tactic : public Leaf {
     public:
     Tactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
@@ -62,15 +74,38 @@ class Tactic : public Leaf {
     virtual Status Update();
     virtual void Terminate(Status s);
 
+    /**
+     * \brief Registers a robot as claimed by this tactic. See RobotDealer.
+     * \param id The id of the robot to claim.
+     */
     virtual void claim_robot(int id);
+    
+    /**
+     * \brief Shortcut to claim multiple robots at once.
+     * \param ids A vector of the ids to claim.
+     */
     virtual void claim_robots(std::vector<int> ids);
+    
+    /**
+     * \brief Gets a vector of all robots claimed by this tactic.
+     */
     virtual std::vector<int> get_claimed_robots();
+    
+    /**
+     * \brief Checks wether a robot is claimed by this tactic.
+     * \param id The id to check.
+     */
     virtual bool is_claimed(int id);
 
     private:
     std::set<int> claimed_robots;
 } ;
 
+/**
+ * \class SingleBotTactic
+ * \brief Utility class for "tactics" which only use a single robot.
+ * It takes care of all the robot claiming stuff.
+ */
 class SingleBotTactic : public Tactic {
     public:
     SingleBotTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)

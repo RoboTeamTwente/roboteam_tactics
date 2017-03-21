@@ -2,6 +2,7 @@
 #include "ros/ros.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Math.h"
+#include "roboteam_utils/world_analysis.h"
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/Kick.h"
@@ -24,7 +25,7 @@ Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
 
 void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
-    oldBallVel = roboteam_utils::Vector2(vel.x, vel.y);
+    oldBallVel = Vector2(vel.x, vel.y);
     cycleCounter = 0;
 }
 
@@ -49,10 +50,10 @@ bt::Node::Status Kick::Update() {
 
 	roboteam_msgs::World world = LastWorld::get();
 	
-    roboteam_utils::Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
-    
-    RTT_DEBUG("Velocity difference is %f", (currentBallVel - oldBallVel).length());
-    if ((currentBallVel - oldBallVel).length() > 0.05) {
+    Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+
+    RTT_DEBUG("Velocity difference is %f\n", (currentBallVel - oldBallVel).length());
+    if ((currentBallVel - oldBallVel).length() > 0.01) {
         RTT_DEBUG("Velocity difference was enough\n");
         return bt::Node::Status::Success;
     }
@@ -77,20 +78,28 @@ bt::Node::Status Kick::Update() {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
-	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	roboteam_utils::Vector2 posDiff = ballPos-robotPos;
+	roboteam_msgs::WorldRobot robot;
+    
+    if (auto botOpt = lookup_our_bot(robotID)) {
+        robot = *botOpt;
+    } else {
+        RTT_DEBUGLN("Could not lookup our bot %d", robotID);
+        return Status::Failure;
+    }
+
+	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 posDiff = ballPos-robotPos;
 
 	double rotDiff = posDiff.angle() - robot.angle;
 	rotDiff = cleanAngle(rotDiff);
+    double const rotDiffErr = 0.2;
 
-	if (posDiff.length() < 0.105) { // ball is close
-
-		if(rotDiff < 0.2 and rotDiff > -0.2){ // ball in front
+	if (posDiff.length() < 0.11) { // ball is close
+		if(rotDiff < rotDiffErr and rotDiff > -rotDiffErr){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
-			command.dribbler = false;
+			command.dribbler = true;
 			command.kicker = true;
 			command.kicker_forced = true;
 			command.kicker_vel = kickVel;
@@ -99,19 +108,15 @@ bt::Node::Status Kick::Update() {
 			command.w = 0.0;
 
             rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
-            // TODO: Shouldn't be needed
-			// ros::spinOnce();
 
-			RTT_DEBUG("Triggered the kicker!\n");
+			RTT_DEBUGLN("Triggered the kicker!");
 			return Status::Running;
-		}
-		else {
-			RTT_DEBUG("Ball is not in front of the dribbler\n");
+		} else {
+			RTT_DEBUGLN("Ball is not in front of the dribbler");
 			return Status::Failure;
 		}
-	}
-	else {
-		RTT_DEBUG("Ball is not close to the robot\n");
+	} else {
+		RTT_DEBUGLN("Ball is not close to the robot");
 		return Status::Failure;
 	}
 }

@@ -250,7 +250,6 @@ bt::Node::Status DistanceXToY::Update() {
 
     auto vecX = getPointOfInterest(X, ROBOT_ID);
     auto vecY = getPointOfInterest(Y, ROBOT_ID);
-
     double dist;
 
     if ((X == "our defense area" || X == "their defense area") && X != Y) {

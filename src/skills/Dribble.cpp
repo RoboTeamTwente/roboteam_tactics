@@ -31,15 +31,15 @@ Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
 void Dribble::stoprobot(int robotID) {
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(stop_command(robotID));
 }
-roboteam_utils::Vector2 Dribble::worldToRobotFrame(roboteam_utils::Vector2 requiredv, double rotation){
-    roboteam_utils::Vector2 robotRequiredv;
+Vector2 Dribble::worldToRobotFrame(Vector2 requiredv, double rotation){
+    Vector2 robotRequiredv;
     robotRequiredv.x=requiredv.x*cos(-rotation)-requiredv.y*sin(-rotation);
     robotRequiredv.y=requiredv.x*sin(-rotation)+requiredv.y*cos(-rotation);
 	return robotRequiredv;
 }
 
-double Dribble::computeAngle(roboteam_utils::Vector2 robotPos, roboteam_utils::Vector2 faceTowardsPos) {
-	roboteam_utils::Vector2 differenceVector = faceTowardsPos - robotPos; 
+double Dribble::computeAngle(Vector2 robotPos, Vector2 faceTowardsPos) {
+	Vector2 differenceVector = faceTowardsPos - robotPos; 
 	return differenceVector.angle();
 }
 
@@ -55,12 +55,12 @@ double Dribble::cleanAngle(double angle){
 	}
 }
 
-roboteam_utils::Vector2 Dribble::saveDribbleDeceleration(roboteam_utils::Vector2 reqspeed){
+Vector2 Dribble::saveDribbleDeceleration(Vector2 reqspeed){
 	// TODO: should improve timing accuracy, because rate is not really known.
-	roboteam_utils::Vector2 deceleration=prevspeed-reqspeed;
+	Vector2 deceleration=prevspeed-reqspeed;
 	double timestep=1.0/60;
 	double maxdeceleration=1.0;
-	roboteam_utils::Vector2 speed;
+	Vector2 speed;
 	if(deceleration.length() > timestep*maxdeceleration){
 		speed=prevspeed-deceleration.normalize()*maxdeceleration*timestep;
 	}
@@ -90,14 +90,14 @@ bt::Node::Status Dribble::Update() {
     // TODO: Even though you checked the size here, you should still use std::vector::at()!
 	roboteam_msgs::WorldRobot robot = world.us[robotID];
 	
-	roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(robot.pos.x, robot.pos.y);
-	roboteam_utils::Vector2 ballPos = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
-	roboteam_utils::Vector2 goalPos = roboteam_utils::Vector2(
+	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
+	Vector2 goalPos = Vector2(
 					GetDouble("goalx"),
 					GetDouble("goaly")
 				);
 	
-	roboteam_utils::Vector2 goalposDiff = ballPos-goalPos;
+	Vector2 goalposDiff = ballPos-goalPos;
 	
 	double targetAngle=computeAngle(robotPos, goalPos);
 	double worldrotDiff=(robotPos-ballPos).angle()-(targetAngle+M_PI);
@@ -111,7 +111,7 @@ bt::Node::Status Dribble::Update() {
 			return Status::Failure;
 		}
 		
-		roboteam_utils::Vector2 rotatearoundPos;
+		Vector2 rotatearoundPos;
 		
 		if (worldrotDiff > 20.0/180.0*M_PI or worldrotDiff < -20.0/180.0*M_PI){ // oriented towards goal behind ball	
 			ROS_INFO("rotate around ball");
@@ -121,7 +121,7 @@ bt::Node::Status Dribble::Update() {
 			rotatearoundPos=goalPos-goalposDiff*(fabs(worldrottoballdiff)/45.0);
 		}
 	
-		roboteam_utils::Vector2 facetowardsPos=goalPos*2-ballPos;
+		Vector2 facetowardsPos=goalPos*2-ballPos;
 		
 		double radius=(rotatearoundPos-robotPos).length();
 		// debug points;
@@ -157,7 +157,7 @@ bt::Node::Status Dribble::Update() {
 
 		double vPconstant=1.5;
 	
-		roboteam_utils::Vector2 vtogoal=goalposDiff*-vPconstant;
+		Vector2 vtogoal=goalposDiff*-vPconstant;
 		
 	
 	

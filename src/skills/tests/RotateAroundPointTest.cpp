@@ -14,13 +14,13 @@
 #include "roboteam_utils/Vector2.h"
 
 bool success;
-roboteam_utils::Vector2 faceTowardsPos = roboteam_utils::Vector2(3.0, 0.2);
+Vector2 faceTowardsPos = Vector2(3.0, 0.2);
 
 void msgCallBackRotateAroundPoint(const roboteam_msgs::WorldConstPtr& world, rtt::RotateAroundPoint* rotateAroundPoint, bt::Blackboard::Ptr bb) {
 	rtt::LastWorld::set(*world);
 	roboteam_msgs::World getworld = rtt::LastWorld::get();
 	roboteam_msgs::WorldBall ball = getworld.ball;
-	roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+	Vector2 center = Vector2(ball.pos.x, ball.pos.y);
 	bb->SetDouble("faceTowardsPosx", faceTowardsPos.x);
     bb->SetDouble("faceTowardsPosy", faceTowardsPos.y);
 	bb->SetDouble("centerx", center.x);
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 	
 	roboteam_msgs::World world = rtt::LastWorld::get();
 	roboteam_msgs::WorldBall ball = world.ball;
-	roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+	Vector2 center = Vector2(ball.pos.x, ball.pos.y);
 	int radius = 0.09;
 
 	auto bb = std::make_shared<bt::Blackboard>();

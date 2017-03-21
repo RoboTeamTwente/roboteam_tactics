@@ -7,6 +7,26 @@
 
 namespace rtt {
 
+/**
+ * \class CanSeePoint
+ * \brief See YAML
+ */
+ /*
+  * Descr: Checks whether a robot can see a certain point
+  * Params:
+  *   - ROBOT_ID:
+  *       Type: Int
+  *       Descr: The robot to check for
+  *   - x_coor: 
+  *       Type: Double
+  *       Descr: The x-coordinate of the target location
+  *   - y_coor:
+  *       Type: Double
+  *       Descr: The y-coordinate of the target location
+  *   - check_move:
+  *       Type: Bool
+  *      Descr: Whether it should check for possibility of movement or just line of sight.
+  */
 class CanSeePoint : public Condition {
   
     public:
@@ -35,7 +55,7 @@ class CanSeeGoal : public CanSeePoint {
     public:
     CanSeeGoal(std::string name, bt::Blackboard::Ptr blackboard) : CanSeePoint(name, blackboard) {
         assert_valid<CanSeeGoal>(name);
-        roboteam_utils::Vector2 a, b; //TODO: goal positions
+        Vector2 a, b; //TODO: goal positions
         std::string name_a = name + "_can_see_goal_a";
         std::string name_b = name + "_can_see_goal_b";
         blackboard->SetInt(name_a + "_me", GetInt("me"));

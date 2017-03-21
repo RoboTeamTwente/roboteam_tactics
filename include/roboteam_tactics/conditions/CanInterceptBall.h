@@ -14,14 +14,29 @@
 #define ICPT_DELTA 0.001
 #define ICPT_RADIUS 0.005
 
+/**
+ * \struct intercept_data
+ * \brief Stores data on a possible interception.
+ */
 struct intercept_data {
-    bool success;
-    roboteam_utils::Vector2 icpt_pos;
-    double time;
+    bool success;           /**< Whether or not an interception is possible */
+    rtt::Vector2 icpt_pos;  /**< The location where the interception would take place */
+    double time;            /**< The time required for the interception, in seconds */
 };
 
 namespace rtt {
 
+/**
+ * \class CanInterceptBall
+ * \brief See YAML
+ */
+/*
+ * Descr: Checks whether a robot can intercept the ball given the current world state.
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The robot to check for.
+ */
 class CanInterceptBall : public Condition {
     public:
 
@@ -31,22 +46,22 @@ class CanInterceptBall : public Condition {
 
     static VerificationMap required_parameters() {
         VerificationMap params;
-        params["me"] = BBArgumentType::Int;
+        params["ROBOT_ID"] = BBArgumentType::Int;
         return params;
     }
 
     struct intercept_data calc_intercept();
 
     static struct intercept_data calc_intercept(
-                        const roboteam_utils::Position& bot_pos,
-                        const roboteam_utils::Position& bot_vel,
-                        const roboteam_utils::Vector2& ball_pos,
-                        const roboteam_utils::Vector2& ball_vel) {
+                        const Position& bot_pos,
+                        const Position& bot_vel,
+                        const Vector2& ball_pos,
+                        const Vector2& ball_vel) {
 
         auto bot_func = [bot_pos, bot_vel](double t) {
             double x = bot_pos.x + bot_vel.x * t + ACCEL_CHEAT * t * t;
             double y = bot_pos.y + bot_vel.y * t + ACCEL_CHEAT * t * t;
-            return roboteam_utils::Vector2(x, y);
+            return Vector2(x, y);
         };
 
         auto bot_range = [bot_vel](double t, double angle) {
@@ -54,20 +69,20 @@ class CanInterceptBall : public Condition {
             double ay = sqrtl(1 - powl(ax/ACCEL_ELLIPSE_A, 2)) * ACCEL_ELLIPSE_B;
             double x = bot_vel.x * cosl(angle) * t - (ax/2.0) * t * t;
             double y = bot_vel.y * sinl(angle) * t - (ay/2.0) * t * t;
-            return roboteam_utils::Vector2(x*cosl(angle), y*sinl(angle)).length();
+            return Vector2(x*cosl(angle), y*sinl(angle)).length();
         };
 
         auto ball_func = [ball_pos, ball_vel](double t) {
             double x = ball_pos.x + ball_vel.x * t;
             double y = ball_pos.y + ball_vel.y * t;
-            return roboteam_utils::Vector2(x, y);
+            return Vector2(x, y);
         };
 
         double time = -1.0;
-        roboteam_utils::Vector2 icpt_pos;
-        roboteam_utils::Vector2 bot = bot_pos.location();
+        Vector2 icpt_pos;
+        Vector2 bot = bot_pos.location();
         for (double t = ICPT_DELTA; t < MAX_ICPT_TIME; t += ICPT_DELTA) {
-            roboteam_utils::Vector2 ball = ball_func(t);
+            Vector2 ball = ball_func(t);
             double range = bot_range(t, (ball).angle());
             //DEBUG_INFO_ICPT("At t=%f: bot(%f, %f) ball(%f, %f) dist=%f, range=%f angle=%f\n\n", t, bot.x, bot.y, ball.x, ball.y,
             //    ball.dist(bot), range, ball.angle());

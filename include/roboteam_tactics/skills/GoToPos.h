@@ -13,8 +13,14 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_utils/Cone.h"
 
+#include "roboteam_tactics/utils/utils.h"
+
 namespace rtt {
 
+/**
+ * \class GoToPos
+ * \brief See YAML
+ */
 /**
  * # Using the YAML multiline literal here
  * Descr: |
@@ -23,33 +29,31 @@ namespace rtt {
  *     @Idea isKeeper should maybe also be global?
  *     @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
  *
- * Global params:
- *     ROBOT_ID:
+ * Params:
+ *     - ROBOT_ID:
  *         Type: Int 
  *         Descr: Id of the robot
- * 
- * Params:
- *     isKeeper:
+ *     - isKeeper:
  *         Type: Bool
  *         Descr: Whether or not the current robot is a keeper
  *     
- *     angleGoal:
+ *     - angleGoal:
  *         Type: Double
  *         Descr: The angle of the arrival position
  *     
- *     xGoal:
+ *     - xGoal:
  *         Type: Double
  *         Descr: The target x coordinate
  *     
- *     yGoal:
+ *     - yGoal:
  *         Type: Double
  *         Descr: The target y coordinate
  *     
- *     dribbler:
+ *     - dribbler:
  *         Type: Bool
  *         Descr: Turns on the dribbler if true
  *
- *     avoidRobots:
+ *     - avoidRobots:
  *         Type: Bool
  *         Descr: Indicates whether or not other robots should be avoided
  *
@@ -58,14 +62,18 @@ class GoToPos : public Skill {
 public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void sendStopCommand(uint id);
-    roboteam_utils::Vector2 positionController(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos);
-    double rotationController(double myAngle, double angleGoal, roboteam_utils::Vector2 posError);
-    roboteam_utils::Vector2 velocityController(roboteam_utils::Vector2 velTarget);
-    double angularVelController(double angularVelTarget);
-    roboteam_utils::Vector2 getForceVectorFromRobot(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    roboteam_utils::Vector2 avoidRobots(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos);
-    roboteam_utils::Vector2 avoidDefenseAreas(roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 myVel, roboteam_utils::Vector2 targetPos, roboteam_utils::Vector2 sumOfForces);
-    roboteam_utils::Vector2 checkTargetPos(roboteam_utils::Vector2 targetPos);
+    Vector2 positionController(Vector2 myPos, Vector2 targetPos);
+    double rotationController(double myAngle, double angleGoal, Vector2 posError);
+    // Vector2 velocityController(Vector2 velTarget);
+    // double angularVelController(double angularVelTarget);
+    Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    // double getAngleFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
+    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
+    // double avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
+    
+    Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
+    Vector2 checkTargetPos(Vector2 targetPos);
+    boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
     Status Update();
     
     static VerificationMap required_params() {
@@ -78,34 +86,48 @@ public:
     std::string node_name() { return "GoToPos"; }
     
 private:
+
     bool success;
 
     // Control gains
-    double pGainPosition = 3.0;
-    double pGainRotation = 6.0;
-    double maxAngularVel = 3.0;
-    double iGainVelocity = 0.5;
-    double iGainAngularVel = 0.02;
+    double pGainPosition;
+    double pGainRotation;
+    // double iGainRotation;
+    // double dGainRotation;
+    double maxAngularVel;
+    double iGainVelocity;
+    double iGainAngularVel;
 
     // Control variables
-    double safetyMarginGoalAreas = 0.2;
-    double marginOutsideField = 0.2;
     double maxSpeed;
     double attractiveForce;
     double attractiveForceWhenClose;
     double repulsiveForce;
+    double safetyMarginGoalAreas;
+    double marginOutsideField;
 
+    // Blackboard arguments
     double xGoal;
     double yGoal;
     double angleGoal;
     uint   ROBOT_ID;
+    uint   KEEPER_ID;
     bool   dribbler;
     roboteam_msgs::WorldRobot me;
 
-    roboteam_utils::Vector2 prevTargetPos;
-    roboteam_utils::Vector2 velControllerI;
-    double angularVelControllerI;
+    Vector2 prevTargetPos;
+    // Vector2 velControllerI;
+    // double angularVelControllerI;
+    double angleErrorIntegral;
+    double* angleErrorHistory;
+    int historyIndex;
+    bool succeeded;
     // double wControllerI;
+    // double prevAngularVelTarget;
+
+    // bool hasReachedFirstStop = false;
+
+    time_point start;
 
     Draw drawer;
 };

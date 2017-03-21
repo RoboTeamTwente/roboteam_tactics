@@ -23,16 +23,16 @@ CanSeeRobot::CanSeeRobot(std::string name, bt::Blackboard::Ptr blackboard) : Con
 
 bt::Node::Status CanSeeRobot::Update() {
 	RTT_DEBUG("called CanSeeRobot");
-	int robotID = GetInt("ROBOT_ID");
+	// int robotID = GetInt("ROBOT_ID");
 	// ROS_INFO_STREAM("CanSeeRobot Update, id: " << robotID);
 
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::WorldRobot me = world.us.at(blackboard->GetInt("ROBOT_ID"));
-	roboteam_utils::Vector2 targetPos;
+	Vector2 targetPos;
 	if (GetBool("our_team")) {
-		targetPos = roboteam_utils::Vector2(world.us.at(GetInt("targetID")).pos.x, world.us.at(GetInt("targetID")).pos.y);
+		targetPos = Vector2(world.us.at(GetInt("targetID")).pos.x, world.us.at(GetInt("targetID")).pos.y);
 	} else {
-		targetPos = roboteam_utils::Vector2(world.them.at(GetInt("targetID")).pos.x, world.them.at(GetInt("targetID")).pos.y);
+		targetPos = Vector2(world.them.at(GetInt("targetID")).pos.x, world.them.at(GetInt("targetID")).pos.y);
 	}
 
 	std::vector<roboteam_msgs::WorldRobot> obstacles = getObstacles(me, targetPos, &world, true);

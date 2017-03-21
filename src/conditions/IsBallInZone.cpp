@@ -21,7 +21,7 @@ IsBallInZone::IsBallInZone(std::string name, bt::Blackboard::Ptr blackboard) : C
 bt::Node::Status IsBallInZone::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
-	roboteam_utils::Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
+	Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
 	std::string our_side = get_our_side();
 	
 	int zone=int(private_bb->GetDouble("zone"));

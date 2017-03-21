@@ -21,11 +21,11 @@ BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
         : Skill(name, bb) {
     assert_valid<BackUp>(name);
     auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));
-    original_pos = roboteam_utils::Position(bot.pos.x, bot.pos.y, bot.angle);
+    original_pos = Position(bot.pos.x, bot.pos.y, bot.angle);
     double theta = fmodl(original_pos.getRot(), 2*M_PI);
     double dx = cosl(theta) * BACK_UP_DIST;
     double dy = sinl(theta) * BACK_UP_DIST;
-    target_pos = roboteam_utils::Position(original_pos.x - dx, original_pos.y - dy, original_pos.rot);
+    target_pos = Position(original_pos.x - dx, original_pos.y - dy, original_pos.rot);
 }
 
 inline double limit(double x) {
@@ -34,9 +34,9 @@ inline double limit(double x) {
 
 bt::Node::Status BackUp::Update() {
     auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));
-    roboteam_utils::Position current_pos = roboteam_utils::Position(bot.pos.x, bot.pos.y, bot.angle);
+    Position current_pos = Position(bot.pos.x, bot.pos.y, bot.angle);
 
-    roboteam_utils::Vector2 vec = target_pos.location() - current_pos.location();
+    Vector2 vec = target_pos.location() - current_pos.location();
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 

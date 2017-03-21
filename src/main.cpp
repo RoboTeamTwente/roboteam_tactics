@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "tactics");
     ros::NodeHandle n;
 
-    roboteam_utils::Vector2 passTo = roboteam_utils::Vector2(-1.0, 1.0);
+    Vector2 passTo = Vector2(-1.0, 1.0);
 
     auto role = make_CoolTree();
     auto bb = role.GetBlackboard();

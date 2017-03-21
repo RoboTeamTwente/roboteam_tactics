@@ -40,9 +40,9 @@ void worldStateCallbackInit(const roboteam_msgs::WorldConstPtr& world) {
 
 //     roboteam_msgs::World getworld = rtt::LastWorld::get();
 //     roboteam_msgs::WorldBall ball = getworld.ball;
-//     roboteam_utils::Vector2 center = roboteam_utils::Vector2(ball.pos.x, ball.pos.y);
+//     Vector2 center = Vector2(ball.pos.x, ball.pos.y);
 
-//     roboteam_utils::Vector2 secondaryAttackerPos(getworld.us.at(secondaryAttacker).pos.x, getworld.us.at(secondaryAttacker).pos.y);
+//     Vector2 secondaryAttackerPos(getworld.us.at(secondaryAttacker).pos.x, getworld.us.at(secondaryAttacker).pos.y);
 //     bb2->SetDouble("GetBall_A_getBallAtX", secondaryAttackerPos.x);
 //     bb2->SetDouble("GetBall_A_getBallAtY", secondaryAttackerPos.y);
     
@@ -79,12 +79,12 @@ void fieldUpdateCallback(const roboteam_msgs::GeometryDataConstPtr& geom) {
 
 void initializeRoles(bt::Blackboard::Ptr bb1, bt::Blackboard::Ptr bb2) {
     roboteam_msgs::World world = rtt::LastWorld::get();
-    roboteam_utils::Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
+    Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
 
     // This tactic directs two robots
     std::array<int, 2> availableRobots = {0, 1};
-    roboteam_utils::Vector2 firstRobotPos(world.us.at(availableRobots.at(0)).pos.x, world.us.at(availableRobots.at(0)).pos.y);
-    roboteam_utils::Vector2 secondRobotPos(world.us.at(availableRobots.at(1)).pos.x, world.us.at(availableRobots.at(1)).pos.y);
+    Vector2 firstRobotPos(world.us.at(availableRobots.at(0)).pos.x, world.us.at(availableRobots.at(0)).pos.y);
+    Vector2 secondRobotPos(world.us.at(availableRobots.at(1)).pos.x, world.us.at(availableRobots.at(1)).pos.y);
     
 
     // Assign the role of primary attacker to the robot that is closest to the ball

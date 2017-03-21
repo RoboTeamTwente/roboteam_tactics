@@ -13,6 +13,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
 
 #define RTT_CURRENT_DEBUG_TAG TwoAttackersTactic
 
@@ -24,10 +25,13 @@ TwoAttackersTactic::TwoAttackersTactic(std::string name, bt::Blackboard::Ptr bla
         : Tactic(name, blackboard) 
         {}
 
+
+
 void TwoAttackersTactic::Initialize() {
     tokens.clear();
 
-    RTT_DEBUG("Initializing TwoAttackersTactic \n");
+    // RTT_DEBUG("Initializing TwoAttackersTactic \n");
+    // ROS_INFO("Initializing TwoAttackersTactic");
     
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -41,9 +45,21 @@ void TwoAttackersTactic::Initialize() {
     int secondAttackerID = 1;
     firstAttacker.robot_id = firstAttackerID;
     secondAttacker.robot_id = secondAttackerID;
+
+    Vector2 standFreePos;
+    std::string ourSide;
+    ros::param::get("our_side", ourSide);
+    if (ourSide == "left") {
+        standFreePos = Vector2(1.5, 1.5);
+    } else if (ourSide == "right") {
+        standFreePos = Vector2(-1.5, -1.5);
+    } else {
+        ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
+        standFreePos = Vector2(-1.5, -1.5);
+    }
     
     // delete_from_vector(robots, attackerID);
-    claim_robots({firstAttackerID, secondAttackerID});
+    // claim_robots({firstAttackerID, secondAttackerID});
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -94,13 +110,17 @@ void TwoAttackersTactic::Initialize() {
 
         bb.SetInt("StandFree_A_theirID", firstAttackerID);
         bb.SetString("StandFree_A_whichTeam", "us");
-        bb.SetDouble("StandFree_A_xGoal", -3.0);
-        bb.SetDouble("StandFree_A_yGoal", 1.0);
+        bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
+        bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
 
         bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
         bb.SetString("ParamSet_readyToReceive_value", "ready");
 
-        bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+        // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
+        
+        ScopedBB(bb, "AimAt_A")
+            .setString("At", "ourgoal")
+            ;
 
         bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
 
@@ -122,6 +142,14 @@ void TwoAttackersTactic::Initialize() {
 }
 
 bt::Node::Status TwoAttackersTactic::Update() {
+
+    // ROS_INFO_STREAM("TwoAttackersTactic time: " << time_difference_milliseconds(now(), lastUpdate).count());
+
+    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
+    //     ROS_INFO("TwoAttackersTactic Update too long ago");
+    //     Initialize();
+    // }
+    
 
     bool firstAttackerSucceeded = false;
     bool secondAttackerSucceeded = false;
@@ -165,6 +193,8 @@ bt::Node::Status TwoAttackersTactic::Update() {
     if (duration.count() >= 25) {
         return Status::Failure;
     }
+
+    lastUpdate = now();
 
     return bt::Node::Status::Running;
 }

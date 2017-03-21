@@ -25,12 +25,12 @@ StandFree::StandFree(std::string name, bt::Blackboard::Ptr blackboard)
             ROS_INFO_STREAM("Standing Free");
 }
 
-boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, roboteam_utils::Vector2 myPos, roboteam_utils::Vector2 targetPos) {
+boost::optional<Cone> StandFree::MakeCoverCone(std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots, Vector2 myPos, Vector2 targetPos) {
     
     // Find out which robots are potentially blocking our view, by choosing those who are closer to the target than me
-    std::vector<roboteam_utils::Vector2> robotsInTheWay;
+    std::vector<Vector2> robotsInTheWay;
     for (size_t i = 0; i < watchOutForTheseBots.size(); i++) {
-        roboteam_utils::Vector2 robotPos = roboteam_utils::Vector2(watchOutForTheseBots.at(i).pos.x, watchOutForTheseBots.at(i).pos.y);
+        Vector2 robotPos = Vector2(watchOutForTheseBots.at(i).pos.x, watchOutForTheseBots.at(i).pos.y);
         if ((robotPos - targetPos).length() < (myPos-targetPos).length()*2) {
             robotsInTheWay.push_back(robotPos);
         }
@@ -76,23 +76,23 @@ bt::Node::Status StandFree::Update() {
 
 
     // Store some variables for easy access
-    roboteam_utils::Vector2 myPos = roboteam_utils::Vector2(world.us.at(myID).pos);
-    roboteam_utils::Vector2 theirPos;
+    Vector2 myPos = Vector2(world.us.at(myID).pos);
+    Vector2 theirPos;
     if (GetString("whichTeam") == "us") {
-        theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos); 
+        theirPos = Vector2(world.us.at(theirID).pos); 
     } else if (GetString("whichTeam") == "them") {
-        theirPos = roboteam_utils::Vector2(world.them.at(theirID).pos); 
+        theirPos = Vector2(world.them.at(theirID).pos); 
     } else {
         ROS_WARN("No team specified...");
-        theirPos = roboteam_utils::Vector2(world.us.at(theirID).pos); 
+        theirPos = Vector2(world.us.at(theirID).pos); 
     }
 
 
-    roboteam_utils::Vector2 targetPos;
+    Vector2 targetPos;
     if (HasDouble("xGoal") && HasDouble("yGoal")) {
         double xGoal = GetDouble("xGoal");
         double yGoal = GetDouble("yGoal");
-        targetPos = roboteam_utils::Vector2(xGoal, yGoal);
+        targetPos = Vector2(xGoal, yGoal);
     } else {
         targetPos = myPos;
     }
@@ -115,7 +115,7 @@ bt::Node::Status StandFree::Update() {
 
 
     // Default result is the target position
-    roboteam_utils::Vector2 nearestFreePos = targetPos;
+    Vector2 nearestFreePos = targetPos;
 
 
     // Make a Cover Cone for the robots standing between me and the target
@@ -124,23 +124,23 @@ bt::Node::Status StandFree::Update() {
     // If the Cover Cone exists, determine the point closest to me on the edge of the cone
     if (coneRobots) {
         Cone cone = *coneRobots;
-        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         // Find the closest point to me on the side of the cone, and preferably close to their goal position
         nearestFreePos = cone.ClosestPointOnSide(targetPos, theirGoalPos);
 
         // Draw the lines of the cone in rqt_view
-        roboteam_utils::Vector2 coneSide1 = (cone.center-cone.start).rotate(0.5*cone.angle);
-        roboteam_utils::Vector2 coneSide2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
-        drawer.DrawLine("coneRobotsSide1", cone.start, coneSide1); 
-        drawer.DrawLine("coneRobotsSide2", cone.start, coneSide2);
+        Vector2 coneSide1 = (cone.center-cone.start).rotate(0.5*cone.angle);
+        Vector2 coneSide2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
+        drawer.drawLine("coneRobotsSide1", cone.start, coneSide1); 
+        drawer.drawLine("coneRobotsSide2", cone.start, coneSide2);
     } else {
-        drawer.RemoveLine("coneRobotsSide1"); 
-        drawer.RemoveLine("coneRobotsSide2");
+        drawer.removeLine("coneRobotsSide1"); 
+        drawer.removeLine("coneRobotsSide2");
     }
 
 
     // Make a Cover Cone for the robots standing between me and the goal
-    roboteam_utils::Vector2 goalPos = LastWorld::get_their_goal_center();
+    Vector2 goalPos = LastWorld::get_their_goal_center();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     goalPos.y = field.goal_width / 2;
     boost::optional<Cone> coneGoal = MakeCoverCone(watchOutForTheseBots, targetPos, goalPos);
@@ -148,29 +148,29 @@ bt::Node::Status StandFree::Update() {
     boost::optional<Cone> coneGoal2 = MakeCoverCone(watchOutForTheseBots, targetPos, goalPos);
 
 
-    roboteam_utils::Vector2 nearestFreePos2(100.0, 100.0);
+    Vector2 nearestFreePos2(100.0, 100.0);
 
     if (coneGoal && coneGoal2) {
 
         Cone cone = *coneGoal;
         Cone cone2 = *coneGoal2;
-        roboteam_utils::Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        Vector2 theirGoalPos = LastWorld::get_their_goal_center();
 
 
         // Draw the lines in rqt_view
-        roboteam_utils::Vector2 cone1Side2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
+        Vector2 cone1Side2 = (cone.center-cone.start).rotate(-0.5*cone.angle);
         cone1Side2 = cone1Side2.scale(3/cone1Side2.length());
-        roboteam_utils::Vector2 cone2Side1 = (cone2.center-cone2.start).rotate(0.5*cone2.angle);
+        Vector2 cone2Side1 = (cone2.center-cone2.start).rotate(0.5*cone2.angle);
         cone2Side1 = cone2Side1.scale(3/cone2Side1.length());
 
-        roboteam_utils::Vector2 newConeStart = Cone::LineIntersection(cone.start, cone1Side2, cone2.start, cone2Side1);
+        Vector2 newConeStart = Cone::LineIntersection(cone.start, cone1Side2, cone2.start, cone2Side1);
         Cone newCone(newConeStart, cone2Side1, cone1Side2);
 
-        roboteam_utils::Vector2 newConeSide1 = (newCone.center-newCone.start).rotate(-0.5*newCone.angle);
-        roboteam_utils::Vector2 newConeSide2 = (newCone.center-newCone.start).rotate(0.5*newCone.angle);
+        Vector2 newConeSide1 = (newCone.center-newCone.start).rotate(-0.5*newCone.angle);
+        Vector2 newConeSide2 = (newCone.center-newCone.start).rotate(0.5*newCone.angle);
 
-        drawer.DrawLine("newConeSide1", newCone.start, newConeSide1);
-        drawer.DrawLine("newConeSide2", newCone.start, newConeSide2);
+        drawer.drawLine("newConeSide1", newCone.start, newConeSide1);
+        drawer.drawLine("newConeSide2", newCone.start, newConeSide2);
 
         if (coneRobots) {
             std::vector<std::string> names;
@@ -183,8 +183,8 @@ bt::Node::Status StandFree::Update() {
             nearestFreePos = newCone.ClosestPointOnSide(targetPos, theirGoalPos);
         }        
     } else {
-        drawer.RemoveLine("newConeSide1");
-        drawer.RemoveLine("newConeSide2");
+        drawer.removeLine("newConeSide1");
+        drawer.removeLine("newConeSide2");
     }
 
 
@@ -192,14 +192,15 @@ bt::Node::Status StandFree::Update() {
         nearestFreePos = nearestFreePos2;
     }
 
-    drawer.SetColor(255,0,0);
-    drawer.DrawPoint("nearestFreePos", nearestFreePos);
-    drawer.SetColor(0,0,0);
+    drawer.setColor(255,0,0);
+    drawer.drawPoint("nearestFreePos", nearestFreePos);
+    drawer.setColor(0,0,0);
 
 
     // Fill the goToPos blackboard and send the command
     double angleGoal = (theirPos-targetPos).angle();
     private_bb->SetInt("ROBOT_ID", myID);
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", nearestFreePos.x);
     private_bb->SetDouble("yGoal", nearestFreePos.y);
     private_bb->SetDouble("angleGoal", angleGoal);
@@ -207,13 +208,13 @@ bt::Node::Status StandFree::Update() {
     if (goToPos.Update() == Status::Success) {
         
         // Remove all the lines from rqt view
-        drawer.RemoveLine("coneRobotsSide1");
-        drawer.RemoveLine("coneRobotsSide2");
-        drawer.RemoveLine("coneGoal1Side1");
-        drawer.RemoveLine("coneGoal1Side2");
-        drawer.RemoveLine("coneGoal2Side1");
-        drawer.RemoveLine("coneGoal2Side2");
-        drawer.RemovePoint("nearestFreePos");
+        drawer.removeLine("coneRobotsSide1");
+        drawer.removeLine("coneRobotsSide2");
+        drawer.removeLine("coneGoal1Side1");
+        drawer.removeLine("coneGoal1Side2");
+        drawer.removeLine("coneGoal2Side1");
+        drawer.removeLine("coneGoal2Side2");
+        drawer.removePoint("nearestFreePos");
         return Status::Success;
     }
     return Status::Running;

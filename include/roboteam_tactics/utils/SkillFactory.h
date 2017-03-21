@@ -97,6 +97,17 @@ bt::Blackboard::Ptr parse_bb(const std::string& skill_name, const std::vector<st
 } // anonymous namespace
   // Just like "static"
 
+/**
+ * \brief Build a skill from a name and a TestX-formatted blackboard string
+ * \tparam T The type of the skill to create
+ * \param type_name The name of the skill class
+ * \param skill_name The name of the node; as listed in the behavior tree
+ * \param arg_fmt A format string which will constitute the blackboard
+ * \param <varargs> All arguments needed to make arg_fmt a valid blackboard string.
+ * \return A pointer to the finished skill
+ * \throws invalid_argument If either blackboard validation is enabled for T, and it failed, or if
+ * no entry for this skill type exists in the skills Repo.
+ */
 template <typename T>
 std::shared_ptr<T> build_skill(const std::string& type_name, const std::string& skill_name, const std::string& arg_fmt, ...) {
     char buf[1024];
