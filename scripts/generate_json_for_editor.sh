@@ -87,6 +87,12 @@ for f in $(find ./include/roboteam_tactics/tactics -depth); do
     fi
 done
 
+for f in ./include/roboteam_tactics/skills/*.h; do
+    name=$(basename "$f" .h)
+    getProperties $f
+    entry $name action "$properties"
+done
+
 for f in ./include/roboteam_tactics/conditions/*.h; do
     name=$(basename "$f" .h)
     getProperties $f
