@@ -28,6 +28,7 @@ public:
         // Keep going until a child behavior says it's running.
         while (index < children.size()) {
             auto &child = children.at(index);
+
             Node::append_status("[MemSequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
 

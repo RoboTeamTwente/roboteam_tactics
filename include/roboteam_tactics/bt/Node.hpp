@@ -7,7 +7,6 @@
 
 #include "Blackboard.hpp"
 
-
 namespace bt
 {
 
@@ -29,7 +28,12 @@ public:
     virtual Status Update() = 0;
     virtual void Initialize() {}
     virtual void Terminate(Status s) {
-        status = Status::Failure;
+        // If we're terminating while we're still running,
+        // consider the node failed. If it already failed
+        // or succeeded, leave it like that.
+        if (s == Status::Running) {
+            status = Status::Failure;
+        }
     }
 
     virtual Status Tick()

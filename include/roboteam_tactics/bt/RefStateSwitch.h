@@ -93,7 +93,7 @@ public:
 
     void Terminate(Status s) override {
         if (last != -1) {
-            children.at(last)->Terminate(children.at(lat)->getStatus());
+            children.at(last)->Terminate(children.at(last)->getStatus());
 
             last = -1;
         }
