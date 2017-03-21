@@ -10,7 +10,7 @@ namespace rtt {
 /**
  * \brief The value which indicates that a referee state has no special treatment in the strategy
  */
-static constexpr const char* UNSET = "<<TODO>>";
+extern std::string UNSET;
     
 /**
  * \class StrategyComposer
@@ -26,16 +26,16 @@ private:
     static constexpr unsigned int CASE_COUNT = 19;
     
     // SET THIS IN StrategyComposer.cpp !!
-    static const std::map<RefState, const char*> MAPPING;
+    static const std::map<RefState, std::string> MAPPING;
     
     class Forwarder final : public bt::Leaf {
         public:
-        Forwarder(bt::Blackboard::Ptr bb, bt::Node& target);
+        Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target);
         bt::Node::Status Update() override;
         void Initialize() override;
         void Terminate(bt::Node::Status status) override;
         private:
-        bt::Node& target;
+        bt::Node::Ptr target;
     };
 public:
     static bt::BehaviorTree getMainStrategy();

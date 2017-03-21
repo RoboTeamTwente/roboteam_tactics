@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Node.hpp"
 #include <string>
 #include <array>
-#include "ros/ros.h"
+#include <ros/ros.h>
 
+#include "roboteam_tactics/bt.hpp"
 #include "roboteam_utils/LastRef.h"
 #include "roboteam_msgs/RefereeCommand.h"
 #include "roboteam_msgs/RefereeData.h"
@@ -21,7 +21,10 @@ public:
     /**
      * \brief The children which a RefStateSwitch should have. Mostly for error messages.
      */
-    static constexpr std::array<const char*, 19> EXPECTED_CHILDREN = {
+    std::array<std::string, 19> const EXPECTED_CHILDREN = {{
+        // TODO: When GCC gets its shit together, replace the doubly
+        // braces with singly braces
+        // (it's a bug: http://stackoverflow.com/questions/8192185/using-stdarray-with-initialization-lists)
         "HALT=0",
         "STOP=1",
         "NORMAL_START=2",
@@ -41,7 +44,7 @@ public:
         "BALL_PLACEMENT_US=16",
         "BALL_PLACEMENT_THEM=17",
         "NORMAL_PLAY=18"
-    };
+    }};
     
     RefStateSwitch() : validated(false), last(-1) {}
     
@@ -83,8 +86,12 @@ public:
         auto child = children.at(cmd);
 
         if (last != cmd) {
-            children.at(last)->Terminate(children.at(last)->getStatus());
+            if (last != -1) {
+                children.at(last)->Terminate(children.at(last)->getStatus());
+            }
+
             child->Initialize();
+
             last = cmd;
         }
 
