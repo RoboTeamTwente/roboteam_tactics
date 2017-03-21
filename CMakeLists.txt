@@ -282,11 +282,13 @@ if (BUILD_STRATEGYNODE)
 
 endif (BUILD_STRATEGYNODE)
 
-catkin_add_gtest(BtTest
+catkin_add_gtest(bt_test
     test/main.cpp
     test/BtTest.cpp
 )
-target_link_libraries(BtTest ${catkin_LIBRARIES})
+target_link_libraries(bt_test 
+    ${catkin_LIBRARIES}
+    )
 
 #   add_executable(Learner
 #        src/utils/tests/Learner.cpp

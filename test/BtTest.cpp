@@ -40,7 +40,7 @@ namespace {
             return Status::Success;
         }
 
-        virtual void Terminate_(Status s) {
+        virtual void Terminate_(Status) {
         
         }
     } ;

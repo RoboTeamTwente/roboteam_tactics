@@ -75,15 +75,32 @@ public:
         if (!validated) {
             assertValid();
         }
+
         validated = true;
+
         int cmd = (int) LastRef::get().command.command;
+
         auto child = children.at(cmd);
+
         if (last != cmd) {
-            children.at(last)->Terminate(bt::Node::Status::Invalid);
+            children.at(last)->Terminate(children.at(last)->getStatus());
             child->Initialize();
             last = cmd;
         }
+
         return child->Update();
+    }
+
+    void Terminate(Status s) override {
+        if (last != -1) {
+            children.at(last)->Terminate(children.at(lat)->getStatus());
+
+            last = -1;
+        }
+
+        if (s == Status::Running) {
+            setStatus(Status::Failure);
+        }
     }
     
     std::string node_name() override { return "RefStateSwitch"; }
