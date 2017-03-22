@@ -55,3 +55,6 @@
 
 #include "TwoVTwoDefenseTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "ThrowinPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
