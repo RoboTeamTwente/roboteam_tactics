@@ -6,18 +6,19 @@ namespace rtt {
     
 bool StrategyComposer::initialized = false;    
 bt::BehaviorTree StrategyComposer::mainStrategy;
+std::string UNSET = "<<UNSET>>";
 
 /*
  * This is a mapping of Ref states to the appropriate strategies.
  * Any UNSET ref states will fall back to the NORMAL_PLAY strategy.
  * If the NORMAL_PLAY strategy is UNSET, bad things will happen.
  */
-const std::map<RefState, const char*> StrategyComposer::MAPPING = {
+const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::HALT,                 UNSET },
         { RefState::STOP,                 UNSET },
         { RefState::NORMAL_START,         UNSET },
         { RefState::FORCED_START,         UNSET },
-        { RefState::PREPARE_KICKOFF_US,   UNSET },
+        { RefState::PREPARE_KICKOFF_US,   "rtt_bob/prepare_kickoff_us"},
         { RefState::PREPARE_KICKOFF_THEM, UNSET },
         { RefState::PREPARE_PENALTY_US,   UNSET },
         { RefState::PREPARE_PENALTY_THEM, UNSET },
@@ -39,37 +40,74 @@ bt::BehaviorTree StrategyComposer::getMainStrategy() {
     return mainStrategy;
 }
 
-
-
 void StrategyComposer::init() {
+    // TODO: There is ****0**** error handling here.
+
+    // Return if not initialized
     if (initialized) return;
     
-    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>(bt::Blackboard());
-    std::shared_ptr<RefStateSwitch> rss;
+    // Construct the global bb and the refstate switch
+    bt::Blackboard::Ptr bb              = std::make_shared<bt::Blackboard>(bt::Blackboard());
+    std::shared_ptr<RefStateSwitch> rss = std::make_shared<RefStateSwitch>();
     
-    auto repo = factories::getRepo<bt::BehaviorTree>();
+    // Get the factory that stores all the behavior trees
+    namespace f = ::rtt::factories;
+    auto const & repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
+
+    // Get the default tree factory map entry
+    std::string defName = MAPPING.at(RefState::NORMAL_PLAY);
+    auto defIt = repo.find(defName);
+
+    // If it exists, set it as default
+    bt::BehaviorTree::Ptr def;
+    if (defIt != repo.end()) {
+        def = defIt->second("", bb);
+    } else {
+        std::cerr << "Could not find a tree for default strategy tree \""
+                  << defName
+                  << "\". Possibly \"refresh_b3_projects.sh\" needs to be run "
+                  << "or a non-existent tree was selected.\n";
+        return;
+    }
     
-    const char* defName = MAPPING.at(RefState::NORMAL_PLAY);
-    bt::BehaviorTree def = repo.at(std::string(defName));
-    
-    for (unsigned int i = 0; i < MAPPING.size() - 1; i++) {
-        const char* strat = MAPPING.at(static_cast<RefState>(i));
+    // For each mapping...
+    for (unsigned int i = 0; i < MAPPING.size(); i++) {
+        // Get the name of the desired strategy
+        std::string strat = MAPPING.at(static_cast<RefState>(i));
+
+        // If it's unset use the default
         if (strat == UNSET) {
             Forwarder fw(bb, def);
             rss->AddChild(std::make_shared<Forwarder>(fw));
         } else {
-            bt::BehaviorTree node = repo.at(std::string(strat));
-            rss->AddChild(std::make_shared<bt::BehaviorTree>(node));
+            // Else try to find the desired strategy tree
+            auto stratIt = repo.find(strat);
+
+            if (stratIt != repo.end()) {
+                // If so, set it
+                auto node = repo.at(strat)("", bb);
+                rss->AddChild(node);
+            } else {
+                // Else it's not there, abort!
+                std::cerr << "Could not find a tree for \""
+                          << strat
+                          << "\". Possibly \"refresh_b3_projects.sh\" needs to be run "
+                          << "or a non-existent tree was selected.\n";
+                return;
+            }
         }
     }
     
+    // The main strategy is now properly initialized
     mainStrategy = bt::BehaviorTree();
     mainStrategy.SetRoot(rss);
+
+    initialized = true;
 }    
     
-StrategyComposer::Forwarder::Forwarder(bt::Blackboard::Ptr bb, bt::Node& target) : bt::Leaf(bb), target(target) {}
-bt::Node::Status StrategyComposer::Forwarder::Update() { return target.Update(); }
-void StrategyComposer::Forwarder::Initialize() { target.Initialize(); }
-void StrategyComposer::Forwarder::Terminate(bt::Node::Status status) { target.Terminate(status); }    
+StrategyComposer::Forwarder::Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target) : bt::Leaf(bb), target(target) {}
+bt::Node::Status StrategyComposer::Forwarder::Update() { return target->Update(); }
+void StrategyComposer::Forwarder::Initialize() { target->Initialize(); }
+void StrategyComposer::Forwarder::Terminate(bt::Node::Status status) { target->Terminate(status); }    
     
 }

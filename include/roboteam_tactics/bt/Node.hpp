@@ -7,7 +7,6 @@
 
 #include "Blackboard.hpp"
 
-
 namespace bt
 {
 
@@ -29,6 +28,12 @@ public:
     virtual Status Update() = 0;
     virtual void Initialize() {}
     virtual void Terminate(Status s) {
+        // If we're terminating while we're still running,
+        // consider the node failed. If it already failed
+        // or succeeded, leave it like that.
+        if (s == Status::Running) {
+            status = Status::Failure;
+        }
     }
 
     virtual Status Tick()
@@ -50,7 +55,8 @@ public:
     bool IsFailure() const { return status == Status::Failure; }
     bool IsRunning() const { return status == Status::Running; }
     bool IsTerminated() const { return IsSuccess() || IsFailure(); }
-    void Reset() { status = Status::Invalid; }
+    Status getStatus() const { return status; }
+    void setStatus(Status s) { status = s; }
 
     using Ptr = std::shared_ptr<Node>;
 
@@ -74,7 +80,9 @@ protected:
 
 using Nodes = std::vector<Node::Ptr>;
 
-static std::string statusToString(Node::Status status) {
+namespace {
+
+std::string statusToString(bt::Node::Status status) {
     if (status == bt::Node::Status::Success) {
         return "Success";
     } else if (status == bt::Node::Status::Failure) {
@@ -89,4 +97,7 @@ static std::string statusToString(Node::Status status) {
     }
 }
 
+} // anonymous namespace
+
 }
+

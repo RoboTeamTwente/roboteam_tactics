@@ -283,6 +283,14 @@ if (BUILD_STRATEGYNODE)
 
 endif (BUILD_STRATEGYNODE)
 
+catkin_add_gtest(bt_test
+    test/main.cpp
+    test/BtTest.cpp
+)
+target_link_libraries(bt_test 
+    ${catkin_LIBRARIES}
+    )
+
 #   add_executable(Learner
 #        src/utils/tests/Learner.cpp
 #        $<TARGET_OBJECTS:treegen>
@@ -303,14 +311,13 @@ endif (BUILD_STRATEGYNODE)
 #	${QT_LIBRARIES}
 #        )
 
-
 if (BUILD_PRACTICE_TESTS)
 
     add_executable(PracticeTests
         ./src/practice_tests/main.cpp
         ./src/practice_tests/PracticeTest.cpp
         ./src/practice_tests/KeeperTest.cpp
-	./src/practice_tests/TestSetup.cpp
+        ./src/practice_tests/TestSetup.cpp
         ./src/practice_tests/FreeKickTest.cpp
 
         $<TARGET_OBJECTS:analysis>
