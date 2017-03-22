@@ -17,11 +17,11 @@ inline void test(C condition) {
     }
 }
 
-
 TEST(ConditionTests, IHaveBallTest) {
     bt::Blackboard bb;
     bb.SetInt("ihb_test_me", 0);
     bb.SetBool("ihb_test_our_team", true);
     test<IHaveBall>(IHaveBall("ihb_test", std::make_shared<bt::Blackboard>(bb)));
 }
+
 }

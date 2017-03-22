@@ -121,7 +121,6 @@ void StandByTactic::Initialize() {
 }
 
 bt::Node::Status StandByTactic::Update() {
-
     bool allSucceeded = true;
 
     for (auto token : tokens) {

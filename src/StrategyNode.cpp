@@ -8,23 +8,25 @@
 #include "std_msgs/Empty.h"
 #include "unique_id/unique_id.h"
 
+#include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
-#include "roboteam_msgs/World.h"
-#include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/StrategyIgnoreRobot.h"
+#include "roboteam_msgs/World.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/constants.h"
+
+#include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/generated/qualification_trees.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/treegen/StrategyComposer.h"
+#include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
-#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_tactics/Parts.h"
-#include "roboteam_utils/constants.h"
-#include "roboteam_tactics/utils/BtDebug.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -83,17 +85,21 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<bt::BehaviorTree> strategy;
     // Only continue if arguments were given
     if (arguments.size() > 0) {
-        // Get all available trees
-        auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
-        // If the given name exists...
-        if (repo.find(arguments[0]) != repo.end()) {
-            // Get the factory
-            auto treeFactory = repo.at(arguments[0]);
-            // Create the tree
-            strategy = treeFactory("", nullptr);
+        if (arguments[0] == "mainStrategy") {
+            strategy = std::make_shared<bt::BehaviorTree>(rtt::StrategyComposer::getMainStrategy());
         } else {
-            ROS_ERROR("\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
-            return 1;
+            // Get all available trees
+            auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
+            // If the given name exists...
+            if (repo.find(arguments[0]) != repo.end()) {
+                // Get the factory
+                auto treeFactory = repo.at(arguments[0]);
+                // Create the tree
+                strategy = treeFactory("", nullptr);
+            } else {
+                ROS_ERROR("\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
+                return 1;
+            }
         }
     } else {
         ROS_ERROR("No strategy tree passed as argument. Aborting.");

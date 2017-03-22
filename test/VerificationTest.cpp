@@ -2,6 +2,9 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
 
+// What the f is this :p
+// std::string bt::Node::status_desc;
+
 namespace rtt {
 
 class HasVerification : public Condition {
