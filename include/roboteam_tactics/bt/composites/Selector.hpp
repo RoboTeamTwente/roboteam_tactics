@@ -14,20 +14,10 @@ namespace bt
 class Selector : public Composite
 {
 public:
-    void Initialize() override
-    {
-        index = 0;
-    }
-
     Status Update() override
     {
-        if (HasNoChildren()) {
-            return Status::Success;
-        }
-
         // Keep going until a child behavior says it's running.
-        while (1) {
-            auto &child = children.at(index);
+        for (auto& child : children) {
             Node::append_status("[Selector: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
 
@@ -35,15 +25,12 @@ public:
             if (status != Status::Failure) {
                 return status;
             }
-
-            // Hit the end of the array, it didn't end well...
-            if (++index == children.size()) {
-                return Status::Failure;
-            }
         }
+
+        return Status::Failure;
     }
     
-    std::string node_name() { return "Selector"; }
+    std::string node_name() override { return "Selector"; }
     
     using Ptr = std::shared_ptr<Selector>;
 };

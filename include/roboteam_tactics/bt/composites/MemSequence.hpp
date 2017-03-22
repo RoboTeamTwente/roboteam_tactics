@@ -14,15 +14,21 @@ namespace bt
 class MemSequence : public Composite
 {
 public:
-    Status Update() override
-    {
+    size_t index;
+
+    void Initialize() override {
+        index = 0;
+    }
+
+    Status Update() override {
         if (HasNoChildren()) {
             return Status::Success;
         }
 
         // Keep going until a child behavior says it's running.
-        while (1) {
+        while (index < children.size()) {
             auto &child = children.at(index);
+
             Node::append_status("[MemSequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
 
@@ -31,15 +37,13 @@ public:
                 return status;
             }
 
-            // Hit the end of the array, job done!
-            if (++index == children.size()) {
-                index = 0;
-                return Status::Success;
-            }
+            index++;
         }
+
+        return Status::Success;
     }
     
-    std::string node_name() { return "MemSequence"; }
+    std::string node_name() override { return "MemSequence"; }
     
     using Ptr = std::shared_ptr<MemSequence>;
 };

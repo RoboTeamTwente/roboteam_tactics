@@ -11,24 +11,16 @@ namespace bt
     In the next tick, it will try to run each child in order again.
     If all children succeeds, only then does the sequence succeed.
 */
-class Sequence : public Composite
-{
+class Sequence : public Composite {
 public:
-    void Initialize() override
-    {
-        index = 0;
-    }
-
     Status Update() override
     {
         if (HasNoChildren()) {
             return Status::Success;
         }
-
+        
         // Keep going until a child behavior says it's running.
-        while (1) {
-            auto &child = children.at(index);
-
+        for (auto &child : children) {
             Node::append_status("[Sequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
             
@@ -36,14 +28,12 @@ public:
             if (status != Status::Success) {
                 return status;
             }
-            // Hit the end of the array, job done!
-            if (++index == children.size()) {
-                return Status::Success;
-            }
         }
+
+        return Status::Success;
     }
     
-    std::string node_name() { return "Sequence"; }
+    std::string node_name() override { return "Sequence"; }
     
     using Ptr = std::shared_ptr<Sequence>;
 };

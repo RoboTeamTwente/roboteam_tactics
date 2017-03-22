@@ -14,14 +14,19 @@ namespace bt
 class MemSelector : public Composite
 {
 public:
-    Status Update() override
-    {
+    size_t index;
+
+    void Initialize() override {
+        index = 0;
+    }
+
+    Status Update() override {
         if (HasNoChildren()) {
             return Status::Success;
         }
 
         // Keep going until a child behavior says it's running.
-        while (1) {
+        while (index < children.size()) {
             auto &child = children.at(index);
             Node::append_status("[MemSelector: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
@@ -31,17 +36,15 @@ public:
                 return status;
             }
 
-            // Hit the end of the array, it didn't end well...
-            if (++index == children.size()) {
-                index = 0;
-                return Status::Failure;
-            }
+            index++;
         }
+
+        return Status::Failure;
     }
     
     using Ptr = std::shared_ptr<MemSelector>;
     
-    std::string node_name() { return "MemSelector"; }
+    std::string node_name() override { return "MemSelector"; }
 };
 
 static MemSelector::Ptr MakeMemSelector()

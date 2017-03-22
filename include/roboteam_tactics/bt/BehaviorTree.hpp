@@ -15,7 +15,17 @@ public:
     BehaviorTree(const Node::Ptr &rootNode) : BehaviorTree() { root = rootNode;}
     BehaviorTree(const Blackboard::Ptr &shared) : BehaviorTree() { sharedBlackboard = shared;}
     
-    Status Update() { return root->Tick(); }
+    Status Update() override { return root->Tick(); }
+
+    void Terminate(Status s) override {
+        if (root->getStatus() == Status::Running) {
+            root->Terminate(root->getStatus());
+        }
+
+        if (s == Node::Status::Running) {
+            setStatus(Node::Status::Failure);
+        }
+    }
     
     void SetRoot(const Node::Ptr &node) { root = node; }
     Blackboard::Ptr GetBlackboard() const { return blackboard; }
