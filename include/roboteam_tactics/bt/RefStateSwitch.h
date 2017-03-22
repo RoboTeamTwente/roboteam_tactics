@@ -60,6 +60,7 @@ public:
             }
 
             child->Initialize();
+            ROS_INFO("Received referee command %d", cmd);
 
             last = cmd;
         }

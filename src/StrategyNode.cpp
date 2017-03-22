@@ -48,6 +48,11 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
     }
 }
 
+void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    rtt::LastRef::set(*refdata);
+}
+
+
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
@@ -140,6 +145,8 @@ int main(int argc, char *argv[]) {
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     RTT_DEBUGLN("More than one robot found. Starting!");
+    
+    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
     
     while (ros::ok()) {
         ros::spinOnce();

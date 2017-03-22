@@ -13,7 +13,7 @@ std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
  * Any UNSET ref states will fall back to the NORMAL_PLAY strategy.
  * If the NORMAL_PLAY strategy is UNSET, bad things will happen.
  */
-const std::map<RefState, const char*> StrategyComposer::MAPPING = {
+const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::HALT,                 "rtt_dennis/HaltStrategy" },
         { RefState::STOP,                 "rtt_dennis/HaltStrategy" },
         { RefState::NORMAL_START,         UNSET },
