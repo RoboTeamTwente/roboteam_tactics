@@ -169,10 +169,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        if (ROBOT_ID == 1) RTT_DEBUGLN("Updating");
         bt::Node::Status status = currentTree->Update();
-        if (ROBOT_ID == 1) RTT_DEBUGLN("Done updating");
-        
 
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure

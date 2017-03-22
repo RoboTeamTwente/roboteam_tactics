@@ -89,6 +89,10 @@ void Tactic::Terminate(Status) {
 
     RobotDealer::release_robots(robots);
     claimed_robots.clear();
+
+    if (getStatus() == bt::Node::Status::Running) {
+        setStatus(bt::Node::Status::Failure);
+    }
 }
 
 void Tactic::claim_robot(int id) {
