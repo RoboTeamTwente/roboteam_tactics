@@ -279,7 +279,6 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    angleGoal = cleanAngle(GetDouble("angleGoal"));  
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
@@ -315,6 +314,12 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+
+    if (HasDouble("angleGoal")) {
+    	angleGoal = cleanAngle(GetDouble("angleGoal"));
+    } else {
+    	angleGoal = posError.angle();
+    }
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
     
