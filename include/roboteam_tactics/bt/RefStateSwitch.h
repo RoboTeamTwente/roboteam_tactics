@@ -17,42 +17,14 @@ namespace rtt {
  */
 class RefStateSwitch : public bt::Composite {    
     
-public:
-    /**
-     * \brief The children which a RefStateSwitch should have. Mostly for error messages.
-     */
-    std::array<std::string, 19> const EXPECTED_CHILDREN = {{
-        // TODO: When GCC gets its shit together, replace the doubly
-        // braces with singly braces
-        // (it's a bug: http://stackoverflow.com/questions/8192185/using-stdarray-with-initialization-lists)
-        "HALT=0",
-        "STOP=1",
-        "NORMAL_START=2",
-        "FORCE_START=3",
-        "PREPARE_KICKOFF_US=4",
-        "PREPARE_KICKOFF_THEM=5",
-        "PREPARE_PENALTY_US=6",
-        "PREPARE_PENALTY_THEM=7",
-        "DIRECT_FREE_US=8",
-        "DIRECT_FREE_THEM=9",
-        "INDIRECT_FREE_US=10",
-        "INDIRECT_FREE_THEM=11",
-        "TIMEOUT_US=12",
-        "TIMEOUT_THEM=13",
-        "GOAL_US=14",
-        "GOAL_THEM=15",
-        "BALL_PLACEMENT_US=16",
-        "BALL_PLACEMENT_THEM=17",
-        "NORMAL_PLAY=18"
-    }};
-    
+public:    
     RefStateSwitch() : validated(false), last(-1) {}
     
     /**
      * \brief Checks whether this RefStateSwitch has all the children it should have.
      */
     bool isValid() const {
-        return children.size() == EXPECTED_CHILDREN.size();
+        return children.size() == REF_STATE_COUNT;
     }
     
     /**
@@ -60,11 +32,8 @@ public:
      */
     void assertValid() const {
         if (!isValid()) {
-            ROS_ERROR("Assertion Failed: RefStateSwitch expected %lu children, but got %lu. Here's a list of what it needs:",
-                        EXPECTED_CHILDREN.size(), children.size());
-            for (const std::string& s : EXPECTED_CHILDREN) {
-                ROS_ERROR("%s", s.c_str());
-            }
+            ROS_ERROR("Assertion Failed: RefStateSwitch expected %lu children, but got %lu.",
+                        REF_STATE_COUNT, children.size());
         }
     }
     

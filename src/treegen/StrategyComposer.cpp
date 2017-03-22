@@ -5,17 +5,17 @@
 namespace rtt {
     
 bool StrategyComposer::initialized = false;    
-bt::BehaviorTree StrategyComposer::mainStrategy;
-std::string UNSET = "<<UNSET>>";
+const std::string UNSET = "<<UNSET>>";
+std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
 
 /*
  * This is a mapping of Ref states to the appropriate strategies.
  * Any UNSET ref states will fall back to the NORMAL_PLAY strategy.
  * If the NORMAL_PLAY strategy is UNSET, bad things will happen.
  */
-const std::map<RefState, std::string> StrategyComposer::MAPPING = {
-        { RefState::HALT,                 UNSET },
-        { RefState::STOP,                 UNSET },
+const std::map<RefState, const char*> StrategyComposer::MAPPING = {
+        { RefState::HALT,                 "rtt_dennis/HaltStrategy" },
+        { RefState::STOP,                 "rtt_dennis/HaltStrategy" },
         { RefState::NORMAL_START,         UNSET },
         { RefState::FORCED_START,         UNSET },
         { RefState::PREPARE_KICKOFF_US,   "rtt_bob/prepare_kickoff_us"},
@@ -32,22 +32,20 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::GOAL_THEM,            UNSET },
         { RefState::BALL_PLACEMENT_US,    UNSET },
         { RefState::BALL_PLACEMENT_THEM,  UNSET },
-        { RefState::NORMAL_PLAY,          "DemoStrategy"}
+        { RefState::NORMAL_PLAY,          "qualification/StandByStrat"}
 };
 
-bt::BehaviorTree StrategyComposer::getMainStrategy() {
+std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
     if (!initialized) init();
     return mainStrategy;
 }
 
 void StrategyComposer::init() {
-    // TODO: There is ****0**** error handling here.
-
     // Return if not initialized
     if (initialized) return;
     
     // Construct the global bb and the refstate switch
-    bt::Blackboard::Ptr bb              = std::make_shared<bt::Blackboard>(bt::Blackboard());
+    bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>(bt::Blackboard());
     std::shared_ptr<RefStateSwitch> rss = std::make_shared<RefStateSwitch>();
     
     // Get the factory that stores all the behavior trees
@@ -99,9 +97,8 @@ void StrategyComposer::init() {
     }
     
     // The main strategy is now properly initialized
-    mainStrategy = bt::BehaviorTree();
-    mainStrategy.SetRoot(rss);
-
+    mainStrategy = std::make_shared<bt::BehaviorTree>();
+    mainStrategy->SetRoot(rss);
     initialized = true;
 }    
     

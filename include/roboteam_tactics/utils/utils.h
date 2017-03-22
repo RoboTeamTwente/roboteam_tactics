@@ -311,6 +311,24 @@ std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& wo
  */
 std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world = LastWorld::get());
 
+/**
+ * \brief Gets the robot with the given ID as a WorldRobot
+ * @param id The ID of the desired robot
+ * @param ourTeam whether or not the robot is in our team
+ * @param world The world to search
+ * @return An optional containing the robot, or an empty optional if it was not found
+ */
+boost::optional<roboteam_msgs::WorldRobot> getWorldBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Gets the robot with the given ID as a TeamRobot
+ * @param id The ID of the desired robot
+ * @param ourTeam whether or not the robot is in our team
+ * @param world The world to search
+ * @return An optional containing the robot, or an empty optional if it was not found
+ */
+boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
+
 } // rtt
 
 #include "roboteam_tactics/utils/utils.tcc"

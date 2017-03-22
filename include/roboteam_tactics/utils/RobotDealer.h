@@ -6,6 +6,9 @@
 
 namespace rtt {
 
+// For friend declaration
+class HaltTactic;
+    
 /**
  * \class RobotDealer
  * \brief Keeps track of which robots have been 'claimed' by tactics
@@ -57,6 +60,9 @@ private:
     static std::set<int> available_robots;
     static int keeper;
     static bool keeper_available;
+    
+    friend class HaltTactic;
+    static void halt_override();
 } ;
 
 } // rtt

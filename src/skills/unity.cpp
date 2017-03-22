@@ -22,6 +22,9 @@
 #include "FollowPath.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Freeze.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "GetBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

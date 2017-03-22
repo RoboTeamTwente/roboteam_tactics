@@ -60,7 +60,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
     ros::NodeHandle n;
 
-    // std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
+     std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
@@ -84,36 +84,35 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    // std::cout << "Ignoring strategy? ";
+     std::cout << "Ignoring strategy? ";
 
-    if (ignoring_strategy_instructions) {
-        // std::cout << "Yes!\n";
+   if (ignoring_strategy_instructions) {
+         std::cout << "Yes!\n";
         return;
     }
-
-    // std::cout << "No!\n";
+   std::cout << "No!\n";
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
 
     if (!bb->HasInt("ROBOT_ID")) {
-        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+         std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
     }
 
 
     if (!bb->HasInt("KEEPER_ID")) {
-        // std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+         std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
     }
 
-    try {
+    {
         ros::NodeHandle n;
         currentTreeName = msg->tree;
         currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
-    } catch (...) {
-        ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
-        return;
+        if (!currentTree)  {
+            ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
+            return;
+        }
     }
-
     currentToken = msg->token;
 
     RTT_DEBUG("Robot %i starts executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
@@ -170,9 +169,9 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // if (ROBOT_ID == 1) RTT_DEBUGLN("Updating");
+        if (ROBOT_ID == 1) RTT_DEBUGLN("Updating");
         bt::Node::Status status = currentTree->Update();
-        // if (ROBOT_ID == 1) RTT_DEBUGLN("Done updating");
+        if (ROBOT_ID == 1) RTT_DEBUGLN("Done updating");
         
 
         if (status == bt::Node::Status::Success

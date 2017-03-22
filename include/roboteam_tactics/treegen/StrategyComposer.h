@@ -10,7 +10,7 @@ namespace rtt {
 /**
  * \brief The value which indicates that a referee state has no special treatment in the strategy
  */
-extern std::string UNSET;
+extern const std::string UNSET;
     
 /**
  * \class StrategyComposer
@@ -19,7 +19,7 @@ extern std::string UNSET;
 class StrategyComposer {
 private:
     StrategyComposer() = delete;
-    static bt::BehaviorTree mainStrategy;
+    static std::shared_ptr<bt::BehaviorTree> mainStrategy;
     static void init();
     static bool initialized;
     
@@ -38,7 +38,7 @@ private:
         bt::Node::Ptr target;
     };
 public:
-    static bt::BehaviorTree getMainStrategy();
+    static std::shared_ptr<bt::BehaviorTree> getMainStrategy();
 };
     
 }
