@@ -50,16 +50,16 @@ GoToPosAlt::GoToPosAlt(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
 
         // Control gains
-        , pGainPosition(3.0)
-        , pGainRotation(5.0)
+        , pGainPosition(2.0)
+        , pGainRotation(2.5) // hansBot: 0.5
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
-        , maxAngularVel(3.0)
+        , maxAngularVel(4.0) // hansBot: 0.8
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(1.0)
+        , maxSpeed(3.5) // hansBot: 1.0
         , attractiveForce(10.0)
         , attractiveForceWhenClose(10.0)
         , repulsiveForce(20.0)
@@ -133,6 +133,9 @@ double GoToPosAlt::rotationController(double myAngle, double angleGoal, Vector2 
     if (fabs(angularVelTarget) > maxAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
+
+
+
 
     return angularVelTarget;
 }
@@ -270,8 +273,8 @@ Vector2 GoToPosAlt::checkTargetPos(Vector2 targetPos) {
 }
 
 
-roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
-
+boost::optional<roboteam_msgs::RobotCommand> GoToPosAlt::getVelCommand() {
+	bool reachedTargetPos = false;
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
     
@@ -285,6 +288,16 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
         // ROS_WARN("GoToPosAlt, KEEPER_ID not set");
         KEEPER_ID = 100;
     }
+
+    if (HasDouble("pGainClose")) {
+    	attractiveForceWhenClose = GetDouble("pGainClose");
+    }
+    if (HasDouble("pGainFar")) {
+    	attractiveForce = GetDouble("pGainFar");
+    }
+    if (HasDouble("pGainRotation")) {
+    	pGainRotation = GetDouble("pGainRotation");
+    }
     
 
     // Find the robot with the specified ID
@@ -293,6 +306,7 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
         me = *findBot;
     } else {
         ROS_WARN_STREAM("GoToPosAlt: robot with this ID not found, ID: " << ROBOT_ID);
+        return boost::none;
     }
 
 
@@ -323,6 +337,35 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
     
+
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < 0.3) {
+    	reachedTargetPos = true;
+    	if (HasDouble("angleGoal")) {
+    		if (fabs(angleError) < 0.3) {
+    			sendStopCommand(ROBOT_ID);
+    			ROS_INFO_STREAM("waiting to stop..." << myVel.length());
+    			if (myVel.length() < 0.1) {
+					success = true;
+					return boost::none;
+    			}
+		        
+		        roboteam_msgs::RobotCommand command;
+		        return command;
+    		}
+    	} else {
+
+    		sendStopCommand(ROBOT_ID);
+    		ROS_INFO_STREAM("waiting to stop..." << myVel.length());
+			if (myVel.length() < 0.1) {
+				success = true;
+				return boost::none;
+			}
+	        
+	        roboteam_msgs::RobotCommand command;
+	        return command;
+    	}   
+    }
 
 
     // If we are close to the target we can also drive backwards if that's easier
@@ -391,7 +434,11 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
+    
 
+    if (HasDouble("maxSpeed")) {
+    	maxSpeed = GetDouble("maxSpeed");
+    }
 
     // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
     // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
@@ -411,25 +458,63 @@ roboteam_msgs::RobotCommand GoToPosAlt::getVelCommand() {
         driveSpeed = 1.0 / (fabs(angleError)) * maxSpeed;
     }
 
+    if (driveSpeed > sumOfForces.length()) {
+    	driveSpeed = sumOfForces.length();
+    }
+
+    double minSpeed = 2.0;
+    if (HasDouble("minSpeed")) {
+    	minSpeed = GetDouble("minSpeed");
+    }
+
+    if (driveSpeed < minSpeed) {
+    	driveSpeed = minSpeed;
+    }
+
+    if (reachedTargetPos) {
+    	driveSpeed = 0.0;
+    }
+
+
+    double minAngularVel = 3.5;
+    if (HasDouble("minAngularVel")) {
+    	minAngularVel = GetDouble("minAngularVel");
+    }
+    minAngularVel = minAngularVel - 2*driveSpeed;
+    
+    if (fabs(angularVelTarget) < minAngularVel) {
+        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
+    }
+
 
     Vector2 velCommand;
-
-
-    // TODO: @Hack Maybe remove this at some point
-    auto mode = getMode();
-    if (mode == Mode::GRSIM) { 
-        if (driveBackwards) {
-            velCommand = Vector2(-1.0, 0.0).scale(driveSpeed);
-        } else {
-            velCommand = Vector2(1.0, 0.0).scale(driveSpeed);
-        }
+    if (driveBackwards) {
+        velCommand = Vector2(-1.0, 0.0).scale(driveSpeed);
     } else {
-        if (driveBackwards) {
-            velCommand = Vector2(0.0, -1.0).scale(driveSpeed);
-        } else {
-            velCommand = Vector2(0.0, 1.0).scale(driveSpeed);
-        }
+        velCommand = Vector2(1.0, 0.0).scale(driveSpeed);
     }
+
+    if (HasBool("drive")) {
+    	if (!GetBool("drive")) {
+    		velCommand = Vector2(0.0, 0.0);
+    	}
+    }
+
+    // // TODO: @Hack Maybe remove this at some point
+    // auto mode = getMode();
+    // if (mode == Mode::GRSIM) { 
+    //     if (driveBackwards) {
+    //         velCommand = Vector2(-1.0, 0.0).scale(driveSpeed);
+    //     } else {
+    //         velCommand = Vector2(1.0, 0.0).scale(driveSpeed);
+    //     }
+    // } else {
+    //     if (driveBackwards) {
+    //         velCommand = Vector2(0.0, -1.0).scale(driveSpeed);
+    //     } else {
+    //         velCommand = Vector2(0.0, 1.0).scale(driveSpeed);
+    //     }
+    // }
 
 
     // Fill the command message
@@ -448,12 +533,22 @@ bt::Node::Status GoToPosAlt::Update() {
 
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
+    if (success) {
+    	sendStopCommand(ROBOT_ID);
+    	sendStopCommand(ROBOT_ID);
+
+    	return Status::Success;
+    }
+
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(*command);
         return Status::Running;
     } else {
-        return Status::Success;
+    	ROS_INFO("No command...");
+    	sendStopCommand(ROBOT_ID);
+    	return Status::Running;
+        
     }
 }
 

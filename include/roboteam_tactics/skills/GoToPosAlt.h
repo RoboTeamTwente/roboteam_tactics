@@ -67,7 +67,7 @@ public:
     
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 checkTargetPos(Vector2 targetPos);
-    roboteam_msgs::RobotCommand getVelCommand();
+    boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
     Status Update();
     
     static VerificationMap required_params() {
