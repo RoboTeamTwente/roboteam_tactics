@@ -70,38 +70,43 @@ std::vector<std::string> get_all(std::string category, bool recurse = true) {
     return get_all_recursively(category, "", recurse);
 }
 
-std::string current_tree;
-bool encountered_error = false;
-
 std::string const RED_BOLD_COLOR = "\e[1;31m";
 std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
 std::string const END_COLOR = "\e[0m";
 
-void cmakeErr(std::string msg) {
+} // Anonymous namespace
+
+void BTBuilder::cmakeErr(std::string msg) {
     std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
 }
 
-void cmakeErrTree(std::string msg) {
+void BTBuilder::cmakeErrTree(std::string msg) {
     cmakeErr("Tree \"" + current_tree + "\": " + msg);
 }
 
-void cmakeWarn(std::string msg) {
+void BTBuilder::cmakeWarn(std::string msg) {
     std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
 }
 
-void cmakeWarnTree(std::string msg) {
+void BTBuilder::cmakeWarnTree(std::string msg) {
     cmakeWarn("Tree \"" + current_tree + "\": " + msg);
 }
 
-} // Anonymous namespace
+void BTBuilder::setCurrentTree(nlohmann::json json, std::vector<std::string> const & namespaces) {
+    std::string stringified_namespaces = "";
+
+    if (namespaces.size() > 0) {
+        for (auto ns : namespaces) {
+            stringified_namespaces += ns + "/";
+        }
+    }
+
+    current_tree = stringified_namespaces + json["title"].get<std::string>();
+}
 
 boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string baseNamespace, std::vector<std::string> namespaces) {
-
-    // namespace f = rtt::factories;
-
-    // allskills_list = f::get_entry_names<Skill>();
-    // allconditions_list = f::get_entry_names<Condition>();
-    // alltactics_list = f::get_entry_names<Tactic>();
+    setCurrentTree(json, namespaces);
+    encountered_error = false;
 
     allskills_list = get_all("skills");
     allconditions_list = get_all("conditions");
@@ -148,6 +153,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 
         if (usedTitles.find(title) != usedTitles.end()) {
             cmakeErrTree("Nodename \"" + title + "\" appears more than once in the tree. Please use unique names, or the nodes might be unaddressable.");
+            encountered_error = true;
         }
 
         if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
@@ -155,6 +161,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 
             if (allskills_set.find(title) != allskills_set.end()) {
                 cmakeErrTree("Skill \"" + title + "\" has the same name as the skill type. Please use a leaf name different from the skill name (e.g. " + title + "_A, " + title + "_1)");
+                encountered_error = true;
             }
         }
 
@@ -163,6 +170,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 
             if (allconditions_set.find(title) != allconditions_set.end()) {
                 cmakeErrTree("Condition \"" + title + "\" has the same name as the condition type. Please use a leaf name different from the condition name (e.g. " + title + "_A, " + title + "_1)");
+                encountered_error = true;
             }
         }
 
@@ -221,21 +229,15 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         out << INDENT << "namespace " << baseNamespace << " {\n\n";
     }
 
-    std::string stringified_namespaces = "";
-
     if (namespaces.size() > 0) {
         out << INDENT;
 
         for (auto ns : namespaces) {
             out << "namespace " << ns << " { ";
-
-            stringified_namespaces += ns + "/";
         }
 
         out << "\n\n";
     }
-
-    current_tree = stringified_namespaces + json["title"].get<std::string>();
 
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
@@ -264,7 +266,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     }
     
     if (!baseNamespace.empty()) {
-        out << INDENT << "} // " << baseNamespace << "\n\n";
+        out << INDENT << "} /* " << baseNamespace << " */\n\n";
     }
 
     std::string treeName = json["title"].get<std::string>();

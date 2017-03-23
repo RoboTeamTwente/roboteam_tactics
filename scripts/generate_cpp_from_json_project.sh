@@ -50,6 +50,7 @@ printf "$headerPreamble" >> $projectHeader
 # Generate declarations and implementations for the behavior trees
 # And append them to the sourc and header files
 rosrun roboteam_tactics converter -impl -i "$projectPath" -o "$projectSource" -namespace rtt -f $projectName -a || { exit 1; }
+
 rosrun roboteam_tactics converter -decl -i "$projectPath" -o "$projectHeader" -namespace rtt -f $projectName -a || { exit 1; }
 
 # mkdir -p generated

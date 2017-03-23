@@ -31,9 +31,9 @@ void PrepareKickoffUsTactic::Initialize() {
     std::vector<rtt::Vector2> startPositions = {
         {-0.5, 1},
         {-0.5, -1},
-        {2, 2},
-        {2, -2},
-        {3, 0}
+        {-2, 2},
+        {-2, -2},
+        {-3, 0}
     };
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
