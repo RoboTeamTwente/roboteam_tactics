@@ -103,7 +103,6 @@ void PrepareKickoffUsTactic::Initialize() {
 
         claim_robot(ROBOT_ID);
     }
-
 }
 
 bt::Node::Status PrepareKickoffUsTactic::Update() {
