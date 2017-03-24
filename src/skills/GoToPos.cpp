@@ -159,8 +159,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.drawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {

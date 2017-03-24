@@ -93,11 +93,16 @@ private:
 
     // Control variables
     double maxSpeed;
-    double attractiveForce;
-    double attractiveForceWhenClose;
-    double repulsiveForce;
+    // double attractiveForce;
+    // double attractiveForceWhenClose;
+    // double repulsiveForce;
     double safetyMarginGoalAreas;
     double marginOutsideField;
+
+    // lalalala
+    double minSpeed;
+    double minAngularVel;
+    
 
     // Blackboard arguments
     double xGoal;

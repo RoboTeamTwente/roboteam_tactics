@@ -32,6 +32,7 @@ bt::Node::Status CanPassSafely::Update (){
 		Vector2 theirPos = Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
 		
 		// projectionOnBallTrajectory contains the point on the ball trajectory to which the opponent is closest
+		ROS_INFO("CanPassSafely closestPointOnVector");
 		Vector2 projectionOnBallTrajectory = ballTrajectory.closestPointOnVector(myPos, theirPos);
 
 		// Estimate how long it will take for the ball to get there
