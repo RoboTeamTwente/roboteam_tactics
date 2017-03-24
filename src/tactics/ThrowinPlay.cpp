@@ -63,7 +63,6 @@ bt::Node::Status ThrowinPlay::Update() {
     bool allSucceeded = true;
     bool oneFailed = false;
     bool oneInvalid = false;
-    std::cout << "update new" << std::endl;
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
