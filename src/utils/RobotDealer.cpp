@@ -88,4 +88,10 @@ void RobotDealer::release_robots(std::vector<int> ids) {
     }
 }
 
+void RobotDealer::halt_override() {
+    ROS_WARN("Overriding claims for all robots because of HALT");
+    available_robots.clear();
+    taken_robots.clear();
+}
+
 } // rtt

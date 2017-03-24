@@ -50,6 +50,13 @@ private:
     void defines(nlohmann::json);
     void build_structure(nlohmann::json);
 
+    void setCurrentTree(nlohmann::json json, std::vector<std::string> const & namespaces);
+
+    void cmakeErr(std::string msg);
+    void cmakeErrTree(std::string msg);
+    void cmakeWarn(std::string msg);
+    void cmakeWarnTree(std::string msg);
+
     std::string get_parallel_params_from_properties(json properties);
 
     NodeType determine_type(nlohmann::json);
@@ -62,6 +69,10 @@ private:
                           allconditions_set,
                           alltactics_set
                           ;
+
+    std::string current_tree;
+    bool encountered_error = false;
+
 };
 
 }

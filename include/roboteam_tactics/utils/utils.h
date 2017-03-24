@@ -21,6 +21,7 @@ ROS_DECLARE_MESSAGE(World);
 #include "roboteam_utils/constants.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/TeamRobot.h"
+#include "roboteam_utils/Cone.h"
 #include "roboteam_msgs/World.h"
 
 #include "roboteam_tactics/bt.hpp"
@@ -92,6 +93,15 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
                                                     bool sight_only = false);
+
+/**
+ * \brief Gets all robots within a conical area
+ * \param world The world where the robots exist
+ * \param cone The Cone describing the area to search
+ * \return A vector of all robots which are at least partially within the cone.
+ */                                                    
+std::vector<roboteam_msgs::WorldRobot> getRobotsInCone(const roboteam_msgs::World& world, const Cone& cone);
+
 
 /**
  * \brief Predict the ball position in the future based on the current velocity
@@ -300,6 +310,24 @@ std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& wo
  * \brief Gets all robots active in the world as TeamRobot structures
  */
 std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Gets the robot with the given ID as a WorldRobot
+ * @param id The ID of the desired robot
+ * @param ourTeam whether or not the robot is in our team
+ * @param world The world to search
+ * @return An optional containing the robot, or an empty optional if it was not found
+ */
+boost::optional<roboteam_msgs::WorldRobot> getWorldBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Gets the robot with the given ID as a TeamRobot
+ * @param id The ID of the desired robot
+ * @param ourTeam whether or not the robot is in our team
+ * @param world The world to search
+ * @return An optional containing the robot, or an empty optional if it was not found
+ */
+boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
 
 } // rtt
 

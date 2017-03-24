@@ -62,6 +62,7 @@ void GetBall::Initialize() {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
+    // ROS_INFO("GetBall Update for %d", robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -204,6 +205,7 @@ bt::Node::Status GetBall::Update (){
         } else {
         	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
         }
+        // ROS_INFO("command for %d: %f, %f, %f", command.id, command.x_vel, command.y_vel, command.w);
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
