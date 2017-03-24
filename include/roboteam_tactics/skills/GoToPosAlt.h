@@ -67,7 +67,7 @@ public:
     
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 checkTargetPos(Vector2 targetPos);
-    roboteam_msgs::RobotCommand getVelCommand();
+    boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
     Status Update();
     
     static VerificationMap required_params() {
@@ -93,11 +93,16 @@ private:
 
     // Control variables
     double maxSpeed;
-    double attractiveForce;
-    double attractiveForceWhenClose;
-    double repulsiveForce;
+    // double attractiveForce;
+    // double attractiveForceWhenClose;
+    // double repulsiveForce;
     double safetyMarginGoalAreas;
     double marginOutsideField;
+
+    // lalalala
+    double minSpeed;
+    double minAngularVel;
+    
 
     // Blackboard arguments
     double xGoal;

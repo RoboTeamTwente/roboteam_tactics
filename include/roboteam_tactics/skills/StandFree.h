@@ -50,6 +50,8 @@ public:
 private:
 	GoToPos goToPos;
     Draw drawer;
+    Vector2 targetPos;
+    bool setFirstTargetPos = false;
 };
     
 }
