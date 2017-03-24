@@ -47,6 +47,9 @@
 #include "OneTwoTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "TargetPracticeTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "TwoAttackersTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
@@ -57,4 +60,7 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "ThrowinPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "PrepareKickoffUsTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

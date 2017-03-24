@@ -48,6 +48,11 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
     }
 }
 
+void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    rtt::LastRef::set(*refdata);
+}
+
+
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
@@ -141,17 +146,24 @@ int main(int argc, char *argv[]) {
 
     RTT_DEBUGLN("More than one robot found. Starting!");
     
+    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
+    
     while (ros::ok()) {
         ros::spinOnce();
 
         bt::Node::Status status = strategy->Update();
 
-        if (status != bt::Node::Status::Running) {
-            auto statusStr = bt::statusToString(status);
-            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
-            break;
-        }
+        // if (status != bt::Node::Status::Running) {
+            // auto statusStr = bt::statusToString(status);
+            // RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            // // break;
+        // }
         rate.sleep();
+    }
+
+    // Terminate if needed
+    if (strategy->getStatus() == bt::Node::Status::Running) {
+        strategy->Terminate(bt::Node::Status::Running);
     }
 
     return 0;

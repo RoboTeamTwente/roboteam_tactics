@@ -32,7 +32,7 @@ void ThrowinPlay::Initialize() {
     std::cout << "Side :" << pos << "\n";
 
     auto allRobots = RobotDealer::get_available_robots();
-    claim_robot(allRobots.at(0));
+    claim_robot(allRobots.at(1));
 
     auto robots = get_claimed_robots();
     
@@ -45,7 +45,7 @@ void ThrowinPlay::Initialize() {
 
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = robot_id;
-        wd.tree = "SlalomTree";
+        wd.tree = "rtt_ewoud/ThrowinTaker";
         wd.blackboard = bb.toMsg();
 
         // is this neccesairy?
@@ -63,7 +63,7 @@ bt::Node::Status ThrowinPlay::Update() {
     bool allSucceeded = true;
     bool oneFailed = false;
     bool oneInvalid = false;
-    std::cout << "update" << std::endl;
+    std::cout << "update new" << std::endl;
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);

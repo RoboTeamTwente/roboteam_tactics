@@ -128,8 +128,12 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     initializeSet(alltactics_set, alltactics_list);
 
     std::stack<std::string> stack;
+    try {
     stack.push(json["root"]);
-
+    } catch (...) {
+        std::cout << json;
+        throw;
+    }
     std::set<std::string> usedSkills, usedConditions, usedTactics, usedTitles;
 
     // auto& skillRepo = getRepo<Factory<Skill>>();

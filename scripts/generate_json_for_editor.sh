@@ -105,6 +105,12 @@ for f in ./include/roboteam_tactics/tactics/*.h; do
 	entry $name action "$properties"
 done
 
+for f in ./include/roboteam_tactics/skills/*.h; do
+    name=$(basename "$f" .h)
+    getProperties $f
+	entry $name action "$properties"
+done
+
 # Custom Composites/decorators here
 entry ParallelTactic composite
 entry ParallelSequence composite

@@ -35,7 +35,7 @@ const std::map<RefState, const RefRule*> RULES = {
 };
 
 const RefRule* getCurrentRuleSet() {
-    return RULES.at(static_cast<RefState>(LastRef::get().command.command));
+    return RULES.at(LastRef::getState());
 }
 
 }
