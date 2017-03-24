@@ -25,16 +25,6 @@ void PrepareKickoffUsTactic::Initialize() {
     // TODO: Stay half a meter away from the ball?
 
     RTT_DEBUGLN("Preparing Kickoff...");
-    
-    std::vector<int> robots = RobotDealer::get_available_robots();
-
-    std::vector<rtt::Vector2> startPositions = {
-        {-0.5, 1},
-        {-0.5, -1},
-        {-2, 2},
-        {-2, -2},
-        {-3, 0}
-    };
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
@@ -47,10 +37,12 @@ void PrepareKickoffUsTactic::Initialize() {
         bb.SetInt("ROBOT_ID", KEEPER_ID);
         bb.SetInt("KEEPER_ID", KEEPER_ID);
 
+        Vector2 lookAtVec = Vector2(0, 0) - Vector2(-4, 0);
+
         ScopedBB(bb, "_GoToPos")
             .setBool("isKeeper", true)
-            .setDouble("angleGoal", M_PI)
-            .setDouble("xGoal", 4)
+            .setDouble("angleGoal", lookAtVec.angle())
+            .setDouble("xGoal", -4)
             .setDouble("yGoal", 0)
             .setBool("dribbler", false)
             .setBool("avoidRobots", true)
@@ -68,6 +60,15 @@ void PrepareKickoffUsTactic::Initialize() {
         claim_robot(KEEPER_ID);
     }
 
+    std::vector<int> robots = RobotDealer::get_available_robots();
+
+    std::vector<rtt::Vector2> startPositions = {
+        {-0.5, 1},
+        {-0.5, -1},
+        {-2, 2},
+        {-2, -2},
+        {-3, 0}
+    };
 
     for (auto const ROBOT_ID : robots) {
         // Get the first position
@@ -80,9 +81,11 @@ void PrepareKickoffUsTactic::Initialize() {
         bb.SetInt("ROBOT_ID", ROBOT_ID);
         bb.SetInt("KEEPER_ID", KEEPER_ID);
 
+        Vector2 lookAtVec = Vector2(0, 0) - START_POS;
+
         ScopedBB(bb, "_GoToPos")
             .setBool("isKeeper", false)
-            .setDouble("angleGoal", 1)
+            .setDouble("angleGoal", lookAtVec.angle())
             .setDouble("xGoal", START_POS.x)
             .setDouble("yGoal", START_POS.y)
             .setBool("dribbler", false)
