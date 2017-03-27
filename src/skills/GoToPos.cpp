@@ -42,12 +42,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , attractiveForceWhenClose(2.0) // was 5? 
         , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
-        , marginOutsideField(0.2)
+        , marginOutsideField(1.2)
         , angleErrorIntegral(0.0)
         , historyIndex(0)
         
         {
-            print_blackboard(blackboard);
             start = now();
             angleErrorHistory = (double*) calloc(10,sizeof(double));
             succeeded = false;

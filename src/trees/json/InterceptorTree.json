@@ -7,8 +7,8 @@
   "nodes": {
     "b70626a8-d8c4-4fec-8557-28b9257028e5": {
       "id": "b70626a8-d8c4-4fec-8557-28b9257028e5",
-      "name": "RepeatUntilFailure",
-      "title": "Repeat Until Failure",
+      "name": "Repeat",
+      "title": "Repeat",
       "description": "",
       "properties": {
         "maxLoop": -1
