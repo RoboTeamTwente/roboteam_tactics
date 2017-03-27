@@ -62,7 +62,7 @@ void GetBall::Initialize() {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    ROS_INFO("GetBall Update for %d", robotID);
+    // ROS_INFO("GetBall Update for %d", robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -115,6 +115,12 @@ bt::Node::Status GetBall::Update (){
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
 	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
+	if (angleDiff > 0.5*M_PI) {
+		targetAngle = (interceptPos - robotPos).angle() + 0.5*M_PI;
+	}
+	if (angleDiff < -0.5*M_PI) {
+		targetAngle = (interceptPos - robotPos).angle() - 0.5*M_PI;
+	}
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
@@ -175,9 +181,22 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", false);
+        private_bb->SetBool("avoidRobots", true);
         // private_bb->SetBool("avoidBall", avoidBall);
         private_bb->SetBool("dribbler", false);
+        private_bb->SetString("whichBot", GetString("whichBot"));
+        // @HACK for robot testing purposes
+        // if (HasDouble("maxSpeed")) {
+        // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+        // }
+        // if (HasDouble("minAngularVel")) {
+        // 	private_bb->SetDouble("minAngularVel", GetDouble("minAngularVel"));
+        // }
+        // if (HasDouble("pGainRotation")) {
+        // 	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+        // }
+        
+
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
         roboteam_msgs::RobotCommand command;
@@ -186,7 +205,7 @@ bt::Node::Status GetBall::Update (){
         } else {
         	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
         }
-        ROS_INFO("command for %d: %f, %f, %f", command.id, command.x_vel, command.y_vel, command.w);
+        // ROS_INFO("command for %d: %f, %f, %f", command.id, command.x_vel, command.y_vel, command.w);
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.

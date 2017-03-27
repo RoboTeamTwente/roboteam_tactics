@@ -153,12 +153,17 @@ int main(int argc, char *argv[]) {
 
         bt::Node::Status status = strategy->Update();
 
-        if (status != bt::Node::Status::Running) {
-            auto statusStr = bt::statusToString(status);
-            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
-            break;
-        }
+        // if (status != bt::Node::Status::Running) {
+            // auto statusStr = bt::statusToString(status);
+            // RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            // // break;
+        // }
         rate.sleep();
+    }
+
+    // Terminate if needed
+    if (strategy->getStatus() == bt::Node::Status::Running) {
+        strategy->Terminate(bt::Node::Status::Running);
     }
 
     return 0;

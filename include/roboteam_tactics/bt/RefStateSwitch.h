@@ -18,7 +18,9 @@ namespace rtt {
 class RefStateSwitch : public bt::Composite {    
     
 public:    
-    RefStateSwitch() : validated(false), last(-1) {}
+    RefStateSwitch() : validated(false), last(-1) {
+        std::cout << "Initializing last!\n";
+    }
     
     /**
      * \brief Checks whether this RefStateSwitch has all the children it should have.
@@ -61,7 +63,7 @@ public:
 
             child->Initialize();
             ROS_INFO("Received referee command %d", cmd);
-
+            std::cout << "Last: " << last << "\n";
             last = cmd;
         }
 
@@ -69,12 +71,20 @@ public:
     }
 
     void Terminate(Status s) override {
+        std::cout << "Terminating RSS!\n";
+
         if (last != -1) {
-            children.at(last)->Terminate(children.at(last)->getStatus());
+            auto& child = children.at(last);
+
+            // Only terminate if the child did not do so properly itself
+            if (child->getStatus() == bt::Node::Status::Running) {
+                child->Terminate(bt::Node::Status::Running);
+            }
 
             last = -1;
         }
 
+        // Consider the node failed if it did not properly finish
         if (s == Status::Running) {
             setStatus(Status::Failure);
         }

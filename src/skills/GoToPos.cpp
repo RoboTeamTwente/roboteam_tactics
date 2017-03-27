@@ -158,8 +158,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.drawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {
@@ -234,25 +234,25 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
     if (ROBOT_ID != KEEPER_ID) {
-        
-        // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("our defense area", newTargetPos)) {
-            Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
-            newTargetPos = newTargetPos + distToOurDefenseArea;
-        }
+        // TODO: Doesn't work if normalize_field (rosparam in mini.launch) is true. Disabled until further notice    
 
-        // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("their defense area", newTargetPos)) {
-            Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
-            newTargetPos = newTargetPos + distToTheirDefenseArea;
-        }
+        // // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
+        // if (isWithinDefenseArea("our defense area", newTargetPos)) {
+            // Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+            // newTargetPos = newTargetPos + distToOurDefenseArea;
+        // }
+
+        // // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
+        // if (isWithinDefenseArea("their defense area", newTargetPos)) {
+            // Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+            // newTargetPos = newTargetPos + distToTheirDefenseArea;
+        // }
     }
 
     return newTargetPos;
 }
 
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
-
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
 
@@ -260,10 +260,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         maxSpeed = GetDouble("maxSpeed");
     }
     
-
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+
     angleGoal = cleanAngle(GetDouble("angleGoal"));  
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
@@ -271,7 +271,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         // ROS_WARN("GoToPos, KEEPER_ID not set");
         KEEPER_ID = 100;
     }
-    
 
     // Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
@@ -279,8 +278,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         me = *findBot;
     } else {
         ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
+        return boost::none;
     }  
-
 
     // Checking inputs
     if (targetPos == prevTargetPos) {
@@ -290,11 +289,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         prevTargetPos = targetPos;
     }
 
-
     // Draw the target position in RQT-view
     drawer.setColor(0, 0, 0);
-    drawer.drawPoint("targetPos", targetPos);
-
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
@@ -302,7 +299,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 posError = targetPos - myPos;
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
-
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
@@ -312,23 +308,18 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
-
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     Vector2 sumOfForces(0.0, 0.0);
 
-
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
-
 
     // Robot avoidance
     if (HasBool("avoidRobots")) {
         if (GetBool("avoidRobots")) {
             sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         }
-    } else {
-        // ROS_WARN("You did not set the boolean avoidRobots in GoToPos");
-    }
+    } 
 
     // if (HasBool("avoidBall")) {
         // std::cout << "Avoiding ball!\n";
@@ -357,10 +348,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Defense area avoidance
     sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
 
-
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
-
 
     // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
     // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
@@ -373,13 +362,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-
     Vector2 velCommand = sumOfForces;
     // Draw the velocity vector acting on the robots
     drawer.drawLine("velCommand", myPos, velCommand);  
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
-    
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;

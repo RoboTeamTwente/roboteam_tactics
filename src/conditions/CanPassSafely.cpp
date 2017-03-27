@@ -22,6 +22,7 @@ bt::Node::Status CanPassSafely::Update (){
 		ROS_INFO("you're trying to pass to yourself, you silly you");
 		return Status::Invalid;
 	}
+	ROS_INFO_STREAM("condition CanPassSafely, from " << myID << " to " << passToRobot);
 
 	Vector2 myPos = Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);	
 	Vector2 targetPos = Vector2(world.us.at(passToRobot).pos.x, world.us.at(passToRobot).pos.y);
@@ -32,6 +33,7 @@ bt::Node::Status CanPassSafely::Update (){
 		Vector2 theirPos = Vector2(world.them.at(i).pos.x, world.them.at(i).pos.y);
 		
 		// projectionOnBallTrajectory contains the point on the ball trajectory to which the opponent is closest
+		ROS_INFO("CanPassSafely closestPointOnVector");
 		Vector2 projectionOnBallTrajectory = ballTrajectory.closestPointOnVector(myPos, theirPos);
 
 		// Estimate how long it will take for the ball to get there
@@ -53,7 +55,7 @@ bt::Node::Status CanPassSafely::Update (){
 			travelledDistance += ballSpeed*timeStep;
 			time += timeStep;
 		}
-
+		ROS_INFO_STREAM("calling canReachPoint with blackboard: ROBOT_ID "<<i<<", whichTeam: them, xGoal "<<projectionOnBallTrajectory.x<<", yGoal "<<projectionOnBallTrajectory.y<< ", timeLimit "<<time);
 		// Check whether the opponent can reach the calculated point within the calculated time
 		auto bb2 = std::make_shared<bt::Blackboard>();
 		bb2->SetInt("ROBOT_ID", i);

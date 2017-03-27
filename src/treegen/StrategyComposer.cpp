@@ -1,6 +1,8 @@
+#include <string>
+
+#include "roboteam_tactics/bt/RefStateSwitch.h"
 #include "roboteam_tactics/treegen/StrategyComposer.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include <string>
 
 namespace rtt {
     

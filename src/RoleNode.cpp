@@ -171,7 +171,6 @@ int main(int argc, char *argv[]) {
         }
 
         bt::Node::Status status = currentTree->Update();
-        
 
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
