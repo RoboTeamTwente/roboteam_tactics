@@ -51,7 +51,7 @@ void PrepareKickoffUsTactic::Initialize() {
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = KEEPER_ID;
-        wd.tree = "rtt_bob/GoToPosTree";
+        wd.tree = "rtt_bob/GoToPosAndStay";
         wd.blackboard = bb.toMsg();
         wd.token = unique_id::toMsg(unique_id::fromRandom());
 
@@ -95,7 +95,7 @@ void PrepareKickoffUsTactic::Initialize() {
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = ROBOT_ID;
-        wd.tree = "rtt_bob/GoToPosTree";
+        wd.tree = "rtt_bob/GoToPosAndStay";
         wd.blackboard = bb.toMsg();
         wd.token = unique_id::toMsg(unique_id::fromRandom());
         
