@@ -227,8 +227,8 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     double dist = ball_norm.length();
     double angle = ball_norm.angle();
 
-    // Within 10.5 cm and .2 radians (of center of dribbler)
-    return dist <= .11 && fabs(angle - bot.angle) <= .4;
+    // Within 15 cm and .4 radians (of center of dribbler)
+    return dist <= .15 && fabs(angle - bot.angle) <= .4;
 }
 
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {

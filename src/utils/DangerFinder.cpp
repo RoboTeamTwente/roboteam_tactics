@@ -105,7 +105,7 @@ const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string*
     return POTENTIAL_CROSS_DANGER;
 };
 
-const std::vector<DangerFactor> DEFAULT_FACTORS({distance, orientation, can_see_our_goal, has_ball});
+const std::vector<DangerFactor> DEFAULT_FACTORS({distance/*, orientation, can_see_our_goal, has_ball*/});
 
 DangerFinder::DangerFinder() {
     running = false;
@@ -226,9 +226,10 @@ boost::optional<Robot> charging_bot() {
 }
 
 bool we_are_left() {
-    std::string tgt;
-    get_PARAM_OUR_SIDE(tgt, false);
-    return tgt == "left";
+    //std::string tgt;
+    //get_PARAM_OUR_SIDE(tgt, false);
+    //return tgt == "left";
+    return false;
 }
 
 std::vector<Vector2> our_goal() {

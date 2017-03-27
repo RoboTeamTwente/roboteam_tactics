@@ -42,12 +42,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , attractiveForceWhenClose(2.0) // was 5? 
         , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
-        , marginOutsideField(0.2)
+        , marginOutsideField(1.2)
         , angleErrorIntegral(0.0)
         , historyIndex(0)
         
         {
-            print_blackboard(blackboard);
             start = now();
             angleErrorHistory = (double*) calloc(10,sizeof(double));
             succeeded = false;
@@ -159,8 +158,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
     Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.drawLine("coneRobotsSide1", antennaCone.start, coneSide1);
-    drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
+    drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (size_t i = 0; i < world.us.size(); i++) {

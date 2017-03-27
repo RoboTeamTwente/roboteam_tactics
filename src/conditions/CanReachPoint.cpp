@@ -27,6 +27,7 @@ CanReachPoint::CanReachPoint(std::string name, bt::Blackboard::Ptr blackboard) :
 double CanReachPoint::estimateTimeToPoint(Vector2 currentPos, Vector2 currentVel, Vector2 targetPos) {
 	Vector2 posDiff = targetPos - currentPos;
 
+	/*
 	Vector2 targetVel = posDiff.normalize().scale(posPGain);
 	Vector2 velDiff = targetVel - currentVel;
 	double timeToReachVel = velDiff.length() / maxAcc; 
@@ -34,17 +35,23 @@ double CanReachPoint::estimateTimeToPoint(Vector2 currentPos, Vector2 currentVel
 
 	double timeToStop = decelerationDistance / (targetVel.length()/2); // deceleration time = deceleration distance / average speed during deceleration
 
-	ROS_INFO_STREAM("distanceToReachVel: " << distanceToReachVel << " decelerationDistance: " << decelerationDistance);
+	//ROS_INFO_STREAM("distanceToReachVel: " << distanceToReachVel << " decelerationDistance: " << decelerationDistance);
 
 	if (posDiff.length() < (distanceToReachVel + decelerationDistance)) {
-		ROS_INFO_STREAM("hmm, distance too short");
 		return -1.0;
 	} else {
 		double distAtMaxVel = posDiff.length() - (distanceToReachVel + decelerationDistance);
 		double timeAtMaxVel = distAtMaxVel / maxVel;
 		return (timeToReachVel + timeToStop + timeAtMaxVel);
 	}
+	*/
+
+	// simple version because acceleration and decaleration calculation where not complete yet
+	double averageVel=3.0; // m/s
+	ROS_INFO_STREAM("currentPos x:"<<currentPos.x<<" y:"<<currentPos.y<<"; targetPos x"<<targetPos.x<<" y:"<<targetPos.y<<" length:"<<posDiff.length());
+	return posDiff.length()/averageVel;
 }
+
 
 bt::Node::Status CanReachPoint::Update() {
 	roboteam_msgs::World world = LastWorld::get();
@@ -61,7 +68,17 @@ bt::Node::Status CanReachPoint::Update() {
 	Vector2 currentVel(world.us.at(ROBOT_ID).vel);
 	Vector2 targetPos(xGoal, yGoal);
 
+	if(HasString("whichTeam") && GetString("whichTeam")=="them"){
+		currentPos=world.them.at(ROBOT_ID).pos;
+		currentVel=world.them.at(ROBOT_ID).vel;
+		ROS_INFO_STREAM("using their team");
+	}
+
+	
+
 	double estimatedTimeToPoint = estimateTimeToPoint(currentPos, currentVel, targetPos);
+
+	ROS_INFO_STREAM("estimatedTimeToPoint: " << estimatedTimeToPoint);
 
 	if (estimatedTimeToPoint < 0.0) {
 		ROS_INFO_STREAM("hmm, distance too short");
@@ -69,8 +86,10 @@ bt::Node::Status CanReachPoint::Update() {
 	} else {
 		double timeLimit = GetDouble("timeLimit");
 		if (estimatedTimeToPoint < timeLimit) {
+			ROS_INFO_STREAM("can reach point within time");
 			return Status::Success;
 		} else {
+			ROS_INFO_STREAM("cannot reach point within time");
 			return Status::Failure;
 		}
 	}

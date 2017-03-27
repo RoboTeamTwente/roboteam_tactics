@@ -41,9 +41,11 @@ double PassPoint::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::Wor
 	Vector2 ballTraj = testPosition - ballPos;
 
 	Vector2 oppPos = Vector2(world.them.at(0).pos);
+	ROS_INFO("ComputePassPoint closestPointOnVector");
 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 	for (size_t i = 1; i < world.them.size(); i++) {
 		Vector2 oppPos = Vector2(world.them.at(i).pos);
+		ROS_INFO("ComputePassPoint closestPointOnVector 2");
 		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 		if (testDistance < shortestDistance) {
 			shortestDistance = testDistance;

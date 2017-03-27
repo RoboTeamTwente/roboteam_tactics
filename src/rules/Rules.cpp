@@ -4,6 +4,7 @@
 #include "roboteam_tactics/rules/HaltRule.h"
 #include "roboteam_tactics/rules/StopRule.h"
 #include "roboteam_tactics/rules/TimeoutRule.h"
+#include "roboteam_tactics/rules/KickoffRule.h"
 
 #include "roboteam_utils/LastRef.h"
 
@@ -31,7 +32,9 @@ const std::map<RefState, const RefRule*> RULES = {
     {RefState::DIRECT_FREE_THEM, FreeKickThemRule::Direct::get()},
     {RefState::INDIRECT_FREE_THEM, FreeKickThemRule::Indirect::get()},
     {RefState::TIMEOUT_US, TimeoutRule::Us::get()},
-    {RefState::TIMEOUT_THEM, TimeoutRule::Them::get()}
+    {RefState::TIMEOUT_THEM, TimeoutRule::Them::get()},
+    {RefState::PREPARE_KICKOFF_US, KickoffRule::Us::get()},
+    {RefState::PREPARE_KICKOFF_THEM, KickoffRule::Them::get()}
 };
 
 const RefRule* getCurrentRuleSet() {

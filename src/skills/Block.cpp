@@ -53,7 +53,6 @@ void normalize(Position& pos) {
 }
 
 bt::Node::Status Block::Update() {
-    ROS_INFO("Block Update");
     roboteam_msgs::WorldRobot me, tgt;
 
     {
@@ -117,7 +116,6 @@ bt::Node::Status Block::Update() {
         goToPos.reset();
         goToPos = std::unique_ptr<GoToPos>();
     }
-    ROS_INFO("avoid_status=%d", (int) avoid_status);
     return avoid_status == bt::Node::Status::Invalid || avoid_status == bt::Node::Status::Failure ? avoid_status : bt::Node::Status::Running;
 }
 
