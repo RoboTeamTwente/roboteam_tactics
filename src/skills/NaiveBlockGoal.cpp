@@ -131,7 +131,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
     // Always face the ball
     double angle = 0;
     {
-        auto possibleRobot = lookup_our_bot(blackboard->GetInt("ROBOT_ID"));
+        auto possibleRobot = getWorldBot(blackboard->GetInt("ROBOT_ID"));
         if (possibleRobot) {
             auto robot = *possibleRobot;
             angle = (ballPos - Vector2(robot.pos)).angle();

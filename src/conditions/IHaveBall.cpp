@@ -30,7 +30,7 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
 
 bt::Node::Status IHaveBall::Update() {
     roboteam_msgs::World world = LastWorld::get();
-    auto opt_bot = lookup_bot(me, us, &world);
+    auto opt_bot = getWorldBot(me, us);
     if (!opt_bot) {
         return Status::Failure;
     }

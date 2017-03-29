@@ -88,7 +88,7 @@ bt::Node::Status DefendGoalarea::Update() {
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	roboteam_msgs::WorldBall ball = world.ball;
 	
 	bool forceonarc=false;

@@ -20,7 +20,7 @@ RTT_REGISTER_SKILL(BackUp);
 BackUp::BackUp(std::string name, bt::Blackboard::Ptr bb)
         : Skill(name, bb) {
     assert_valid<BackUp>(name);
-    auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));
+    auto bot = *(getWorldBot(blackboard->GetInt("ROBOT_ID")));
     original_pos = Position(bot.pos.x, bot.pos.y, bot.angle);
     double theta = fmodl(original_pos.getRot(), 2*M_PI);
     double dx = cosl(theta) * BACK_UP_DIST;
@@ -33,7 +33,7 @@ inline double limit(double x) {
 }
 
 bt::Node::Status BackUp::Update() {
-    auto bot = *(lookup_bot(blackboard->GetInt("ROBOT_ID"), true));
+    auto bot = *(getWorldBot(blackboard->GetInt("ROBOT_ID")));
     Position current_pos = Position(bot.pos.x, bot.pos.y, bot.angle);
 
     Vector2 vec = target_pos.location() - current_pos.location();

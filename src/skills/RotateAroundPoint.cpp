@@ -163,7 +163,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 		firstworld=false;
 		prevworldseq=world.header.seq;
 	}
-	robot = world.us.at(robotID);
+	robot = *getWorldBot(robotID);
 	ball = world.ball;
 
 	Status status = checkAndSetArguments();

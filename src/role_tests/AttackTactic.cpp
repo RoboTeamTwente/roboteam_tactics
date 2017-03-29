@@ -83,8 +83,10 @@ void initializeRoles(bt::Blackboard::Ptr bb1, bt::Blackboard::Ptr bb2) {
 
     // This tactic directs two robots
     std::array<int, 2> availableRobots = {0, 1};
-    Vector2 firstRobotPos(world.us.at(availableRobots.at(0)).pos.x, world.us.at(availableRobots.at(0)).pos.y);
-    Vector2 secondRobotPos(world.us.at(availableRobots.at(1)).pos.x, world.us.at(availableRobots.at(1)).pos.y);
+    auto bot0 = getWorldBot(0);
+    auto bot1 = getWorldBot(1);
+    Vector2 firstRobotPos(bot0->pos);
+    Vector2 secondRobotPos(bot1->pos);
     
 
     // Assign the role of primary attacker to the robot that is closest to the ball

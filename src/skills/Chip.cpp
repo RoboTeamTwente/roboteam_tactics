@@ -58,7 +58,7 @@ bt::Node::Status Chip::Update() {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	Vector2 posDiff = ballPos-robotPos;

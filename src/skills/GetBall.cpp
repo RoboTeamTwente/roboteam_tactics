@@ -75,7 +75,7 @@ bt::Node::Status GetBall::Update (){
 
 
 	// Find the robot with the specified ID
-    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(robotID, true, &world);
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
     roboteam_msgs::WorldRobot robot;
     if (findBot) {
         robot = *findBot;
