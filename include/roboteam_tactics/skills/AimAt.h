@@ -14,7 +14,7 @@ namespace rtt {
  * 
  * Params:
  * - At :
- *     Type: Int
+ *     Type: String
  *     Can be:
  *        - robot:      Aim at a robot
  *        - theirgoal:  Aim at their goal 

@@ -54,15 +54,6 @@ void FreeKickDefenceTactic::Initialize() {
     // int keeper = RobotDealer::get_keeper();
     int defender, harasser, interceptor1 = -1, interceptor2 = -1;
     
-    RTT_DEBUGLN("Self:");
-    for (auto opp : world.us) {
-        RTT_DEBUGLN("\t#%d @ (%f, %f)", opp.id, opp.pos.x, opp.pos.y);
-    }
-    RTT_DEBUGLN("Opponents:");
-    for (auto opp : world.them) {
-        RTT_DEBUGLN("\t#%d @ (%f, %f)", opp.id, opp.pos.x, opp.pos.y);
-    }
-    
     // Set harasser: blocks kick taker
     auto free_kick_taker_opt = getBallHolder();
     if (!free_kick_taker_opt) {
@@ -124,10 +115,14 @@ void FreeKickDefenceTactic::Initialize() {
     
     isInitialized = true;
     
+    
+    int keeper = RobotDealer::get_keeper();
+    
     auto pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", defender);
+        bb.SetInt("KEEPER_ID", keeper);
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = defender;
         wd.tree = "SecondaryKeeperTree";
@@ -141,6 +136,8 @@ void FreeKickDefenceTactic::Initialize() {
     {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", harasser);
+        bb.SetInt("KEEPER_ID", keeper);
+        bb.SetInt("Harass_A_TGT_ID", most_dangerous.id);
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = harasser;
         wd.tree = "HarasserTree";
@@ -154,6 +151,7 @@ void FreeKickDefenceTactic::Initialize() {
     if (additional > 0) {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", interceptor1);
+        bb.SetInt("KEEPER_ID", keeper);
         bb.SetInt("TGT_ID", additional_tgt_1.id);
         bb.SetInt("IHaveBall_A_me", additional_tgt_1.id);
         bb.SetBool("IHaveBall_A_our_team", false);
@@ -174,6 +172,7 @@ void FreeKickDefenceTactic::Initialize() {
     if (additional > 1) {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", interceptor2);
+        bb.SetInt("KEEPER_ID", keeper);
         bb.SetInt("TGT_ID", additional_tgt_2.id);
         bb.SetInt("IHaveBall_A_me", additional_tgt_2.id);
         bb.SetBool("IHaveBall_A_our_team", false);

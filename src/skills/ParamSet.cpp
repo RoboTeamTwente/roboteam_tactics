@@ -18,7 +18,6 @@ ParamSet::ParamSet(std::string name, bt::Blackboard::Ptr blackboard)
 bt::Node::Status ParamSet::Update() {
     std::string signal = "/signal_" + GetString("signal");
     std::string value;
-    
     std::string argType;
     if (HasString("value")) {
         value = GetString("value");
@@ -47,6 +46,7 @@ bt::Node::Status ParamSet::Update() {
     } else {
         // No value is set. Simply make the param empty and exit.
         ros::param::del(signal);
+        RTT_DEBUGLN("No value set for param %s", signal.c_str());
         return Status::Success;
     }
 
