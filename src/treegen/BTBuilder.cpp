@@ -503,6 +503,15 @@ void BTBuilder::defines(nlohmann::json jsonData) {
                         << "\", "
                         << property.second.get<std::string>()
                         << ");\n";
+                } else if (value.back() == 'd') {
+                    std::string num = value.substr(0, value.size() - 1);
+                    out << DINDENT
+                        << jsonData["title"].get<std::string>()
+                        << "->private_bb->SetDouble(\""
+                        << property.first
+                        << "\", "
+                        << atof(num.c_str())
+                        << ");\n";
                 } else {
                     out << DINDENT
                         << jsonData["title"].get<std::string>()
