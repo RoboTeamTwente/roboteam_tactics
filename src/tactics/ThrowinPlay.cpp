@@ -32,31 +32,53 @@ void ThrowinPlay::Initialize() {
     std::cout << "Side :" << pos << "\n";
 
     auto allRobots = RobotDealer::get_available_robots();
+    claim_robot(allRobots.at(0));
     claim_robot(allRobots.at(1));
 
     auto robots = get_claimed_robots();
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    for (auto robot_id : robots) {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
-        bb.SetInt("ROBOT_ID", robot_id);
 
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = robot_id;
-        wd.tree = "rtt_ewoud/ThrowinTaker";
-        wd.blackboard = bb.toMsg();
+    // set throwin taker role
+    bt::Blackboard bbThrowinTaker;
+    bbThrowinTaker.SetInt("ROBOT_ID", robots[0]);
+    ScopedBB(bbThrowinTaker, "CanPassSafely_A")
+            .setInt("passToRobot", robots[1]);
 
-        // is this neccesairy?
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        wd.token = unique_id::toMsg(token);
+    ScopedBB(bbThrowinTaker, "AimAt_A")
+            .setInt("AtRobot", robots[1]);
 
-        // Send to rolenode
-        pub.publish(wd);
-    }
+    roboteam_msgs::RoleDirective wdThrowinTaker;
+    wdThrowinTaker.robot_id = robots[0];
+    wdThrowinTaker.tree = "rtt_ewoud/ThrowinTaker";
+    wdThrowinTaker.blackboard = bbThrowinTaker.toMsg();
+
+    // Add random token and save it for later
+    boost::uuids::uuid token = unique_id::fromRandom();
+    tokens.push_back(token);
+    wdThrowinTaker.token = unique_id::toMsg(token);
+
+    // Send to rolenode
+    pub.publish(wdThrowinTaker);
+
+    // set receiver role
+    bt::Blackboard bbThrowinReceiver;
+    bbThrowinReceiver.SetInt("ROBOT_ID", robots[1]);
+
+    roboteam_msgs::RoleDirective wdThrowinReceiver;
+    wdThrowinReceiver.robot_id = robots[1];
+    wdThrowinReceiver.tree = "rtt_ewoud/ThrowinReceiver";
+    wdThrowinReceiver.blackboard = bbThrowinReceiver.toMsg();
+
+    // Add random token and save it for later
+    token = unique_id::fromRandom();
+    tokens.push_back(token);
+    wdThrowinReceiver.token = unique_id::toMsg(token);
+
+    // Send to rolenode
+    pub.publish(wdThrowinReceiver);
+
 }
 
 bt::Node::Status ThrowinPlay::Update() {
