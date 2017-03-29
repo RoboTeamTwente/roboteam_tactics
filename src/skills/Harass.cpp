@@ -16,7 +16,6 @@ bt::Blackboard::Ptr make_bb(const bt::Blackboard::Ptr base, int blockId, const s
     subBB->SetInt(name + "_BLOCK_ID", blockId);
     subBB->SetString(name + "_block_type", "COVER");
     subBB->SetBool(name + "_invert_direction", invert);
-    print_blackboard(subBB);
     return subBB;
 }
     
