@@ -30,7 +30,7 @@ TwoAttackersTactic::TwoAttackersTactic(std::string name, bt::Blackboard::Ptr bla
 void TwoAttackersTactic::Initialize() {
     tokens.clear();
 
-    // RTT_DEBUG("Initializing TwoAttackersTactic \n");
+    RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");
     // ROS_INFO("Initializing TwoAttackersTactic");
     
     if (RobotDealer::get_available_robots().size() < 1) {
@@ -142,15 +142,6 @@ void TwoAttackersTactic::Initialize() {
 }
 
 bt::Node::Status TwoAttackersTactic::Update() {
-
-    // ROS_INFO_STREAM("TwoAttackersTactic time: " << time_difference_milliseconds(now(), lastUpdate).count());
-
-    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
-    //     ROS_INFO("TwoAttackersTactic Update too long ago");
-    //     Initialize();
-    // }
-    
-
     bool firstAttackerSucceeded = false;
     bool secondAttackerSucceeded = false;
     bool oneFailed = false;
@@ -162,15 +153,9 @@ bt::Node::Status TwoAttackersTactic::Update() {
             if (status == bt::Node::Status::Success) {
                 if (token == unique_id::fromMsg(firstAttacker.token)) {
                     firstAttackerSucceeded = true;
-                    firstAttacker.tree = firstAttacker.STOP_EXECUTING_TREE;
-                    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-                    pub.publish(firstAttacker);
                 }
                 if (token == unique_id::fromMsg(secondAttacker.token)) {
                     secondAttackerSucceeded = true;
-                    secondAttacker.tree = secondAttacker.STOP_EXECUTING_TREE;
-                    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-                    pub.publish(secondAttacker);
                 }
             } 
             if (status == bt::Node::Status::Failure) {
