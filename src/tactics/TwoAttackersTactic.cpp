@@ -119,7 +119,7 @@ void TwoAttackersTactic::Initialize() {
         // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
         
         ScopedBB(bb, "AimAt_A")
-            .setString("At", "ourgoal")
+            .setString("At", "theirgoal")
             ;
 
         bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);

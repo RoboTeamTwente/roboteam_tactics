@@ -49,8 +49,8 @@ void StandByTactic::Initialize() {
     Vector2 firstRobotGoalPos(-4.4, -2.0);
     Vector2 secondRobotGoalPos(-4.4, -2.5);
     if (ourSide == "right") {
-        firstRobotGoalPos.y = firstRobotGoalPos.y * -1;
-        secondRobotGoalPos.y = secondRobotGoalPos.y * -1;
+        firstRobotGoalPos.x = firstRobotGoalPos.x * -1;
+        secondRobotGoalPos.x = secondRobotGoalPos.x * -1;
     }
     
     // delete_from_vector(robots, attackerID);
