@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     int iterationsPerSecond = 60;
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
+    RTT_DEBUGLN_TEAM("Iterations per second: %i", iterationsPerSecond);
 
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
-            RTT_DEBUGLN("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
+            RTT_DEBUGLN_TEAM("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
 
 
             roboteam_msgs::RoleFeedback feedback;
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
-                RTT_DEBUGLN("Role node failed! ID: %d", ROBOT_ID);
+                RTT_DEBUGLN_TEAM("Role node failed! ID: %d", ROBOT_ID);
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }
