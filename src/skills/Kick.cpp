@@ -80,7 +80,7 @@ bt::Node::Status Kick::Update() {
 
 	roboteam_msgs::WorldRobot robot;
     
-    if (auto botOpt = lookup_our_bot(robotID)) {
+    if (auto botOpt = getWorldBot(robotID)) {
         robot = *botOpt;
     } else {
         RTT_DEBUGLN("Could not lookup our bot %d", robotID);

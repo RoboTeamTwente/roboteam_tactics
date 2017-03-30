@@ -56,8 +56,8 @@ bt::Node::Status Block::Update() {
     roboteam_msgs::WorldRobot me, tgt;
 
     {
-        auto maybeMe = lookup_bot(my_id, true);
-        auto maybeTgt = lookup_bot(tgt_id, false);
+        auto maybeMe = getWorldBot(my_id);
+        auto maybeTgt = getWorldBot(tgt_id, false);
         if (!maybeMe || !maybeTgt) return Status::Failure;
 
         me = *maybeMe;
@@ -75,7 +75,7 @@ bt::Node::Status Block::Update() {
     } else {
         roboteam_msgs::WorldRobot blk;
         {
-            auto maybeBlk = lookup_bot(block_id, false);
+            auto maybeBlk = getWorldBot(block_id, false);
             if (!maybeBlk) return Status::Failure;
             blk = *maybeBlk;
         }

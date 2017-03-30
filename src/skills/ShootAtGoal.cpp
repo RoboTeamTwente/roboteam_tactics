@@ -64,7 +64,7 @@ Vector2 ShootAtGoal::DetermineTarget() {
 	std::vector<roboteam_msgs::WorldRobot> watchOutForTheseBots;
 
 	for (size_t i = 0; i < world.us.size(); i++) {
-		boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(i, true, &world);
+		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(i);
 		roboteam_msgs::WorldRobot currentRobot;
 		if (bot) {
 			currentRobot = *bot;
@@ -118,7 +118,7 @@ Vector2 ShootAtGoal::DetermineTarget() {
 
 bt::Node::Status ShootAtGoal::Update() {
 	roboteam_msgs::World world = LastWorld::get();
-	boost::optional<roboteam_msgs::WorldRobot> bot = lookup_bot(robotID, true, &world);
+	boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(robotID);
 
 	if (bot) {
 		me = *bot;

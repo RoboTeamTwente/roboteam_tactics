@@ -28,7 +28,7 @@ Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
         ROS_ERROR("getPointOfInterest: name was empty");
         return Vector2(0, 0);
     } else if (name == "me") {
-        if (auto bot = lookup_our_bot(ROBOT_ID)) {
+        if (auto bot = getWorldBot(ROBOT_ID)) {
             return bot->pos;   
         }
         
@@ -61,7 +61,7 @@ Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
     } else if (name == "closest opponent") {
         auto const world = LastWorld::get();
 
-        if (auto myBotOpt = lookup_bot(ROBOT_ID, true, &world)) {
+        if (auto myBotOpt = getWorldBot(ROBOT_ID)) {
             double minDist = std::numeric_limits<double>::max();
             Vector2 minPos(0, 0);
 
@@ -95,12 +95,7 @@ Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
     }
 
     // Try to find a bot based on the suffix
-    boost::optional<roboteam_msgs::WorldRobot> possibleBot;
-    if (name.back() == 'T') {
-        possibleBot = lookup_bot(robotID, false);
-    } else {
-        possibleBot = lookup_bot(robotID, true);
-    }
+    boost::optional<roboteam_msgs::WorldRobot> possibleBot = getWorldBot(robotID, name.back() != 'T');
 
     // If it's not there, return the zero vector
     if (!possibleBot) {

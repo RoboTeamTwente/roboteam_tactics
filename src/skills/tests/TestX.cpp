@@ -170,7 +170,7 @@ How to use:
         }
     }
 
-    rtt::print_blackboard(bb);
+    //rtt::print_blackboard(bb);
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;

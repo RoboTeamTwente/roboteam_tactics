@@ -16,7 +16,6 @@ bt::Blackboard::Ptr make_bb(const bt::Blackboard::Ptr base, int blockId, const s
     subBB->SetInt(name + "_BLOCK_ID", blockId);
     subBB->SetString(name + "_block_type", "COVER");
     subBB->SetBool(name + "_invert_direction", invert);
-    print_blackboard(subBB);
     return subBB;
 }
     
@@ -41,7 +40,7 @@ bt::Node::Status Harass::Update() {
     auto world = LastWorld::get();
     auto ball = world.ball;
     Vector2 ballPos(ball.pos);
-    Vector2 myPos(lookup_bot(blackboard->GetInt("ROBOT_ID"), true, &world)->pos);
+    Vector2 myPos(getWorldBot(blackboard->GetInt("ROBOT_ID"))->pos);
     if (bot_has_ball(target, false, LastWorld::get().ball)) {
         bt::Node::Status s = block_kick->Update();
         if (s == bt::Node::Status::Failure) {

@@ -96,12 +96,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot(double receiveBallAtX, do
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot otherRobot;
-	if (our_team) {
-		otherRobot = world.us.at(hasBall);
-	} else {
-		otherRobot = world.them.at(hasBall);
-	}
+	roboteam_msgs::WorldRobot otherRobot = *getWorldBot(hasBall, our_team);
 
 	// If the other robot would shoot now, use its orientation to estimate the ball trajectory, and then the closest
 	// point on this trajectory to our robot, so he can receive the ball there
@@ -159,7 +154,7 @@ bt::Node::Status ReceiveBall::Update (){
 
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	double robotAngle = robot.angle;

@@ -220,7 +220,7 @@ double GoToPosAlt::avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targ
     double sumOfAngles;
 
     for (size_t i = 0; i < world.us.size(); i++) {
-        roboteam_msgs::WorldRobot currentRobot = world.us.at(i);
+        roboteam_msgs::WorldRobot currentRobot = *getWorldBot(i);
         if (currentRobot.id != ROBOT_ID) {
 
             Vector2 otherRobotPos(currentRobot.pos);
@@ -334,7 +334,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPosAlt::getVelCommand() {
     
 
     // Find the robot with the specified ID
-    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(ROBOT_ID, true, &world);
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
     if (findBot) {
         me = *findBot;
     } else {

@@ -42,7 +42,7 @@ bt::Node::Status AimAt::Update (){
 
 	if (destination=="robot"){
         int AtRobotID = GetInt("AtRobot");
-        auto possibleBot = lookup_our_bot(AtRobotID);
+        auto possibleBot = getWorldBot(AtRobotID);
         if (possibleBot) {
             passTo = Vector2(possibleBot->pos);
         } else {

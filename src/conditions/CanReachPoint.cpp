@@ -5,6 +5,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -64,8 +65,8 @@ bt::Node::Status CanReachPoint::Update() {
 		return Status::Running;
 	}
 
-	Vector2 currentPos(world.us.at(ROBOT_ID).pos);
-	Vector2 currentVel(world.us.at(ROBOT_ID).vel);
+	Vector2 currentPos(getWorldBot(ROBOT_ID)->pos);
+	Vector2 currentVel(getWorldBot(ROBOT_ID)->vel);
 	Vector2 targetPos(xGoal, yGoal);
 
 	if(HasString("whichTeam") && GetString("whichTeam")=="them"){
