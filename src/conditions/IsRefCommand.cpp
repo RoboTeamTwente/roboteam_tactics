@@ -24,8 +24,7 @@ bt::Node::Status IsRefCommand::Update() {
 	roboteam_msgs::RefereeData ref = LastRef::get();
 	roboteam_msgs::RefereeCommand refcommand = ref.command;
 	int testCommand;
-	
-	
+
 	if (private_bb->HasDouble("command")){
 		testCommand = int(GetDouble("command"));
 		
@@ -33,20 +32,21 @@ bt::Node::Status IsRefCommand::Update() {
 		testCommand= refcommandlookup.at(GetString("command"));
 	
 	} else {
-		RTT_DEBUG("no good blackboard \r\n");
+		RTT_DEBUGLN("no good blackboard");
 		return Status::Failure;
 	}
 	
+	bool previous = HasBool("previous") && GetBool("previous");
 	
-	
-	if(refcommand.command == testCommand){
-		ROS_INFO("ja, command: %ld", (long)refcommand.command);
+    if (previous) {
+        if(LastRef::getPreviousRefCommand() == testCommand) {
+            return Status::Success;
+        }
+    } else if(refcommand.command == testCommand){
 		return Status::Success;
-	} else {
-		ROS_INFO("nee, command: %ld", (long)refcommand.command);
-		return Status::Failure;
-	}
-	
+	} 
+
+    return Status::Failure;
 }
 
 } // rtt
