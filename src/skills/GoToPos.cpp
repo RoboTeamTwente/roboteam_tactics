@@ -266,8 +266,20 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         minSpeed = GetDouble("minSpeed");
     }
 
+    if (HasDouble("maxAngularVel")) {
+        maxAngularVel = GetDouble("maxAngularVel");
+    }
+
     if (HasDouble("minAngularVel")) {
-        minSpeed = GetDouble("minAngularVel");
+        minAngularVel = GetDouble("minAngularVel");
+    }
+
+    if (HasDouble("pGainRotation")) {
+        pGainRotation = GetDouble("pGainRotation");
+    }
+
+    if (HasDouble("pGainPosition")) {
+        pGainRotation = GetDouble("pGainPosition");
     }
 
     // Get blackboard info
@@ -376,7 +388,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         sumOfForces = Vector2(0.0, 0.0);
     }
 
-    if (angularVelTarget < minAngularVel) {
+    if (fabs(angularVelTarget) < minAngularVel) {
         angularVelTarget = 0;
     }
 
