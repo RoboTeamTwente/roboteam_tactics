@@ -2,6 +2,13 @@
 
 #include <cstdio>
 
+namespace rtt {
+
+void setStdoutToTeam();
+void resetStdoutColor();
+
+}
+
 #define RTT_xstr(a) RTT_str(a)
 #define RTT_str(a) #a
 #define RTT_PASTER3(x, y, z) x ## _ ## y ## _ ## z
@@ -19,6 +26,12 @@ RTT_DEBUG_TAG( RTT_CURRENT_DEBUG_TAG , format, ##__VA_ARGS__)
 
 #define RTT_DEBUGLN(format, ...) \
 RTT_DEBUG(format "\n", ##__VA_ARGS__)
+
+#define RTT_DEBUG_TEAM(format, ...) \
+{ ::rtt::setStdoutToTeam(); RTT_DEBUG(format, ##__VA_ARGS__); ::rtt::resetStdoutColor(); }
+
+#define RTT_DEBUGLN_TEAM(format, ...) \
+{ ::rtt::setStdoutToTeam(); RTT_DEBUGLN(format, ##__VA_ARGS__); ::rtt::resetStdoutColor(); }
 
 // Enable below here which debug statements should be on and/or off
 

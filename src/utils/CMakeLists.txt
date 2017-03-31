@@ -1,15 +1,16 @@
 add_library(utils OBJECT
+    BBParser.cpp
+    BTRunner.cpp
+    BtDebug.cpp
     ComputePassPoint.cpp
     DangerFinder.cpp
     FeedbackCollector.cpp
-    RobotDealer.cpp
-    utils.cpp
-    BTRunner.cpp
-    BtDebug.cpp
-    BBParser.cpp
-    Parts.cpp
     Leaf.cpp
+    Parts.cpp
+    RobotDealer.cpp
     ScopedBB.cpp
+    debug_print.cpp
+    utils.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

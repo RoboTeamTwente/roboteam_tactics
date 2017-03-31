@@ -41,16 +41,17 @@ void StandByTactic::Initialize() {
     int firstRobotID = 0;
     int secondRobotID = 1;
 
-    std::string ourSide;
-    ros::param::get("our_side", ourSide);
-
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
     Vector2 firstRobotGoalPos(-4.4, -2.0);
     Vector2 secondRobotGoalPos(-4.4, -2.5);
+
+    std::string ourSide;
+    ros::param::get("our_side", ourSide);
+
     if (ourSide == "right") {
-        firstRobotGoalPos.y = firstRobotGoalPos.y * -1;
-        secondRobotGoalPos.y = secondRobotGoalPos.y * -1;
+        firstRobotGoalPos.x = firstRobotGoalPos.x * -1;
+        secondRobotGoalPos.x = secondRobotGoalPos.x * -1;
     }
     
     // delete_from_vector(robots, attackerID);
