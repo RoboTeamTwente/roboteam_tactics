@@ -46,12 +46,7 @@ void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
-void obituary() {
-    std::cerr << "TestX died!\n";
-}
-
 int main(int argc, char **argv) {
-    REGISTER_GRACEFUL_EXIT_AFTER(obituary);
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
     if (arguments.size() == 0) {

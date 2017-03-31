@@ -122,7 +122,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 }
 
 int main(int argc, char *argv[]) {
-    REGISTER_GRACEFUL_EXIT_AFTER(rtt::defaultPreExit);
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
