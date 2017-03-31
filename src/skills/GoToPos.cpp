@@ -33,11 +33,13 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(3.0)
+        , minAngularVel(0.0)
         , iGainVelocity(0.5)
         , iGainAngularVel(0.02)
         
         // Rest of the members
         , maxSpeed(1.0)
+        , minSpeed(0.0)
         , attractiveForce(10.0)
         , attractiveForceWhenClose(2.0) // was 5? 
         , repulsiveForce(20.0)
@@ -260,6 +262,26 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         maxSpeed = GetDouble("maxSpeed");
     }
     
+    if (HasDouble("minSpeed")) {
+        minSpeed = GetDouble("minSpeed");
+    }
+
+    if (HasDouble("maxAngularVel")) {
+        maxAngularVel = GetDouble("maxAngularVel");
+    }
+
+    if (HasDouble("minAngularVel")) {
+        minAngularVel = GetDouble("minAngularVel");
+    }
+
+    if (HasDouble("pGainRotation")) {
+        pGainRotation = GetDouble("pGainRotation");
+    }
+
+    if (HasDouble("pGainPosition")) {
+        pGainRotation = GetDouble("pGainPosition");
+    }
+
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
@@ -360,6 +382,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         } else {
             sumOfForces = Vector2(0.0, 0.0);
         }
+    }
+
+    if (sumOfForces.length() < minSpeed) {
+        sumOfForces = Vector2(0.0, 0.0);
+    }
+
+    if (fabs(angularVelTarget) < minAngularVel) {
+        angularVelTarget = 0;
     }
 
     Vector2 velCommand = sumOfForces;
