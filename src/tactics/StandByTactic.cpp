@@ -40,7 +40,7 @@ void StandByTactic::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
 
     int firstRobotID = 0;
-    int secondRobotID = 1;
+    int secondRobotID = 3;
 
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
