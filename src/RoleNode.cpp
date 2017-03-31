@@ -16,7 +16,6 @@
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/constants.h"
-#include "roboteam_utils/Termination.h"
 
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/bt.hpp"

@@ -92,11 +92,11 @@ void Wander::pickDestination() {
     ScopedBB(*bb, gtpName)
         .setBool("isKeeper", false)
         .setDouble("angleGoal", 0) // TODO?
-        .setDouble("xGoal", wanderArea.topLeft.x + x)
-        .setDouble("yGoal", wanderArea.topLeft.y + y)
+        .setDouble("xGoal", wanderArea.bottomRight.x + x)
+        .setDouble("yGoal", wanderArea.bottomRight.y + y)
         .setBool("dribbler", false)
         .setBool("avoidRobots", true);
-    ROS_INFO("WA: (%f, %f) (+ %f, %f) (~ %f, %f)", wanderArea.topLeft.x, wanderArea.topLeft.y, wanderArea.length, wanderArea.width, x, y);
+    ROS_INFO("WA: (%f, %f) (+ %f, %f) (~ %f, %f)", wanderArea.bottomRight.x, wanderArea.bottomRight.y, wanderArea.length, wanderArea.width, x, y);
     print_blackboard(bb);
     currentDestination = std::make_shared<GoToPos>(gtpName, bb);
     currentDestinationValid = true;
