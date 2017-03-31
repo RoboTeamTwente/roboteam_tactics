@@ -16,7 +16,6 @@
 #include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/constants.h"
-#include "roboteam_utils/Termination.h"
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/utils.h"
@@ -44,10 +43,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
-}
-
-void obituary() {
-    std::cerr << "TestX died!\n";
 }
 
 int main(int argc, char **argv) {

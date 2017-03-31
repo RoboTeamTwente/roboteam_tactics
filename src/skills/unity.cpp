@@ -79,5 +79,8 @@
 #include "StandFree.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Wander.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "DebugTrace.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
