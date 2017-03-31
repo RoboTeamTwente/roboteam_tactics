@@ -5,15 +5,16 @@
 #include <limits>
 #include <cmath>
 
-#include "unique_id/unique_id.h" 
+#include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/StandByTactic.h"
-#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "unique_id/unique_id.h" 
 
 #define RTT_CURRENT_DEBUG_TAG StandByTactic
 
@@ -39,7 +40,7 @@ void StandByTactic::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
 
     int firstRobotID = 0;
-    int secondRobotID = 1;
+    int secondRobotID = 3;
 
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
@@ -52,6 +53,17 @@ void StandByTactic::Initialize() {
     if (ourSide == "right") {
         firstRobotGoalPos.x = firstRobotGoalPos.x * -1;
         secondRobotGoalPos.x = secondRobotGoalPos.x * -1;
+    }
+
+    auto field = LastWorld::get_field();
+    if (field.field_length < 5) {
+        // Going into small field test mode!!!!1
+        
+        double xMax = 2.0 / 2 - 0.09;
+        double yMax = 1.75 / 2 - 0.09;
+        
+        firstRobotGoalPos = Vector2(-xMax, yMax);
+        secondRobotGoalPos = Vector2(-xMax, -yMax);
     }
     
     // delete_from_vector(robots, attackerID);
