@@ -62,6 +62,7 @@ SET_DEBUG_FOR(QualKeeper, false);
 SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(Harass, true);
+SET_DEBUG_FOR(Wander, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
@@ -90,6 +91,7 @@ SET_DEBUG_FOR(TwoAttackersCoolTactic, true);
 SET_DEBUG_FOR(TwoVTwoDefenseTactic, true);
 SET_DEBUG_FOR(PrepareKickoffUsTactic, true);
 SET_DEBUG_FOR(Qualification1v1Tactic, true);
+SET_DEBUG_FOR(WanderTactic, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

@@ -67,3 +67,6 @@
 
 #include "PrepareKickoffUsTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "WanderTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

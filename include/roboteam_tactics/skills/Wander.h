@@ -25,14 +25,7 @@ enum class WanderArea {
 /**
  * \brief Gets the WanderArea corresponding to a string
  */ 
-WanderArea areaForName(const std::string& name) {
-    if (name == "NEAR_BALL") return WanderArea::NEAR_BALL;
-    if (name == "NEAR_OUR_GOAL") return WanderArea::NEAR_OUR_GOAL;
-    if (name == "NEAR_THEIR_GOAL") return WanderArea::NEAR_THEIR_GOAL;
-    if (name == "QUADRANT") return WanderArea::QUADRANT;
-    if (name == "BOX") return WanderArea::BOX;
-    return WanderArea::NEAR_OUR_GOAL;
-}
+WanderArea areaForName(const std::string& name);
 
 /**
  * \struct Box

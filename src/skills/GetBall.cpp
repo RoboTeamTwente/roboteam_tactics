@@ -62,7 +62,6 @@ void GetBall::Initialize() {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // ROS_INFO("GetBall Update for %d", robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -97,18 +96,18 @@ bt::Node::Status GetBall::Update (){
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
-		targetAngle = GetTargetAngle(ballPos+ballVel.scale(1.25), GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 		// ROS_INFO_STREAM("targetAngle: " << targetAngle);
 		// targetAngle = (Vector2(-4.5, 0.0) - robotPos).angle();
 	} else {
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			targetAngle = (interceptPos - robotPos).angle();	
+			targetAngle = (interceptPos - robotPos).angle();
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-
+    ROS_INFO("GetBall targetAngle: %f", targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
