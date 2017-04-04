@@ -129,7 +129,7 @@ bt::Node::Status GetBall::Update (){
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
         avoidBall = true;
 	} else {
-		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
         avoidBall = false;
 	}
 
