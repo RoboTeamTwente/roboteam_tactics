@@ -82,7 +82,6 @@ bt::Node::Status GetBall::Update (){
         ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
     }  
 
-
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
 	Vector2 ballPos(ball.pos);
@@ -107,7 +106,7 @@ bt::Node::Status GetBall::Update (){
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-    ROS_INFO("GetBall targetAngle: %f", targetAngle);
+    // ROS_INFO("GetBall targetAngle: %f", targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
@@ -149,9 +148,12 @@ bt::Node::Status GetBall::Update (){
         ballCloseFrameCount = 0;
     }
 
-    // Only stop if ball has been here 5 frames
+    double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+
+    // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
             && fabs(targetAngle - robot.angle) < 0.1
+            && (rotDiff > -0.1 && rotDiff < 0.1)
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it

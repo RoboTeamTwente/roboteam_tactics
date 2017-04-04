@@ -121,3 +121,14 @@ result=$(join_by , "${allNodes[@]}")
 printf "[\n" > $dstFile
 printf "${result}" >> $dstFile
 printf "\n]" >> $dstFile
+
+# Check if 
+command -v xclip >/dev/null 2>&1 || { 
+    echo >&2 "If you'd like the JSON to be copied to your clipboard run \"sudo apt install xclip\" and then run this script again. Otherwise you can find the json in $dstFile and in the gedit window I just opened for you :D"
+    gedit "$dstFile"
+    exit 1
+}
+
+cat "$dstFile" | xclip -sel clip
+
+printf "The JSON should now be in your clipboard. Otherwise you can find the json in $dstFile."

@@ -87,3 +87,6 @@
 
 #include "DebugTrace.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
+
+#include "Twirl.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 

@@ -49,7 +49,7 @@ SET_DEBUG_FOR(Tactic, false);
 
 // Skills
 SET_DEBUG_FOR(AimAt, false);
-SET_DEBUG_FOR(Chip, false);
+SET_DEBUG_FOR(Chip, true);
 SET_DEBUG_FOR(DefendGoalarea, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(GetBall, false);
@@ -90,8 +90,10 @@ SET_DEBUG_FOR(TwoAttackersTactic, true);
 SET_DEBUG_FOR(TwoAttackersCoolTactic, true);
 SET_DEBUG_FOR(TwoVTwoDefenseTactic, true);
 SET_DEBUG_FOR(PrepareKickoffUsTactic, true);
+SET_DEBUG_FOR(KickoffUsTactic, true);
 SET_DEBUG_FOR(Qualification1v1Tactic, true);
 SET_DEBUG_FOR(WanderTactic, true);
+SET_DEBUG_FOR(TwirlPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

@@ -70,3 +70,9 @@
 
 #include "WanderTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "KickoffUsTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "TwirlPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
