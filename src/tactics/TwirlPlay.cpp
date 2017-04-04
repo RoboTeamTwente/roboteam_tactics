@@ -8,6 +8,7 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
+#include "roboteam_msgs/RobotCommand.h"
 
 #define RTT_CURRENT_DEBUG_TAG TwirlPlay
 
@@ -25,106 +26,26 @@ void TwirlPlay::Initialize() {
     RTT_DEBUGLN("Preparing Kickoff...");
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-    
-    // Position the keeper
-    int const KEEPER_ID = RobotDealer::get_keeper();
-    {
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
 
-        bb.SetInt("ROBOT_ID", KEEPER_ID);
-        bb.SetInt("KEEPER_ID", KEEPER_ID);
+    auto robots = RobotDealer::get_available_robots();
 
-        Vector2 lookAtVec = Vector2(0, 0) - Vector2(-4, 0);
-
-        ScopedBB(bb, "_GoToPos")
-            .setBool("isKeeper", true)
-            .setDouble("angleGoal", lookAtVec.angle())
-            .setDouble("xGoal", -4)
-            .setDouble("yGoal", 0)
-            .setBool("dribbler", false)
-            .setBool("avoidRobots", true)
-            ;
-
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = KEEPER_ID;
-        wd.tree = "rtt_bob/GoToPosAndStay";
-        wd.blackboard = bb.toMsg();
-        wd.token = unique_id::toMsg(unique_id::fromRandom());
-
-        pub.publish(wd);
-
-        claim_robot(KEEPER_ID);
+    if (RobotDealer::get_keeper_available()) {
+        robots.push_back(RobotDealer::get_keeper());
     }
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
-
-    // Getter bot
-    {
-        int const ROBOT_ID = robots.back();
-        robots.pop_back();
-
-        bt::Blackboard bb;
-
-        bb.SetInt("ROBOT_ID", ROBOT_ID);
-        bb.SetInt("KEEPER_ID", KEEPER_ID);
-
-        ScopedBB(bb, "_GetBall")
-            .setString("AimAt", "theirgoal")
-            ;
-
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = ROBOT_ID;
-        wd.tree = "rtt_bob/GetBallAndStay";
-        wd.blackboard = bb.toMsg();
-        wd.token = unique_id::toMsg(unique_id::fromRandom());
-        
-        pub.publish(wd);
-
-        claim_robot(ROBOT_ID);
-    }
-
-    std::vector<rtt::Vector2> startPositions = {
-        {-0.5, 2},
-        {-0.5, -2},
-        {-2, 2},
-        {-2, -2},
-    };
+    int KEEPER_ID = RobotDealer::get_keeper();
 
     for (auto const ROBOT_ID : robots) {
-        // Get the first position
-        auto const START_POS = startPositions.front();
-        // Erase it
-        startPositions.erase(startPositions.begin());
-
         bt::Blackboard bb;
-
         bb.SetInt("ROBOT_ID", ROBOT_ID);
         bb.SetInt("KEEPER_ID", KEEPER_ID);
 
-        Vector2 lookAtVec = Vector2(0, 0) - START_POS;
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = ROBOT_ID;
+        rd.tree = "rtt_bob/TwirlTree";
+        rd.blackboard = bb.toMsg();
 
-        ScopedBB(bb, "_GoToPos")
-            .setBool("isKeeper", false)
-            .setDouble("angleGoal", lookAtVec.angle())
-            .setDouble("xGoal", START_POS.x)
-            .setDouble("yGoal", START_POS.y)
-            .setBool("dribbler", false)
-            .setBool("avoidRobots", true)
-            ;
-
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = ROBOT_ID;
-        wd.tree = "rtt_bob/GoToPosAndStay";
-        wd.blackboard = bb.toMsg();
-        wd.token = unique_id::toMsg(unique_id::fromRandom());
-        
-        pub.publish(wd);
-
-        claim_robot(ROBOT_ID);
+        pub.publish(rd);
     }
 }
 

@@ -13,7 +13,7 @@ Twirl::Twirl(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {}
 bt::Node::Status Twirl::Update() {
     roboteam_msgs::RobotCommand rc;
 
-    rc.id = blackboard->GetBool("ROBOT_ID");
+    rc.id = blackboard->GetInt("ROBOT_ID");
 
     if (HasDouble("speed")) {
         rc.w = GetDouble("speed");

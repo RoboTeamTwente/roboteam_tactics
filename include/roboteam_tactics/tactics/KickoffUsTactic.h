@@ -1,6 +1,6 @@
 #pragma once
 
-#include "unique_id/unique_id.h"
+#include <boost/uuid/uuid.hpp>
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
@@ -17,9 +17,8 @@ public:
     std::string node_name() override { return "KickoffUsTactic"; }
 
 private:
-    std::vector<boost::uuids::uuid> tokens;
-
     bool initFailed;
+       boost::uuids::uuid kickerToken;
 
 } ;
 

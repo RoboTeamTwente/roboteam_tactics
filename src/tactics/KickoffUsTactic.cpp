@@ -1,15 +1,17 @@
 #include <sstream>
+#include <unique_id/unique_id.h>
 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/world_analysis.h"
 
-#include "roboteam_tactics/tactics/KickoffUsTactic.h"
-#include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_tactics/utils/ScopedBB.h"
 #include "boost/optional.hpp"
+#include "roboteam_tactics/tactics/KickoffUsTactic.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
+#include "roboteam_tactics/utils/debug_print.h"
 
 namespace b = boost;
 
@@ -24,7 +26,6 @@ KickoffUsTactic::KickoffUsTactic(std::string name, bt::Blackboard::Ptr blackboar
         {}
 
 void KickoffUsTactic::Initialize() {
-    tokens.clear();
     initFailed = false;
     
     RTT_DEBUGLN("Doing Kickoff!");
@@ -105,12 +106,15 @@ void KickoffUsTactic::Initialize() {
             .setString("AimAt", "theirgoal")
             ;
 
+        // Create token
+        kickerToken = unique_id::fromRandom();
+        
         // Create message
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = ROBOT_ID;
         wd.tree = "rtt_bob/GetBallAndChip";
         wd.blackboard = bb.toMsg();
-        wd.token = unique_id::toMsg(unique_id::fromRandom());
+        wd.token = unique_id::toMsg(kickerToken);
         
         pub.publish(wd);
 
@@ -157,6 +161,16 @@ void KickoffUsTactic::Initialize() {
 
 bt::Node::Status KickoffUsTactic::Update() {
     if (initFailed) return bt::Node::Status::Failure;
+
+    auto feedbacksIt = feedbacks.find(kickerToken);
+    if (feedbacksIt != feedbacks.end()) {
+        auto status = feedbacksIt->second;
+        if (status == bt::Node::Status::Success) {
+            return bt::Node::Status::Success;
+        } else {
+            return bt::Node::Status::Failure;
+        }
+    }
 
     // KickoffUsTactic is done when a normal start is signalled.
     // RefStateSwitch will take care of that for us

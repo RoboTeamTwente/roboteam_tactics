@@ -34,7 +34,9 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::GOAL_THEM,            UNSET },
         { RefState::BALL_PLACEMENT_US,    UNSET },
         { RefState::BALL_PLACEMENT_THEM,  UNSET },
-        { RefState::NORMAL_PLAY,          "qualification/StandByStrat"}
+        // qualification/StandByStrat
+        // rtt_bob/NormalStrategy
+        { RefState::NORMAL_PLAY,          "rtt_bob/NormalStrategy"}
 };
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
