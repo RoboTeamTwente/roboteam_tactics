@@ -27,10 +27,8 @@ bt::Node::Status IsRefCommand::Update() {
 
 	if (private_bb->HasDouble("command")){
 		testCommand = int(GetDouble("command"));
-		
 	} else if(private_bb->HasString("command")){
 		testCommand= refcommandlookup.at(GetString("command"));
-	
 	} else {
 		RTT_DEBUGLN("no good blackboard");
 		return Status::Failure;

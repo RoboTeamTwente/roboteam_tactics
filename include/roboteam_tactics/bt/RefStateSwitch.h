@@ -6,6 +6,7 @@
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_utils/LastRef.h"
+#include "roboteam_utils/RefLookup.h"
 #include "roboteam_msgs/RefereeCommand.h"
 #include "roboteam_msgs/RefereeData.h"
 
@@ -62,8 +63,15 @@ public:
             }
 
             child->Initialize();
-            ROS_INFO("Received referee command %d", cmd);
-            std::cout << "Last: " << last << "\n";
+
+            std::cout << "[RefStateSwitch] Current ref command: "
+                      << getRefCommandName(cmd).get_value_or("unknown");
+            
+            std::cout << ", previous ref command: "
+                      << getRefCommandName(last).get_value_or("unknown");
+
+            std::cout << "\n";
+
             last = cmd;
         }
 

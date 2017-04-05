@@ -5,26 +5,24 @@
 namespace rtt {
 
 /**
- * \class Freeze
+ * \class Twirl
  * \brief See YAML
  */
 /*
- * Descr: Stops a robot from moving, possibly repeatedly
+ * Descr: Twirls the robot at eye blazing speed.
  * Params:
  *   ROBOT_ID:
  *     Type: Int
  *     Descr: The id of the robot to stop
- *   repeat:
+ *   speed:
  *     Type: Int
- *     Descr: |
- *       The amount of times to repeat the stop command. Set to zero to send it only once.
- *       If this number is set to a negative value, this skill will always return Running.
+ *     Descr: Number if rotations per second
+ *     Default: 0.5
  */
-class Freeze final : public Skill {
+class Twirl final : public Skill {
 
 public:
-    Freeze(std::string name = "", bt::Blackboard::Ptr = nullptr);
-    void Initialize() override;
+    Twirl(std::string name = "", bt::Blackboard::Ptr = nullptr);
     Status Update() override;
     
     static VerificationMap required_params() {
@@ -34,7 +32,7 @@ public:
         return params;
     }
     
-    std::string node_name() override { return "Freeze"; }
+    std::string node_name() override { return "Twirl"; }
 private:
     int count;
 };

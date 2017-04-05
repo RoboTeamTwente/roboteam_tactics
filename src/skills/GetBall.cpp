@@ -82,7 +82,6 @@ bt::Node::Status GetBall::Update (){
         ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
     }  
 
-
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
 	Vector2 ballPos(ball.pos);
@@ -129,7 +128,7 @@ bt::Node::Status GetBall::Update (){
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
         avoidBall = true;
 	} else {
-		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
         avoidBall = false;
 	}
 
@@ -148,9 +147,12 @@ bt::Node::Status GetBall::Update (){
         ballCloseFrameCount = 0;
     }
 
-    // Only stop if ball has been here 5 frames
+    double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+
+    // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
             && fabs(targetAngle - robot.angle) < 0.1
+            && (rotDiff > -0.1 && rotDiff < 0.1)
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it
@@ -207,13 +209,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        // if (newVelCommand.length() > 2.0) {
-            // newVelCommand.scale(2.0 / newVelCommand.length());
-        // }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 4.0) {
+          newVelCommand.scale(4.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

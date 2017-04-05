@@ -37,6 +37,12 @@ bt::Node::Status IsBallInZone::Update() {
 	double zone2x2=1.5;
 	double zone2y1=0.0;
 	double zone2y2=-3.0;
+
+	// zone 3: all field except area close to opponents goal
+	double zone3x1=3.5;
+	double zone3x2=-4.5;
+	double zone3y1=-3.0;
+	double zone3y2=-3.0;
 	
 	if(zone == 1){
 		if(our_side == "right"){
@@ -58,6 +64,21 @@ bt::Node::Status IsBallInZone::Update() {
 		}
 		else{
 			if(ballPos.x > -zone2x1 && ballPos.x < -zone2x2 && ballPos.y > -zone2y1 && ballPos.y < -zone2y2){
+				return Status::Success;
+			}
+		
+		}
+	
+	
+	}
+	else if(zone == 3){
+		if(our_side == "right"){
+			if(ballPos.x < zone3x1 && ballPos.x > zone3x2 && ballPos.y < zone3y1 && ballPos.y > zone3y2){
+				return Status::Success;
+			}
+		}
+		else{
+			if(ballPos.x > -zone3x1 && ballPos.x < -zone3x2 && ballPos.y > -zone3y1 && ballPos.y < -zone3y2){
 				return Status::Success;
 			}
 		

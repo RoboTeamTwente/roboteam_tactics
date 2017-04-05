@@ -16,23 +16,29 @@ void HaltTactic::Initialize() {
     
     auto world = LastWorld::get();
     for (const auto& bot : world.us) {
-        RobotDealer::claim_robot(bot.id);
-        Blackboard bb;
+        claim_robot(bot.id);
+
+        bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", bot.id);
+        bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
         bb.SetInt("repeat", -1); // Freeze forever
+
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = bot.id;
-        rd.tree = "HaltRole";
+        rd.tree = "rtt_dennis/HaltRole";
         rd.blackboard = bb.toMsg();
         boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
         rd.token = unique_id::toMsg(token);
-        pub.publish(wd);
+
+        pub.publish(rd);
+
+        tokens.push_back(token);
     } 
 }
 
 bt::Node::Status HaltTactic::Update() {
-    return LastRef::getState() == RefState::HALT ? bt::Node::Status::Running : bt::Node::Status::Success;
+    // return LastRef::getState() == RefState::HALT ? bt::Node::Status::Running : bt::Node::Status::Success;
+    return bt::Node::Status::Running;
 }
 
 }
