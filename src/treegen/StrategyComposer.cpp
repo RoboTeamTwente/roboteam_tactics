@@ -17,7 +17,7 @@ std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
  */
 const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::HALT,                 "rtt_dennis/HaltStrategy" },
-        { RefState::STOP,                 "rtt_dennis/HaltStrategy" },
+        { RefState::STOP,                 "rtt_dennis/WanderStrategy" },
         { RefState::NORMAL_START,         UNSET },
         { RefState::FORCED_START,         UNSET },
         { RefState::PREPARE_KICKOFF_US,   "rtt_bob/prepare_kickoff_us"},
@@ -28,8 +28,8 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::DIRECT_FREE_THEM,     "FreeKickDefenceStrategy"},
         { RefState::INDIRECT_FREE_US,     UNSET },
         { RefState::INDIRECT_FREE_THEM,   "FreeKickDefenceStrategy"},
-        { RefState::TIMEOUT_US,           UNSET },
-        { RefState::TIMEOUT_THEM,         UNSET },
+        { RefState::TIMEOUT_US,           "rtt_dennis/WanderStrategy" },
+        { RefState::TIMEOUT_THEM,         "rtt_dennis/WanderStrategy" },
         { RefState::GOAL_US,              UNSET },
         { RefState::GOAL_THEM,            UNSET },
         { RefState::BALL_PLACEMENT_US,    UNSET },
