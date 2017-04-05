@@ -27,13 +27,9 @@ bt::Node::Status CanSeeRobot::Update() {
 	// ROS_INFO_STREAM("CanSeeRobot Update, id: " << robotID);
 
 	roboteam_msgs::World world = LastWorld::get();
-	roboteam_msgs::WorldRobot me = world.us.at(blackboard->GetInt("ROBOT_ID"));
-	Vector2 targetPos;
-	if (GetBool("our_team")) {
-		targetPos = Vector2(world.us.at(GetInt("targetID")).pos.x, world.us.at(GetInt("targetID")).pos.y);
-	} else {
-		targetPos = Vector2(world.them.at(GetInt("targetID")).pos.x, world.them.at(GetInt("targetID")).pos.y);
-	}
+	roboteam_msgs::WorldRobot me = *getWorldBot(blackboard->GetInt("ROBOT_ID"));
+    roboteam_msgs::WorldRobot tgt = *getWorldBot(GetInt("targetID"), GetBool("our_team"));
+	Vector2 targetPos(tgt.pos);
 
 	std::vector<roboteam_msgs::WorldRobot> obstacles = getObstacles(me, targetPos, &world, true);
 	if (obstacles.size() > 1) {

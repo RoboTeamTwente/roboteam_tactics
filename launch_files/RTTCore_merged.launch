@@ -7,8 +7,7 @@
 		<param name="our_color" type="str" value="blue" />
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world"/>
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
-        <node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" args="--merge-mode" output="screen"/>
 
 		<param name="role_iterations_per_second" type="int" value="20" />
 		<param name="num_role_nodes" type="int" value="2" />
@@ -33,11 +32,10 @@
 		<param name="our_color" type="str" value="yellow" />
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world"/>
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
-		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" args="--merge-mode" output="screen"/>
 
 		<param name="role_iterations_per_second" type="int" value="20" />
-		<param name="num_role_nodes" type="int" value="1" />
+		<param name="num_role_nodes" type="int" value="2" />
 		<param name="normalize_field" type="bool" value="true" />
 
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
@@ -45,11 +43,13 @@
 
         <!--
 		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-        -->
 		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-        <!--
 		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
         -->
 	</group>
+
+    <param name="our_color" type="str" value="yellow" />
+	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" args="--merge-mode" />
+
 </launch>

@@ -58,7 +58,7 @@ bt::Node::Status Chip::Update() {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	Vector2 posDiff = ballPos-robotPos;
@@ -66,7 +66,7 @@ bt::Node::Status Chip::Update() {
 	double rotDiff = posDiff.angle() - robot.angle;
 	rotDiff = cleanAngle(rotDiff);
 
-	if (posDiff.length() < 0.105) { // ball is close
+	if (posDiff.length() < 0.12) { // ball is close
 		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;

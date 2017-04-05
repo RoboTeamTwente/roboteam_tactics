@@ -62,7 +62,6 @@ void GetBall::Initialize() {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // ROS_INFO("GetBall Update for %d", robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -75,14 +74,13 @@ bt::Node::Status GetBall::Update (){
 
 
 	// Find the robot with the specified ID
-    boost::optional<roboteam_msgs::WorldRobot> findBot = lookup_bot(robotID, true, &world);
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
     roboteam_msgs::WorldRobot robot;
     if (findBot) {
         robot = *findBot;
     } else {
         ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
     }  
-
 
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
@@ -97,18 +95,18 @@ bt::Node::Status GetBall::Update (){
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
-		targetAngle = GetTargetAngle(ballPos+ballVel.scale(1.25), GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
+		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
 		// ROS_INFO_STREAM("targetAngle: " << targetAngle);
 		// targetAngle = (Vector2(-4.5, 0.0) - robotPos).angle();
 	} else {
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			targetAngle = (interceptPos - robotPos).angle();	
+			targetAngle = (interceptPos - robotPos).angle();
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-
+    // ROS_INFO("GetBall targetAngle: %f", targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
@@ -131,7 +129,7 @@ bt::Node::Status GetBall::Update (){
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
         avoidBall = true;
 	} else {
-		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
         avoidBall = false;
 	}
 
@@ -150,9 +148,12 @@ bt::Node::Status GetBall::Update (){
         ballCloseFrameCount = 0;
     }
 
-    // Only stop if ball has been here 5 frames
+    double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+
+    // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
             && fabs(targetAngle - robot.angle) < 0.1
+            && (rotDiff > -0.1 && rotDiff < 0.1)
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it

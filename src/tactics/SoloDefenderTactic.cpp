@@ -84,20 +84,18 @@ void SoloDefenderTactic::Initialize() {
 }
 
 bt::Node::Status SoloDefenderTactic::Update() {
-
-    // ROS_INFO("SoloDefenderTactic Update");
-    // ROS_INFO_STREAM("SoloDefenderTactic time: " << time_difference_milliseconds(lastUpdate, now()).count());
-
-    // if (time_difference_milliseconds(lastUpdate, now()).count() > 500) {
-    //     ROS_INFO("SoloDefenderTactic Update too long ago");
-    //     Initialize();
-    // }
     
     bool allSucceeded = true;
+    bool failure = false;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
+
+            if (status == Status::Failure) {
+                failure = true;
+            }
+
             allSucceeded &= status == bt::Node::Status::Success;
         } else {
             allSucceeded = false;
@@ -105,14 +103,7 @@ bt::Node::Status SoloDefenderTactic::Update() {
     }
 
     if (allSucceeded) return Status::Success;
-
-    auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 60) {
-        RTT_DEBUGLN("Tactic failed because it took too long");
-        return Status::Failure;
-    }
-
-    lastUpdate = now();
+    if (failure) return Status::Failure;
 
     // Keep defending until stopped by the strategy
     return bt::Node::Status::Running;

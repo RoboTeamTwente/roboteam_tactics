@@ -76,15 +76,15 @@ bt::Node::Status StandFree::Update() {
 
 
     // Store some variables for easy access
-    Vector2 myPos = Vector2(world.us.at(myID).pos);
+    Vector2 myPos = Vector2(getWorldBot(myID)->pos);
     Vector2 theirPos;
     if (GetString("whichTeam") == "us") {
-        theirPos = Vector2(world.us.at(theirID).pos); 
+        theirPos = Vector2(getWorldBot(theirID)->pos); 
     } else if (GetString("whichTeam") == "them") {
-        theirPos = Vector2(world.them.at(theirID).pos); 
+        theirPos = Vector2(getWorldBot(theirID, false)->pos); 
     } else {
         ROS_WARN("No team specified...");
-        theirPos = Vector2(world.us.at(theirID).pos); 
+        theirPos = Vector2(getWorldBot(theirID)->pos); 
     }
 
 

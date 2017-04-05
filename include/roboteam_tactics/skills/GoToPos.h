@@ -95,11 +95,13 @@ private:
     // double iGainRotation;
     // double dGainRotation;
     double maxAngularVel;
+    double minAngularVel;
     double iGainVelocity;
     double iGainAngularVel;
 
     // Control variables
     double maxSpeed;
+    double minSpeed;
     double attractiveForce;
     double attractiveForceWhenClose;
     double repulsiveForce;

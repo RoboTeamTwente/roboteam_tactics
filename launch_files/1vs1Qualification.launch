@@ -1,8 +1,8 @@
 <launch>
 
-	<group ns="blue">
+	<!-- <group ns="blue">
 		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/SoloDefenderStrat" output="screen" /> 
-	</group>
+	</group> -->
 
 	<group ns="yellow">
 		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="qualification/SoloAttackerStrat" output="screen" /> 

@@ -5,6 +5,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -24,8 +25,8 @@ bt::Node::Status CanPassSafely::Update (){
 	}
 	ROS_INFO_STREAM("condition CanPassSafely, from " << myID << " to " << passToRobot);
 
-	Vector2 myPos = Vector2(world.us.at(myID).pos.x, world.us.at(myID).pos.y);	
-	Vector2 targetPos = Vector2(world.us.at(passToRobot).pos.x, world.us.at(passToRobot).pos.y);
+	Vector2 myPos = Vector2(getWorldBot(myID)->pos.x, getWorldBot(myID)->pos.y);	
+	Vector2 targetPos = Vector2(getWorldBot(passToRobot)->pos.x, getWorldBot(passToRobot)->pos.y);
 	Vector2 ballTrajectory = targetPos - myPos;
 
 	bool failure;

@@ -16,7 +16,6 @@
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/constants.h"
-#include "roboteam_utils/Termination.h"
 
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/bt.hpp"
@@ -24,8 +23,10 @@
 #include "roboteam_tactics/utils/BtDebug.h"
 
 namespace {
+
     std::string const RED_BOLD_COLOR = "\e[1;31m";
     std::string const END_COLOR = "\e[0m";
+
 } // anonymous namespace
 
 #define RTT_CURRENT_DEBUG_TAG RoleNode
@@ -46,8 +47,6 @@ void reset_tree() {
 
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
-    // ROS_INFO_STREAM("role directive callback!");
-
     std::string name = ros::this_node::getName();
     // Some control statements to regulate starting and stopping of rolenodes
     if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
@@ -59,9 +58,9 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    ros::NodeHandle n;
+    RTT_DEBUGLN_TEAM("Robot %i directive: %s", ROBOT_ID, msg->tree.c_str());
 
-     std::cout << ROBOT_ID  << ": Got tree: " << msg->tree << "\n";
+    ros::NodeHandle n;
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
@@ -69,40 +68,32 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
 
-        // std::cout << ROBOT_ID << ": Stop executing tree!\n";
-
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
         reset_tree();
         ignoring_strategy_instructions = true;
 
-        // std::cout << "Ignoring strategy instructions!\n";
-
         return;
     } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
         ignoring_strategy_instructions = false;
-        // std::cout << "Ignoring strategy instructions no!\n";
+
         return;
     }
 
-     std::cout << "Ignoring strategy? ";
-
-   if (ignoring_strategy_instructions) {
-         std::cout << "Yes!\n";
+    if (ignoring_strategy_instructions) {
         return;
     }
-   std::cout << "No!\n";
 
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
 
     if (!bb->HasInt("ROBOT_ID")) {
-         std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
     }
 
 
     if (!bb->HasInt("KEEPER_ID")) {
-         std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
     }
 
     {
@@ -116,13 +107,10 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     }
     currentToken = msg->token;
 
-    RTT_DEBUG("Robot %i starts executing tree: %s.\n", ROBOT_ID, msg->tree.c_str());
-
     RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
-    REGISTER_GRACEFUL_EXIT_AFTER(rtt::defaultPreExit);
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
@@ -142,7 +130,7 @@ int main(int argc, char *argv[]) {
     int iterationsPerSecond = 60;
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    RTT_DEBUG("Iterations per second: %i\n", iterationsPerSecond);
+    RTT_DEBUGLN_TEAM("Iterations per second: %i", iterationsPerSecond);
 
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -175,7 +163,7 @@ int main(int argc, char *argv[]) {
         if (status == bt::Node::Status::Success
                  || status == bt::Node::Status::Failure
                  || status == bt::Node::Status::Invalid) {
-            RTT_DEBUGLN("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
+            RTT_DEBUGLN_TEAM("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
 
 
             roboteam_msgs::RoleFeedback feedback;
@@ -192,7 +180,7 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
             } else if (status == bt::Node::Status::Failure) {
-                RTT_DEBUGLN("Role node failed! ID: %d", ROBOT_ID);
+                RTT_DEBUGLN_TEAM("Role node failed! ID: %d", ROBOT_ID);
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }

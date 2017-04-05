@@ -83,7 +83,7 @@ bt::Node::Status FollowPath::Update () {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = world.us.at(robotID);
+	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	Vector2 goalPos = Vector2(xGoal, yGoal);
 

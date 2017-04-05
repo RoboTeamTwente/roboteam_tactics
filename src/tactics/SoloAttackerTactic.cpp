@@ -10,6 +10,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
@@ -37,8 +38,9 @@ void SoloAttackerTactic::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
     
     int attackerID = 0;
+    int keeperID = 3;
     // delete_from_vector(robots, attackerID);
-    claim_robots({attackerID});
+    claim_robots({attackerID, keeperID});
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -55,6 +57,41 @@ void SoloAttackerTactic::Initialize() {
         roboteam_msgs::RoleDirective wd;
         wd.robot_id = attackerID;
         wd.tree = "qualification/SoloAttackerRole";
+        wd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        wd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(wd);
+    }
+
+    Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+    Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+
+    {
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", keeperID);
+        bb.SetInt("KEEPER_ID", 5);
+
+        bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
+        bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
+        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
+
+        bb.SetString("AimAt_fieldCenter_AimAt", "position");
+        bb.SetDouble("AimAt_fieldCenter_xGoal", 0.0);
+        bb.SetDouble("AimAt_fieldCenter_yGoal", 0.0);
+
+        bb.SetDouble("Kick_A_kickVel", 2.5);
+
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.robot_id = keeperID;
+        wd.tree = "qualification/SoloDefenderRole";
         wd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

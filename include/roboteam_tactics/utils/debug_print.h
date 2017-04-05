@@ -2,6 +2,13 @@
 
 #include <cstdio>
 
+namespace rtt {
+
+void setStdoutToTeam();
+void resetStdoutColor();
+
+}
+
 #define RTT_xstr(a) RTT_str(a)
 #define RTT_str(a) #a
 #define RTT_PASTER3(x, y, z) x ## _ ## y ## _ ## z
@@ -20,6 +27,12 @@ RTT_DEBUG_TAG( RTT_CURRENT_DEBUG_TAG , format, ##__VA_ARGS__)
 #define RTT_DEBUGLN(format, ...) \
 RTT_DEBUG(format "\n", ##__VA_ARGS__)
 
+#define RTT_DEBUG_TEAM(format, ...) \
+{ ::rtt::setStdoutToTeam(); RTT_DEBUG(format, ##__VA_ARGS__); ::rtt::resetStdoutColor(); }
+
+#define RTT_DEBUGLN_TEAM(format, ...) \
+{ ::rtt::setStdoutToTeam(); RTT_DEBUGLN(format, ##__VA_ARGS__); ::rtt::resetStdoutColor(); }
+
 // Enable below here which debug statements should be on and/or off
 
 namespace rtt {
@@ -36,7 +49,7 @@ SET_DEBUG_FOR(Tactic, false);
 
 // Skills
 SET_DEBUG_FOR(AimAt, false);
-SET_DEBUG_FOR(Chip, false);
+SET_DEBUG_FOR(Chip, true);
 SET_DEBUG_FOR(DefendGoalarea, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(GetBall, false);
@@ -49,6 +62,7 @@ SET_DEBUG_FOR(QualKeeper, false);
 SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(Harass, true);
+SET_DEBUG_FOR(Wander, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
@@ -76,7 +90,10 @@ SET_DEBUG_FOR(TwoAttackersTactic, true);
 SET_DEBUG_FOR(TwoAttackersCoolTactic, true);
 SET_DEBUG_FOR(TwoVTwoDefenseTactic, true);
 SET_DEBUG_FOR(PrepareKickoffUsTactic, true);
+SET_DEBUG_FOR(KickoffUsTactic, true);
 SET_DEBUG_FOR(Qualification1v1Tactic, true);
+SET_DEBUG_FOR(WanderTactic, true);
+SET_DEBUG_FOR(TwirlPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
