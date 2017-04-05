@@ -46,8 +46,6 @@ Wander::Wander(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, b
     assert_valid<Wander>(name);
     currentDestinationValid = false;
     lazyInitDefaults();
-    print_blackboard(blackboard);
-    RTT_DEBUGLN("Wander: %d %s", GetInt("ROBOT_ID"), GetString("type").c_str());
 }    
 
 void Wander::configure() {
@@ -107,7 +105,7 @@ void Wander::pickDestination() {
         .setDouble("yGoal", wanderArea.bottomRight.y + y)
         .setBool("dribbler", false)
         .setBool("avoidRobots", true);
-    currentDestination = std::make_shared<GoToPos>(gtpName, bb);
+    currentDestination = std::make_shared<Approach>(gtpName, bb);
     currentDestinationValid = true;
 }
     

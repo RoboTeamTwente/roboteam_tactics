@@ -107,7 +107,6 @@ bt::Node::Status GetBall::Update (){
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-    ROS_INFO("GetBall targetAngle: %f", targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 

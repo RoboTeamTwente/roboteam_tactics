@@ -6,7 +6,7 @@
 #include "roboteam_utils/Position.h"
 #include "roboteam_utils/Cone.h"
 #include "roboteam_msgs/World.h"
-#include "GoToPos.h"
+#include "Approach.h"
 
 namespace rtt {
 
@@ -104,7 +104,7 @@ private:
     Box wanderArea;
     void configure();
     
-    std::shared_ptr<GoToPos> currentDestination;
+    std::shared_ptr<Approach> currentDestination;
     bool currentDestinationValid;
     
     void pickDestination();

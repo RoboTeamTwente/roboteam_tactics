@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Composite.hpp"
+#include <iostream>
 
 namespace bt
 {
@@ -17,6 +18,7 @@ public:
     size_t index;
 
     void Initialize() override {
+        std::cout << "(Re-)Initializing MemSequence\n";
         index = 0;
     }
 
@@ -28,6 +30,7 @@ public:
         // Keep going until a child behavior says it's running.
         while (index < children.size()) {
             auto &child = children.at(index);
+            std::cout << "Idx: " << index << ": " << child->node_name() << "\n";
 
             Node::append_status("[MemSequence: executing child of type %s]", child->node_name().c_str());
             auto status = child->Tick();
