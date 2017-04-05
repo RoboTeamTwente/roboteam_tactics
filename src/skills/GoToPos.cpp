@@ -411,7 +411,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 bt::Node::Status GoToPos::Update() {
-
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
