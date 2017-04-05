@@ -1,7 +1,7 @@
 #include <string>
 
-#include "roboteam_tactics/bt/RefStateSwitch.h"
-#include "roboteam_tactics/treegen/StrategyComposer.h"
+#include "roboteam_tactics/utils/RefStateSwitch.h"
+#include "roboteam_tactics/utils/StrategyComposer.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
@@ -17,7 +17,7 @@ std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
  */
 const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::HALT,                 "rtt_dennis/HaltStrategy" },
-        { RefState::STOP,                 "rtt_dennis/WanderStrategy" },
+        { RefState::STOP,                 "rtt_dennis/HaltStrategy" },
         { RefState::NORMAL_START,         UNSET },
         { RefState::FORCED_START,         UNSET },
         { RefState::PREPARE_KICKOFF_US,   "rtt_bob/prepare_kickoff_us"},

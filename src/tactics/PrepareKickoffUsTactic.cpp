@@ -60,6 +60,8 @@ void PrepareKickoffUsTactic::Initialize() {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
 
+    if (robots.size() == 0) return;
+
     // Getter bot
     {
         int const ROBOT_ID = robots.back();
