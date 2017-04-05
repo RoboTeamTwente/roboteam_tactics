@@ -57,6 +57,14 @@ namespace rtt {
  *         Type: Bool
  *         Descr: Indicates whether or not other robots should be avoided
  *
+ *     - stayOnSide:
+ *         Type: String
+ *         Descr: Indicates on which side of the field GoToPos should stay.
+ *         Can be:
+ *             ourSide: Have the robot stay at our side.
+ *             theirSide: Have the robot stay at their side.
+ *             TOTALLY EMPTY: Does nothing
+ *
  */
 class GoToPos : public Skill {
 public:

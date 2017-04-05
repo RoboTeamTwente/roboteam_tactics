@@ -39,6 +39,9 @@ namespace rtt {
  *    - passOn:
  *        Type: Bool
  *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.
+ *    - stayOnSide:
+ *        Type: String
+ *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
  */
 class GetBall : public Skill {
 public:
