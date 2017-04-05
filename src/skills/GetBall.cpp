@@ -196,7 +196,9 @@ bt::Node::Status GetBall::Update (){
         // 	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
         // }
         
-
+        if (HasString("stayOnSide")) {
+            private_bb->SetString("stayOnSide", GetString("stayOnSide"));
+        }
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
         roboteam_msgs::RobotCommand command;
