@@ -17,17 +17,21 @@ void HaltTactic::Initialize() {
     auto world = LastWorld::get();
     for (const auto& bot : world.us) {
         RobotDealer::claim_robot(bot.id);
-        Blackboard bb;
+
+        bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", bot.id);
         bb.SetInt("repeat", -1); // Freeze forever
+
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = bot.id;
         rd.tree = "HaltRole";
         rd.blackboard = bb.toMsg();
         boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
         rd.token = unique_id::toMsg(token);
-        pub.publish(wd);
+
+        pub.publish(rd);
+
+        tokens.push_back(token);
     } 
 }
 

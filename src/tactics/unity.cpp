@@ -76,3 +76,6 @@
 
 #include "TwirlPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "HaltTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

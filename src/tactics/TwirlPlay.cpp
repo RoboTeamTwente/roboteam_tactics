@@ -23,7 +23,7 @@ TwirlPlay::TwirlPlay(std::string name, bt::Blackboard::Ptr blackboard)
 void TwirlPlay::Initialize() {
     tokens.clear();
     
-    RTT_DEBUGLN("Preparing Kickoff...");
+    RTT_DEBUGLN("Preparing twirling...");
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
