@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Composite.hpp"
-#include <iostream>
+#include <string>
 
 namespace bt
 {
@@ -17,41 +17,15 @@ class MemSequence : public Composite
 public:
     size_t index;
 
-    void Initialize() override {
-        index = 0;
-    }
+    void Initialize() override;
 
-    Status Update() override {
-        if (HasNoChildren()) {
-            return Status::Success;
-        }
-
-        // Keep going until a child behavior says it's running.
-        while (index < children.size()) {
-            auto &child = children.at(index);
-
-            Node::append_status("[MemSequence: executing child of type %s]", child->node_name().c_str());
-            auto status = child->Tick();
-
-            // If the child fails, or keeps running, do the same.
-            if (status != Status::Success) {
-                return status;
-            }
-
-            index++;
-        }
-
-        return Status::Success;
-    }
+    Status Update() override;
     
-    std::string node_name() override { return "MemSequence"; }
+    std::string node_name() override;
     
     using Ptr = std::shared_ptr<MemSequence>;
 };
 
-static MemSequence::Ptr MakeMemSequence()
-{
-    return std::make_shared<MemSequence>();
-}
+MemSequence::Ptr MakeMemSequence();
 
 }

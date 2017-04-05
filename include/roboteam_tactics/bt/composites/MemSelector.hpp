@@ -16,40 +16,15 @@ class MemSelector : public Composite
 public:
     size_t index;
 
-    void Initialize() override {
-        index = 0;
-    }
+    void Initialize() override;
 
-    Status Update() override {
-        if (HasNoChildren()) {
-            return Status::Success;
-        }
-
-        // Keep going until a child behavior says it's running.
-        while (index < children.size()) {
-            auto &child = children.at(index);
-            Node::append_status("[MemSelector: executing child of type %s]", child->node_name().c_str());
-            auto status = child->Tick();
-
-            // If the child succeeds, or keeps running, do the same.
-            if (status != Status::Failure) {
-                return status;
-            }
-
-            index++;
-        }
-
-        return Status::Failure;
-    }
+    Status Update() override;
     
     using Ptr = std::shared_ptr<MemSelector>;
     
-    std::string node_name() override { return "MemSelector"; }
+    std::string node_name() override;
 };
 
-static MemSelector::Ptr MakeMemSelector()
-{
-    return std::make_shared<MemSelector>();
-}
+MemSelector::Ptr MakeMemSelector();
 
 }
