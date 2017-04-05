@@ -22,8 +22,9 @@ bt::Node::Status Freeze::Update() {
     if (repeat == -1) {
         return bt::Node::Status::Running;
     } else {
-        count++;
-        if (count == repeat) {
+        auto currentCount = count;
+        count += 1;
+        if (currentCount >= repeat) {
             return bt::Node::Status::Success;
         } else {
             return bt::Node::Status::Running;

@@ -19,7 +19,6 @@ namespace rtt {
  *     Descr: |
  *       The amount of times to repeat the stop command. Set to zero to send it only once.
  *       If this number is set to a negative value, this skill will always return Running.
- *       (Or at least, it will do so between 2^31 and 2^32 times)
  */
 class Freeze final : public Skill {
 
