@@ -15,8 +15,21 @@ namespace rtt {
 RTT_REGISTER_SKILL(Block);
 
 Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
-    assert_valid<Block>(name);
-    printf("Name: %s\n", name.c_str());
+    //assert_valid<Block>(name);
+}
+
+void normalize(Position& pos) {
+    if (pos.x > 6)
+        pos.x = 6;
+    if (pos.x < -6)
+        pos.x = -6;
+    if (pos.y > 4)
+        pos.y = 4;
+    if (pos.y < -4)
+        pos.y = -4;
+}
+
+bt::Node::Status Block::Update() {
     
     std::string type = GetString("block_type");
     if (type == block_type_names.at(BlockType::RELATIVE)) {
@@ -33,31 +46,12 @@ Block::Block(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
         ROS_ERROR("%s", err);
         throw std::invalid_argument(err);
     }
-    my_id = GetInt("ROBOT_ID");
-    tgt_id = GetInt("TGT_ID");
-    // TODO: ERROR! block_id is unsigned and can never be less than zero!
-    block_id = GetInt("BLOCK_ID");
-    constant = HasDouble("block_x") && HasDouble("block_y");
-    invert = GetBool("invert_direction");
-}
-
-void normalize(Position& pos) {
-    if (pos.x > 6)
-        pos.x = 6;
-    if (pos.x < -6)
-        pos.x = -6;
-    if (pos.y > 4)
-        pos.y = 4;
-    if (pos.y < -4)
-        pos.y = -4;
-}
-
-bt::Node::Status Block::Update() {
+    
     roboteam_msgs::WorldRobot me, tgt;
 
     {
-        auto maybeMe = getWorldBot(my_id);
-        auto maybeTgt = getWorldBot(tgt_id, false);
+        auto maybeMe = getWorldBot(GetInt("ROBOT_ID"));
+        auto maybeTgt = getWorldBot(GetInt("TGT_ID"), HasBool("selfBlock") && GetBool("selfBlock"));
         if (!maybeMe || !maybeTgt) return Status::Failure;
 
         me = *maybeMe;
@@ -68,14 +62,14 @@ bt::Node::Status Block::Update() {
     Position tgtpos(tgt.pos.x, tgt.pos.y, tgt.angle);
     Vector block;
 
-    if (block_id == BLOCK_BALL_ID) {
+    if (GetInt("BLOCK_ID") == BLOCK_BALL_ID) {
         block = Vector(LastWorld::get().ball.pos);
-    } else if (constant) {
+    } else if (HasDouble("block_x") && HasDouble("block_y")) {
         block = Vector(GetDouble("block_x"), GetDouble("block_y"));
     } else {
         roboteam_msgs::WorldRobot blk;
         {
-            auto maybeBlk = getWorldBot(block_id, false);
+            auto maybeBlk = getWorldBot(GetInt("BLOCK_ID"), false);
             if (!maybeBlk) return Status::Failure;
             blk = *maybeBlk;
         }
@@ -86,7 +80,7 @@ bt::Node::Status Block::Update() {
 
     Position goal = pos->block_pos(mypos, tgtpos.location(), block);
     normalize(goal);
-    if (invert)
+    if (GetBool("invert_direction"))
         goal.rot -= M_PI;
     //if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
 

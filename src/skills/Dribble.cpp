@@ -202,8 +202,6 @@ bt::Node::Status Dribble::Update() {
 		
 	}
 	rotateAroundPoint.Update();
-    // TODO: Wtf is this :p ^^
-	sleep(0.1);
 	return Status::Running;
 }
 

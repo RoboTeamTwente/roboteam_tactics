@@ -36,7 +36,7 @@ public:
         }
     }
 
-    virtual Status Tick()
+    Status Tick()
     {
         if (status != Status::Running) {
             Initialize();

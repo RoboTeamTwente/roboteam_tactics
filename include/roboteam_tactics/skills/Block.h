@@ -99,6 +99,10 @@ public:
  *        Type: Bool
  *        Used when: block_type is used
  *        Descr: When true, the robot will face the direction opposite to the one it normally would given the block_type.
+ *    - selfBlock:
+ *        Type: Bool
+ *        Default: false
+ *        Descr: When true, TGT_ID is considered to be one of our robots, rather than an opponent. For testing.
  *             
  */
 class Block : public Skill {
@@ -123,9 +127,6 @@ public:
 private:
     BlockPos* pos;
     std::unique_ptr<GoToPos> goToPos;
- 
-    unsigned int my_id, tgt_id, block_id;
-    bool constant, invert;
 };
 
 

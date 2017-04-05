@@ -106,7 +106,6 @@ bt::Node::Status GetBall::Update (){
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-    // ROS_INFO("GetBall targetAngle: %f", targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
@@ -212,13 +211,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        // if (newVelCommand.length() > 2.0) {
-            // newVelCommand.scale(2.0 / newVelCommand.length());
-        // }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 4.0) {
+          newVelCommand.scale(4.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
