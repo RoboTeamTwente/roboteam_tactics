@@ -25,6 +25,7 @@ class Freeze final : public Skill {
 
 public:
     Freeze(std::string name = "", bt::Blackboard::Ptr = nullptr);
+    void Initialize() override;
     Status Update() override;
     
     static VerificationMap required_params() {
