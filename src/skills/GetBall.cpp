@@ -209,13 +209,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        // if (newVelCommand.length() > 2.0) {
-            // newVelCommand.scale(2.0 / newVelCommand.length());
-        // }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 4.0) {
+          newVelCommand.scale(4.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
