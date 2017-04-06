@@ -102,7 +102,10 @@ bt::Node::Status GetBall::Update (){
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			targetAngle = (interceptPos - robotPos).angle();
+			Vector2 posdiff=interceptPos - robotPos;
+			targetAngle = posdiff.angle();
+			ROS_INFO("targetAngle: %f; Why is it NaN here?",targetAngle);
+        
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
