@@ -119,6 +119,7 @@ if (BUILD_TESTX)
         )
     target_link_libraries(TestX
         ${catkin_LIBRARIES}
+        bt
         )
 
 endif (BUILD_TESTX)
@@ -234,7 +235,10 @@ catkin_add_gtest(tactics_test
     $<TARGET_OBJECTS:utils>
     $<TARGET_OBJECTS:skills>
 )
-target_link_libraries(tactics_test ${catkin_LIBRARIES})
+target_link_libraries(tactics_test 
+    ${catkin_LIBRARIES}
+    bt
+    )
 
 if (BUILD_ROBOTNODE)
 
@@ -256,6 +260,7 @@ if (BUILD_ROBOTNODE)
         )
     target_link_libraries(RoleNode
         ${catkin_LIBRARIES}
+        bt
         )
 
 endif (BUILD_ROBOTNODE)
@@ -279,6 +284,7 @@ if (BUILD_STRATEGYNODE)
         )
     target_link_libraries(StrategyNode
         ${catkin_LIBRARIES}
+        bt
         )
 
 endif (BUILD_STRATEGYNODE)
@@ -289,6 +295,7 @@ catkin_add_gtest(bt_test
 )
 target_link_libraries(bt_test 
     ${catkin_LIBRARIES}
+    bt
     )
 
 #   add_executable(Learner
@@ -332,12 +339,13 @@ if (BUILD_PRACTICE_TESTS)
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
         generate_json_t
-	utils
+        utils
         )
     target_link_libraries(PracticeTests
         ${catkin_LIBRARIES}
         # For networking
         ${QT_LIBRARIES}
+        bt
         )
 
 endif (BUILD_PRACTICE_TESTS)

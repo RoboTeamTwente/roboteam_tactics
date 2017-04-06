@@ -1,23 +1,24 @@
-#include "roboteam_tactics/treegen/LeafRegister.h"
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <ros/ros.h>
 
-#include "ros/ros.h"
-
+#include "roboteam_msgs/GeometryFieldSize.h"
+#include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
-#include "roboteam_msgs/RobotCommand.h"
-#include "roboteam_msgs/GeometryFieldSize.h"
-#include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
-#include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_utils/Cone.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
-#include "roboteam_utils/Cone.h"
 
 namespace rtt {
 
@@ -251,6 +252,47 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
         // }
     }
 
+    // Check if we have to stay on our side of the field
+    if (HasString("stayOnSide")) {
+        auto side = GetString("stayOnSide");
+        auto field = LastWorld::get_field();
+        double top = field.field_width / 2,
+               right = field.field_length / 2 + marginOutsideField,
+               bottom = field.field_width / -2,
+               left = 0
+               ;
+
+        // @Hack omfg this is so f#$%& ugly
+        bool isAllWhitespace = std::all_of(
+                side.cbegin(),
+                side.cend(),
+                static_cast<int (*)(int)>(std::isspace)
+                );
+
+        if (!(side.empty() || isAllWhitespace || side == "TOTALLY EMPTY")) {
+            if (side == "ourSide") {
+                left = field.field_length / -2 - marginOutsideField;
+                right = 0;
+            } else if (side == "theirSide") {
+                left = 0;
+                right = field.field_length / 2 + marginOutsideField;
+            }
+
+            if (newTargetPos.y > top) {
+                newTargetPos.y = top;
+            }
+            if (newTargetPos.x > right) {
+                newTargetPos.x = right;
+            } 
+            if (newTargetPos.y < bottom) {
+                newTargetPos.y = bottom;
+            }
+            if (newTargetPos.x < left) {
+                newTargetPos.x = left;
+            }
+        }
+    }
+
     return newTargetPos;
 }
 
@@ -429,7 +471,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 bt::Node::Status GoToPos::Update() {
-
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {

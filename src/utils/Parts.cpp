@@ -93,6 +93,8 @@ void Tactic::Terminate(Status) {
     if (getStatus() == bt::Node::Status::Running) {
         setStatus(bt::Node::Status::Failure);
     }
+
+    std::cout << "Terminating tactic!\n";
 }
 
 void Tactic::claim_robot(int id) {

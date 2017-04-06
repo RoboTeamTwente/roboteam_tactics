@@ -66,7 +66,7 @@ bt::Node::Status Chip::Update() {
 	double rotDiff = posDiff.angle() - robot.angle;
 	rotDiff = cleanAngle(rotDiff);
 
-	if (posDiff.length() < 0.105) { // ball is close
+	if (posDiff.length() < 0.12) { // ball is close
 		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;

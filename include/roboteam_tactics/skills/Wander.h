@@ -6,7 +6,7 @@
 #include "roboteam_utils/Position.h"
 #include "roboteam_utils/Cone.h"
 #include "roboteam_msgs/World.h"
-#include "GoToPos.h"
+#include "Approach.h"
 
 namespace rtt {
 
@@ -25,14 +25,7 @@ enum class WanderArea {
 /**
  * \brief Gets the WanderArea corresponding to a string
  */ 
-WanderArea areaForName(const std::string& name) {
-    if (name == "NEAR_BALL") return WanderArea::NEAR_BALL;
-    if (name == "NEAR_OUR_GOAL") return WanderArea::NEAR_OUR_GOAL;
-    if (name == "NEAR_THEIR_GOAL") return WanderArea::NEAR_THEIR_GOAL;
-    if (name == "QUADRANT") return WanderArea::QUADRANT;
-    if (name == "BOX") return WanderArea::BOX;
-    return WanderArea::NEAR_OUR_GOAL;
-}
+WanderArea areaForName(const std::string& name);
 
 /**
  * \struct Box
@@ -111,7 +104,7 @@ private:
     Box wanderArea;
     void configure();
     
-    std::shared_ptr<GoToPos> currentDestination;
+    std::shared_ptr<Approach> currentDestination;
     bool currentDestinationValid;
     
     void pickDestination();

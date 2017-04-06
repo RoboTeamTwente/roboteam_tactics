@@ -17,6 +17,15 @@ Box Wander::leftGoal;
 Box Wander::rightGoal;
 bool Wander::defaultsInitialized = false;
     
+WanderArea areaForName(const std::string& name) {
+    if (name == "NEAR_BALL") return WanderArea::NEAR_BALL;
+    if (name == "NEAR_OUR_GOAL") return WanderArea::NEAR_OUR_GOAL;
+    if (name == "NEAR_THEIR_GOAL") return WanderArea::NEAR_THEIR_GOAL;
+    if (name == "QUADRANT") return WanderArea::QUADRANT;
+    if (name == "BOX") return WanderArea::BOX;
+    return WanderArea::NEAR_OUR_GOAL;
+}    
+    
 void Wander::lazyInitDefaults() {
     if (defaultsInitialized || !LastWorld::have_received_first_geom()) return;
     defaultsInitialized = true;
@@ -96,9 +105,7 @@ void Wander::pickDestination() {
         .setDouble("yGoal", wanderArea.bottomRight.y + y)
         .setBool("dribbler", false)
         .setBool("avoidRobots", true);
-    ROS_INFO("WA: (%f, %f) (+ %f, %f) (~ %f, %f)", wanderArea.bottomRight.x, wanderArea.bottomRight.y, wanderArea.length, wanderArea.width, x, y);
-    print_blackboard(bb);
-    currentDestination = std::make_shared<GoToPos>(gtpName, bb);
+    currentDestination = std::make_shared<Approach>(gtpName, bb);
     currentDestinationValid = true;
 }
     

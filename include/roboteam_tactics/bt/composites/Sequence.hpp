@@ -13,34 +13,13 @@ namespace bt
 */
 class Sequence : public Composite {
 public:
-    Status Update() override
-    {
-        if (HasNoChildren()) {
-            return Status::Success;
-        }
-        
-        // Keep going until a child behavior says it's running.
-        for (auto &child : children) {
-            Node::append_status("[Sequence: executing child of type %s]", child->node_name().c_str());
-            auto status = child->Tick();
-            
-            // If the child fails, or keeps running, do the same.
-            if (status != Status::Success) {
-                return status;
-            }
-        }
-
-        return Status::Success;
-    }
+    Status Update() override;
     
-    std::string node_name() override { return "Sequence"; }
+    std::string node_name() override;
     
     using Ptr = std::shared_ptr<Sequence>;
 };
 
-static Sequence::Ptr MakeSequence()
-{
-    return std::make_shared<Sequence>();
-}
+Sequence::Ptr MakeSequence();
 
 }

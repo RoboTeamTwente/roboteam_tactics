@@ -2,29 +2,19 @@
 
 #include "Node.hpp"
 
-namespace bt
-{
+namespace bt {
 
-class Decorator : public Node
-{
+class Decorator : public Node {
 public:
-    virtual ~Decorator() {}
+    virtual ~Decorator();
 
-    void SetChild(Node::Ptr child) { this->child = child; }
-    bool HasNoChild() const { return child == nullptr; }
+    void SetChild(Node::Ptr child);
+    bool HasNoChild() const;
 
-    void Terminate(Status s) override {
-        if (child->getStatus() == Status::Running) {
-            child->Terminate(child->getStatus());
-        }
-
-        if (s == Status::Running) {
-            setStatus(Status::Failure);
-        }
-    }
+    void Terminate(Status s) override;
     
 protected:
     Node::Ptr child = nullptr;
 };
 
-}
+} // bt

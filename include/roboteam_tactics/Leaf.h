@@ -180,6 +180,9 @@ public:
             if ((*blackboard.*Checker)(global_key)) {
                 return (*blackboard.*Getter)(global_key);
             }
+            if ((*blackboard.*Checker)(key)) {
+                return (*blackboard.*Getter)(key);
+            }
             case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
             return (*private_bb.*Getter)(key);
 

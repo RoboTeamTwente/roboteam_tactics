@@ -1,7 +1,7 @@
 #include "roboteam_tactics/tactics/Qualification1v1Tactic.h"
 
 #define RTT_CURRENT_DEBUG_TAG Qualification1v1Tactic
-
+    
 namespace rtt {
     
 RTT_REGISTER_TACTIC(Qualification1v1Tactic);
@@ -10,6 +10,7 @@ Qualification1v1Tactic::Qualification1v1Tactic(std::string name, bt::Blackboard:
     : Tactic(name, bb), canRun(true) {}
     
 void Qualification1v1Tactic::Initialize() {
+    RTT_DEBUGLN("Q1v1 Initializing");
     tokens.clear();
     auto robots = RobotDealer::get_available_robots();
     if (robots.size() < 2) {
@@ -26,6 +27,7 @@ void Qualification1v1Tactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", robots.at(0));
         bb.SetInt("KEEPER_ID", -1);
+        bb.SetInt("AimAtRobot", robots.at(1));
         // Everything else set in tree
         
         firstRD.tree = "qualification/Qualification1v1FirstRole";
@@ -41,9 +43,11 @@ void Qualification1v1Tactic::Initialize() {
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", robots.at(1));
         bb.SetInt("KEEPER_ID", -1);
+        bb.SetInt("Block_A_TGT_ID", robots.at(0));
         bb.SetInt("IHaveBall_A_me", robots.at(0));
-        bb.SetInt("Harass_A_TGT_ID", robots.at(0));
         bb.SetBool("IHaveBall_A_our_team", true);
+        bb.SetInt("IHaveBall_B_me", robots.at(1));
+        bb.SetBool("IHaveBall_B_our_team", true);
         
         
         secondRD.tree = "qualification/Qualification1v1SecondRole";
@@ -55,9 +59,14 @@ void Qualification1v1Tactic::Initialize() {
 
         pub.publish(secondRD);
     }
+    RTT_DEBUGLN("Q1v1 Initialized");
 }
 
 bt::Node::Status Qualification1v1Tactic::Update() {
+    if (!canRun) {
+        return bt::Node::Status::Invalid;
+    }
+    
     bool error = false, failure = false, success = true;
     
     if (feedbacks.find(tokens.at(0)) != feedbacks.end()) {

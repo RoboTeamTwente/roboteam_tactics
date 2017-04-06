@@ -90,15 +90,9 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
         return targetAngle;
     }
     if (target == "robot") {
-        if (target_our_team) {
-            Vector2 theirPos = w.us.at(theirID).pos;
-            double targetAngle = (theirPos - startPos).angle();
-            return targetAngle;
-        } else {
-            Vector2 theirPos = w.them.at(theirID).pos;
-            double targetAngle = (theirPos - startPos).angle();
-            return targetAngle;
-        }
+        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+        double targetAngle = (theirPos - startPos).angle();
+        return targetAngle;
     }
     ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
     return 0.0;

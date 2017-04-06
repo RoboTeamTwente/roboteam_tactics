@@ -6,6 +6,7 @@ add_subdirectory(trees)
 add_subdirectory(treegen)
 add_subdirectory(analysis)
 add_subdirectory(rules)
+add_subdirectory(bt)
 
 set(JSON_FILES ${JSON_FILES} PARENT_SCOPE)
 set(JSON_PROJECTS ${JSON_PROJECTS} PARENT_SCOPE)

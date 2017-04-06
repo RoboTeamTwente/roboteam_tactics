@@ -11,13 +11,8 @@ namespace bt
 class Succeeder : public Decorator
 {
 public:
-    Status Update() override
-    {
-        Node::append_status("[Succeeder: executing child of type %s]", child->node_name().c_str());
-        child->Tick();
-        return Status::Success;
-    }
-    std::string node_name() { return "Succeeder"; }
+    Status Update() override;
+    std::string node_name() override;
 };
 
 }

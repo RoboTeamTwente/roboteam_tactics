@@ -1,6 +1,9 @@
 #include "AimAt.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Approach.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "BackUp.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -79,8 +82,14 @@
 #include "StandFree.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Succeeder.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "Wander.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "DebugTrace.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "Twirl.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 

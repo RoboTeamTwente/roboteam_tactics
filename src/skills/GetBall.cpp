@@ -62,7 +62,6 @@ void GetBall::Initialize() {
 bt::Node::Status GetBall::Update (){
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // ROS_INFO("GetBall Update for %d", robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	}
@@ -82,7 +81,6 @@ bt::Node::Status GetBall::Update (){
     } else {
         ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
     }  
-
 
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
@@ -104,11 +102,10 @@ bt::Node::Status GetBall::Update (){
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			targetAngle = (interceptPos - robotPos).angle();	
+			targetAngle = (interceptPos - robotPos).angle();
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
-
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
@@ -133,7 +130,7 @@ bt::Node::Status GetBall::Update (){
         avoidBall = true;
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.1, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
         avoidBall = false;
 	}
 
@@ -152,9 +149,16 @@ bt::Node::Status GetBall::Update (){
         ballCloseFrameCount = 0;
     }
 
-    // Only stop if ball has been here 5 frames
+    double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+
+    // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
+<<<<<<< HEAD
             && fabs(targetAngle - robot.angle) < 0.5
+=======
+            && fabs(targetAngle - robot.angle) < 0.1
+            && (rotDiff > -0.1 && rotDiff < 0.1)
+>>>>>>> 27f7bb26118a362f780478e76469afb51509626b
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it
@@ -209,7 +213,9 @@ bt::Node::Status GetBall::Update (){
         	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
         }
         
-
+        if (HasString("stayOnSide")) {
+            private_bb->SetString("stayOnSide", GetString("stayOnSide"));
+        }
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
         roboteam_msgs::RobotCommand command;
@@ -222,13 +228,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        // if (newVelCommand.length() > 2.0) {
-            // newVelCommand.scale(2.0 / newVelCommand.length());
-        // }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 4.0) {
+          newVelCommand.scale(4.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

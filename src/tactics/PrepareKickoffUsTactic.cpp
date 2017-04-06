@@ -22,8 +22,6 @@ PrepareKickoffUsTactic::PrepareKickoffUsTactic(std::string name, bt::Blackboard:
 void PrepareKickoffUsTactic::Initialize() {
     tokens.clear();
     
-    // TODO: Stay half a meter away from the ball?
-
     RTT_DEBUGLN("Preparing Kickoff...");
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -62,12 +60,39 @@ void PrepareKickoffUsTactic::Initialize() {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
 
+    if (robots.size() == 0) return;
+
+    // Getter bot
+    {
+        int const ROBOT_ID = robots.back();
+        robots.pop_back();
+
+        bt::Blackboard bb;
+
+        bb.SetInt("ROBOT_ID", ROBOT_ID);
+        bb.SetInt("KEEPER_ID", KEEPER_ID);
+
+        ScopedBB(bb, "_GetBall")
+            .setString("AimAt", "theirgoal")
+            ;
+
+        // Create message
+        roboteam_msgs::RoleDirective wd;
+        wd.robot_id = ROBOT_ID;
+        wd.tree = "rtt_bob/GetBallAndStay";
+        wd.blackboard = bb.toMsg();
+        wd.token = unique_id::toMsg(unique_id::fromRandom());
+        
+        pub.publish(wd);
+
+        claim_robot(ROBOT_ID);
+    }
+
     std::vector<rtt::Vector2> startPositions = {
-        {-0.5, 1},
-        {-0.5, -1},
+        {-0.5, 2},
+        {-0.5, -2},
         {-2, 2},
         {-2, -2},
-        {-3, 0}
     };
 
     for (auto const ROBOT_ID : robots) {

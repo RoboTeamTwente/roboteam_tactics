@@ -7,12 +7,10 @@
 
 #include "Blackboard.hpp"
 
-namespace bt
-{
+namespace bt {
 
 
-class Node
-{
+class Node {
 public:
     // When this is updated, updated the tostring method below too!
     enum class Status
@@ -23,81 +21,36 @@ public:
         Running,
     };
 
-    virtual ~Node() {}
+    virtual ~Node();
 
     virtual Status Update() = 0;
-    virtual void Initialize() {}
-    virtual void Terminate(Status s) {
-        // If we're terminating while we're still running,
-        // consider the node failed. If it already failed
-        // or succeeded, leave it like that.
-        if (s == Status::Running) {
-            status = Status::Failure;
-        }
-    }
+    virtual void Initialize();
+    virtual void Terminate(Status s);
 
-    virtual Status Tick()
-    {
-        if (status != Status::Running) {
-            Initialize();
-        }
+    Status Tick();
 
-        status = Update();
-
-        if (status != Status::Running) {
-            Terminate(status);
-        }
-
-        return status;
-    }
-
-    bool IsSuccess() const { return status == Status::Success; }
-    bool IsFailure() const { return status == Status::Failure; }
-    bool IsRunning() const { return status == Status::Running; }
-    bool IsTerminated() const { return IsSuccess() || IsFailure(); }
-    Status getStatus() const { return status; }
-    void setStatus(Status s) { status = s; }
+    bool IsSuccess() const;
+    bool IsFailure() const;
+    bool IsRunning() const;
+    bool IsTerminated() const;
+    Status getStatus() const;
+    void setStatus(Status s);
 
     using Ptr = std::shared_ptr<Node>;
 
     bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
     
-    virtual std::string node_name() { return "<ERROR>"; };
+    virtual std::string node_name();
     static std::string status_desc;
 
 protected:
     Status status = Status::Invalid;
-    static void append_status(std::string fmt, ...) {
-        char buf[1024];
-        va_list varargs;
-        va_start(varargs, fmt);
-        vsnprintf(buf, 1024, fmt.c_str(), varargs);
-        va_end(varargs);
-        
-        status_desc += std::string(buf);
-    }
+    static void append_status(std::string fmt, ...);
 };
 
 using Nodes = std::vector<Node::Ptr>;
 
-namespace {
+std::string statusToString(bt::Node::Status status);
 
-std::string statusToString(bt::Node::Status status) {
-    if (status == bt::Node::Status::Success) {
-        return "Success";
-    } else if (status == bt::Node::Status::Failure) {
-        return "Failure";
-    } else if (status == bt::Node::Status::Invalid) {
-        return "Invalid";
-    } else if (status == bt::Node::Status::Running) {
-        return "Running";
-    } else {
-        std::cout << "Enum failure in Node::Status overload of to_string\n";
-        return "ERROR ERROR!!!";
-    }
-}
-
-} // anonymous namespace
-
-}
+} // bt
 
