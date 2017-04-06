@@ -74,11 +74,27 @@ bt::Node::Status NaiveBlockGoal::Update() {
     auto const GOAL_AREA_ARC_RADIUS = field.top_left_penalty_arc.radius;
 
 
+    // TODO: @Bug this is bad semantics on vision's part
     roboteam_msgs::FieldLineSegment leftPenaltyLine;
+    roboteam_msgs::FieldCircularArc topLeftArc;
+    roboteam_msgs::FieldCircularArc bottomLeftArc;
+
     if (field.left_penalty_line.begin.x < field.right_penalty_line.begin.x) {
         leftPenaltyLine = field.left_penalty_line;
     } else {
         leftPenaltyLine = field.right_penalty_line;
+    }
+
+    if (field.top_left_penalty_arc.center.x < field.top_right_penalty_arc.center.x) {
+        topLeftArc = field.top_left_penalty_arc;
+    } else {
+        topLeftArc = field.top_right_penalty_arc;
+    }
+
+    if (field.bottom_left_penalty_arc.center.x < field.bottom_right_penalty_arc.center.x) {
+        bottomLeftArc = field.bottom_left_penalty_arc;
+    } else {
+        bottomLeftArc = field.bottom_right_penalty_arc;
     }
 
     auto const leftPenaltyLineYMax = std::max(leftPenaltyLine.begin.y, leftPenaltyLine.end.y);
@@ -95,9 +111,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
             drawer.drawLineAbs("yLine", Vector2(-4, leftPenaltyLineYMax), Vector2(-3.25, leftPenaltyLineYMax));
 
             // Top goal border
-            auto topArcCenter = field.top_left_penalty_arc.center;
-
-            std::cout << "Top arc center: " << Vector2(topArcCenter) << "\n";
+            auto topArcCenter = topLeftArc.center;
 
             drawer.drawPoint("arcCenter", topArcCenter);
 
@@ -111,7 +125,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
             drawer.drawLineAbs("yLine", Vector2(-4, leftPenaltyLineYMin), Vector2(-3.25, leftPenaltyLineYMin));
 
             // Bottom goal border
-            auto bottomArcCenter = field.bottom_left_penalty_arc.center;
+            auto bottomArcCenter = bottomLeftArc.center;
 
             drawer.drawPoint("arcCenter", bottomArcCenter);
 
@@ -124,7 +138,7 @@ bt::Node::Status NaiveBlockGoal::Update() {
             // In front of the goal
             // Project ball onto penalty line
             
-            minVec = ballPos.project(field.left_penalty_line.begin, field.left_penalty_line.end);
+            minVec = ballPos.project(leftPenaltyLine.begin, leftPenaltyLine.end);
         }
     }
 
