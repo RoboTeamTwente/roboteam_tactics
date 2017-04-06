@@ -30,28 +30,30 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
         // Control gains
         , pGainPosition(3.0)
-        , pGainRotation(3.0) // was 5?
+        , pGainRotation(2.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
-        , maxAngularVel(3.0)
-        , minAngularVel(0.0)
-        , iGainVelocity(0.5)
-        , iGainAngularVel(0.02)
+        , maxAngularVel(10.0)
+        , minAngularVel(3.0)
+        // , iGainVelocity(0.5)
+        // , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(1.0)
-        , minSpeed(0.0)
-        , attractiveForce(10.0)
-        , attractiveForceWhenClose(2.0) // was 5? 
-        , repulsiveForce(20.0)
+        , maxSpeed(2.0)
+        , minSpeed(0.6)
+        // , minSpeedX(0.4)
+        // , minSpeedY(0.6)
+        // , attractiveForce(10.0)
+        // , attractiveForceWhenClose(2.0) // was 5? 
+        // , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
-        , angleErrorIntegral(0.0)
-        , historyIndex(0)
+        // , angleErrorIntegral(0.0)
+        // , historyIndex(0)
         
         {
             start = now();
-            angleErrorHistory = (double*) calloc(10,sizeof(double));
+            // angleErrorHistory = (double*) calloc(10,sizeof(double));
             succeeded = false;
         }
 
@@ -78,7 +80,7 @@ void GoToPos::sendStopCommand(uint id) {
 // Proportional position controller
 Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
     Vector2 posError = targetPos - myPos;
-    Vector2 velTarget = posError*attractiveForceWhenClose;
+    Vector2 velTarget = posError*pGainPosition;
     return velTarget;
 }
 
@@ -86,7 +88,7 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 posError) {
 
-    if (posError.length() > 1.0) {
+    if (posError.length() > 0.5) {
         angleGoal = posError.angle();
     }
 
@@ -321,14 +323,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     if (HasDouble("pGainPosition")) {
-        pGainRotation = GetDouble("pGainPosition");
+        pGainPosition = GetDouble("pGainPosition");
     }
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
 
-    angleGoal = cleanAngle(GetDouble("angleGoal"));  
+
+      
     if (blackboard->HasInt("KEEPER_ID")) {
         KEEPER_ID = blackboard->GetInt("KEEPER_ID");
     } else {
@@ -361,11 +364,21 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+    if (HasDouble("angleGoal")) {
+        angleGoal = cleanAngle(GetDouble("angleGoal"));
+    } else {
+        angleGoal = posError.angle();
+    }
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.01 && fabs(angleError) < 0.05) {
+    if (posError.length() < 0.05 && fabs(angleError) < 0.5) {
+        sendStopCommand(ROBOT_ID);
+        sendStopCommand(ROBOT_ID);
+        sendStopCommand(ROBOT_ID);
+        sendStopCommand(ROBOT_ID);
+        sendStopCommand(ROBOT_ID);
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         roboteam_msgs::RobotCommand command;
@@ -379,10 +392,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
 
     // Robot avoidance
-    if (HasBool("avoidRobots")) {
-        if (GetBool("avoidRobots")) {
-            sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-        }
+    if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
+        sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
     } 
 
     // if (HasBool("avoidBall")) {
@@ -410,7 +421,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // }
 
     // Defense area avoidance
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
+        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    }
+    
 
     // Rotation controller to make sure the robot has and keeps the correct orientation
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
@@ -426,8 +440,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-    if (sumOfForces.length() < minSpeed) {
+    if (sumOfForces.length() < (minSpeed / 2)) {
         sumOfForces = Vector2(0.0, 0.0);
+    } else if (sumOfForces.length() <  minSpeed) {
+        sumOfForces = sumOfForces.scale(minSpeed / sumOfForces.length());
     }
 
     if (fabs(angularVelTarget) < minAngularVel) {
@@ -439,6 +455,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.drawLine("velCommand", myPos, velCommand);  
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
+
+    if (HasBool("dontDrive") && GetBool("dontDrive")) {
+        velCommand = Vector2(0.0, 0.0);
+    }
+
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
