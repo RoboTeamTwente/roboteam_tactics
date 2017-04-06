@@ -29,29 +29,31 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
 
         // Control gains
-        , pGainPosition(1.0)
+        , pGainPosition(3.0)
         , pGainRotation(2.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(10.0)
-        , minAngularVel(0.0)
-        , iGainVelocity(0.5)
-        , iGainAngularVel(0.02)
+        , minAngularVel(3.0)
+        // , iGainVelocity(0.5)
+        // , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(0.5)
-        , minSpeed(0.0)
-        , attractiveForce(10.0)
-        , attractiveForceWhenClose(2.0) // was 5? 
-        , repulsiveForce(20.0)
+        , maxSpeed(2.0)
+        , minSpeed(0.6)
+        // , minSpeedX(0.4)
+        // , minSpeedY(0.6)
+        // , attractiveForce(10.0)
+        // , attractiveForceWhenClose(2.0) // was 5? 
+        // , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
-        , angleErrorIntegral(0.0)
-        , historyIndex(0)
+        // , angleErrorIntegral(0.0)
+        // , historyIndex(0)
         
         {
             start = now();
-            angleErrorHistory = (double*) calloc(10,sizeof(double));
+            // angleErrorHistory = (double*) calloc(10,sizeof(double));
             succeeded = false;
         }
 
@@ -457,6 +459,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasBool("dontDrive") && GetBool("dontDrive")) {
         velCommand = Vector2(0.0, 0.0);
     }
+
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;

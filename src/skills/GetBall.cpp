@@ -153,12 +153,7 @@ bt::Node::Status GetBall::Update (){
 
     // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
-<<<<<<< HEAD
             && fabs(targetAngle - robot.angle) < 0.5
-=======
-            && fabs(targetAngle - robot.angle) < 0.1
-            && (rotDiff > -0.1 && rotDiff < 0.1)
->>>>>>> 27f7bb26118a362f780478e76469afb51509626b
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it
