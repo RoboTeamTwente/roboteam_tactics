@@ -44,6 +44,7 @@ void PrepareKickoffUsTactic::Initialize() {
             .setDouble("yGoal", 0)
             .setBool("dribbler", false)
             .setBool("avoidRobots", true)
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create message
@@ -74,6 +75,7 @@ void PrepareKickoffUsTactic::Initialize() {
 
         ScopedBB(bb, "_GetBall")
             .setString("AimAt", "theirgoal")
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create message
@@ -115,6 +117,7 @@ void PrepareKickoffUsTactic::Initialize() {
             .setDouble("yGoal", START_POS.y)
             .setBool("dribbler", false)
             .setBool("avoidRobots", true)
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create message
