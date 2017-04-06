@@ -45,10 +45,10 @@ void WanderTactic::Initialize() {
     if (cont) cont = fill(firstQuad, available, wantInFirstQuad);
     if (cont) cont = fill(secondQuad, available, wantInSecondQuad);
     
-    RobotDealer::claim_robots(nearBall);
-    RobotDealer::claim_robots(nearGoal);
-    RobotDealer::claim_robots(firstQuad);
-    RobotDealer::claim_robots(secondQuad);
+    claim_robots(nearBall);
+    claim_robots(nearGoal);
+    claim_robots(firstQuad);
+    claim_robots(secondQuad);
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     

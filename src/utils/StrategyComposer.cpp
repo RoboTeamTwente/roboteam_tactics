@@ -1,7 +1,7 @@
 #include <string>
 
-#include "roboteam_tactics/bt/RefStateSwitch.h"
-#include "roboteam_tactics/treegen/StrategyComposer.h"
+#include "roboteam_tactics/utils/RefStateSwitch.h"
+#include "roboteam_tactics/utils/StrategyComposer.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 namespace rtt {
@@ -28,8 +28,8 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::DIRECT_FREE_THEM,     "FreeKickDefenceStrategy"},
         { RefState::INDIRECT_FREE_US,     "rtt_ewoud/FreeKickTakeStrategy" },
         { RefState::INDIRECT_FREE_THEM,   "FreeKickDefenceStrategy"},
-        { RefState::TIMEOUT_US,           UNSET },
-        { RefState::TIMEOUT_THEM,         UNSET },
+        { RefState::TIMEOUT_US,           "rtt_dennis/WanderStrategy" },
+        { RefState::TIMEOUT_THEM,         "rtt_dennis/WanderStrategy" },
         { RefState::GOAL_US,              UNSET },
         { RefState::GOAL_THEM,            UNSET },
         { RefState::BALL_PLACEMENT_US,    UNSET },

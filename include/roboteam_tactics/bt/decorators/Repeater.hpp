@@ -12,27 +12,12 @@ class Repeater : public Decorator
 {
 public:
     // TODO: constructor can be updated, ask Bob
-    Repeater(int limit = 0) : limit(limit) {}
+    Repeater(int limit = 0);
 
-    void Initialize() override
-    {
-        counter = 0;
-    }
+    void Initialize() override;
 
-    Status Update() override
-    {
-        while (1) {
-            Node::append_status("[Repeater: executing child of type %s]", child->node_name().c_str());
-            child->Tick();
-
-            if (limit > 0 && ++counter == limit) {
-                return Status::Success;
-            }
-
-            return Status::Running;
-        }
-    }
-    std::string node_name() { return "Repeater"; }
+    Status Update() override;
+    std::string node_name() override;
 
 protected:
     int limit;

@@ -25,11 +25,11 @@ namespace rtt {
 using namespace roboteam_utils;
 
 // TODO: Hardcoded!
-const double GOAL_AREA_WIDTH = 0.9;
+// const double GOAL_AREA_WIDTH = 0.9;
 // Distance from front of goal area to goal
-const double GOAL_AREA_LENGTH = 0.5;
+// const double GOAL_AREA_LENGTH = 0.5;
 
-bool isBallInGoalArea() {
+bool isBallInGoalArea(double const GOAL_AREA_LENGTH, double const GOAL_AREA_WIDTH) {
     Vector2 ballPos(LastWorld::get().ball.pos);
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
     if (get_our_side() == "left") {
@@ -63,65 +63,68 @@ bt::Node::Status NaiveBlockGoal::Update() {
     const double FIELD_LENGTH = LastWorld::get_field().field_length;
 
     auto ballPos = Vector2(LastWorld::get().ball.pos);
-    Vector2 goalPos = LastWorld::get_our_goal_center();
     Vector2 minVec;
 
-    // if (our_side == "left") {
-        // goalPos = Vector2(FIELD_LENGTH / -2, 0);
-    // } else {
-        // goalPos = Vector2(FIELD_LENGTH / 2, 0);
-    // }
+    // Eew.
+    auto field = LastWorld::get_field();
 
-    std::string our_side = get_our_side();
-    auto ballVec = ballPos - goalPos;
+    auto leftPenaltyLineLength = (Vector2(field.left_penalty_line.begin) - Vector2(field.left_penalty_line.end)).length();
+    auto const GOAL_AREA_WIDTH = leftPenaltyLineLength + field.top_left_penalty_arc.radius + field.top_right_penalty_arc.radius;
+
+    auto const GOAL_AREA_ARC_RADIUS = field.top_left_penalty_arc.radius;
+
+
+    roboteam_msgs::FieldLineSegment leftPenaltyLine;
+    if (field.left_penalty_line.begin.x < field.right_penalty_line.begin.x) {
+        leftPenaltyLine = field.left_penalty_line;
+    } else {
+        leftPenaltyLine = field.right_penalty_line;
+    }
+
+    auto const leftPenaltyLineYMax = std::max(leftPenaltyLine.begin.y, leftPenaltyLine.end.y);
+    auto const leftPenaltyLineYMin = std::min(leftPenaltyLine.begin.y, leftPenaltyLine.end.y);
 
     double padding = 0.10;
-    if (our_side == "left" && ballPos.x <= -FIELD_LENGTH / 2) {
+
+    if (ballPos.x <= -FIELD_LENGTH / 2) {
         minVec.x = -FIELD_LENGTH / 2 + padding;
         minVec.y = ballPos.y;
-    } else if (our_side == "right" && ballPos.x >= FIELD_LENGTH / 2) {
-        minVec.x = FIELD_LENGTH / 2 - padding;
-        minVec.y = ballPos.y;
-    } else if (isBallInGoalArea()) {
-        minVec = ballVec * 0.9 + goalPos;
     } else {
-        Vector2 horVec;
-        Vector2 vertVec;
+        if (ballPos.y > leftPenaltyLineYMax) {
+            drawer.setColor(255, 0, 0);
+            drawer.drawLineAbs("yLine", Vector2(-4, leftPenaltyLineYMax), Vector2(-3.25, leftPenaltyLineYMax));
 
-        vertVec = ballVec.normalize();
-        vertVec = vertVec * std::abs(1 / vertVec.x);
-        vertVec = vertVec * (GOAL_AREA_LENGTH);
+            // Top goal border
+            auto topArcCenter = field.top_left_penalty_arc.center;
 
-        horVec = ballVec.normalize();
-        horVec = horVec * std::abs(1 / horVec.y);
-        horVec = horVec * (GOAL_AREA_WIDTH / 2);
+            std::cout << "Top arc center: " << Vector2(topArcCenter) << "\n";
 
-        if (!horVec.real()) {
-            minVec = vertVec;
-        } else if (!vertVec.real()) {
-            minVec = horVec;
-        } else if (vertVec.length() < horVec.length()) {
-            minVec = vertVec;
+            drawer.drawPoint("arcCenter", topArcCenter);
+
+            auto ballPosRelativeToArcCenter = ballPos - topArcCenter;
+
+            auto keeperPosRelativeToBottomGoalPole = ballPosRelativeToArcCenter.normalize() * GOAL_AREA_ARC_RADIUS;
+
+            minVec = keeperPosRelativeToBottomGoalPole + topArcCenter;
+        } else if (ballPos.y < leftPenaltyLineYMin) {
+            drawer.setColor(0, 0, 255);
+            drawer.drawLineAbs("yLine", Vector2(-4, leftPenaltyLineYMin), Vector2(-3.25, leftPenaltyLineYMin));
+
+            // Bottom goal border
+            auto bottomArcCenter = field.bottom_left_penalty_arc.center;
+
+            drawer.drawPoint("arcCenter", bottomArcCenter);
+
+            auto ballPosRelativeToArcCenter = ballPos - bottomArcCenter;
+
+            auto keeperPosRelativeToBottomGoalPole = ballPosRelativeToArcCenter.normalize() * GOAL_AREA_ARC_RADIUS;
+
+            minVec = keeperPosRelativeToBottomGoalPole + bottomArcCenter;
         } else {
-            minVec = horVec;
-        }
-
-        RTT_DEBUG("Goal area width: %f\n", GOAL_AREA_WIDTH);
-        RTT_DEBUG("Ball vec: %f %f\n", ballVec.x, ballVec.y);
-        RTT_DEBUG("Hor vec: %f %f\n", horVec.x, horVec.y);
-        RTT_DEBUG("Vert vec: %f %f\n", vertVec.x, vertVec.y);
-        RTT_DEBUG("Min vec: %f %f\n", minVec.x, minVec.y);
-
-        minVec = minVec + goalPos;
-
-        // If not real, stand in the center of the goal
-        if (!minVec.real()) {
-            if (our_side == "left") {
-                minVec.x = -FIELD_LENGTH / 2;
-            } else {
-                minVec.x = FIELD_LENGTH / 2;
-            }
-            minVec.y = 0;
+            // In front of the goal
+            // Project ball onto penalty line
+            
+            minVec = ballPos.project(field.left_penalty_line.begin, field.left_penalty_line.end);
         }
     }
 

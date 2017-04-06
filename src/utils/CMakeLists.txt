@@ -11,6 +11,8 @@ add_library(utils OBJECT
     ScopedBB.cpp
     debug_print.cpp
     utils.cpp
+    RefStateSwitch.cpp
+    StrategyComposer.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

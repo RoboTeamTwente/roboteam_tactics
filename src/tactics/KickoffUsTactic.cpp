@@ -50,6 +50,7 @@ void KickoffUsTactic::Initialize() {
             .setDouble("yGoal", 0)
             .setBool("dribbler", false)
             .setBool("avoidRobots", true)
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create message
@@ -104,6 +105,7 @@ void KickoffUsTactic::Initialize() {
 
         ScopedBB(bb, "GetBall_")
             .setString("AimAt", "theirgoal")
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create token
@@ -144,6 +146,7 @@ void KickoffUsTactic::Initialize() {
             .setDouble("yGoal", stayPos.y)
             .setBool("dribbler", false)
             .setBool("avoidRobots", true)
+            .setString("stayOnSide", "ourSide")
             ;
 
         // Create message

@@ -8,23 +8,13 @@ namespace bt
 class Composite : public Node
 {
 public:
-    virtual ~Composite() {}
+    virtual ~Composite();
     
-    virtual void AddChild(Node::Ptr child) { children.push_back(child); }
-    bool HasNoChildren() const { return children.empty(); }
-    int GetIndex() const { return index; }
+    virtual void AddChild(Node::Ptr child);
+    bool HasNoChildren() const;
+    int GetIndex() const;
 
-    void Terminate(Status s) override {
-        for (auto child : children) {
-            if (child->getStatus() == Status::Running) {
-                child->Terminate(child->getStatus());
-            }
-        }
-
-        if (s == Status::Running) {
-            setStatus(Status::Failure);
-        }
-    }
+    void Terminate(Status s) override;
     
 protected:
     Nodes children;

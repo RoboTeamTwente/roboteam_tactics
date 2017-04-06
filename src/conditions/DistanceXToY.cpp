@@ -38,23 +38,16 @@ Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
         return Vector2(LastWorld::get().ball.pos);
     } else if (name == "our goal" || name == "their goal") {
         // Get the side of the field
-        std::string our_side = "right";
-        get_PARAM_OUR_SIDE(our_side);
+        // std::string our_side = "right";
+        // get_PARAM_OUR_SIDE(our_side);
 
         // Get the length of the field
         double field_length = LastWorld::get_field().field_length;
 
-        // If we want their goal, set the modifier to -1
-        // This flips the point to the other side
-        int mod = 1;
-        if (name == "their goal") {
-            mod = -1;
-        }
-
-        if (our_side == "right") {
-            return Vector2(field_length / 2 / mod, 0);
-        } else {
-            return Vector2(field_length / -2 / mod, 0);
+        if (name == "our goal") {
+            return Vector2(field_length / -2, 0);
+        } else if (name == "their goal") {
+            return Vector2(field_length / 2, 0);
         }
     } else if (name == "center dot") {
         return Vector2(0, 0);
@@ -254,7 +247,6 @@ bt::Node::Status DistanceXToY::Update() {
     } else {
         dist = vecX.dist(vecY);
     }
-
 
     bool result = false;
 

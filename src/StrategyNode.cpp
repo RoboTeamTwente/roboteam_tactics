@@ -21,7 +21,7 @@
 #include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/generated/qualification_trees.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_tactics/treegen/StrategyComposer.h"
+#include "roboteam_tactics/utils/StrategyComposer.h"
 #include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
