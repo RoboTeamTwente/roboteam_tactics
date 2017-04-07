@@ -30,7 +30,7 @@ FreeKickDefenceTactic::FreeKickDefenceTactic(std::string name, bt::Blackboard::P
 
 void FreeKickDefenceTactic::Initialize() {
     if (!danger_finder.is_running()) {
-        danger_finder.run();
+        danger_finder.run(100);
     }
     tokens.clear();
     ros::Duration(.1).sleep();

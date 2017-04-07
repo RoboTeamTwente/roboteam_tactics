@@ -1,4 +1,5 @@
 #include "roboteam_tactics/tactics/Qualification1v1Tactic.h"
+#include "roboteam_tactics/utils/DangerFinder.h"
 
 #define RTT_CURRENT_DEBUG_TAG Qualification1v1Tactic
     
@@ -10,7 +11,6 @@ Qualification1v1Tactic::Qualification1v1Tactic(std::string name, bt::Blackboard:
     : Tactic(name, bb), canRun(true) {}
     
 void Qualification1v1Tactic::Initialize() {
-    RTT_DEBUGLN("Q1v1 Initializing");
     tokens.clear();
     auto robots = RobotDealer::get_available_robots();
     if (robots.size() < 2) {
@@ -59,7 +59,6 @@ void Qualification1v1Tactic::Initialize() {
 
         pub.publish(secondRD);
     }
-    RTT_DEBUGLN("Q1v1 Initialized");
 }
 
 bt::Node::Status Qualification1v1Tactic::Update() {

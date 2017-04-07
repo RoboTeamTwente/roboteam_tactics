@@ -23,8 +23,9 @@ snprintf(buf, 100, msg, ##__VA_ARGS__); \
 
 namespace rtt {
  
-DangerFinder danger_finder;    
-    
+RemoteDangerFinder danger_finder;    
+DangerFinder dangerFinderImpl;
+
 inline Vector2 get_goal() {
     return Vector2(we_are_left() ? -3 : 3, 0);
 }
@@ -140,6 +141,7 @@ DangerResult DangerFinder::update() const {
 }
 
 void DangerFinder::_run(unsigned int delay) {
+    ros::Rate rate(delay);
     while (!_stop) {
         DangerResult new_res = update();
                     
@@ -154,6 +156,7 @@ void DangerFinder::_run(unsigned int delay) {
             continue;
         }
         lock.unlock();
+        rate.sleep();
     }
 }
 
@@ -240,7 +243,7 @@ std::vector<Vector2> our_goal() {
 
 static inline void ensure_running() {
     if (!danger_finder.is_running())
-        danger_finder.run();
+        danger_finder.run(100);
 }
 
 std::vector<Vector2> our_goal() { ensure_running(); return df_impl::our_goal(); }
@@ -248,5 +251,49 @@ bool we_are_left() { ensure_running(); return df_impl::we_are_left(); }
 boost::optional<Robot> charging_bot() { ensure_running(); return danger_finder.current_result().charging; }
 boost::optional<Robot> most_dangerous_bot() { ensure_running(); return danger_finder.current_result().most_dangerous; }
 boost::optional<Robot> second_most_dangerous_bot() { ensure_running(); return danger_finder.current_result().second_most_dangerous; }
+ 
+RemoteDangerFinder::RemoteDangerFinder() {
     
+}
+
+void RemoteDangerFinder::run(unsigned int delay = 100) {}
+
+void RemoteDangerFinder::stop() {}
+
+bool RemoteDangerFinder::is_running() const { return true; }
+
+inline DangerResult convert(const DFService::Response& res) {
+    return {
+        res.charging.present ? boost::optional<Robot>(res.charging.robot) : boost::none,
+        res.mostDangerous.present ? boost::optional<Robot>(res.mostDangerous.robot) : boost::none,
+        res.secondMostDangerous.present ? boost::optional<Robot>(res.secondMostDangerous.robot) : boost::none,
+        res.robots
+    };
+}
+
+inline DangerResult fetch(bool immediate, bool mostDangerousOnly) {
+    if (ros::this_node::getName() == "/StrategyNode") {
+        return immediate ? dangerFinderImpl.get_immediate_update() : dangerFinderImpl.current_result();
+    }
+    DFService::Request req;
+    DFService::Response res;
+    
+    req.immediate = immediate;
+    req.mostDangerousOnly = mostDangerousOnly;
+    
+    if (!ros::service::call("dangerFinder", req, res)) {
+        return DangerResult();
+    }
+    
+    return convert(res);
+}
+
+DangerResult RemoteDangerFinder::current_result() {
+    return fetch(false, false);
+}
+
+DangerResult RemoteDangerFinder::get_immediate_update() const {
+    return fetch(true, false);
+}
+   
 }

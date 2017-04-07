@@ -9,12 +9,14 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+#include "roboteam_msgs/DangerFinder.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Position.h"
 
 namespace rtt {
     
 using Robot = roboteam_msgs::WorldRobot;
+using DFService = roboteam_msgs::DangerFinder;
 
 /**
  * \typedef DangerFactor
@@ -96,28 +98,28 @@ class DangerFinder {
      * \brief Starts the background thread.
      * \param delay The amount of milliseconds to pause between evaluations
      */
-    void run(unsigned int delay = 100);
+    virtual void run(unsigned int delay = 100);
     
     /**
      * \brief Stops the background thread. If an evaluation is currently running, it will be allowed to finish.
      */
-    void stop();
+    virtual void stop();
     
     /**
      * \brief Checks whether or not the background thread is running
      */
-    bool is_running() const;
+    virtual bool is_running() const;
     
     /**
      * \brief Gets the most recent DangerResult. If the background thread is not running and has never run, this will be empty.
      */
-    DangerResult current_result();
+    virtual DangerResult current_result();
     
     /**
      * \brief Evaluates the current world state and returns a DangerResult. This does not affect the background
      * thread, whether it is running or not.
      */
-    DangerResult get_immediate_update() const;
+    virtual DangerResult get_immediate_update() const;
     
     private:
     void _run(unsigned int delay);
@@ -130,7 +132,17 @@ class DangerFinder {
     std::thread runner;
 };
 
-extern DangerFinder danger_finder;
+class RemoteDangerFinder : public DangerFinder {
+    public:
+    RemoteDangerFinder();
+    void run(unsigned int delay) override;
+    void stop() override;
+    bool is_running() const override;
+    DangerResult current_result() override;
+    DangerResult get_immediate_update() const override;
+};
+
+extern RemoteDangerFinder danger_finder;
 
 namespace df_impl {
     std::vector<Vector2> our_goal();
