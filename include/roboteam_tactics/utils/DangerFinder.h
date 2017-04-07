@@ -57,24 +57,6 @@ extern const DangerFactor orientation;
 extern const std::vector<DangerFactor> DEFAULT_FACTORS;
 
 /**
- * \brief The essential coordinates of the left-side goal
- */
-const std::vector<Vector2> GOAL_POINTS_LEFT({
-    Vector2(-4.5, .35),
-    Vector2(-4.5, 0),
-    Vector2(-4.5, -.35)
-});
-  
-/**
- * \brief The essential coordinates of the right-side goal
- */
-const std::vector<Vector2> GOAL_POINTS_RIGHT({
-    Vector2(4.5, .35),
-    Vector2(4.5, 0),
-    Vector2(4.5, -.35)
-});
-
-/**
  * \struct DangerResult
  * \brief The result of a single round of danger evaluation
  */
@@ -134,7 +116,6 @@ class DangerFinder {
 
 class RemoteDangerFinder : public DangerFinder {
     public:
-    RemoteDangerFinder();
     void run(unsigned int delay) override;
     void stop() override;
     bool isRunning() const override;

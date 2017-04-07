@@ -3,6 +3,7 @@
 
 #include <boost/optional.hpp>
 
+#include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -35,15 +36,9 @@ inline Position getOpp(const Robot& bot) {
 }   
 
 const DangerFactor canSeeOurGoal = [](const Robot& bot, std::string* reasoning=nullptr) {
-    std::vector<Vector2> goalPoints = weAreLeft() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
-    for (const Vector2& goal : goalPoints) {
-        if (getObstacles(bot, goal, nullptr, true).empty()) {
-            // reason("[bot can see goal; adding 5.0]");
-            return CAN_SEE_GOAL_DANGER;
-        }
-    }
-    // reason("[bot cannot see goal]");
-    return 0.0;
+    GoalPartition partition(weAreLeft());
+    partition.calculatePartition(LastWorld::get(), Vector2(bot.pos));
+    return (bool) partition.largestOpenSection();
 };
 
 const DangerFactor hasBall = [](const Robot& bot, std::string* reasoning=nullptr) {
@@ -234,10 +229,6 @@ bool weAreLeft() {
     return tgt == "left";
 }
 
-std::vector<Vector2> ourGoal() {
-    return weAreLeft() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
-}
-
 }
 
 static inline void ensureRunning() {
@@ -245,16 +236,11 @@ static inline void ensureRunning() {
         dangerFinder.run(100);
 }
 
-std::vector<Vector2> ourGoal() { ensureRunning(); return df_impl::ourGoal(); }
 bool weAreLeft() { ensureRunning(); return df_impl::weAreLeft(); }
 boost::optional<Robot> chargingBot() { ensureRunning(); return dangerFinder.currentResult().charging; }
 boost::optional<Robot> mostDangerousBot() { ensureRunning(); return dangerFinder.currentResult().mostDangerous; }
 boost::optional<Robot> secondMostDangerousBot() { ensureRunning(); return dangerFinder.currentResult().secondMostDangerous; }
  
-RemoteDangerFinder::RemoteDangerFinder() {
-    
-}
-
 void RemoteDangerFinder::run(unsigned int delay = 100) {}
 
 void RemoteDangerFinder::stop() {}

@@ -36,14 +36,14 @@ void KeeperBlock::reevaluate_target() {
     //ROS_INFO("Target: %d", danger->id);
     
     target = danger->id;
-    auto goal = (weAreLeft() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
+    auto goalX = (weAreLeft() ? -1 : 1) * LastWorld::get_field().field_length / 2; // center
 
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
     bb->SetInt("TGT_ID", target);
     bb->SetInt("BLOCK_ID", -1);
-    bb->SetDouble("block_x", goal.x);
-    bb->SetDouble("block_y", goal.y);
+    bb->SetDouble("block_x", goalX);
+    bb->SetDouble("block_y", 0.0);
     bb->SetString("block_type", "CIRCLE");
     bb->SetDouble("block_arg", cover_dist);
     bb->SetBool("invert_direction", false);
