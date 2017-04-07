@@ -217,27 +217,49 @@ public:
         return (*private_bb.*Checker)(key);
     }
 
+    /**
+     * \brief Gets a value from the blackboard if it exists, or a default value otherwise.
+     * \tparam T The expected return type.
+     * \tparam Checker The method which should check whether the value exists.
+     * \tparam Getter The method which actually gets the value.
+     * \param key The key to search for
+     * \param def The default value to return if no value is mapped to the key
+     * \param policy The policy to employ, defaults to rtt::DEFAULT_BB_POLICY
+     * \return The value mapped to the key if there is one, otherwise def.
+     */
+    template<typename T, bool (bt::Blackboard::*Checker)(std::string) const, T (bt::Blackboard::*Getter)(std::string)>
+    T GetOrDefault(const std::string& key, T def, BlackboardPolicy policy) const {
+        if (HasVar<T, Checker>(key, policy)) {
+            return GetVar<T, Checker, Getter>(key, policy);
+        }
+        return def;
+    }
+
     public:
     // Proxies that prefix an id for lookups in the global table.
     void SetBool(std::string key, bool value);
     bool GetBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
-
+    bool GetBool(std::string key, bool def, BlackboardPolicy policy = DEFAULT_BB_POLICY);
     bool HasBool(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
     void SetInt(std::string key, int value) ;
     int GetInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    int GetInt(std::string key, int def, BlackboardPolicy policy = DEFAULT_BB_POLICY);
     int HasInt(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
     void SetFloat(std::string key, float value) ;
     float GetFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    float GetFloat(std::string key, float def, BlackboardPolicy policy = DEFAULT_BB_POLICY);
     float HasFloat(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
     void SetDouble(std::string key, double value) ;
     double GetDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    double GetDouble(std::string key, double def, BlackboardPolicy policy = DEFAULT_BB_POLICY);
     bool HasDouble(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
     void SetString(std::string key, std::string value) ;
     std::string GetString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY);
+    std::string GetString(std::string key, std::string def, BlackboardPolicy policy = DEFAULT_BB_POLICY);
     bool HasString(std::string key, BlackboardPolicy policy = DEFAULT_BB_POLICY) const;
 
     std::string getPrefixedId(std::string id) const;
