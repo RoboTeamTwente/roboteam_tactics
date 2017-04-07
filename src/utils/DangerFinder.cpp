@@ -3,6 +3,7 @@
 
 #include <boost/optional.hpp>
 
+#include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -23,29 +24,24 @@ snprintf(buf, 100, msg, ##__VA_ARGS__); \
 
 namespace rtt {
  
-DangerFinder danger_finder;    
-    
-inline Vector2 get_goal() {
-    return Vector2(we_are_left() ? -3 : 3, 0);
+RemoteDangerFinder dangerFinder;    
+DangerFinder dangerFinderImpl;
+
+inline Vector2 getGoal() {
+    return Vector2(weAreLeft() ? -3 : 3, 0);
 }
    
-inline Position get_opp(const Robot& bot) {
+inline Position getOpp(const Robot& bot) {
     return Position(bot.pos.x, bot.pos.y, bot.angle);
 }   
 
-const DangerFactor can_see_our_goal = [](const Robot& bot, std::string* reasoning=nullptr) {
-    std::vector<Vector2> goal_points = we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
-    for (const Vector2& goal : goal_points) {
-        if (getObstacles(bot, goal, nullptr, true).empty()) {
-            // reason("[bot can see goal; adding 5.0]");
-            return CAN_SEE_GOAL_DANGER;
-        }
-    }
-    // reason("[bot cannot see goal]");
-    return 0.0;
+const DangerFactor canSeeOurGoal = [](const Robot& bot, std::string* reasoning=nullptr) {
+    GoalPartition partition(weAreLeft());
+    partition.calculatePartition(LastWorld::get(), Vector2(bot.pos));
+    return (bool) partition.largestOpenSection();
 };
 
-const DangerFactor has_ball = [](const Robot& bot, std::string* reasoning=nullptr) {
+const DangerFactor hasBall = [](const Robot& bot, std::string* reasoning=nullptr) {
     auto opt = getBallHolder();
     if ((bool) opt && !opt->second && bot.id == opt->first.id) {
         reason("[bot has ball; adding 5.0]");
@@ -56,8 +52,8 @@ const DangerFactor has_ball = [](const Robot& bot, std::string* reasoning=nullpt
 };
 
 const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullptr) {
-    Vector2 goal = get_goal();
-    Position opp = get_opp(bot);
+    Vector2 goal = getGoal();
+    Position opp = getOpp(bot);
     double x = (opp.location().dist(goal) - 9) / DISTANCE_DENOMINATOR;
     // reason("[distance=%f; score=%f]", opp.location().dist(goal), x*x);
     return x*x;
@@ -65,8 +61,8 @@ const DangerFactor distance = [](const Robot& bot, std::string* reasoning=nullpt
 };
 
 const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nullptr) {
-    Vector2 goal = get_goal();
-    Position opp = get_opp(bot);
+    Vector2 goal = getGoal();
+    Position opp = getOpp(bot);
     goal = goal - opp.location();
     double tgt_angle = goal.angle();
     double angle_diff = fabs(tgt_angle - bot.angle);
@@ -75,7 +71,7 @@ const DangerFactor orientation = [](const Robot& bot, std::string* reasoning=nul
     return (x*x) / 3.0;
 };
 
-const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string* reasoning=nullptr) {
+const DangerFactor potentialCrossRecipient = [](const Robot& bot, std::string* reasoning=nullptr) {
     // TODO: incorporate chipped passes
     //Vector2 goal = get_goal();
     Position pos(bot.pos.x, bot.pos.y, bot.angle);
@@ -95,9 +91,9 @@ const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string*
         return 0.0;
     }
     
-    double my_score = df_impl::danger_score(bot, DEFAULT_FACTORS, false);
-    double other_score = df_impl::danger_score(other, DEFAULT_FACTORS, false);
-    if (my_score < other_score) {
+    double myScore = df_impl::dangerScore(bot, DEFAULT_FACTORS, false);
+    double otherScore = df_impl::dangerScore(other, DEFAULT_FACTORS, false);
+    if (myScore < otherScore) {
         // Other is in better position
         return 0.0;
     }
@@ -105,7 +101,7 @@ const DangerFactor potential_cross_recipient = [](const Robot& bot, std::string*
     return POTENTIAL_CROSS_DANGER;
 };
 
-const std::vector<DangerFactor> DEFAULT_FACTORS({distance/*, orientation, can_see_our_goal, has_ball*/});
+const std::vector<DangerFactor> DEFAULT_FACTORS({distance/*, orientation, canSeeOurGoal, hasBall*/});
 
 DangerFinder::DangerFinder() {
     running = false;
@@ -115,7 +111,7 @@ DangerFinder::DangerFinder() {
 void DangerFinder::run(unsigned int delay) {
     ROS_INFO("DF start");
     _stop = false;
-    runner = std::thread(&DangerFinder::_run, this, delay);
+    runner = std::thread(&DangerFinder::runImpl, this, delay);
     runner.detach();
     running = true;
 }
@@ -127,64 +123,66 @@ void DangerFinder::stop() {
     running = false;
 }
 
-bool DangerFinder::is_running() const { return running; }
+bool DangerFinder::isRunning() const { return running; }
 
 DangerResult DangerFinder::update() const {
-    DangerResult new_res;
-    new_res.danger_list = df_impl::sorted_opponents(LastWorld::get(), -1);
-    int count = new_res.danger_list.size();
-    new_res.most_dangerous = count > 0 ? boost::optional<Robot>(new_res.danger_list.at(count - 1)) : boost::optional<Robot>();
-    new_res.second_most_dangerous = count > 1 ? boost::optional<Robot>(new_res.danger_list.at(count - 2)) : boost::optional<Robot>();
-    new_res.charging = df_impl::charging_bot();
-    return new_res;
+    DangerResult newRes;
+    newRes.dangerList = df_impl::sortedOpponents(LastWorld::get(), -1);
+    int count = newRes.dangerList.size();
+    newRes.mostDangerous = count > 0 ? boost::optional<Robot>(newRes.dangerList.at(count - 1)) : boost::optional<Robot>();
+    newRes.secondMostDangerous = count > 1 ? boost::optional<Robot>(newRes.dangerList.at(count - 2)) : boost::optional<Robot>();
+    newRes.charging = df_impl::chargingBot();
+    return newRes;
 }
 
-void DangerFinder::_run(unsigned int delay) {
+void DangerFinder::runImpl(unsigned int delay) {
+    ros::Rate rate(delay);
     while (!_stop) {
-        DangerResult new_res = update();
+        DangerResult newRes = update();
                     
         while (!lock.try_lock()) {
            if (_stop) return; 
         }
         
         try {
-            result = new_res;
+            result = newRes;
         } catch (...) {
             lock.unlock();
             continue;
         }
         lock.unlock();
+        rate.sleep();
     }
 }
 
-DangerResult DangerFinder::current_result() {
+DangerResult DangerFinder::currentResult() {
     DangerResult res;
     lock.lock();
     try {
         res = result;
     } catch (...) {
         lock.unlock();
-        throw std::runtime_error("DangerFinder::current_result failed");
+        throw std::runtime_error("DangerFinder::currentResult failed");
     }
     lock.unlock();
     return result;
 }
 
-DangerResult DangerFinder::get_immediate_update() const {
+DangerResult DangerFinder::getImmediateUpdate() const {
     return update();
 }
 
 namespace df_impl {
     
-double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors, 
-                    bool include_cross, unsigned int preferred) {
+double dangerScore(const Robot& bot, const std::vector<DangerFactor>& factors, 
+                    bool includeCross, unsigned int preferred) {
     double score = 0.0;
     std::string reasoning;
     for (const DangerFactor& factor : factors) {
         score += factor(bot, &reasoning);
     }
-    if (include_cross) {
-        score += potential_cross_recipient(bot, &reasoning);
+    if (includeCross) {
+        score += potentialCrossRecipient(bot, &reasoning);
     }
     if (bot.id == preferred) {
         score += 10.0;
@@ -193,10 +191,10 @@ double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors,
     return score;
 }
 
-std::vector<Robot> sorted_opponents(const roboteam_msgs::World& world, unsigned int preferred) {
+std::vector<Robot> sortedOpponents(const roboteam_msgs::World& world, unsigned int preferred) {
     std::vector<Robot> bots = world.them;
     auto comp = [](const Robot& a, const Robot& b) {
-        return danger_score(a) < danger_score(b);
+        return dangerScore(a) < dangerScore(b);
     };
     std::vector<Robot> res;
     res.insert(res.cbegin(), bots.begin(), bots.end());
@@ -204,49 +202,83 @@ std::vector<Robot> sorted_opponents(const roboteam_msgs::World& world, unsigned 
     return res;
 }
 
-boost::optional<Robot> most_dangerous_bot(unsigned int preferred) {
+boost::optional<Robot> mostDangerousBot(unsigned int preferred) {
     roboteam_msgs::World world = LastWorld::get();
     if (world.them.size() < 1) return boost::optional<Robot>();
-    auto it = sorted_opponents(world, preferred).end();
+    auto it = sortedOpponents(world, preferred).end();
     it--;
     return *it;
 }
 
-boost::optional<Robot> second_most_dangerous_bot(unsigned int preferred) {
+boost::optional<Robot> secondMostDangerousBot(unsigned int preferred) {
     roboteam_msgs::World world = LastWorld::get();
     if (world.them.size() < 2) return boost::optional<Robot>();
-    auto it = sorted_opponents(world, preferred).end();
+    auto it = sortedOpponents(world, preferred).end();
     it--;
     it--;
     return *it;
 }
  
-boost::optional<Robot> charging_bot() {
+boost::optional<Robot> chargingBot() {
     return boost::optional<Robot>();
 }
 
-bool we_are_left() {
-    //std::string tgt;
-    //get_PARAM_OUR_SIDE(tgt, false);
-    //return tgt == "left";
-    return false;
-}
-
-std::vector<Vector2> our_goal() {
-    return we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT;
+bool weAreLeft() {
+    std::string tgt;
+    get_PARAM_OUR_SIDE(tgt, false);
+    return tgt == "left";
 }
 
 }
 
-static inline void ensure_running() {
-    if (!danger_finder.is_running())
-        danger_finder.run();
+static inline void ensureRunning() {
+    if (!dangerFinder.isRunning())
+        dangerFinder.run(100);
 }
 
-std::vector<Vector2> our_goal() { ensure_running(); return df_impl::our_goal(); }
-bool we_are_left() { ensure_running(); return df_impl::we_are_left(); }
-boost::optional<Robot> charging_bot() { ensure_running(); return danger_finder.current_result().charging; }
-boost::optional<Robot> most_dangerous_bot() { ensure_running(); return danger_finder.current_result().most_dangerous; }
-boost::optional<Robot> second_most_dangerous_bot() { ensure_running(); return danger_finder.current_result().second_most_dangerous; }
+bool weAreLeft() { ensureRunning(); return df_impl::weAreLeft(); }
+boost::optional<Robot> chargingBot() { ensureRunning(); return dangerFinder.currentResult().charging; }
+boost::optional<Robot> mostDangerousBot() { ensureRunning(); return dangerFinder.currentResult().mostDangerous; }
+boost::optional<Robot> secondMostDangerousBot() { ensureRunning(); return dangerFinder.currentResult().secondMostDangerous; }
+ 
+void RemoteDangerFinder::run(unsigned int delay = 100) {}
+
+void RemoteDangerFinder::stop() {}
+
+bool RemoteDangerFinder::isRunning() const { return true; }
+
+inline DangerResult convert(const DFService::Response& res) {
+    return {
+        res.charging.present ? boost::optional<Robot>(res.charging.robot) : boost::none,
+        res.mostDangerous.present ? boost::optional<Robot>(res.mostDangerous.robot) : boost::none,
+        res.secondMostDangerous.present ? boost::optional<Robot>(res.secondMostDangerous.robot) : boost::none,
+        res.robots
+    };
+}
+
+inline DangerResult fetch(bool immediate, bool mostDangerousOnly) {
+    if (ros::this_node::getName() == "/StrategyNode") {
+        return immediate ? dangerFinderImpl.getImmediateUpdate() : dangerFinderImpl.currentResult();
+    }
+    DFService::Request req;
+    DFService::Response res;
     
+    req.immediate = immediate;
+    req.mostDangerousOnly = mostDangerousOnly;
+    
+    if (!ros::service::call("dangerFinder", req, res)) {
+        return DangerResult();
+    }
+    
+    return convert(res);
+}
+
+DangerResult RemoteDangerFinder::currentResult() {
+    return fetch(false, false);
+}
+
+DangerResult RemoteDangerFinder::getImmediateUpdate() const {
+    return fetch(true, false);
+}
+   
 }

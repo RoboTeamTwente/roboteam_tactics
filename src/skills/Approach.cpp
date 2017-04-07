@@ -17,7 +17,7 @@ bt::Node::Status Approach::Update() {
     }
     Vector2 goal(GetDouble("xGoal"), GetDouble("yGoal"));
     double dist = fabs(goal.dist(Vector2(getWorldBot(GetInt("ROBOT_ID"))->pos)));
-    bool done = dist < HasDouble("approachDistance") ? GetDouble("approachDistance") : DEFAULT_DISTANCE;
+    bool done = dist < GetDouble("approachDistance", DEFAULT_DISTANCE);
     if (done) gtp.reset(nullptr);
     return done ? bt::Node::Status::Success : bt::Node::Status::Running;
 }

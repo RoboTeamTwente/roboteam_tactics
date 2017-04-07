@@ -69,7 +69,7 @@ void TwoVTwoDefenseTactic::Initialize() {
         if (holder && !holder->second) {
             tgt = holder->first.id;
         } else {
-            tgt = danger_finder.get_immediate_update().most_dangerous->id;
+            tgt = dangerFinder.getImmediateUpdate().mostDangerous->id;
         }
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", harasser.robot_id);
