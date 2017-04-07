@@ -83,7 +83,7 @@ void Wander::configure() {
             double cx = GetDouble("boxCenterX");
             double cy = GetDouble("boxCenterY");
             double length = GetDouble("boxLength");
-            double width = HasDouble("boxWidth") ? GetDouble("boxWidth") : length;
+            double width = GetDouble("boxWidth", length);
             wanderArea = { { cx - width / 2, cy + length / 2 }, length, width };
             break;
         }

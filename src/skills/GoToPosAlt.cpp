@@ -318,12 +318,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPosAlt::getVelCommand() {
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    if (blackboard->HasInt("KEEPER_ID")) {
-        KEEPER_ID = blackboard->GetInt("KEEPER_ID");
-    } else {
-        // ROS_WARN("GoToPosAlt, KEEPER_ID not set");
-        KEEPER_ID = 100;
-    }
+    KEEPER_ID = GetInt("KEEPER_ID", 100);
 
     if (HasDouble("pGainPosition")) {
     	pGainPosition = GetDouble("pGainPosition");

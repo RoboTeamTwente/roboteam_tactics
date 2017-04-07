@@ -35,10 +35,10 @@ void WanderTactic::Initialize() {
     }
     
     std::vector<int> nearBall, nearGoal, firstQuad, secondQuad;
-    int wantNearBall = HasInt("nearBall") ? GetInt("nearBall") : DEFAULT_NEAR_BALL;
-    int wantNearGoal = HasInt("nearGoal") ? GetInt("nearGoal") : DEFAULT_NEAR_GOAL;
-    int wantInFirstQuad = HasInt("mostImportantQuad") ? GetInt("mostImportantQuad") : DEFAULT_MOST_IMPORTANT_QUADRANT;
-    int wantInSecondQuad = HasInt("secondaryQuad") ? GetInt("secondaryQuad") : DEFAULT_SECONDARY_QUARDRANT;
+    int wantNearBall = GetInt("nearBall", DEFAULT_NEAR_BALL);
+    int wantNearGoal = GetInt("nearGoal", DEFAULT_NEAR_GOAL);
+    int wantInFirstQuad = GetInt("mostImportantQuad", DEFAULT_MOST_IMPORTANT_QUADRANT);
+    int wantInSecondQuad = GetInt("secondaryQuad", DEFAULT_SECONDARY_QUARDRANT);
     
     bool cont = fill(nearBall, available, wantNearBall);
     if (cont) cont = fill(nearGoal, available, wantNearGoal);

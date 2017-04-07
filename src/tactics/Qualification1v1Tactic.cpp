@@ -70,7 +70,6 @@ bt::Node::Status Qualification1v1Tactic::Update() {
     
     if (feedbacks.find(tokens.at(0)) != feedbacks.end()) {
         auto stat = feedbacks.at(tokens.at(0));
-        RTT_DEBUGLN("First Status: %d", static_cast<int>(stat));
         error |= stat == bt::Node::Status::Invalid;
         failure |= stat == bt::Node::Status::Failure;
         success &= stat == bt::Node::Status::Success;
@@ -78,7 +77,6 @@ bt::Node::Status Qualification1v1Tactic::Update() {
     
     if (feedbacks.find(tokens.at(1)) != feedbacks.end()) {
         auto stat = feedbacks.at(tokens.at(1));
-        RTT_DEBUGLN("Second Status: %d", static_cast<int>(stat));
         error |= stat == bt::Node::Status::Invalid;
         failure |= stat == bt::Node::Status::Failure;
         success &= stat == bt::Node::Status::Success;
