@@ -12,7 +12,7 @@ SecondaryKeeper::SecondaryKeeper(std::string name,
 }
 
 boost::optional<roboteam_msgs::WorldRobot> SecondaryKeeper::select_target() const {
-    return second_most_dangerous_bot();
+    return secondMostDangerousBot();
 }
     
 }

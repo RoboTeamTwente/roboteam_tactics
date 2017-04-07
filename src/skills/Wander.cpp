@@ -59,11 +59,11 @@ void Wander::configure() {
             break;
         }
         case WanderArea::NEAR_OUR_GOAL: {
-            wanderArea = we_are_left() ? leftGoal : rightGoal;
+            wanderArea = weAreLeft() ? leftGoal : rightGoal;
             break;
         }
         case WanderArea::NEAR_THEIR_GOAL: {
-            wanderArea = we_are_left() ? rightGoal : leftGoal;
+            wanderArea = weAreLeft() ? rightGoal : leftGoal;
             break;
         }
         case WanderArea::QUADRANT: {
@@ -83,7 +83,7 @@ void Wander::configure() {
             double cx = GetDouble("boxCenterX");
             double cy = GetDouble("boxCenterY");
             double length = GetDouble("boxLength");
-            double width = HasDouble("boxWidth") ? GetDouble("boxWidth") : length;
+            double width = GetDouble("boxWidth", length);
             wanderArea = { { cx - width / 2, cy + length / 2 }, length, width };
             break;
         }
