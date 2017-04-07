@@ -33,14 +33,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , pGainRotation(2.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
-        , maxAngularVel(10.0)
+        , maxAngularVel(5.0)
         , minAngularVel(3.0)
         // , iGainVelocity(0.5)
         // , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(2.0)
-        , minSpeed(0.6)
+        , maxSpeed(1.0)
+        , minSpeed(0.4)
         // , minSpeedX(0.4)
         // , minSpeedY(0.6)
         // , attractiveForce(10.0)
