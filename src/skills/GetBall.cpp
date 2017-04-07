@@ -123,13 +123,13 @@ bt::Node::Status GetBall::Update (){
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
-    bool avoidBall = false;
+    //bool avoidBall = false;
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
-        avoidBall = true;
+    //    avoidBall = true;
 	} else {
 		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
-        avoidBall = false;
+    //    avoidBall = false;
 	}
 
 

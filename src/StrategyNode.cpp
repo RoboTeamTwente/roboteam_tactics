@@ -57,21 +57,21 @@ namespace rtt {
 
 bool dangerFinderCallback(DFService::Request& req, DFService::Response& res) {
     ROS_INFO("DF Request: %d %d", req.immediate, req.mostDangerousOnly);
-    DangerResult dr = req.immediate ? danger_finder.get_immediate_update() : danger_finder.current_result();
-    res.mostDangerous.present = (bool) dr.most_dangerous;
-    if (dr.most_dangerous) {
-        res.mostDangerous.robot = *dr.most_dangerous;
+    DangerResult dr = req.immediate ? dangerFinder.getImmediateUpdate() : dangerFinder.currentResult();
+    res.mostDangerous.present = (bool) dr.mostDangerous;
+    if (dr.mostDangerous) {
+        res.mostDangerous.robot = *dr.mostDangerous;
     }
     if (!req.mostDangerousOnly) {
         res.charging.present = (bool) dr.charging;
         if (dr.charging) {
             res.charging.robot = *dr.charging;
         }
-        res.secondMostDangerous.present = (bool) dr.second_most_dangerous;
-        if (dr.second_most_dangerous) {
-            res.secondMostDangerous.robot = *dr.second_most_dangerous;
+        res.secondMostDangerous.present = (bool) dr.secondMostDangerous;
+        if (dr.secondMostDangerous) {
+            res.secondMostDangerous.robot = *dr.secondMostDangerous;
         }
-        res.robots = dr.danger_list;
+        res.robots = dr.dangerList;
     }
     return true;
 }

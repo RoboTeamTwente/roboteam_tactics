@@ -135,7 +135,7 @@ bt::Node::Status StandFree::Update() {
     // If the Cover Cone exists, determine the point closest to me on the edge of the cone
     if (coneRobots) {
         Cone cone = *coneRobots;
-        Vector2 theirGoalPos = LastWorld::get_their_goal_center();
+        // Vector2 theirGoalPos = LastWorld::get_their_goal_center();
         // Find the closest point to me on the side of the cone, and preferably close to their goal position
         nearestFreePos = cone.ClosestPointOnSide(targetPos, closeTo);
 

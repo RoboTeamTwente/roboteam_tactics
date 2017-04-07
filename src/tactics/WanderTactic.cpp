@@ -121,7 +121,7 @@ void WanderTactic::Initialize() {
 
 int WanderTactic::pickMostImportantQuad() const {
     Vector2 ballPos(LastWorld::get().ball.pos);
-    if ((ballPos.x <= 0 && we_are_left()) || (ballPos.x > 0 && we_are_left())) {
+    if ((ballPos.x <= 0 && weAreLeft()) || (ballPos.x > 0 && weAreLeft())) {
         return ballPos.y >= 0 ? 0 : 2;
     } else {
         return ballPos.y >= 0 ? 1 : 3;

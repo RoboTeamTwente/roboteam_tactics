@@ -26,7 +26,7 @@ KeeperBlock::~KeeperBlock() {
 }
 
 boost::optional<roboteam_msgs::WorldRobot> KeeperBlock::select_target() const {
-    return most_dangerous_bot();
+    return mostDangerousBot();
 }
 
 void KeeperBlock::reevaluate_target() {
@@ -36,7 +36,7 @@ void KeeperBlock::reevaluate_target() {
     //ROS_INFO("Target: %d", danger->id);
     
     target = danger->id;
-    auto goal = (we_are_left() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
+    auto goal = (weAreLeft() ? GOAL_POINTS_LEFT : GOAL_POINTS_RIGHT)[1]; // center
 
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));

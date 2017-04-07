@@ -27,18 +27,18 @@ typedef std::function<double(const Robot&, std::string*)> DangerFactor;
 /**
  * \brief DangerFactor which gives high scores to robots which have a clear line of sight to our goal
  */
-extern const DangerFactor can_see_our_goal;
+extern const DangerFactor canSeeOurGoal;
 
 /**
  * \brief DangerFactor which gives high scores if it seems likely that an opponent might try to pass the
  * ball to this robot from the opposite side of the field.
  */
-extern const DangerFactor potential_cross_recipient;
+extern const DangerFactor potentialCrossRecipient;
 
 /**
  * \brief DangerFactor which gives a very high score to the robot which has the ball, and low scores to all others.
  */
-extern const DangerFactor has_ball;
+extern const DangerFactor hasBall;
 
 /**
  * \brief DangerFactor which scores opponents relative to their distance to our goal
@@ -80,9 +80,9 @@ const std::vector<Vector2> GOAL_POINTS_RIGHT({
  */
 typedef struct {
     boost::optional<Robot> charging;                //< An optional robot with the ball, coming towards our goal
-    boost::optional<Robot> most_dangerous;          //< The most dangerous opponent, if there is any
-    boost::optional<Robot> second_most_dangerous;   //< The second most dangerous opponent, if there is more than one
-    std::vector<Robot> danger_list;                 //< All opponents, sorted from least to most dangerous
+    boost::optional<Robot> mostDangerous;          //< The most dangerous opponent, if there is any
+    boost::optional<Robot> secondMostDangerous;   //< The second most dangerous opponent, if there is more than one
+    std::vector<Robot> dangerList;                 //< All opponents, sorted from least to most dangerous
 } DangerResult;
 
 /**
@@ -108,21 +108,21 @@ class DangerFinder {
     /**
      * \brief Checks whether or not the background thread is running
      */
-    virtual bool is_running() const;
+    virtual bool isRunning() const;
     
     /**
      * \brief Gets the most recent DangerResult. If the background thread is not running and has never run, this will be empty.
      */
-    virtual DangerResult current_result();
+    virtual DangerResult currentResult();
     
     /**
      * \brief Evaluates the current world state and returns a DangerResult. This does not affect the background
      * thread, whether it is running or not.
      */
-    virtual DangerResult get_immediate_update() const;
+    virtual DangerResult getImmediateUpdate() const;
     
     private:
-    void _run(unsigned int delay);
+    void runImpl(unsigned int delay);
     DangerResult update() const;
     
     DangerResult result;
@@ -137,33 +137,33 @@ class RemoteDangerFinder : public DangerFinder {
     RemoteDangerFinder();
     void run(unsigned int delay) override;
     void stop() override;
-    bool is_running() const override;
-    DangerResult current_result() override;
-    DangerResult get_immediate_update() const override;
+    bool isRunning() const override;
+    DangerResult currentResult() override;
+    DangerResult getImmediateUpdate() const override;
 };
 
-extern RemoteDangerFinder danger_finder;
+extern RemoteDangerFinder dangerFinder;
 
 namespace df_impl {
-    std::vector<Vector2> our_goal();
+    std::vector<Vector2> ourGoal();
 
-    bool we_are_left();
+    bool weAreLeft();
 
-    double danger_score(const Robot& bot, const std::vector<DangerFactor>& factors = DEFAULT_FACTORS, 
-                    bool include_cross = true, unsigned int preferred = 999);
+    double dangerScore(const Robot& bot, const std::vector<DangerFactor>& factors = DEFAULT_FACTORS, 
+                    bool includeCross = true, unsigned int preferred = 999);
     
-    void dump_scores(const roboteam_msgs::World& world);    
+    void dumpScores(const roboteam_msgs::World& world);    
     
-    boost::optional<Robot> charging_bot();
-    boost::optional<Robot> most_dangerous_bot(unsigned int preferred = 999);
-    boost::optional<Robot> second_most_dangerous_bot(unsigned int preferred = 999);
-    std::vector<Robot> sorted_opponents(const roboteam_msgs::World& world, unsigned int preferred);
+    boost::optional<Robot> chargingBot();
+    boost::optional<Robot> mostDangerousBot(unsigned int preferred = 999);
+    boost::optional<Robot> secondMostDangerousBot(unsigned int preferred = 999);
+    std::vector<Robot> sortedOpponents(const roboteam_msgs::World& world, unsigned int preferred);
 }
 
-std::vector<Vector2> our_goal();
-bool we_are_left();
-boost::optional<Robot> charging_bot();
-boost::optional<Robot> most_dangerous_bot();
-boost::optional<Robot> second_most_dangerous_bot();
+std::vector<Vector2> ourGoal();
+bool weAreLeft();
+boost::optional<Robot> chargingBot();
+boost::optional<Robot> mostDangerousBot();
+boost::optional<Robot> secondMostDangerousBot();
    
 }

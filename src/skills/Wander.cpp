@@ -59,11 +59,11 @@ void Wander::configure() {
             break;
         }
         case WanderArea::NEAR_OUR_GOAL: {
-            wanderArea = we_are_left() ? leftGoal : rightGoal;
+            wanderArea = weAreLeft() ? leftGoal : rightGoal;
             break;
         }
         case WanderArea::NEAR_THEIR_GOAL: {
-            wanderArea = we_are_left() ? rightGoal : leftGoal;
+            wanderArea = weAreLeft() ? rightGoal : leftGoal;
             break;
         }
         case WanderArea::QUADRANT: {
