@@ -6,15 +6,15 @@ namespace rtt {
 
 namespace rtt_bob {
 
-class BestTactic : public Tactic {
+class SingleKeeperPlay : public Tactic {
     public:
-    BestTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    SingleKeeperPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize();
 
     Status Update();
 
-    std::string node_name() { return "BestTactic"; }
+    std::string node_name() { return "SingleKeeperPlay"; }
 
     private:
 } ;
@@ -22,3 +22,4 @@ class BestTactic : public Tactic {
 } // rtt_bob
 
 } // rtt
+

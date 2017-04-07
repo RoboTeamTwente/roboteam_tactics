@@ -38,11 +38,11 @@ void ThrowinPlay::Initialize() {
     auto robots = get_claimed_robots();
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
-
-    // set throwin taker role
+    int KEEPER_ID = RobotDealer::get_keeper();
+    // create throwin taker role
     bt::Blackboard bbThrowinTaker;
     bbThrowinTaker.SetInt("ROBOT_ID", robots[0]);
+    bbThrowinTaker.SetInt("KEEPER_ID", KEEPER_ID);
     ScopedBB(bbThrowinTaker, "CanPassSafely_A")
             .setInt("passToRobot", robots[1]);
 
@@ -62,8 +62,9 @@ void ThrowinPlay::Initialize() {
     // Send to rolenode
     pub.publish(wdThrowinTaker);
 
-    // set receiver role
+    // create receiver role
     bt::Blackboard bbThrowinReceiver;
+    bbThrowinReceiver.SetInt("KEEPER_ID", KEEPER_ID);
     bbThrowinReceiver.SetInt("ROBOT_ID", robots[1]);
 
     roboteam_msgs::RoleDirective wdThrowinReceiver;

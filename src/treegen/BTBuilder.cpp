@@ -430,8 +430,23 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             << name
             << "\", bb);"
             << std::endl;
-    } else if (allconditions_set.find(type) != allconditions_set.end()
-            || alltactics_set.find(type) != alltactics_set.end()) {
+    } else if (allconditions_set.find(type) != allconditions_set.end()) {
+        out << DINDENT
+            << "auto "
+            << name
+            << " = std::make_shared<"
+            << type
+            << ">(\""
+            << name
+            << "\", bb);"
+            << std::endl;
+    } else if (alltactics_set.find(type) != alltactics_set.end()) {
+        size_t pos = pos = type.find("/");
+        while (pos != std::string::npos) {
+            type.replace(pos, std::string("/").length(), "::");
+            pos = pos = type.find("/");
+        }
+
         out << DINDENT
             << "auto "
             << name

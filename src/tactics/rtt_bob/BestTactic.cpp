@@ -3,6 +3,8 @@
 
 namespace rtt {
 
+namespace rtt_bob {
+
 RTT_REGISTER_TACTIC_F(rtt_bob, BestTactic);
 
 BestTactic::BestTactic(std::string name, bt::Blackboard::Ptr blackboard)
@@ -15,6 +17,8 @@ void BestTactic::Initialize() {
 
 bt::Node::Status BestTactic::Update() {
     return Status::Failure;
+}
+
 }
 
 } // rtt

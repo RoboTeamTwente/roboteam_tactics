@@ -4,6 +4,8 @@
 
 namespace rtt {
 
+namespace rtt_bob {
+
 class WorstTactic : public Tactic {
     public:
     WorstTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
@@ -17,5 +19,7 @@ class WorstTactic : public Tactic {
     private:
 } ;
 
-}
+} // rtt_bob
 
+} // rtt
+ 

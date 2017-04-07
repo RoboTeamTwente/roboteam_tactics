@@ -104,15 +104,15 @@ private:
     // double dGainRotation;
     double maxAngularVel;
     double minAngularVel;
-    double iGainVelocity;
-    double iGainAngularVel;
+    // double iGainVelocity;
+    // double iGainAngularVel;
 
     // Control variables
     double maxSpeed;
     double minSpeed;
-    double attractiveForce;
-    double attractiveForceWhenClose;
-    double repulsiveForce;
+    // double attractiveForce;
+    // double attractiveForceWhenClose;
+    // double repulsiveForce;
     double safetyMarginGoalAreas;
     double marginOutsideField;
 
@@ -126,11 +126,12 @@ private:
     roboteam_msgs::WorldRobot me;
 
     Vector2 prevTargetPos;
+    Vector2 prevSumOfForces;
     // Vector2 velControllerI;
     // double angularVelControllerI;
-    double angleErrorIntegral;
-    double* angleErrorHistory;
-    int historyIndex;
+    // double angleErrorIntegral;
+    // double* angleErrorHistory;
+    // int historyIndex;
     bool succeeded;
     // double wControllerI;
     // double prevAngularVelTarget;

@@ -71,7 +71,9 @@ private:
 	Vector2 center;
    	double radius=radius;
    	GoToPos goToPos;
-	
+   	double rotPconstant;
+	double radiusPconstant;
+	double turnPconstant;
 } ;
 
 } // rtt
