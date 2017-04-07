@@ -29,8 +29,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , success(false)
 
         // Control gains
-        , pGainPosition(3.0)
-        , pGainRotation(3.0) // was 5?
+        , pGainPosition(2.0)
+        , pGainRotation(5.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(5.0)
@@ -40,8 +40,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         // Rest of the members
 
-        , maxSpeed(0.5)
-        , minSpeed(0.0)
+        , maxSpeed(0.8)
+        , minSpeed(0.5)
         // , minSpeedX(0.4)
         // , minSpeedY(0.6)
         // , attractiveForce(10.0)
@@ -142,6 +142,8 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, d
         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
             forceVector = antenna.rotate(0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
         }
+        drawer.setColor(255, 255, 0);
+        drawer.drawLine("forceFromRobot", myPos, forceVector);
     }    
     return forceVector;
 }
@@ -152,14 +154,14 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 0.7; // default
-    if (lookingDistance > posError.length()) {
-        lookingDistance = posError.length();
+    double lookingDistance = 1.0; // default
+    if (lookingDistance > (posError.length()) + 0.3) {
+        lookingDistance = posError.length() + 0.3;
     }
     
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
     Vector2 coneStart = myPos - antenna;
-    Cone antennaCone(coneStart, (antenna + myPos), 0.3);
+    Cone antennaCone(coneStart, (antenna + myPos), 0.4);
 
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
@@ -180,6 +182,10 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         Vector2 otherRobotPos(world.them.at(i).pos);
         Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
         sumOfForces = sumOfForces + forceVector; 
+    }
+
+    if (sumOfForces.length() < 0.01) {
+        drawer.removeLine("forceFromRobot");
     }
 
     return sumOfForces;
@@ -390,6 +396,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
 
+    // Draw the velocity vector acting on the robot
+    drawer.drawLine("velCommand", myPos, sumOfForces);  
+
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
@@ -455,8 +464,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     prevSumOfForces=sumOfForces;
     Vector2 velCommand = sumOfForces;
-    // Draw the velocity vector acting on the robots
-    drawer.drawLine("velCommand", myPos, velCommand);  
+    
     // Rotate the commands from world frame to robot frame 
     velCommand = worldToRobotFrame(velCommand, myAngle);
 
