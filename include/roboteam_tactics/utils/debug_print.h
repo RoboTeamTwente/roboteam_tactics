@@ -57,7 +57,7 @@ SET_DEBUG_FOR(InterceptBall, true);
 SET_DEBUG_FOR(KeeperBlock, true);
 SET_DEBUG_FOR(Kick, false);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
-SET_DEBUG_FOR(ParamSet, true);
+SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(QualKeeper, false);
 SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
@@ -67,7 +67,7 @@ SET_DEBUG_FOR(Wander, true);
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
-SET_DEBUG_FOR(DistanceXToY, true);
+SET_DEBUG_FOR(DistanceXToY, false);
 SET_DEBUG_FOR(IsRefCommand, true);
 SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(ParamCheck, false);

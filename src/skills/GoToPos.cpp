@@ -30,7 +30,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
         // Control gains
         , pGainPosition(3.0)
-        , pGainRotation(2.0) // was 5?
+        , pGainRotation(3.0) // was 5?
         // , iGainRotation(0.5)
         // , dGainRotation(0.2)
         , maxAngularVel(5.0)
@@ -39,8 +39,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         // , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(1.0)
-        , minSpeed(0.4)
+
+        , maxSpeed(0.5)
+        , minSpeed(0.0)
         // , minSpeedX(0.4)
         // , minSpeedY(0.6)
         // , attractiveForce(10.0)
@@ -167,10 +168,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
-    for (size_t i = 0; i < world.us.size(); i++) {
-        roboteam_msgs::WorldRobot currentRobot = *getWorldBot(i);
+    for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
-
             Vector2 otherRobotPos(currentRobot.pos);
             Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
             sumOfForces = sumOfForces + forceVector;
@@ -366,6 +365,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 posError = targetPos - myPos;
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
+        ROS_INFO("angleGoal received: %f",angleGoal);
     } else {
         angleGoal = posError.angle();
     }
@@ -373,7 +373,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     double angleError = angleGoal - myAngle;
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.05 && fabs(angleError) < 0.5) {
+    if (posError.length() < 0.05 && fabs(angleError) < 0.2) {
         sendStopCommand(ROBOT_ID);
         sendStopCommand(ROBOT_ID);
         sendStopCommand(ROBOT_ID);
@@ -387,7 +387,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     Vector2 sumOfForces(0.0, 0.0);
-
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
 
@@ -432,6 +431,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
     // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
     // it should still go at maximum speed and use the sumOfForces vector only for direction.
+    
     if (posError.length() > 1.0 || sumOfForces.length() > maxSpeed) {
         if (sumOfForces.length() > 0) {
             sumOfForces = sumOfForces.scale(1/sumOfForces.length() * maxSpeed);
@@ -440,8 +440,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
+    // if speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
     if (sumOfForces.length() < (minSpeed / 2)) {
-        sumOfForces = Vector2(0.0, 0.0);
+        if(sumOfForces.length() > prevSumOfForces.length()){
+            sumOfForces = Vector2(0.0, 0.0);
+        }
     } else if (sumOfForces.length() <  minSpeed) {
         sumOfForces = sumOfForces.scale(minSpeed / sumOfForces.length());
     }
@@ -450,6 +453,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         angularVelTarget = 0;
     }
 
+    prevSumOfForces=sumOfForces;
     Vector2 velCommand = sumOfForces;
     // Draw the velocity vector acting on the robots
     drawer.drawLine("velCommand", myPos, velCommand);  

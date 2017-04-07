@@ -126,6 +126,7 @@ private:
     roboteam_msgs::WorldRobot me;
 
     Vector2 prevTargetPos;
+    Vector2 prevSumOfForces;
     // Vector2 velControllerI;
     // double angularVelControllerI;
     // double angleErrorIntegral;

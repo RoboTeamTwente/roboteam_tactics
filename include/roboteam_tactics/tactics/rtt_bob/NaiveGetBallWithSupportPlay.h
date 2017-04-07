@@ -4,18 +4,22 @@
 
 namespace rtt {
 
-class NaiveGetBallWithSupport : public Tactic {
+namespace rtt_bob {
+
+class NaiveGetBallWithSupportPlay : public Tactic {
     public:
-    NaiveGetBallWithSupport(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    NaiveGetBallWithSupportPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize();
 
     Status Update();
 
-    std::string node_name() { return "NaiveGetBallWithSupport"; }
+    std::string node_name() { return "NaiveGetBallWithSupportPlay"; }
 
     private:
 } ;
+
+} // rtt_bob
 
 } // rtt
 
