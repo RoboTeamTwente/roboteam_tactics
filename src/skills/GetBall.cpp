@@ -187,7 +187,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", false);
+        private_bb->SetBool("avoidRobots", true);
         // private_bb->SetBool("avoidBall", avoidBall);
         private_bb->SetBool("dribbler", dribbler);
         private_bb->SetString("whichBot", GetString("whichBot"));
@@ -223,13 +223,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 4.0) {
-          newVelCommand.scale(4.0 / newVelCommand.length());
-        }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;
+        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        // if (newVelCommand.length() > 4.0) {
+        //   newVelCommand.scale(4.0 / newVelCommand.length());
+        // }
+        // command.x_vel = newVelCommand.x;
+        // command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
