@@ -5,6 +5,8 @@ namespace b = boost;
 #include "roboteam_tactics/tactics/rtt_bob/NaiveGetBallWithSupportPlay.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
+#include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/RoleDirective.h"
 
 namespace rtt {
 
@@ -48,16 +50,16 @@ roboteam_msgs::RoleDirective NaiveGetBallWithSupportPlay::initSupport(
         ;
 
     ScopedBB(bb, "AimAt_Goal")
-        .SetString("At", "theirgoal")
+        .setString("At", "theirgoal")
         ;
 
     ScopedBB(bb, "CanSeeSpits")
-        .SetInt("targetID", SPITS_ID)
+        .setInt("targetID", SPITS_ID)
         ;
 
     ScopedBB(bb, "AimAt_Spits_A")
-        .SetString("At", "robot")
-        .SetInt("AtRobot", SPITS_ID)
+        .setString("At", "robot")
+        .setInt("AtRobot", SPITS_ID)
         ;
 
     roboteam_msgs::RoleDirective rd;
@@ -65,10 +67,16 @@ roboteam_msgs::RoleDirective NaiveGetBallWithSupportPlay::initSupport(
     rd.tree = "rtt_bob/TwirlTree";
     rd.blackboard = bb.toMsg();
 
+    return rd;
 }
 
 roboteam_msgs::RoleDirective NaiveGetBallWithSupportPlay::initSpits() {
+    roboteam_msgs::RoleDirective rd;
+    rd.robot_id = 0;
+    rd.tree = "rtt_bob/TwirlTree";
+    // rd.blackboard = bb.toMsg();
 
+    return rd;
 }
 
 void NaiveGetBallWithSupportPlay::Initialize() {
