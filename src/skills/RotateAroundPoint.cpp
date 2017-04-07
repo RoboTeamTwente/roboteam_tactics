@@ -107,6 +107,26 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 		return Status::Failure;
 	}
 
+	if(HasDouble("rotPconstant")){
+		rotPconstant = GetDouble("rotPconstant");
+	}
+	else {
+		rotPconstant=5.0;
+	}
+
+	if(HasDouble("radiusPconstant")){
+		radiusPconstant = GetDouble("radiusPconstant");
+	}
+	else {
+		radiusPconstant=4.0;
+	}
+
+	if(HasDouble("turnPconstant")){
+		turnPconstant = GetDouble("turnPconstant");
+	}
+	else {
+		turnPconstant=2.0;
+	}
 	return Status::Running;
 
 }
@@ -185,7 +205,8 @@ bt::Node::Status RotateAroundPoint::Update (){
 
 	double worldrotDiff=(robotPos-center).angle()-(targetAngle+M_PI);
 	worldrotDiff=cleanAngle(worldrotDiff);
-	if (worldposDiff.length() < 1.5*radius) { // close enough
+	//if (worldposDiff.length() < 1.5*radius) { // close enough
+	if (true){
 		//if (worldrottoballdiff < 1 and worldrottoballdiff > -1) // oriented towards center		
 		if(true){
 		
@@ -199,8 +220,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			Vector2 worldrequiredv;
 			
 			// velocity in towards and away from ball (x) and around ball (y)
-			double radiusPconstant=10;
-			double turnPconstant=5;
+			
 			double maxv=1.0;
 			double maxrot=4.0;
 
@@ -237,8 +257,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			}
 			
 			// rotation controller (w)
-			double rotPconstant=8; // Used to be 20
-
+		
 			double reqRobotrot=worldposDiff.angle();
 
 			if(faceoutward){

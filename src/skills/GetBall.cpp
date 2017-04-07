@@ -102,7 +102,10 @@ bt::Node::Status GetBall::Update (){
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			targetAngle = (interceptPos - robotPos).angle();
+			Vector2 posdiff=interceptPos - robotPos;
+			targetAngle = posdiff.angle();
+			ROS_INFO("targetAngle: %f; Why is it NaN here?",targetAngle);
+        
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
@@ -124,10 +127,12 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool avoidBall = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.2*M_PI) {
-		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
+    bool dribbler = false;
+	if (posDiff > 0.6 || fabs(angleDiff) > 0.1*M_PI) {
+		targetPos = interceptPos + Vector2(0.5, 0.0).rotate(targetAngle + M_PI);
         avoidBall = true;
 	} else {
+		dribbler = true;
 		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
         avoidBall = false;
 	}
@@ -151,8 +156,7 @@ bt::Node::Status GetBall::Update (){
 
     // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
-            && fabs(targetAngle - robot.angle) < 0.1
-            && (rotDiff > -0.1 && rotDiff < 0.1)
+            && fabs(targetAngle - robot.angle) < 0.5
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it
@@ -172,6 +176,11 @@ bt::Node::Status GetBall::Update (){
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	    pub.publish(command);	
+	    pub.publish(command);	
+	    pub.publish(command);	
+	    pub.publish(command);	
+	    pub.publish(command);	
+
 
 		RTT_DEBUGLN("GetBall skill completed.");
 		return Status::Success;
@@ -181,20 +190,26 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", true);
+        private_bb->SetBool("avoidRobots", false);
         // private_bb->SetBool("avoidBall", avoidBall);
-        private_bb->SetBool("dribbler", false);
+        private_bb->SetBool("dribbler", dribbler);
         private_bb->SetString("whichBot", GetString("whichBot"));
         // @HACK for robot testing purposes
-        // if (HasDouble("maxSpeed")) {
-        // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
-        // }
+        if (HasDouble("minSpeed")) {
+        	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
+        }
+        if (HasDouble("maxSpeed")) {
+        	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+        }
         // if (HasDouble("minAngularVel")) {
         // 	private_bb->SetDouble("minAngularVel", GetDouble("minAngularVel"));
         // }
-        // if (HasDouble("pGainRotation")) {
-        // 	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
-        // }
+        if (HasDouble("pGainRotation")) {
+        	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+        }
+        if (HasDouble("pGainPosition")) {
+        	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+        }
         
         if (HasString("stayOnSide")) {
             private_bb->SetString("stayOnSide", GetString("stayOnSide"));
