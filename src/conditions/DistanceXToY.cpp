@@ -234,7 +234,7 @@ bt::Node::Status DistanceXToY::Update() {
     const std::string X = GetString("X");
     const std::string Y = GetString("Y");
 
-    RTT_DEBUGLN("Check if %s -> %s %s %f\n", X.c_str(), Y.c_str(), mode.c_str(), checkDistance);
+    // RTT_DEBUGLN("Check if %s -> %s %s %f\n", X.c_str(), Y.c_str(), mode.c_str(), checkDistance);
 
     auto vecX = getPointOfInterest(X, ROBOT_ID);
     auto vecY = getPointOfInterest(Y, ROBOT_ID);
@@ -265,7 +265,7 @@ bt::Node::Status DistanceXToY::Update() {
         return Status::Failure;
     }
 
-    RTT_DEBUGLN("%s => Dist: %f, result: %d", name.c_str(), dist, result);
+    // RTT_DEBUGLN("%s => Dist: %f, result: %d", name.c_str(), dist, result);
 
     if (result) {
         return Status::Success;

@@ -165,10 +165,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
-    for (size_t i = 0; i < world.us.size(); i++) {
-        roboteam_msgs::WorldRobot currentRobot = *getWorldBot(i);
+    for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
-
             Vector2 otherRobotPos(currentRobot.pos);
             Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
             sumOfForces = sumOfForces + forceVector;

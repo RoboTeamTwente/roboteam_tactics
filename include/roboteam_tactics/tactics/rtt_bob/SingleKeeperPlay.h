@@ -4,6 +4,8 @@
 
 namespace rtt {
 
+namespace rtt_bob {
+
 class SingleKeeperPlay : public Tactic {
     public:
     SingleKeeperPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
@@ -16,6 +18,8 @@ class SingleKeeperPlay : public Tactic {
 
     private:
 } ;
+
+} // rtt_bob
 
 } // rtt
 

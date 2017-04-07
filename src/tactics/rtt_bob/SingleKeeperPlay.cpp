@@ -6,6 +6,8 @@
 
 namespace rtt {
 
+namespace rtt_bob {
+
 RTT_REGISTER_TACTIC_F(rtt_bob, SingleKeeperPlay);
 
 SingleKeeperPlay::SingleKeeperPlay(std::string name, bt::Blackboard::Ptr blackboard)
@@ -41,6 +43,8 @@ void SingleKeeperPlay::Initialize() {
 bt::Node::Status SingleKeeperPlay::Update() {
     // BasicKeeperTree never ends, thus this tactics never ends either
     return Status::Running;
+}
+
 }
 
 } // rtt

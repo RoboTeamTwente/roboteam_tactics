@@ -3,18 +3,22 @@
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC_F(rtt_bob, NaiveGetBallWithSupport);
+namespace rtt_bob {
 
-NaiveGetBallWithSupport::NaiveGetBallWithSupport(std::string name, bt::Blackboard::Ptr blackboard)
+RTT_REGISTER_TACTIC_F(rtt_bob, NaiveGetBallWithSupportPlay);
+
+NaiveGetBallWithSupportPlay::NaiveGetBallWithSupportPlay(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-void NaiveGetBallWithSupport::Initialize() {
+void NaiveGetBallWithSupportPlay::Initialize() {
     return;
 }
 
-bt::Node::Status NaiveGetBallWithSupport::Update() {
+bt::Node::Status NaiveGetBallWithSupportPlay::Update() {
     return Status::Running;
+}
+
 }
 
 } // rtt

@@ -73,7 +73,6 @@ bt::Node::Status NaiveBlockGoal::Update() {
 
     auto const GOAL_AREA_ARC_RADIUS = field.top_left_penalty_arc.radius;
 
-
     // TODO: @Bug this is bad semantics on vision's part
     roboteam_msgs::FieldLineSegment leftPenaltyLine;
     roboteam_msgs::FieldCircularArc topLeftArc;
