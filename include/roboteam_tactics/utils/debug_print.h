@@ -37,9 +37,6 @@ RTT_DEBUG(format "\n", ##__VA_ARGS__)
 
 namespace rtt {
 
-// Don't print anything if we are profiling
-#ifndef PROFILING_ENABLED
-    
 // Top level nodes
 SET_DEBUG_FOR(PracticeTest, true);
 SET_DEBUG_FOR(RoleNode, true);
@@ -103,5 +100,4 @@ SET_DEBUG_FOR(TwirlPlay, true);
 SET_DEBUG_FOR(ComputePassPoint, true);
 SET_DEBUG_FOR(Learner, true);
 
-#endif
 } // rtt

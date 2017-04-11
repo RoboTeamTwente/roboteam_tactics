@@ -67,7 +67,7 @@ if (ENABLE_DEBUG_GRAPHICS)
 endif (ENABLE_DEBUG_GRAPHICS)
 
 if (ENABLE_PROFILING)
-    message("Compiling with profiling enabled!")
+    message("-- Compiling with profiling enabled!")
     set(ENABLE_DEBUG_GRAPHICS FALSE)
     set(CMAKE_CXX_FLAGS "\
 --std=c++14 ${CMAKE_CXX_FLAGS} \
