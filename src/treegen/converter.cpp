@@ -79,6 +79,18 @@ Options:
 
 )V0G0N";
 
+std::string const RED_BOLD_COLOR = "\e[1;31m";
+std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
+std::string const END_COLOR = "\e[0m";
+
+void cmakeErr(std::string msg) {
+    std::cerr << "[----] " << RED_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
+void cmakeWarn(std::string msg) {
+    std::cerr << "[----] " << YELLOW_BOLD_COLOR << msg << END_COLOR << "\n";
+}
+
 } // anonymous namespace
 
 int main(int argc, char** argv) {
@@ -111,13 +123,14 @@ int main(int argc, char** argv) {
     std::vector<std::string> namespaces = split(folder, '/');
 
     std::string input;
+    boost::optional<std::string> inputFile;
 
     if (fromStdIn) {
         input = readFileFromStdIn();
     } else {
-        auto inputFile = getCmdOption(args, "-i");
+        inputFile = getCmdOption(args, "-i");
 
-        std::ifstream t(inputFile);
+        std::ifstream t(*inputFile);
         std::stringstream buffer;
         buffer << t.rdbuf();
         input = buffer.str();
@@ -133,7 +146,15 @@ int main(int argc, char** argv) {
     } else if (info.find("data")  != info.end()) {
         isProject = true;
     } else {
-        std::cerr << "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project. Aborting.\n";
+        std::string heading = "File error: ";
+        if (inputFile) {
+            heading = "File error (" + *inputFile +"): ";
+        } else {
+            heading = "File error (stdin): ";
+        }
+
+        cmakeErr(heading + "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project.\n");
+
         return 1;
     }
 
@@ -144,7 +165,15 @@ int main(int argc, char** argv) {
     } else if (isProject) {
         allTrees = info["data"]["trees"];
     } else {
-        std::cerr << "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project. Aborting.\n";
+        std::string heading = "File error: ";
+        if (inputFile) {
+            heading = "File error (" + *inputFile +"): ";
+        } else {
+            heading = "File error (stdin): ";
+        }
+
+        cmakeErr(heading + "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project.\n");
+
         return 1;
     }
 
@@ -185,19 +214,42 @@ int main(int argc, char** argv) {
         
         std::stringstream ss;
 
+        std::string namespacesConcat = "";
+
         if (doNamespace) {
             ss << "namespace " << baseNamespace << " {\n\n";
+            namespacesConcat = baseNamespace + "/";
         }
 
         if (namespaces.size() > 0) {
             for (auto ns : namespaces) {
                 ss << "namespace " << ns << " { ";
+
+                namespacesConcat += ns + "/";
             }
 
             ss << "\n\n";
         }
 
         for (auto& jsonTree : allTrees) {
+            auto title = jsonTree["title"].get<std::string>();
+
+            if (title.find(" ") != std::string::npos
+                    || title.find("/") != std::string::npos) {
+                if (namespacesConcat.size() > 0) {
+                    cmakeErr("The tree \"" + namespacesConcat + title + "\" contains spaces or "
+                            "other disallowed characters. Only alphanumeric characters and "
+                            "underscores are allowed."
+                            );
+                } else {
+                    cmakeErr("The tree \"" + title + "\" contains spaces or "
+                            "other disallowed characters. Only alphanumeric characters and "
+                            "underscores are allowed."
+                            );
+                }
+                return 1;
+            }
+
             ss << "bt::BehaviorTree make_" << jsonTree["title"].get<std::string>() << "(bt::Blackboard* blackboard = nullptr);\n";
         }
 

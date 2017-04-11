@@ -127,11 +127,11 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool dribbler = false;
-	if (posDiff > 0.6 || fabs(angleDiff) > 0.1*M_PI) {
-		targetPos = interceptPos + Vector2(0.5, 0.0).rotate(targetAngle + M_PI);
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
+		targetPos = interceptPos + Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
@@ -187,7 +187,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", false);
+        private_bb->SetBool("avoidRobots", true);
         // private_bb->SetBool("avoidBall", avoidBall);
         private_bb->SetBool("dribbler", dribbler);
         private_bb->SetString("whichBot", GetString("whichBot"));
@@ -223,13 +223,13 @@ bt::Node::Status GetBall::Update (){
 
         // TODO: Commented this out because it was giving problems. Hopefully we can
         // activate it at some point.
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 4.0) {
-          newVelCommand.scale(4.0 / newVelCommand.length());
-        }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;
+        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        // if (newVelCommand.length() > 4.0) {
+        //   newVelCommand.scale(4.0 / newVelCommand.length());
+        // }
+        // command.x_vel = newVelCommand.x;
+        // command.y_vel = newVelCommand.y;
 
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

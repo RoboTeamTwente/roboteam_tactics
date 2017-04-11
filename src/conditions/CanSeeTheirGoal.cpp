@@ -32,12 +32,7 @@ bt::Node::Status CanSeeTheirGoal::Update() {
 
 	std::string our_side = get_our_side();
 
-	Vector2 goalPos;
-	if(our_side == "left"){
-		goalPos = Vector2(field.field_length/2.0, 0);
-	} else {
-		goalPos = Vector2(field.field_length/-2.0, 0);
-	}
+	Vector2 goalPos = Vector2(field.field_length/2.0, 0);
 
 	auto bb2 = std::make_shared<bt::Blackboard>();
     bb2->SetInt("me", blackboard->GetInt("ROBOT_ID"));

@@ -27,39 +27,38 @@ RTT_REGISTER_SKILL(GoToPos);
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , success(false)
-
-        // Control gains
-        , pGainPosition(3.0)
-        , pGainRotation(3.0) // was 5?
-        // , iGainRotation(0.5)
-        // , dGainRotation(0.2)
-        , maxAngularVel(10.0)
-        , minAngularVel(3.0)
-        // , iGainVelocity(0.5)
-        // , iGainAngularVel(0.02)
         
         // Rest of the members
-        , maxSpeed(0.5)
-        , minSpeed(0.0)
-        // , minSpeedX(0.4)
-        // , minSpeedY(0.6)
-        // , attractiveForce(10.0)
-        // , attractiveForceWhenClose(2.0) // was 5? 
-        // , repulsiveForce(20.0)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
-        // , angleErrorIntegral(0.0)
-        // , historyIndex(0)
         
         {
             start = now();
-            // angleErrorHistory = (double*) calloc(10,sizeof(double));
             succeeded = false;
+
+            std::string robot_output_target = "";
+            ros::param::getCached("robot_output_target", robot_output_target);
+            if (robot_output_target == "grsim") {
+                pGainPosition = 5.0;
+                pGainRotation = 10.0;
+                minSpeedX = 0.0;
+                minSpeedY = 0.0;
+                maxSpeed = 1.5;
+                minAngularVel = 0.0;
+                maxAngularVel = 10.0;
+            } else if (robot_output_target == "serial") {
+                pGainPosition = 2.0;
+                pGainRotation = 8.0;
+                minSpeedX = 0.3;
+                minSpeedY = 0.5;
+                maxSpeed = 0.8;
+                minAngularVel = 3.0;
+                maxAngularVel = 5.0;
+            }
         }
 
 
 void GoToPos::sendStopCommand(uint id) {
-
     roboteam_msgs::RobotCommand command;
     command.id = id;
     command.x_vel = 0.0;
@@ -141,6 +140,8 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, d
         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
             forceVector = antenna.rotate(0.5*M_PI).scale(2 / (otherRobotPos - myPos).length());
         }
+        drawer.setColor(255, 255, 0);
+        drawer.drawLine("forceFromRobot", myPos, forceVector);
     }    
     return forceVector;
 }
@@ -151,14 +152,14 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 0.7; // default
-    if (lookingDistance > posError.length()) {
-        lookingDistance = posError.length();
+    double lookingDistance = 1.0; // default
+    if (lookingDistance > (posError.length()) + 0.3) {
+        lookingDistance = posError.length() + 0.3;
     }
     
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
     Vector2 coneStart = myPos - antenna;
-    Cone antennaCone(coneStart, (antenna + myPos), 0.3);
+    Cone antennaCone(coneStart, (antenna + myPos), 0.4);
 
     // Draw the lines of the cone in rqt_view
     Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
@@ -179,6 +180,10 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         Vector2 otherRobotPos(world.them.at(i).pos);
         Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
         sumOfForces = sumOfForces + forceVector; 
+    }
+
+    if (sumOfForces.length() < 0.01) {
+        drawer.removeLine("forceFromRobot");
     }
 
     return sumOfForces;
@@ -207,6 +212,22 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
         } else {
             sumOfForces = distToTheirDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
         }
+    }
+
+    return sumOfForces;
+}
+
+
+Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
+    Vector2 diff = ballPos - myPos;
+    double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
+
+    if (theta < (0.5 * M_PI)) {
+        if (theta == 0) theta = 0.01;
+        double force = theta / (0.5 * M_PI);
+        Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
+        Vector2 ballForce = projectedBall - ballPos;
+        sumOfForces = sumOfForces + ballForce * 5;
     }
 
     return sumOfForces;
@@ -292,43 +313,62 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             }
         }
     }
-
     return newTargetPos;
 }
 
+
+Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
+    // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
+    // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
+    // it should still go at maximum speed and use the sumOfForces vector only for direction.
+    if (posError.length() > 1.0 || sumOfForces.length() > maxSpeed) {
+        if (sumOfForces.length() > 0) {
+            sumOfForces = sumOfForces.scale(1/sumOfForces.length() * maxSpeed);
+        } else {
+            sumOfForces = Vector2(0.0, 0.0);
+        }
+    }
+
+    double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle();
+    double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
+
+    // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
+    if (sumOfForces.length() < (minSpeed / 4)) {
+        if (sumOfForces.length() > prevSumOfForces.length()) {
+            sumOfForces = Vector2(0.0, 0.0);
+        }
+    } else if (sumOfForces.length() <  minSpeed) {
+        sumOfForces = sumOfForces.scale(minSpeed / sumOfForces.length());
+    }
+
+    prevSumOfForces = sumOfForces;
+    return sumOfForces;
+}
+
+
+double GoToPos::limitAngularVel(double angularVelTarget) {
+    // If angularVel is decreasing, going below the minAngularVel is allowed because the motors can handle it.
+    if (fabs(angularVelTarget) < (minAngularVel / 4)) {
+        if (angularVelTarget > prevAngularVelTarget) {
+            angularVelTarget = 0.0;
+        }
+    } else if (fabs(angularVelTarget) < minAngularVel) {
+        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
+    }
+
+    prevAngularVelTarget = angularVelTarget;
+    return angularVelTarget;
+}
+
+
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
+    
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
-
-    if (HasDouble("maxSpeed")) {
-        maxSpeed = GetDouble("maxSpeed");
-    }
-    
-    if (HasDouble("minSpeed")) {
-        minSpeed = GetDouble("minSpeed");
-    }
-
-    if (HasDouble("maxAngularVel")) {
-        maxAngularVel = GetDouble("maxAngularVel");
-    }
-
-    if (HasDouble("minAngularVel")) {
-        minAngularVel = GetDouble("minAngularVel");
-    }
-
-    if (HasDouble("pGainRotation")) {
-        pGainRotation = GetDouble("pGainRotation");
-    }
-
-    if (HasDouble("pGainPosition")) {
-        pGainPosition = GetDouble("pGainPosition");
-    }
 
     // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-
-    angleGoal = cleanAngle(GetDouble("angleGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
 
     // Find the robot with the specified ID
@@ -340,7 +380,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }  
 
-    // Checking inputs
+    // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
     } else {
@@ -358,7 +398,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 posError = targetPos - myPos;
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
-        ROS_INFO("angleGoal received: %f",angleGoal);
     } else {
         angleGoal = posError.angle();
     }
@@ -366,12 +405,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     double angleError = angleGoal - myAngle;
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.05 && fabs(angleError) < 0.2) {
-        sendStopCommand(ROBOT_ID);
-        sendStopCommand(ROBOT_ID);
-        sendStopCommand(ROBOT_ID);
-        sendStopCommand(ROBOT_ID);
-        sendStopCommand(ROBOT_ID);
+    if (posError.length() < 0.02 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         roboteam_msgs::RobotCommand command;
@@ -380,83 +414,37 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     Vector2 sumOfForces(0.0, 0.0);
+
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
+
+    // Draw the velocity vector acting on the robot
+    drawer.drawLine("velCommand", myPos, sumOfForces);  
 
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-    } 
-
-    // if (HasBool("avoidBall")) {
-        // std::cout << "Avoiding ball!\n";
-        // roboteam_msgs::WorldBall ball = world.ball;
-
-        // Vector2 ballPos(ball.pos);
-        // Vector2 diff = ballPos - myPos;
-
-        // double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
-
-        // std::cout << "Theta: " << theta / M_PI * 180 << "\n";
-
-        // if (theta < (0.5 * M_PI)) {
-            // if (theta == 0) theta = 0.01;
-
-            // double force = theta / (0.5 * M_PI);
-
-            // auto projectedBall = ballPos.project(myPos, myPos + sumOfForces);
-            // auto ballForce = projectedBall - ballPos;
-
-            // std::cout << "Ballforce: " << ballForce << "\n";
-            // sumOfForces = sumOfForces + ballForce * 5;
-        // }
-    // }
+    }
 
     // Defense area avoidance
     if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    } 
+
+    // Ball avoidance
+    if (HasBool("avoidBall") && GetBool("avoidBall")) {
+        Vector2 ballPos = Vector2(world.ball.pos);
+        sumOfForces = avoidBall(ballPos, myPos, sumOfForces);
     }
     
-
-    // Rotation controller to make sure the robot has and keeps the correct orientation
+    // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
 
-    // Limit the robot velocity to the maximum speed, but also ensure that it goes at maximum speed when not yet close to the target. Because 
-    // it might the case that an opponent is blocking our robot, and its sumOfForces is therefore low, but since it is far away from the target
-    // it should still go at maximum speed and use the sumOfForces vector only for direction.
-    
-    if (posError.length() > 1.0 || sumOfForces.length() > maxSpeed) {
-        if (sumOfForces.length() > 0) {
-            sumOfForces = sumOfForces.scale(1/sumOfForces.length() * maxSpeed);
-        } else {
-            sumOfForces = Vector2(0.0, 0.0);
-        }
-    }
+    sumOfForces = limitVel(sumOfForces, posError);
+    angularVelTarget = limitAngularVel(angularVelTarget);
 
-    // if speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
-    if (sumOfForces.length() < (minSpeed / 2)) {
-        if(sumOfForces.length() > prevSumOfForces.length()){
-            sumOfForces = Vector2(0.0, 0.0);
-        }
-    } else if (sumOfForces.length() <  minSpeed) {
-        sumOfForces = sumOfForces.scale(minSpeed / sumOfForces.length());
-    }
-
-    if (fabs(angularVelTarget) < minAngularVel) {
-        angularVelTarget = 0;
-    }
-
-    prevSumOfForces=sumOfForces;
-    Vector2 velCommand = sumOfForces;
-    // Draw the velocity vector acting on the robots
-    drawer.drawLine("velCommand", myPos, velCommand);  
     // Rotate the commands from world frame to robot frame 
-    velCommand = worldToRobotFrame(velCommand, myAngle);
-
-    if (HasBool("dontDrive") && GetBool("dontDrive")) {
-        velCommand = Vector2(0.0, 0.0);
-    }
-
+    Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
