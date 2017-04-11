@@ -69,19 +69,23 @@ namespace rtt {
 class GoToPos : public Skill {
 public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+
     void sendStopCommand(uint id);
+
     Vector2 positionController(Vector2 myPos, Vector2 targetPos);
     double rotationController(double myAngle, double angleGoal, Vector2 posError);
-    // Vector2 velocityController(Vector2 velTarget);
-    // double angularVelController(double angularVelTarget);
+
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    // double getAngleFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
-    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
-    // double avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
-    
+    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
+    Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces);
+
     Vector2 checkTargetPos(Vector2 targetPos);
+    Vector2 limitVel(Vector2 sumOfForces, Vector2 posError);
+    double limitAngularVel(double angularVelTarget);
+
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
+
     Status Update();
     
     static VerificationMap required_params() {
@@ -100,19 +104,13 @@ private:
     // Control gains
     double pGainPosition;
     double pGainRotation;
-    // double iGainRotation;
-    // double dGainRotation;
     double maxAngularVel;
     double minAngularVel;
-    // double iGainVelocity;
-    // double iGainAngularVel;
 
     // Control variables
     double maxSpeed;
-    double minSpeed;
-    // double attractiveForce;
-    // double attractiveForceWhenClose;
-    // double repulsiveForce;
+    double minSpeedX;
+    double minSpeedY;
     double safetyMarginGoalAreas;
     double marginOutsideField;
 
@@ -127,16 +125,8 @@ private:
 
     Vector2 prevTargetPos;
     Vector2 prevSumOfForces;
-    // Vector2 velControllerI;
-    // double angularVelControllerI;
-    // double angleErrorIntegral;
-    // double* angleErrorHistory;
-    // int historyIndex;
+    double prevAngularVelTarget;
     bool succeeded;
-    // double wControllerI;
-    // double prevAngularVelTarget;
-
-    // bool hasReachedFirstStop = false;
 
     time_point start;
 

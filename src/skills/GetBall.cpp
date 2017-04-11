@@ -127,11 +127,11 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool dribbler = false;
-	if (posDiff > 0.6 || fabs(angleDiff) > 0.1*M_PI) {
-		targetPos = interceptPos + Vector2(0.5, 0.0).rotate(targetAngle + M_PI);
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
+		targetPos = interceptPos + Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.095, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
