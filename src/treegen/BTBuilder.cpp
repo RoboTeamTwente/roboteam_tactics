@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 namespace bf = boost::filesystem;
+namespace b = boost;
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
@@ -73,6 +74,28 @@ std::vector<std::string> get_all(std::string category, bool recurse = true) {
 std::string const RED_BOLD_COLOR = "\e[1;31m";
 std::string const YELLOW_BOLD_COLOR = "\e[1;33m";
 std::string const END_COLOR = "\e[0m";
+
+
+bool isDouble(std::string value) {
+    try {
+        std::stof(value);
+    } catch (...) {
+        return false;
+    }
+
+    return true;
+}
+
+b::optional<double> tryParseDoubleFollowedByD(std::string value) {
+    if (value.back() == 'd') {
+        auto frontValue = value.substr(0, value.size() - 1);
+        if (isDouble(frontValue)) {
+            return std::stof(frontValue);   
+        }
+    }
+
+    return b::none;
+}
 
 } // Anonymous namespace
 
@@ -528,14 +551,13 @@ void BTBuilder::defines(nlohmann::json jsonData) {
                         << "\", "
                         << property.second.get<std::string>()
                         << ");\n";
-                } else if (value.back() == 'd') {
-                    std::string num = value.substr(0, value.size() - 1);
+                } else if (auto doubleOpt = tryParseDoubleFollowedByD(value)) {
                     out << DINDENT
                         << jsonData["title"].get<std::string>()
                         << "->private_bb->SetDouble(\""
                         << property.first
                         << "\", "
-                        << atof(num.c_str())
+                        << std::to_string(*doubleOpt)
                         << ");\n";
                 } else {
                     out << DINDENT
