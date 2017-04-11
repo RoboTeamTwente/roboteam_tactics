@@ -10,6 +10,9 @@
 #include "Block.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "BlockGoal.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "Chip.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
