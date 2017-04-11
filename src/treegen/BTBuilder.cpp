@@ -239,6 +239,16 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         out << "\n\n";
     }
 
+    {
+        auto title = json["title"].get<std::string>();
+        if (title.find(" ") != std::string::npos
+                || title.find("/") != std::string::npos) {
+            cmakeErrTree("Non-alphanumeric-or-underscore characters found in behavior tree name!");
+            encountered_error = true;
+        }
+
+    }
+
     out << INDENT << "bt::BehaviorTree make_"
         << json["title"].get<std::string>()
         << "(bt::Blackboard* blackboard) {"
