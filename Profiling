@@ -1,0 +1,19 @@
+Alleen erste keer: sudo apt install google-perftools graphviz gv
+
+Profiling meecompileren: catkin_make --force-cmake --cmake-args -DENABLE_PROFILING=true
+Profiling niet meer meecompileren: catkin_make --force-cmake --cmake-args -DENABLE_PROFILING=false (duh)
+
+Met profiling: -O2 staat aan, dus het is sneller. Er zijn geen debug symbols, dus gdb werkt verre van optimaal.
+Zonder profiling: Oude situatie
+
+Om daadwerkelijk de profiling te gebruiken moet je een eenmalige environment variable meegeven, bijvoorbeeld:
+    jij@jouwlaptop$ CPUPROFILE=prof.out ~/catkin/devel/lib/roboteam_utils/TestX
+
+Om de resultaten te bekijken:
+    jij@jouwlaptop$ google-pprof --gv ~/catkin/devel/lib/roboteam_utils/TestX prof.out
+
+Meer documentatie: https://raw.githubusercontent.com/gperftools/gperftools/master/docs/cpuprofile.html
+
+LET OP: (en ga niet bij mij zeuren als je het niet gelezen hebt)
+Als je programma door een signal eindigt (ctrl+c, segfault, etc.), dan is de output gegarandeerd corrupt. Het programma moet normaal eindigen.
+
