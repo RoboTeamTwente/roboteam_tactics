@@ -63,6 +63,7 @@ SET_DEBUG_FOR(ReceiveBall, false);
 SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(Harass, true);
 SET_DEBUG_FOR(Wander, true);
+SET_DEBUG_FOR(BlockGoal, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);

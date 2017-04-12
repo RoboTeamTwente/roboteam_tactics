@@ -233,7 +233,9 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			double turnDiff=worldrotDiff;
 			double turnReq=turnDiff*turnPconstant;
-								
+			
+
+
 			if(turnReq > rotw){
 				turnReq=rotw;
 			}
@@ -251,8 +253,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;
-				
-			if(robotrequiredv.length() > maxv){
+			
+			bool forceExtrav=false;
+			if(HasBool("forceExtrav") && GetBool("forceExtrav")){ // for demonstration purposes
+				forceExtrav=true;
+
+			}
+
+			if(robotrequiredv.length() > maxv && !forceExtrav){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
 			}
 			

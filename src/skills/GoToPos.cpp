@@ -87,7 +87,12 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 posError) {
 
-    if (posError.length() > 1.0) {
+    bool forceAngle = false;
+    if(HasBool("forceAngle") && GetBool("forceAngle")){
+        forceAngle = true;
+    }
+
+    if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
     }
 

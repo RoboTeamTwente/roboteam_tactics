@@ -66,13 +66,32 @@ if (ENABLE_DEBUG_GRAPHICS)
     add_definitions(-DRTT_ENABLE_DEBUG_GRAPHICS)
 endif (ENABLE_DEBUG_GRAPHICS)
 
-set(CMAKE_CXX_FLAGS "\
+if (ENABLE_PROFILING)
+    message("-- Compiling with profiling enabled!")
+    set(ENABLE_DEBUG_GRAPHICS FALSE)
+    set(CMAKE_CXX_FLAGS "\
+--std=c++14 ${CMAKE_CXX_FLAGS} \
+-Wall \
+-Wno-unused-function \
+-Wsign-compare \
+-O2 \
+-Wl,--no-as-needed \
+-ltcmalloc \
+-fno-builtin-malloc \
+-fno-builtin-calloc \
+-fno-builtin-realloc \
+-fno-builtin-free \
+-lprofiler \
+-DPROFILING_ENABLED")
+else (ENABLE_PROFILING)
+    set(CMAKE_CXX_FLAGS "\
 --std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
 -g \
 ")
+endif (ENABLE_PROFILING)
 
 catkin_package(
     INCLUDE_DIRS 
