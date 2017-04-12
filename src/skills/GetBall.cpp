@@ -131,7 +131,7 @@ bt::Node::Status GetBall::Update (){
 		targetPos = interceptPos + Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
