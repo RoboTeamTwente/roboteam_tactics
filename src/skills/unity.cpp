@@ -1,6 +1,9 @@
 #include "AimAt.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "AimAtSafe.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "Approach.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

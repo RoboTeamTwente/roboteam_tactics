@@ -1,5 +1,6 @@
 set(SKILL_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/AimAt.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/AimAtSafe.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/AvoidRobots.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/GetBall.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/Kick.cpp
