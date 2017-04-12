@@ -1,5 +1,6 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include <chrono>
+#include <string>
 
 #include "ros/ros.h"
 #include "roboteam_utils/LastWorld.h"
@@ -24,6 +25,15 @@ void DebugTrace::Initialize() {
 
 bt::Node::Status DebugTrace::Update() {
     std::cout << "Update from " << name << "\n";
+
+    std::string DoReturn = GetString("DoReturn");
+    std::cout << "bb argument: " << DoReturn;
+    if(DoReturn=="Success"){
+    	return Status::Success;
+    }
+    else if(DoReturn=="Failure"){
+    	return Status::Failure;
+    }
 
     return Status::Running;
 }
