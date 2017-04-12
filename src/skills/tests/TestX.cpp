@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         arguments.push_back("help");
     }
 
-    if (arguments.at(0) == "show") {
+    if (arguments.at(0) == "show" && arguments.size() >= 2) {
         if (arguments.at(1) == "skills") {
             rtt::factories::print_all<rtt::Skill>("skills");
         } else if (arguments.at(1) == "conditions") {
@@ -66,9 +66,10 @@ int main(int argc, char **argv) {
             rtt::factories::print_all<rtt::Condition>("conditions");
             rtt::factories::print_all<rtt::Tactic>("tactics");
             rtt::factories::print_all<bt::BehaviorTree>("trees");
+        } else {
+            std::cout << "second argument from show not recognized (\"" << arguments.at(1) << "\")\n";
+            arguments = { "help "};
         }
-
-        return 0;
     }
 
     if (arguments.at(0) == "help") {
@@ -109,6 +110,11 @@ How to use:
         std::vector<std::string> typeSplit;
 
         auto arg = arguments.at(i);
+
+        if (arg.find(":=") != std::string::npos) {
+            // If := is in the string, it's a ROS argument, so we skip it
+            continue;
+        }
 
         auto nameSplit = split(arg, '=');
         auto name = nameSplit.at(0);
