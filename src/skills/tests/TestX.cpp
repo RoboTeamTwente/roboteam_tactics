@@ -55,17 +55,22 @@ int main(int argc, char **argv) {
     if (arguments.at(0) == "show" && arguments.size() >= 2) {
         if (arguments.at(1) == "skills") {
             rtt::factories::print_all<rtt::Skill>("skills");
+            return 0;
         } else if (arguments.at(1) == "conditions") {
             rtt::factories::print_all<rtt::Condition>("conditions");
+            return 0;
         } else if (arguments.at(1) == "tactics") {
             rtt::factories::print_all<rtt::Tactic>("tactics");
+            return 0;
         } else if (arguments.at(1) == "trees") {
             rtt::factories::print_all<bt::BehaviorTree>("trees");
+            return 0;
         } else if (arguments.at(1) == "all") {
             rtt::factories::print_all<rtt::Skill>("skills");
             rtt::factories::print_all<rtt::Condition>("conditions");
             rtt::factories::print_all<rtt::Tactic>("tactics");
             rtt::factories::print_all<bt::BehaviorTree>("trees");
+            return 0;
         } else {
             std::cout << "second argument from show not recognized (\"" << arguments.at(1) << "\")\n";
             arguments = { "help "};

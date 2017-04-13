@@ -74,7 +74,12 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 	if(HasString("center")){
 		if(GetString("center")=="ball"){
 			center = Vector2(ball.pos.x, ball.pos.y);
-			radius = 0.1;
+			if(HasDouble("radius")){
+				radius = GetDouble("radius");
+			}
+			else {
+				radius=0.1;
+			}
 		} 
 		else if(GetString("center")=="point"){
 			if(HasDouble("centerx") and HasDouble("centery")){
