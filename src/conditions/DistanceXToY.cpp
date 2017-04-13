@@ -234,7 +234,7 @@ bt::Node::Status DistanceXToY::Update() {
     const std::string X = GetString("X");
     const std::string Y = GetString("Y");
 
-    RTT_DEBUGLN("Check if %s -> %s %s %f\n", X.c_str(), Y.c_str(), mode.c_str(), checkDistance);
+    RTT_DEBUGLN("Check if %s -> %s %s %f", X.c_str(), Y.c_str(), mode.c_str(), checkDistance);
 
     auto vecX = getPointOfInterest(X, ROBOT_ID);
     auto vecY = getPointOfInterest(Y, ROBOT_ID);

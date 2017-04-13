@@ -21,13 +21,15 @@ DebugTrace::DebugTrace(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) { }
 
 void DebugTrace::Initialize() {
+    std::cout << "DEBUG TRACE!!!\n";
 }
 
 bt::Node::Status DebugTrace::Update() {
-    std::cout << "Update from " << name << "\n";
+    std::cout << "[DebugTrace] Update from " << name << "\n";
 
     std::string DoReturn = GetString("DoReturn");
     std::cout << "bb argument: " << DoReturn;
+
     if(DoReturn=="Success"){
     	return Status::Success;
     }

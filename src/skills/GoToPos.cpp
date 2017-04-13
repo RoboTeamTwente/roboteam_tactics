@@ -39,6 +39,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             std::string robot_output_target = "";
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
+
                 pGainPosition = 2.0;
                 pGainRotation = 4.0;
                 minSpeedX = 0.0;
@@ -46,7 +47,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxSpeed = 1.5;
                 minAngularVel = 0.0;
                 maxAngularVel = 10.0;
+
             } else if (robot_output_target == "serial") {
+
                 pGainPosition = 2.0;
                 pGainRotation = 4.0; //hansBot: 8.0
                 minSpeedX = 0.7; //hansBot: 0.3
@@ -54,6 +57,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxSpeed = 1.0; // hansBot: 0.8
                 minAngularVel = 5.0; // hansBot: 3.0
                 maxAngularVel = 7.0;
+
             }
         }
 
