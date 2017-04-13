@@ -102,10 +102,8 @@ bt::Node::Status GetBall::Update (){
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			Vector2 posdiff=interceptPos - robotPos;
-			targetAngle = posdiff.angle();
-			ROS_INFO("targetAngle: %f; Why is it NaN here?",targetAngle);
-        
+			Vector2 posdiff = interceptPos - robotPos;
+			targetAngle = posdiff.angle();        
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
@@ -127,11 +125,11 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
-		targetPos = interceptPos + Vector2(0.25, 0.0).rotate(targetAngle + M_PI);
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.15*M_PI) {
+		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.09, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
@@ -153,11 +151,11 @@ bt::Node::Status GetBall::Update (){
 
     // Only stop if ball has been here 8 frames
 	if (stat == Status::Success 
-            && fabs(targetAngle - robot.angle) < 0.5
+            && fabs(targetAngle - robot.angle) < 0.2*M_PI
             // Only send succes if either:
             //  - The ball was close for 8 or more frames
             //  - The ball must be kicked as soon as there's a chance of kicking it
-            && (ballCloseFrameCount >= 8 || GetBool("passOn"))) {
+            && (ballCloseFrameCount >= 3 && GetBool("passOn"))) {
 
 		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
 		// in the situation when the ball is rolling and we are catching up
