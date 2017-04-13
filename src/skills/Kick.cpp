@@ -31,94 +31,120 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
   	// ROS_INFO_STREAM("Kick Update");
-    if (HasBool("wait_for_signal")) {
-    	if (GetBool("wait_for_signal")) {
-    		bool readyToPass = false;
-    		ros::param::get("ready_to_pass", readyToPass);
-    		if (!readyToPass) {
-    			return Status::Running;
-    		}
-    	}
-    }
+ //    if (HasBool("wait_for_signal")) {
+ //    	if (GetBool("wait_for_signal")) {
+ //    		bool readyToPass = false;
+ //    		ros::param::get("ready_to_pass", readyToPass);
+ //    		if (!readyToPass) {
+ //    			return Status::Running;
+ //    		}
+ //    	}
+ //    }
 
-    cycleCounter++;
+ //    cycleCounter++;
 
-    if (cycleCounter > 20) {
-        RTT_DEBUG("Failed to kick!\n");
-        // return bt::Node::Status::Failure;
-    }
+ //    if (cycleCounter > 20) {
+ //        RTT_DEBUG("Failed to kick!\n");
+ //        // return bt::Node::Status::Failure;
+ //    }
 
-	roboteam_msgs::World world = LastWorld::get();
+	// roboteam_msgs::World world = LastWorld::get();
 	
-    Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+ //    Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
-    RTT_DEBUG("Velocity difference is %f\n", (currentBallVel - oldBallVel).length());
-    if ((currentBallVel - oldBallVel).length() > 0.01) {
-        RTT_DEBUG("Velocity difference was enough\n");
-        return bt::Node::Status::Success;
-    }
+    // RTT_DEBUG("Velocity difference is %f\n", (currentBallVel - oldBallVel).length());
+    // if ((currentBallVel - oldBallVel).length() > 0.01) {
+    //     RTT_DEBUG("Velocity difference was enough\n");
+    //     return bt::Node::Status::Success;
+    // }
 
-    oldBallVel = currentBallVel;
+    // oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");
     double kickVel;
-    if (HasDouble("kickVel")) {
-    	kickVel = GetDouble("kickVel");
-    } else {
+    // if (HasDouble("kickVel")) {
+    // 	kickVel = GetDouble("kickVel");
+    // } else {
     	kickVel = 4;
-    }
+    // }
 
 	// ROS_INFO_STREAM("name: " << name << " " << robotID);
-	roboteam_msgs::WorldBall ball = world.ball;
+	// roboteam_msgs::WorldBall ball = world.ball;
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update
 	// is called before the first world state update
-	if (world.us.size() == 0) {
-		RTT_DEBUG("No information about the world state :(\n");
-		return Status::Running;
-	}
+	// if (world.us.size() == 0) {
+	// 	RTT_DEBUG("No information about the world state :(\n");
+	// 	return Status::Running;
+	// }
 
-	roboteam_msgs::WorldRobot robot;
+	// roboteam_msgs::WorldRobot robot;
     
-    if (auto botOpt = getWorldBot(robotID)) {
-        robot = *botOpt;
-    } else {
-        RTT_DEBUGLN("Could not lookup our bot %d", robotID);
-        return Status::Failure;
-    }
+ //    if (auto botOpt = getWorldBot(robotID)) {
+ //        robot = *botOpt;
+ //    } else {
+ //        RTT_DEBUGLN("Could not lookup our bot %d", robotID);
+ //        return Status::Failure;
+ //    }
 
-	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
-	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
-	Vector2 posDiff = ballPos-robotPos;
+	// Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
+	// Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	// Vector2 posDiff = ballPos-robotPos;
 
-	double rotDiff = posDiff.angle() - robot.angle;
-	rotDiff = cleanAngle(rotDiff);
-    double const rotDiffErr = 0.2;
+	// double rotDiff = posDiff.angle() - robot.angle;
+	// rotDiff = cleanAngle(rotDiff);
+ //    double const rotDiffErr = 0.2;
 
-	if (posDiff.length() < 0.11) { // ball is close
-		if(rotDiff < rotDiffErr and rotDiff > -rotDiffErr){ // ball in front
-			roboteam_msgs::RobotCommand command;
-			command.id = robotID;
-			command.dribbler = true;
-			command.kicker = true;
-			command.kicker_forced = true;
-			command.kicker_vel = kickVel;
-			command.x_vel = 0.0;
-			command.y_vel = 0.0;
-			command.w = 0.0;
+	// if (posDiff.length() < 0.11) { // ball is close
+		// if(rotDiff < rotDiffErr and rotDiff > -rotDiffErr){ // ball in front
+			{
+                roboteam_msgs::RobotCommand command;
+                command.id = robotID;
+                command.dribbler = true;
+                command.kicker = true;
+                command.kicker_forced = true;
+                command.kicker_vel = kickVel;
+                command.x_vel = 0.0;
+                command.y_vel = 0.0;
+                command.w = 0.0;
+    // 
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+            }
+            
+            {
+                roboteam_msgs::RobotCommand command;
+                command.id = robotID;
+                command.dribbler = false;
+                command.kicker = false;
+                command.kicker_forced = false;
+                command.kicker_vel = 0.0;
+                command.x_vel = 0.0;
+                command.y_vel = 0.0;
+                command.w = 0.0;
 
-            rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+                rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+
+            }
+            
+// 
+            
 
 			RTT_DEBUGLN("Triggered the kicker!");
-			return Status::Running;
-		} else {
-			RTT_DEBUGLN("Ball is not in front of the dribbler");
-			return Status::Failure;
-		}
-	} else {
-		RTT_DEBUGLN("Ball is not close to the robot");
-		return Status::Failure;
-	}
+			return Status::Success;
+		// } else {
+			// RTT_DEBUGLN("Ball is not in front of the dribbler");
+			// return Status::Failure;
+		// }
+	// } else {
+		// RTT_DEBUGLN("Ball is not close to the robot");
+		// return Status::Failure;
+	// }
 }
 
 } // rtt

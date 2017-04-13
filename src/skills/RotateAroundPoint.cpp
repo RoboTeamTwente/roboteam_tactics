@@ -74,7 +74,12 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 	if(HasString("center")){
 		if(GetString("center")=="ball"){
 			center = Vector2(ball.pos.x, ball.pos.y);
-			radius = 0.1;
+			if(HasDouble("radius")){
+				radius = GetDouble("radius");
+			}
+			else {
+				radius=0.1;
+			}
 		} 
 		else if(GetString("center")=="point"){
 			if(HasDouble("centerx") and HasDouble("centery")){
@@ -233,7 +238,9 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			double turnDiff=worldrotDiff;
 			double turnReq=turnDiff*turnPconstant;
-								
+			
+
+
 			if(turnReq > rotw){
 				turnReq=rotw;
 			}
@@ -251,8 +258,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;
-				
-			if(robotrequiredv.length() > maxv){
+			
+			bool forceExtrav=false;
+			if(HasBool("forceExtrav") && GetBool("forceExtrav")){ // for demonstration purposes
+				forceExtrav=true;
+
+			}
+
+			if(robotrequiredv.length() > maxv && !forceExtrav){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
 			}
 			

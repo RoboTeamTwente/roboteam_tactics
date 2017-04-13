@@ -39,8 +39,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             std::string robot_output_target = "";
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
-                pGainPosition = 5.0;
-                pGainRotation = 10.0;
+                pGainPosition = 2.0;
+                pGainRotation = 4.0;
                 minSpeedX = 0.0;
                 minSpeedY = 0.0;
                 maxSpeed = 1.5;
@@ -48,12 +48,12 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxAngularVel = 10.0;
             } else if (robot_output_target == "serial") {
                 pGainPosition = 2.0;
-                pGainRotation = 8.0;
-                minSpeedX = 0.3;
-                minSpeedY = 0.5;
-                maxSpeed = 0.8;
-                minAngularVel = 3.0;
-                maxAngularVel = 5.0;
+                pGainRotation = 4.0; //hansBot: 8.0
+                minSpeedX = 0.7; //hansBot: 0.3
+                minSpeedY = 1.0; //hansBot: 0.5
+                maxSpeed = 1.0; // hansBot: 0.8
+                minAngularVel = 5.0; // hansBot: 3.0
+                maxAngularVel = 7.0;
             }
         }
 
@@ -87,7 +87,12 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
 // Proportional rotation controller
 double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 posError) {
 
-    if (posError.length() > 0.5) {
+    bool forceAngle = false;
+    if(HasBool("forceAngle") && GetBool("forceAngle")){
+        forceAngle = true;
+    }
+
+    if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
     }
 
@@ -334,7 +339,7 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
 
     // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
     if (sumOfForces.length() < (minSpeed / 4)) {
-        if (sumOfForces.length() > prevSumOfForces.length()) {
+        if (sumOfForces.length() >= prevSumOfForces.length()) {
             sumOfForces = Vector2(0.0, 0.0);
         }
     } else if (sumOfForces.length() <  minSpeed) {
@@ -349,12 +354,16 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
 double GoToPos::limitAngularVel(double angularVelTarget) {
     // If angularVel is decreasing, going below the minAngularVel is allowed because the motors can handle it.
     if (fabs(angularVelTarget) < (minAngularVel / 4)) {
-        if (angularVelTarget > prevAngularVelTarget) {
+        if (fabs(angularVelTarget) >= fabs(prevAngularVelTarget)) {
             angularVelTarget = 0.0;
-        }
+        } 
+            // angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
+        // }
     } else if (fabs(angularVelTarget) < minAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
     }
+
+    ROS_INFO_STREAM("new target: " << angularVelTarget);
 
     prevAngularVelTarget = angularVelTarget;
     return angularVelTarget;
@@ -370,6 +379,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
+
+    if (HasDouble("pGainRotation")) {
+        pGainRotation = GetDouble("pGainRotation");
+    }
+
+    if (HasDouble("pGainPosition")) {
+        pGainPosition = GetDouble("pGainPosition");
+    }
 
     // Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
@@ -396,11 +413,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
-    if (HasDouble("angleGoal")) {
-        angleGoal = cleanAngle(GetDouble("angleGoal"));
-    } else {
-        angleGoal = posError.angle();
-    }
+    angleGoal = cleanAngle(GetDouble("angleGoal"));
+
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
@@ -441,7 +455,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
 
     sumOfForces = limitVel(sumOfForces, posError);
-    angularVelTarget = limitAngularVel(angularVelTarget);
+    if (sumOfForces.length() < 0.5) {
+        angularVelTarget = limitAngularVel(angularVelTarget);
+    }
 
     // Rotate the commands from world frame to robot frame 
     Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
