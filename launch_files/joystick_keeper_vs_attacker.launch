@@ -1,5 +1,5 @@
 <launch>
 	<include file="$(find roboteam_utils)/mini_grsim.launch" />
 	<include file="$(find roboteam_input)/joysticks.launch" />
-	<node pkg="roboteam_tactics" type="TestX" args="rtt_bob/DemoAttacker ROBOT_ID=5" name="$(anon TestX)" />
+	<node pkg="roboteam_tactics" type="TestX" args="rtt_bob/DemoAttacker ROBOT_ID=5" name="$(anon TestX)" output="screen" />
 </launch>
