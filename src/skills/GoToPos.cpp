@@ -39,7 +39,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             std::string robot_output_target = "";
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
-
                 pGainPosition = 2.0;
                 pGainRotation = 4.0;
                 minSpeedX = 0.0;
@@ -47,16 +46,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxSpeed = 1.5;
                 minAngularVel = 0.0;
                 maxAngularVel = 10.0;
-
             } else if (robot_output_target == "serial") {
-                pGainPosition = 1.0;
+                pGainPosition = 2.0;
                 pGainRotation = 2.0; //hansBot: 8.0
                 minSpeedX = 0.7; //hansBot: 0.3
                 minSpeedY = 1.0; //hansBot: 0.5
-                maxSpeed = 1.0; // hansBot: 0.8
+                maxSpeed = 2.0; // hansBot: 0.8
                 minAngularVel = 5.0; // hansBot: 3.0
-                maxAngularVel = 7.0;
-
+                maxAngularVel = 10.0;
             }
         }
 
@@ -335,9 +332,7 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
 
     if (minSpeedX > 0 || minSpeedY > 0) {
         double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle(); // number between zero and 0.5*pi
-        ROS_INFO_STREAM("absDrivingAngle " << absDrivingAngle);
         double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
-        ROS_INFO_STREAM("minSpeed: " << minSpeed);
 
         // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
         if (sumOfForces.length() < (minSpeed / 8.0)) {
@@ -354,7 +349,6 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
     }    
 
     prevSumOfForces = sumOfForces;
-    ROS_INFO_STREAM("sumOfForces after: " << sumOfForces.x << " " << sumOfForces.y);
     return sumOfForces;
 }
 
@@ -370,8 +364,6 @@ double GoToPos::limitAngularVel(double angularVelTarget) {
     } else if (fabs(angularVelTarget) < minAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
     }
-
-    ROS_INFO_STREAM("new target: " << angularVelTarget);
 
     prevAngularVelTarget = angularVelTarget;
     return angularVelTarget;
@@ -434,9 +426,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
-
+    
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.02 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.04 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         roboteam_msgs::RobotCommand command;

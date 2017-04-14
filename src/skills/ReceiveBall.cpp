@@ -215,6 +215,7 @@ bt::Node::Status ReceiveBall::Update (){
 			// Set a rosparam to let other robots know that we are ready to receive the ball
 			ros::param::set("readyToReceiveBall", true);
 		}
+		private_bb->SetBool("dribbler", false);
 	} else { 
 		// If we are close enough to the ball we can drive towards it and turn on the dribbler
 		Vector2 posDiff = ballPos - robotPos;

@@ -125,7 +125,7 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.15*M_PI) {
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
@@ -149,16 +149,21 @@ bt::Node::Status GetBall::Update (){
 
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
 
-    // Only stop if ball has been here 8 frames
-	if (stat == Status::Success 
-            && fabs(targetAngle - robot.angle) < 0.2*M_PI
-            // Only send succes if either:
-            //  - The ball was close for 8 or more frames
-            //  - The ball must be kicked as soon as there's a chance of kicking it
-            && (ballCloseFrameCount >= 3 && GetBool("passOn"))) {
 
-		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
-		// in the situation when the ball is rolling and we are catching up
+    // Only stop if ball has been here 8 frames
+	// if (stat == Status::Success 
+ //            && fabs(targetAngle - robot.angle) < 0.2*M_PI
+ //            // Only send succes if either:
+ //            //  - The ball was close for 8 or more frames
+ //            //  - The ball must be kicked as soon as there's a chance of kicking it
+ //            && (ballCloseFrameCount >= 5)) {
+    ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " rotDiff: " << fabs(rotDiff));
+
+	if ((ballPos - robotPos).length() < GetDouble("dist") && fabs(rotDiff) < GetDouble("angle")) {
+        ROS_INFO_STREAM("we're there!");
+
+        // Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
+        // in the situation when the ball is rolling and we are catching up
         roboteam_msgs::RobotCommand command;
         command.id = robotID;
         command.kicker = GetBool("passOn");
@@ -170,16 +175,19 @@ bt::Node::Status GetBall::Update (){
         command.dribbler = true;
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
+        pub.publish(command);   
+        pub.publish(command);   
+        pub.publish(command);   
+        pub.publish(command);   
+        pub.publish(command);  
+
+        return Status::Success;
+    }
 
 
-		RTT_DEBUGLN("GetBall skill completed.");
-		return Status::Success;
-	} else {
+		// RTT_DEBUGLN("GetBall skill completed.");
+		// return Status::Success;
+	// } else {
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
@@ -234,7 +242,7 @@ bt::Node::Status GetBall::Update (){
 	    pub.publish(command);	
 
 		return Status::Running;
-	}
+	// }
 }
 
 } // rtt
