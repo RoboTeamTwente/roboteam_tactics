@@ -32,6 +32,16 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb) {
     hasBall = whichRobotHasBall();
+
+            std::string robot_output_target = "";
+            ros::param::getCached("robot_output_target", robot_output_target);
+            if (robot_output_target == "grsim") {
+                distanceFromBallWhenDribbling = 0.105;
+            } else if (robot_output_target == "serial") {
+                distanceFromBallWhenDribbling = 0.08;
+            } else {
+                distanceFromBallWhenDribbling = 0.105;
+            }
 }
 
 int GetBall::whichRobotHasBall() {
@@ -134,17 +144,23 @@ bt::Node::Status GetBall::Update (){
 
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
-	auto bb2 = std::make_shared<bt::Blackboard>();
-	bb2->SetInt("me", robotID);
-	bb2->SetBool("our_team", true);
-	IHaveBall iHaveBall("", bb2);
+	// auto bb2 = std::make_shared<bt::Blackboard>();
+	// bb2->SetInt("me", robotID);
+	// bb2->SetBool("our_team", true);
+	// IHaveBall iHaveBall("", bb2);
 
-	bt::Node::Status stat = iHaveBall.Update();
+	bt::Node::Status stat; //= iHaveBall.Update();
+    
+    std::cout << (ballPos - robotPos).length() << "\n";
 
-    if (stat == Status::Success) {
+    if ((ballPos - robotPos).length() <= distanceFromBallWhenDribbling) {
         ballCloseFrameCount++;
+        stat = bt::Node::Status::Success;
+        std::cout << "[GetBall] have ball\n";
     } else {
         ballCloseFrameCount = 0;
+        stat = bt::Node::Status::Failure;
+        std::cout << "[GetBall] don't have ball\n";
     }
 
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
@@ -157,13 +173,24 @@ bt::Node::Status GetBall::Update (){
  //            //  - The ball was close for 8 or more frames
  //            //  - The ball must be kicked as soon as there's a chance of kicking it
  //            && (ballCloseFrameCount >= 5)) {
-    ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " rotDiff: " << fabs(rotDiff));
+    // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " rotDiff: " << fabs(rotDiff));
 
 	if ((ballPos - robotPos).length() < GetDouble("dist") && fabs(rotDiff) < GetDouble("angle")) {
-        ROS_INFO_STREAM("we're there!");
+        // ROS_INFO_STREAM("we're there!");
 
         // Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
         // in the situation when the ball is rolling and we are catching up
+// =======
+// 	if (stat == Status::Success 
+//             && fabs(targetAngle - robot.angle) < 0.2*M_PI
+//             // Only send succes if either:
+//             //  - The ball was close for 8 or more frames
+//             //  - The ball must be kicked as soon as there's a chance of kicking it
+//             && (ballCloseFrameCount >= 3 || GetBool("passOn"))) {
+
+// 		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
+// 		// in the situation when the ball is rolling and we are catching up
+// >>>>>>> 1706a8dc695f3b77e4f8c4490b6ecd2471c55c58
         roboteam_msgs::RobotCommand command;
         command.id = robotID;
         command.kicker = GetBool("passOn");

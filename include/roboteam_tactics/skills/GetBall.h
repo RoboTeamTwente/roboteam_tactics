@@ -68,7 +68,7 @@ public:
         };
     }
     
-    std::string node_name() { return "GetBall"; }
+    std::string node_name() override { return "GetBall"; }
 
 private:
 	int whichRobotHasBall();
@@ -84,6 +84,8 @@ private:
     Draw drawer;
 
     int ballCloseFrameCount;
+
+    double distanceFromBallWhenDribbling;
 };
 
 } // rtt
