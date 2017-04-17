@@ -173,9 +173,9 @@ bt::Node::Status GetBall::Update (){
  //            //  - The ball was close for 8 or more frames
  //            //  - The ball must be kicked as soon as there's a chance of kicking it
  //            && (ballCloseFrameCount >= 5)) {
-    // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " rotDiff: " << fabs(rotDiff));
+    ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " rotDiff: " << fabs(rotDiff));
 
-	if ((ballPos - robotPos).length() < GetDouble("dist") && fabs(rotDiff) < GetDouble("angle")) {
+	if ((ballPos - robotPos).length() < 0.12 && fabs(rotDiff) < 0.35) {
         // ROS_INFO_STREAM("we're there!");
 
         // Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
