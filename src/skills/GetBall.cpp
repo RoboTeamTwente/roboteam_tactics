@@ -225,6 +225,9 @@ bt::Node::Status GetBall::Update (){
         if (HasString("stayOnSide")) {
             private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }
+        if (HasBool("ignoreFieldBounds")) {
+            private_bb->SetBool("ignoreFieldBounds", GetBool("ignoreFieldBounds"));
+        }
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
         roboteam_msgs::RobotCommand command;

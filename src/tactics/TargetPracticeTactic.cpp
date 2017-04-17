@@ -58,7 +58,8 @@ void TargetPracticeTactic::Initialize() {
             .setString("AimAt", "ourgoal")
             .setBool("passOn", true)
             .setBool("intercept", false)
-            .setBool("isKeeper", false);
+            .setBool("isKeeper", false)
+            .setBool("ignoreFieldBounds", true);
         bb.SetInt("ROBOT_ID", shooterID);
         bb.SetInt("KEEPER_ID", keeperID);
         roboteam_msgs::RoleDirective wd;

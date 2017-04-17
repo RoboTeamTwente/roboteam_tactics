@@ -255,11 +255,13 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
-    if (xGoal > (field.field_length/2+marginOutsideField) || xGoal < (-field.field_length/2-marginOutsideField)) {
-        xGoal = signum(xGoal)*(field.field_length/2+marginOutsideField);
-    }
-    if (yGoal > (field.field_width/2+marginOutsideField) || yGoal < (-field.field_width/2-marginOutsideField)) {
-        yGoal = signum(yGoal)*(field.field_width/2+marginOutsideField);
+    if (GetBool("ignoreFieldBounds", false)) {
+        if (xGoal > (field.field_length/2+marginOutsideField) || xGoal < (-field.field_length/2-marginOutsideField)) {
+            xGoal = signum(xGoal)*(field.field_length/2+marginOutsideField);
+        }
+        if (yGoal > (field.field_width/2+marginOutsideField) || yGoal < (-field.field_width/2-marginOutsideField)) {
+            yGoal = signum(yGoal)*(field.field_width/2+marginOutsideField);
+        }
     }
 
     Vector2 newTargetPos(xGoal, yGoal);
