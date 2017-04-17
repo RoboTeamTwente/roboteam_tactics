@@ -62,11 +62,11 @@ bt::Node::Status Kick::Update() {
 
     int robotID = blackboard->GetInt("ROBOT_ID");
     double kickVel;
-    // if (HasDouble("kickVel")) {
-    // 	kickVel = GetDouble("kickVel");
-    // } else {
+    if (HasDouble("kickVel")) {
+    	kickVel = GetDouble("kickVel");
+    } else {
     	kickVel = 4;
-    // }
+    }
 
 	// ROS_INFO_STREAM("name: " << name << " " << robotID);
 	// roboteam_msgs::WorldBall ball = world.ball;
@@ -97,6 +97,8 @@ bt::Node::Status Kick::Update() {
 
 	// if (posDiff.length() < 0.11) { // ball is close
 		// if(rotDiff < rotDiffErr and rotDiff > -rotDiffErr){ // ball in front
+
+    // #SUPERUGLY
 			{
                 roboteam_msgs::RobotCommand command;
                 command.id = robotID;
