@@ -39,7 +39,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             std::string robot_output_target = "";
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
-
                 pGainPosition = 2.0;
                 pGainRotation = 4.0;
                 minSpeedX = 0.0;
@@ -47,16 +46,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxSpeed = 1.5;
                 minAngularVel = 0.0;
                 maxAngularVel = 10.0;
-
             } else if (robot_output_target == "serial") {
-                pGainPosition = 1.0;
+                pGainPosition = 1.0; // OR FOR GETBALL MAYBE 2.0
                 pGainRotation = 2.0; //hansBot: 8.0
                 minSpeedX = 0.7; //hansBot: 0.3
                 minSpeedY = 1.0; //hansBot: 0.5
-                maxSpeed = 1.0; // hansBot: 0.8
+                maxSpeed = 1.5; // hansBot: 0.8
                 minAngularVel = 5.0; // hansBot: 3.0
-                maxAngularVel = 7.0;
-
+                maxAngularVel = 10.0;
             }
         }
 
@@ -136,21 +133,30 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
 // TODO: fix the problem that if there are two robots in the way on both sides of the cone, our robot tries to push through them regardless
 // of whether he hits them or not (maybe use the commented variable distanceToCenter to accomplish this)
-Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
-    Vector2 antenna = antennaCone.center - myPos;    
+// Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+//     Vector2 antenna = antennaCone.center - myPos;    
 
+//     Vector2 forceVector(0.0, 0.0);
+//     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
+//         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
+//         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
+//             forceVector = antenna.rotate(-0.5*M_PI).scale(1.0 / (otherRobotPos - myPos).length());
+//         }
+//         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
+//             forceVector = antenna.rotate(0.5*M_PI).scale(1.0 / (otherRobotPos - myPos).length());
+//         }
+//         // drawer.setColor(255, 255, 0);
+//         // drawer.drawLine("forceFromRobot", myPos, forceVector);
+//     }    
+//     return forceVector;
+// }
+
+Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
     Vector2 forceVector(0.0, 0.0);
-    if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
-        // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
-        if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(-0.5*M_PI).scale(0.5 / (otherRobotPos - myPos).length());
-        }
-        if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
-            forceVector = antenna.rotate(0.5*M_PI).scale(0.5 / (otherRobotPos - myPos).length());
-        }
-        drawer.setColor(255, 255, 0);
-        drawer.drawLine("forceFromRobot", myPos, forceVector);
-    }    
+    Vector2 diffVec = myPos - otherRobotPos;
+    if (diffVec.length() < lookingDistance) {
+        forceVector = diffVec.scale(0.2 / (diffVec.length() * diffVec.length()));
+    }
     return forceVector;
 }
 
@@ -170,10 +176,10 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     Cone antennaCone(coneStart, (antenna + myPos), 0.3);
 
     // Draw the lines of the cone in rqt_view
-    Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
-    Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
-    drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
+    // Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    // Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    // drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
+    // drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (auto const currentRobot : world.us) {
@@ -190,9 +196,9 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         sumOfForces = sumOfForces + forceVector; 
     }
 
-    if (sumOfForces.length() < 0.01) {
-        drawer.removeLine("forceFromRobot");
-    }
+    // if (sumOfForces.length() < 0.01) {
+    //     drawer.removeLine("forceFromRobot");
+    // }
 
     return sumOfForces;
 }
@@ -337,9 +343,7 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
 
     if (minSpeedX > 0 || minSpeedY > 0) {
         double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle(); // number between zero and 0.5*pi
-        ROS_INFO_STREAM("absDrivingAngle " << absDrivingAngle);
         double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
-        ROS_INFO_STREAM("minSpeed: " << minSpeed);
 
         // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
         if (sumOfForces.length() < (minSpeed / 8.0)) {
@@ -356,7 +360,6 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
     }    
 
     prevSumOfForces = sumOfForces;
-    ROS_INFO_STREAM("sumOfForces after: " << sumOfForces.x << " " << sumOfForces.y);
     return sumOfForces;
 }
 
@@ -372,8 +375,6 @@ double GoToPos::limitAngularVel(double angularVelTarget) {
     } else if (fabs(angularVelTarget) < minAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
     }
-
-    ROS_INFO_STREAM("new target: " << angularVelTarget);
 
     prevAngularVelTarget = angularVelTarget;
     return angularVelTarget;
@@ -396,6 +397,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     if (HasDouble("pGainPosition")) {
         pGainPosition = GetDouble("pGainPosition");
+    }
+
+    if (HasDouble("maxSpeed")) {
+        maxSpeed = GetDouble("maxSpeed");
     }
 
     // Find the robot with the specified ID
@@ -436,9 +441,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
-
+    
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.02 && fabs(angleError) < 0.1) {
+    if (posError.length() < 0.04 && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         roboteam_msgs::RobotCommand command;
@@ -452,12 +457,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
 
     // Draw the velocity vector acting on the robot
-    drawer.drawLine("velCommand", myPos, sumOfForces);  
+      
 
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
     }
+
+    drawer.drawLine("velCommand", myPos, sumOfForces);
 
     // Defense area avoidance
     if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
