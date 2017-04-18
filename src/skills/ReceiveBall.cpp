@@ -215,14 +215,20 @@ bt::Node::Status ReceiveBall::Update (){
 			// Set a rosparam to let other robots know that we are ready to receive the ball
 			ros::param::set("readyToReceiveBall", true);
 		}
-		private_bb->SetBool("dribbler", false);
+		// private_bb->SetBool("dribbler", false);
 	} else { 
 		// If we are close enough to the ball we can drive towards it and turn on the dribbler
 		Vector2 posDiff = ballPos - robotPos;
 		Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
 		targetAngle = posDiff.angle();
+		// private_bb->SetBool("dribbler", true);
+	}
+	
+	if (distanceToBall < 1.0) {
 		private_bb->SetBool("dribbler", true);
+	} else {
+		private_bb->SetBool("dribbler", false);
 	}
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
@@ -234,8 +240,8 @@ bt::Node::Status ReceiveBall::Update (){
 	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
-		publishStopCommand();
 		RTT_DEBUGLN("GetBall skill completed.");
+		// return Status::Running;
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
@@ -244,8 +250,21 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
-        goToPos.Update();
+        goToPos.getVelCommand();
+
+        // goToPos.Update();
+        boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
+	    if (command) {
+	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	        pub.publish(*command);
+	    }
+	        // return Status::Running;
+	    // } else {
+	    	// return Status::Running;
+	        // return Status::Success;
+	    // }
 		return Status::Running;
+		
 	}
 };
 

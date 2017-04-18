@@ -189,7 +189,6 @@ bt::Node::Status GetBall::Update (){
         return Status::Success;
     }
 
-
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
