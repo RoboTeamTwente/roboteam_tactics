@@ -53,6 +53,7 @@ SET_DEBUG_FOR(Chip, true);
 SET_DEBUG_FOR(DefendGoalarea, true);
 SET_DEBUG_FOR(Failer, true);
 SET_DEBUG_FOR(GetBall, false);
+SET_DEBUG_FOR(GoToPos, true);
 SET_DEBUG_FOR(InterceptBall, true);
 SET_DEBUG_FOR(KeeperBlock, true);
 SET_DEBUG_FOR(Kick, false);

@@ -130,7 +130,7 @@ bt::Node::Status RotateAroundPoint::checkAndSetArguments(){
 		turnPconstant = GetDouble("turnPconstant");
 	}
 	else {
-		turnPconstant=2.0;
+		turnPconstant=4.0;
 	}
 	return Status::Running;
 
@@ -287,7 +287,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 			if(requiredrotv < -maxrot){requiredrotv=-maxrot;}
 
 			
-			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > 0.005 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
+			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > 0.01 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;

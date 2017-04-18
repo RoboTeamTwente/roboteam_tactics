@@ -20,6 +20,8 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 
+#define RTT_CURRENT_DEBUG_TAG GetBall
+
 namespace rtt {
 
 RTT_REGISTER_SKILL(GoToPos);
@@ -330,7 +332,8 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
         }
     }
 
-    if (minSpeedX > 0 || minSpeedY > 0) {
+    if (minSpeedX > 0 || minSpeedY > 0) {\
+        ROS_INFO_STREAM("limiting Vel!");
         double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle(); // number between zero and 0.5*pi
         double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
 
@@ -426,6 +429,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
+
+    RTT_DEBUG("robot %i \n", ROBOT_ID);
     
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < 0.04 && fabs(angleError) < 0.1) {

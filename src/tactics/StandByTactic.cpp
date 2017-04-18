@@ -30,17 +30,18 @@ void StandByTactic::Initialize() {
     tokens.clear();
 
     RTT_DEBUG("Initializing StandByTactic \n");
+
     
-    if (RobotDealer::get_available_robots().size() < 2) {
-        RTT_DEBUG("Not enough robots, cannot initialize... \n");
+    // if (RobotDealer::get_available_robots().size() < 2) {
+        // RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
-        return;
-    }
+        // return;
+    // }
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
     int firstRobotID = 0;
-    int secondRobotID = 3;
+    int secondRobotID = 1;
 
     double firstRobotAngleGoal = 0.0;
     double secondRobotAngleGoal = 0.0;
@@ -139,6 +140,9 @@ bt::Node::Status StandByTactic::Update() {
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
+            if (status == bt::Node::Status::Running) {
+                ROS_INFO("running!");
+            }
             allSucceeded &= status == bt::Node::Status::Success;
         } else {
             allSucceeded = false;

@@ -33,11 +33,11 @@ void TwoAttackersTactic::Initialize() {
     RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");
     // ROS_INFO("Initializing TwoAttackersTactic");
     
-    if (RobotDealer::get_available_robots().size() < 1) {
-        RTT_DEBUG("Not enough robots, cannot initialize... \n");
-        // TODO: Want to pass failure here as well!
-        return;
-    }
+    // if (RobotDealer::get_available_robots().size() < 1) {
+    //     RTT_DEBUG("Not enough robots, cannot initialize... \n");
+    //     // TODO: Want to pass failure here as well!
+    //     return;
+    // }
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
@@ -112,6 +112,7 @@ void TwoAttackersTactic::Initialize() {
         bb.SetString("StandFree_A_whichTeam", "us");
         bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
         bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
+        bb.SetBool("StandFree_A_seeGoal", true);
 
         bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
         bb.SetString("ParamSet_readyToReceive_value", "ready");
