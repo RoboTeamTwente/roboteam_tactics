@@ -70,6 +70,7 @@ void GetBall::Initialize() {
 }
 
 bt::Node::Status GetBall::Update (){
+
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
@@ -132,49 +133,45 @@ bt::Node::Status GetBall::Update (){
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
-	// at a distance of 25 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
+	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
     bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.15*M_PI) {
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
 	} else {
 		dribbler = true;
-		targetPos = interceptPos + Vector2(0.08, 0.0).rotate(targetAngle + M_PI);
+		targetPos = interceptPos + Vector2(0.06, 0.0).rotate(targetAngle + M_PI);
 	}
 
 
-	// Check the IHaveBall condition to see whether the GetBall skill succeeded
-	// auto bb2 = std::make_shared<bt::Blackboard>();
-	// bb2->SetInt("me", robotID);
-	// bb2->SetBool("our_team", true);
-	// IHaveBall iHaveBall("", bb2);
-
-	bt::Node::Status stat; //= iHaveBall.Update();
-    
-    std::cout << (ballPos - robotPos).length() << "\n";
-
-    if ((ballPos - robotPos).length() <= distanceFromBallWhenDribbling) {
-        ballCloseFrameCount++;
-        stat = bt::Node::Status::Success;
-        std::cout << "[GetBall] have ball\n";
-    } else {
-        ballCloseFrameCount = 0;
-        stat = bt::Node::Status::Failure;
-        std::cout << "[GetBall] don't have ball\n";
+    std::string robot_output_target = "";
+    ros::param::getCached("robot_output_target", robot_output_target);
+    double successDist;
+    if (robot_output_target == "grsim") {
+        successDist = 0.11;
+    } else if (robot_output_target == "serial") {
+        successDist = 0.12;
     }
 
+    // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
+
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+	if ((ballPos - robotPos).length() < successDist && fabs(rotDiff) < 0.35) {
+        // ROS_INFO_STREAM("we're there!");
 
-    // Only stop if ball has been here 8 frames
-	if (stat == Status::Success 
-            && fabs(targetAngle - robot.angle) < 0.2*M_PI
-            // Only send succes if either:
-            //  - The ball was close for 8 or more frames
-            //  - The ball must be kicked as soon as there's a chance of kicking it
-            && (ballCloseFrameCount >= 3 || GetBool("passOn"))) {
+        // Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
+        // in the situation when the ball is rolling and we are catching up
+// =======
+// 	if (stat == Status::Success 
+//             && fabs(targetAngle - robot.angle) < 0.2*M_PI
+//             // Only send succes if either:
+//             //  - The ball was close for 8 or more frames
+//             //  - The ball must be kicked as soon as there's a chance of kicking it
+//             && (ballCloseFrameCount >= 3 || GetBool("passOn"))) {
 
-		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
-		// in the situation when the ball is rolling and we are catching up
+// 		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
+// 		// in the situation when the ball is rolling and we are catching up
+// >>>>>>> 1706a8dc695f3b77e4f8c4490b6ecd2471c55c58
         roboteam_msgs::RobotCommand command;
         command.id = robotID;
         command.kicker = GetBool("passOn");
@@ -186,71 +183,62 @@ bt::Node::Status GetBall::Update (){
         command.dribbler = true;
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
-	    pub.publish(command);	
+        pub.publish(command);   
+        pub.publish(command);    
 
+        return Status::Success;
+    }
 
-		RTT_DEBUGLN("GetBall skill completed.");
-		return Status::Success;
-	} else {
-        private_bb->SetInt("ROBOT_ID", robotID);
-        private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
-        private_bb->SetDouble("xGoal", targetPos.x);
-        private_bb->SetDouble("yGoal", targetPos.y);
-        private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", true);
-        // private_bb->SetBool("avoidBall", avoidBall);
-        private_bb->SetBool("dribbler", dribbler);
-        private_bb->SetString("whichBot", GetString("whichBot"));
-        // @HACK for robot testing purposes
-        if (HasDouble("minSpeed")) {
-        	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
-        }
-        if (HasDouble("maxSpeed")) {
-        	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
-        }
-        // if (HasDouble("minAngularVel")) {
-        // 	private_bb->SetDouble("minAngularVel", GetDouble("minAngularVel"));
-        // }
-        if (HasDouble("pGainRotation")) {
-        	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
-        }
-        if (HasDouble("pGainPosition")) {
-        	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-        }
-        
-        if (HasString("stayOnSide")) {
-            private_bb->SetString("stayOnSide", GetString("stayOnSide"));
-        }
+    private_bb->SetInt("ROBOT_ID", robotID);
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
+    private_bb->SetDouble("xGoal", targetPos.x);
+    private_bb->SetDouble("yGoal", targetPos.y);
+    private_bb->SetDouble("angleGoal", targetAngle);
+    private_bb->SetBool("avoidRobots", true);
+    private_bb->SetBool("dribbler", dribbler);
+    private_bb->SetString("whichBot", GetString("whichBot"));
+    
+    // @HACK for robot testing purposes
+    if (HasDouble("minSpeed")) {
+    	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
+    }
+    if (HasDouble("maxSpeed")) {
+    	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+    }
+    if (HasDouble("pGainRotation")) {
+    	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+    }
+    if (HasDouble("pGainPosition")) {
+    	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    }
+    
+    if (HasString("stayOnSide")) {
+        private_bb->SetString("stayOnSide", GetString("stayOnSide"));
+    }
 
-        boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
-        roboteam_msgs::RobotCommand command;
-        if (commandPtr) {
-        	command = *commandPtr;
-        } else {
-        	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
-        }
-        // ROS_INFO("command for %d: %f, %f, %f", command.id, command.x_vel, command.y_vel, command.w);
+    boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+    roboteam_msgs::RobotCommand command;
+    if (commandPtr) {
+    	command = *commandPtr;
+    } else {
+    	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
+    }
 
-        // TODO: Commented this out because it was giving problems. Hopefully we can
-        // activate it at some point.
-        // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        // if (newVelCommand.length() > 4.0) {
-        //   newVelCommand.scale(4.0 / newVelCommand.length());
-        // }
-        // command.x_vel = newVelCommand.x;
-        // command.y_vel = newVelCommand.y;
+    // TODO: Commented this out because it was giving problems. Hopefully we can
+    // activate it at some point.
+    // Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+    // Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+    // if (newVelCommand.length() > 4.0) {
+    //   newVelCommand.scale(4.0 / newVelCommand.length());
+    // }
+    // command.x_vel = newVelCommand.x;
+    // command.y_vel = newVelCommand.y;
 
-        // Get global robot command publisher, and publish the command
-        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    pub.publish(command);	
+    // Get global robot command publisher, and publish the command
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    pub.publish(command);	
 
-		return Status::Running;
-	}
+	return Status::Running;
 }
 
 } // rtt

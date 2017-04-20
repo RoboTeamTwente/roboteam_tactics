@@ -78,7 +78,7 @@ public:
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
     Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
-    Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces);
+    // Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces);
 
     Vector2 checkTargetPos(Vector2 targetPos);
     Vector2 limitVel(Vector2 sumOfForces, Vector2 posError);
