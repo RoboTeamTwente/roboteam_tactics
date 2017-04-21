@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
+from __future__ import print_function
 
 import subprocess
 import sys
 import os
 import re
+import argparse
+import sys
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def removeFirstSpaceIfPresent(x):
     if len(x) > 0:
@@ -12,34 +18,46 @@ def removeFirstSpaceIfPresent(x):
 
     return x
 
-def getAndPrintDocumentation(args, skillsHeaderPath):
-    helpStr = """How to use:
-- get_docs.py of [skillName]"""
+def processRawCommentsToString(comments):
+    truncated = comments.split("\n")
 
-    if len(args) < 2:
-        print(helpStr)
-        sys.exit(1)
+    # Removes anything up until the first star in every line
+    truncated = [x.split("*", 1)[-1] for x in truncated]
+    # Removes first space if present
+    truncated = [removeFirstSpaceIfPresent(x) for x in truncated]
+    # Removes empty lines
+    truncated = [x for x in truncated if len(x) > 0]
 
-    if not args[0] == "of":
-        print(helpstr)
-        sys.exit(1)
+    return "\n".join(truncated)
 
-    desiredNode = args[1]
-    
+def getDocumentation(docTarget, tacticsRoot):
     found = False
     foundAt = ""
-    for entry in os.listdir(skillsHeaderPath):
-        if not os.path.isdir(entry) and entry.endswith(".h"):
-            entryWithoutExtension = entry[:-2]
+    foundType = ""
 
-            if entryWithoutExtension == desiredNode:
-                foundAt = os.path.join(skillsHeaderPath, entry)
-                found = True
-                break
+    tacticsInclude = os.path.join(tacticsRoot, "include", "roboteam_tactics")
+
+    locations = {
+        "skills": os.path.join(tacticsInclude, "skills"),
+        "conditions": os.path.join(tacticsInclude, "conditions"),
+        "tactics": os.path.join(tacticsInclude, "tactics")
+    }
+
+    for locationType, location in locations.items():
+        for entry in os.listdir(location):
+            if not os.path.isdir(entry) and entry.endswith(".h"):
+                entryWithoutExtension = entry[:-2]
+
+                if entryWithoutExtension == docTarget:
+                    foundAt = os.path.join(location, entry)
+                    found = True
+                    foundType = locationType
+                    break
 
     if not found:
-        print("Could not find skill with name " + desiredNode)
-        sys.exit(1)
+        # eprint("Could not find skill with name \"" + docTarget + "\"")
+        # sys.exit(1)
+        return None
 
     with open(foundAt, 'r') as f:
         contents = f.read();
@@ -47,19 +65,36 @@ def getAndPrintDocumentation(args, skillsHeaderPath):
     m = re.search("/\*.*?\*/.*/\*(.*)\*/", contents, re.DOTALL)
 
     if m:
-        rawDocs = m.group(1)
-        truncated = rawDocs.split("\n")
+        return processRawCommentsToString(m.group(1))
+        # truncated = rawDocs.split("\n")
 
-        # Removes anything up until the first star in every line
-        truncated = [x.split("*", 1)[-1] for x in truncated]
-        # Removes first space if present
-        truncated = [removeFirstSpaceIfPresent(x) for x in truncated]
-        # Removes empty lines
-        truncated = [x for x in truncated if len(x) > 0]
+        # # Removes anything up until the first star in every line
+        # truncated = [x.split("*", 1)[-1] for x in truncated]
+        # # Removes first space if present
+        # truncated = [removeFirstSpaceIfPresent(x) for x in truncated]
+        # # Removes empty lines
+        # truncated = [x for x in truncated if len(x) > 0]
 
-        print("\n".join(truncated))
+        # return "\n".join(truncated)
 
-def getSkillsHeaderPath():
+    m = re.search("/\*(.*)\*/", contents, re.DOTALL)
+
+    if m:
+        return processRawCommentsToString(m.group(1))
+
+    return None
+
+def getAndPrintDocumentation(docTarget, roboteam_tactics_root):
+    result = getDocumentation(docTarget, roboteam_tactics_root)
+
+    if result:
+        print(result)
+        sys.exit(0)
+    else:
+        eprint("Could not find doctarget with name: \"" + docTarget + "\"")
+        sys.exit(1)
+
+def getTacticsRoot():
     procResult = subprocess.run(["rospack", "find", "roboteam_tactics"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     if not procResult.returncode == 0:
@@ -70,25 +105,33 @@ def getSkillsHeaderPath():
         tacticsPath = procResult.stdout.decode('utf8')[:-1]
 
 
-    skillsHeaderPath = os.path.join(tacticsPath, "include", "roboteam_tactics", "skills")
+    # skillsHeaderPath = os.path.join(tacticsPath, "include", "roboteam_tactics", "skills")
 
-    return skillsHeaderPath
+    return tacticsPath
 
 if __name__ == "__main__":
-    skillsHeaderPath = getSkillsHeaderPath()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--of", help="Indicates the skill, condition, or tactic to look up")
+    parser.add_argument("--roboteam-tactics-root", help="Can be used to force get_docs.py to use a specific directory to look for headers.")
+    args = parser.parse_args()
 
-    args = sys.argv[1:]
+    docTarget = None
+    roboteam_tactics_root = None
 
-    if len(args) < 1:
-        print("""How to use:
-- get_docs.py of [skillname]""")
-        sys.exit(1)
+    if args.of:
+        docTarget = args.of
 
-    if args[0] == "of":
-        getAndPrintDocumentation(args, skillsHeaderPath)
-        # If nothing goes wrong, we terminate after this argument
+    if args.roboteam_tactics_root:
+        roboteam_tactics_root = args.roboteam_tactics_root
+
+    if not roboteam_tactics_root:
+        roboteam_tactics_root = getTacticsRoot()
+
+    # If no doc target is specified there is nothing to do here
+    if not docTarget:
         sys.exit(0)
-    else:
-        print("unknown argument " + args[0])
-        sys.exit(1)
+
+    getAndPrintDocumentation(docTarget, roboteam_tactics_root)
+    # If nothing goes wrong, we terminate after this argument
+    sys.exit(0)
 
