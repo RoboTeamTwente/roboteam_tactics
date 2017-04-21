@@ -135,6 +135,13 @@ bt::Node::Status GetBall::Update (){
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	double posDiff = (interceptPos - robotPos).length();
+    double getBallDist;
+    if (HasDouble("getBallDist")) {
+        getBallDist = GetDouble("getBallDist");
+    } else {
+        getBallDist = 0.13;
+    }
+
     bool dribbler = false;
 	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
 		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
@@ -142,7 +149,7 @@ bt::Node::Status GetBall::Update (){
 		// dribbler = true;
         private_bb->SetBool("dribbler", true);
         private_bb->SetDouble("pGainPosition", 1.0);
-		targetPos = interceptPos + Vector2(0.13, 0.0).rotate(targetAngle + M_PI); // For arduinobot: 0.06
+		targetPos = interceptPos + Vector2(getBallDist, 0.0).rotate(targetAngle + M_PI); // For arduinobot: 0.06
 	}
 
 
@@ -152,7 +159,7 @@ bt::Node::Status GetBall::Update (){
     if (robot_output_target == "grsim") {
         successDist = 0.11;
     } else if (robot_output_target == "serial") {
-        successDist = 0.14;
+        successDist = getBallDist + 0.1;
     }
 
     // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
