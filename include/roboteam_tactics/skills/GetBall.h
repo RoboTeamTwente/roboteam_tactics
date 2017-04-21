@@ -14,6 +14,7 @@ namespace rtt {
  * \class GetBall
  * \brief See YAML
  */
+
 /*
  * Descr: Moves to the ball and optionally kicks it.
  * Params:
