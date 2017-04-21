@@ -33,7 +33,7 @@ bt::Node::Status SimpleKeeper::Update() {
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
     } else {
-        distanceFromGoal = 0.4;
+        distanceFromGoal = 0.5;
     }
 
     Vector2 ballPos(world.ball.pos);
@@ -55,6 +55,20 @@ bt::Node::Status SimpleKeeper::Update() {
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetDouble("receiveBallAtX", targetPos.x);
     private_bb->SetDouble("receiveBallAtY", targetPos.y);
+    if (HasDouble("pGainPosition")) {
+        private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    } else {
+        private_bb->SetDouble("pGainPosition", 3.0);
+    }
+    if (HasDouble("successDist")) {
+        private_bb->SetDouble("successDist", GetDouble("successDist"));
+    }
+    if (HasDouble("acceptableDeviation")) {
+        private_bb->SetDouble("acceptableDeviation", GetDouble("acceptableDeviation"));
+    } else {
+        private_bb->SetDouble("acceptableDeviation", 0.5);
+    }
+    
 
     return receiveBall.Update();
 }

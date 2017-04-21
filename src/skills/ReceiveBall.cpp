@@ -241,8 +241,8 @@ bt::Node::Status ReceiveBall::Update (){
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
 		RTT_DEBUGLN("GetBall skill completed.");
-		// return Status::Running;
-		return Status::Success;
+		return Status::Running;
+		// return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
@@ -250,6 +250,12 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
+        if (HasDouble("pGainPosition")) {
+        	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+        }
+        if (HasDouble("successDist")) {
+        	private_bb->SetDouble("successDist", GetDouble("successDist"));
+        }
         goToPos.getVelCommand();
 
         // goToPos.Update();
