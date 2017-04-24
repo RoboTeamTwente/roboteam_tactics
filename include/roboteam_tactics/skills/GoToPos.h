@@ -104,7 +104,8 @@ public:
     std::string node_name() { return "GoToPos"; }
     
     RobotType getRobotType();
-    void setControlParams(RobotType newRobotType);
+    void setPresetControlParams(RobotType newRobotType);
+    void setPresetControlParams();
     
 private:
 

@@ -40,6 +40,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             start = now();
             succeeded = false;
 
+            // TODO: As soon as it's proven that the new mechanism works we need to remove this
             std::string robot_output_target = "";
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
@@ -94,7 +95,7 @@ RobotType GoToPos::getRobotType() {
 
 }
 
-void GoToPos::setControlParams(RobotType newRobotType) {
+void GoToPos::setPresetControlParams(RobotType newRobotType) {
     if (newRobotType == RobotType::ARDUINO) {
         pGainPosition = 1.0;
         pGainRotation = 2.0;
@@ -133,6 +134,10 @@ void GoToPos::setControlParams(RobotType newRobotType) {
                 << "\n"
                 );
     }
+}
+
+void GoToPos::setPresetControlParams() {
+    setPresetControlParams(getRobotType());
 }
 
 void GoToPos::sendStopCommand(uint id) {
@@ -602,6 +607,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 bt::Node::Status GoToPos::Update() {
+    setPresetControlParams();
+
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
