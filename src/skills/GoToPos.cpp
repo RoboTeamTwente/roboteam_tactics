@@ -51,12 +51,12 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 minAngularVel = 0.0;
                 maxAngularVel = 10.0;
             } else if (robot_output_target == "serial") {
-                pGainPosition = 1.0; // OR FOR GETBALL MAYBE 2.0
-                pGainRotation = 2.0; //hansBot: 8.0
-                minSpeedX = 0.7; //hansBot: 0.3
-                minSpeedY = 1.0; //hansBot: 0.5
-                maxSpeed = 1.5; // hansBot: 0.8
-                minAngularVel = 5.0; // hansBot: 3.0
+                pGainPosition = 2.0; // OR FOR GETBALL MAYBE 2.0
+                pGainRotation = 2.0; //hansBot: 2.0 arduinoBot 2.0
+                minSpeedX = 0.3; //hansBot: 0.3 arduinoBot: 0.7
+                minSpeedY = 0.5; //hansBot: 0.5 arduinoBot: 1.0
+                maxSpeed = 3.0; // hansBot: 5.0 arduinoBot: 1.5
+                minAngularVel = 3.0; // hansBot: 3.0 arduinoBot: 5.0
                 maxAngularVel = 10.0;
             }
         }
@@ -156,7 +156,21 @@ void GoToPos::sendStopCommand(uint id) {
 // Proportional position controller
 Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
     Vector2 posError = targetPos - myPos;
-    Vector2 velTarget = posError*pGainPosition;
+
+    // Make the controller less strong once we get very close, to make it more precise for short distances
+    if (posError.length() < 0.2) {
+        pGainPosition = 1.0;
+    }
+
+    Vector2 velTarget;
+    if (GetBool("quadraticController")) {
+        Vector2 posErrorSquared = Vector2(posError.x*posError.length(), posError.y*posError.length());
+        double sqGainPosition = GetDouble("sqGainPosition");
+        velTarget = posErrorSquared * sqGainPosition;
+    } else {
+        velTarget = posError*pGainPosition;
+    }
+    
     if (velTarget.length() > maxSpeed) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
@@ -421,8 +435,7 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
         }
     }
 
-    if (minSpeedX > 0 || minSpeedY > 0) {\
-        ROS_INFO_STREAM("limiting Vel!");
+    if (minSpeedX > 0 || minSpeedY > 0) {
         double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle(); // number between zero and 0.5*pi
         double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
 
@@ -518,15 +531,21 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             angleGoal = me.angle;
         }
     }
-    
 
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
-    RTT_DEBUG("robot %i \n", ROBOT_ID);
+    // RTT_DEBUG("robot %i \n", ROBOT_ID);
     
+    double successDist;
+    if (HasDouble("successDist")) {
+        successDist = GetDouble("successDist");
+    } else {
+        successDist = 0.02;
+    }
+
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < 0.04 && fabs(angleError) < 0.1) {
+    if (posError.length() < successDist && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         roboteam_msgs::RobotCommand command;
@@ -538,9 +557,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + positionController(myPos, targetPos);
-
-    // Draw the velocity vector acting on the robot
-      
 
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
