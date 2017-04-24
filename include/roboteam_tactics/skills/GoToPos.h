@@ -17,6 +17,12 @@
 
 namespace rtt {
 
+enum class RobotType {
+    ARDUINO,
+    PROTO,
+    GRSIM
+} ;
+
 /**
  * \class GoToPos
  * \brief See YAML
@@ -97,6 +103,9 @@ public:
     }
     std::string node_name() { return "GoToPos"; }
     
+    RobotType getRobotType();
+    void setControlParams(RobotType newRobotType);
+    
 private:
 
     bool success;
@@ -131,6 +140,7 @@ private:
     time_point start;
 
     Draw drawer;
-};
+    RobotType robotType;
+} ;
 
 } // rtt
