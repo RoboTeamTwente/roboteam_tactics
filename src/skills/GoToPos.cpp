@@ -133,8 +133,6 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
 void GoToPos::setPresetControlParams() {
     setPresetControlParams(getRobotType());
-
-    std::cout << "minSpeedX: " << minSpeedX << "\n";
 }
 
 void GoToPos::sendStopCommand(uint id) {
