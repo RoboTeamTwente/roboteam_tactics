@@ -41,27 +41,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         
         {
             succeeded = false;
-
-            // TODO: As soon as it's proven that the new mechanism works we need to remove this
-            std::string robot_output_target = "";
-            ros::param::getCached("robot_output_target", robot_output_target);
-            if (robot_output_target == "grsim") {
-                pGainPosition = 2.0;
-                pGainRotation = 4.0;
-                minSpeedX = 0.0;
-                minSpeedY = 0.0;
-                maxSpeed = 1.5;
-                minAngularVel = 0.0;
-                maxAngularVel = 10.0;
-            } else if (robot_output_target == "serial") {
-                pGainPosition = 2.0; // OR FOR GETBALL MAYBE 2.0
-                pGainRotation = 2.0; //hansBot: 2.0 arduinoBot 2.0
-                minSpeedX = 0.3; //hansBot: 0.3 arduinoBot: 0.7
-                minSpeedY = 0.5; //hansBot: 0.5 arduinoBot: 1.0
-                maxSpeed = 3.0; // hansBot: 5.0 arduinoBot: 1.5
-                minAngularVel = 3.0; // hansBot: 3.0 arduinoBot: 5.0
-                maxAngularVel = 10.0;
-            }
         }
 
 RobotType GoToPos::getRobotType() {
@@ -154,6 +133,8 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
 void GoToPos::setPresetControlParams() {
     setPresetControlParams(getRobotType());
+
+    std::cout << "minSpeedX: " << minSpeedX << "\n";
 }
 
 void GoToPos::sendStopCommand(uint id) {
