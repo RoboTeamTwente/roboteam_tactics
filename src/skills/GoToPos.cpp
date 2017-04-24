@@ -93,6 +93,7 @@ RobotType GoToPos::getRobotType() {
         ROS_INFO_STREAM("No value for found for param \"" << robotTypeKey << "\" found. Defaulting to RobotTypes::PROTO.\n");
     }
 
+    return RobotType::PROTO;
 }
 
 void GoToPos::setPresetControlParams(RobotType newRobotType) {
