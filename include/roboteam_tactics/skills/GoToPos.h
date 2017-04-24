@@ -138,10 +138,11 @@ private:
     double prevAngularVelTarget;
     bool succeeded;
 
-    time_point start;
-
     Draw drawer;
     RobotType robotType;
+
+    time_point lastRobotTypeError;
+    time_point lastPresetError;
 } ;
 
 } // rtt

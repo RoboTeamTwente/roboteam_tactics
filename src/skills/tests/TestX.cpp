@@ -190,6 +190,7 @@ How to use:
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
 
     // Wait for the first geom & world message
+    std::cout << "Waiting for first world & geom message...\n";
     rtt::LastWorld::wait_for_first_messages();
 
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);

@@ -35,9 +35,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , marginOutsideField(1.2)
 
         , robotType(RobotType::PROTO)
+
+        , lastRobotTypeError(now())
+        , lastPresetError(now())
         
         {
-            start = now();
             succeeded = false;
 
             // TODO: As soon as it's proven that the new mechanism works we need to remove this
@@ -77,20 +79,29 @@ RobotType GoToPos::getRobotType() {
         } else if (robotType == "grsim") {
             return RobotType::GRSIM;
         } else if (robotType == "") {
-            ROS_INFO_STREAM("Empty value for found for param \"" 
-                    << robotTypeKey
-                    << "\" found. Defaulting to RobotTypes::PROTO.\n"
-                    );
+            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+                ROS_INFO_STREAM("Empty value for found for param \"" 
+                        << robotTypeKey
+                        << "\" found. Defaulting to RobotTypes::PROTO.\n"
+                        );
+                lastRobotTypeError = now();
+            }
         } else {
-            ROS_ERROR_STREAM("Unknown value found for param \"" 
-                    << robotTypeKey 
-                    << "\": \"" 
-                    << robotType
-                    << "\". Defaulting to RobotType::PROTO."
-                    );
+            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+                ROS_ERROR_STREAM("Unknown value found for param \"" 
+                        << robotTypeKey 
+                        << "\": \"" 
+                        << robotType
+                        << "\". Defaulting to RobotType::PROTO."
+                        );
+                lastRobotTypeError = now();
+            }
         }
     } else {
-        ROS_INFO_STREAM("No value for found for param \"" << robotTypeKey << "\" found. Defaulting to RobotTypes::PROTO.\n");
+        if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+            ROS_INFO_STREAM("No value for found for param \"" << robotTypeKey << "\" found. Defaulting to RobotTypes::PROTO.\n");
+            lastRobotTypeError = now();
+        }
     }
 
     return RobotType::PROTO;
@@ -128,12 +139,16 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::GRSIM;
     } else {
-        ROS_ERROR_STREAM("Could not set robot type of " 
-                << blackboard->GetInt("ROBOT_ID")
-                << ". Undefined type. Leaving the type on: "
-                << (int) robotType
-                << "\n"
-                );
+        if (time_difference_milliseconds(lastPresetError, now()).count() >= 1000) {
+            ROS_ERROR_STREAM("Could not set robot type of " 
+                    << blackboard->GetInt("ROBOT_ID")
+                    << ". Undefined type. Leaving the type on: "
+                    << (int) robotType
+                    << "\n"
+                    );
+
+            lastPresetError = now();
+        }
     }
 }
 
