@@ -102,8 +102,6 @@ bt::Node::Status GetBall::Update (){
 	Vector2 targetPos;
 	double targetAngle;
 
-	Vector2 interceptPos = ballPos; // + ballVel.scale(0.25);
-
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
 	if (HasString("AimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
@@ -113,7 +111,7 @@ bt::Node::Status GetBall::Update (){
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
-			Vector2 posdiff = interceptPos - robotPos;
+			Vector2 posdiff = ballPos - robotPos;
 			targetAngle = posdiff.angle();        
 		}
 	}
@@ -122,51 +120,62 @@ bt::Node::Status GetBall::Update (){
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
-	double angleDiff = (targetAngle - (interceptPos - robotPos).angle());
+    double angleDiff = (targetAngle - (ballPos - robotPos).angle());
+    ROS_INFO_STREAM("angleDiff: " << angleDiff);
 	angleDiff = cleanAngle(angleDiff);
+    double intermediateAngle;
 	if (angleDiff > 0.5*M_PI) {
-		targetAngle = (interceptPos - robotPos).angle() + 0.5*M_PI;
-	}
-	if (angleDiff < -0.5*M_PI) {
-		targetAngle = (interceptPos - robotPos).angle() - 0.5*M_PI;
-	}
+		intermediateAngle = (ballPos - robotPos).angle() + 0.5*M_PI;
+	} else if (angleDiff < -0.5*M_PI) {
+		intermediateAngle = (ballPos - robotPos).angle() - 0.5*M_PI;
+	} else {
+        intermediateAngle = targetAngle;
+    }
 	
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	double posDiff = (interceptPos - robotPos).length();
+	double posDiff = (ballPos - robotPos).length();
     double getBallDist;
     if (HasDouble("getBallDist")) {
         getBallDist = GetDouble("getBallDist");
     } else {
-        getBallDist = 0.13;
+        getBallDist = 0.11;
     }
 
     bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.1*M_PI) {
-		targetPos = interceptPos + Vector2(0.3, 0.0).rotate(targetAngle + M_PI);
+	if (posDiff > 0.4 || fabs(angleDiff) > 0.05*M_PI) {
+		targetPos = ballPos + Vector2(0.3, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
 		// dribbler = true;
         private_bb->SetBool("dribbler", true);
         private_bb->SetDouble("pGainPosition", 1.0);
-		targetPos = interceptPos + Vector2(getBallDist, 0.0).rotate(targetAngle + M_PI); // For arduinobot: 0.06
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
 	}
 
 
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     double successDist;
+    double successAngle;
     if (robot_output_target == "grsim") {
         successDist = 0.11;
+        successAngle = 0.1*M_PI;
     } else if (robot_output_target == "serial") {
-        successDist = getBallDist + 0.1;
+        successDist = getBallDist + 0.01;
+        if (HasDouble("successAngle")) {
+            successAngle = GetDouble("successAngle");
+        } else {
+            successAngle = 0.05*M_PI;
+        }
     }
 
-    // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
+    // targetAngle = (ballPos - robotPos).angle();
+    ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
 
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
     double angleError = cleanAngle(robot.angle - targetAngle);
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < 0.1*M_PI) {
+	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // ROS_INFO_STREAM("we're there!");
 
         // Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
@@ -203,6 +212,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
+
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", true);
     // private_bb->SetBool("dribbler", dribbler);
@@ -225,10 +235,14 @@ bt::Node::Status GetBall::Update (){
     if (HasString("stayOnSide")) {
         private_bb->SetString("stayOnSide", GetString("stayOnSide"));
     }
-
-    if (HasDouble("successDist")) {
-        private_bb->SetDouble("successDist", GetDouble("successDist"));
+    if (HasDouble("avoidRobotsGain")) {
+        private_bb->SetDouble("avoidRobotsGain", GetDouble("avoidRobotsGain"));
     }
+
+
+    // if (HasDouble("successDist")) {
+    //     private_bb->SetDouble("successDist", GetDouble("successDist"));
+    // }
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
