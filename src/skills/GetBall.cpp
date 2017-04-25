@@ -149,7 +149,7 @@ bt::Node::Status GetBall::Update (){
 	} else {
 		// dribbler = true;
         private_bb->SetBool("dribbler", true);
-        private_bb->SetDouble("pGainPosition", 1.0);
+        //private_bb->SetDouble("pGainPosition", 1.0);
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
 	}
 
@@ -209,10 +209,10 @@ bt::Node::Status GetBall::Update (){
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);
-    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
+    //private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
-
+    /*
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", true);
     // private_bb->SetBool("dribbler", dribbler);
@@ -243,7 +243,7 @@ bt::Node::Status GetBall::Update (){
     // if (HasDouble("successDist")) {
     //     private_bb->SetDouble("successDist", GetDouble("successDist"));
     // }
-
+    */
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {

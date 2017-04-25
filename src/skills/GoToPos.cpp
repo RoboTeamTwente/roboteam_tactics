@@ -161,7 +161,6 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
     if (posError.length() < 0.2) {
         pGainPosition = 1.0;
     }
-
     // Vector2 velTarget;
     // if (GetBool("quadraticController")) {
     //     Vector2 posErrorSquared = Vector2(posError.x*posError.length(), posError.y*posError.length());
@@ -174,6 +173,7 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
     if (velTarget.length() > maxSpeed) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
+
     return velTarget;
 }
 
@@ -478,6 +478,7 @@ double GoToPos::limitAngularVel(double angularVelTarget) {
 
 
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
+    setPresetControlParams();
     
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
@@ -580,7 +581,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             }
         }
     }
-
     drawer.drawLine("velCommand", myPos, sumOfForces);
 
     // Defense area avoidance
@@ -614,14 +614,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
-
     return command;
 }
 
 
 bt::Node::Status GoToPos::Update() {
-    setPresetControlParams();
-
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
