@@ -45,11 +45,11 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
 RobotType GoToPos::getRobotType() {
     int const ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    std::string const robotTypeKey = "/robot" + std::to_string(ROBOT_ID) + "/robotType";
+    std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
 
     if (ros::param::has(robotTypeKey)) {
         std::string robotType;
-        ros::param::getCached("/robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
+        ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
 
         if (robotType == "arduino") {
             return RobotType::ARDUINO;
