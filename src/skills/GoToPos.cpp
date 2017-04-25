@@ -33,32 +33,107 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         // Rest of the members
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
+
+        , robotType(RobotType::PROTO)
+
+        , lastRobotTypeError(now())
+        , lastPresetError(now())
         
         {
-            start = now();
             succeeded = false;
-
-            std::string robot_output_target = "";
-            ros::param::getCached("robot_output_target", robot_output_target);
-            if (robot_output_target == "grsim") {
-                pGainPosition = 2.0;
-                pGainRotation = 4.0;
-                minSpeedX = 0.0;
-                minSpeedY = 0.0;
-                maxSpeed = 1.5;
-                minAngularVel = 0.0;
-                maxAngularVel = 10.0;
-            } else if (robot_output_target == "serial") {
-                pGainPosition = 2.0; // OR FOR GETBALL MAYBE 2.0
-                pGainRotation = 2.0; //hansBot: 2.0 arduinoBot 2.0
-                minSpeedX = 0.2; //hansBot: 0.3 arduinoBot: 0.7
-                minSpeedY = 0.5; //hansBot: 0.5 arduinoBot: 1.0
-                maxSpeed = 3.0; // hansBot: 5.0 arduinoBot: 1.5
-                minAngularVel = 3.0; // hansBot: 3.0 arduinoBot: 5.0
-                maxAngularVel = 10.0;
-            }
         }
 
+RobotType GoToPos::getRobotType() {
+    int const ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
+
+    if (ros::param::has(robotTypeKey)) {
+        std::string robotType;
+        ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
+
+        if (robotType == "arduino") {
+            return RobotType::ARDUINO;
+        } else if (robotType == "proto") {
+            return RobotType::PROTO;
+        } else if (robotType == "grsim") {
+            return RobotType::GRSIM;
+        } else if (robotType == "") {
+            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+                ROS_INFO_STREAM("Empty value for found for param \"" 
+                        << robotTypeKey
+                        << "\" found. Defaulting to RobotTypes::PROTO.\n"
+                        );
+                lastRobotTypeError = now();
+            }
+        } else {
+            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+                ROS_ERROR_STREAM("Unknown value found for param \"" 
+                        << robotTypeKey 
+                        << "\": \"" 
+                        << robotType
+                        << "\". Defaulting to RobotType::PROTO."
+                        );
+                lastRobotTypeError = now();
+            }
+        }
+    } else {
+        if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
+            ROS_INFO_STREAM("No value for found for param \"" << robotTypeKey << "\" found. Defaulting to RobotTypes::PROTO.\n");
+            lastRobotTypeError = now();
+        }
+    }
+
+    return RobotType::PROTO;
+}
+
+void GoToPos::setPresetControlParams(RobotType newRobotType) {
+    if (newRobotType == RobotType::ARDUINO) {
+        pGainPosition = 1.0;
+        pGainRotation = 2.0;
+        minSpeedX = 0.7;
+        minSpeedY = 1.0; 
+        maxSpeed = 1.5; 
+        minAngularVel = 5.0;
+        maxAngularVel = 10.0;
+
+        robotType = RobotType::ARDUINO;
+    } else if (newRobotType == RobotType::PROTO) {
+        pGainPosition = 2.0; 
+        pGainRotation = 2.0;
+        minSpeedX = 0.2;
+        minSpeedY = 0.5;
+        maxSpeed = 2.0;
+        minAngularVel = 3.0;
+        maxAngularVel = 10.0;
+
+        robotType = RobotType::PROTO;
+    } else if (newRobotType == RobotType::GRSIM) {
+        pGainPosition = 2.0;
+        pGainRotation = 4.0;
+        minSpeedX = 0.0;
+        minSpeedY = 0.0;
+        maxSpeed = 1.5;
+        minAngularVel = 0.0;
+        maxAngularVel = 10.0;
+
+        robotType = RobotType::GRSIM;
+    } else {
+        if (time_difference_milliseconds(lastPresetError, now()).count() >= 1000) {
+            ROS_ERROR_STREAM("Could not set robot type of " 
+                    << blackboard->GetInt("ROBOT_ID")
+                    << ". Undefined type. Leaving the type on: "
+                    << (int) robotType
+                    << "\n"
+                    );
+
+            lastPresetError = now();
+        }
+    }
+}
+
+void GoToPos::setPresetControlParams() {
+    setPresetControlParams(getRobotType());
+}
 
 void GoToPos::sendStopCommand(uint id) {
     roboteam_msgs::RobotCommand command;
@@ -545,6 +620,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 bt::Node::Status GoToPos::Update() {
+    setPresetControlParams();
+
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {

@@ -57,6 +57,8 @@ public:
      * \brief Resets all data.
      */
     void reset();
+
+    void draw() const;
 private:
     const Section goalSection;
     std::vector<Section> blocked, open, robots;
@@ -82,7 +84,7 @@ public:
     Status Update() override;
     
 private:
-    static constexpr double ACCEPTABLE_DEVIATION = .05; // rad
+    static constexpr double ACCEPTABLE_DEVIATION = .02; // rad
     static constexpr double KICK_VEL = 7.5; // .5 m/s safety margin
     GoalPartition partition;
 };
