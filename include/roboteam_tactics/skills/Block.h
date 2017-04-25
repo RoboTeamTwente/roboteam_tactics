@@ -183,7 +183,7 @@ private:
 
 class GoalareaBlock : public BlockPos {
 public:
-    GoalareaBlock(string block_arg) : block_arg(block_arg), fallback(RelativeBlock(.5)) {}
+    GoalareaBlock(std::string block_arg) : block_arg(block_arg), fallback(RelativeBlock(.5)) {}
     Position block_pos(const Position& current,
                              const Vector& opponent,
                              const Vector& to_block) const {
@@ -219,7 +219,7 @@ public:
         return targetpospos;
     }  
 private:
-    string block_arg;
+    std::string block_arg;
     RelativeBlock fallback;
 };
 

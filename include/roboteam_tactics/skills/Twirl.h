@@ -15,7 +15,7 @@ namespace rtt {
  *     Type: Int
  *     Descr: The id of the robot to stop
  *   speed:
- *     Type: Int
+ *     Type: Double
  *     Descr: Number if rotations per second
  *     Default: 0.5
  */

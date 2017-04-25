@@ -53,7 +53,7 @@ private:
     ros::NodeHandle n;
     ros::Publisher debug_pub;
 
-    string our_side;
+    std::string our_side;
     double radius;
     double offsetlength=0.0;
     double offsetangle=0.0;
