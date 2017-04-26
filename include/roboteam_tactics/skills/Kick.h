@@ -4,6 +4,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -40,8 +41,10 @@ public:
 private:
 	int robotID;
 
+    Vector2 ballStartPos;
     Vector2 oldBallVel;
     int cycleCounter;
+    time_point startTime;
 };
 
 
