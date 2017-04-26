@@ -34,7 +34,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
 
-        , robotType(RobotType::PROTO)
+        , robotType(RobotType::ARDUINO)
 
         , lastRobotTypeError(now())
         , lastPresetError(now())
@@ -92,7 +92,7 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 2.0;
         minSpeedX = 0.7;
         minSpeedY = 1.0; 
-        maxSpeed = 1.5; 
+        maxSpeed = 3.0; 
         minAngularVel = 5.0;
         maxAngularVel = 10.0;
 

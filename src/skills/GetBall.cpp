@@ -199,7 +199,12 @@ bt::Node::Status GetBall::Update (){
 
         command.x_vel = 0;
         command.y_vel = 0;
-        command.dribbler = true;
+        if (GetBool("passOn")) {
+            command.dribbler = false;
+        } else {
+            command.dribbler = true;
+        }
+        
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command);   

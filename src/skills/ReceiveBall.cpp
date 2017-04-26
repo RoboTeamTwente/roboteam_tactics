@@ -241,6 +241,7 @@ bt::Node::Status ReceiveBall::Update (){
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
 		RTT_DEBUGLN("GetBall skill completed.");
+		publishStopCommand();
 		return Status::Running;
 		// return Status::Success;
 	} else {
