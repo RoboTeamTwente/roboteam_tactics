@@ -27,6 +27,9 @@ void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
     oldBallVel = Vector2(vel.x, vel.y);
     cycleCounter = 0;
+
+    ballStartPos = LastWorld::get().ball.pos;
+    startTime = now();
 }
 
 bt::Node::Status Kick::Update() {
@@ -66,6 +69,47 @@ bt::Node::Status Kick::Update() {
     	kickVel = GetDouble("kickVel");
     } else {
     	kickVel = 4;
+    }
+
+    if (HasBool("wait") && GetBool("wait")) {
+        // Check if we have waited for longer than the wait time
+        double waitTime = 250;
+        if (HasDouble("waitTime")) {
+            waitTime = GetDouble("waitTime");
+        }
+
+        if (time_difference_milliseconds(startTime, now()).count() >= waitTime) {
+            ROS_WARN_STREAM("Kicker timer expired!\n");
+            return Status::Failure;
+        }
+
+        // Check if the ball has moved beyond the threshold
+        auto world = LastWorld::get();
+        Vector2 ballNewPos = world.ball.pos;
+        double distThreshold = 0.10;
+        if (HasDouble("distThreshold")) {
+            distThreshold = GetDouble("distThreshold");
+        }
+
+        if ((ballNewPos - ballStartPos).length() >= distThreshold) {
+            ROS_WARN_STREAM("Ball moved beyond threshold, succeeded!");
+            return Status::Success;
+        }
+
+        // Otherwise kick the mofo
+        roboteam_msgs::RobotCommand command;
+        command.id = robotID;
+        command.dribbler = true;
+        command.kicker = true;
+        command.kicker_forced = true;
+        command.kicker_vel = kickVel;
+        command.x_vel = 0.0;
+        command.y_vel = 0.0;
+        command.w = 0.0;
+
+        rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+
+        return Status::Running;
     }
 
 	// ROS_INFO_STREAM("name: " << name << " " << robotID);
