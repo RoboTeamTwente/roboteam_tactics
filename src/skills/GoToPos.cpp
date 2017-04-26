@@ -135,6 +135,28 @@ void GoToPos::setPresetControlParams() {
     setPresetControlParams(getRobotType());
 }
 
+void GoToPos::setPresetControlParams(
+    	double pGainPosition,
+    	double pGainRotation,
+    	double maxAngularVel,
+    	double minAngularVel,
+    	double maxSpeed,
+    	double minSpeedX,
+    	double minSpeedY) {
+	this->pGainPosition = pGainPosition;
+	this->pGainRotation = pGainRotation;
+	this->maxAngularVel = maxAngularVel;
+	this->minAngularVel = minAngularVel;
+	this->maxSpeed = maxSpeed;
+	this->minSpeedX = minSpeedX;
+	this->minSpeedY	= minSpeedY;
+}
+
+void GoToPos::setPGains(double position, double rotation) {
+	pGainPosition = position;
+	pGainRotation = rotation;
+}
+
 void GoToPos::sendStopCommand(uint id) {
     roboteam_msgs::RobotCommand command;
     command.id = id;
@@ -600,10 +622,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     return command;
 }
 
+void GoToPos::Initialize() {
+	setPresetControlParams();
+}
 
 bt::Node::Status GoToPos::Update() {
-    setPresetControlParams();
-
     // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
