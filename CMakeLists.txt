@@ -57,6 +57,9 @@ set(BUILD_PRACTICE_TESTS TRUE)
 set(ENABLE_BT_TRACE TRUE)
 set(ENABLE_DEBUG_GRAPHICS TRUE)
 
+# Build machine learning components
+set(BUILD_LEARNING TRUE)
+
 # Set defines based on settings
 if (ENABLE_BT_TRACE)
     add_definitions(-DRTT_ENABLE_BT_RQT_TRACE)
@@ -368,3 +371,28 @@ if (BUILD_PRACTICE_TESTS)
         )
 
 endif (BUILD_PRACTICE_TESTS)
+
+if (BUILD_LEARNING)
+    add_executable(LearnGoToPos
+      ./src/learning/LearnGoToPos.cpp
+
+      $<TARGET_OBJECTS:analysis>
+      $<TARGET_OBJECTS:treegen>
+      $<TARGET_OBJECTS:alltrees>
+      $<TARGET_OBJECTS:skills>
+      $<TARGET_OBJECTS:conditions>
+      $<TARGET_OBJECTS:tactics>
+      $<TARGET_OBJECTS:utils>)
+    add_dependencies(LearnGoToPos
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        generate_json_t
+        utils
+        )
+    target_link_libraries(LearnGoToPos
+        ${catkin_LIBRARIES}
+        # For networking
+        ${QT_LIBRARIES}
+        bt
+        )
+endif (BUILD_LEARNING)
