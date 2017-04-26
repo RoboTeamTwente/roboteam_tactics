@@ -127,6 +127,7 @@ private:
     double pGainRotation;
     double maxAngularVel;
     double minAngularVel;
+    double avoidRobotsGain;
 
     // Control variables
     double maxSpeed;
@@ -134,6 +135,7 @@ private:
     double minSpeedY;
     double safetyMarginGoalAreas;
     double marginOutsideField;
+
 
     // Blackboard arguments
     double xGoal;

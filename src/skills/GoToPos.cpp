@@ -98,11 +98,11 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 1.0; 
-        pGainRotation = 8.0;
-        minSpeedX = 0.3;
+        pGainPosition = 2.0; 
+        pGainRotation = 2.0;
+        minSpeedX = 0.2;
         minSpeedY = 0.5;
-        maxSpeed = 0.8;
+        maxSpeed = 2.0;
         minAngularVel = 3.0;
         maxAngularVel = 10.0;
 
@@ -183,19 +183,19 @@ Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
     if (posError.length() < 0.2) {
         pGainPosition = 1.0;
     }
-
-    Vector2 velTarget;
-    if (GetBool("quadraticController")) {
-        Vector2 posErrorSquared = Vector2(posError.x*posError.length(), posError.y*posError.length());
-        double sqGainPosition = GetDouble("sqGainPosition");
-        velTarget = posErrorSquared * sqGainPosition;
-    } else {
-        velTarget = posError*pGainPosition;
-    }
+    // Vector2 velTarget;
+    // if (GetBool("quadraticController")) {
+    //     Vector2 posErrorSquared = Vector2(posError.x*posError.length(), posError.y*posError.length());
+    //     double sqGainPosition = GetDouble("sqGainPosition");
+    //     velTarget = posErrorSquared * sqGainPosition;
+    // } else {
+    Vector2 velTarget = posError*pGainPosition;
+    // }
     
     if (velTarget.length() > maxSpeed) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
+
     return velTarget;
 }
 
@@ -249,32 +249,32 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
 // TODO: fix the problem that if there are two robots in the way on both sides of the cone, our robot tries to push through them regardless
 // of whether he hits them or not (maybe use the commented variable distanceToCenter to accomplish this)
-// Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
-//     Vector2 antenna = antennaCone.center - myPos;    
-
-//     Vector2 forceVector(0.0, 0.0);
-//     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
-//         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
-//         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
-//             forceVector = antenna.rotate(-0.5*M_PI).scale(1.0 / (otherRobotPos - myPos).length());
-//         }
-//         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
-//             forceVector = antenna.rotate(0.5*M_PI).scale(1.0 / (otherRobotPos - myPos).length());
-//         }
-//         // drawer.setColor(255, 255, 0);
-//         // drawer.drawLine("forceFromRobot", myPos, forceVector);
-//     }    
-//     return forceVector;
-// }
-
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+    Vector2 antenna = antennaCone.center - myPos;    
+
     Vector2 forceVector(0.0, 0.0);
-    Vector2 diffVec = myPos - otherRobotPos;
-    if (diffVec.length() < lookingDistance) {
-        forceVector = diffVec.scale(0.5 / (diffVec.length() * diffVec.length()));
-    }
+    if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
+        // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
+        if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            forceVector = antenna.rotate(-0.5*M_PI).scale(avoidRobotsGain / (otherRobotPos - myPos).length());
+        }
+        if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
+            forceVector = antenna.rotate(0.5*M_PI).scale(avoidRobotsGain / (otherRobotPos - myPos).length());
+        }
+        // drawer.setColor(255, 255, 0);
+        // drawer.drawLine("forceFromRobot", myPos, forceVector);
+    }    
     return forceVector;
 }
+
+// Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
+//     Vector2 forceVector(0.0, 0.0);
+//     Vector2 diffVec = myPos - otherRobotPos;
+//     if (diffVec.length() < lookingDistance) {
+//         forceVector = diffVec.scale(avoidRobotsGain / (diffVec.length() * diffVec.length()));
+//     }
+//     return forceVector;
+// }
 
 
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
@@ -282,20 +282,20 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 0.75; // default
+    double lookingDistance = 0.5; // default
     if (lookingDistance > (posError.length()) + 0.0) {
         lookingDistance = posError.length() + 0.0;
     }
     
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    Vector2 coneStart = myPos - antenna;
-    Cone antennaCone(coneStart, (antenna + myPos), 0.3);
+    Vector2 coneStart = myPos - antenna.scale(1.0);
+    Cone antennaCone(coneStart, (antenna + myPos), 0.2);
 
     // Draw the lines of the cone in rqt_view
-    // Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
-    // Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    // drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
-    // drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
+    Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
+    Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
+    drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
+    drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
     for (auto const currentRobot : world.us) {
@@ -312,9 +312,11 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         sumOfForces = sumOfForces + forceVector; 
     }
 
-    // if (sumOfForces.length() < 0.01) {
-    //     drawer.removeLine("forceFromRobot");
-    // }
+    if (sumOfForces.length() < 0.01) {
+        drawer.removeLine("forceFromRobot");
+    }
+
+
 
     return sumOfForces;
 }
@@ -498,6 +500,7 @@ double GoToPos::limitAngularVel(double angularVelTarget) {
 
 
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
+    setPresetControlParams();
     
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
@@ -517,6 +520,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     if (HasDouble("maxSpeed")) {
         maxSpeed = GetDouble("maxSpeed");
+    }
+
+    if (HasDouble("avoidRobotsGain")) {
+        avoidRobotsGain = GetDouble("avoidRobotsGain");
+    } else {
+        avoidRobotsGain = 0.2;
+    }
+
+    if (GetBool("avoidRobots")) {
+        // pGainPosition = 5.0;
+        maxSpeed = 0.6;
     }
 
     // Find the robot with the specified ID
@@ -583,8 +597,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        if (posError.length() > 0.5) {
+            if (sumOfForces.length() < maxSpeed) {
+                sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
+            }
+        }
     }
-
     drawer.drawLine("velCommand", myPos, sumOfForces);
 
     // Defense area avoidance
@@ -618,7 +636,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
-
     return command;
 }
 
