@@ -25,22 +25,49 @@ BlockGoal::BlockGoal(std::string name, bt::Blackboard::Ptr blackboard) : Skill(n
         
         // Note the '+ M_PI_2l': SSLVision says 0 is the positive y-axis, here it's the positive x-axis,
         // so rotate ccw by a quarter circle.
+        double rot = - .01;
         if (leftSide) {
             auto top = geom->top_right_penalty_arc;
             auto bottom = geom->bottom_right_penalty_arc;
-            topArc = Arc(Vector2(top.center), top.radius, top.a1 + M_PI_2l, top.a2 + M_PI_2l);
-            bottomArc = Arc(Vector2(bottom.center), bottom.radius, bottom.a1 + M_PI_2l, bottom.a2 + M_PI_2l);
+            topArc = Arc(Vector2(top.center), top.radius, top.a1 + rot, top.a2 + rot);
+            bottomArc = Arc(Vector2(bottom.center), bottom.radius, bottom.a1 + rot, bottom.a2 + rot);
             straightSection = Section(geom->right_penalty_line.begin, geom->right_penalty_line.end);
         } else {
             auto top = geom->top_left_penalty_arc;
             auto bottom = geom->bottom_left_penalty_arc;
-            topArc = Arc(Vector2(top.center), top.radius, top.a1 + M_PI_2l, top.a2 + M_PI_2l);
-            bottomArc = Arc(Vector2(bottom.center), bottom.radius, bottom.a1 + M_PI_2l, bottom.a2 + M_PI_2l);
+            topArc = Arc(Vector2(top.center), top.radius, top.a1 + rot, top.a2 + rot);
+            bottomArc = Arc(Vector2(bottom.center), bottom.radius, bottom.a1 + rot, bottom.a2 + rot);
             straightSection = Section(geom->left_penalty_line.begin, geom->left_penalty_line.end);
         }
     }
     
     center = Vector2((leftSide ? 1 : -1) * geom->field_length / 2, 0.0);
+
+    static Draw d;
+    d.setColor(255,0,0);
+    double topD = (topArc.angleEnd - topArc.angleStart) / 100.0;
+    double bottomD = (bottomArc.angleEnd - bottomArc.angleStart) / 100.0;
+    double topA = topArc.angleStart + .001;
+    double bottomA = bottomArc.angleStart + .001;
+    Vector2 lastTop = *topArc.arcPointTowards(topA) + topArc.center;
+    Vector2 lastBottom = *bottomArc.arcPointTowards(bottomA) + bottomArc.center;
+    for (int i = 0; i < 100; i++) {
+    	auto optVec = topArc.arcPointTowards(topA);
+    	if (optVec) {
+    		d.drawLineAbs("toparc" + std::to_string(i), lastTop, *optVec + topArc.center);
+    		lastTop = *optVec + topArc.center;
+    		std::cout << lastTop << "\n";
+    	}
+    	topA += topD;
+
+    	optVec = bottomArc.arcPointTowards(bottomA);
+    	if (optVec) {
+        	d.drawLineAbs("bottomarc" + std::to_string(i), lastBottom, *optVec + bottomArc.center);
+        	lastBottom = *optVec + bottomArc.center;
+    	}
+    	bottomA += bottomD;
+    }
+    ros::spinOnce();
 }
 
 constexpr double GOAL_LINE_CLEARANCE = .15;
