@@ -93,6 +93,7 @@ public:
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
 
     Status Update();
+    void Initialize() override;
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -106,6 +107,16 @@ public:
     RobotType getRobotType();
     void setPresetControlParams(RobotType newRobotType);
     void setPresetControlParams();
+    void setPresetControlParams(
+    	double pGainPosition,
+    	double pGainRotation,
+    	double maxAngularVel,
+    	double minAngularVel,
+    	double maxSpeed,
+    	double minSpeedX,
+    	double minSpeedY
+    );
+    void setPGains(double position, double rotation);
     
 private:
 
