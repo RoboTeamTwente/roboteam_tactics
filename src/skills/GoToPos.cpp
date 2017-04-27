@@ -34,7 +34,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
 
-        , robotType(RobotType::PROTO)
+        , robotType(RobotType::ARDUINO)
 
         , lastRobotTypeError(now())
         , lastPresetError(now())
@@ -92,7 +92,7 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 2.0;
         minSpeedX = 0.7;
         minSpeedY = 1.0; 
-        maxSpeed = 1.5; 
+        maxSpeed = 3.0; 
         minAngularVel = 5.0;
         maxAngularVel = 10.0;
 
@@ -211,11 +211,11 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
     if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
     }
-
+    std::cout<<"angleGoal: "<<angleGoal<<" myAngle: "<<myAngle<<"\n";
     // Proportional term
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
-
+    std::cout << "angleError "<< angleError << " pGainRotation: "<<pGainRotation << "\n";
     // // Integral term
     // double updateRate;
     // ros::param::get("role_iterations_per_second", updateRate);
@@ -241,7 +241,7 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
     if (fabs(angularVelTarget) > maxAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
-
+    std::cout << "angularVelTarget: "<<angularVelTarget<<"maxAngularVel: "<<maxAngularVel<<"\n";
     return angularVelTarget;
 }
 
@@ -618,7 +618,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
-
+    std::cout<< "angularVelTarget: "<<angularVelTarget<<"\n";
     sumOfForces = limitVel(sumOfForces, posError);
     if (sumOfForces.length() < 0.5) {
         angularVelTarget = limitAngularVel(angularVelTarget);

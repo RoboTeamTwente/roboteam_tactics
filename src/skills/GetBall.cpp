@@ -169,12 +169,18 @@ bt::Node::Status GetBall::Update (){
             successAngle = 0.05*M_PI;
         }
     }
+    if (HasDouble("successDist")) {
+         successDist=GetDouble("successDist");
+    }
 
     // targetAngle = (ballPos - robotPos).angle();
     ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
-
+    ROS_INFO_STREAM("successDist: "<<successDist<< ", angleDist: "<<successAngle);
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
     double angleError = cleanAngle(robot.angle - targetAngle);
+
+
+
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // ROS_INFO_STREAM("we're there!");
 
@@ -191,15 +197,25 @@ bt::Node::Status GetBall::Update (){
 // 		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
 // 		// in the situation when the ball is rolling and we are catching up
 // >>>>>>> 1706a8dc695f3b77e4f8c4490b6ecd2471c55c58
+        double kicker_vel=5.0;
+        if(HasDouble("kickerVel")){
+            kicker_vel=GetDouble("kickerVel");
+        }
+        
         roboteam_msgs::RobotCommand command;
         command.id = robotID;
         command.kicker = GetBool("passOn");
         command.kicker_forced = GetBool("passOn");
-        command.kicker_vel = GetBool("passOn") ? 5.0 : 0;
+        command.kicker_vel = GetBool("passOn") ? kicker_vel : 0;
 
         command.x_vel = 0;
         command.y_vel = 0;
-        command.dribbler = true;
+        if (GetBool("passOn")) {
+            command.dribbler = false;
+        } else {
+            command.dribbler = true;
+        }
+        
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command);   
@@ -209,10 +225,10 @@ bt::Node::Status GetBall::Update (){
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);
-    //private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
-    /*
+    
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", true);
     // private_bb->SetBool("dribbler", dribbler);
@@ -238,11 +254,14 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("avoidRobotsGain")) {
         private_bb->SetDouble("avoidRobotsGain", GetDouble("avoidRobotsGain"));
     }
+    if (HasBool("forceAngle")) {
+        private_bb->SetBool("forceAngle", GetBool("forceAngle"));
+    }
 
-
-    // if (HasDouble("successDist")) {
-    //     private_bb->SetDouble("successDist", GetDouble("successDist"));
-    // }
+    /*
+    if (HasDouble("successDist")) {
+         private_bb->SetDouble("successDist", GetDouble("successDist"));
+    }
     */
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
