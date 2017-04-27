@@ -179,19 +179,8 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("getBallDist")) {
         getBallDist = GetDouble("getBallDist");
     } else {
-        getBallDist = 0.11;
+        getBallDist = 0.09;
     }
-
-    bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > 0.05*M_PI) {
-		targetPos = ballPos + Vector2(0.3, 0.0).rotate(intermediateAngle + M_PI);
-	} else {
-		// dribbler = true;
-        private_bb->SetBool("dribbler", true);
-        //private_bb->SetDouble("pGainPosition", 1.0);
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
-	}
-
 
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
@@ -211,6 +200,20 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("successDist")) {
          successDist=GetDouble("successDist");
     }
+
+
+    bool dribbler = false;
+	if (posDiff > 0.4 || fabs(angleDiff) > successAngle) {
+		targetPos = ballPos + Vector2(0.3, 0.0).rotate(intermediateAngle + M_PI);
+	} else {
+		// dribbler = true;
+        private_bb->SetBool("dribbler", true);
+        //private_bb->SetDouble("pGainPosition", 1.0);
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
+	}
+
+
+    
 
     // targetAngle = (ballPos - robotPos).angle();
     ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
