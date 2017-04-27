@@ -59,17 +59,56 @@ void GetBall::publishStopCommand() {
 	command.x_vel = 0.0;
 	command.y_vel = 0.0;
 	command.w = 0.0;
-	command.dribbler = true;
+	command.dribbler = false;
 
 	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
 }
+
+void GetBall::publishKickCommand(){
+
+    double kicker_vel=5.0;
+    if(HasDouble("kickerVel")){
+        kicker_vel=GetDouble("kickerVel");
+    }
+    
+    roboteam_msgs::RobotCommand command;
+    command.id = robotID;
+    command.kicker = GetBool("passOn");
+    command.kicker_forced = GetBool("passOn");
+    command.kicker_vel = GetBool("passOn") ? kicker_vel : 0;
+
+    command.x_vel = 0;
+    command.y_vel = 0;
+    if (GetBool("passOn")) {
+        command.dribbler = false;
+    } else {
+        command.dribbler = true;
+    }
+    
+
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    pub.publish(command);  
+}
+
 
 void GetBall::Initialize() {
     ballCloseFrameCount = 0;
 }
 
 bt::Node::Status GetBall::Update (){
+
+    if(finalStage){
+        if(countFinalMessages < 10){
+            publishKickCommand();
+            countFinalMessages=countFinalMessages+1;
+            return Status::Running;
+        }
+        else {
+            publishStopCommand();
+            return Status::Success;
+        }
+    }
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
@@ -159,14 +198,14 @@ bt::Node::Status GetBall::Update (){
     double successDist;
     double successAngle;
     if (robot_output_target == "grsim") {
-        successDist = 0.11;
-        successAngle = 0.1*M_PI;
+        successDist = 0.13;
+        successAngle = 0.3;
     } else if (robot_output_target == "serial") {
         successDist = getBallDist + 0.01;
         if (HasDouble("successAngle")) {
             successAngle = GetDouble("successAngle");
         } else {
-            successAngle = 0.05*M_PI;
+            successAngle = 0.3;
         }
     }
     if (HasDouble("successDist")) {
@@ -175,7 +214,7 @@ bt::Node::Status GetBall::Update (){
 
     // targetAngle = (ballPos - robotPos).angle();
     ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
-    ROS_INFO_STREAM("successDist: "<<successDist<< ", angleDist: "<<successAngle);
+    ROS_INFO_STREAM("successDist: "<<successDist<< ", successAngle: "<<successAngle);
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
     double angleError = cleanAngle(robot.angle - targetAngle);
 
@@ -219,9 +258,13 @@ bt::Node::Status GetBall::Update (){
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command);   
-        pub.publish(command);    
+        pub.publish(command); 
 
-        return Status::Success;
+        finalStage=true;
+        publishKickCommand();
+        
+
+        return Status::Running;
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);

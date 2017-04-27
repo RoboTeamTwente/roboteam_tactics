@@ -286,8 +286,19 @@ bt::Node::Status RotateAroundPoint::Update (){
 			if(requiredrotv > maxrot){requiredrotv=maxrot;}
 			if(requiredrotv < -maxrot){requiredrotv=-maxrot;}
 
-			
-			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > 0.01 or fabs(radiusReq) > 0.1 or fabs(turnReq) > 0.1) { // robot not finished yet
+			double successDist=0.13;
+			if(HasDouble("successDist")){
+				successDist=GetDouble("successDist");
+			}
+
+			double successAngle=0.2;
+			if(HasDouble("successAngle")){
+				successDist=GetDouble("successAngle");
+			}
+
+
+
+			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > successAngle or fabs(radiusReq) > successDist or fabs(turnReq) > successAngle) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;

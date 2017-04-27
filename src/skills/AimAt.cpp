@@ -61,7 +61,7 @@ bt::Node::Status AimAt::Update (){
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
     private_bb->SetDouble("faceTowardsPosy", passTo.y);
     private_bb->SetDouble("w",3.0);
-    private_bb->SetDouble("radius", 0.1);
+    private_bb->SetDouble("radius", 0.11);
 
     Status result = rotateAroundPoint.Update();
 	if (result == Status::Success) {
