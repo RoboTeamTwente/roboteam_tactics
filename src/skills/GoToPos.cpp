@@ -102,7 +102,7 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 2.0;
         minSpeedX = 0.2;
         minSpeedY = 0.5;
-        maxSpeed = 2.0;
+        maxSpeed = 1.0;
         minAngularVel = 3.0;
         maxAngularVel = 10.0;
 
@@ -540,7 +540,7 @@ double GoToPos::limitAngularVel(double angularVelTarget) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
     }
 
-    prevAngularVelTarget = angularVelTarget;
+    // prevAngularVelTarget = angularVelTarget;
     return angularVelTarget;
 }
 
@@ -567,7 +567,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("maxSpeed")) {
         maxSpeed = GetDouble("maxSpeed");
     }
-    ROS_INFO_STREAM("maxSpeed: " << maxSpeed);
+    // ROS_INFO_STREAM("maxSpeed: " << maxSpeed);
 
     if (HasDouble("avoidRobotsGain")) {
         avoidRobotsGain = GetDouble("avoidRobotsGain");
@@ -650,7 +650,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             }
         }
     }
-    
+
     drawer.setColor(255, 0, 0);
     drawer.drawLine("velCommand", myPos, sumOfForces);
     drawer.setColor(0, 0, 0);
@@ -678,6 +678,19 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Rotate the commands from world frame to robot frame 
     Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
 
+    if (GetBool("smoothDriving")) {
+        if ((velCommand.length() - prevVelCommand.length()) > 0.1) {
+            ROS_INFO_STREAM("limiting acceleration!");
+            velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
+        }
+        if ((fabs(angularVelTarget) - fabs(prevAngularVelTarget)) > 0.5) {
+            ROS_INFO_STREAM("limiting angular acc " << angularVelTarget);
+            angularVelTarget = prevAngularVelTarget + (0.5 * signum(angularVelTarget));
+            ROS_INFO_STREAM("new angular vel: " << angularVelTarget);
+        }
+        prevVelCommand = velCommand;
+    }
+    prevAngularVelTarget = angularVelTarget;
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;

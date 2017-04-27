@@ -29,7 +29,8 @@ RTT_REGISTER_SKILL(ReceiveBall);
 
 ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , goToPos("", private_bb) {
+        , goToPos("", private_bb)
+        , getBall("", blackboard) {
     hasBall = whichRobotHasBall();
     ros::param::set("readyToReceiveBall", false);
 }
@@ -218,6 +219,8 @@ bt::Node::Status ReceiveBall::Update (){
 		// private_bb->SetBool("dribbler", false);
 	} else { 
 		// If we are close enough to the ball we can drive towards it and turn on the dribbler
+		return getBall.Update();
+
 		Vector2 posDiff = ballPos - robotPos;
 		Vector2 posDiffNorm = posDiff.normalize();
 		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
@@ -240,10 +243,10 @@ bt::Node::Status ReceiveBall::Update (){
 	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
-		RTT_DEBUGLN("GetBall skill completed.");
+		RTT_DEBUGLN("ReceiveBall skill completed.");
 		publishStopCommand();
-		return Status::Running;
-		// return Status::Success;
+		// return Status::Running;
+		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
@@ -265,13 +268,8 @@ bt::Node::Status ReceiveBall::Update (){
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	        pub.publish(*command);
 	    }
-	        // return Status::Running;
-	    // } else {
-	    	// return Status::Running;
-	        // return Status::Success;
-	    // }
-		return Status::Running;
-		
+
+	    return Status::Running;		
 	}
 };
 

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
@@ -70,6 +71,7 @@ private:
 	double acceptableDeviation = 0.4;
 
 	GoToPos goToPos;
+	GetBall getBall;
 
     bool touchedBall = false;
     time_point initialBallContact;

@@ -160,13 +160,13 @@ bt::Node::Status GetBall::Update (){
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
-    ROS_INFO_STREAM("angleDiff: " << angleDiff);
+    // ROS_INFO_STREAM("angleDiff: " << angleDiff);
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.5*M_PI) {
-		intermediateAngle = (ballPos - robotPos).angle() + 0.5*M_PI;
-	} else if (angleDiff < -0.5*M_PI) {
-		intermediateAngle = (ballPos - robotPos).angle() - 0.5*M_PI;
+	if (angleDiff > 0.3*M_PI) {
+		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
+	} else if (angleDiff < -0.3*M_PI) {
+		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
     }
@@ -190,7 +190,7 @@ bt::Node::Status GetBall::Update (){
         successDist = 0.13;
         successAngle = 0.3;
     } else if (robot_output_target == "serial") {
-        successDist = getBallDist + 0.01;
+        successDist = 0.12;
         if (HasDouble("successAngle")) {
             successAngle = GetDouble("successAngle");
         } else {
@@ -203,8 +203,8 @@ bt::Node::Status GetBall::Update (){
 
 
     bool dribbler = false;
-	if (posDiff > 0.4 || fabs(angleDiff) > successAngle) {
-		targetPos = ballPos + Vector2(0.3, 0.0).rotate(intermediateAngle + M_PI);
+	if (posDiff > 0.5 || fabs(angleDiff) > successAngle) {
+		targetPos = ballPos + Vector2(0.4, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
 		// dribbler = true;
         private_bb->SetBool("dribbler", true);
@@ -216,13 +216,13 @@ bt::Node::Status GetBall::Update (){
     
 
     // targetAngle = (ballPos - robotPos).angle();
-    ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
-    ROS_INFO_STREAM("successDist: "<<successDist<< ", successAngle: "<<successAngle);
+    // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
+    // ROS_INFO_STREAM("successDist: "<<successDist<< ", successAngle: "<<successAngle);
     double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
     double angleError = cleanAngle(robot.angle - targetAngle);
 
 
-
+    ROS_INFO_STREAM("dist: " << (ballPos - robotPos).length() << " angle: " << angleError);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // ROS_INFO_STREAM("we're there!");
 
@@ -302,6 +302,9 @@ bt::Node::Status GetBall::Update (){
     }
     if (HasBool("forceAngle")) {
         private_bb->SetBool("forceAngle", GetBool("forceAngle"));
+    }
+    if (HasBool("smoothDriving")) {
+        private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
     }
 
     /*

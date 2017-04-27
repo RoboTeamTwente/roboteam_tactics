@@ -65,6 +65,25 @@ bt::Node::Status AimAt::Update (){
 
     Status result = rotateAroundPoint.Update();
 	if (result == Status::Success) {
+
+		roboteam_msgs::RobotCommand command;
+        command.id = robotID;
+        command.kicker = GetBool("passOn");
+        command.kicker_forced = GetBool("passOn");
+        command.kicker_vel = GetBool("passOn") ? 6.0 : 0;
+
+        command.x_vel = 0;
+        command.y_vel = 0;
+        if (GetBool("passOn")) {
+            command.dribbler = false;
+        } else {
+            command.dribbler = true;
+        }
+
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        pub.publish(command); 
+        pub.publish(command);   
+
 		if (setRosParam) {
 			set_PARAM_KICKING(true);
 		}

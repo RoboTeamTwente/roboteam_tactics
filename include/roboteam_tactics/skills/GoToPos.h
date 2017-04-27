@@ -150,6 +150,7 @@ private:
 
     Vector2 prevTargetPos;
     Vector2 prevSumOfForces;
+    Vector2 prevVelCommand;
     double prevAngularVelTarget;
     bool succeeded;
 
