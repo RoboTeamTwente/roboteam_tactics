@@ -37,19 +37,37 @@ bt::Node::Status SimpleKeeper::Update() {
     }
 
     Vector2 ballPos(world.ball.pos);
-    Vector2 goalPos = LastWorld::get_our_goal_center();
+    Vector2 goalPos;
+    bool ourSide;
+    if (HasBool("ourSide")) {
+        ourSide = GetBool("ourSide");
+        if (ourSide) {
+            goalPos = LastWorld::get_our_goal_center();
+        } else {
+            goalPos = LastWorld::get_their_goal_center();
+        }
+    } else {
+        ourSide = true;
+        goalPos = LastWorld::get_our_goal_center();
+    }
+
     double angle = (ballPos - goalPos).angle();
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
-    if (goalPos.x < 0) {
+    // if (goalPos.x < 0) {
         targetPos = goalPos + targetPos;
-    } else {
-        targetPos = goalPos - targetPos;
-    }
+    // } else {
+        // targetPos = goalPos - targetPos;
+    // }
 
     if (ballPos.y < -0.8 || ballPos.y > 0.8) {
-        targetPos = Vector2(distanceFromGoal, 0.0) + goalPos;
+        if (goalPos.x < 0) {
+            targetPos = goalPos + Vector2(distanceFromGoal, 0.0);
+        } else {
+            targetPos = goalPos - Vector2(distanceFromGoal, 0.0);
+        }
+        
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);
