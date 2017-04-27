@@ -375,7 +375,9 @@ endif (BUILD_PRACTICE_TESTS)
 if (BUILD_LEARNING)
     add_executable(LearnGoToPos
       ./src/learning/LearnGoToPos.cpp
-
+      ./src/practice_tests/PracticeTest.cpp
+      ./src/practice_tests/TestSetup.cpp
+      
       $<TARGET_OBJECTS:analysis>
       $<TARGET_OBJECTS:treegen>
       $<TARGET_OBJECTS:alltrees>
