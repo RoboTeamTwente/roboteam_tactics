@@ -98,8 +98,8 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0; 
-        pGainRotation = 2.0;
+        pGainPosition = 2.0; // eventueel 1 
+        pGainRotation = 2.0; // eventueel 1
         minSpeedX = 0.2;
         minSpeedY = 0.5;
         maxSpeed = 1.0;
