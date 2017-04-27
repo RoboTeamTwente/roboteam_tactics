@@ -225,7 +225,7 @@ bt::Node::Status ReceiveBall::Update (){
 		// private_bb->SetBool("dribbler", true);
 	}
 	
-	if (distanceToBall < 1.0) {
+	if (distanceToBall < 0.7) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);

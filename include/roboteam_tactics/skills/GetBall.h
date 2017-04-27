@@ -74,6 +74,7 @@ public:
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
+    void publishKickCommand();
     
 	int robotID;
 	int hasBall;
@@ -87,6 +88,8 @@ private:
     int ballCloseFrameCount;
 
     double distanceFromBallWhenDribbling;
+    bool finalStage=false;
+    int countFinalMessages=0;
 };
 
 } // rtt
