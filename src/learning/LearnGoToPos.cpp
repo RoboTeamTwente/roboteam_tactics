@@ -1,21 +1,28 @@
 #include "roboteam_tactics/learning/LearnGoToPos.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/practice_tests/TestSetup.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Position.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/RoleDirective.h"
 
-
-constexpr int TIME_LIMIT_MILLIS = 3000;         //< Time in ms to allow before applying a score penalty
-constexpr rtt::Position TGT_POS(2.0, 2.0, M_PI);//< Position to drive to
-constexpr rtt::Position INIT_POS;				//< Position to return to after tests
-constexpr size_t MAX_ITERATIONS = 10;			//< Max number of iterations to train
-constexpr double INIT_P_POS = 2.0;				//< Initial pGainPosition
-constexpr double INIT_P_ROT = 4.0;				//< Initial pGainRotation
-constexpr double MIN_GAIN = .5;					//< Minimum possible gain value
-constexpr double MAX_GAIN = 15;					//< Maximum possible gain value
-constexpr double GAIN_STEP = 1.0;				//< Initial gain step size
-constexpr double CONVERGENCE_THRESHOLD = 0.001; //< Divergence value at which to consider the training to have converged
+constexpr double GRSIM_SPEEDUP_FACTOR = 1.0;
+constexpr int TIME_LIMIT_MILLIS = 3000 / GRSIM_SPEEDUP_FACTOR;	//< Time in ms to allow before applying a score penalty
+constexpr rtt::Position TGT_POS(2.0, 2.0, M_PI);				//< Position to drive to
+constexpr rtt::Position INIT_POS;								//< Position to return to after tests
+constexpr size_t MAX_ITERATIONS = 10;							//< Max number of iterations to train
+constexpr double INIT_P_POS = 2.0;								//< Initial pGainPosition
+constexpr double INIT_P_ROT = 4.0;								//< Initial pGainRotation
+constexpr double MIN_GAIN = .5;									//< Minimum possible gain value
+constexpr double MAX_GAIN = 15;									//< Maximum possible gain value
+constexpr double GAIN_STEP = 1.0;								//< Initial gain step size
+constexpr double CONVERGENCE_THRESHOLD = 0.001;					//< Divergence value at which to consider the training to have converged
+const rtt::practice::Config SETUP =
+		rtt::practice::SetupBuilder::builder()
+			->combine(rtt::practice::SetupBuilder::reset())
+			->with_bot({0, true}, {0, 0, 0})
+			->with_bot({1, true}, {1, 1, 0})
+			->build();
 
 namespace rtt {
 
@@ -42,6 +49,8 @@ bt::Node::Status runGTP(const Position& pos, boost::optional<GTPLearner::Data> p
 }
 
 const GTPLearner::ScoreFunction gtpScorer = [](const GTPLearner::Data& data) {
+	rtt::practice::send_setup_to_grsim(SETUP);
+	ros::spinOnce();
 	time_point startTime = now();
 	auto status = runGTP(TGT_POS, data);
 	milliseconds time = time_difference_milliseconds(startTime, now());
@@ -64,7 +73,7 @@ const GTPLearner::ScoreFunction gtpScorer = [](const GTPLearner::Data& data) {
 		// missing the target by 10 cm.
 	}
 
-	runGTP(INIT_POS, boost::none);
+	//runGTP(INIT_POS, boost::none);
 	return -score;
 };
 
@@ -78,6 +87,7 @@ int main(int argc, char* argv[]) {
 	rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
 	rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
 	rtt::LastWorld::wait_for_first_messages();
+
 	ros::param::set("robot0/robotType", "grsim");
 
 	std::cout << "done. Initial pGains: pos=" << INIT_P_POS << ", rot=" << INIT_P_ROT << "\n";
