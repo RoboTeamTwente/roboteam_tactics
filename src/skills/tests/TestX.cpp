@@ -218,8 +218,6 @@ How to use:
 
         std::cout << "Spotted 6 role directives, carrying on!\n";
 
-        rtt::RobotDealer::initialize_robots(5, {0, 1, 2, 3, 4});
-
         // TODO: Maybe at the end ensure that the role nodes stop the execution?
         // And this can then be prevented with a command line switch
     }
