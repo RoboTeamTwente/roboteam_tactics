@@ -27,7 +27,7 @@ public:
     virtual void Initialize();
     virtual void Terminate(Status s);
 
-    Status Tick();
+    virtual Status Tick();
 
     bool IsSuccess() const;
     bool IsFailure() const;
@@ -39,7 +39,7 @@ public:
     using Ptr = std::shared_ptr<Node>;
 
     bt::Blackboard::Ptr private_bb = std::make_shared<bt::Blackboard>();
-    
+
     virtual std::string node_name();
     static std::string status_desc;
 
@@ -53,4 +53,3 @@ using Nodes = std::vector<Node::Ptr>;
 std::string statusToString(bt::Node::Status status);
 
 } // bt
-
