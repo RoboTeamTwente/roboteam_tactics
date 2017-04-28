@@ -21,7 +21,7 @@ namespace rtt {
  *   - ROBOT_ID:
  *       Type: Int
  *       Descr: The id of the robot
- *   - AimAt:
+ *   - aimAt:
  *       Type: String
  *       Can be:
  *         - fieldcenter: The center of the field, (0, 0)
@@ -29,13 +29,13 @@ namespace rtt {
  *         - ourgoal: Our goal
  *         - robot: The robot determined by AimAtRobot and AimAtRobotOurTeam
  *       Descr: Determines where to aim after getting the ball
- *    - AimAtRobot:
+ *    - aimAtRobot:
  *        Type: Int
- *        Used when: AimAt == robot
+ *        Used when: aimAt == robot
  *        Descr: The id of an opponent robot to aim at
- *    - AimAtRobotOurTeam:
+ *    - aimAtRobotOurTeam:
  *        Type: Int
- *        Used when: AimAt == robot
+ *        Used when: aimAt == robot
  *        Descr: The id of one of our robots to aim at
  *    - passOn:
  *        Type: Bool

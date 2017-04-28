@@ -218,8 +218,6 @@ How to use:
 
         std::cout << "Spotted 6 role directives, carrying on!\n";
 
-        rtt::RobotDealer::initialize_robots(5, {0, 1, 2, 3, 4});
-
         // TODO: Maybe at the end ensure that the role nodes stop the execution?
         // And this can then be prevented with a command line switch
     }
@@ -229,6 +227,8 @@ How to use:
     double updateRate = 30;
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
+
+    rtt::RobotDealer::initialize_robots(0, {1, 2}); // , 3, 4, 5});
 
     if (rtt::factories::isTree(testClass)) {
         // Notify the tree debugger that we're running a tree.
