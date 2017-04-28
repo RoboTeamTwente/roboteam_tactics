@@ -217,9 +217,11 @@ bt::Node::Status ReceiveBall::Update (){
 	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
 	Vector2 posError = targetPos - robotPos;
 	double distanceToBall = (ballPos-receiveBallAtPos).length();
-	double acceptableDeviation2 = 1.0;
+	double acceptableDeviation2 = 1.5;
 
-	if (ballHasBeenClose || distanceToBall < acceptableDeviation2) {
+	Vector2 ballVel(ball.vel);
+	ROS_INFO_STREAM("ballVel: " << ballVel.length());
+	if (ballHasBeenClose || (distanceToBall < acceptableDeviation2 && ballVel.length() < 0.5)) {
 		ballHasBeenClose = true;
 		return getBall.Update();
 	}

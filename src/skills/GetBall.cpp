@@ -221,6 +221,7 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("dribbler", true);
         //private_bb->SetDouble("pGainPosition", 1.0);
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
+        // targetAngle = (ballPos - robotPos).angle();
 	}
 
 
@@ -294,7 +295,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("yGoal", targetPos.y);
     
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", true);
+    private_bb->SetBool("avoidRobots", false);
     // private_bb->SetBool("dribbler", dribbler);
     private_bb->SetString("whichBot", GetString("whichBot"));
     

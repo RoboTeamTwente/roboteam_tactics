@@ -651,9 +651,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velCommand", myPos, sumOfForces);
-    drawer.setColor(0, 0, 0);
+    
 
     // Defense area avoidance
     if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
@@ -673,6 +671,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (sumOfForces.length() < 0.5) {
         angularVelTarget = limitAngularVel(angularVelTarget);
     }
+
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velCommand" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    drawer.setColor(0, 0, 0);
+
     // ROS_INFO_STREAM("limitVel: " << sumOfForces.x << " " << sumOfForces.y);
 
     // Rotate the commands from world frame to robot frame 
