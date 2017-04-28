@@ -10,7 +10,7 @@ constexpr double GRSIM_SPEEDUP_FACTOR = 1.0;
 constexpr int TIME_LIMIT_MILLIS = 3000 / GRSIM_SPEEDUP_FACTOR;	//< Time in ms to allow before applying a score penalty
 constexpr rtt::Position TGT_POS(2.0, 2.0, M_PI);				//< Position to drive to
 constexpr rtt::Position INIT_POS;								//< Position to return to after tests
-constexpr size_t MAX_ITERATIONS = 10;							//< Max number of iterations to train
+constexpr size_t MAX_ITERATIONS = 100;							//< Max number of iterations to train
 constexpr double INIT_P_POS = 2.0;								//< Initial pGainPosition
 constexpr double INIT_P_ROT = 4.0;								//< Initial pGainRotation
 constexpr double MIN_GAIN = .5;									//< Minimum possible gain value
