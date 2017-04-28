@@ -274,7 +274,7 @@ bt::Node::Status GetBall::Update (){
         // pub.publish(command);   
         // pub.publish(command); 
 
-        if (ballCloseFrameCount < 3) {
+        if (ballCloseFrameCount < 5) {
             // ROS_INFO_STREAM("ballCounter " << ballCloseFrameCount);
             ballCloseFrameCount++;
             return Status::Running;
