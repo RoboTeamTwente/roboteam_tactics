@@ -10,16 +10,21 @@ namespace rtt {
     
 RTT_REGISTER_SKILL(ShootAtGoalV2);
     
-const Section GoalPartition::LEFT_GOAL = Section(-4.5, 0.5, -4.5, -0.5);
-const Section GoalPartition::RIGHT_GOAL = Section(4.5, 0.5, 4.5, -0.5);
-    
-GoalPartition::GoalPartition(bool leftSide) : goalSection(leftSide ? LEFT_GOAL : RIGHT_GOAL) {}
+GoalPartition::GoalPartition(bool leftSide) : goalSection(calcSection(leftSide)) {}
 
 struct BlockedSectionSorter {
     bool operator()(const Section& a, const Section& b) {
         return a.a.y > b.a.y;
     }
 };
+
+Section GoalPartition::calcSection(bool leftSide) {
+	auto geom = LastWorld::get_field();
+	double x = geom.field_width;
+	if (leftSide) x *= -1;
+	double halfY = geom.goal_width / 2;
+	return Section(x, halfY, x, -halfY);
+}
 
 void GoalPartition::calculatePartition(const roboteam_msgs::World& world, const Vector2& shooterPos) {
     Cone cone(shooterPos, goalSection.center, .5);

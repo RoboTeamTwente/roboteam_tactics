@@ -20,8 +20,6 @@ namespace rtt {
  */
 class GoalPartition {
 public:
-    static const Section LEFT_GOAL;
-    static const Section RIGHT_GOAL;
     GoalPartition(bool leftSide);
     
     /**
@@ -62,6 +60,8 @@ public:
 private:
     const Section goalSection;
     std::vector<Section> blocked, open, robots;
+
+    static Section calcSection(bool leftSide);
 };
 
 /**
