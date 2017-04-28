@@ -69,6 +69,8 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, dou
 	Vector2 ballTrajectory = ballPosThen - ballPosNow;
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 
+	drawer.drawLine("ballTrajectory", ballPosNow, ballTrajectory);
+
 	double ballTrajectoryMagn = ballTrajectory.length();
 	ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
 	double projectionOnBallTrajectory = ballToCenter.dot(ballTrajectory);
@@ -77,6 +79,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, dou
 	// If the ball is moving (towards us) and the computed closest point is within range, then stand on the closest point
 	bool ballMovingTowardsUs = (ballPosThen-ballPosNow).dot(receiveBallAtPos-ballPosNow) >= 0;
 	if (ballMovingTowardsUs && ballTrajectoryMagn > 0.1 && (closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
+		ROS_INFO_STREAM("deduce from ballvel, pos: " << interceptPos.x << " " << interceptPos.y);
 		interceptPos = closestPoint;
 		interceptAngle = (ballPosNow-ballPosThen).angle();
 	} else {
@@ -85,6 +88,8 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, dou
 	}
 	interceptPose.interceptPos = interceptPos;
 	interceptPose.interceptAngle = interceptAngle;
+
+
 	
 	return interceptPose;
 }
@@ -134,6 +139,8 @@ bt::Node::Status ReceiveBall::Update (){
 	robotID = blackboard->GetInt("ROBOT_ID");
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
+	} else {
+		acceptableDeviation = 1.0;
 	}
 
 
@@ -159,7 +166,7 @@ bt::Node::Status ReceiveBall::Update (){
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	double robotAngle = robot.angle;
-	double distanceToBall = (ballPos-robotPos).length();
+	
 	Vector2 targetPos;
 	double targetAngle;
 
@@ -209,26 +216,33 @@ bt::Node::Status ReceiveBall::Update (){
 
 	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
 	Vector2 posError = targetPos - robotPos;
-	double acceptableDeviation2 = 0.5;
-	if (distanceToBall > acceptableDeviation2 || posError.length() > acceptableDeviation2) {
-		double angleError = targetAngle - robotAngle;
-		if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
-			// Set a rosparam to let other robots know that we are ready to receive the ball
-			ros::param::set("readyToReceiveBall", true);
-		}
-		// private_bb->SetBool("dribbler", false);
-	} else { 
-		// If we are close enough to the ball we can drive towards it and turn on the dribbler
-		return getBall.Update();
+	double distanceToBall = (ballPos-receiveBallAtPos).length();
+	double acceptableDeviation2 = 1.0;
 
-		Vector2 posDiff = ballPos - robotPos;
-		Vector2 posDiffNorm = posDiff.normalize();
-		targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
-		targetAngle = posDiff.angle();
-		// private_bb->SetBool("dribbler", true);
+	if (ballHasBeenClose || distanceToBall < acceptableDeviation2) {
+		ballHasBeenClose = true;
+		return getBall.Update();
 	}
+
+	// if (distanceToBall > acceptableDeviation2 || posError.length() > acceptableDeviation2) {
+	// 	double angleError = targetAngle - robotAngle;
+	// 	if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
+	// 		// Set a rosparam to let other robots know that we are ready to receive the ball
+	// 		ros::param::set("readyToReceiveBall", true);
+	// 	}
+	// 	// private_bb->SetBool("dribbler", false);
+	// } else { 
+	// 	// If we are close enough to the ball we can drive towards it and turn on the dribbler
+	// 	return getBall.Update();
+
+	// 	Vector2 posDiff = ballPos - robotPos;
+	// 	Vector2 posDiffNorm = posDiff.normalize();
+	// 	targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
+	// 	targetAngle = posDiff.angle();
+	// 	// private_bb->SetBool("dribbler", true);
+	// }
 	
-	if (distanceToBall < 0.7) {
+	if (distanceToBall < 2.0) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);

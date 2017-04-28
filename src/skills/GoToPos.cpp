@@ -99,7 +99,7 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 2.0; // eventueel 1 
-        pGainRotation = 2.0; // eventueel 1
+        pGainRotation = 1.0; // eventueel 1
         minSpeedX = 0.2;
         minSpeedY = 0.5;
         maxSpeed = 1.0;
@@ -679,7 +679,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
 
     if (GetBool("smoothDriving")) {
-        if ((velCommand.length() - prevVelCommand.length()) > 0.1) {
+        if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
             ROS_INFO_STREAM("limiting acceleration!");
             velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
         }

@@ -85,7 +85,7 @@ private:
 	GoToPos goToPos;
     Draw drawer;
 
-    int ballCloseFrameCount;
+    int ballCloseFrameCount = 0;
 
     double distanceFromBallWhenDribbling;
     bool finalStage=false;

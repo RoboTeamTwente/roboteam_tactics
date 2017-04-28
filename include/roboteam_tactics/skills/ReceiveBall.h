@@ -7,6 +7,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
 
@@ -68,10 +69,12 @@ private:
 	int robotID;
 	int hasBall;
 	bool our_team;
-	double acceptableDeviation = 0.4;
+	double acceptableDeviation = 1.0;
 
 	GoToPos goToPos;
 	GetBall getBall;
+	Draw drawer;
+	bool ballHasBeenClose = false;
 
     bool touchedBall = false;
     time_point initialBallContact;

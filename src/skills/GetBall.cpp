@@ -142,19 +142,30 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
-	if (HasString("AimAt")) {
-		targetAngle = GetTargetAngle(ballPos, GetString("AimAt"), GetInt("AimAtRobot"), GetBool("AimAtRobotOurTeam")); // in roboteam_tactics/utils/utils.cpp
-		// ROS_INFO_STREAM("targetAngle: " << targetAngle);
-		// targetAngle = (Vector2(-4.5, 0.0) - robotPos).angle();
+    // if (HasInt("aimAtRobot")) {
+        // bool ourTeam = true;
+        // if (HasBool("ourTeam")) {
+            // if (GetBool("ourTeam")) {
+                // ourTeam = true;
+            // } else {
+                // ourTeam = false;
+            // }
+        // }
+        // targetAngle = GetTargetAngle(ballPos, "robot", GetInt("aimAtRobot"), ourTeam); // in roboteam_tactics/utils/utils.cpp
+    // } 
+    if (HasString("aimAt")) {
+		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else {
 		if (HasDouble("targetAngle")) {
 			targetAngle = GetDouble("targetAngle");
 		} else {
 			Vector2 posdiff = ballPos - robotPos;
-			targetAngle = posdiff.angle();        
+			targetAngle = posdiff.angle();
 		}
 	}
 	targetAngle = cleanAngle(targetAngle);
+
+    ROS_INFO_STREAM(robotID << " getball targetAngle: " << targetAngle << " robot angle: " << robot.angle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
@@ -179,7 +190,7 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("getBallDist")) {
         getBallDist = GetDouble("getBallDist");
     } else {
-        getBallDist = 0.09;
+        getBallDist = 0.06;
     }
 
     std::string robot_output_target = "";
@@ -190,7 +201,7 @@ bt::Node::Status GetBall::Update (){
         successDist = 0.13;
         successAngle = 0.3;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12;
+        successDist = 0.11;
         if (HasDouble("successAngle")) {
             successAngle = GetDouble("successAngle");
         } else {
@@ -222,7 +233,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 
 
-    ROS_INFO_STREAM("dist: " << (ballPos - robotPos).length() << " angle: " << angleError);
+    // ROS_INFO_STREAM("dist: " << (ballPos - robotPos).length() << " angle: " << angleError);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // ROS_INFO_STREAM("we're there!");
 
@@ -239,35 +250,42 @@ bt::Node::Status GetBall::Update (){
 // 		// Ideally we want to use the kick skill here, but it is the question whether that is fast enough to respond
 // 		// in the situation when the ball is rolling and we are catching up
 // >>>>>>> 1706a8dc695f3b77e4f8c4490b6ecd2471c55c58
-        double kicker_vel=5.0;
-        if(HasDouble("kickerVel")){
-            kicker_vel=GetDouble("kickerVel");
-        }
+        // double kicker_vel=5.0;
+        // if(HasDouble("kickerVel")){
+        //     kicker_vel=GetDouble("kickerVel");
+        // }
         
-        roboteam_msgs::RobotCommand command;
-        command.id = robotID;
-        command.kicker = GetBool("passOn");
-        command.kicker_forced = GetBool("passOn");
-        command.kicker_vel = GetBool("passOn") ? kicker_vel : 0;
+        // roboteam_msgs::RobotCommand command;
+        // command.id = robotID;
+        // command.kicker = GetBool("passOn");
+        // command.kicker_forced = GetBool("passOn");
+        // command.kicker_vel = GetBool("passOn") ? kicker_vel : 0;
 
-        command.x_vel = 0;
-        command.y_vel = 0;
-        if (GetBool("passOn")) {
-            command.dribbler = false;
+        // command.x_vel = 0;
+        // command.y_vel = 0;
+        // if (GetBool("passOn")) {
+        //     command.dribbler = false;
+        // } else {
+        //     command.dribbler = true;
+        // }
+        
+
+        // auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        // pub.publish(command);   
+        // pub.publish(command); 
+
+        if (ballCloseFrameCount < 3) {
+            // ROS_INFO_STREAM("ballCounter " << ballCloseFrameCount);
+            ballCloseFrameCount++;
+            return Status::Running;
         } else {
-            command.dribbler = true;
+            finalStage=true;
+            publishKickCommand();
         }
         
-
-        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-        pub.publish(command);   
-        pub.publish(command); 
-
-        finalStage=true;
-        publishKickCommand();
-        
-
-        return Status::Running;
+        // return Status::Running;
+    } else {
+        ballCloseFrameCount = 0;
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);
@@ -305,6 +323,7 @@ bt::Node::Status GetBall::Update (){
     }
     if (HasBool("smoothDriving")) {
         private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
+        private_bb->SetDouble("smoothingNumber", GetDouble("smoothingNumber"));
     }
 
     /*

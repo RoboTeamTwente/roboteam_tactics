@@ -33,7 +33,7 @@ bt::Node::Status SimpleKeeper::Update() {
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
     } else {
-        distanceFromGoal = 0.5;
+        distanceFromGoal = 0.8;
     }
 
     Vector2 ballPos(world.ball.pos);
@@ -61,13 +61,23 @@ bt::Node::Status SimpleKeeper::Update() {
         // targetPos = goalPos - targetPos;
     // }
 
+    if (ballPos.x < -4.3) {
+        targetPos = goalPos + Vector2(distanceFromGoal, 0.0);
+        private_bb->SetDouble("acceptableDeviation", 0.2);
+    } else {
+        if (HasDouble("acceptableDeviation")) {
+            private_bb->SetDouble("acceptableDeviation", GetDouble("acceptableDeviation"));
+        } else {
+            private_bb->SetDouble("acceptableDeviation", 0.7);
+        }
+    }
+
     if (ballPos.y < -0.8 || ballPos.y > 0.8) {
         if (goalPos.x < 0) {
             targetPos = goalPos + Vector2(distanceFromGoal, 0.0);
         } else {
             targetPos = goalPos - Vector2(distanceFromGoal, 0.0);
-        }
-        
+        }   
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);
@@ -84,7 +94,7 @@ bt::Node::Status SimpleKeeper::Update() {
     if (HasDouble("acceptableDeviation")) {
         private_bb->SetDouble("acceptableDeviation", GetDouble("acceptableDeviation"));
     } else {
-        private_bb->SetDouble("acceptableDeviation", 0.5);
+        private_bb->SetDouble("acceptableDeviation", 0.7);
     }
     
 

@@ -60,7 +60,11 @@ bt::Node::Status AimAt::Update (){
     private_bb->SetString("center", "ball");
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
     private_bb->SetDouble("faceTowardsPosy", passTo.y);
-    private_bb->SetDouble("w",3.0);
+    double rotationSpeed = 3.0;
+    if (HasDouble("rotationSpeed")) {
+    	rotationSpeed = GetDouble("rotationSpeed");
+    }
+    private_bb->SetDouble("w",rotationSpeed);
     private_bb->SetDouble("radius", 0.11);
 
     Status result = rotateAroundPoint.Update();
