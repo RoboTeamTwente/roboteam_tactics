@@ -106,7 +106,7 @@ bt::Node::Status Dribble::Update() {
 	
 	if(goalposDiff.length() > 0.02){
 		if((robotPos-ballPos).length() > 0.2){
-			ROS_INFO("lost ball");
+			// ROS_INFO("lost ball");
 			stoprobot(robotID);
 			return Status::Failure;
 		}
@@ -114,7 +114,7 @@ bt::Node::Status Dribble::Update() {
 		Vector2 rotatearoundPos;
 		
 		if (worldrotDiff > 20.0/180.0*M_PI or worldrotDiff < -20.0/180.0*M_PI){ // oriented towards goal behind ball	
-			ROS_INFO("rotate around ball");
+			// ROS_INFO("rotate around ball");
 			rotatearoundPos=ballPos;
 		}
 		else {

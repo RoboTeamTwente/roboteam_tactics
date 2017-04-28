@@ -13,6 +13,7 @@ Qualification1v1Tactic::Qualification1v1Tactic(std::string name, bt::Blackboard:
 void Qualification1v1Tactic::Initialize() {
     tokens.clear();
     auto robots = RobotDealer::get_available_robots();
+
     if (robots.size() < 2) {
         canRun = false;
         return;
@@ -20,6 +21,8 @@ void Qualification1v1Tactic::Initialize() {
     
     firstRD.robot_id = robots.at(0);
     secondRD.robot_id = robots.at(1);
+
+    std::cout << "Working with robots: " << firstRD.robot_id << ", " << secondRD.robot_id << "\n";
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
     
