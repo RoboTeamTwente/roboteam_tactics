@@ -178,7 +178,8 @@ int main(int argc, char *argv[]) {
     while (ros::ok()) {
         ros::spinOnce();
 
-        bt::Node::Status status = strategy->Update();
+        //bt::Node::Status status =
+        strategy->Update();
 
         // if (status != bt::Node::Status::Running) {
             // auto statusStr = bt::statusToString(status);

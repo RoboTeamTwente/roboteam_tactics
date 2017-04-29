@@ -181,7 +181,7 @@ double GoToPosAlt::rotationController(double myAngle, double angleGoal, Vector2 
 double GoToPosAlt::getAngleFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
     Vector2 antenna = antennaCone.center - myPos;    
 
-    double angle;
+    double angle = 0.0;
     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
@@ -217,7 +217,7 @@ double GoToPosAlt::avoidRobotsForward(Vector2 myPos, Vector2 myVel, Vector2 targ
     drawer.drawLine("coneRobotsSide2", antennaCone.start, coneSide2);
 
     Vector2 sumOfForces;
-    double sumOfAngles;
+    double sumOfAngles = 0.0;
 
     for (size_t i = 0; i < world.us.size(); i++) {
         roboteam_msgs::WorldRobot currentRobot = *getWorldBot(i);

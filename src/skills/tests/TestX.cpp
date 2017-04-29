@@ -251,7 +251,7 @@ How to use:
     } else {
         node->Initialize();
 
-        bt::Node::Status status;
+        bt::Node::Status status = bt::Node::Status::Invalid;
         while (ros::ok()) {
             ros::spinOnce();
 
