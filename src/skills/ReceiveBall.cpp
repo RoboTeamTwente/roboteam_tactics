@@ -89,8 +89,6 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, dou
 	interceptPose.interceptPos = interceptPos;
 	interceptPose.interceptAngle = interceptAngle;
 
-
-	
 	return interceptPose;
 }
 
@@ -195,7 +193,6 @@ bt::Node::Status ReceiveBall::Update (){
 		interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	} else {
 		interceptPose = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
-		// interceptPose = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	}
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
@@ -225,30 +222,13 @@ bt::Node::Status ReceiveBall::Update (){
 		ballHasBeenClose = true;
 		return getBall.Update();
 	}
-
-	// if (distanceToBall > acceptableDeviation2 || posError.length() > acceptableDeviation2) {
-	// 	double angleError = targetAngle - robotAngle;
-	// 	if (posError.length() <= 0.1 && fabs(angleError) < 0.3) {
-	// 		// Set a rosparam to let other robots know that we are ready to receive the ball
-	// 		ros::param::set("readyToReceiveBall", true);
-	// 	}
-	// 	// private_bb->SetBool("dribbler", false);
-	// } else { 
-	// 	// If we are close enough to the ball we can drive towards it and turn on the dribbler
-	// 	return getBall.Update();
-
-	// 	Vector2 posDiff = ballPos - robotPos;
-	// 	Vector2 posDiffNorm = posDiff.normalize();
-	// 	targetPos = ballPos - posDiffNorm.scale(0.09); // 0.09 = robot radius
-	// 	targetAngle = posDiff.angle();
-	// 	// private_bb->SetBool("dribbler", true);
-	// }
 	
 	if (distanceToBall < 2.0) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);
 	}
+
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
 	auto bb3 = std::make_shared<bt::Blackboard>();
@@ -261,7 +241,6 @@ bt::Node::Status ReceiveBall::Update (){
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
 		RTT_DEBUGLN("ReceiveBall skill completed.");
 		publishStopCommand();
-		// return Status::Running;
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
@@ -270,15 +249,14 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
+
         if (HasDouble("pGainPosition")) {
         	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
         }
         if (HasDouble("successDist")) {
         	private_bb->SetDouble("successDist", GetDouble("successDist"));
         }
-        goToPos.getVelCommand();
 
-        // goToPos.Update();
         boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
 	    if (command) {
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

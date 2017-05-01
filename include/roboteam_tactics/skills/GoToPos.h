@@ -77,17 +77,13 @@ public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 
     void sendStopCommand(uint id);
-
     Vector2 positionController(Vector2 myPos, Vector2 targetPos);
     double rotationController(double myAngle, double angleGoal, Vector2 posError);
-
-    // Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone);
     Vector2 limitAngleDiff(Vector2 vector1, Vector2 vector2, double maxAngleDiff);
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos);
     Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     // Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces);
-
     Vector2 checkTargetPos(Vector2 targetPos);
     Vector2 limitVel(Vector2 sumOfForces, Vector2 posError);
     double limitAngularVel(double angularVelTarget);
@@ -152,7 +148,9 @@ private:
     Vector2 prevSumOfForces;
     Vector2 prevVelCommand;
     double prevAngularVelTarget;
+    
     bool succeeded;
+    bool failure;
 
     Draw drawer;
     RobotType robotType;
