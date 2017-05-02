@@ -33,9 +33,15 @@ public:
     
     std::string node_name() override;
 
+    bt::Node::Ptr getCurrentChild();
+    bt::Node::Ptr getPreviousChild();
+
 private:
     bool validated;
     int last;
+
+    bool runningImplicitNormalStartRefCommand;
+    bool switchedToNormal;
 };
     
 } // rtt
