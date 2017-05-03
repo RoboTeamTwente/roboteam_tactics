@@ -15,9 +15,7 @@ namespace rtt {
 RTT_REGISTER_CONDITION(IHaveBall);
 
 IHaveBall::IHaveBall(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
-    assert_valid<IHaveBall>(name);
-    me = GetInt("me");
-    us = GetBool("our_team");
+    
 }
 
 boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const roboteam_msgs::World& world) const {
@@ -29,6 +27,8 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
 }
 
 bt::Node::Status IHaveBall::Update() {
+    me = GetInt("me");
+    us = GetBool("our_team");
     roboteam_msgs::World world = LastWorld::get();
     auto opt_bot = getWorldBot(me, us);
     if (!opt_bot) {

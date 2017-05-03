@@ -212,10 +212,16 @@ bt::Node::Status GetBall::Update (){
          successDist=GetDouble("successDist");
     }
 
+    double distAwayFromBall=0.4;
+    if (HasDouble("distAwayFromBall")) {
+         distAwayFromBall=GetDouble("distAwayFromBall");
+    }
+
 
     bool dribbler = false;
-	if (posDiff > 0.5 || fabs(angleDiff) > successAngle) {
-		targetPos = ballPos + Vector2(0.4, 0.0).rotate(intermediateAngle + M_PI);
+    bool goawayfromball=false;
+	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
+		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
 		// dribbler = true;
         private_bb->SetBool("dribbler", true);
@@ -274,8 +280,11 @@ bt::Node::Status GetBall::Update (){
         // auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         // pub.publish(command);   
         // pub.publish(command); 
-
-        if (ballCloseFrameCount < 5) {
+        int ballCloseFrameCountTo=5;
+        if(HasInt("ballCloseFrameCount")){
+            ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
+        }
+        if (ballCloseFrameCount < ballCloseFrameCountTo) {
             // ROS_INFO_STREAM("ballCounter " << ballCloseFrameCount);
             ballCloseFrameCount++;
             return Status::Running;
@@ -300,6 +309,9 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetString("whichBot", GetString("whichBot"));
     
     // @HACK for robot testing purposes
+    if (HasBool("avoidRobots")) {
+        private_bb->SetBool("avoidRobots", GetBool("avoidRobots"));
+    }
     if (HasDouble("minSpeed")) {
     	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
     }
