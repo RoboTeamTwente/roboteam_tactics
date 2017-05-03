@@ -195,8 +195,8 @@ bt::Node::Status GetBall::Update (){
 
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
-    double successDist;
-    double successAngle;
+    double successDist = 0.0;
+    double successAngle = 0.0;
     if (robot_output_target == "grsim") {
         successDist = 0.13;
         successAngle = 0.3;
@@ -217,7 +217,6 @@ bt::Node::Status GetBall::Update (){
          distAwayFromBall=GetDouble("distAwayFromBall");
     }
 
-
     bool dribbler = false;
     bool goawayfromball=false;
 	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
@@ -236,7 +235,7 @@ bt::Node::Status GetBall::Update (){
     // targetAngle = (ballPos - robotPos).angle();
     // ROS_INFO_STREAM("posError: " << (ballPos - robotPos).length() << " angleError: " << cleanAngle(targetAngle - robot.angle));
     // ROS_INFO_STREAM("successDist: "<<successDist<< ", successAngle: "<<successAngle);
-    double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
+    // double rotDiff = cleanAngle((ballPos - robotPos).angle() - robot.angle);
     double angleError = cleanAngle(robot.angle - targetAngle);
 
 

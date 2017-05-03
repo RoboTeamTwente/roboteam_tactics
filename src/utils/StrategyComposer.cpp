@@ -24,9 +24,13 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::PREPARE_KICKOFF_THEM, UNSET },
         { RefState::PREPARE_PENALTY_US,   UNSET },
         { RefState::PREPARE_PENALTY_THEM, UNSET },
-        { RefState::DIRECT_FREE_US,       "rtt_ewoud/FreeKickTakeStrategy" },
+
+        // rtt_ewoud/FreeKickTakeStrategy
+        { RefState::DIRECT_FREE_US,       "rtt_bob/Wait5SecAndFail_DirectFreeUs" },
         { RefState::DIRECT_FREE_THEM,     "FreeKickDefenceStrategy"},
-        { RefState::INDIRECT_FREE_US,     "rtt_ewoud/FreeKickTakeStrategy" },
+
+        // rtt_ewoud/FreeKickTakeStrategy
+        { RefState::INDIRECT_FREE_US,     "rtt_bob/Wait5SecAndFail_IndirectFreeUs" },
         { RefState::INDIRECT_FREE_THEM,   "FreeKickDefenceStrategy"},
         { RefState::TIMEOUT_US,           "rtt_dennis/WanderStrategy" },
         { RefState::TIMEOUT_THEM,         "rtt_dennis/WanderStrategy" },
@@ -34,9 +38,10 @@ const std::map<RefState, std::string> StrategyComposer::MAPPING = {
         { RefState::GOAL_THEM,            UNSET },
         { RefState::BALL_PLACEMENT_US,    UNSET },
         { RefState::BALL_PLACEMENT_THEM,  UNSET },
-        // qualification/StandByStrat
+
+        // qualification/StandByStrategy
         // rtt_bob/NormalStrategy
-        { RefState::NORMAL_PLAY,          "rtt_bob/NormalStrategy"}
+        { RefState::NORMAL_PLAY,          "rtt_bob/Wait5SecAndFail_NormalStart"}
 };
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {

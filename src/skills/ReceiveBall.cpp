@@ -165,7 +165,7 @@ bt::Node::Status ReceiveBall::Update (){
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
-	double robotAngle = robot.angle;
+	//double robotAngle = robot.angle;
 	
 	Vector2 targetPos;
 	double targetAngle;
@@ -215,7 +215,7 @@ bt::Node::Status ReceiveBall::Update (){
 
 
 	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
-	Vector2 posError = targetPos - robotPos;
+	//Vector2 posError = targetPos - robotPos;
 	double distanceToBall = (ballPos-receiveBallAtPos).length();
 	double acceptableDeviation2 = 1.5;
 

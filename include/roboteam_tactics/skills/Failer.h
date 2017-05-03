@@ -13,7 +13,7 @@ namespace rtt {
  */
 /*
  * Descr: Utility skill which always fails.
- * Params: null
+ * Params: None
  */
 class Failer : public Skill {
 public:

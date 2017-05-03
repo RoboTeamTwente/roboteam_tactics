@@ -58,11 +58,11 @@ class CanInterceptBall : public Condition {
                         const Vector2& ball_pos,
                         const Vector2& ball_vel) {
 
-        auto bot_func = [bot_pos, bot_vel](double t) {
+        /*auto bot_func = [bot_pos, bot_vel](double t) {
             double x = bot_pos.x + bot_vel.x * t + ACCEL_CHEAT * t * t;
             double y = bot_pos.y + bot_vel.y * t + ACCEL_CHEAT * t * t;
             return Vector2(x, y);
-        };
+        };*/
 
         auto bot_range = [bot_vel](double t, double angle) {
             double ax = (ACCEL_ELLIPSE_A * ACCEL_ELLIPSE_B) / sqrtl(powl(ACCEL_ELLIPSE_B, 2) + powl(ACCEL_ELLIPSE_A, 2) * powl(tanl(angle), 2));

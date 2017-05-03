@@ -29,7 +29,7 @@ Vector2 goalPos;
 bt::Node::Status AimAtSafe::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
-	bool setRosParam = GetBool("setRosParam");
+	//bool setRosParam = GetBool("setRosParam");
 
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);

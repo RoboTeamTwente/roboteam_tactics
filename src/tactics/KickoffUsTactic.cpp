@@ -71,7 +71,7 @@ void KickoffUsTactic::Initialize() {
     Vector2 ballPos = world.ball.pos;
 
     double closestDist = std::numeric_limits<double>::max();
-    b::optional<int> closestRobotID;
+    b::optional<int> closestRobotID = b::none;
 
     for (auto robotID : robots) {
         if (auto bot = lookup_our_bot(robotID)) {
