@@ -593,7 +593,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         succeeded = true;
         failure = false;
         roboteam_msgs::RobotCommand command;
-        // return boost::none;
+        return boost::none;
     }
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -647,7 +647,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         ROS_INFO_STREAM("command is empty!");
         failure = true;
         success = false;
-        // return boost::none;
+        return boost::none;
     }
 
     if (GetBool("smoothDriving")) {
@@ -671,8 +671,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
-    // auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-    // pub.publish(command);
     return command;
 }
 
@@ -682,7 +680,7 @@ void GoToPos::Initialize() {
 
 bt::Node::Status GoToPos::Update() {
 
-        boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
+    boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(*command);
