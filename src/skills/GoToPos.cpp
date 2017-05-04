@@ -34,7 +34,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         , safetyMarginGoalAreas(0.2)
         , marginOutsideField(1.2)
 
-        , robotType(RobotType::ARDUINO)
+        , robotType(RobotType::PROTO)
 
         , lastRobotTypeError(now())
         , lastPresetError(now())
@@ -42,6 +42,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         {
             succeeded = false;
             failure = false;
+            ros::NodeHandle n;
+            myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
+            myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
         }
 
 RobotType GoToPos::getRobotType() {
@@ -89,6 +92,7 @@ RobotType GoToPos::getRobotType() {
 
 void GoToPos::setPresetControlParams(RobotType newRobotType) {
     if (newRobotType == RobotType::ARDUINO) {
+        // ROS_INFO_STREAM("ARDUINO control parameters set!");
         pGainPosition = 1.0;
         pGainRotation = 2.0;
         minSpeedX = 0.7;
@@ -99,16 +103,18 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
+        // ROS_INFO_STREAM("PROTO control parameters set!");
         pGainPosition = 2.0;
-        pGainRotation = 1.0;
-        minSpeedX = 0.2;
-        minSpeedY = 0.5;
+        pGainRotation = 3.0;
+        minSpeedX = 0.4;
+        minSpeedY = 0.6;
         maxSpeed = 1.0;
         minAngularVel = 3.0;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
+        // ROS_INFO_STREAM("GRSIM control parameters set!");
         pGainPosition = 2.0;
         pGainRotation = 4.0;
         minSpeedX = 0.0;
@@ -203,9 +209,9 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
         forceAngle = true;
     }
 
-    if (posError.length() > 1.0 && !forceAngle) {
-        angleGoal = posError.angle();
-    }
+    // if (posError.length() > 1.0 && !forceAngle) {
+    //     angleGoal = posError.angle();
+    // }
 
     // Proportional term
     double angleError = angleGoal - myAngle;
@@ -503,13 +509,13 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
 
-    // if (HasDouble("pGainRotation")) {
-    //     pGainRotation = GetDouble("pGainRotation");
-    // }
+    if (HasDouble("pGainRotation")) {
+        pGainRotation = GetDouble("pGainRotation");
+    }
 
-    // if (HasDouble("pGainPosition")) {
-    //     pGainPosition = GetDouble("pGainPosition");
-    // }
+    if (HasDouble("pGainPosition")) {
+        pGainPosition = GetDouble("pGainPosition");
+    }
 
     // if (HasDouble("maxSpeed")) {
     //     maxSpeed = GetDouble("maxSpeed");
@@ -546,6 +552,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
+
+    myPosTopic.publish(me);
+    
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
     if (HasDouble("angleGoal")) {
@@ -558,6 +567,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
+    roboteam_msgs::WorldRobot targetPosPub;
+    targetPosPub.pos.x = targetPos.x;
+    targetPosPub.pos.y = targetPos.y;
+    targetPosPub.w = angleGoal;
+    myTargetPosTopic.publish(targetPosPub);
+
+
+    
+
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
     
@@ -568,13 +586,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         successDist = 0.02;
     }
 
+
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < successDist && fabs(angleError) < 0.1) {
         sendStopCommand(ROBOT_ID);
         succeeded = true;
         failure = false;
         roboteam_msgs::RobotCommand command;
-        return boost::none;
+        // return boost::none;
     }
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -608,11 +627,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = rotationController(myAngle, angleGoal, posError);
-    sumOfForces = limitVel(sumOfForces, posError);
-    if (sumOfForces.length() < 0.5) {
-        angularVelTarget = limitAngularVel(angularVelTarget);
-    }
 
+    
     drawer.setColor(255, 0, 0);
     drawer.drawLine("velCommand" + std::to_string(ROBOT_ID), myPos, sumOfForces);
     drawer.setColor(0, 0, 0);
@@ -620,6 +636,19 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Rotate the commands from world frame to robot frame 
     Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
+    
+    // Set a minimum and maximum speed for x and y
+    velCommand = limitVel(velCommand, posError);
+    if (sumOfForces.length() < 0.05) {
+        angularVelTarget = limitAngularVel(angularVelTarget);
+    }
+
+    if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
+        ROS_INFO_STREAM("command is empty!");
+        failure = true;
+        success = false;
+        // return boost::none;
+    }
 
     if (GetBool("smoothDriving")) {
         if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
@@ -642,6 +671,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
+    // auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+    // pub.publish(command);
     return command;
 }
 
@@ -658,9 +689,9 @@ bt::Node::Status GoToPos::Update() {
         return Status::Running;
     } else {
         if (succeeded) {
-            return Status::Success;
+            return Status::Running;
         } else if (failure) {
-            return Status::Failure;
+            return Status::Running;
         } else {
             return Status::Invalid;
         }

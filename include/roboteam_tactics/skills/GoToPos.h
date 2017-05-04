@@ -157,6 +157,9 @@ private:
 
     time_point lastRobotTypeError;
     time_point lastPresetError;
+
+    ros::Publisher myPosTopic;
+    ros::Publisher myTargetPosTopic;
 } ;
 
 } // rtt

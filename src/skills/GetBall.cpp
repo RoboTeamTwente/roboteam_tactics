@@ -213,13 +213,13 @@ bt::Node::Status GetBall::Update (){
 
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
 
-        if (ballCloseFrameCount < 5) {
-            ballCloseFrameCount++;
-            return Status::Running;
-        } else {
+        // if (ballCloseFrameCount < 5) {
+            // ballCloseFrameCount++;
+            // return Status::Running;
+        // } else {
             finalStage = true;
             publishKickCommand();
-        }
+        // }
     } else {
         ballCloseFrameCount = 0;
     }
