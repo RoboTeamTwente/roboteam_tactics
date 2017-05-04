@@ -122,7 +122,9 @@ private:
 
     // Control gains
     double pGainPosition;
+    double iGainPosition;
     double pGainRotation;
+    double iGainRotation;
     double maxAngularVel;
     double minAngularVel;
     double avoidRobotsGain;
@@ -149,6 +151,9 @@ private:
     Vector2 prevVelCommand;
     double prevAngularVelTarget;
     
+    Vector2 posErrorI;
+    double angleErrorI;
+    int successCounter;
     bool succeeded;
     bool failure;
 

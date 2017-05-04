@@ -94,7 +94,9 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
     if (newRobotType == RobotType::ARDUINO) {
         // ROS_INFO_STREAM("ARDUINO control parameters set!");
         pGainPosition = 1.0;
+        iGainPosition = 0.0;
         pGainRotation = 2.0;
+        iGainRotation = 0.0;
         minSpeedX = 0.7;
         minSpeedY = 1.0; 
         maxSpeed = 3.0; 
@@ -105,18 +107,22 @@ void GoToPos::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::PROTO) {
         // ROS_INFO_STREAM("PROTO control parameters set!");
         pGainPosition = 2.0;
+        iGainPosition = 0.3;
         pGainRotation = 3.0;
-        minSpeedX = 0.4;
-        minSpeedY = 0.6;
+        iGainRotation = 0.5;
+        minSpeedX = 0.0;
+        minSpeedY = 0.0;
         maxSpeed = 1.0;
-        minAngularVel = 3.0;
+        minAngularVel = 0.0;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
         // ROS_INFO_STREAM("GRSIM control parameters set!");
         pGainPosition = 2.0;
+        iGainPosition = 0.0;
         pGainRotation = 4.0;
+        iGainRotation = 0.0;
         minSpeedX = 0.0;
         minSpeedY = 0.0;
         maxSpeed = 1.5;
@@ -184,14 +190,24 @@ void GoToPos::sendStopCommand(uint id) {
 
 // Proportional position controller
 Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
+
     Vector2 posError = targetPos - myPos;
+    if (posError.length() < 0.15) {
+        posErrorI = posErrorI.scale(0.95) + posError.scale(1);
+    } else {
+        posErrorI = Vector2(0.0, 0.0);
+    }
+    
+
+    // ROS_INFO_STREAM("posErrorI: " << posErrorI);
 
     // Make the controller less strong once we get very close, to make it more precise for short distances
-    if (posError.length() < 0.2) {
-        pGainPosition = 1.0;
-    }
+    // if (posError.length() < 0.2) {
+    //     pGainPosition = 1.0;
+    // }
 
-    Vector2 velTarget = posError*pGainPosition;
+    // ROS_INFO_STREAM("d effect: " << myVel*dGainPosition);
+    Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition;
     
     if (velTarget.length() > maxSpeed) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
@@ -209,19 +225,26 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
         forceAngle = true;
     }
 
-    // if (posError.length() > 1.0 && !forceAngle) {
-    //     angleGoal = posError.angle();
-    // }
+    if (posError.length() > 1.0 && !forceAngle) {
+        angleGoal = posError.angle();
+    }
 
     // Proportional term
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
 
     // // Integral term
-    // double updateRate;
-    // ros::param::get("role_iterations_per_second", updateRate);
-    // double timeStep = 1 / updateRate;
-    // angleErrorIntegral += angleError * timeStep;
+    double updateRate;
+    ros::param::get("role_iterations_per_second", updateRate);
+    double timeStep = 1 / updateRate;
+    if (angleError < 0.15*M_PI) {
+        angleErrorI = angleErrorI * 0.9 + angleError * timeStep;
+    } else {
+        angleErrorI = 0;
+    }
+    
+
+    ROS_INFO_STREAM("angleErrorI: " << angleErrorI);
     
     // // Differential term (UNTESTED!)
     // angleErrorHistory[historyIndex] = angleError;
@@ -235,8 +258,9 @@ double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 pos
     // double angleErrorDiff = avgHistory * timeStep;
 
     // Maybe we later choose to add an integral and/or differential term to this controller if it proves to be necessary, the basic structure
-    // for this is already there, although it is not yet well tested
-    double angularVelTarget = angleError * pGainRotation;    
+    // for this is already there, although it is not yet well tested7
+    iGainRotation = GetDouble("iGainRotation");
+    double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation;
 
     // Limit the angular velocity target
     if (fabs(angularVelTarget) > maxAngularVel) {
@@ -466,7 +490,7 @@ Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
         double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
 
         // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
-        if (sumOfForces.length() < (minSpeed / 8.0)) {
+        if (sumOfForces.length() < (minSpeed / 100.0)) {
             if (sumOfForces.length() >= prevSumOfForces.length()) {
                 sumOfForces = Vector2(0.0, 0.0);
             }
@@ -517,9 +541,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         pGainPosition = GetDouble("pGainPosition");
     }
 
-    // if (HasDouble("maxSpeed")) {
-    //     maxSpeed = GetDouble("maxSpeed");
-    // }
+    if (HasDouble("maxSpeed")) {
+        maxSpeed = GetDouble("maxSpeed");
+    }
+    if (HasDouble("minSpeedX")) {
+        minSpeedX = GetDouble("minSpeedX");
+    }
+    if (HasDouble("minSpeedY")) {
+        minSpeedY = GetDouble("minSpeedY");
+    }
 
     // if (HasDouble("avoidRobotsGain")) {
     //     avoidRobotsGain = GetDouble("avoidRobotsGain");
@@ -574,8 +604,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     myTargetPosTopic.publish(targetPosPub);
 
 
-    
-
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
     
@@ -586,14 +614,20 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         successDist = 0.02;
     }
 
+    ROS_INFO_STREAM("posError: " << posError.x << " " << posError.y << " angleError: " << angleError);
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.1) {
-        sendStopCommand(ROBOT_ID);
-        succeeded = true;
-        failure = false;
-        roboteam_msgs::RobotCommand command;
-        return boost::none;
+    if (posError.length() < successDist && fabs(angleError) < 0.05) {
+        successCounter++;
+        ROS_INFO_STREAM("GoToPos successCounter: " << successCounter);
+        if (successCounter >= 20) {
+            sendStopCommand(ROBOT_ID);
+            succeeded = true;
+            failure = false;
+            return boost::none;
+        }
+    } else {
+        successCounter = 0;
     }
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
@@ -616,7 +650,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Defense area avoidance
     if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    } 
+    }
 
     // Ball avoidance
     // if (HasBool("avoidBall") && GetBool("avoidBall")) {
@@ -644,7 +678,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
-        ROS_INFO_STREAM("command is empty!");
         failure = true;
         success = false;
         return boost::none;
@@ -687,9 +720,9 @@ bt::Node::Status GoToPos::Update() {
         return Status::Running;
     } else {
         if (succeeded) {
-            return Status::Running;
+            return Status::Success;
         } else if (failure) {
-            return Status::Running;
+            return Status::Failure;
         } else {
             return Status::Invalid;
         }

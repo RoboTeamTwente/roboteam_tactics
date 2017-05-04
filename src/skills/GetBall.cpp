@@ -198,7 +198,7 @@ bt::Node::Status GetBall::Update (){
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
+	if (posDiff > 0.8 || fabs(angleDiff) > successAngle){
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
         private_bb->SetBool("dribbler", true);
@@ -237,15 +237,15 @@ bt::Node::Status GetBall::Update (){
     // if (HasDouble("minSpeed")) {
     // 	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
     // }
-    // if (HasDouble("maxSpeed")) {
-    // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
-    // }
+    if (HasDouble("maxSpeed")) {
+    	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+    }
     // if (HasDouble("pGainRotation")) {
     // 	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
     // }
-    // if (HasDouble("pGainPosition")) {
-    // 	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    // }
+    if (HasDouble("pGainPosition")) {
+    	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    }
     // if (HasString("stayOnSide")) {
     //     private_bb->SetString("stayOnSide", GetString("stayOnSide"));
     // }
