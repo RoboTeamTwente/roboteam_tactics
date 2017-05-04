@@ -20,20 +20,20 @@ RTT_REGISTER_SKILL(DebugTrace);
 DebugTrace::DebugTrace(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard) { }
 
-void DebugTrace::Initialize() {
-    std::cout << "DEBUG TRACE!!!\n";
-}
+void DebugTrace::Initialize() { }
 
 bt::Node::Status DebugTrace::Update() {
-    std::cout << "[DebugTrace] Update from " << name << "\n";
-
-    std::string DoReturn = GetString("DoReturn");
-    std::cout << "bb argument: " << DoReturn;
-
-    if(DoReturn=="Success"){
-    	return Status::Success;
+    if (HasString("msg")) {
+        std::cout << "[DebugTrace] " << name << ": " << GetString("msg") << "\n";
+    } else {
+        std::cout << "[DebugTrace] " << name << "\n";
     }
-    else if(DoReturn=="Failure"){
+
+    std::string doReturn = GetString("doReturn");
+
+    if (doReturn=="Success") {
+    	return Status::Success;
+    } else if (doReturn=="Failure") {
     	return Status::Failure;
     }
 

@@ -8,7 +8,10 @@
 
 namespace rtt {
 
-RefStateSwitch::RefStateSwitch() : validated(false), last(-1) {
+RefStateSwitch::RefStateSwitch() : validated(false)
+                                 , last(-1)
+                                 , runningImplicitNormalStartRefCommand(false)
+                                 , switchedToNormal(false) {
     std::cout << "Initializing last!\n";
 }
 
@@ -38,14 +41,24 @@ bt::Node::Status RefStateSwitch::Update() {
 
     int cmd = (int) LastRef::get().command.command;
 
-    auto child = children.at(cmd);
-
     if (last != cmd) {
         if (last != -1) {
-            children.at(last)->Terminate(children.at(last)->getStatus());
+            getPreviousChild()->Terminate(getPreviousChild()->getStatus());
         }
 
-        child->Initialize();
+        if (!isImplicitNormalStartCommand(cmd)) {
+            runningImplicitNormalStartRefCommand = false;
+            switchedToNormal = false;
+        } else {
+            if (!runningImplicitNormalStartRefCommand) {
+                runningImplicitNormalStartRefCommand = true;
+                switchedToNormal = false;
+            } else {
+                // Do nothing, we want to retain the state in switchedToNormal and initializedNormal
+            }
+        }
+
+        getCurrentChild()->Initialize();
 
         std::cout << "[RefStateSwitch] Current ref command: "
                   << getRefCommandName(cmd).get_value_or("unknown");
@@ -58,19 +71,34 @@ bt::Node::Status RefStateSwitch::Update() {
         last = cmd;
     }
 
-    return child->Update();
+    return getCurrentChild()->Update();
+}
+
+bt::Node::Ptr RefStateSwitch::getCurrentChild() {
+    if (runningImplicitNormalStartRefCommand && switchedToNormal) {
+        return children.at(roboteam_msgs::RefereeCommand::NORMAL_START);
+    }
+
+    return children.at(LastRef::get().command.command);
+}
+
+bt::Node::Ptr RefStateSwitch::getPreviousChild() {
+    if (runningImplicitNormalStartRefCommand && switchedToNormal) {
+        return children.at(roboteam_msgs::RefereeCommand::NORMAL_START);
+    }
+
+    return children.at(last);
 }
 
 void RefStateSwitch::Terminate(Status s) {
     std::cout << "Terminating RSS!\n";
 
     if (last != -1) {
-        auto& child = children.at(last);
-
-        // Only terminate if the child did not do so properly itself
-        if (child->getStatus() == bt::Node::Status::Running) {
-            child->Terminate(bt::Node::Status::Running);
+        if (getCurrentChild()->getStatus() == bt::Node::Status::Running) {
+            getCurrentChild()->Terminate(getCurrentChild()->getStatus());
         }
+
+        switchedToNormal = true;
 
         last = -1;
     }

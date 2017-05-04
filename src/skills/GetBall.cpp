@@ -190,22 +190,18 @@ bt::Node::Status GetBall::Update (){
         successAngle = 0.3;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
-        // if (HasDouble("successAngle")) {
-            // successAngle = GetDouble("successAngle");
-        // } else {
-            successAngle = 0.3;
-        // }
+        successAngle = 0.3;
     }
-    // if (HasDouble("successDist")) {
-         // successDist=GetDouble("successDist");
-    // }
 
+    double distAwayFromBall = 0.4;
+    if (HasDouble("distAwayFromBall")) {
+         distAwayFromBall = GetDouble("distAwayFromBall");
+    }
 
-	if (posDiff > 0.5 || fabs(angleDiff) > successAngle) {
-		targetPos = ballPos + Vector2(0.4, 0.0).rotate(intermediateAngle + M_PI);
+	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
+		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
         private_bb->SetBool("dribbler", true);
-        //private_bb->SetDouble("pGainPosition", 1.0);
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
 	}
     
@@ -213,13 +209,17 @@ bt::Node::Status GetBall::Update (){
 
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
 
-        // if (ballCloseFrameCount < 5) {
-            // ballCloseFrameCount++;
-            // return Status::Running;
-        // } else {
+        int ballCloseFrameCountTo = 3;
+        if(HasInt("ballCloseFrameCount")){
+            ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
+        }
+        if (ballCloseFrameCount < ballCloseFrameCountTo) {
+            ballCloseFrameCount++;
+            return Status::Running;
+        } else {
             finalStage = true;
             publishKickCommand();
-        // }
+        }
     } else {
         ballCloseFrameCount = 0;
     }
