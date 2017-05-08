@@ -38,10 +38,12 @@ public:
 
 private:
     bool validated;
-    int last;
+    int previousCmd;
+    int currentCmd;
+    bool finishedOnce;
+    bool needToInitialize;
 
-    bool runningImplicitNormalStartRefCommand;
-    bool switchedToNormal;
+    // bool runningImplicitNormalStartRefCommand;
 };
     
 } // rtt
