@@ -88,6 +88,7 @@ SET_DEBUG_FOR(SoloAttackerTactic, true);
 SET_DEBUG_FOR(SoloAttacker2Tactic, true);
 SET_DEBUG_FOR(SoloDefenderTactic, true);
 SET_DEBUG_FOR(StandByTactic, true);
+SET_DEBUG_FOR(StarAttackTactic, true);
 SET_DEBUG_FOR(TwoAttackersTactic, true);
 SET_DEBUG_FOR(TwoAttackersCoolTactic, true);
 SET_DEBUG_FOR(TwoVTwoDefenseTactic, true);
