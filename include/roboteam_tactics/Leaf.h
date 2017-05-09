@@ -177,21 +177,36 @@ public:
         std::string global_key = getPrefixedId(key);
         switch (policy) {
             case BlackboardPolicy::GLOBAL_FIRST:
-            if ((*blackboard.*Checker)(global_key)) {
-                return (*blackboard.*Getter)(global_key);
-            }
-            if ((*blackboard.*Checker)(key)) {
-                return (*blackboard.*Getter)(key);
-            }
+            	if ((*blackboard.*Checker)(global_key)) {
+            		return (*blackboard.*Getter)(global_key);
+            	}
+            	if ((*blackboard.*Checker)(key)) {
+            		return (*blackboard.*Getter)(key);
+            	}
             case BlackboardPolicy::PRIVATE_ONLY: //fallthrough
-            return (*private_bb.*Getter)(key);
+            	if ((*private_bb.*Checker)(global_key)) {
+            		return (*private_bb.*Getter)(global_key);
+            	}
+            	if ((*private_bb.*Checker)(key)) {
+            		return (*private_bb.*Getter)(key);
+            	}
+            return T();//throw std::logic_error("Parameter \"" + key + "\" requested from blackboard, but it does not exist.");
 
             case BlackboardPolicy::PRIVATE_FIRST:
-            if ((*private_bb.*Checker)(key)) {
-                return (*private_bb.*Getter)(key);
-            }
+                if ((*private_bb.*Checker)(global_key)) {
+                    return (*private_bb.*Getter)(global_key);
+                }
+                if ((*private_bb.*Checker)(key)) {
+                    return (*private_bb.*Getter)(key);
+                }
             case BlackboardPolicy::GLOBAL_ONLY:
-            return (*blackboard.*Getter)(global_key);
+            	if ((*blackboard.*Checker)(global_key)) {
+            		return (*blackboard.*Getter)(global_key);
+            	}
+            	if ((*blackboard.*Checker)(key)) {
+            	    return (*blackboard.*Getter)(key);
+            	}
+            	return T();//throw std::logic_error("Parameter \"" + key + "\" requested from blackboard, but it does not exist.");
             default:
             throw std::logic_error("Something really bad happened in GetVar...");
         }
