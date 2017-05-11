@@ -23,7 +23,7 @@ namespace rtt {
 using namespace roboteam_utils;
 using namespace roboteam_msgs;
 
-Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
+Vector2 DistanceXToY::getPointOfInterest(std::string name, int const ROBOT_ID) {
     if (name.empty()) {
         ROS_ERROR("getPointOfInterest: name was empty");
         return Vector2(0, 0);
@@ -74,6 +74,13 @@ Vector2 getPointOfInterest(std::string name, int const ROBOT_ID) {
         
         // Error! myBot could not be found!
         return Vector2(0, 0);
+    } else if (name == "fixed point") {
+    	if (!HasDouble("px") || !HasDouble("py")) {
+    		ROS_ERROR("DistanceXToY (Name: %s) set to \"fixed point\" mode, but doubles px and py not specified.",
+    				this->name.c_str());
+    		return Vector2();
+    	}
+    	return { GetDouble("px"), GetDouble("py") };
     }
 
     // See if we are looking for a robot.
