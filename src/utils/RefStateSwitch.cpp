@@ -6,16 +6,17 @@
 #include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/RefLookup.h"
 
+namespace b = boost;
+
 namespace rtt {
 
 RefStateSwitch::RefStateSwitch() : validated(false)
-                                 , previousCmd(-1)
-                                 , currentCmd(-1)
+                                 // , previousCmd(-1)
+                                 // , currentCmd(-1)
                                  , finishedOnce(false)
                                  , needToInitialize(false) {
                                  // , runningImplicitNormalStartRefCommand(false)
                                  // , switchedToNormal(false) {
-    std::cout << "Initializing last!\n";
 }
 
 bool RefStateSwitch::isValid() const {
@@ -29,58 +30,42 @@ void RefStateSwitch::assertValid() const {
     }
 }
 
-void RefStateSwitch::AddChild(Node::Ptr child) {
-    if (!validated) {
-        bt::Composite::AddChild(child);
-    }
+// void RefStateSwitch::AddChild(Node::Ptr child) {
+    // if (!validated) {
+        // bt::Composite::AddChild(child);
+    // }
+// }
+
+void RefStateSwitch::AddStrategy(RefState refState, Node::Ptr child) {
+    refStateStrategies[refState] = child;
 }
 
 bt::Node::Status RefStateSwitch::Update() {
     if (!validated) {
         assertValid();
+        validated = true;
     }
 
-    validated = true;
+    if (!LastRef::hasReceivedFirstCommand()) {
+        ROS_WARN_STREAM("Have not yet received a ref command, so not executing any strategy tree.");
+        return Status::Running;
+    }
 
-    // int previousCmd = LastRef::getPreviousRefCommand();
-    int cmd = (int) LastRef::get().command.command;
+    auto cmd = LastRef::getState();
 
     if (currentCmd != cmd) {
-        if (currentCmd != -1) {
+        if (currentCmd) {
             getCurrentChild()->Terminate(getCurrentChild()->getStatus());
         }
 
         previousCmd = currentCmd;
         currentCmd = cmd;
 
-        if (isTwoStage(previousCmd, currentCmd)) {
+        if (isTwoState(previousCmd, *currentCmd)) {
             finishedOnce = false;
         }
 
         needToInitialize = true;
-
-        // if (!isImplicitNormalStartCommand(cmd)) {
-            // runningImplicitNormalStartRefCommand = false;
-            // hasFinishedTreeOnce = false;
-        // } else {
-            // if (!runningImplicitNormalStartRefCommand) {
-                // runningImplicitNormalStartRefCommand = true;
-                // hasFinishedTreeOnce = false;
-            // } 
-            // // Else we do nothing, we want to retain the state in switchedToNormal and initializedNormal
-        // }
-
-        // getCurrentChild()->Initialize();
-
-        // std::cout << "[RefStateSwitch] Current ref command: "
-                  // << getRefCommandName(cmd).get_value_or("unknown");
-        
-        // std::cout << ", previous ref command: "
-                  // << getRefCommandName(last).get_value_or("unknown");
-
-        // std::cout << "\n";
-
-        // last = cmd;
     }
 
     if (needToInitialize) {
@@ -99,36 +84,69 @@ bt::Node::Status RefStateSwitch::Update() {
 }
 
 bt::Node::Ptr RefStateSwitch::getCurrentChild() {
-    if (isTwoStage(previousCmd, currentCmd)) {
-        if (finishedOnce) {
-            getFirstState(previousCmd, currentCmd);
+    std::string previousCmdName = "none yet";
+    std::string currentCmdName = "none yet";
+
+    if (currentCmd) {
+        currentCmdName = refStateToString(*currentCmd);
+    }
+
+    if (previousCmd) {
+        previousCmdName = refStateToString(*previousCmd);
+    }
+
+    if (isTwoState(previousCmd, *currentCmd)) {
+        if (!finishedOnce) {
+            // TODO: Get child here
+            if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
+                auto stateIt = refStateStrategies.find(*targetStateOpt);
+                if (stateIt != refStateStrategies.end()) {
+                    return stateIt->second;
+                } else {
+                    ROS_ERROR("No strategy tree found! Previouscmd: %s, currentCmd: %s",
+                            previousCmdName.c_str(),
+                            currentCmdName.c_str()
+                            );
+                    
+                    return nullptr;
+                }
+            } else {
+                ROS_ERROR( "PreviousCmd and currentCmd are twoState states, but getFirstState "
+                           "returned nothing! PreviousCmd: %s, currentCmd: %s",
+                           previousCmdName.c_str(),
+                           currentCmdName.c_str()
+                           );
+
+                return nullptr;
+            }
         } else {
-            getSecondState(previousCmd, currentCmd);
+            auto stateIt = refStateStrategies.find(RefState::NORMAL_PLAY);
+            
+            if (stateIt != refStateStrategies.end()) {
+                return stateIt->second;
+            } else {
+                ROS_ERROR("No strategy found for NORMAL_PLAY!");
+                return nullptr;
+            }
         }
     } 
-    /* else {
-        return children.at(currentCmd);
-    } */
 
-    return children.at(currentCmd);
-
-    // if (runningImplicitNormalStartRefCommand && switchedToNormal) {
-        // return children.at(roboteam_msgs::RefereeCommand::NORMAL_START);
-    // }
-
-    // return children.at(LastRef::get().command.command);
+    if (!currentCmd) {
+        ROS_ERROR("No ref command set!");
+        return nullptr;
+    } else {
+        auto stateIt = refStateStrategies.find(*currentCmd);
+        if (stateIt != refStateStrategies.end()) {
+            return stateIt->second;
+        } else {
+            ROS_ERROR("No strategy found for: %s!", currentCmdName.c_str());
+            return nullptr;
+        }
+    }
 }
 
-// bt::Node::Ptr RefStateSwitch::getPreviousChild() {
-    // if (runningImplicitNormalStartRefCommand && switchedToNormal) {
-        // return children.at(roboteam_msgs::RefereeCommand::NORMAL_START);
-    // }
-
-    // return children.at(last);
-// }
-
-void RefStateSwitch::Terminate(Status s) {
-    ROS_ERROR_STREAM("TERMINATING THE REF STATE SWITCH IS NOT SUPPORTED!")
+void RefStateSwitch::Terminate(Status) {
+    ROS_ERROR_STREAM("TERMINATING THE REF STATE SWITCH IS NOT SUPPORTED!");
     // std::cout << "Terminating RSS!\n";
 
     // if (last != -1) {

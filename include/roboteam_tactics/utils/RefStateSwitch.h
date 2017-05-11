@@ -3,6 +3,7 @@
 #include <string>
 
 #include "roboteam_tactics/bt.hpp"
+#include "roboteam_utils/LastRef.h"
 
 namespace rtt {
 
@@ -25,7 +26,7 @@ public:
      */
     void assertValid() const;
     
-    void AddChild(Node::Ptr child) final override;
+    // void AddChild(Node::Ptr child) final override;
     
     bt::Node::Status Update() override;
 
@@ -36,14 +37,18 @@ public:
     bt::Node::Ptr getCurrentChild();
     bt::Node::Ptr getPreviousChild();
 
+    void AddStrategy(RefState refState, Node::Ptr child);
+
 private:
     bool validated;
-    int previousCmd;
-    int currentCmd;
+    boost::optional<RefState> previousCmd;
+    boost::optional<RefState> currentCmd;
     bool finishedOnce;
     bool needToInitialize;
 
     // bool runningImplicitNormalStartRefCommand;
+    
+    std::map<RefState, Node::Ptr> refStateStrategies;
 };
     
 } // rtt
