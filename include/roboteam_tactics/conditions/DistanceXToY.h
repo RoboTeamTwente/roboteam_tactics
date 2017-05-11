@@ -52,7 +52,16 @@ bool isWithinDefenseArea(std::string whichArea, Vector2 point);
  *         - closest opponent: Distance to the closest opponent
  *         - some integer: Distance to OUR robot with that id
  *         - some integer T: As in "5T" or "0T", distance to the OPPONENT robot with that id.
+ *         - fixed point: Distance to (px, py), as listed below.
  *       Descr: The location we want to measure the distance TO
+ *   - px:
+ *       Type: Double
+ *       Used when: Y == fixed point
+ *       Descr: The x-coordinate of the point to measure the distance to
+ *   - py:
+ *       Type: Double
+ *       Used when: Y == fixed point
+ *       Descr: The y-coordinate of the point to measure the distance to
  */
 class DistanceXToY : public Condition {
     public:
@@ -90,6 +99,8 @@ class DistanceXToY : public Condition {
     Status Update() override;
     private:
     int count = 0;
+
+    Vector2 getPointOfInterest(std::string name, int const ROBOT_ID);
 
 } ;
 
