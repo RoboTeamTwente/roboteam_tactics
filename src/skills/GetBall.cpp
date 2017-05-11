@@ -198,7 +198,7 @@ bt::Node::Status GetBall::Update (){
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-	if (posDiff > 0.8 || fabs(angleDiff) > successAngle){
+	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(intermediateAngle + M_PI);
 	} else {
         private_bb->SetBool("dribbler", true);
@@ -234,31 +234,22 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetString("whichBot", GetString("whichBot"));
     
     // @HACK for robot testing purposes
-    // if (HasDouble("minSpeed")) {
-    // 	private_bb->SetDouble("minSpeed", GetDouble("minSpeed"));
-    // }
     if (HasDouble("maxSpeed")) {
     	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     }
-    // if (HasDouble("pGainRotation")) {
-    // 	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
-    // }
+    if (HasDouble("pGainRotation")) {
+    	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+    }
+    if (HasDouble("iGainRotation")) {
+        private_bb->SetDouble("iGainRotation", GetDouble("iGainRotation"));
+    }
     if (HasDouble("pGainPosition")) {
     	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
     }
-    // if (HasString("stayOnSide")) {
-    //     private_bb->SetString("stayOnSide", GetString("stayOnSide"));
-    // }
-    // if (HasDouble("avoidRobotsGain")) {
-    //     private_bb->SetDouble("avoidRobotsGain", GetDouble("avoidRobotsGain"));
-    // }
-    // if (HasBool("forceAngle")) {
-    //     private_bb->SetBool("forceAngle", GetBool("forceAngle"));
-    // }
-    // if (HasBool("smoothDriving")) {
-    //     private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
-    //     private_bb->SetDouble("smoothingNumber", GetDouble("smoothingNumber"));
-    // }
+    if (HasBool("smoothDriving")) {
+        private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
+        private_bb->SetDouble("smoothingNumber", GetDouble("smoothingNumber"));
+    }
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;

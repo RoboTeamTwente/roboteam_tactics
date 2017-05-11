@@ -192,7 +192,7 @@ How to use:
     // Wait for the first geom & world message
     std::cout << "Waiting for first world & geom message...\n";
     rtt::LastWorld::wait_for_first_messages();
-    
+    std::cout << "Received first messages, proceeding\n";
 
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
