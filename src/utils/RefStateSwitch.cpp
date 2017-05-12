@@ -19,22 +19,20 @@ RefStateSwitch::RefStateSwitch() : validated(false)
                                  // , switchedToNormal(false) {
 }
 
+// TODO: Reimplement this
 bool RefStateSwitch::isValid() const {
-    return children.size() == REF_STATE_COUNT;
+    // return children.size() == REF_STATE_COUNT;
+    return true;
 }
 
+// TODO: Reimplement this
 void RefStateSwitch::assertValid() const {
     if (!isValid()) {
-        ROS_ERROR("Assertion Failed: RefStateSwitch expected %lu children, but got %lu.",
-                    REF_STATE_COUNT, children.size());
+        // ROS_ERROR("Assertion Failed: RefStateSwitch expected %lu children, but got %lu.",
+                    // REF_STATE_COUNT, children.size());
+        ROS_ERROR("Something went wrong in RefStateSwitch!");
     }
 }
-
-// void RefStateSwitch::AddChild(Node::Ptr child) {
-    // if (!validated) {
-        // bt::Composite::AddChild(child);
-    // }
-// }
 
 void RefStateSwitch::AddStrategy(RefState refState, Node::Ptr child) {
     refStateStrategies[refState] = child;
@@ -97,7 +95,6 @@ bt::Node::Ptr RefStateSwitch::getCurrentChild() {
 
     if (isTwoState(previousCmd, *currentCmd)) {
         if (!finishedOnce) {
-            // TODO: Get child here
             if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
                 auto stateIt = refStateStrategies.find(*targetStateOpt);
                 if (stateIt != refStateStrategies.end()) {
@@ -120,12 +117,12 @@ bt::Node::Ptr RefStateSwitch::getCurrentChild() {
                 return nullptr;
             }
         } else {
-            auto stateIt = refStateStrategies.find(RefState::NORMAL_PLAY);
+            auto stateIt = refStateStrategies.find(RefState::NORMAL_START);
             
             if (stateIt != refStateStrategies.end()) {
                 return stateIt->second;
             } else {
-                ROS_ERROR("No strategy found for NORMAL_PLAY!");
+                ROS_ERROR("No strategy found for NORMAL_START!");
                 return nullptr;
             }
         }

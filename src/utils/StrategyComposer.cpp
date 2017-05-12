@@ -26,33 +26,37 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
         
-        { RefState::NORMAL_START          , b::none                                   }  , 
-        { RefState::FORCED_START          , b::none                                   }  , 
+        { RefState::NORMAL_START          , "rtt_bob/W5_NormalStart"s      } ,
+        { RefState::FORCED_START          , b::none                        } ,
         
         ////////////////////////////////////////////////////
         // Ref states that have a specific implementation //
         ////////////////////////////////////////////////////
         
-        { RefState::HALT                  , "rtt_dennis/HaltStrategy"s                }  , 
-        { RefState::STOP                  , "rtt_dennis/HaltStrategy"s                }  , 
-        { RefState::PREPARE_KICKOFF_US    , "rtt_bob/prepare_kickoff_us"s             }  , 
-        { RefState::PREPARE_KICKOFF_THEM  , b::none                                   }  , 
-        { RefState::PREPARE_PENALTY_US    , b::none                                   }  , 
-        { RefState::PREPARE_PENALTY_THEM  , b::none                                   }  , 
+        { RefState::HALT                  , "rtt_dennis/HaltStrategy"s     } ,
+        { RefState::STOP                  , "rtt_dennis/HaltStrategy"s     } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_bob/prepare_kickoff_us"s  } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_bob/IdleStrategy"s        } ,
+        { RefState::PREPARE_PENALTY_US    , "rtt_bob/IdleStrategy"s        } ,
+        { RefState::PREPARE_PENALTY_THEM  , "rtt_bob/IdleStrategy"s        } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::DIRECT_FREE_US        , "rtt_bob/Wait5SecAndFail_DirectFreeUs"s   }  , 
-        { RefState::DIRECT_FREE_THEM      , "FreeKickDefenceStrategy"s                }  , 
+        { RefState::DIRECT_FREE_US        , "rtt_bob/W5_DirectFreeUs"s     } ,
+
+        // FreeKickDefenceStrategy
+        { RefState::DIRECT_FREE_THEM      , "rtt_bob/W5_DirectFreeThem"s   } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::INDIRECT_FREE_US      , "rtt_bob/Wait5SecAndFail_IndirectFreeUs"s }  , 
-        { RefState::INDIRECT_FREE_THEM    , "FreeKickDefenceStrategy"s                }  , 
-        { RefState::TIMEOUT_US            , "rtt_dennis/WanderStrategy"s              }  , 
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s              }  , 
-        { RefState::GOAL_US               , b::none                                   }  , 
-        { RefState::GOAL_THEM             , b::none                                   }  , 
-        { RefState::BALL_PLACEMENT_US     , b::none                                   }  , 
-        { RefState::BALL_PLACEMENT_THEM   , b::none                                   }  , 
+        { RefState::INDIRECT_FREE_US      , "rtt_bob/W5_IndirectFreeUs"s   } ,
+
+        // FreeKickDefenceStrategy
+        { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s } ,
+        { RefState::TIMEOUT_US            , "rtt_dennis/WanderStrategy"s   } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s   } ,
+        { RefState::GOAL_US               , b::none                        } ,
+        { RefState::GOAL_THEM             , b::none                        } ,
+        { RefState::BALL_PLACEMENT_US     , b::none                        } ,
+        { RefState::BALL_PLACEMENT_THEM   , b::none                        } ,
 
         //////////////////////////
         // Our custom refstates //
@@ -60,15 +64,12 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         
         // qualification/StandByStrategy
         // rtt_bob/NormalStrategy
-        { RefState::NORMAL_PLAY           , "rtt_bob/Wait5SecAndFail_NormalStart"s    }  , 
-        { RefState::DO_KICKOFF            , b::none                                   }  , 
-        { RefState::DEFEND_KICKOFF        , b::none                                   }  , 
-        { RefState::DO_PENALTY            , b::none                                   }  , 
-        { RefState::DEFEND_PENALTY        , b::none                                   }  , 
-        { RefState::DO_INDIRECT           , b::none                                   }  , 
-        { RefState::DEFEND_INDIRECT       , b::none                                   }  , 
-        { RefState::DO_DIRECT             , b::none                                   }  , 
-        { RefState::DEFEND_DIRECT         , b::none                                   }  , 
+        { RefState::DO_KICKOFF            , "rtt_bob/W5_DoKickoff"s     } ,
+        { RefState::DEFEND_KICKOFF        , "rtt_bob/W5_DefendKickoff"s } ,
+        { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s     } ,
+        { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s } ,
+
+        { RefState::NORMAL_PLAY           , b::none                     } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
@@ -90,7 +91,7 @@ void StrategyComposer::init() {
 
     // Get the default tree factory map entry
     std::string defName;
-    auto defNameIt = MAPPING.find(RefState::NORMAL_PLAY);
+    auto defNameIt = MAPPING.find(RefState::NORMAL_START);
     if (defNameIt != MAPPING.end() && defNameIt->second) {
         defName = *defNameIt->second;
     } else {
@@ -120,8 +121,10 @@ void StrategyComposer::init() {
 
         // If it's unset use the default
         if (!stratNameOpt) {
+            std::cout << "Forwarding tree: " << refStateToString(refState) << "\n";
             Forwarder fw(bb, def);
-            rss->AddChild(std::make_shared<Forwarder>(fw));
+            // rss->AddChild(std::make_shared<Forwarder>(fw));
+            rss->AddStrategy(refState, std::make_shared<Forwarder>(fw));
         } else {
             auto stratName = *stratNameOpt;
             // Else try to find the desired strategy tree
@@ -130,7 +133,7 @@ void StrategyComposer::init() {
             if (stratIt != repo.end()) {
                 // If so, set it
                 auto node = stratIt->second("", bb);
-                rss->AddChild(node);
+                rss->AddStrategy(refState, node);
             } else {
                 // Else it's not there, abort!
                 std::cerr << "Could not find a tree for \""
