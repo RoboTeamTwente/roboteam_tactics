@@ -43,6 +43,11 @@ namespace rtt {
  *    - stayOnSide:
  *        Type: String
  *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
+ *    - targetAngle:
+ *        Type: Double
+ *        Descr: The angle to look at with the ball
+ *        Used when: aimAt is not set
+ *
  */
 class GetBall : public Skill {
 public:
