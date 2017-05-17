@@ -202,6 +202,7 @@ bt::Node::Status ReceiveBall::Update (){
 	// from the specified receiveBallAt... point. This should always be the case (maybe move this check to some test function rather than perform
 	// it in the skill update)
 	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	ROS_INFO_STREAM("receiveBallAtPos: " << receiveBallAtPos);
 	if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos)) {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;

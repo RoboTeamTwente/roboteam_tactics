@@ -39,11 +39,11 @@ bt::Node::Status SimpleKeeper::Update() {
     double acceptableDeviation;
     double dribblerDist;
     std::string fieldType = GetString("fieldType");
-    if (fieldType == "small") {
+    if (fieldType == "office") {
         distanceFromGoal = 0.4;
         acceptableDeviation = 0.7;
         dribblerDist = 1.0;
-    } else if (fieldType == "large") {
+    } else {
         distanceFromGoal = 0.7;
         acceptableDeviation = 1.5;
         dribblerDist = 2.0;
