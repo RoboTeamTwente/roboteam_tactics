@@ -6,6 +6,7 @@
 #include "roboteam_utils/Vector2.h"
 
 #include "roboteam_tactics/skills/ReceiveBall.h"
+#include "roboteam_tactics/skills/GetBall.h"
 
 namespace rtt {
 
@@ -35,6 +36,7 @@ public:
 private:
 	int robotID;
     ReceiveBall receiveBall;
+    GoToPos goToPos;
     
 };
 

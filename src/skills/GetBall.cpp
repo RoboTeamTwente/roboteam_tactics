@@ -162,14 +162,15 @@ bt::Node::Status GetBall::Update (){
     // ROS_INFO_STREAM("angleDiff: " << angleDiff);
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.3*M_PI) {
+	if (angleDiff > 0.1*M_PI) {
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.3*M_PI) {
+	} else if (angleDiff < -0.1*M_PI) {
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
     }
 	
+    // ROS_INFO_STREAM("intermediateAngle: " << intermediateAngle);
 
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
@@ -193,16 +194,20 @@ bt::Node::Status GetBall::Update (){
         successAngle = 0.3;
     }
 
-    double distAwayFromBall = 0.4;
+    double distAwayFromBall = 0.2;
     if (HasDouble("distAwayFromBall")) {
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-	if (posDiff > 0.5 || fabs(angleDiff) > successAngle){
-		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(intermediateAngle + M_PI);
+    // ROS_INFO_STREAM("posDiff: " << posDiff << " angleDiff: " << angleDiff << " intermediateAngle: " << intermediateAngle);
+    // bool noYVel = false;
+	if (posDiff > 0.25 || fabs(angleDiff) > successAngle){
+		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(intermediateAngle + M_PI); // For arduinobot: 0.06
+        private_bb->SetDouble("maxSpeed", 0.6);
+        // noYVel = true;
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
 	}
     
     double angleError = cleanAngle(robot.angle - targetAngle);
@@ -268,6 +273,12 @@ bt::Node::Status GetBall::Update (){
         command.x_vel = newVelCommand.x;
         command.y_vel = newVelCommand.y;    
     }
+
+    // if (noYVel) {
+    //     command.y_vel = 0.0;
+    // }
+
+    // ROS_INFO_STREAM("xvel: " << command.x_vel << " yvel: " << command.y_vel << " w: " << command.w);
     
 
     // Get global robot command publisher, and publish the command
