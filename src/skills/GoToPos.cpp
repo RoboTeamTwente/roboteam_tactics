@@ -7,20 +7,16 @@
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/World.h"
-#include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/conditions/CanSeePoint.h"
-#include "roboteam_tactics/conditions/DistanceXToY.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include "roboteam_utils/Cone.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 
-#define RTT_CURRENT_DEBUG_TAG GetBall
+#define RTT_CURRENT_DEBUG_TAG GoToPos
 
 namespace rtt {
 
@@ -28,146 +24,24 @@ RTT_REGISTER_SKILL(GoToPos);
 
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , success(false)
-        
-        // Rest of the members
-        , safetyMarginGoalAreas(0.2)
-        , marginOutsideField(1.2)
-
-        , robotType(RobotType::ARDUINO)
-
-        , lastRobotTypeError(now())
-        , lastPresetError(now())
         
         {
             succeeded = false;
+            failure = false;
+            ros::NodeHandle n;
+            myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
+            myVelTopic = n.advertise<roboteam_msgs::WorldRobot>("myVelTopic", 1000);
+            myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
+            controller.Initialize(blackboard->GetInt("ROBOT_ID"));
+
+            safetyMarginGoalAreas = 0.2;
+            marginOutsideField = 1.2;
+            avoidRobotsGain = 0.2;
         }
 
-RobotType GoToPos::getRobotType() {
-    int const ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
-
-    if (ros::param::has(robotTypeKey)) {
-        std::string robotType;
-        ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
-
-        if (robotType == "arduino") {
-            return RobotType::ARDUINO;
-        } else if (robotType == "proto") {
-            return RobotType::PROTO;
-        } else if (robotType == "grsim") {
-            return RobotType::GRSIM;
-        } else if (robotType == "") {
-            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
-                ROS_INFO_STREAM("Empty value for found for param \"" 
-                        << robotTypeKey
-                        << "\" found. Defaulting to RobotTypes::PROTO.\n"
-                        );
-                lastRobotTypeError = now();
-            }
-        } else {
-            if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
-                ROS_ERROR_STREAM("Unknown value found for param \"" 
-                        << robotTypeKey 
-                        << "\": \"" 
-                        << robotType
-                        << "\". Defaulting to RobotType::PROTO."
-                        );
-                lastRobotTypeError = now();
-            }
-        }
-    } else {
-        if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
-            ROS_INFO_STREAM("No value for found for param \"" << robotTypeKey << "\" found. Defaulting to RobotTypes::PROTO.\n");
-            lastRobotTypeError = now();
-        }
-    }
-
-    return RobotType::PROTO;
-}
-
-void GoToPos::setPresetControlParams(RobotType newRobotType) {
-    if (newRobotType == RobotType::ARDUINO) {
-        pGainPosition = 1.0;
-        pGainRotation = 2.0;
-        minSpeedX = 0.7;
-        minSpeedY = 1.0; 
-        maxSpeed = 3.0; 
-        minAngularVel = 5.0;
-        maxAngularVel = 10.0;
-
-        robotType = RobotType::ARDUINO;
-    } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0; // eventueel 1 
-        pGainRotation = 1.0; // eventueel 1
-        minSpeedX = 0.2;
-        minSpeedY = 0.5;
-        maxSpeed = 1.0;
-        minAngularVel = 3.0;
-        maxAngularVel = 10.0;
-
-        robotType = RobotType::PROTO;
-    } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;
-        pGainRotation = 4.0;
-        minSpeedX = 0.0;
-        minSpeedY = 0.0;
-        maxSpeed = 1.5;
-        minAngularVel = 0.0;
-        maxAngularVel = 10.0;
-
-        robotType = RobotType::GRSIM;
-    } else {
-        if (time_difference_milliseconds(lastPresetError, now()).count() >= 1000) {
-            ROS_ERROR_STREAM("Could not set robot type of " 
-                    << blackboard->GetInt("ROBOT_ID")
-                    << ". Undefined type. Leaving the type on: "
-                    << (int) robotType
-                    << "\n"
-                    );
-
-            lastPresetError = now();
-        }
-    }
-}
-
-void GoToPos::setPresetControlParams() {
-    setPresetControlParams(getRobotType());
-}
-
-void GoToPos::setPresetControlParams(
-    	double pGainPosition,
-    	double pGainRotation,
-    	double maxAngularVel,
-    	double minAngularVel,
-    	double maxSpeed,
-    	double minSpeedX,
-    	double minSpeedY) {
-	this->pGainPosition = pGainPosition;
-	this->pGainRotation = pGainRotation;
-	this->maxAngularVel = maxAngularVel;
-	this->minAngularVel = minAngularVel;
-	this->maxSpeed = maxSpeed;
-	this->minSpeedX = minSpeedX;
-	this->minSpeedY	= minSpeedY;
-}
-
-void GoToPos::setPGains(double position, double rotation) {
-	pGainPosition = position;
-	pGainRotation = rotation;
-}
 
 void GoToPos::sendStopCommand(uint id) {
-    roboteam_msgs::RobotCommand command;
-    command.id = id;
-    command.x_vel = 0.0;
-    command.y_vel = 0.0;
-    command.w = 0.0;
-    if (GetBool("dribbler")) {
-        command.dribbler = true;
-    } else {
-        command.dribbler = false;
-    }
+    roboteam_msgs::RobotCommand command = controller.getStopCommand(id);
 
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -175,117 +49,8 @@ void GoToPos::sendStopCommand(uint id) {
 }
 
 
-// Proportional position controller
-Vector2 GoToPos::positionController(Vector2 myPos, Vector2 targetPos) {
-    Vector2 posError = targetPos - myPos;
-
-    // Make the controller less strong once we get very close, to make it more precise for short distances
-    if (posError.length() < 0.2) {
-        pGainPosition = 1.0;
-    }
-    // Vector2 velTarget;
-    // if (GetBool("quadraticController")) {
-    //     Vector2 posErrorSquared = Vector2(posError.x*posError.length(), posError.y*posError.length());
-    //     double sqGainPosition = GetDouble("sqGainPosition");
-    //     velTarget = posErrorSquared * sqGainPosition;
-    // } else {
-    Vector2 velTarget = posError*pGainPosition;
-    // }
-    
-    if (velTarget.length() > maxSpeed) {
-        velTarget = velTarget.scale(maxSpeed / velTarget.length());
-    }
-
-    return velTarget;
-}
-
-
-// Proportional rotation controller
-double GoToPos::rotationController(double myAngle, double angleGoal, Vector2 posError) {
-
-    bool forceAngle = false;
-    if(HasBool("forceAngle") && GetBool("forceAngle")){
-        forceAngle = true;
-    }
-
-    if (posError.length() > 1.0 && !forceAngle) {
-        angleGoal = posError.angle();
-    }
-    // std::cout<<"angleGoal: "<<angleGoal<<" myAngle: "<<myAngle<<"\n";
-    // Proportional term
-    double angleError = angleGoal - myAngle;
-    angleError = cleanAngle(angleError);
-    // std::cout << "angleError "<< angleError << " pGainRotation: "<<pGainRotation << "\n";
-    // // Integral term
-    // double updateRate;
-    // ros::param::get("role_iterations_per_second", updateRate);
-    // double timeStep = 1 / updateRate;
-    // angleErrorIntegral += angleError * timeStep;
-    
-    // // Differential term (UNTESTED!)
-    // angleErrorHistory[historyIndex] = angleError;
-    // int amountOfHistories = 4;
-    // historyIndex = (historyIndex + 1) % amountOfHistories;
-    // double avgHistory = 0;
-    // for (int i = 0; i < amountOfHistories; i++) {
-    //     avgHistory += angleErrorHistory[i];
-    // }
-    // avgHistory /= ((double) amountOfHistories);
-    // double angleErrorDiff = avgHistory * timeStep;
-
-    // Maybe we later choose to add an integral and/or differential term to this controller if it proves to be necessary, the basic structure
-    // for this is already there, although it is not yet well tested
-    double angularVelTarget = angleError * pGainRotation;    
-
-    // Limit the angular velocity target
-    if (fabs(angularVelTarget) > maxAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
-    }
-    // std::cout << "angularVelTarget: "<<angularVelTarget<<"maxAngularVel: "<<maxAngularVel<<"\n";
-    return angularVelTarget;
-}
-
-
-// Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them
-// TODO: fix the problem that if there are two robots in the way on both sides of the cone, our robot tries to push through them regardless
-// of whether he hits them or not (maybe use the commented variable distanceToCenter to accomplish this)
-// Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
-//     Vector2 antenna = antennaCone.center - myPos;    
-
-//     Vector2 forceVector(0.0, 0.0);
-//     if ((otherRobotPos-myPos).length() < lookingDistance && antennaCone.IsWithinCone(otherRobotPos)) {
-//         // double distanceToCenter = (otherRobotPos - antenna.closestPointOnVector(myPos, otherRobotPos)).length();
-//         if (isBetweenAngles(antenna.angle(), antennaCone.side1.angle(), (otherRobotPos - antennaCone.start).angle())) {
-//             forceVector = antenna.rotate(-0.5*M_PI).scale(avoidRobotsGain / (otherRobotPos - myPos).length());
-//         }
-//         if (isBetweenAngles(antennaCone.side2.angle(), antenna.angle(), (otherRobotPos - antennaCone.start).angle())) {
-//             forceVector = antenna.rotate(0.5*M_PI).scale(avoidRobotsGain / (otherRobotPos - myPos).length());
-//         }
-//         // drawer.setColor(255, 255, 0);
-//         // drawer.drawLine("forceFromRobot", myPos, forceVector);
-//     }    
-//     return forceVector;
-// }
-
-// Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, double lookingDistance, Cone antennaCone) {
-//     Vector2 forceVector(0.0, 0.0);
-//     Vector2 diffVec = myPos - otherRobotPos;
-//     if (diffVec.length() < lookingDistance) {
-//         forceVector = diffVec.scale(avoidRobotsGain / (diffVec.length() * diffVec.length()));
-//     }
-//     return forceVector;
-// }
-
-Vector2 GoToPos::limitAngleDiff(Vector2 vector1, Vector2 vector2, double maxAngleDiff) {
-    double angleDiff = cleanAngle(vector1.angle() - vector2.angle());
-    if (angleDiff > maxAngleDiff) {
-        vector1 = vector2.scale(vector1.length() / vector2.length()).rotate(maxAngleDiff);
-    } else if (angleDiff < -maxAngleDiff) {
-        vector1 = vector2.scale(vector1.length() / vector2.length()).rotate(-maxAngleDiff);
-    }
-    return vector1;
-}
-
+// Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them7
+// Based on this algorithm: https://gamedevelopment.tutsplus.com/tutorials/understanding-steering-behaviors-collision-avoidance--gamedev-7777
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos) {
 
     Vector2 forceVector;
@@ -324,45 +89,35 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
 
     Vector2 posError = targetPos - myPos;
     double lookingDistance = 0.5; // default
-    if (lookingDistance > (posError.length()) + 0.0) {
-        lookingDistance = posError.length() + 0.0;
+    if (lookingDistance > (posError.length())) {
+        lookingDistance = posError.length();
     }
     
+    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.5);
-    // Vector2 coneStart = myPos - antenna.scale(1.0);
-    // Cone antennaCone(coneStart, (antenna + myPos), 0.2);
+    antenna = antenna.scale(myVel.length()*1.5); // magic scaling constant
 
-    // Draw the lines of the cone in rqt_view
-    // Vector2 coneSide1 = (antennaCone.center-antennaCone.start).rotate(0.5*antennaCone.angle);
-    // Vector2 coneSide2 = (antennaCone.center-antennaCone.start).rotate(-0.5*antennaCone.angle);
-    // drawer.drawLine("coneGoToPosSide1", antennaCone.start, coneSide1);
-    // drawer.drawLine("coneGoToPosSide2", antennaCone.start, coneSide2);
-
+    // Draw the antenna in rqt-view
     drawer.drawLine("antenna", myPos, antenna);
 
+    // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
     for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
             Vector2 otherRobotPos(currentRobot.pos);
-            // Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
-            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
-            sumOfForces = sumOfForces + forceVector;
+            if ((otherRobotPos - myPos).length() <= lookingDistance) {
+                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
+                sumOfForces = sumOfForces + forceVector;
+            }
         }
     }
-
     for (size_t i = 0; i < world.them.size(); i++) {
         Vector2 otherRobotPos(world.them.at(i).pos);
-        // Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, lookingDistance, antennaCone);
-        Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
-        sumOfForces = sumOfForces + forceVector; 
+        if ((otherRobotPos - myPos).length() <= lookingDistance) {
+            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
+            sumOfForces = sumOfForces + forceVector; 
+        }
     }
-
-    // if (sumOfForces.length() < 0.01) {
-    //     drawer.removeLine("forceFromRobot");
-    // }
-
-
 
     return sumOfForces;
 }
@@ -396,20 +151,20 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
 }
 
 
-// Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
-//     Vector2 diff = ballPos - myPos;
-//     double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
+Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
+    Vector2 diff = ballPos - myPos;
+    double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
 
-//     if (theta < (0.5 * M_PI)) {
-//         if (theta == 0) theta = 0.01;
-//         double force = theta / (0.5 * M_PI);
-//         Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
-//         Vector2 ballForce = projectedBall - ballPos;
-//         sumOfForces = sumOfForces + ballForce * 5;
-//     }
+    if (theta < (0.5 * M_PI)) {
+        if (theta == 0) theta = 0.01;
+        double force = theta / (0.5 * M_PI);
+        Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
+        Vector2 ballForce = projectedBall - ballPos;
+        sumOfForces = sumOfForces + ballForce * 5;
+    }
 
-//     return sumOfForces;
-// }
+    return sumOfForces;
+}
 
 
 // Makes sure that the given target position is not inside a goal area, or (too far) outside the field. "Too far" is specified by the class variable marginOutsideField
@@ -497,95 +252,24 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
 }
 
 
-Vector2 GoToPos::limitVel(Vector2 sumOfForces, Vector2 posError) {
-    // Limit the robot velocity to the maximum speed
-    if (sumOfForces.length() > maxSpeed) {
-        if (sumOfForces.length() > 0.0) {
-            sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
-        }
-    }
-
-    if (minSpeedX > 0 || minSpeedY > 0) {
-        double absDrivingAngle = Vector2(fabs(sumOfForces.x), fabs(sumOfForces.y)).angle(); // number between zero and 0.5*pi
-        double minSpeed = minSpeedX + ((minSpeedY-minSpeedX) * absDrivingAngle / (0.5*M_PI));
-
-        // If speed is decreasing, going below the minSpeed is allowed because the motors can handle it.
-        if (sumOfForces.length() < (minSpeed / 8.0)) {
-            if (sumOfForces.length() >= prevSumOfForces.length()) {
-                sumOfForces = Vector2(0.0, 0.0);
-            }
-        } else if (sumOfForces.length() <  minSpeed) {
-            if (sumOfForces.length() > 0) {
-                sumOfForces = sumOfForces.scale(1/sumOfForces.length() * minSpeed);
-            } else {
-                sumOfForces = Vector2(0.0, 0.0);
-            }
-        }
-    }    
-
-    prevSumOfForces = sumOfForces;
-    return sumOfForces;
-}
-
-
-double GoToPos::limitAngularVel(double angularVelTarget) {
-    // If angularVel is decreasing, going below the minAngularVel is allowed because the motors can handle it.
-    if (fabs(angularVelTarget) < (minAngularVel / 4)) {
-        if (fabs(angularVelTarget) >= fabs(prevAngularVelTarget)) {
-            angularVelTarget = 0.0;
-        } 
-            // angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
-        // }
-    } else if (fabs(angularVelTarget) < minAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * minAngularVel;
-    }
-
-    // prevAngularVelTarget = angularVelTarget;
-    return angularVelTarget;
-}
-
-
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
-    setPresetControlParams();
     
-    // Get the latest world state
-    roboteam_msgs::World world = LastWorld::get();
-
-    // Get blackboard info
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
 
-    if (HasDouble("pGainRotation")) {
-        pGainRotation = GetDouble("pGainRotation");
-    }
-
-    if (HasDouble("pGainPosition")) {
-        pGainPosition = GetDouble("pGainPosition");
-    }
-
-    if (HasDouble("maxSpeed")) {
-        maxSpeed = GetDouble("maxSpeed");
-    }
-    // ROS_INFO_STREAM("maxSpeed: " << maxSpeed);
-
-    if (HasDouble("avoidRobotsGain")) {
-        avoidRobotsGain = GetDouble("avoidRobotsGain");
-    } else {
-        avoidRobotsGain = 0.2;
-    }
-
-    // if (GetBool("avoidRobots")) {
-    //     // pGainPosition = 5.0;
-    //     maxSpeed = 0.6;
-    // }
+    // Get the latest world state
+    roboteam_msgs::World world = LastWorld::get();
 
     // Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
+    roboteam_msgs::WorldRobot me;
     if (findBot) {
         me = *findBot;
     } else {
         ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
+        failure = true;
+        succeeded = false;
         return boost::none;
     }  
 
@@ -605,6 +289,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+
+    double angleGoal;
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
     } else {
@@ -618,8 +304,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
-    // RTT_DEBUG("robot %i \n", ROBOT_ID);
-    
+    // @DEBUG info: 
+    myPosTopic.publish(me);
+    roboteam_msgs::WorldRobot targetPosPub;
+    targetPosPub.pos.x = targetPos.x;
+    targetPosPub.pos.y = targetPos.y;
+    targetPosPub.angle = angleGoal;
+    myTargetPosTopic.publish(targetPosPub);
+
     double successDist;
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
@@ -629,71 +321,90 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < successDist && fabs(angleError) < 0.1) {
-        sendStopCommand(ROBOT_ID);
-        succeeded = true;
-        roboteam_msgs::RobotCommand command;
-        return boost::none;
+        successCounter++;
+        if (successCounter >= 4) {
+            sendStopCommand(ROBOT_ID);
+            succeeded = true;
+            failure = false;
+            return boost::none;
+        }
+    } else {
+        successCounter = 0;
     }
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     Vector2 sumOfForces(0.0, 0.0);
 
     // Position controller to steer the robot towards the target position
-    sumOfForces = sumOfForces + positionController(myPos, targetPos);
+    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos);
+
+    // Rotation controller to make sure the robot reaches its angleGoal
+    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError);
 
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-        if (posError.length() > 0.5) {
-            if (sumOfForces.length() < maxSpeed) {
-                sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
-            }
-        }
+        // Possibly necessary to scale the velocity to the maxSpeed again after avoidRobots:
+        // if (posError.length() > 0.5) {
+        //     if (sumOfForces.length() < maxSpeed) {
+        //         sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
+        //     }
+        // }
     }
-
-    
 
     // Defense area avoidance
     if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    } 
+    }
 
     // Ball avoidance
-    // if (HasBool("avoidBall") && GetBool("avoidBall")) {
-    //     Vector2 ballPos = Vector2(world.ball.pos);
-    //     sumOfForces = avoidBall(ballPos, myPos, sumOfForces);
-    // }
-    
-    // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = rotationController(myAngle, angleGoal, posError);
-    // std::cout<< "angularVelTarget: "<<angularVelTarget<<"\n";
-    sumOfForces = limitVel(sumOfForces, posError);
-    if (sumOfForces.length() < 0.5) {
-        angularVelTarget = limitAngularVel(angularVelTarget);
+    if (HasBool("avoidBall") && GetBool("avoidBall")) {
+        Vector2 ballPos = Vector2(world.ball.pos);
+        sumOfForces = avoidBall(ballPos, myPos, sumOfForces);
     }
 
+    // Draw the target velocity vector in rqt-view (in red, oooh)
     drawer.setColor(255, 0, 0);
-    drawer.drawLine("velCommand" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
     drawer.setColor(0, 0, 0);
 
-    // ROS_INFO_STREAM("limitVel: " << sumOfForces.x << " " << sumOfForces.y);
-
     // Rotate the commands from world frame to robot frame 
-    Vector2 velCommand = worldToRobotFrame(sumOfForces, myAngle);
+    Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
 
-    if (GetBool("smoothDriving")) {
-        if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
-            ROS_INFO_STREAM("limiting acceleration!");
-            velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
-        }
-        if ((fabs(angularVelTarget) - fabs(prevAngularVelTarget)) > 0.5) {
-            ROS_INFO_STREAM("limiting angular acc " << angularVelTarget);
-            angularVelTarget = prevAngularVelTarget + (0.5 * signum(angularVelTarget));
-            ROS_INFO_STREAM("new angular vel: " << angularVelTarget);
-        }
-        prevVelCommand = velCommand;
-    }
-    prevAngularVelTarget = angularVelTarget;
+    // @DEBUG info
+    Vector2 myVelRobotFrame = worldToRobotFrame(myVel, myAngle);
+    roboteam_msgs::WorldRobot myVelRobot;
+    myVelRobot.pos.x = myVelRobotFrame.x;
+    myVelRobot.pos.y = myVelRobotFrame.y;
+    myVelRobot.w = me.w;
+    myVelTopic.publish(myVelRobot); 
+
+    // Velocity controller
+    Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+
+    // Limit angular and linear velocity
+    velCommand = controller.limitVel(velCommand);
+    angularVelTarget = controller.limitAngularVel(angularVelTarget);
+
+    // if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
+    //     failure = true;
+    //     succeeded = false;
+    //     return boost::none;
+    // }
+
+    // @TODO: find out if this is useful and perhaps move it to utils/Control
+    // if (GetBool("smoothDriving")) {
+    //     if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
+    //         ROS_INFO_STREAM("limiting acceleration!");
+    //         velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
+    //     }
+    //     if ((fabs(angularVelTarget) - fabs(prevAngularVelTarget)) > 0.5) {
+    //         ROS_INFO_STREAM("limiting angular acc " << angularVelTarget);
+    //         angularVelTarget = prevAngularVelTarget + (0.5 * signum(angularVelTarget));
+    //         ROS_INFO_STREAM("new angular vel: " << angularVelTarget);
+    //     }
+    // }
+    // prevAngularVelTarget = angularVelTarget;
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
@@ -702,22 +413,26 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.y_vel = velCommand.y;
     command.w = angularVelTarget;
     command.dribbler = GetBool("dribbler");
+
     return command;
 }
 
-void GoToPos::Initialize() {
-	setPresetControlParams();
-}
 
 bt::Node::Status GoToPos::Update() {
-    // Maybe not the best way?? Because it is harder to take into account failure in getVelCommand() this way...
+    
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(*command);
         return Status::Running;
     } else {
-        return Status::Success;
+        if (succeeded) {
+            return Status::Success;
+        } else if (failure) {
+            return Status::Failure;
+        } else {
+            return Status::Invalid;
+        }
     }
 }
 

@@ -474,10 +474,10 @@ void BTBuilder::define_nod(std::string name, std::string type) {
             << "\", bb);"
             << std::endl;
     } else if (alltactics_set.find(type) != alltactics_set.end()) {
-        size_t pos = pos = type.find("/");
+        size_t pos = type.find("/");
         while (pos != std::string::npos) {
             type.replace(pos, std::string("/").length(), "::");
-            pos = pos = type.find("/");
+            pos = type.find("/");
         }
 
         out << DINDENT

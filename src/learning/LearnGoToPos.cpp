@@ -37,7 +37,8 @@ bt::Node::Status runGTP(const Position& pos, boost::optional<GTPLearner::Data> p
 	gtp.Initialize();
 
 	if(params) {
-		gtp.setPGains((*params)[0], (*params)[1]);
+		std::cout << "Param setting in GoToPos disabled, because this is not expected to be used anymore, and GoToPos structure has changed";
+		// gtp.setPGains((*params)[0], (*params)[1]);
 	}
 
 	bt::Node::Status status = bt::Node::Status::Running;

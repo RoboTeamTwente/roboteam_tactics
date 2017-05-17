@@ -50,6 +50,9 @@
 #include "Qualification1v1Tactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "StarAttackTactic.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "TargetPracticeTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
