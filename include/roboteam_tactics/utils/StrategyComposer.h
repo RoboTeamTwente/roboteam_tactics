@@ -1,9 +1,11 @@
 #pragma once
 
+#include <boost/optional.hpp>
+#include <map>
+
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_utils/LastRef.h"
-#include <map>
 
 namespace rtt {
 
@@ -26,7 +28,7 @@ private:
     static constexpr unsigned int CASE_COUNT = 19;
     
     // SET THIS IN StrategyComposer.cpp !!
-    static const std::map<RefState, std::string> MAPPING;
+    static const std::map<RefState, boost::optional<std::string>> MAPPING;
     
     class Forwarder final : public bt::Leaf {
         public:
