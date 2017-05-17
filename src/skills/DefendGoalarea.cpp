@@ -125,9 +125,9 @@ bt::Node::Status DefendGoalarea::Update() {
 	} else { // on an arc
 		Vector2 center;
 		if (our_side == "right"){ // right field side
-			center.x=4.5;
-		} else {
 			center.x=-4.5;
+		} else {
+			center.x=4.5;
 		}
 
 		if(robot.pos.y > 0){ // top half circle
