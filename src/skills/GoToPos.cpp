@@ -34,8 +34,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
-            safetyMarginGoalAreas = 0.2;
-            marginOutsideField = 1.2;
+            safetyMarginGoalAreas = 0.0;
+            marginOutsideField = -0.1;
             avoidRobotsGain = 0.2;
         }
 
@@ -180,14 +180,14 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
-    if (GetBool("ignoreFieldBounds", false)) {
+    // if (GetBool("ignoreFieldBounds", false)) {
         if (xGoal > (field.field_length/2+marginOutsideField) || xGoal < (-field.field_length/2-marginOutsideField)) {
             xGoal = signum(xGoal)*(field.field_length/2+marginOutsideField);
         }
         if (yGoal > (field.field_width/2+marginOutsideField) || yGoal < (-field.field_width/2-marginOutsideField)) {
             yGoal = signum(yGoal)*(field.field_width/2+marginOutsideField);
         }
-    }
+    // }
 
     Vector2 newTargetPos(xGoal, yGoal);
 
@@ -257,6 +257,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
+    if (HasDouble("maxSpeed")) {
+        controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
+    }
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
@@ -271,7 +274,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         failure = true;
         succeeded = false;
         return boost::none;
-    }  
+    }
 
     // Check the input position
     if (targetPos == prevTargetPos) {
@@ -385,6 +388,20 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Limit angular and linear velocity
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
+
+
+
+    double drivingAngle = velCommand.angle();
+    // ROS_INFO_STREAM("drivingAngle: " << drivingAngle);
+    // if (drivingAngle >= ((30.0-20.0)/180.0*M_PI) && drivingAngle <= ((30.0+40.0)/180.0*M_PI)) {
+    //     ROS_INFO_STREAM("limiting drive direction pos y");
+    //     velCommand = Vector2(1.0, 0.0).rotate(30.0/180.0*M_PI).scale(velCommand.length());
+    // } else if (drivingAngle >= ((-30.0-40.0)/180.0*M_PI) && drivingAngle <= ((-30.0+20.0)/180.0*M_PI)) {
+    //     ROS_INFO_STREAM("limiting drive direction neg y");
+    //     velCommand = Vector2(1.0, 0.0).rotate(330.0/180.0*M_PI).scale(velCommand.length());
+    // }
+
+    // ROS_INFO_STREAM("velcommand length: " << velCommand.length());
 
     // if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
     //     failure = true;

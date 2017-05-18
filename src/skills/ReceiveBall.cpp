@@ -202,6 +202,7 @@ bt::Node::Status ReceiveBall::Update (){
 	// from the specified receiveBallAt... point. This should always be the case (maybe move this check to some test function rather than perform
 	// it in the skill update)
 	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	ROS_INFO_STREAM("receiveBallAtPos: " << receiveBallAtPos);
 	if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos)) {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;
@@ -211,19 +212,21 @@ bt::Node::Status ReceiveBall::Update (){
 	}
 
 
-	// If we are too far from the ball, or too far from the speficied targetPos, we should drive towards the targetPos
-	//Vector2 posError = targetPos - robotPos;
+	// If the ball is within reach and lying still or moving slowy, we should drive towards it
 	double distanceToBall = (ballPos-receiveBallAtPos).length();
-	double acceptableDeviation2 = 1.5;
-
 	Vector2 ballVel(ball.vel);
-	ROS_INFO_STREAM("ballVel: " << ballVel.length());
-	if (ballHasBeenClose || (distanceToBall < acceptableDeviation2 && ballVel.length() < 0.5)) {
+	if (ballHasBeenClose || (distanceToBall < acceptableDeviation && ballVel.length() < 0.5)) {
 		ballHasBeenClose = true;
 		return getBall.Update();
 	}
 	
-	if (distanceToBall < 2.0) {
+	// If the ball gets close, turn on the dribbler
+	double dribblerDist = acceptableDeviation;
+	if (HasDouble("dribblerDist")) {
+		dribblerDist = GetDouble("dribblerDist");
+	}
+
+	if (distanceToBall < dribblerDist) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);
@@ -250,12 +253,12 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
 
-        if (HasDouble("pGainPosition")) {
-        	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-        }
-        if (HasDouble("successDist")) {
-        	private_bb->SetDouble("successDist", GetDouble("successDist"));
-        }
+        // if (HasDouble("pGainPosition")) {
+        // 	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+        // }
+        // if (HasDouble("successDist")) {
+        // 	private_bb->SetDouble("successDist", GetDouble("successDist"));
+        // }
 
         boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
 	    if (command) {

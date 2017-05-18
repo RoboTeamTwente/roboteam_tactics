@@ -2,6 +2,7 @@
 
 #include "ros/ros.h"
 
+#include <string>
 #include <vector>
 #include <boost/optional.hpp>
 
@@ -52,6 +53,7 @@ public:
     	double minSpeedX,
     	double minSpeedY
     );
+    void setControlParam(std::string paramName, double paramValue);
     // void setPGains(double position, double rotation);
     
 private:

@@ -25,8 +25,6 @@ namespace rtt {
  * Descr: |
  *     Goes to a position
  *
- *     @Idea same goes for canIGoIntoGoalArea & stay50cmAwayFromBall?
- *
  * Params:
  *     - ROBOT_ID:
  *         Type: Int 
