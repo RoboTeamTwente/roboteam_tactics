@@ -4,6 +4,8 @@
 
 #include "roboteam_utils/Vector2.h"
 
+
+#include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_tactics/tactics/BasicDefenseTactic.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_utils/LastWorld.h"
@@ -36,30 +38,88 @@ void BasicDefenseTactic::Initialize() {
 
     const Vector2 theirGoal = rtt::LastWorld::get_their_goal_center();
 
+    int goalareaDefenders=0;
+
+    std::vector<roboteam_msgs::WorldRobot> dangerousbots;
+
+    // find most dangerous attacker
+    // TODO: determine to most dangerous attackers
+    for (const auto& bot : world.them) {
+        std::cout<<"id: "<<bot.id<<", x:"<<bot.pos.x<<", y:"<<bot.pos.y<<std::endl;
+        
+
+    }
+    ROS_INFO("end of opponents");
+
     for (const int ROBOT_ID : robots) {
-        RTT_DEBUGLN("StartY: %f", startY);
+        ROS_INFO("found a robot");
 
-        // Fill blackboard with relevant info
-        bt::Blackboard bb;
+        if(goalareaDefenders!=2){
+            goalareaDefenders+=1;
 
-        bb.SetInt("ROBOT_ID", ROBOT_ID);
-        bb.SetDouble("xGoal", (LastWorld::get_our_goal_center().normalize() * 2).x);
-        bb.SetDouble("yGoal", startY);
-        bb.SetDouble("angleGoal", theirGoal.angle());
+            string position;
+            if(goalareaDefenders==1){position="top";}
+            else {position="bottom";}
 
-        RTT_DEBUGLN("xGoal: %f", bb.GetDouble("xGoal"));
+            bt::Blackboard bb;
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = ROBOT_ID;
-        wd.tree = "AvoidRobots";
-        wd.blackboard = bb.toMsg();
+            bb.SetInt("ROBOT_ID", ROBOT_ID);
+            bb.SetInt("KEEPER_ID",0);
+            bb.SetInt("numberOfRobots", 2);
+            bb.SetString("position",position);
 
-        // Send to rolenode
-        pub.publish(wd);
+            // Create message
+            roboteam_msgs::RoleDirective wd;
+            wd.robot_id = ROBOT_ID;
+            wd.tree = "DefendGoalarea";
+            
+            boost::uuids::uuid token = unique_id::fromRandom();
+            //tokens.push_back(token);
+            wd.token = unique_id::toMsg(token);
 
-        // Move one pos down
-        startY -= yStep;
+            wd.blackboard = bb.toMsg();
+           
+            // Send to rolenode
+            pub.publish(wd);
+            
+
+        } else {
+
+            //int tgt;
+            //tgt = dangerFinder.getImmediateUpdate().mostDangerous->id;
+            
+
+            bt::Blackboard bb;
+
+            bb.SetInt("ROBOT_ID", ROBOT_ID);
+            bb.SetInt("KEEPER_ID",0);
+            bb.SetInt("TGT_ID",3);
+            bb.SetString("block_type","ABSOLUTE");
+            bb.SetDouble("block_arg", 0.5);
+            bb.SetDouble("block_x",4.5);
+            bb.SetDouble("block_y",0.0);
+
+        
+            // Create message
+            roboteam_msgs::RoleDirective wd;
+            wd.robot_id = ROBOT_ID;
+            wd.tree = "Block";
+            
+            boost::uuids::uuid token = unique_id::fromRandom();
+            //tokens.push_back(token);
+            wd.token = unique_id::toMsg(token);
+            
+
+
+            wd.blackboard = bb.toMsg();
+
+            // Send to rolenode
+            pub.publish(wd);
+
+        }
+
+        
+
 
         RTT_DEBUG("Claiming: %i\n", ROBOT_ID);
     }
