@@ -253,7 +253,7 @@ How to use:
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
 
-    rtt::RobotDealer::initialize_robots(0, {1, 2}); // , 3, 4, 5});
+    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     if (rtt::factories::isTree(testClass)) {
         // Notify the tree debugger that we're running a tree.
