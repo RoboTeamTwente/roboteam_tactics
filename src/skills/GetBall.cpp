@@ -93,6 +93,8 @@ void GetBall::publishKickCommand(){
 
 void GetBall::Initialize() {
     ballCloseFrameCount = 0;
+    finalStage = false;
+    countFinalMessages = 0;
 }
 
 bt::Node::Status GetBall::Update (){
