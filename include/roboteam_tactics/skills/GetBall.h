@@ -33,10 +33,10 @@ namespace rtt {
  *        Type: Int
  *        Used when: aimAt == robot
  *        Descr: The id of an opponent robot to aim at
- *    - aimAtRobotOurTeam:
- *        Type: Int
+ *    - ourTeam:
+ *        Type: Bool
  *        Used when: aimAt == robot
- *        Descr: The id of one of our robots to aim at
+ *        Descr: To indicate whether or not the opponent robot is meant
  *    - passOn:
  *        Type: Bool
  *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.

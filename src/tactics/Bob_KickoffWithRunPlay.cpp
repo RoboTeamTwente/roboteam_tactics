@@ -38,6 +38,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
     if (robots.size() < 2) {
         RTT_DEBUGLN("Less than two robots detected; cannot use play!");
         failImmediately = true;
+        return;
     }
 
     int firstAttackerID = robots[0];
@@ -51,20 +52,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
 
     Vector2 receivePos(4.5 / 2, 3 / -2.0);
     Vector2 thresholdPos(-1, 3 / -2.0);
-
-    // std::string ourSide;
-    // ros::param::get("our_side", ourSide);
-    // if (ourSide == "left") {
-        // standFreePos = Vector2(1.5, 1.5);
-    // } else if (ourSide == "right") {
-        // standFreePos = Vector2(-1.5, -1.5);
-    // } else {
-        // ROS_WARN("Bob_KickoffWithRunPlay: something went wrong in getting param ourSide");
-        // standFreePos = Vector2(-1.5, -1.5);
-    // }
-    
-    // delete_from_vector(robots, attackerID);
-    // claim_robots({firstAttackerID, secondAttackerID});
+    Vector2 rendezvous(3, -2);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -78,7 +66,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GetBallAndLookAtGoal")
-            .setString("aimAt", "theirGoal")
+            .setString("aimAt", "theirgoal")
             .setBool("passOn", false)
             .setString("stayOnSide", "ourSide")
             ;
@@ -92,7 +80,11 @@ void Bob_KickoffWithRunPlay::Initialize() {
             .setDouble("distance", 0.5)
             ;
 
-        ScopedBB(bb, "GetBallAndShootAtReceiver");
+        ScopedBB(bb, "GetBallAndShootAtReceiver")
+            .setDouble("targetAngle", (rendezvous - receivePos).angle())
+            .setBool("ourTeam", true)
+            .setBool("passOn", true)
+            ;
 
         // bb.SetString("GetBall_A_AimAt", "robot");
         // bb.SetInt("GetBall_A_AimAtRobot", secondAttackerID);
@@ -177,13 +169,17 @@ bt::Node::Status Bob_KickoffWithRunPlay::Update() {
 
             if (status == bt::Node::Status::Success) {
                 if (token == unique_id::fromMsg(firstAttacker.token)) {
+                    std::cout << "First attacker succeeded!\n";
                     firstAttackerSucceeded = true;
                 }
                 if (token == unique_id::fromMsg(secondAttacker.token)) {
+                    std::cout << "Second attacker succeeded!\n";
                     secondAttackerSucceeded = true;
                 }
             } 
+
             if (status == bt::Node::Status::Failure) {
+                std::cout << "One failed!\n";
                 oneFailed = true;
             }
         }
@@ -196,13 +192,14 @@ bt::Node::Status Bob_KickoffWithRunPlay::Update() {
 
     if (oneFailed) {
         RTT_DEBUGLN("One role failed, so tactic failed");
+        std::cout << "FAILING!!\n";
         return bt::Node::Status::Failure;
     }
 
-    auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 25) {
-        return Status::Failure;
-    }
+    // auto duration = time_difference_seconds(start, now());
+    // if (duration.count() >= 25) {
+        // return Status::Failure;
+    // }
 
     lastUpdate = now();
 
