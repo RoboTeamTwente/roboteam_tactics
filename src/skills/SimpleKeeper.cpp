@@ -30,6 +30,7 @@ SimpleKeeper::SimpleKeeper(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb) { }
 
 bt::Node::Status SimpleKeeper::Update() {
+    
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();

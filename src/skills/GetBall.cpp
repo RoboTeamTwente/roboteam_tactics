@@ -159,7 +159,6 @@ bt::Node::Status GetBall::Update (){
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
-    // ROS_INFO_STREAM("angleDiff: " << angleDiff);
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
 	if (angleDiff > 0.1*M_PI) {
@@ -170,28 +169,23 @@ bt::Node::Status GetBall::Update (){
         intermediateAngle = targetAngle;
     }
 	
-    // ROS_INFO_STREAM("intermediateAngle: " << intermediateAngle);
-
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	double posDiff = (ballPos - robotPos).length();
-    double getBallDist;
-    // if (HasDouble("getBallDist")) {
-        // getBallDist = GetDouble("getBallDist");
-    // } else {
-        getBallDist = 0.06;
-    // }
+	double posDiff = (ballPos - robotPos).length(); 
 
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     double successDist = 0.0;
     double successAngle = 0.0;
+    double getBallDist;
     if (robot_output_target == "grsim") {
         successDist = 0.13;
         successAngle = 0.3;
+        getBallDist = 0.11;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.3;
+        getBallDist = 0.06;
     }
 
     double distAwayFromBall = 0.2;
@@ -273,6 +267,9 @@ bt::Node::Status GetBall::Update (){
         command.x_vel = newVelCommand.x;
         command.y_vel = newVelCommand.y;    
     }
+
+    Vector2 velCommand = Vector2(command.x_vel, command.y_vel);
+    ROS_INFO_STREAM("velCommand: " << velCommand);
 
     // if (noYVel) {
     //     command.y_vel = 0.0;
