@@ -83,8 +83,6 @@ bt::Node::Status DefendGoalarea::Update() {
 	radius=1.00+spacingfromline;
 	SetOffsets();
 
-	ROS_INFO("offsets: length:%f, angle:%f",offsetlength,offsetangle);
-
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -111,11 +109,11 @@ bt::Node::Status DefendGoalarea::Update() {
 		goto_bb->SetBool("dribbler",false);
 		goto_bb->SetDouble("maxspeed",2.0);
 		if (our_side == "right"){
-			goto_bb->SetDouble("xGoal", 3.5-spacingfromline);
-			goto_bb->SetDouble("angleGoal", 3.14);
-		} else {
 			goto_bb->SetDouble("xGoal", -3.5+spacingfromline);
 			goto_bb->SetDouble("angleGoal", 0.0);
+		} else {
+			goto_bb->SetDouble("xGoal", +3.5-spacingfromline);
+			goto_bb->SetDouble("angleGoal", 3.14);
 		}
 		goto_bb->SetDouble("yGoal", ball.pos.y+offsetlength);
 		goto_bb->SetBool("endPoint",true);
@@ -125,17 +123,15 @@ bt::Node::Status DefendGoalarea::Update() {
 	} else { // on an arc
 		Vector2 center;
 		if (our_side == "right"){ // right field side
-			center.x=4.5;
-		} else {
 			center.x=-4.5;
+		} else {
+			center.x=4.5;
 		}
 
 		if(robot.pos.y > 0){ // top half circle
 			center.y=0.25;
-			ROS_INFO("top circle");
 		} else { // bottom half circle
 			center.y=-0.25;
-			ROS_INFO("bottom circle");
 		}
 
 		rotate_bb->SetDouble("centerx", center.x);
@@ -157,8 +153,7 @@ bt::Node::Status DefendGoalarea::Update() {
         point.color.b = 255;
         debug_pub.publish(point);
 
-        ROS_INFO("facetowards x:%f y:%f",facetowardsPos.x,facetowardsPos.y);
-
+        
 		rotate_bb->SetDouble("radius", radius);
 	    rotate_bb->SetDouble("faceTowardsPosx", facetowardsPos.x);
 	    rotate_bb->SetDouble("faceTowardsPosy", facetowardsPos.y);

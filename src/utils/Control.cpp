@@ -22,6 +22,8 @@ Control::Control()
             myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
             myVelTopic = n.advertise<roboteam_msgs::WorldRobot>("myVelTopic", 1000);
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
+            angleErrorI = 0.0;
+            posErrorI = Vector2(0.0, 0.0);
         }
 
 RobotType Control::getRobotType() {
@@ -78,7 +80,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 2.0;
         iGainPosition = 0.15; 
-        pGainRotation = 2.0; 
+        pGainRotation = 1.0; 
         iGainRotation = 1.0;
         pGainVelocity = 0.5;
         maxSpeed = 0.6;
@@ -124,6 +126,12 @@ void Control::setPresetControlParams(
 	this->pGainRotation = pGainRotation;
 	this->maxAngularVel = maxAngularVel;
 	this->maxSpeed = maxSpeed;
+}
+
+void Control::setControlParam(std::string paramName, double paramValue) {
+    if (paramName == "maxSpeed") {
+        this->maxSpeed = paramValue;
+    }
 }
 
 
@@ -198,6 +206,7 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
+    // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
 
     // Integral term
     double updateRate;
@@ -208,6 +217,8 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     } else {
         angleErrorI = 0;
     }
+
+    // ROS_INFO_STREAM("angleErrorI: " << angleErrorI);
     
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation;
@@ -216,6 +227,8 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     if (fabs(angularVelTarget) > maxAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
+
+    // ROS_INFO_STREAM("angularVelTarget: " << angularVelTarget);
 
     return angularVelTarget;
 }

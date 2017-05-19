@@ -37,7 +37,7 @@ void KeeperBlock::reevaluate_target() {
     
     target = danger->id;
     auto goalX = (weAreLeft() ? -1 : 1) * LastWorld::get_field().field_length / 2; // center
-
+    
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
     bb->SetInt("TGT_ID", target);
@@ -60,5 +60,5 @@ bt::Node::Status KeeperBlock::Update() {
     // Keeping is never done, unless something failed elsewhere.
     return stat == bt::Node::Status::Invalid ? stat : bt::Node::Status::Running;
 }
-    
+
 }

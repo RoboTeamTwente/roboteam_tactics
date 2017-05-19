@@ -34,6 +34,8 @@ bt::Node::Status Block::Update() {
     std::string type = GetString("block_type");
     if (type == block_type_names.at(BlockType::RELATIVE)) {
         pos = new RelativeBlock(GetDouble("block_arg"));
+    } else if (type ==  block_type_names.at(BlockType::ABSOLUTE)) {
+        pos = new AbsoluteBlock(GetDouble("block_arg"));
     } else if (type ==  block_type_names.at(BlockType::CIRCLE)) {
         pos = new CircleBlock(GetDouble("block_arg"));
     } else if (type ==  block_type_names.at(BlockType::GOALAREA)) {
@@ -48,11 +50,13 @@ bt::Node::Status Block::Update() {
     }
     
     roboteam_msgs::WorldRobot me, tgt;
-
     {
         auto maybeMe = getWorldBot(GetInt("ROBOT_ID"));
         auto maybeTgt = getWorldBot(GetInt("TGT_ID"), HasBool("selfBlock") && GetBool("selfBlock"));
-        if (!maybeMe || !maybeTgt) return Status::Failure;
+        if (!maybeMe || !maybeTgt){
+            ROS_ERROR("cannot get me or tgt from world");
+            return Status::Failure;
+        }
 
         me = *maybeMe;
         tgt = *maybeTgt;
@@ -70,14 +74,20 @@ bt::Node::Status Block::Update() {
         roboteam_msgs::WorldRobot blk;
         {
             auto maybeBlk = getWorldBot(GetInt("BLOCK_ID"), false);
-            if (!maybeBlk) return Status::Failure;
+            if (!maybeBlk){
+                ROS_ERROR("cannot get BLOCK_ID robot from world");
+                return Status::Failure;
+            }
             blk = *maybeBlk;
         }
         block = Vector(blk.pos);
     }
-
-    if (block.dist(tgtpos.location()) < .4) return bt::Node::Status::Failure;
-
+    
+    if (block.dist(tgtpos.location()) < .4){
+        ROS_ERROR("distance to tgtpos is too small");
+      return bt::Node::Status::Failure;
+  
+    }
     Position goal = pos->block_pos(mypos, tgtpos.location(), block);
     normalize(goal);
     if (GetBool("invert_direction"))

@@ -176,9 +176,11 @@ int main(int argc, char *argv[]) {
             if (status == bt::Node::Status::Success) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
                 feedbackPub.publish(feedback);
+                RTT_DEBUGLN_TEAM("Robot has success");
             } else if (status == bt::Node::Status::Invalid) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
+                RTT_DEBUGLN_TEAM("Robot has invalid");
             } else if (status == bt::Node::Status::Failure) {
                 RTT_DEBUGLN_TEAM("Role node failed! ID: %d", ROBOT_ID);
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;

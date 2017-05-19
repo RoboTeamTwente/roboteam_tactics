@@ -35,17 +35,18 @@ std::random_device rd;
 std::mt19937 rng(rd());
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
+    
     auto uuid = unique_id::fromMsg(msg->token);
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
-        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
+        std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
-        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
+        std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
-        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
+        std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
