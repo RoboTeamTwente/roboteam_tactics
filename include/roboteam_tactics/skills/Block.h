@@ -18,10 +18,11 @@ namespace rtt {
 using Vector = Vector2;
 using Position = Position;
 
-enum class BlockType { RELATIVE, CIRCLE, COVER, GOALAREA };
+enum class BlockType { RELATIVE, ABSOLUTE, CIRCLE, COVER, GOALAREA };
 
 const std::map<BlockType, const char*> block_type_names {
     { BlockType::RELATIVE, "RELATIVE" },
+    { BlockType::ABSOLUTE, "ABSOLUTE" },
     { BlockType::CIRCLE, "CIRCLE" },
     { BlockType::COVER, "COVER" },
     { BlockType::GOALAREA, "GOALAREA" }
@@ -149,6 +150,27 @@ public:
     }
 private:
     double factor;
+};
+
+/**
+ * \class AbsoluteBlock
+ * \brief Blocks at the point a given distance between the opponent and target, facing the opponent.
+ * For example, if the opponent is at (0, 0), the target at (0, 10) and the argument 1, then the block_pos
+ * will be (0, 1).
+ */
+class AbsoluteBlock : public BlockPos {
+public:
+    AbsoluteBlock(double distance) : distance(distance) {}
+    Position block_pos(const Position& current,
+                             const Vector& opponent,
+                             const Vector& to_block) const override {
+        Vector norm = opponent-to_block;
+        double angle = norm.angle();
+        norm = norm.scale(1/norm.length())*-distance + opponent;
+        return Position(norm.x, norm.y, angle);
+    }
+private:
+    double distance;
 };
 
 /**

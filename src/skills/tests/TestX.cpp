@@ -11,6 +11,7 @@
 #include "roboteam_msgs/RefereeData.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/RoleFeedback.h"
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/LastRef.h"
@@ -22,8 +23,25 @@
 #include "roboteam_tactics/treegen/NodeFactory.h"
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
 
 static volatile bool may_update = false;
+
+void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
+    
+    auto uuid = unique_id::fromMsg(msg->token);
+
+    if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Failure;
+        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
+    } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
+        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
+    } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
+        rtt::feedbacks[uuid] = bt::Node::Status::Success;
+        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
+    }
+}
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss;
@@ -105,6 +123,12 @@ How to use:
 
 	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
+
+    ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
+        rtt::TOPIC_ROLE_FEEDBACK,
+        10,
+        &feedbackCallback
+        );
 
     auto bb = std::make_shared<bt::Blackboard>();
 
@@ -192,7 +216,7 @@ How to use:
     // Wait for the first geom & world message
     std::cout << "Waiting for first world & geom message...\n";
     rtt::LastWorld::wait_for_first_messages();
-    
+    std::cout << "Received first messages, proceeding\n";
 
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
@@ -229,7 +253,7 @@ How to use:
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
 
-    rtt::RobotDealer::initialize_robots(0, {1, 2}); // , 3, 4, 5});
+    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     if (rtt::factories::isTree(testClass)) {
         // Notify the tree debugger that we're running a tree.

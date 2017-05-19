@@ -1,3 +1,5 @@
+#include <string>
+
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "ros/ros.h"
 #include "roboteam_utils/LastWorld.h"
@@ -11,6 +13,7 @@
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
@@ -20,20 +23,31 @@ namespace rtt {
 
 RTT_REGISTER_SKILL(SimpleKeeper);
 
+
 SimpleKeeper::SimpleKeeper(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , receiveBall("", private_bb) { }
+        , receiveBall("", private_bb)
+        , goToPos("", private_bb) { }
 
 bt::Node::Status SimpleKeeper::Update() {
+    
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
+    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     robotID = blackboard->GetInt("ROBOT_ID");
 
     double distanceFromGoal;
-    if (HasDouble("distanceFromGoal")) {
-        distanceFromGoal = GetDouble("distanceFromGoal");
+    double acceptableDeviation;
+    double dribblerDist;
+    std::string fieldType = GetString("fieldType");
+    if (fieldType == "office") {
+        distanceFromGoal = 0.4;
+        acceptableDeviation = 0.7;
+        dribblerDist = 1.0;
     } else {
-        distanceFromGoal = 0.8;
+        distanceFromGoal = 0.7;
+        acceptableDeviation = 1.5;
+        dribblerDist = 2.0;
     }
 
     Vector2 ballPos(world.ball.pos);
@@ -55,50 +69,25 @@ bt::Node::Status SimpleKeeper::Update() {
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
-    // if (goalPos.x < 0) {
-        targetPos = goalPos + targetPos;
-    // } else {
-        // targetPos = goalPos - targetPos;
-    // }
+    targetPos = goalPos + targetPos;
 
-    if (ballPos.x < -4.3) {
-        targetPos = goalPos + Vector2(distanceFromGoal, 0.0);
-        private_bb->SetDouble("acceptableDeviation", 0.2);
+    if (fabs(ballPos.x) > (field.field_length/2 - 0.2) || fabs(ballPos.y) > (field.field_width/2 - 0.2)) {
+        targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);
+        private_bb->SetInt("ROBOT_ID", robotID);
+        private_bb->SetDouble("xGoal", targetPos.x);
+        private_bb->SetDouble("yGoal", targetPos.y);
+        private_bb->SetDouble("angleGoal", (Vector2(0.0, 0.0)-goalPos).angle());
+        goToPos.Update();
+        return Status::Running;
     } else {
-        if (HasDouble("acceptableDeviation")) {
-            private_bb->SetDouble("acceptableDeviation", GetDouble("acceptableDeviation"));
-        } else {
-            private_bb->SetDouble("acceptableDeviation", 0.7);
-        }
-    }
+        private_bb->SetInt("ROBOT_ID", robotID);
+        private_bb->SetDouble("receiveBallAtX", targetPos.x);
+        private_bb->SetDouble("receiveBallAtY", targetPos.y);
+        private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
+        private_bb->SetDouble("dribblerDist", dribblerDist);
 
-    if (ballPos.y < -0.8 || ballPos.y > 0.8) {
-        if (goalPos.x < 0) {
-            targetPos = goalPos + Vector2(distanceFromGoal, 0.0);
-        } else {
-            targetPos = goalPos - Vector2(distanceFromGoal, 0.0);
-        }   
+        return receiveBall.Update();
     }
-
-    private_bb->SetInt("ROBOT_ID", robotID);
-    private_bb->SetDouble("receiveBallAtX", targetPos.x);
-    private_bb->SetDouble("receiveBallAtY", targetPos.y);
-    if (HasDouble("pGainPosition")) {
-        private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    } else {
-        private_bb->SetDouble("pGainPosition", 3.0);
-    }
-    if (HasDouble("successDist")) {
-        private_bb->SetDouble("successDist", GetDouble("successDist"));
-    }
-    if (HasDouble("acceptableDeviation")) {
-        private_bb->SetDouble("acceptableDeviation", GetDouble("acceptableDeviation"));
-    } else {
-        private_bb->SetDouble("acceptableDeviation", 0.7);
-    }
-    
-
-    return receiveBall.Update();
 }
 
 } // rtt

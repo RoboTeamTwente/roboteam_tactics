@@ -3,6 +3,8 @@
 #include <iostream>
 #include <random>
 #include <limits>
+#include <ros/ros.h>
+
 
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
@@ -37,7 +39,7 @@ void SoloAttackerTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     
-    int attackerID = 0;
+    int attackerID = 7;
     int keeperID = 3;
     // delete_from_vector(robots, attackerID);
     claim_robots({attackerID, keeperID});
@@ -51,7 +53,7 @@ void SoloAttackerTactic::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", attackerID);
-        bb.SetInt("KEEPER_ID", 5);
+        bb.SetInt("KEEPER_ID", keeperID);
 
         // Create message
         roboteam_msgs::RoleDirective wd;
@@ -68,45 +70,46 @@ void SoloAttackerTactic::Initialize() {
         pub.publish(wd);
     }
 
-    Vector2 theirGoalPos = LastWorld::get_our_goal_center();
-    Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
+    // Vector2 theirGoalPos = LastWorld::get_our_goal_center();
+    // Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);
 
-    {
-        bt::Blackboard bb;
+    // {
+    //     bt::Blackboard bb;
 
-        // Set the robot ID
-        bb.SetInt("ROBOT_ID", keeperID);
-        bb.SetInt("KEEPER_ID", 5);
+    //     // Set the robot ID
+    //     bb.SetInt("ROBOT_ID", keeperID);
+    //     bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
-        bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
-        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
+    //     bb.SetDouble("ReceiveBall_A_receiveBallAtX", keeperPos.x);
+    //     bb.SetDouble("ReceiveBall_A_receiveBallAtY", keeperPos.y);
+    //     bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.45);
 
-        bb.SetString("AimAt_fieldCenter_AimAt", "position");
-        bb.SetDouble("AimAt_fieldCenter_xGoal", 0.0);
-        bb.SetDouble("AimAt_fieldCenter_yGoal", 0.0);
+    //     bb.SetString("AimAt_fieldCenter_AimAt", "position");
+    //     bb.SetDouble("AimAt_fieldCenter_xGoal", 0.0);
+    //     bb.SetDouble("AimAt_fieldCenter_yGoal", 0.0);
 
-        bb.SetDouble("Kick_A_kickVel", 2.5);
+    //     bb.SetDouble("Kick_A_kickVel", 2.5);
 
-        // Create message
-        roboteam_msgs::RoleDirective wd;
-        wd.robot_id = keeperID;
-        wd.tree = "qualification/SoloDefenderRole";
-        wd.blackboard = bb.toMsg();
+    //     // Create message
+    //     roboteam_msgs::RoleDirective wd;
+    //     wd.robot_id = keeperID;
+    //     wd.tree = "qualification/SoloDefenderRole";
+    //     wd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        wd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     wd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        pub.publish(wd);
-    }
+    //     // Send to rolenode
+    //     pub.publish(wd);
+    // }
 
     start = rtt::now();
 }
 
 bt::Node::Status SoloAttackerTactic::Update() {
+    // ROS_INFO("tactic update");
     bool treeSucceeded = false;
     bool treeFailed = false;
     bool treeInvalid = false;
