@@ -28,7 +28,7 @@
 static volatile bool may_update = false;
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
-    
+
     auto uuid = unique_id::fromMsg(msg->token);
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
@@ -204,7 +204,7 @@ How to use:
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
-    
+
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -228,7 +228,7 @@ How to use:
     if (rtt::factories::isTactic(testClass)) {
         std::cout << "Testing a tactic! Please ensure that 6 role nodes are available...\n";
         std::cout << "(For example by using mini_rolenodes.launch from roboteam_utils)\n";
-        
+
         auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
         ros::Rate fps60(60);
         while ((int) directivePub.getNumSubscribers() < 6) {
@@ -248,7 +248,7 @@ How to use:
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    
+
     double updateRate = 30;
     ros::param::set("role_iterations_per_second", updateRate);
     ros::Rate fps(updateRate);
@@ -256,8 +256,12 @@ How to use:
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     if (rtt::factories::isTree(testClass)) {
+        int bot_id = -1;
+        if (bb->HasInt("ROBOT_ID")) {
+            bot_id = bb->GetInt("ROBOT_ID");
+        }
         // Notify the tree debugger that we're running a tree.
-        RTT_SEND_RQT_BT_TRACE(testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+        RTT_SEND_RQT_BT_TRACE(bot_id, testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 
         bt::BehaviorTree* bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 

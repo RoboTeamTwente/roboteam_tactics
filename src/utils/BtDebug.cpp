@@ -3,9 +3,10 @@
 
 namespace rtt {
 
-void send_rqt_bt_trace(const std::string& name, const uint8_t& debugType, const uint8_t& status, const roboteam_msgs::Blackboard& bb) {
+void send_rqt_bt_trace(const int& id, const std::string& name, const uint8_t& debugType, const uint8_t& status, const roboteam_msgs::Blackboard& bb) {
     roboteam_msgs::BtDebugInfo msg;
 
+    msg.bot_id = id;
     msg.name = name;
     msg.type = debugType;
     msg.status.status = status;
