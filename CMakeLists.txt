@@ -320,25 +320,26 @@ target_link_libraries(bt_test
     bt
     )
 
-#   add_executable(Learner
-#        src/utils/tests/Learner.cpp
-#        $<TARGET_OBJECTS:treegen>
-#        $<TARGET_OBJECTS:alltrees>
-#        $<TARGET_OBJECTS:skills>
-#        $<TARGET_OBJECTS:conditions>
-#        $<TARGET_OBJECTS:tactics>
-#        $<TARGET_OBJECTS:utils>
-#        )
-#    add_dependencies(Learner
-#        ${${PROJECT_NAME}_EXPORTED_TARGETS}
-#        ${catkin_EXPORTED_TARGETS}
-#        
-#        generate_json_t
-#        )
-#    target_link_libraries(Learner
-#        ${catkin_LIBRARIES}
-#	${QT_LIBRARIES}
-#        )
+   add_executable(Learner
+        src/utils/tests/Learner.cpp
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:alltrees>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+       )
+    add_dependencies(Learner
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        
+        generate_json_t
+        )
+    target_link_libraries(Learner
+        ${catkin_LIBRARIES}
+	${QT_LIBRARIES}
+	bt
+        )
 
 if (BUILD_PRACTICE_TESTS)
 
