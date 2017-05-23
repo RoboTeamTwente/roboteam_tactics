@@ -140,6 +140,7 @@ int main(int argc, char **argv) {
 
 	// PassPoint, for the functions for calculating the best pass point and adapting the weights
 	rtt::PassPoint passPoint;
+	passPoint.Initialize();
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, &worldCallback);
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
@@ -155,12 +156,23 @@ int main(int argc, char **argv) {
 	}
 
 	int ROBOT_ID = 1;
-	rtt::Vector2 passTo1 = passPoint.computeBestPassPoint(ROBOT_ID);
-	ros::spinOnce();
+	// rtt::Vector2 passTo1 = passPoint.computeBestPassPoint(ROBOT_ID);
+	// ros::spinOnce();
 
-	ROBOT_ID = 2;
-	rtt::Vector2 passTo2 = passPoint.computeBestPassPoint(ROBOT_ID);
-	ros::spinOnce();
+	rtt::time_point start = rtt::now();
+	while (ros::ok()) {
+		ros::spinOnce();
+		if (rtt::time_difference_milliseconds(start, rtt::now()).count() > 1000) {
+			passPoint.Initialize();
+			rtt::Vector2 passTo1 = passPoint.computeBestPassPoint(ROBOT_ID);
+			start = rtt::now();
+		}
+	}
+	
+
+	// ROBOT_ID = 2;
+	// rtt::Vector2 passTo2 = passPoint.computeBestPassPoint(ROBOT_ID);
+	// ros::spinOnce();
 
 	return 0;
 

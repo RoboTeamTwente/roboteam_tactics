@@ -257,6 +257,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
+
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
     }
@@ -315,6 +316,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     targetPosPub.angle = angleGoal;
     myTargetPosTopic.publish(targetPosPub);
 
+    // Determine how close we should get to the targetPos before we succeed
     double successDist;
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
@@ -388,11 +390,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Limit angular and linear velocity
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
-
-
-
-    double drivingAngle = velCommand.angle();
-    // ROS_INFO_STREAM("drivingAngle: " << drivingAngle);
+    
+    // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
+    // wheels remain still
+    // double drivingAngle = velCommand.angle();
     // if (drivingAngle >= ((30.0-20.0)/180.0*M_PI) && drivingAngle <= ((30.0+40.0)/180.0*M_PI)) {
     //     ROS_INFO_STREAM("limiting drive direction pos y");
     //     velCommand = Vector2(1.0, 0.0).rotate(30.0/180.0*M_PI).scale(velCommand.length());
@@ -400,28 +401,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     //     ROS_INFO_STREAM("limiting drive direction neg y");
     //     velCommand = Vector2(1.0, 0.0).rotate(330.0/180.0*M_PI).scale(velCommand.length());
     // }
-
-    // ROS_INFO_STREAM("velcommand length: " << velCommand.length());
-
-    // if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
-    //     failure = true;
-    //     succeeded = false;
-    //     return boost::none;
-    // }
-
-    // @TODO: find out if this is useful and perhaps move it to utils/Control
-    // if (GetBool("smoothDriving")) {
-    //     if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
-    //         ROS_INFO_STREAM("limiting acceleration!");
-    //         velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
-    //     }
-    //     if ((fabs(angularVelTarget) - fabs(prevAngularVelTarget)) > 0.5) {
-    //         ROS_INFO_STREAM("limiting angular acc " << angularVelTarget);
-    //         angularVelTarget = prevAngularVelTarget + (0.5 * signum(angularVelTarget));
-    //         ROS_INFO_STREAM("new angular vel: " << angularVelTarget);
-    //     }
-    // }
-    // prevAngularVelTarget = angularVelTarget;
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;

@@ -104,7 +104,7 @@ void AttackerTactic::Initialize() {
         // Make sure you stand free to receive the ball
         // bb.SetInt("StandFree_A_theirID", primaryAttacker);
         // bb.SetBool("StandFree_A_setRosParam", true);
-        // bb.SetString("StandFree_A_whichTeam", "us");
+        // bb.SetBool("StandFree_A_ourTeam", true);
         // bb.SetDouble("StandFree_A_distanceFromPoint", 0.3);
 
         // Receive the ball

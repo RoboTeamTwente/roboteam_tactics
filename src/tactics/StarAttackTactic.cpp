@@ -86,7 +86,7 @@ void StarAttackTactic::initBot(int botID, int posID) {
 
 	bb.SetInt("WasIPicked_value", botID);
 	bb.SetInt("StandFree_A_theirID", GetInt("shooterID"));
-	bb.SetString("StandFree_A_whichTeam", "us");
+	bb.SetBool("StandFree_A_ourTeam", true);
 	bb.SetDouble("StandFree_A_distanceFromPoint", .2);
 	bb.SetString("AmITooFarAway_X", "me");
 	bb.SetString("AmITooFarAway_Y", "fixed point");

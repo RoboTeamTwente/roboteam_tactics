@@ -16,8 +16,10 @@
 namespace rtt {
 
 class PassPoint {
+
 public:
 	PassPoint();
+	void Initialize();
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
@@ -28,6 +30,8 @@ public:
 	boost::optional<double> computePassPointScore(Vector2 testPosition);
 	Vector2 computeBestPassPoint(int ROBOT_ID);
 private:
+
+	// Weights for determining the score of a point on the field
 	double distToGoalWeight;
 	double distToOppWeight;
 	double distToBallWeight;
@@ -36,13 +40,14 @@ private:
 	double distToRobotWeight;
 	double angleDiffRobotGoalWeight;
 
+	// Thresholds for determining whether a point on the field should be considered or not
 	double distToRobotThreshold;
 	double distOppToBallTrajThreshold;
 
+	// The ID of the robot for which are trying to find a good point to stand on the field
 	int ROBOT_ID;
 
 	Draw drawer;
-	// GoalPartition goalPartition;
 };
 
 } // rtt

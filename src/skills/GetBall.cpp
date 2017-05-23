@@ -111,9 +111,6 @@ bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-	if (HasDouble("acceptableDeviation")) {
-		acceptableDeviation = GetDouble("acceptableDeviation");
-	}
 
 
 	// Wait for the first world message
@@ -193,14 +190,11 @@ bt::Node::Status GetBall::Update (){
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-    // ROS_INFO_STREAM("posDiff: " << posDiff << " angleDiff: " << angleDiff << " intermediateAngle: " << intermediateAngle);
-    // bool noYVel = false;
 	if (posDiff > 0.25 || fabs(angleDiff) > successAngle){
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
         private_bb->SetDouble("maxSpeed", 0.6);
-        // noYVel = true;
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
 	}
     
@@ -227,28 +221,16 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
-    
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", false);
     private_bb->SetString("whichBot", GetString("whichBot"));
+
     
-    // @HACK for robot testing purposes
+    // @DEBUG for robot testing purposes we like to change the maxSpeed sometimes manually
     if (HasDouble("maxSpeed")) {
     	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     }
-    if (HasDouble("pGainRotation")) {
-    	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
-    }
-    if (HasDouble("iGainRotation")) {
-        private_bb->SetDouble("iGainRotation", GetDouble("iGainRotation"));
-    }
-    if (HasDouble("pGainPosition")) {
-    	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    }
-    if (HasBool("smoothDriving")) {
-        private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
-        private_bb->SetDouble("smoothingNumber", GetDouble("smoothingNumber"));
-    }
+
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
@@ -269,15 +251,7 @@ bt::Node::Status GetBall::Update (){
     }
 
     Vector2 velCommand = Vector2(command.x_vel, command.y_vel);
-    ROS_INFO_STREAM("velCommand: " << velCommand);
-
-    // if (noYVel) {
-    //     command.y_vel = 0.0;
-    // }
-
-    // ROS_INFO_STREAM("xvel: " << command.x_vel << " yvel: " << command.y_vel << " w: " << command.w);
     
-
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);	

@@ -11,7 +11,9 @@
 
 namespace rtt {
 
-PassPoint::PassPoint() {
+PassPoint::PassPoint() {}
+
+void PassPoint::Initialize() {
 	std::fstream myfile("src/roboteam_tactics/src/utils/passpoint_weights.txt", std::ios_base::in);
 	myfile >> distToGoalWeight 
 		   >> distToOppWeight 
@@ -141,6 +143,7 @@ double PassPoint::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World worl
 	return viewOfGoal;
 }
 
+// Calculates the distance between the testPosition and the current robot
 double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world) {
 	boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
 	if (bot) {
@@ -153,6 +156,9 @@ double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World wor
 	}
 }
 
+
+// Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
+// If this angle is low, it means that a robot standing on the testPosition can more easily shoot the ball at the goal directly after receiving the ball
 double PassPoint::calcAngleDiffRobotGoal(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 goalPos(LastWorld::get_their_goal_center());
@@ -202,8 +208,8 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID) {
 	this->ROBOT_ID = ROBOT_ID;
 
-	int x_steps = 27;
-	int y_steps = 18;
+	int x_steps = 45;
+	int y_steps = 30;
 	for (int x_step = 1; x_step < x_steps; x_step++) {
 		for (int y_step = 1; y_step < y_steps; y_step++) {
 			// generate a name:
@@ -262,15 +268,18 @@ Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID) {
 	for (size_t i = 0; i < passPoints.size(); i++) {
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
 		// RTT_DEBUG("Drawing stuff... \n");
-		if (relScore > 205) {
-			relScore = (relScore - 205)*5;
+		// if (relScore > 205) {
+			// relScore = (relScore - 205)*5;
 			drawer.setColor(255 - relScore, 0, relScore);
 			drawer.drawPoint(names.at(i), passPoints.at(i));
 			ros::spinOnce();
-		}	
+		// }	
 	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	drawer.removePoint(winningPointName);
+
 	std::string name = "bestPosition";
 	name.append(std::to_string(ROBOT_ID));
 	drawer.setColor(255, 255, 255);

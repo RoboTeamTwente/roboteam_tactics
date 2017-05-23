@@ -61,6 +61,10 @@ namespace rtt {
  *             theirSide: Have the robot stay at their side.
  *             TOTALLY EMPTY: Does nothing
  *
+ *      - maxSpeed:
+ *          Type: Double
+ *          Descr: Sets the maximum robot speed in the controller
+ *
  */
 class GoToPos : public Skill {
 public:

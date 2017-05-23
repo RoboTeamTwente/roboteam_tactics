@@ -109,7 +109,7 @@ void TwoAttackersTactic::Initialize() {
         bb.SetString("ParamSet_default_value", "nope");
 
         bb.SetInt("StandFree_A_theirID", firstAttackerID);
-        bb.SetString("StandFree_A_whichTeam", "us");
+        bb.SetBool("StandFree_A_ourTeam", true);
         bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
         bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
         bb.SetBool("StandFree_A_seeGoal", true);
