@@ -14,6 +14,8 @@ bt::Node::Status Leaf::Tick() {
 
     roboteam_msgs::Blackboard bb;
 
+    int bot_id = GetInt("ROBOT_ID", -1);
+
     if (newStatus != bt::Node::Status::Running) {
         roboteam_msgs::BtDebugInfo::_type_type msgStatus;
 
@@ -25,10 +27,10 @@ bt::Node::Status Leaf::Tick() {
             msgStatus = roboteam_msgs::BtStatus::INVALID;
         }
 
-        RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
+        RTT_SEND_RQT_BT_TRACE(bot_id, name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
     } else if (newStatus != previousStatus) {
         roboteam_msgs::BtDebugInfo::_type_type msgStatus = roboteam_msgs::BtStatus::STARTUP;
-        RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
+        RTT_SEND_RQT_BT_TRACE(bot_id, name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
     }
 
     return newStatus;

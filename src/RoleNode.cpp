@@ -107,7 +107,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     }
     currentToken = msg->token;
 
-    RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+    RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
-    
+
     // Create world & geom callbacks
     rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 
     while (ros::ok()) {
         ros::spinOnce();
-        
+
         sleeprate.sleep();
 
         if (!currentTree){
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
             }
 
             currentTree = nullptr;
-            
+
             // Stop the robot in its tracks
             pub.publish(rtt::stop_command(ROBOT_ID));
         }
