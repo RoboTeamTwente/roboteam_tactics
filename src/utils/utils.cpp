@@ -98,6 +98,27 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
     return 0.0;
 }
 
+Vector2 getTargetPos(std::string target, int theirID, bool target_our_team) {
+    roboteam_msgs::World w = LastWorld::get();
+
+    if (target == "fieldcenter") {
+        return Vector2(0.0, 0.0);
+    }
+
+    if (target == "theirgoal") {
+        return LastWorld::get_their_goal_center();
+    }
+    if (target == "ourgoal") {
+        return LastWorld::get_our_goal_center();
+    }
+    if (target == "robot") {
+        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+        return theirPos;
+    }
+    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
+    return Vector2(0.0, 0.0);
+}
+
 boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
     const auto& ball = LastWorld::get().ball;
     for (auto& bot : LastWorld::get().us) {

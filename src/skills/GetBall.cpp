@@ -176,9 +176,9 @@ bt::Node::Status GetBall::Update (){
     double successAngle = 0.0;
     double getBallDist;
     if (robot_output_target == "grsim") {
-        successDist = 0.13;
+        successDist = 0.11;
         successAngle = 0.3;
-        getBallDist = 0.11;
+        getBallDist = 0.08 ;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.3;
@@ -194,7 +194,9 @@ bt::Node::Status GetBall::Update (){
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
-        private_bb->SetDouble("maxSpeed", 0.6);
+        if (robot_output_target == "serial") {
+            private_bb->SetDouble("maxSpeed", 0.6);
+        }
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
 	}
     

@@ -88,11 +88,11 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;
+        pGainPosition = 3.0;
         iGainPosition = 0.0;
         pGainRotation = 4.0;
         iGainRotation = 0.0;
-        maxSpeed = 1.5;
+        maxSpeed = 2.5;
         maxAngularVel = 10.0;
 
         robotType = RobotType::GRSIM;

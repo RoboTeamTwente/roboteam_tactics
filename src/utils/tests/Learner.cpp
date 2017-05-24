@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <cmath>
 #include <iostream>
+#include <string>
 
 #include "roboteam_msgs/RoleFeedback.h"
 #include "roboteam_msgs/GeometryData.h"
@@ -134,13 +135,19 @@ bool didWeScore() {
 
 int main(int argc, char **argv) {
 	RTT_DEBUG("Initializing Learner \n");
+
 	ros::init(argc, argv, "Learner");
 	ros::NodeHandle n;
 	ros::Rate rate(60);	
 
+	std::cout << "Please enter the name of the weights file you want to use: \n";
+	std::string fileName;
+	std::cin >> fileName;
+	std::cout << "Using path: " << fileName << " \n";
+
 	// PassPoint, for the functions for calculating the best pass point and adapting the weights
 	rtt::PassPoint passPoint;
-	passPoint.Initialize();
+	passPoint.Initialize(fileName);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, &worldCallback);
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
@@ -156,24 +163,38 @@ int main(int argc, char **argv) {
 	}
 
 	int ROBOT_ID = 1;
-	// rtt::Vector2 passTo1 = passPoint.computeBestPassPoint(ROBOT_ID);
-	// ros::spinOnce();
+	std::string target = "robot";
+	int targetID = 2;
 
 	rtt::time_point start = rtt::now();
+	
+	// Benchmark!!
+	// int count = 0;
+	// int nIterations = 100;
+	// std::vector<int> times;
+	// while (count < nIterations) {
+	// 	passPoint.Initialize(fileName);
+	// 	passPoint.computeBestPassPoint(ROBOT_ID, target, targetID);
+	// 	ros::spinOnce();
+	// 	int timePast = rtt::time_difference_milliseconds(start, rtt::now()).count();
+	// 	times.push_back(timePast);
+	// 	count++;
+	// 	start = rtt::now();
+	// }
+	// int sumOfTimes = std::accumulate(times.begin(), times.end(), 0);	
+	// double avg = sumOfTimes / nIterations;
+	// RTT_DEBUG("Average time per iteration: %f \n", avg);
+	// return 0;
+
 	while (ros::ok()) {
-		ros::spinOnce();
 		if (rtt::time_difference_milliseconds(start, rtt::now()).count() > 1000) {
-			passPoint.Initialize();
-			rtt::Vector2 passTo1 = passPoint.computeBestPassPoint(ROBOT_ID);
+			passPoint.Initialize(fileName);
+			passPoint.computeBestPassPoint(ROBOT_ID, target, targetID);
+			ros::spinOnce();
 			start = rtt::now();
 		}
 	}
 	
-
-	// ROBOT_ID = 2;
-	// rtt::Vector2 passTo2 = passPoint.computeBestPassPoint(ROBOT_ID);
-	// ros::spinOnce();
-
 	return 0;
 
 	// PassToTactic, for executing the tactic that controls two robots to test the pass

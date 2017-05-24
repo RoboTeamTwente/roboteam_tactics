@@ -61,6 +61,7 @@ std::string getMyNamespace();
  * \brief Calculates the target angle for GetBall. See its documentation for details.
  */
 double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool target_our_team);
+Vector2 getTargetPos(std::string target, int theirID, bool target_our_team);
 
 /**
  * \brief Gets the robot which currently holds the ball, if one does.

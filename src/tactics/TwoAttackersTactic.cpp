@@ -30,9 +30,7 @@ TwoAttackersTactic::TwoAttackersTactic(std::string name, bt::Blackboard::Ptr bla
 void TwoAttackersTactic::Initialize() {
     tokens.clear();
 
-    RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");
-    // ROS_INFO("Initializing TwoAttackersTactic");
-    
+    RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");    
     // if (RobotDealer::get_available_robots().size() < 1) {
     //     RTT_DEBUG("Not enough robots, cannot initialize... \n");
     //     // TODO: Want to pass failure here as well!
@@ -41,8 +39,8 @@ void TwoAttackersTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    int firstAttackerID = 0;
-    int secondAttackerID = 1;
+    firstAttackerID = 0;
+    secondAttackerID = 1;
     firstAttacker.robot_id = firstAttackerID;
     secondAttacker.robot_id = secondAttackerID;
 
@@ -72,16 +70,15 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("ROBOT_ID", firstAttackerID);
         bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetString("GetBall_A_AimAt", "robot");
-        bb.SetInt("GetBall_A_AimAtRobot", secondAttackerID);
-        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
+        // bb.SetString("GetBall_A_aimAt", "robot");
+        bb.SetInt("GetBall_A_aimAtRobot", secondAttackerID);
+        // bb.SetBool("GetBall_A_ourTeam", true);
 
-        bb.SetString("AimAt_secondAttacker_At", "robot");
-        bb.SetInt("AimAt_secondAttacker_AtRobot", secondAttackerID);
+        bb.SetInt("AimAt_A_AtRobot", secondAttackerID);
 
-        bb.SetString("ParamCheck_canIShoot_signal", "readyToReceiveBall");
-        bb.SetString("ParamCheck_canIShoot_mode", "eq");
-        bb.SetString("ParamCheck_canIShoot_value", "ready");
+        // bb.SetString("ParamCheck_canIShoot_signal", "readyToReceiveBall");
+        // bb.SetString("ParamCheck_canIShoot_mode", "eq");
+        // bb.SetString("ParamCheck_canIShoot_value", "ready");
 
         // Create message
         firstAttacker.tree = "qualification/TwoAttackersFirstRole";
@@ -105,25 +102,8 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("ROBOT_ID", secondAttackerID);
         bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetString("ParamSet_default_signal", "readyToReceiveBall");
-        bb.SetString("ParamSet_default_value", "nope");
-
-        bb.SetInt("StandFree_A_theirID", firstAttackerID);
-        bb.SetBool("StandFree_A_ourTeam", true);
-        bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
-        bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
-        bb.SetBool("StandFree_A_seeGoal", true);
-
-        bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
-        bb.SetString("ParamSet_readyToReceive_value", "ready");
-
-        // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
-        
-        ScopedBB(bb, "AimAt_A")
-            .setString("At", "theirgoal")
-            ;
-
         bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
+        bb.SetBool("ReceiveBall_A_computePoint", true);
 
         // Create message
         secondAttacker.tree = "qualification/TwoAttackersSecondRole";
@@ -146,6 +126,11 @@ bt::Node::Status TwoAttackersTactic::Update() {
     bool firstAttackerSucceeded = false;
     bool secondAttackerSucceeded = false;
     bool oneFailed = false;
+
+    // passPoint.Initialize("spits.txt");
+    // Vector2 secondAttackerPos = passPoint.computeBestPassPoint(secondAttackerID, "theirgoal", 0);
+
+
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {

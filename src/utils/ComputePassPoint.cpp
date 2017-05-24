@@ -13,19 +13,40 @@ namespace rtt {
 
 PassPoint::PassPoint() {}
 
-void PassPoint::Initialize() {
-	std::fstream myfile("src/roboteam_tactics/src/utils/passpoint_weights.txt", std::ios_base::in);
-	myfile >> distToGoalWeight 
-		   >> distToOppWeight 
-		   >> distToBallWeight 
-		   >> viewOfGoalWeight 
-		   >> distOppToBallTrajWeight 
-		   >> distToRobotWeight
-		   >> distToRobotThreshold
-		   >> distOppToBallTrajThreshold
-		   >> angleDiffRobotGoalWeight;
+void PassPoint::Initialize(std::string fileName) {
 
 	RTT_DEBUG("Initializing PassPoint and loading weights \n");
+	std::string filePrefix = "src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePath = filePrefix.append(fileName);
+
+	std::vector<float> weightsVector;
+	std::string line;
+	std::cout << "filePath: " << filePath << " \n";
+	std::fstream myfile(filePath, std::ios_base::in);
+	if (myfile.is_open()) {
+		while (getline(myfile, line)) {
+			size_t i = line.find(" ");
+			std::string numberString = line.substr(i);
+			weightsVector.push_back(std::stod(numberString));
+		}
+
+		myfile.close();
+	} else {
+		RTT_DEBUG("Unable to open file \n");
+	}
+
+	distToGoalWeight = weightsVector.at(0);
+	distToOppWeight = weightsVector.at(1);
+	distToBallWeight = weightsVector.at(2);
+	viewOfGoalWeight = weightsVector.at(3);
+	distOppToBallTrajWeight = weightsVector.at(4);
+	distToRobotWeight = weightsVector.at(5);
+	angleDiffRobotTargetWeight = weightsVector.at(6);
+	distToRobotThreshold = weightsVector.at(7);
+	distOppToBallTrajThreshold = weightsVector.at(8);
+	distOppToBallToTargetTrajThreshold = weightsVector.at(9);
+
+	
 	// RTT_DEBUG("distToGoalWeight: %f \n", distToGoalWeight);
 	// RTT_DEBUG("distToOppWeight: %f \n", distToOppWeight);
 	// RTT_DEBUG("distToBallWeight: %f \n", distToBallWeight);
@@ -52,11 +73,9 @@ double PassPoint::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::Wor
 	Vector2 ballTraj = testPosition - ballPos;
 
 	Vector2 oppPos = Vector2(world.them.at(0).pos);
-	// ROS_INFO("ComputePassPoint closestPointOnVector");
 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 	for (size_t i = 1; i < world.them.size(); i++) {
 		Vector2 oppPos = Vector2(world.them.at(i).pos);
-		// ROS_INFO("ComputePassPoint closestPointOnVector 2");
 		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 		if (testDistance < shortestDistance) {
 			shortestDistance = testDistance;
@@ -64,6 +83,23 @@ double PassPoint::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::Wor
 	}
 	return shortestDistance;
 }
+
+// Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
+double PassPoint::calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
+	Vector2 ballToTargetTraj = targetPos - testPosition;
+
+	Vector2 oppPos = Vector2(world.them.at(0).pos);
+	double shortestDistance = fabs((ballToTargetTraj.closestPointOnVector(testPosition, oppPos) - oppPos).length());
+	for (size_t i = 1; i < world.them.size(); i++) {
+		Vector2 oppPos = Vector2(world.them.at(i).pos);
+		double testDistance = fabs((ballToTargetTraj.closestPointOnVector(testPosition, oppPos) - oppPos).length());
+		if (testDistance < shortestDistance) {
+			shortestDistance = testDistance;
+		}
+	}
+	return shortestDistance;
+}
+
 
 // If multiple robots are blocking the view of the goal, and two of these robots are (partly) covering
 // the same part of the goal, this functions combines these two robot cones into one cone
@@ -156,19 +192,18 @@ double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World wor
 	}
 }
 
-
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
 // If this angle is low, it means that a robot standing on the testPosition can more easily shoot the ball at the goal directly after receiving the ball
-double PassPoint::calcAngleDiffRobotGoal(Vector2 testPosition, roboteam_msgs::World world) {
+double PassPoint::calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballPos(world.ball.pos);
-	Vector2 goalPos(LastWorld::get_their_goal_center());
-	double angleDiffRobotGoal = fabs(cleanAngle((goalPos-testPosition).angle() - (ballPos-testPosition).angle()));
-	return angleDiffRobotGoal;
+	double angleDiffRobotTarget = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
+	return angleDiffRobotTarget;
 }
 
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
 boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
+
 	while(world.us.size() == 0) {
 		ros::spinOnce();
 		world = LastWorld::get();
@@ -184,32 +219,42 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 		return boost::none;
 	}
 
+	double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
+	if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
+		return boost::none;
+	}
+
+
 	Vector2 ballPos(world.ball.pos);
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
 	double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world)); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
-	double angleDiffRobotGoal = calcAngleDiffRobotGoal(testPosition, world);
+	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 	
-	double score =  - distToGoal*distToGoalWeight 
-					+ distToOpp*distToOppWeight 
-					- distToBall*distToBallWeight 
-					+ viewOfGoal*viewOfGoalWeight
-					+ distOppToBallTraj*distOppToBallTrajWeight
-					- distToRobot*distToRobotWeight
-					- angleDiffRobotGoal*angleDiffRobotGoalWeight;
+	double score = - distToGoal*distToGoalWeight 
+				   + distToOpp*distToOppWeight 
+				   - distToBall*distToBallWeight 
+				   + viewOfGoal*viewOfGoalWeight
+				   + distOppToBallTraj*distOppToBallTrajWeight
+				   - distToRobot*distToRobotWeight
+				   - angleDiffRobotTarget*angleDiffRobotTargetWeight;
 
-	// ROS_INFO_STREAM("score: " << score);
 	return score;
 }
 
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
-Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID) {
+Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID, std::string target, int targetID) {
 	this->ROBOT_ID = ROBOT_ID;
+	this->target = target;
+	this->targetID = targetID;
+	targetPos = getTargetPos(target, targetID, true);
 
 	int x_steps = 45;
 	int y_steps = 30;
+
+	// Remove all the old drawn points
 	for (int x_step = 1; x_step < x_steps; x_step++) {
 		for (int y_step = 1; y_step < y_steps; y_step++) {
 			// generate a name:
@@ -224,6 +269,7 @@ Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID) {
 			ros::spinOnce();
 		}
 	}
+	drawer.removePoint("bestPosition");
 
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
@@ -262,18 +308,19 @@ Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID) {
 		}
 	}
 
+	if (passPoints.size() == 0) {
+		ROS_WARN("No position found that meets the requirements :(");
+		return Vector2(0.0, 0.0);
+	}
+
 	double maxScore = *max_element(scores.begin(), scores.end());
 	double minScore = *min_element(scores.begin(), scores.end());
 
 	for (size_t i = 0; i < passPoints.size(); i++) {
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-		// RTT_DEBUG("Drawing stuff... \n");
-		// if (relScore > 205) {
-			// relScore = (relScore - 205)*5;
-			drawer.setColor(255 - relScore, 0, relScore);
-			drawer.drawPoint(names.at(i), passPoints.at(i));
-			ros::spinOnce();
-		// }	
+		drawer.setColor(255 - relScore, 0, relScore);
+		drawer.drawPoint(names.at(i), passPoints.at(i));
+		ros::spinOnce();	
 	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

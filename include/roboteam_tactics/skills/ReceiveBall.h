@@ -8,6 +8,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
+#include "roboteam_tactics/utils/ComputePassPoint.h"
 
 namespace rtt {
 
@@ -63,8 +64,8 @@ public:
 private:
 	int whichRobotHasBall();
 	void publishStopCommand();
-	InterceptPose deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY);
-	InterceptPose deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY);
+	InterceptPose deduceInterceptPosFromBall();
+	InterceptPose deduceInterceptPosFromRobot();
 	
 	int robotID;
 	int hasBall;
@@ -78,6 +79,10 @@ private:
 
     bool touchedBall = false;
     time_point initialBallContact;
+
+    PassPoint passPoint;
+    time_point prevCheck;
+    Vector2 receiveBallAtPos;
 };
 
 } // rtt
