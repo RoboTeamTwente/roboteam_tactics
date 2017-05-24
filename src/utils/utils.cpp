@@ -94,7 +94,7 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
         double targetAngle = (theirPos - startPos).angle();
         return targetAngle;
     }
-    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
+    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong? target = %s", target.c_str());
     return 0.0;
 }
 

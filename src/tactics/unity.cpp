@@ -82,3 +82,6 @@
 
 #include "HaltTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Bob_KickoffWithRunPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

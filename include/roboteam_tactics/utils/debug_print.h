@@ -69,7 +69,7 @@ SET_DEBUG_FOR(BlockGoal, true);
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
-SET_DEBUG_FOR(DistanceXToY, false);
+SET_DEBUG_FOR(DistanceXToY, true);
 SET_DEBUG_FOR(IsRefCommand, true);
 SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(ParamCheck, false);
@@ -97,6 +97,7 @@ SET_DEBUG_FOR(KickoffUsTactic, true);
 SET_DEBUG_FOR(Qualification1v1Tactic, true);
 SET_DEBUG_FOR(WanderTactic, true);
 SET_DEBUG_FOR(TwirlPlay, true);
+SET_DEBUG_FOR(Bob_KickoffWithRunPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

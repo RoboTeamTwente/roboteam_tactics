@@ -45,6 +45,11 @@ namespace rtt {
  *           Used when: aimAt == robot
  *           Descr: True if the robot we should aim at is from our team
  *
+ *    - targetAngle:
+ *        Type: Double
+ *        Descr: The angle to look at with the ball
+ *        Used when: aimAt is not set
+ *
  *    - passOn:
  *        Type: Bool
  *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.
