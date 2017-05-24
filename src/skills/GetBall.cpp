@@ -208,6 +208,8 @@ bt::Node::Status GetBall::Update (){
     
     double angleError = cleanAngle(robot.angle - targetAngle);
 
+    // std::cout << (ballPos - robotPos).length()
+
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
 
         int ballCloseFrameCountTo = 3;
