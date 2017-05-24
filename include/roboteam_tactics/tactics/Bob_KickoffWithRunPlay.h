@@ -3,6 +3,7 @@
 #include "unique_id/unique_id.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_utils/Draw.h"
 
 #include "roboteam_msgs/RoleDirective.h"
 
@@ -26,6 +27,8 @@ class Bob_KickoffWithRunPlay : public Tactic {
 
     roboteam_msgs::RoleDirective firstAttacker;
     roboteam_msgs::RoleDirective secondAttacker;
+
+    Draw drawer;
 
 };
 

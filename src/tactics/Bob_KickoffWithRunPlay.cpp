@@ -25,8 +25,6 @@ Bob_KickoffWithRunPlay::Bob_KickoffWithRunPlay(std::string name, bt::Blackboard:
         : Tactic(name, blackboard) 
         {}
 
-
-
 void Bob_KickoffWithRunPlay::Initialize() {
     tokens.clear();
     failImmediately = false;
@@ -53,6 +51,9 @@ void Bob_KickoffWithRunPlay::Initialize() {
     Vector2 receivePos(4.5 / 2, 3 / -2.0);
     Vector2 thresholdPos(-1, 3 / -2.0);
     Vector2 rendezvous(3, -2);
+
+    drawer.drawPoint("threshold!", thresholdPos);
+    drawer.drawPoint("rendezvous!", rendezvous);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
