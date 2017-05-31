@@ -94,7 +94,15 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
         double targetAngle = (theirPos - startPos).angle();
         return targetAngle;
     }
-    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong? target = %s", target.c_str());
+    if (target == "param") {
+    	int tgt;
+    	if (ros::param::get("AimTargetBot", tgt)) {
+    		Vector2 theirPos(getWorldBot(tgt)->pos);
+    		double targetAngle = (theirPos - startPos).angle();
+    		return targetAngle;
+    	}
+    }
+    ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
     return 0.0;
 }
 
@@ -136,44 +144,18 @@ boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder() {
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr,
-                                                    bool sight_only) {
-    return getObstacles(Vector2(bot.pos.x, bot.pos.y), point, world_ptr, sight_only);
+                                                    bool sight_only,
+													bool ignore_both_ends) {
+    return getObstacles(Vector2(bot.pos.x, bot.pos.y), point, world_ptr, sight_only, ignore_both_ends);
 }
 
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr,
-                                                    bool sight_only) {
-    const roboteam_msgs::World world = world_ptr == nullptr ? LastWorld::get() : *world_ptr;
-    const auto all_bots = boost::join(world.us, world.them);
-
-    double threshold = sight_only ? .15 : .35;
-
-    std::vector<std::pair<roboteam_msgs::WorldRobot, double>> obstacles;
-    for (const auto& obs : all_bots) {
-        const Vector2 obs_pos(obs.pos.x, obs.pos.y);
-
-        if (obs_pos == bot_pos) continue;
-
-        const Vector2 proj = obs_pos.project(bot_pos, point);
-        double proj_dist = proj.dist(obs_pos);
-        double dist_to_start = bot_pos.dist(obs_pos);
-        if (proj_dist < threshold && dist_to_start > .0001) {
-            obstacles.push_back(std::make_pair(obs, dist_to_start));
-        }
-    }
-
-    auto sorter = [](const std::pair<roboteam_msgs::WorldRobot, double>& a,
-                     const std::pair<roboteam_msgs::WorldRobot, double>& b) {
-        return a.second < b.second;
-    };
-    std::sort<std::vector<std::pair<roboteam_msgs::WorldRobot, double>>::iterator, decltype(sorter)>
-        (obstacles.begin(), obstacles.end(), sorter);
-    std::vector<roboteam_msgs::WorldRobot> result;
-    for (const auto& obs : obstacles) {
-        result.push_back(obs.first);
-    }
-    return result;
+                                                    bool sight_only,
+													bool ignore_both_ends) {
+	// This used to be implemented here, but was moved to roboteam_utils/src/world_analysis.cpp
+    return getObstaclesBetweenPoints(bot_pos, point, world_ptr, sight_only, ignore_both_ends);
 }
 
 std::vector<roboteam_msgs::WorldRobot> getRobotsInCone(const roboteam_msgs::World& world, const Cone& cone) {
@@ -221,7 +203,7 @@ bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::Wor
     double dist = ball_norm.length();
     double angle = ball_norm.angle();
 
-    // Within 15 cm and .4 radians (of center of dribbler)
+    // Within 11 cm and .3 radians (of center of dribbler)
     return dist <= .11 && fabs(angle - bot.angle) <= .3;
 }
 
@@ -423,6 +405,20 @@ boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam, const robot
         }
     }
     return boost::none;
+}
+
+boost::optional<roboteam_msgs::WorldRobot> getBotFromDangerList(unsigned dangerIndex) {
+	const auto& world = LastWorld::get();
+	if (dangerIndex >= world.dangerList.size()) {
+		return boost::none;
+	}
+	return world.dangerList.at(dangerIndex);
+}
+
+bool weAreLeft() {
+    std::string tgt;
+    get_PARAM_OUR_SIDE(tgt, false);
+    return tgt == "left";
 }
 
 } // rtt

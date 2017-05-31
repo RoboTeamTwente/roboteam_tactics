@@ -1,7 +1,6 @@
 #include "roboteam_tactics/skills/Block.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/KeeperBlock.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_tactics/utils/utils.h"
 #include <sstream>
 
@@ -26,7 +25,7 @@ KeeperBlock::~KeeperBlock() {
 }
 
 boost::optional<roboteam_msgs::WorldRobot> KeeperBlock::select_target() const {
-    return mostDangerousBot();
+    return getBotFromDangerList(0);
 }
 
 void KeeperBlock::reevaluate_target() {
@@ -36,7 +35,7 @@ void KeeperBlock::reevaluate_target() {
     //ROS_INFO("Target: %d", danger->id);
     
     target = danger->id;
-    auto goalX = (weAreLeft() ? -1 : 1) * LastWorld::get_field().field_length / 2; // center
+    auto goalX = -LastWorld::get_field().field_length / 2; // center
     
     auto bb = std::make_shared<bt::Blackboard>();
     bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));

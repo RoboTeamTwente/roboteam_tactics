@@ -1,6 +1,7 @@
 #include <string>
 
 #include "roboteam_tactics/Leaf.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -155,6 +156,13 @@ std::string Leaf::getPrefixedId(std::string id) const {
     }
 
     return name + "_" + id;
+}
+
+bt::Blackboard::Ptr Leaf::newSubBlackboard() const {
+	bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+	merge_blackboards(bb, blackboard);
+	merge_blackboards(bb, private_bb);
+	return bb;
 }
 
 } // rtt

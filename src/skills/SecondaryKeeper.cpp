@@ -1,6 +1,6 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/SecondaryKeeper.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
     
@@ -12,7 +12,7 @@ SecondaryKeeper::SecondaryKeeper(std::string name,
 }
 
 boost::optional<roboteam_msgs::WorldRobot> SecondaryKeeper::select_target() const {
-    return secondMostDangerousBot();
+    return getBotFromDangerList(1);
 }
     
 }

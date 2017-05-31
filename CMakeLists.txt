@@ -14,6 +14,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   roboteam_msgs
   roboteam_utils
+  roboteam_world
   roscpp
   std_msgs
   actionlib_msgs

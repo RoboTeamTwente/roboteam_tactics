@@ -34,7 +34,6 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
     ros::param::set("readyToReceiveBall", false);
     prevCheck = now();
-    // ROS_INFO_STREAM("ReceiveBall constructor");
     computedTargetPos = false;
 }
 
@@ -64,13 +63,12 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
-// yoooooooo
+
 	double timeToLookIntoFuture = 5.0; // in seconds
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
 	Vector2 ballPosThen(LastWorld::predictBallPos(timeToLookIntoFuture));
 	Vector2 ballTrajectory = ballPosThen - ballPosNow;
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
-	// drawer.drawLine("ballTrajectory", ballPosNow, ballTrajectory);
 
 	double ballTrajectoryMagn = ballTrajectory.length();
 	ballTrajectory = ballTrajectory.scale(1/ballTrajectoryMagn);
@@ -166,7 +164,7 @@ bt::Node::Status ReceiveBall::Update (){
 	Vector2 targetPos;
 	double targetAngle;
 
-// yoooooooo
+
 	// Read the blackboard info about where to receive the ball 
 	if (HasBool("receiveBallAtCurrentPos") || (HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		if (GetBool("receiveBallAtCurrentPos")) {
@@ -177,6 +175,7 @@ bt::Node::Status ReceiveBall::Update (){
 			receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 		}
 	} else if (HasBool("computePoint") && GetBool("computePoint")) {
+
 		if (!computedTargetPos) {
 			passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
 			receiveBallAtPos = passPoint.computeBestPassPoint();
@@ -203,6 +202,7 @@ bt::Node::Status ReceiveBall::Update (){
 	targetPos = interceptPos;
 	targetAngle = interceptAngle;
 
+
 	Vector2 posError = receiveBallAtPos - robotPos;
 	if (posError.length() < acceptableDeviation && GetBool("setSignal")) {
 		ros::param::set("readyToReceiveBall", true);
@@ -224,12 +224,13 @@ bt::Node::Status ReceiveBall::Update (){
 	if (HasDouble("dribblerDist")) {
 		dribblerDist = GetDouble("dribblerDist");
 	}
-// yoooooooo
+
 	if (distanceToBall < dribblerDist) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);
 	}
+
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
 	auto bb3 = std::make_shared<bt::Blackboard>();

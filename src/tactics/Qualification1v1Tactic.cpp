@@ -1,5 +1,4 @@
 #include "roboteam_tactics/tactics/Qualification1v1Tactic.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
 
 #define RTT_CURRENT_DEBUG_TAG Qualification1v1Tactic
     

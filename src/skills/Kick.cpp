@@ -13,6 +13,7 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG Kick
 
@@ -21,19 +22,19 @@ namespace rtt {
 RTT_REGISTER_SKILL(Kick);
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) { }
+        : Skill(name, blackboard), goneForward(false) {
+        cycleCounter = 0;
+        }
 
 void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
     oldBallVel = Vector2(vel.x, vel.y);
-    cycleCounter = 0;
-
     ballStartPos = LastWorld::get().ball.pos;
-    startTime = now();
 }
 
 bt::Node::Status Kick::Update() {
-// yoooooooo
+
+    // ROS_INFO_STREAM("Kick update");
     if (HasBool("wait_for_signal")) {
     	if (GetBool("wait_for_signal")) {
     		bool readyToPass = false;
@@ -64,7 +65,7 @@ bt::Node::Status Kick::Update() {
     if (HasDouble("kickVel")) {
     	kickVel = GetDouble("kickVel");
     } else {
-    	kickVel = 4;
+    	kickVel = 6;
     }
 
     // if (HasBool("wait") && GetBool("wait")) {
@@ -122,9 +123,65 @@ bt::Node::Status Kick::Update() {
 
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
         
-	RTT_DEBUGLN("Triggered the kicker!");
+	// ROS_WARN_STREAM("Triggered the kicker!");
 	return Status::Running;
 
+}
+
+// bt::Node::Status Kick::Update() {
+// 	if (GetBool("wait_for_signal", false)) {
+// 		RTT_DEBUG("Checking for signal... ");
+// 		bool ready = false;
+// 		ros::param::get("ready_to_pass", ready);
+// 		if (!ready) {
+// 			RTT_DEBUGLN("No...");
+// 			return Status::Running;
+// 		}
+// 		RTT_DEBUGLN("Yes!");
+// 	}
+// 	if (GetBool("pushFirst", false) && !goneForward) {
+// 		goForward();
+// 		RTT_DEBUGLN("Moving forward a bit");
+// 		return Status::Running;
+// 	}
+// 	doKick();
+// 	ros::param::set("ready_to_pass", false);
+// 	return Status::Success;
+// }
+
+void Kick::doKick() {
+	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	int id = GetInt("ROBOT_ID");
+	for (int i = 0; i < 10; i++) {
+		RTT_DEBUGLN("Kicking");
+		roboteam_msgs::RobotCommand command;
+		command.id = id;
+		command.dribbler = false;
+		command.kicker = true;
+		command.kicker_forced = false;//GetBool("forced", false);
+		command.kicker_vel = GetDouble("kickVel", 4.0);
+		command.x_vel = 0.0;
+		command.y_vel = 0.0;
+		command.w = 0.0;
+		pub.publish(command);
+	}
+}
+
+void Kick::goForward() {
+	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	Vector2 forward(.5, 0);
+	forward = forward.rotate(getWorldBot(robotID)->angle);
+	roboteam_msgs::RobotCommand command;
+	command.id = robotID;
+	command.dribbler = true;
+	command.kicker = false;
+	command.kicker_forced = false;
+	command.kicker_vel = 0.0;
+	command.x_vel = forward.x;
+	command.y_vel = forward.y;
+	command.w = 0.0;
+	pub.publish(command);
+	goneForward = true;
 }
 
 } // rtt

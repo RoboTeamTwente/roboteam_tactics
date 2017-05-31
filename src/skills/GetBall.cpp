@@ -221,12 +221,12 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.06;
     }
 
-    double distAwayFromBall = 0.3; // 0.2 for protoBots??
+    double distAwayFromBall = 0.2; // 0.2 for protoBots??
     if (HasDouble("distAwayFromBall")) {
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-	if (posDiff.length() > 0.4 || fabs(angleDiff) > successAngle) { // posDiff > 0.25 for protoBots
+	if (posDiff.length() > 0.3 || fabs(angleDiff) > successAngle) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);

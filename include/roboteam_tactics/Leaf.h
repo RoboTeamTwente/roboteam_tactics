@@ -294,6 +294,8 @@ public:
             throw std::invalid_argument("Blackboard verification failed.");
         }
     }
+
+    bt::Blackboard::Ptr newSubBlackboard() const;
 } ;
 
 }

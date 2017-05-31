@@ -73,6 +73,9 @@
 #include "SecondaryKeeper.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "SelectStarAttackShooter.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "ShootAtGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
