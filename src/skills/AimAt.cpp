@@ -40,8 +40,13 @@ bt::Node::Status AimAt::Update (){
 
 	Vector2 passTo;
 
-	if (destination=="robot"){
-        int AtRobotID = GetInt("AtRobot");
+	if (destination=="robot" || destination == "paramrobot"){
+        int AtRobotID;
+        if (destination == "robot") {
+        	AtRobotID = GetInt("AtRobot");
+        } else if (!ros::param::get(name + "_targetBot", AtRobotID)) {
+        	ROS_WARN("[AimAt] Mode is set to paramrobot, but the %s_targetBot parameter is not set!", name.c_str());
+        }
         auto possibleBot = getWorldBot(AtRobotID);
         if (possibleBot) {
             passTo = Vector2(possibleBot->pos);
@@ -54,6 +59,8 @@ bt::Node::Status AimAt::Update (){
         passTo = LastWorld::get_our_goal_center();
 	} else if (destination == "position") {
         passTo = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    } else if (destination == "paramrobot") {
+
     }
 
     private_bb->SetInt("ROBOT_ID", robotID);

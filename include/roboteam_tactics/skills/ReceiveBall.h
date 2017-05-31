@@ -7,6 +7,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Position.h"
 #include "roboteam_utils/Draw.h"
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 
@@ -40,12 +41,6 @@ namespace rtt {
  *        If reception is the current position of the robot, this
  *        does not do anything
  */
-
-struct InterceptPose {
-	Vector2 interceptPos;
-	double interceptAngle;
-} ;
-
 class ReceiveBall : public Skill {
 public:
     ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -62,10 +57,12 @@ public:
     
     std::string node_name() { return "ReceiveBall"; }
 private:
+    const std::string paramName;
 	int whichRobotHasBall();
 	void publishStopCommand();
-	InterceptPose deduceInterceptPosFromBall();
-	InterceptPose deduceInterceptPosFromRobot();
+	Position deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY);
+	Position deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY);
+	void setParam(Position targetPos);
 	
 	int robotID;
 	int hasBall;

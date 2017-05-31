@@ -419,6 +419,10 @@ bt::Node::Status GoToPos::Update() {
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        if (command->x_vel != command->x_vel) {
+        	ROS_ERROR("Tried to send NAN");
+        	return Status::Invalid;
+        }
         pub.publish(*command);
         return Status::Running;
     } else {

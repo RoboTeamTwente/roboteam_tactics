@@ -4,6 +4,8 @@
 #include <vector>
 #include <map>
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Section.h"
+#include "boost/optional.hpp"
 
 namespace rtt {
 
@@ -24,6 +26,7 @@ private:
 
 	std::vector<Vector2> basePositions;
 	std::map<int, BotParams> botParams;
+	int freeKickTaker;
     time_point start;
     bool canRun;
 

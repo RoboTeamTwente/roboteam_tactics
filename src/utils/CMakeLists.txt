@@ -4,7 +4,6 @@ add_library(utils OBJECT
     BtDebug.cpp
     ComputePassPoint.cpp
     Control.cpp
-    DangerFinder.cpp
     FeedbackCollector.cpp
     Leaf.cpp
     Parts.cpp
@@ -14,6 +13,8 @@ add_library(utils OBJECT
     utils.cpp
     RefStateSwitch.cpp
     StrategyComposer.cpp
+    GoalPartition.cpp
+
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}

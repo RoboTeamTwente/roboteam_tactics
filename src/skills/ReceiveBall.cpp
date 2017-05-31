@@ -29,11 +29,11 @@ RTT_REGISTER_SKILL(ReceiveBall);
 
 ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
+		, paramName(name + "_readyToReceiveBall")
         , goToPos("", private_bb)
         , getBall("", blackboard) {
     hasBall = whichRobotHasBall();
-    ros::param::set("readyToReceiveBall", false);
-    prevCheck = now();
+    ros::param::set(paramName, false);
 }
 
 int ReceiveBall::whichRobotHasBall() {
@@ -56,9 +56,8 @@ void ReceiveBall::publishStopCommand() {
 }
 
 // Predict intercept pos from ball velocity
-InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
+Position ReceiveBall::deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY) {
 
-	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
@@ -87,16 +86,13 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		interceptPos = receiveBallAtPos;
 		interceptAngle = (ballPosNow - receiveBallAtPos).angle();
 	}
-	interceptPose.interceptPos = interceptPos;
-	interceptPose.interceptAngle = interceptAngle;
 
-	return interceptPose;
+	return {interceptPos.x, interceptPos.y, interceptAngle};
 }
 
 // Predict intercept pos by looking at the robot that has the ball
-InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
+Position ReceiveBall::deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY) {
 	
-	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
@@ -126,9 +122,20 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 		interceptAngle = (ballPosNow - receiveBallAtPos).angle();
 	}
 
-	interceptPose.interceptPos = interceptPos; 
-	interceptPose.interceptAngle = interceptAngle;
-	return interceptPose;
+	return {interceptPos.x, interceptPos.y, interceptAngle};
+}
+
+void ReceiveBall::setParam(Position targetPos) {
+	auto bot = *getWorldBot(robotID);
+	Position pos = {bot.pos.x, bot.pos.y, bot.angle};
+	// Must be within 1 cm (=sqrt(.0001) m) and .05 rad of the target position
+	if (pos.location().dist2(targetPos.location()) < .0001 && fabs(pos.rot - targetPos.rot) < .05) {
+		ros::param::set(paramName, true);
+		ros::param::set("ready_to_pass", true);
+		RTT_DEBUGLN("Ready! Setting params!");
+	} else {
+		RTT_DEBUGLN("Not ready yet...");
+	}
 }
 
 bt::Node::Status ReceiveBall::Update (){
@@ -166,21 +173,19 @@ bt::Node::Status ReceiveBall::Update (){
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	//double robotAngle = robot.angle;
 	
-	Vector2 targetPos;
-	double targetAngle;
-
+	Position targetPos;
 
 	// Read the blackboard info about where to receive the ball 
 	double receiveBallAtX;
 	double receiveBallAtY;
 	if (HasBool("receiveBallAtCurrentPos") || (HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		if (GetBool("receiveBallAtCurrentPos")) {
-			// receiveBallAtX = robotPos.x;
-			// receiveBallAtY = robotPos.y;
+			receiveBallAtX = robotPos.x;
+			receiveBallAtY = robotPos.y;
 			receiveBallAtPos = robotPos;
 		} else {
-			double receiveBallAtX = GetDouble("receiveBallAtX");
-			double receiveBallAtY = GetDouble("receiveBallAtY");
+			receiveBallAtX = GetDouble("receiveBallAtX");
+			receiveBallAtY = GetDouble("receiveBallAtY");
 			receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 		}
 	} else if (HasBool("computePoint") && GetBool("computePoint")) {
@@ -188,41 +193,38 @@ bt::Node::Status ReceiveBall::Update (){
 			passPoint.Initialize("spits.txt");
 			receiveBallAtPos = passPoint.computeBestPassPoint(robotID, "theirgoal", 0);
 			ROS_INFO_STREAM("ReceiveBall computed point: " << receiveBallAtPos);
-			// receiveBallAtX = receiveBallAtPos.x;
-			// receiveBallAtY = receiveBallAtPos.y;
+			receiveBallAtX = receiveBallAtPos.x;
+			receiveBallAtY = receiveBallAtPos.y;
 			prevCheck = now();
 		} else {
 			ROS_INFO_STREAM("not chekcing");
 		}
 	} else {
 		ROS_WARN("ReceiveBall blackboard is probably not set well, I'll just assume I have to receive the ball at my current position");
-		// receiveBallAtX = robotPos.x;
-		// receiveBallAtY = robotPos.y;
+		receiveBallAtX = robotPos.x;
+		receiveBallAtY = robotPos.y;
 		receiveBallAtPos = robotPos;
 	}
 
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
-	InterceptPose interceptPose;
+	Position interceptPos;
 	if (hasBall == -1) {
-		interceptPose = deduceInterceptPosFromBall();
+		interceptPos = deduceInterceptPosFromBall(receiveBallAtX, receiveBallAtY);
 	} else {
-		interceptPose = deduceInterceptPosFromRobot();
+		interceptPos = deduceInterceptPosFromRobot(receiveBallAtX, receiveBallAtY);
 	}
-	Vector2 interceptPos = interceptPose.interceptPos;
-	double interceptAngle = interceptPose.interceptAngle;
 
 
 	// Check whether the point returned by the deduceInterceptPos... function actually returns a point that is close (less than acceptableDeviation)
 	// from the specified receiveBallAt... point. This should always be the case (maybe move this check to some test function rather than perform
 	// it in the skill update)
-	// Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
-	ROS_INFO_STREAM("receiveBallAtPos: " << receiveBallAtPos);
-	if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos)) {
+	Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
+	if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos.location())) {
 		targetPos = interceptPos;
-		targetAngle = interceptAngle;
 	} else {
-		ROS_ERROR("This is probably not a valid intercept position...");
+		ROS_ERROR("This is probably not a valid intercept position... @(%f, %f) ->(%f, %f)",
+				receiveBallAtPos.x, receiveBallAtPos.y, interceptPos.x, interceptPos.y);
 		return Status::Failure;
 	}
 
@@ -256,6 +258,8 @@ bt::Node::Status ReceiveBall::Update (){
 
 	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
+	setParam(targetPos);
+
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
 		RTT_DEBUGLN("ReceiveBall skill completed.");
 		publishStopCommand();
@@ -265,7 +269,7 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
-        private_bb->SetDouble("angleGoal", targetAngle);
+        private_bb->SetDouble("angleGoal", targetPos.rot);
         private_bb->SetBool("avoidRobots", true);
 
         // if (HasDouble("pGainPosition")) {

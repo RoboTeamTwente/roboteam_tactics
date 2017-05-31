@@ -80,7 +80,8 @@ boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
-                                                    bool sight_only = false);
+                                                    bool sight_only = false,
+													bool ignore_both_ends = false);
                                                     
 /**
  * \brief Gets all robots on a line between two points
@@ -93,7 +94,8 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
-                                                    bool sight_only = false);
+                                                    bool sight_only = false,
+													bool ignore_both_ends = false);
 
 /**
  * \brief Gets all robots within a conical area
@@ -257,6 +259,8 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
  */
 bool robotIsWithinBounds(const TeamRobot& bot, const roboteam_msgs::World& world);
 
+boost::optional<roboteam_msgs::WorldRobot> getBotFromDangerList(unsigned dangerIndex);
+
 /**
  * \class GlobalPublisher
  * \brief Shared ros::Publisher instance of all messages of a certain type
@@ -329,6 +333,15 @@ boost::optional<roboteam_msgs::WorldRobot> getWorldBot(unsigned int id, bool our
  * @return An optional containing the robot, or an empty optional if it was not found
  */
 boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Checks whether the parameter is the NaN value.
+ */
+constexpr bool isNaN(double	 t) {
+	return t != t;
+}
+
+bool weAreLeft();
 
 } // rtt
 
