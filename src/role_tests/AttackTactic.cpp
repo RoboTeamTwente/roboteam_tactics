@@ -127,7 +127,7 @@ void initializeRoles(bt::Blackboard::Ptr bb1, bt::Blackboard::Ptr bb2) {
     // Make sure you stand free to receive the ball
     bb2->SetInt("StandFree_A_theirID", primaryAttacker);
     bb2->SetBool("StandFree_A_setRosParam", true);
-    bb2->SetString("StandFree_A_whichTeam", "us");
+    bb2->SetBool("StandFree_A_ourTeam", true);
     bb2->SetDouble("StandFree_A_distanceFromPoint", 0.3);
 
     // Receive the ball

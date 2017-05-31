@@ -26,6 +26,10 @@ class TwoAttackersTactic : public Tactic {
     roboteam_msgs::RoleDirective firstAttacker;
     roboteam_msgs::RoleDirective secondAttacker;
 
+    int firstAttackerID;
+    int secondAttackerID;
+
+    // PassPoint passPoint;
 };
 
 }

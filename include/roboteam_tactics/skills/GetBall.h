@@ -20,35 +20,51 @@ namespace rtt {
  * Params:
  *   - ROBOT_ID:
  *       Type: Int
- *       Descr: The id of the robot
+ *       Descr: The ID of the robot
+ *
+ *   - KEEPER_ID
+ *       Type: Int
+ *       Descr: The ID of the keeper
+ *
  *   - aimAt:
  *       Type: String
  *       Can be:
  *         - fieldcenter: The center of the field, (0, 0)
  *         - theirgoal: The opponents' goal
  *         - ourgoal: Our goal
- *         - robot: The robot determined by AimAtRobot and AimAtRobotOurTeam
+ *         - robot: The robot determined by aimAtRobot and ourTeam
  *       Descr: Determines where to aim after getting the ball
- *    - aimAtRobot:
- *        Type: Int
- *        Used when: aimAt == robot
- *        Descr: The id of an opponent robot to aim at
- *    - ourTeam:
- *        Type: Bool
- *        Used when: aimAt == robot
- *        Descr: To indicate whether or not the opponent robot is meant
- *    - passOn:
- *        Type: Bool
- *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.
- *    - stayOnSide:
- *        Type: String
- *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
+ *
+ *       - aimAtRobot:
+ *           Type: Int
+ *           Used when: aimAt == robot
+ *           Descr: The id of an opponent robot to aim at
+ *
+ *       - ourTeam:
+ *           Type: Bool
+ *           Used when: aimAt == robot
+ *           Descr: True if the robot we should aim at is from our team
+ *
  *    - targetAngle:
  *        Type: Double
  *        Descr: The angle to look at with the ball
  *        Used when: aimAt is not set
  *
+ *    - passOn:
+ *        Type: Bool
+ *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.
+ *        Note: Not sure if this feature should remain, or whether we should always use the kick skill
+ *
+ *    - stayOnSide:
+ *        Type: String
+ *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
+ *
+ *    - maxSpeed:
+ *        Type: Double
+ *        Descr: For debugging purposes, a maxSpeed parameter can be set here and will be passed on to GoToPos
  */
+
+
 class GetBall : public Skill {
 public:
     GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
@@ -84,7 +100,6 @@ private:
 	int robotID;
 	int hasBall;
 	bool our_team;
-	double acceptableDeviation = 0.4;
     bool waiting = true;
 
 	GoToPos goToPos;

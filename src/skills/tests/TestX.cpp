@@ -231,7 +231,7 @@ How to use:
 
         auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
         ros::Rate fps60(60);
-        while ((int) directivePub.getNumSubscribers() < 6) {
+        while ((int) directivePub.getNumSubscribers() < 2) {
             ros::spinOnce();
             fps60.sleep();
 
