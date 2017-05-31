@@ -103,13 +103,13 @@ private:
 	int hasBall;
 	bool our_team;
     bool waiting = true;
-
+// yoooooooo
 	GoToPos goToPos;
     Draw drawer;
     PassPoint passPoint;
     bool choseRobotToPassTo;
     int maxScoreID;
-
+// yoooooooo
     int ballCloseFrameCount = 0;
 
     double distanceFromBallWhenDribbling;

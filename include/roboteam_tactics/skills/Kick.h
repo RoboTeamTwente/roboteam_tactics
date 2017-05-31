@@ -31,7 +31,7 @@ public:
 	Kick(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
 	Status Update() override;
-
+// yoooooooo
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;

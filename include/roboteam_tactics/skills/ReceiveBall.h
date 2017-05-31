@@ -71,12 +71,12 @@ private:
 	int hasBall;
 	bool our_team;
 	double acceptableDeviation = 1.0;
-
+// yoooooooo
 	GoToPos goToPos;
 	GetBall getBall;
 	Draw drawer;
 	bool ballHasBeenClose = false;
-
+// yoooooooo
     bool touchedBall = false;
     time_point initialBallContact;
 

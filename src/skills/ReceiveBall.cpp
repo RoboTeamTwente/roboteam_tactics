@@ -64,14 +64,12 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
-
+// yoooooooo
 	double timeToLookIntoFuture = 5.0; // in seconds
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
 	Vector2 ballPosThen(LastWorld::predictBallPos(timeToLookIntoFuture));
-	// Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
 	Vector2 ballTrajectory = ballPosThen - ballPosNow;
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
-
 	// drawer.drawLine("ballTrajectory", ballPosNow, ballTrajectory);
 
 	double ballTrajectoryMagn = ballTrajectory.length();
@@ -109,7 +107,6 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	Vector2 otherRobotLooksAt = Vector2(1, 0);
 	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
-	// Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 	double projectionOnBallTrajectory = ballToCenter.dot(otherRobotLooksAt);
 	Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
@@ -165,19 +162,14 @@ bt::Node::Status ReceiveBall::Update (){
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
-	//double robotAngle = robot.angle;
 	
 	Vector2 targetPos;
 	double targetAngle;
 
-
+// yoooooooo
 	// Read the blackboard info about where to receive the ball 
-	double receiveBallAtX;
-	double receiveBallAtY;
 	if (HasBool("receiveBallAtCurrentPos") || (HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		if (GetBool("receiveBallAtCurrentPos")) {
-			// receiveBallAtX = robotPos.x;
-			// receiveBallAtY = robotPos.y;
 			receiveBallAtPos = robotPos;
 		} else {
 			double receiveBallAtX = GetDouble("receiveBallAtX");
@@ -185,22 +177,15 @@ bt::Node::Status ReceiveBall::Update (){
 			receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 		}
 	} else if (HasBool("computePoint") && GetBool("computePoint")) {
-		// if (time_difference_milliseconds(prevCheck, now()).count() >= 1000) {
 		if (!computedTargetPos) {
 			passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
 			receiveBallAtPos = passPoint.computeBestPassPoint();
 			ROS_INFO_STREAM("ReceiveBall computed point: " << receiveBallAtPos);
-			// receiveBallAtX = receiveBallAtPos.x;
-			// receiveBallAtY = receiveBallAtPos.y;
 			prevCheck = now();
 			computedTargetPos = true;
-		// } else {
-			// ROS_INFO_STREAM("not chekcing");
 		}
 	} else {
 		ROS_WARN("ReceiveBall blackboard is probably not set well, I'll just assume I have to receive the ball at my current position");
-		// receiveBallAtX = robotPos.x;
-		// receiveBallAtY = robotPos.y;
 		receiveBallAtPos = robotPos;
 	}
 
@@ -215,17 +200,8 @@ bt::Node::Status ReceiveBall::Update (){
 	double interceptAngle = interceptPose.interceptAngle;
 
 
-	// Check whether the point returned by the deduceInterceptPos... function actually returns a point that is close (less than acceptableDeviation)
-	// from the specified receiveBallAt... point. This should always be the case (maybe move this check to some test function rather than perform
-	// it in the skill update)
-	// Vector2 receiveBallAtPos(receiveBallAtX, receiveBallAtY);
-	// if (isPointInCircle(receiveBallAtPos, acceptableDeviation, interceptPos)) {
 	targetPos = interceptPos;
 	targetAngle = interceptAngle;
-	// } else {
-		// ROS_ERROR("This is probably not a valid intercept position...");
-		// return Status::Failure;
-	// }
 
 	Vector2 posError = receiveBallAtPos - robotPos;
 	if (posError.length() < acceptableDeviation && GetBool("setSignal")) {
@@ -233,7 +209,6 @@ bt::Node::Status ReceiveBall::Update (){
 	} else {
 		targetPos = receiveBallAtPos;
 	}
-
 
 
 	// If the ball is within reach and lying still or moving slowy, we should drive towards it
@@ -249,13 +224,12 @@ bt::Node::Status ReceiveBall::Update (){
 	if (HasDouble("dribblerDist")) {
 		dribblerDist = GetDouble("dribblerDist");
 	}
-
+// yoooooooo
 	if (distanceToBall < dribblerDist) {
 		private_bb->SetBool("dribbler", true);
 	} else {
 		private_bb->SetBool("dribbler", false);
 	}
-
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
 	auto bb3 = std::make_shared<bt::Blackboard>();
@@ -276,13 +250,6 @@ bt::Node::Status ReceiveBall::Update (){
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidRobots", true);
-
-        // if (HasDouble("pGainPosition")) {
-        // 	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-        // }
-        // if (HasDouble("successDist")) {
-        // 	private_bb->SetDouble("successDist", GetDouble("successDist"));
-        // }
 
         boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
 	    if (command) {
