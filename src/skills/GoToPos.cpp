@@ -157,7 +157,7 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) 
 
     if (theta < (0.5 * M_PI)) {
         if (theta == 0) theta = 0.01;
-        double force = theta / (0.5 * M_PI);
+        // double force = theta / (0.5 * M_PI);
         Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
         Vector2 ballForce = projectedBall - ballPos;
         sumOfForces = sumOfForces + ballForce * 5;

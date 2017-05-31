@@ -28,6 +28,7 @@ public:
 	double calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world);
 	double calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world);
 
+	void setCloseToPos(Vector2 closeToPos);
 	boost::optional<double> computePassPointScore(Vector2 testPosition);
 	Vector2 computeBestPassPoint();
 private:
@@ -51,6 +52,9 @@ private:
 	std::string target;
 	int targetID;
 	Vector2 targetPos;
+
+	bool isCloseToPosSet;
+	Vector2 closeToPos;
 
 	Draw drawer;
 };

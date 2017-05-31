@@ -47,6 +47,8 @@ void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string targe
 	this->ROBOT_ID = ROBOT_ID;
 	this->target = target;
 	this->targetID = targetID;
+
+	isCloseToPosSet = false;
 }
 
 // Calculates the distance between the closest opponent and the testPosition
@@ -175,15 +177,20 @@ double PassPoint::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World worl
 
 // Calculates the distance between the testPosition and the current robot
 double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world) {
-	boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
-	if (bot) {
-		roboteam_msgs::WorldRobot robot = *bot;
-		Vector2 robotPos(robot.pos);
-		return (testPosition - robotPos).length();
+	
+	if (isCloseToPosSet) {
+		return (testPosition - closeToPos).length();
 	} else {
-		ROS_WARN("PassPoint::distToRobot robot not found :(");
-		return 0.0;
-	}
+		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
+		if (bot) {
+			roboteam_msgs::WorldRobot robot = *bot;
+			Vector2 robotPos(robot.pos);
+			return (testPosition - robotPos).length();
+		} else {
+			ROS_WARN("PassPoint::distToRobot robot not found :(");
+			return 0.0;
+		}
+	}	
 }
 
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
@@ -192,6 +199,11 @@ double PassPoint::calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::
 	Vector2 ballPos(world.ball.pos);
 	double angleDiffRobotTarget = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
 	return angleDiffRobotTarget;
+}
+
+void PassPoint::setCloseToPos(Vector2 closeToPos) {
+	this->closeToPos = closeToPos;
+	isCloseToPosSet = true;
 }
 
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
@@ -304,8 +316,8 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	double maxScore = *max_element(scores.begin(), scores.end());
-	double minScore = *min_element(scores.begin(), scores.end());
+	// double maxScore = *max_element(scores.begin(), scores.end());
+	// double minScore = *min_element(scores.begin(), scores.end());
 
 	// for (size_t i = 0; i < passPoints.size(); i++) {
 	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;

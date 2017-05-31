@@ -61,7 +61,7 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("KEEPER_ID", 5);
 
         // bb.SetString("GetBall_A_aimAt", "robot");
-        bb,SetBool("GetBall_A_passToBestAttacker", true); 
+        bb.SetBool("GetBall_A_passToBestAttacker", true); 
         // bb.SetInt("GetBall_A_aimAtRobot", secondAttackerID);
 
         // bb.SetString("AimAt_A_At", "robot");

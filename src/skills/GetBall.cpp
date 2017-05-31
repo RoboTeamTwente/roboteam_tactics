@@ -156,7 +156,7 @@ bt::Node::Status GetBall::Update (){
         // }
 
 
-        for (int i = 0; i < (world.us.size()); i++) {
+        for (size_t i = 0; i < (world.us.size()); i++) {
             passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
             boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
             if (scorePointer) {
@@ -287,8 +287,6 @@ bt::Node::Status GetBall::Update (){
         command.x_vel = newVelCommand.x;
         command.y_vel = newVelCommand.y;    
     }
-
-    Vector2 velCommand = Vector2(command.x_vel, command.y_vel);
     
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

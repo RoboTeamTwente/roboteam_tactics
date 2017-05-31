@@ -85,3 +85,6 @@
 
 #include "Bob_KickoffWithRunPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Jim_StandReadyPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
