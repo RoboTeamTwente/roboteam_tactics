@@ -145,9 +145,17 @@ int main(int argc, char **argv) {
 	std::cin >> fileName;
 	std::cout << "Using path: " << fileName << " \n";
 
+	std::cout << "Please enter the robotID for which you want to calculate a point: \n";
+	int robotID;
+	std::cin >> robotID;
+	std::cout << "Using robotID: " << robotID << " \n";
+
+	std::string target = "theirgoal";
+	int targetID = 2;
+
 	// PassPoint, for the functions for calculating the best pass point and adapting the weights
 	rtt::PassPoint passPoint;
-	passPoint.Initialize(fileName);
+	passPoint.Initialize(fileName, robotID, target, targetID);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, &worldCallback);
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
@@ -161,10 +169,6 @@ int main(int argc, char **argv) {
 	while (!firstFieldCallBack) {
 		ros::spinOnce();
 	}
-
-	int ROBOT_ID = 1;
-	std::string target = "robot";
-	int targetID = 2;
 
 	rtt::time_point start = rtt::now();
 	
@@ -187,9 +191,9 @@ int main(int argc, char **argv) {
 	// return 0;
 
 	while (ros::ok()) {
-		if (rtt::time_difference_milliseconds(start, rtt::now()).count() > 1000) {
-			passPoint.Initialize(fileName);
-			passPoint.computeBestPassPoint(ROBOT_ID, target, targetID);
+		if (rtt::time_difference_milliseconds(start, rtt::now()).count() > 500) {
+			passPoint.Initialize(fileName, robotID, target, targetID);
+			passPoint.computeBestPassPoint();
 			ros::spinOnce();
 			start = rtt::now();
 		}

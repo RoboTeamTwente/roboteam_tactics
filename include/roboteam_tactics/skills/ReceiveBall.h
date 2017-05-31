@@ -83,6 +83,8 @@ private:
     PassPoint passPoint;
     time_point prevCheck;
     Vector2 receiveBallAtPos;
+
+    bool computedTargetPos;
 };
 
 } // rtt

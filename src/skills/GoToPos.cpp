@@ -98,7 +98,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     antenna = antenna.scale(myVel.length()*1.5); // magic scaling constant
 
     // Draw the antenna in rqt-view
-    drawer.drawLine("antenna", myPos, antenna);
+    // drawer.drawLine("antenna", myPos, antenna);
 
     // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
@@ -286,13 +286,18 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Draw the target position in RQT-view
-    drawer.setColor(0, 0, 0);
-    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    // drawer.setColor(0, 100, 100);
+    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+
+    // Draw the line towards the target position
+    drawer.setColor(0, 100, 100);
+    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
+    drawer.setColor(0, 0, 0);
 
     double angleGoal;
     if (HasDouble("angleGoal")) {
@@ -369,9 +374,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-    drawer.setColor(0, 0, 0);
+    // drawer.setColor(255, 0, 0);
+    // drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    // drawer.setColor(0, 0, 0);
 
     // Rotate the commands from world frame to robot frame 
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);

@@ -60,7 +60,7 @@ bt::Node::Status AimAt::Update (){
     private_bb->SetString("center", "ball");
     private_bb->SetDouble("faceTowardsPosx", passTo.x);
     private_bb->SetDouble("faceTowardsPosy", passTo.y);
-    double rotationSpeed = 3.0;
+    double rotationSpeed = 2.0;
     if (HasDouble("rotationSpeed")) {
     	rotationSpeed = GetDouble("rotationSpeed");
     }

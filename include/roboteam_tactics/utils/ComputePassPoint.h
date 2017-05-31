@@ -19,7 +19,7 @@ class PassPoint {
 
 public:
 	PassPoint();
-	void Initialize(std::string fileName);
+	void Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID);
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
@@ -29,7 +29,7 @@ public:
 	double calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world);
 
 	boost::optional<double> computePassPointScore(Vector2 testPosition);
-	Vector2 computeBestPassPoint(int ROBOT_ID, std::string target, int targetID);
+	Vector2 computeBestPassPoint();
 private:
 
 	// Weights for determining the score of a point on the field
