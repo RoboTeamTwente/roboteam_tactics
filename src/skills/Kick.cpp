@@ -34,7 +34,6 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-    // ROS_INFO_STREAM("Kick update");
     if (HasBool("wait_for_signal")) {
     	if (GetBool("wait_for_signal")) {
     		bool readyToPass = false;
@@ -46,7 +45,6 @@ bt::Node::Status Kick::Update() {
     }
 
     cycleCounter++;
-
     if (cycleCounter > 20) {
         return bt::Node::Status::Failure;
     }
@@ -54,9 +52,16 @@ bt::Node::Status Kick::Update() {
 	roboteam_msgs::World world = LastWorld::get();
     Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
-    if ((currentBallVel - oldBallVel).length() > 0.1) {
+    if (oldBallVel.length() < 0.1) {
+        // ROS_INFO_STREAM("oldBallVel: " << oldBallVel << " currentBallVel: " << currentBallVel);
+        if ((currentBallVel.length() - oldBallVel.length()) > 0.1) {
+            return bt::Node::Status::Success;
+        }
+    } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.3) {
+        // ROS_INFO_STREAM("oldBallVelAngle: " << oldBallVel.angle() << " currentBallVelAngle: " << currentBallVel.angle());
         return bt::Node::Status::Success;
     }
+
     oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");

@@ -239,7 +239,6 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-// yoooooooo
         int ballCloseFrameCountTo = 3;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");

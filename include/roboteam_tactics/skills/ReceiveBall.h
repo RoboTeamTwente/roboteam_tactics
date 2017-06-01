@@ -4,6 +4,7 @@
 
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
+#include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
@@ -75,7 +76,9 @@ private:
     GoToPos goToPos;
     GetBall getBall;
     Draw drawer;
+    Kick kick;
     bool ballHasBeenClose = false;
+    bool startKicking = false;
 
     bool touchedBall = false;
     time_point initialBallContact;

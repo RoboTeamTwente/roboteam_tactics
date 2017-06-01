@@ -100,6 +100,7 @@ SET_DEBUG_FOR(WanderTactic, true);
 SET_DEBUG_FOR(TwirlPlay, true);
 SET_DEBUG_FOR(Bob_KickoffWithRunPlay, true);
 SET_DEBUG_FOR(Jim_StandReadyPlay, true);
+SET_DEBUG_FOR(Jim_MultipleStrikersPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

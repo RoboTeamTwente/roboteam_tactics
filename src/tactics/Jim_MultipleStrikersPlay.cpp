@@ -1,0 +1,144 @@
+#include <algorithm>
+#include <memory>
+#include <iostream>
+#include <random>
+#include <limits>
+#include <cmath>
+
+#include "unique_id/unique_id.h" 
+#include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_tactics/tactics/Jim_MultipleStrikersPlay.h"
+#include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_utils/LastWorld.h"
+#include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
+
+#define RTT_CURRENT_DEBUG_TAG Jim_MultipleStrikersPlay
+
+namespace rtt {
+
+RTT_REGISTER_TACTIC(Jim_MultipleStrikersPlay);
+
+Jim_MultipleStrikersPlay::Jim_MultipleStrikersPlay(std::string name, bt::Blackboard::Ptr blackboard)
+        : Tactic(name, blackboard) 
+        {}
+
+
+
+void Jim_MultipleStrikersPlay::Initialize() {
+    tokens.clear();
+
+    RTT_DEBUGLN_TEAM("Initializing Jim_MultipleStrikersPlay");    
+    if (RobotDealer::get_available_robots().size() < 2) {
+        RTT_DEBUG("Not enough robots, cannot initialize... \n");
+        // TODO: Want to pass failure here as well!
+        return;
+    }
+    
+    std::vector<int> robots = RobotDealer::get_available_robots();
+    
+    int ballGetter = get_robot_closest_to_ball(robots);
+    RTT_DEBUGLN("ballGetter ID: %i", ballGetter);
+    delete_from_vector(robots, ballGetter);
+    claim_robot(ballGetter);
+
+    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
+    RTT_DEBUGLN("numStrikers: %i", numStrikers);
+
+
+    // Get the default roledirective publisher
+    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+    // Create the GetBallRole
+    {
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = ballGetter;
+        bt::Blackboard bb;
+
+        bb.SetInt("ROBOT_ID", ballGetter);
+        bb.SetInt("KEEPER_ID", 5);
+
+        bb.SetBool("GetBall_A_passToBestAttacker", true); 
+
+        bb.SetBool("Kick_A_wait_for_signal", true);
+
+        // Create message
+        rd.tree = "rtt_jim/GetBallRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
+
+    // Create the striker role
+    for (int i = 0; i < numStrikers; i++) {
+
+        int strikerID = get_robot_closest_to_their_goal(robots);
+        RTT_DEBUGLN("Initializing Striker %i", strikerID);
+        delete_from_vector(robots, strikerID);
+        claim_robot(strikerID);
+
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = strikerID;
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", strikerID);
+        bb.SetInt("KEEPER_ID", 5);
+
+        // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
+        bb.SetBool("ReceiveBall_A_computePoint", true);
+        bb.SetBool("ReceiveBall_A_setSignal", true);
+        bb.SetBool("ReceiveBall_A_shootAtGoal", true);
+
+        // Create message
+        rd.tree = "rtt_jim/StrikerRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
+    start = rtt::now();
+}
+
+bt::Node::Status Jim_MultipleStrikersPlay::Update() {
+
+    int successCount = 0;
+
+    for (auto token : tokens) {
+        if (feedbacks.find(token) != feedbacks.end()) {
+            Status status = feedbacks.at(token);
+            if (status == bt::Node::Status::Success) {
+                successCount++;
+            }
+        }
+    }
+
+    if (successCount >= 2) {
+        RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
+        return Status::Success;
+    }
+
+    auto duration = time_difference_seconds(start, now());
+    if (duration.count() >= 25) {
+        return Status::Failure;
+    }
+
+    return Status::Running;
+}
+
+} // rtt
