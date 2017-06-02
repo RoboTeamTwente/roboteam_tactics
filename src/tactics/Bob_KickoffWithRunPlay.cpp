@@ -39,16 +39,17 @@ void Bob_KickoffWithRunPlay::Initialize() {
         return;
     }
 
-    int firstAttackerID = robots[0];
-    int secondAttackerID = robots[1];
+    int takerID = robots[0];
+    int receiverID = robots[1];
     int keeperID = RobotDealer::get_keeper();
 
-    RobotDealer::claim_robots({firstAttackerID, secondAttackerID});
+    RobotDealer::claim_robots({takerID, receiverID});
 
-    firstAttacker.robot_id = firstAttackerID;
-    secondAttacker.robot_id = secondAttackerID;
+    taker.robot_id = takerID;
+    receiver.robot_id = receiverID;
 
     Vector2 receivePos(4.5 / 2, 3 / -2.0);
+    Vector2 startPos(-3, 3 / -2.0);
     Vector2 thresholdPos(-1, 3 / -2.0);
     Vector2 rendezvous(3, -2);
 
@@ -63,7 +64,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", firstAttackerID);
+        bb.SetInt("ROBOT_ID", takerID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GetBallAndLookAtGoal")
@@ -73,7 +74,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
             ;
 
         ScopedBB(bb, "ReceiverPassedThreshold")
-            .setString("X", std::to_string(secondAttackerID))
+            .setString("X", std::to_string(receiverID))
             .setString("Y", "fixed point")
             .setDouble("px", thresholdPos.x)
             .setDouble("py", thresholdPos.y)
@@ -88,70 +89,68 @@ void Bob_KickoffWithRunPlay::Initialize() {
             ;
 
         // bb.SetString("GetBall_A_AimAt", "robot");
-        // bb.SetInt("GetBall_A_AimAtRobot", secondAttackerID);
+        // bb.SetInt("GetBall_A_AimAtRobot", receiverID);
         // bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
 
-        // bb.SetString("AimAt_secondAttacker_At", "robot");
-        // bb.SetInt("AimAt_secondAttacker_AtRobot", secondAttackerID);
+        // bb.SetString("AimAt_receiver_At", "robot");
+        // bb.SetInt("AimAt_receiver_AtRobot", receiverID);
 
         // bb.SetString("ParamCheck_canIShoot_signal", "readyToReceiveBall");
         // bb.SetString("ParamCheck_canIShoot_mode", "eq");
         // bb.SetString("ParamCheck_canIShoot_value", "ready");
 
         // Create message
-        firstAttacker.tree = "rtt_bob/Kickoff_Taker";
-        firstAttacker.blackboard = bb.toMsg();
+        taker.tree = "rtt_bob/Kickoff_Taker";
+        taker.blackboard = bb.toMsg();
 
         // Add random token and save it for later
         boost::uuids::uuid token = unique_id::fromRandom();
         tokens.push_back(token);
-        firstAttacker.token = unique_id::toMsg(token);
+        taker.token = unique_id::toMsg(token);
 
         // Send to rolenode
-        pub.publish(firstAttacker);
+        pub.publish(taker);
     }
 
 
     // Create the second Attacker Role
-    // {
-        // bt::Blackboard bb;
+    {
+        bt::Blackboard bb;
 
-        // // Set the robot ID
-        // bb.SetInt("ROBOT_ID", secondAttackerID);
-        // bb.SetInt("KEEPER_ID", 5);
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", takerID);
+        bb.SetInt("KEEPER_ID", keeperID);
 
-        // bb.SetString("ParamSet_default_signal", "readyToReceiveBall");
-        // bb.SetString("ParamSet_default_value", "nope");
+        ScopedBB(bb, "GoToStartPos")
+            .setDouble("xGoal", startPos.x)
+            .setDouble("yGoal", startPos.y)
+            .setDouble("angleGoal", (rendezvous - startPos).angle())
+            .setBool("avoidRobots", true)
+            ;
 
-        // bb.SetInt("StandFree_A_theirID", firstAttackerID);
-        // bb.SetString("StandFree_A_whichTeam", "us");
-        // bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
-        // bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
-        // bb.SetBool("StandFree_A_seeGoal", true);
+        ScopedBB(bb, "ReceiveBallAtRendezVous")
+            .setDouble("receiveBallAtX", rendezvous.x)
+            .setDouble("receiveBallAtY", rendezvous.y)
+            .setDouble("acceptableDeviation", 0.5)
+            ;
 
-        // bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
-        // bb.SetString("ParamSet_readyToReceive_value", "ready");
+        ScopedBB(bb, "GetBallAndShootAtGoal")
+            .setString("aimAt", "theirgoal")
+            .setBool("passOn", true)
+            ;
 
-        // // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
-        
-        // ScopedBB(bb, "AimAt_A")
-            // .setString("At", "theirgoal")
-            // ;
+        // Create message
+        receiver.tree = "rtt_bob/Kickoff_Receiver";
+        receiver.blackboard = bb.toMsg();
 
-        // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        receiver.token = unique_id::toMsg(token);
 
-        // // Create message
-        // secondAttacker.tree = "qualification/TwoAttackersSecondRole";
-        // secondAttacker.blackboard = bb.toMsg();
-
-        // // Add random token and save it for later
-        // boost::uuids::uuid token = unique_id::fromRandom();
-        // tokens.push_back(token);
-        // secondAttacker.token = unique_id::toMsg(token);
-
-        // // Send to rolenode
-        // pub.publish(secondAttacker);
-    // }
+        // Send to rolenode
+        pub.publish(receiver);
+    }
 
     isThisYourFirstTimeHere = true;
     start = rtt::now();
@@ -160,8 +159,8 @@ void Bob_KickoffWithRunPlay::Initialize() {
 bt::Node::Status Bob_KickoffWithRunPlay::Update() {
     if (failImmediately) return Status::Failure;
 
-    bool firstAttackerSucceeded = false;
-    bool secondAttackerSucceeded = false;
+    bool takerSucceeded = false;
+    bool receiverSucceeded = false;
     bool oneFailed = false;
 
     for (auto token : tokens) {
@@ -169,13 +168,13 @@ bt::Node::Status Bob_KickoffWithRunPlay::Update() {
             Status status = feedbacks.at(token);
 
             if (status == bt::Node::Status::Success) {
-                if (token == unique_id::fromMsg(firstAttacker.token)) {
+                if (token == unique_id::fromMsg(taker.token)) {
                     std::cout << "First attacker succeeded!\n";
-                    firstAttackerSucceeded = true;
+                    takerSucceeded = true;
                 }
-                if (token == unique_id::fromMsg(secondAttacker.token)) {
+                if (token == unique_id::fromMsg(receiver.token)) {
                     std::cout << "Second attacker succeeded!\n";
-                    secondAttackerSucceeded = true;
+                    receiverSucceeded = true;
                 }
             } 
 
@@ -186,7 +185,7 @@ bt::Node::Status Bob_KickoffWithRunPlay::Update() {
         }
     }
 
-    if (firstAttackerSucceeded && secondAttackerSucceeded) {
+    if (takerSucceeded && receiverSucceeded) {
         RTT_DEBUGLN("Both roles succeeded, so tactic succeeded");
         return bt::Node::Status::Success;
     }

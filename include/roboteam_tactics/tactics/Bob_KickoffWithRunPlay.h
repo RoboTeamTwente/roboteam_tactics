@@ -25,8 +25,8 @@ class Bob_KickoffWithRunPlay : public Tactic {
     time_point lastUpdate;
     time_point finishTime;
 
-    roboteam_msgs::RoleDirective firstAttacker;
-    roboteam_msgs::RoleDirective secondAttacker;
+    roboteam_msgs::RoleDirective taker;
+    roboteam_msgs::RoleDirective receiver;
 
     Draw drawer;
 
