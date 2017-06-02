@@ -78,6 +78,7 @@ class ParamCheck : public Condition {
     std::string node_name() override { return "ParamCheck"; }
     private:
     int count = 0;
+    BBArgumentType deduceType();
 } ;
 
 }

@@ -3,8 +3,8 @@ distToOppWeight 1.0
 distToBallWeight 1.0
 viewOfGoalWeight 0.0
 distOppToBallTrajWeight 0.0
-distToRobotWeight 0.5
-angleDiffRobotTargetWeight 3.0
+distToRobotWeight 1.0
+angleDiffRobotTargetWeight 2.0
 distToRobotThreshold 1.5
-distOppToBallTrajThreshold 0.4
-distOppToBallToTargetTrajThreshold 0.4
+distOppToBallTrajThreshold 0.2
+distOppToBallToTargetTrajThreshold 0.2

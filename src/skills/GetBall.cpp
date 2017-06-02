@@ -21,6 +21,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <boost/optional.hpp>
 
 #define RTT_CURRENT_DEBUG_TAG GetBall
 
@@ -33,15 +34,16 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb) {
     hasBall = whichRobotHasBall();
 
-            std::string robot_output_target = "";
-            ros::param::getCached("robot_output_target", robot_output_target);
-            if (robot_output_target == "grsim") {
-                distanceFromBallWhenDribbling = 0.105;
-            } else if (robot_output_target == "serial") {
-                distanceFromBallWhenDribbling = 0.08;
-            } else {
-                distanceFromBallWhenDribbling = 0.105;
-            }
+    std::string robot_output_target = "";
+    ros::param::getCached("robot_output_target", robot_output_target);
+    if (robot_output_target == "grsim") {
+        distanceFromBallWhenDribbling = 0.105;
+    } else if (robot_output_target == "serial") {
+        distanceFromBallWhenDribbling = 0.08;
+    } else {
+        distanceFromBallWhenDribbling = 0.105;
+    }
+    choseRobotToPassTo = false;
 }
 
 int GetBall::whichRobotHasBall() {
@@ -138,19 +140,51 @@ bt::Node::Status GetBall::Update (){
 	Vector2 robotVel(robot.vel);
 	Vector2 targetPos;
 	double targetAngle;
+    Vector2 posDiff = ballPos - robotPos; 
+
+
+    // If we should pass on to the best available attacker, we should find which one has the highest score
+    if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo) {
+        double maxScore = -100000;
+        // maxScoreID = -1;
+        // maxScoreID = world.us.at(0).id;
+        
+        // passPoint.Initialize("spits.txt", maxScoreID, "theirgoal", 0);
+        // boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(0).pos));
+        // if (scorePointer) {
+            // maxScore = *scorePointer;
+        // }
+
+
+        for (size_t i = 0; i < (world.us.size()); i++) {
+            passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
+            boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
+            if (scorePointer) {
+                double score = *scorePointer;
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxScoreID = world.us.at(i).id;
+                }
+                // ROS_INFO_STREAM("robotID: " << world.us.at(i).id << " score: " << score);
+            }
+        }
+
+        choseRobotToPassTo = true;
+    }
 
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
-	} else {
-		if (HasDouble("targetAngle")) {
-			targetAngle = GetDouble("targetAngle");
-		} else {
-			Vector2 posdiff = ballPos - robotPos;
-			targetAngle = posdiff.angle();
-		}
-	}
+	} else if (choseRobotToPassTo) {
+        targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
+    } else if (HasDouble("targetAngle")) {
+        targetAngle = GetDouble("targetAngle");
+    } else {
+        targetAngle = posDiff.angle();
+    }
+	
+
 	targetAngle = cleanAngle(targetAngle);
 
 
@@ -160,9 +194,9 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.1*M_PI) {
+	if (angleDiff > 0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.1*M_PI) {
+	} else if (angleDiff < -0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
@@ -170,8 +204,8 @@ bt::Node::Status GetBall::Update (){
 	
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	double posDiff = (ballPos - robotPos).length(); 
-
+	
+// yoooooooo
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     double successDist = 0.0;
@@ -179,7 +213,7 @@ bt::Node::Status GetBall::Update (){
     double getBallDist;
     if (robot_output_target == "grsim") {
         successDist = 0.11;
-        successAngle = 0.3;
+        successAngle = 0.1;
         getBallDist = 0.08 ;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
@@ -187,19 +221,19 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.06;
     }
 
-    double distAwayFromBall = 0.2;
+    double distAwayFromBall = 0.2; // 0.2 for protoBots??
     if (HasDouble("distAwayFromBall")) {
          distAwayFromBall = GetDouble("distAwayFromBall");
     }
 
-	if (posDiff > 0.25 || fabs(angleDiff) > successAngle){
+	if (posDiff.length() > 0.3 || fabs(angleDiff) > successAngle) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
         if (robot_output_target == "serial") {
             private_bb->SetDouble("maxSpeed", 0.6);
         }
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
 	}
     
     double angleError = cleanAngle(robot.angle - targetAngle);
@@ -207,7 +241,6 @@ bt::Node::Status GetBall::Update (){
     // std::cout << (ballPos - robotPos).length()
 
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-
         int ballCloseFrameCountTo = 3;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
@@ -255,8 +288,6 @@ bt::Node::Status GetBall::Update (){
         command.x_vel = newVelCommand.x;
         command.y_vel = newVelCommand.y;    
     }
-
-    Vector2 velCommand = Vector2(command.x_vel, command.y_vel);
     
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

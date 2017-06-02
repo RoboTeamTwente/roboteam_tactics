@@ -41,7 +41,9 @@ template<
 >
 bt::Node::Status check_param(std::string signal, std::string mode, const T &default_val, const T &bb_value) {
     T signalValue = default_val;
-    ros::param::get(signal, signalValue);
+    if (!ros::param::get(signal, signalValue)) {
+    	return bt::Node::Status::Failure;
+    }
     if (compare_values(mode, signalValue, bb_value)) {
         RTT_DEBUG("Success!\n");
         return bt::Node::Status::Success;
@@ -51,22 +53,52 @@ bt::Node::Status check_param(std::string signal, std::string mode, const T &defa
     }
 }
 
+BBArgumentType ParamCheck::deduceType() {
+	if (HasString("typeOverride")) {
+		std::string type = GetString("typeOverride");
+		if (type == "string") {
+			return BBArgumentType::String;
+		} else if (type == "int") {
+			return BBArgumentType::Int;
+		} else if (type == "double") {
+			return BBArgumentType::Double;
+		} else if (type == "bool") {
+			return BBArgumentType::Bool;
+		}
+		ROS_ERROR("ParamCheck::deduceType: Invalid typeOverride: %s", type.c_str());
+		throw std::invalid_argument("ParamCheck::deduceType:: Invalid typeOverride");
+	} else if (HasString("value")) {
+		return BBArgumentType::String;
+	} else if (HasInt("value")) {
+		return BBArgumentType::Int;
+	} else if (HasDouble("value")) {
+		return BBArgumentType::Double;
+	} else if (HasBool("value")) {
+		return BBArgumentType::Bool;
+	}
+	ROS_ERROR("ParamCheck::deduceType: No 'value' parameter of any type");
+	throw std::invalid_argument("ParamCheck::deduceType: No 'value' parameter of any type");
+}
+
 bt::Node::Status ParamCheck::Update() {
     std::string signal = "/signal_" + GetString("signal");
     std::string mode = GetString("mode");
-
     std::string argType;
-    if (HasString("value")) {
-        return check_param(signal, mode, std::string(""), GetString("value"));
-    } else if (HasDouble("value")) {
+
+    BBArgumentType type = deduceType();
+    RTT_DEBUGLN("Type: %d", static_cast<int>(type));
+    switch (type) {
+    case BBArgumentType::String:
+        return check_param(signal, mode, std::string(), GetString("value"));
+    case BBArgumentType::Double:
         return check_param(signal, mode, 0.0, GetDouble("value"));
-    } else if (HasInt("value")) {
+    case BBArgumentType::Int:
         return check_param(signal, mode, 0, GetInt("value"));
-    } else if (HasBool("value")) {
+    case BBArgumentType::Bool:
         return check_param(signal, mode, false, GetBool("value"));
-    } else {
-        // If no param is set we cannot properly check the ros param. Hence, we fail.
-        return bt::Node::Status::Failure;
+    default:
+        // This is impossible. deduceType should have thrown an std::invalid_argument.
+    	throw std::logic_error("ParamCheck::Update: deduceType did not fail when it should have.");
     }
 }
 

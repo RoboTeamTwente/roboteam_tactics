@@ -291,14 +291,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 				successDist=GetDouble("successDist");
 			}
 
-			double successAngle=0.2;
+			double successAngle=0.005;
 			if(HasDouble("successAngle")){
 				successDist=GetDouble("successAngle");
 			}
 
 
-
-			if (extrav.x > 0.01 or extrav.y>0.01 or fabs(worldrotDiff) > successAngle or fabs(radiusReq) > successDist or fabs(turnReq) > successAngle) { // robot not finished yet
+			// ROS_INFO_STREAM("worldrotDiff: " << worldrotDiff);
+			if (fabs(worldrotDiff) > successAngle or fabs(radiusReq) > successDist) { // robot not finished yet
 			
 				// send command
 				roboteam_msgs::RobotCommand cmd;

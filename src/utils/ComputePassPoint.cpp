@@ -13,15 +13,13 @@ namespace rtt {
 
 PassPoint::PassPoint() {}
 
-void PassPoint::Initialize(std::string fileName) {
+void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	RTT_DEBUG("Initializing PassPoint and loading weights \n");
-	std::string filePrefix = "src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
 	std::string line;
-	std::cout << "filePath: " << filePath << " \n";
 	std::fstream myfile(filePath, std::ios_base::in);
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
@@ -31,28 +29,26 @@ void PassPoint::Initialize(std::string fileName) {
 		}
 
 		myfile.close();
+
+		distToGoalWeight = weightsVector.at(0);
+		distToOppWeight = weightsVector.at(1);
+		distToBallWeight = weightsVector.at(2);
+		viewOfGoalWeight = weightsVector.at(3);
+		distOppToBallTrajWeight = weightsVector.at(4);
+		distToRobotWeight = weightsVector.at(5);
+		angleDiffRobotTargetWeight = weightsVector.at(6);
+		distToRobotThreshold = weightsVector.at(7);
+		distOppToBallTrajThreshold = weightsVector.at(8);
+		distOppToBallToTargetTrajThreshold = weightsVector.at(9);
 	} else {
 		RTT_DEBUG("Unable to open file \n");
 	}
 
-	distToGoalWeight = weightsVector.at(0);
-	distToOppWeight = weightsVector.at(1);
-	distToBallWeight = weightsVector.at(2);
-	viewOfGoalWeight = weightsVector.at(3);
-	distOppToBallTrajWeight = weightsVector.at(4);
-	distToRobotWeight = weightsVector.at(5);
-	angleDiffRobotTargetWeight = weightsVector.at(6);
-	distToRobotThreshold = weightsVector.at(7);
-	distOppToBallTrajThreshold = weightsVector.at(8);
-	distOppToBallToTargetTrajThreshold = weightsVector.at(9);
+	this->ROBOT_ID = ROBOT_ID;
+	this->target = target;
+	this->targetID = targetID;
 
-	
-	// RTT_DEBUG("distToGoalWeight: %f \n", distToGoalWeight);
-	// RTT_DEBUG("distToOppWeight: %f \n", distToOppWeight);
-	// RTT_DEBUG("distToBallWeight: %f \n", distToBallWeight);
-	// RTT_DEBUG("viewOfGoalWeight: %f \n", viewOfGoalWeight);
-	// RTT_DEBUG("distOppToBallTrajWeight: %f \n", distOppToBallTrajWeight);
-	// RTT_DEBUG("Check\n");
+	isCloseToPosSet = false;
 }
 
 // Calculates the distance between the closest opponent and the testPosition
@@ -181,15 +177,20 @@ double PassPoint::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World worl
 
 // Calculates the distance between the testPosition and the current robot
 double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world) {
-	boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
-	if (bot) {
-		roboteam_msgs::WorldRobot robot = *bot;
-		Vector2 robotPos(robot.pos);
-		return (testPosition - robotPos).length();
+	
+	if (isCloseToPosSet) {
+		return (testPosition - closeToPos).length();
 	} else {
-		ROS_WARN("PassPoint::distToRobot robot not found :(");
-		return 0.0;
-	}
+		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
+		if (bot) {
+			roboteam_msgs::WorldRobot robot = *bot;
+			Vector2 robotPos(robot.pos);
+			return (testPosition - robotPos).length();
+		} else {
+			ROS_WARN("PassPoint::distToRobot robot not found :(");
+			return 0.0;
+		}
+	}	
 }
 
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
@@ -200,13 +201,17 @@ double PassPoint::calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::
 	return angleDiffRobotTarget;
 }
 
+void PassPoint::setCloseToPos(Vector2 closeToPos) {
+	this->closeToPos = closeToPos;
+	isCloseToPosSet = true;
+}
+
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
 boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
 
-	while(world.us.size() == 0) {
-		ros::spinOnce();
-		world = LastWorld::get();
+	if (world.us.size() == 0) {
+		return boost::none;
 	}
 
 	double distToRobot = calcDistToRobot(testPosition, world);
@@ -245,10 +250,8 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
-Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID, std::string target, int targetID) {
-	this->ROBOT_ID = ROBOT_ID;
-	this->target = target;
-	this->targetID = targetID;
+Vector2 PassPoint::computeBestPassPoint() {
+	
 	targetPos = getTargetPos(target, targetID, true);
 
 	int x_steps = 45;
@@ -266,7 +269,7 @@ Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID, std::string target, int ta
 			name.append("y");
 			name.append(y_string);
 			drawer.removePoint(name);
-			ros::spinOnce();
+			// ros::spinOnce();
 		}
 	}
 	drawer.removePoint("bestPosition");
@@ -320,7 +323,7 @@ Vector2 PassPoint::computeBestPassPoint(int ROBOT_ID, std::string target, int ta
 		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
 		drawer.setColor(255 - relScore, 0, relScore);
 		drawer.drawPoint(names.at(i), passPoints.at(i));
-		ros::spinOnce();	
+		// ros::spinOnce();
 	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

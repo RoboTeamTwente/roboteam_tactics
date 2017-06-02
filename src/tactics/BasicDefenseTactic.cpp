@@ -5,7 +5,6 @@
 #include "roboteam_utils/Vector2.h"
 
 
-#include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_tactics/tactics/BasicDefenseTactic.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_utils/LastWorld.h"
@@ -30,13 +29,13 @@ void BasicDefenseTactic::Initialize() {
 
     // Assign the remaining robots the secondary keeper role
     std::vector<int> robots = RobotDealer::get_available_robots();
-    double yStep = LastWorld::get_field().field_width / (robots.size() + 1);
-    double startY = LastWorld::get_field().field_width / 2 - yStep;
+    // double yStep = LastWorld::get_field().field_width / (robots.size() + 1);
+    // double startY = LastWorld::get_field().field_width / 2 - yStep;
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    const Vector2 theirGoal = rtt::LastWorld::get_their_goal_center();
+    // const Vector2 theirGoal = rtt::LastWorld::get_their_goal_center();
 
     int goalareaDefenders=0;
 

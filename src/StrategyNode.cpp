@@ -27,7 +27,6 @@
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -54,36 +53,10 @@ void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
 }
 
-namespace rtt {
-
-bool dangerFinderCallback(DFService::Request& req, DFService::Response& res) {
-    ROS_INFO("DF Request: %d %d", req.immediate, req.mostDangerousOnly);
-    DangerResult dr = req.immediate ? dangerFinder.getImmediateUpdate() : dangerFinder.currentResult();
-    res.mostDangerous.present = (bool) dr.mostDangerous;
-    if (dr.mostDangerous) {
-        res.mostDangerous.robot = *dr.mostDangerous;
-    }
-    if (!req.mostDangerousOnly) {
-        res.charging.present = (bool) dr.charging;
-        if (dr.charging) {
-            res.charging.robot = *dr.charging;
-        }
-        res.secondMostDangerous.present = (bool) dr.secondMostDangerous;
-        if (dr.secondMostDangerous) {
-            res.secondMostDangerous.robot = *dr.secondMostDangerous;
-        }
-        res.robots = dr.dangerList;
-    }
-    return true;
-}
-
-}
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
-    
-    ros::ServiceServer dfServer = n.advertiseService("dangerFinder", rtt::dangerFinderCallback);
     
     namespace f = rtt::factories;
 

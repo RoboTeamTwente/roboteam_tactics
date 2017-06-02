@@ -197,7 +197,7 @@ bt::Node::Status StandFree::Update() {
     private_bb->SetDouble("yGoal", nearestFreePos.y);
     private_bb->SetDouble("angleGoal", angleGoal);
     private_bb->SetBool("avoidRobots", true);
-
+    private_bb->SetBool("avoidDefenseAreas", GetBool("avoidDefenseAreas", true));
     if (goToPos.Update() == Status::Success) {
         // Remove all the lines from rqt view
         drawer.removeLine("coneRobotsSide1");

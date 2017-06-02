@@ -56,7 +56,7 @@ SET_DEBUG_FOR(GetBall, false);
 SET_DEBUG_FOR(GoToPos, true);
 SET_DEBUG_FOR(InterceptBall, true);
 SET_DEBUG_FOR(KeeperBlock, true);
-SET_DEBUG_FOR(Kick, false);
+SET_DEBUG_FOR(Kick, true);
 SET_DEBUG_FOR(NaiveBlockGoal, false);
 SET_DEBUG_FOR(ParamSet, false);
 SET_DEBUG_FOR(QualKeeper, false);
@@ -65,11 +65,12 @@ SET_DEBUG_FOR(Runner, true);
 SET_DEBUG_FOR(Harass, true);
 SET_DEBUG_FOR(Wander, true);
 SET_DEBUG_FOR(BlockGoal, true);
+SET_DEBUG_FOR(SelectStarAttackShooter, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
 SET_DEBUG_FOR(CanSeeTheirGoal, false);
-SET_DEBUG_FOR(DistanceXToY, true);
+SET_DEBUG_FOR(DistanceXToY, false);
 SET_DEBUG_FOR(IsRefCommand, true);
 SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(ParamCheck, false);
@@ -98,9 +99,12 @@ SET_DEBUG_FOR(Qualification1v1Tactic, true);
 SET_DEBUG_FOR(WanderTactic, true);
 SET_DEBUG_FOR(TwirlPlay, true);
 SET_DEBUG_FOR(Bob_KickoffWithRunPlay, true);
+SET_DEBUG_FOR(Jim_StandReadyPlay, true);
+SET_DEBUG_FOR(Jim_MultipleStrikersPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
 SET_DEBUG_FOR(Learner, true);
+SET_DEBUG_FOR(DangerFinder, true);
 
 } // rtt

@@ -1,6 +1,8 @@
 #include "roboteam_tactics/tactics/StarAttackTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_msgs/RoleDirective.h"
+#include <sstream>
+#include "roboteam_tactics/skills/SelectStarAttackShooter.h"
 
 #define RTT_CURRENT_DEBUG_TAG StarAttackTactic
 
@@ -8,9 +10,8 @@ namespace rtt {
 
 RTT_REGISTER_TACTIC(StarAttackTactic);
 
-
 StarAttackTactic::StarAttackTactic(std::string name, bt::Blackboard::Ptr blackboard)
-	: Tactic(name, blackboard), canRun(true) {
+	: Tactic(name, blackboard),  freeKickTaker(-1), canRun(true) {
 	auto geom = LastWorld::get_field();
 
 	for (const Vector2& frac : STAR_POSITION_FRACTIONS) {
@@ -19,16 +20,44 @@ StarAttackTactic::StarAttackTactic(std::string name, bt::Blackboard::Ptr blackbo
 }
 
 void StarAttackTactic::Initialize() {
+	static auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 	auto robots = RobotDealer::get_available_robots();
 
-	if (robots.size() < 3) {
+	if (robots.size() < 4) {
 		ROS_ERROR("StarAttackTactic: Insufficient robots (%lu)", robots.size());
 		canRun = false;
 		return;
 	}
 
+	freeKickTaker = robots.at(3);
+
 	for (int i = 0; i < 3; i++)
 		initBot(robots.at(i), i);
+
+	std::ostringstream ss;
+	for (const auto& pair : botParams) {
+		ss << pair.first << ",";
+	}
+	std::string ids = ss.str();
+
+
+	bt::Blackboard bb;
+	bb.SetInt("ROBOT_ID", freeKickTaker);
+	bb.SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
+	bb.SetString("SelectStarAttackShooter_A_availableIDs", ids);
+	bb.SetBool("Kick_A_wait_for_signal", true);
+	bb.SetDouble("Kick_A_kickVel", 4.0);
+	bb.SetDouble("AimAt_B_xGoal", 3.0);
+	roboteam_msgs::RoleDirective rd;
+	rd.robot_id = freeKickTaker;
+	boost::uuids::uuid token = unique_id::fromRandom();
+	botParams[freeKickTaker].token = token;
+	rd.token = unique_id::toMsg(token);
+	rd.tree = "rtt_dennis/StarAttackFKTRole";
+	rd.blackboard = bb.toMsg();
+	pub.publish(rd);
+
+	botParams[freeKickTaker] = { Vector2{}, token, rd };
 }
 
 bt::Node::Status StarAttackTactic::Update() {
@@ -64,16 +93,13 @@ bt::Node::Status StarAttackTactic::Update() {
 
 double angleToGoal(const Vector2& from) {
 	roboteam_msgs::GeometryFieldSize geom = LastWorld::get_field();
-	Vector2 goal(geom.field_length / 2, 0);
-	if (!weAreLeft()) goal.x *= -1;
+	Vector2 goal(-geom.field_length / 2, 0);
 	return (goal - from).angle();
 }
 
 void StarAttackTactic::initBot(int botID, int posID) {
 	static auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
 	Vector2 basePos = basePositions.at(posID);
-	if (!weAreLeft()) basePos.x *= -1;
 	float xDev = get_rand_real(-DEVIATION_RANGE, DEVIATION_RANGE);
 	float yDev = get_rand_real(-DEVIATION_RANGE, DEVIATION_RANGE);
 	Vector2 tgtPos = basePos + Vector2(xDev, yDev);
@@ -85,8 +111,8 @@ void StarAttackTactic::initBot(int botID, int posID) {
 	bb.SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
 
 	bb.SetInt("WasIPicked_value", botID);
-	bb.SetInt("StandFree_A_theirID", GetInt("shooterID"));
-	bb.SetBool("StandFree_A_ourTeam", true);
+	bb.SetInt("StandFree_A_theirID", freeKickTaker);
+	bb.SetString("StandFree_A_whichTeam", "us");
 	bb.SetDouble("StandFree_A_distanceFromPoint", .2);
 	bb.SetString("AmITooFarAway_X", "me");
 	bb.SetString("AmITooFarAway_Y", "fixed point");
@@ -100,9 +126,7 @@ void StarAttackTactic::initBot(int botID, int posID) {
 	roboteam_msgs::RoleDirective rd;
 	rd.robot_id = botID;
 	boost::uuids::uuid token = unique_id::fromRandom();
-	ROS_INFO("A");
 	botParams[botID].token = token;
-	ROS_INFO("B");
 	rd.token = unique_id::toMsg(token);
 	rd.tree = "rtt_dennis/StarAttackRole";
 	rd.blackboard = bb.toMsg();
@@ -110,4 +134,3 @@ void StarAttackTactic::initBot(int botID, int posID) {
 }
 
 }
-
