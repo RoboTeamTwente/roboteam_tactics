@@ -4,10 +4,10 @@
 
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
+#include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
-#include "roboteam_utils/Position.h"
 #include "roboteam_utils/Draw.h"
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 
@@ -41,10 +41,16 @@ namespace rtt {
  *        If reception is the current position of the robot, this
  *        does not do anything
  */
+
+struct InterceptPose {
+    Vector2 interceptPos;
+    double interceptAngle;
+} ;
+
 class ReceiveBall : public Skill {
 public:
     ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-	Status Update();
+    Status Update();
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -57,22 +63,22 @@ public:
     
     std::string node_name() { return "ReceiveBall"; }
 private:
-    const std::string paramName;
-	int whichRobotHasBall();
-	void publishStopCommand();
-	Position deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY);
-	Position deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY);
-	void setParam(Position targetPos);
-	
-	int robotID;
-	int hasBall;
-	bool our_team;
-	double acceptableDeviation = 1.0;
+    int whichRobotHasBall();
+    void publishStopCommand();
+    InterceptPose deduceInterceptPosFromBall();
+    InterceptPose deduceInterceptPosFromRobot();
+    
+    int robotID;
+    int hasBall;
+    bool our_team;
+    double acceptableDeviation = 1.0;
 
-	GoToPos goToPos;
-	GetBall getBall;
-	Draw drawer;
-	bool ballHasBeenClose = false;
+    GoToPos goToPos;
+    GetBall getBall;
+    Draw drawer;
+    Kick kick;
+    bool ballHasBeenClose = false;
+    bool startKicking = false;
 
     bool touchedBall = false;
     time_point initialBallContact;
@@ -80,6 +86,8 @@ private:
     PassPoint passPoint;
     time_point prevCheck;
     Vector2 receiveBallAtPos;
+
+    bool computedTargetPos;
 };
 
 } // rtt

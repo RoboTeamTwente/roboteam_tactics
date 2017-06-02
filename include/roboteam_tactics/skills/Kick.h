@@ -39,6 +39,7 @@ public:
 	Kick(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
 	Status Update() override;
+
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;
@@ -51,6 +52,9 @@ private:
     Vector2 ballStartPos;
     Vector2 oldBallVel;
     bool goneForward;
+
+
+    int cycleCounter;
 
     void doKick();
     void goForward();

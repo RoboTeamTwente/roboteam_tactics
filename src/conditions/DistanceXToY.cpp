@@ -212,33 +212,28 @@ bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_s
 
     if (whichArea == "our defense area") {
         if (our_side == "left") {
-            if (point.x > field.left_penalty_line.begin.x) return false;
-            else if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return false;
-            else return true;
+            if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return true;
+            else if ((Vector2(field.bottom_left_penalty_arc.center) - point).length() < field.bottom_left_penalty_arc.radius) return true;
+            else return false;
         }
         
         if (our_side == "right") {
-            if (point.x < field.right_penalty_line.begin.x) return false;
-            else if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return false;
-            else return true;
+            if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return true;
+            else if ((Vector2(field.bottom_right_penalty_arc.center) - point).length() < field.bottom_right_penalty_arc.radius) return true;
+            else return false;
         }
     }
 
     if (whichArea == "their defense area") {
         if (our_side == "left") {
-
             if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return true;
             else if ((Vector2(field.bottom_right_penalty_arc.center) - point).length() < field.bottom_right_penalty_arc.radius) return true;
             else return false;
-
-            // if (point.x < field.right_penalty_line.begin.x) return false;
-            // else if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return false;
-            // else return true;
         }
         if (our_side == "right") {
-            if (point.x > field.left_penalty_line.begin.x) return false;
-            else if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return false;
-            else return true;
+            if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return true;
+            else if ((Vector2(field.bottom_left_penalty_arc.center) - point).length() < field.bottom_left_penalty_arc.radius) return true;
+            else return false;
         }
     }
 

@@ -18,7 +18,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     const roboteam_msgs::World world = LastWorld::get();
     auto bot = getWorldBot(blackboard->GetInt("ROBOT_ID"));
     const Vector2 ownPos(bot->pos);
-    const double orientation = bot->angle;
+    // const double orientation = bot->angle;
     
     partition.reset();
     partition.calculatePartition(world, ownPos);
@@ -31,7 +31,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     Vector2 target = largest->center;
     double targetAngle = (target - ownPos).angle();
     
-    ROS_INFO("targetAngle: %f, orientation; %f", targetAngle, orientation);
+    // ROS_INFO("targetAngle: %f, orientation; %f", targetAngle, orientation);
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
         bb->SetInt("ROBOT_ID", bot->id);
