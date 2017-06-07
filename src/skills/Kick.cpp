@@ -22,7 +22,8 @@ namespace rtt {
 RTT_REGISTER_SKILL(Kick);
 
 Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard), goneForward(false) {
+        : Skill(name, blackboard), goneForward(false),
+		  waitStart{time_point::min()}{
         cycleCounter = 0;
         }
 
@@ -34,13 +35,24 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-    if (HasBool("wait_for_signal")) {
-    	if (GetBool("wait_for_signal")) {
-    		bool readyToPass = false;
-    		ros::param::get("readyToReceiveBall", readyToPass);
-    		if (!readyToPass) {
-    			return Status::Running;
+    if (GetBool("wait_for_signal", false)) {
+    	bool timeOut;
+    	if (!GetBool("ignore_timeout", false)) {
+    		if (waitStart == time_point::min()) {
+    			waitStart == now();
     		}
+    		if ((now() - waitStart).count() / 1000000000 > 2) {
+    			timeOut = false;
+    		} else {
+    			timeOut = true;
+    		}
+    	} else {
+    		timeOut = false;
+    	}
+    	bool readyToPass = false;
+    	ros::param::get("readyToReceiveBall", readyToPass);
+    	if (!(readyToPass || timeOut)) {
+    		return Status::Running;
     	}
     }
 

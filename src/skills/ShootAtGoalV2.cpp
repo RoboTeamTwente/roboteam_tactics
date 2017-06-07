@@ -36,6 +36,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
         bb->SetInt("ROBOT_ID", bot->id);
         bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
+        bb->SetDouble("targetAngle", targetAngle);
         bb->SetBool("SAGV2_GetBall_passOn", true);
     	aimer = std::make_unique<GetBall>("SAGV2_GetBall", bb);
     }
