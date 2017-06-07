@@ -36,6 +36,7 @@ namespace rtt {
 class SimpleKeeper : public Skill {
 public:
 	SimpleKeeper(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    static Vector2 computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal);
 	Status Update();
 
     static VerificationMap required_params() {
@@ -46,11 +47,13 @@ public:
 
     std::string node_name() override { return "SimpleKeeper"; }
 private:
+    
 	int robotID;
     ReceiveBall receiveBall;
     GoToPos goToPos;
+    // double distanceFromGoal;
+    // bool ourSide;
     
 };
-
 
 } // rtt

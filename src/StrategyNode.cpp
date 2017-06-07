@@ -143,7 +143,15 @@ int main(int argc, char *argv[]) {
     }
 
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
-    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+    // rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+
+    roboteam_msgs::World world = rtt::LastWorld::get();
+    std::vector<int> initializeBots;
+    initializeBots.clear();
+    for (size_t i = 1; i < world.us.size(); i++) {
+        initializeBots.push_back(world.us.at(i).id);
+    }
+    rtt::RobotDealer::initialize_robots(0, initializeBots);
 
     RTT_DEBUGLN("More than one robot found. Starting!");
     
@@ -153,13 +161,13 @@ int main(int argc, char *argv[]) {
         ros::spinOnce();
 
         //bt::Node::Status status =
-        strategy->Update();
+        bt::Node::Status status = strategy->Update();
 
-        // if (status != bt::Node::Status::Running) {
-            // auto statusStr = bt::statusToString(status);
-            // RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
-            // // break;
-        // }
+        if (status != bt::Node::Status::Running) {
+            auto statusStr = bt::statusToString(status);
+            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            break;
+        }
         rate.sleep();
     }
     

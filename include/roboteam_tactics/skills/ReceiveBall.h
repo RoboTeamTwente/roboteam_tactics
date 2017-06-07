@@ -50,6 +50,7 @@ struct InterceptPose {
 class ReceiveBall : public Skill {
 public:
     ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    void Initialize();
     Status Update();
     
     static VerificationMap required_params() {

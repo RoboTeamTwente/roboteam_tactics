@@ -16,6 +16,7 @@
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG SimpleKeeper
 
@@ -29,6 +30,24 @@ SimpleKeeper::SimpleKeeper(std::string name, bt::Blackboard::Ptr blackboard)
         , receiveBall("", private_bb)
         , goToPos("", private_bb) { }
 
+Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal) {
+    
+    Vector2 goalPos;
+    if (ourSide) {
+        goalPos = LastWorld::get_our_goal_center();
+    } else {
+        goalPos = LastWorld::get_their_goal_center();
+    }
+    
+    double angle = (defendPos - goalPos).angle();
+
+    Vector2 targetPos(distanceFromGoal, 0.0);
+    targetPos = targetPos.rotate(angle);
+    targetPos = goalPos + targetPos;
+
+    return targetPos;
+}
+
 bt::Node::Status SimpleKeeper::Update() {
     
     // Get the last world information and some blackboard info
@@ -36,9 +55,16 @@ bt::Node::Status SimpleKeeper::Update() {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     robotID = blackboard->GetInt("ROBOT_ID");
 
-    double distanceFromGoal;
+    bool ourSide;
+    if (HasBool("ourSide")) {
+        ourSide = GetBool("ourSide");
+    } else {
+        ourSide = true;
+    }
+
     double acceptableDeviation;
     double dribblerDist;
+    double distanceFromGoal;
     std::string fieldType = GetString("fieldType");
     if (fieldType == "office") {
         distanceFromGoal = 0.4;
@@ -46,47 +72,50 @@ bt::Node::Status SimpleKeeper::Update() {
         dribblerDist = 1.0;
     } else {
         distanceFromGoal = 0.7;
-        acceptableDeviation = 1.5;
+        acceptableDeviation = 0.8;
         dribblerDist = 2.0;
     }
 
-    Vector2 ballPos(world.ball.pos);
-    Vector2 goalPos;
-    bool ourSide;
-    if (HasBool("ourSide")) {
-        ourSide = GetBool("ourSide");
-        if (ourSide) {
-            goalPos = LastWorld::get_our_goal_center();
-        } else {
-            goalPos = LastWorld::get_their_goal_center();
-        }
-    } else {
-        ourSide = true;
-        goalPos = LastWorld::get_our_goal_center();
+    if (HasDouble("distanceFromGoal")) {
+        distanceFromGoal = GetDouble("distanceFromGoal");
     }
 
-    double angle = (ballPos - goalPos).angle();
+    Vector2 defendPos;
 
-    Vector2 targetPos(distanceFromGoal, 0.0);
-    targetPos = targetPos.rotate(angle);
-    targetPos = goalPos + targetPos;
+    if (HasInt("defendRobot")) {
+        unsigned int defendRobot = GetInt("defendRobot");
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(defendRobot, false, world);
+        roboteam_msgs::WorldRobot robot;
+        if (findBot) {
+            robot = *findBot;
+        } else {
+            ROS_WARN_STREAM("SimpleKeeper: robot with this ID not found, ID: " << robotID);
+        }  
+        defendPos = Vector2(robot.pos);
+    } else {
+        defendPos = Vector2(world.ball.pos);
+    }
+    
+    Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal);
 
-    if (fabs(ballPos.x) > (field.field_length/2 - 0.2) || fabs(ballPos.y) > (field.field_width/2 - 0.2)) {
+    if (fabs(defendPos.x) > (field.field_length/2) || fabs(defendPos.y) > (field.field_width/2)) {
         targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", (Vector2(0.0, 0.0)-goalPos).angle());
+        private_bb->SetBool("avoidRobots", true);
         goToPos.Update();
         return Status::Running;
-    } else {
+    } else {   
+        
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetDouble("receiveBallAtX", targetPos.x);
         private_bb->SetDouble("receiveBallAtY", targetPos.y);
         private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
         private_bb->SetDouble("dribblerDist", dribblerDist);
 
-        return receiveBall.Update();
+        return receiveBall.Tick();
     }
 }
 

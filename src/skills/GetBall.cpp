@@ -4,6 +4,8 @@
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
+#include "roboteam_tactics/conditions/CanClaimBall.h"
+// #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -92,16 +94,50 @@ void GetBall::publishKickCommand(){
     pub.publish(command);  
 }
 
+bool GetBall::canClaimBall() {
+    roboteam_msgs::World world = LastWorld::get();
+
+    for (size_t i = 0; i < world.us.size(); i++) {
+        int currentID = world.us.at(i).id;
+        if (currentID != robotID) {
+            std::string paramName = "robot" + std::to_string(currentID) + "/claimedBall";
+            bool claimedBall;
+            ros::param::getCached(paramName, claimedBall);
+            if (claimedBall) {
+                ROS_WARN_STREAM("GetBall " << robotID << ": robot " << currentID << " already claimed ball");
+                return false;
+            }
+        }
+    } 
+    std::string paramName = "robot" + std::to_string(robotID) + "/claimedBall";
+    ros::param::set(paramName, true);
+    return true;
+}
+
+void GetBall::releaseBall() {
+    std::string paramName = "robot" + std::to_string(robotID) + "/claimedBall";
+    ros::param::set(paramName, false);
+    return;
+}
+
 
 void GetBall::Initialize() {
     ballCloseFrameCount = 0;
     finalStage = false;
     countFinalMessages = 0;
+
+    
 }
+
 
 bt::Node::Status GetBall::Update (){
 
-    if(finalStage){
+	roboteam_msgs::World world = LastWorld::get();
+	robotID = blackboard->GetInt("ROBOT_ID");
+    if (!canClaimBall()) {return Status::Failure;}
+
+
+    if (finalStage){
         if(countFinalMessages < 10){
             publishKickCommand();
             countFinalMessages=countFinalMessages+1;
@@ -109,12 +145,10 @@ bt::Node::Status GetBall::Update (){
         }
         else {
             publishStopCommand();
+            releaseBall();
             return Status::Success;
         }
     }
-
-	roboteam_msgs::World world = LastWorld::get();
-	robotID = blackboard->GetInt("ROBOT_ID");
 
 
 	// Wait for the first world message
@@ -146,29 +180,28 @@ bt::Node::Status GetBall::Update (){
     // If we should pass on to the best available attacker, we should find which one has the highest score
     if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo) {
         double maxScore = -100000;
-        // maxScoreID = -1;
-        // maxScoreID = world.us.at(0).id;
-        
-        // passPoint.Initialize("spits.txt", maxScoreID, "theirgoal", 0);
-        // boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(0).pos));
-        // if (scorePointer) {
-            // maxScore = *scorePointer;
+
+        // bt::Blackboard::Ptr CanSeeTheirGoalBB;
+        // CanSeeTheirGoalBB->SetInt("ROBOT_ID", robotID);
+        // CanSeeTheirGoal("", CanSeeTheirGoalBB);
+        // if (CanSeeTheirGoal.Update() == bt::Node::Status::Success) {
+        //     aimAtTheirGoal
         // }
 
-
         for (size_t i = 0; i < (world.us.size()); i++) {
-            passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
-            boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
-            if (scorePointer) {
-                double score = *scorePointer;
-                if (score > maxScore) {
-                    maxScore = score;
-                    maxScoreID = world.us.at(i).id;
+            if (world.us.at(i).id != (unsigned int) robotID) {
+                passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
+                boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
+                if (scorePointer) {
+                    double score = *scorePointer;
+                    if (score > maxScore) {
+                        maxScore = score;
+                        maxScoreID = world.us.at(i).id;
+                    }
                 }
-                // ROS_INFO_STREAM("robotID: " << world.us.at(i).id << " score: " << score);
             }
         }
-
+        ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
         choseRobotToPassTo = true;
     }
 
@@ -183,7 +216,10 @@ bt::Node::Status GetBall::Update (){
     } else {
         targetAngle = posDiff.angle();
     }
-	
+
+    if (GetBool("aimAwayFromTarget")) {
+        targetAngle = targetAngle + M_PI;
+    }
 
 	targetAngle = cleanAngle(targetAngle);
 
@@ -205,7 +241,6 @@ bt::Node::Status GetBall::Update (){
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	
-// yoooooooo
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     double successDist = 0.0;
