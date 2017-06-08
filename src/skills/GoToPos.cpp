@@ -283,11 +283,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         targetPos = checkTargetPos(targetPos);
         prevTargetPos = targetPos;
-    }
-
-    // Draw the target position in RQT-view
-    // drawer.setColor(0, 100, 100);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    }  
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
@@ -349,13 +345,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos);
 
-    // ROS_INFO_STREAM("Robot: " << ROBOT_ID << " sumOfForces: " << sumOfForces);
 
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError);
 
     // Robot avoidance
-    // if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
+    if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         // Possibly necessary to scale the velocity to the maxSpeed again after avoidRobots:
         // if (posError.length() > 0.5) {
@@ -363,11 +358,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         //         sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
         //     }
         // }
-    // }
+    }
 
     // Defense area avoidance
     // if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
-        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     // }
 
     // Ball avoidance
@@ -393,13 +388,13 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     myVelTopic.publish(myVelRobot); 
 
     // Velocity controller
-    Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+    // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+    Vector2 velCommand = velTarget;
 
     // Limit angular and linear velocity
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
 
-    // ROS_INFO_STREAM("Robot: " << ROBOT_ID << " velCommand: " << velCommand);
     
     // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
     // wheels remain still

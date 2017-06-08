@@ -30,7 +30,7 @@ SimpleKeeper::SimpleKeeper(std::string name, bt::Blackboard::Ptr blackboard)
         , receiveBall("", private_bb)
         , goToPos("", private_bb) { }
 
-Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal) {
+Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
     
     Vector2 goalPos;
     if (ourSide) {
@@ -39,7 +39,7 @@ Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, doubl
         goalPos = LastWorld::get_their_goal_center();
     }
     
-    double angle = (defendPos - goalPos).angle();
+    double angle = (defendPos - goalPos).angle() + angleOffset;
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
@@ -96,7 +96,8 @@ bt::Node::Status SimpleKeeper::Update() {
         defendPos = Vector2(world.ball.pos);
     }
     
-    Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal);
+    double angleOffset = GetDouble("angleOffset");
+    Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
 
     if (fabs(defendPos.x) > (field.field_length/2) || fabs(defendPos.y) > (field.field_width/2)) {
         targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);

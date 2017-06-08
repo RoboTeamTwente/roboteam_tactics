@@ -31,9 +31,9 @@ Jim_MultipleDefendersPlay::Jim_MultipleDefendersPlay(std::string name, bt::Black
         : Tactic(name, blackboard) 
         {}
 
-int Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos) {
+int Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
     double distanceFromGoal = 1.35;
-    Vector2 defensePoint = SimpleKeeper::computeDefensePoint(dangerPos, true, distanceFromGoal);
+    Vector2 defensePoint = SimpleKeeper::computeDefensePoint(dangerPos, true, distanceFromGoal, 0.0);
     int defenderID = get_robot_closest_to_point(robots, world, defensePoint);
     return defenderID;
 }
@@ -84,9 +84,16 @@ void Jim_MultipleDefendersPlay::Initialize() {
         pub.publish(rd);
     }
 
-    // Ball Defender: drives towards the ball to block as much as possible of the view of goal of the attackers
-    if (robots.size() >= 1) {
-        int ballDefenderID = get_robot_closest_to_point(robots, world, Vector2(world.ball.pos));
+    int numBallDefenders = std::min((int) robots.size(), 2);
+    std::vector<double> angleOffsets;
+    if (numBallDefenders == 2) {
+        angleOffsets.push_back(0.1);
+        angleOffsets.push_back(-0.1);
+    }
+    RTT_DEBUGLN("numBallDefenders: %i", numBallDefenders);
+
+    for (int i = 0; i < numBallDefenders; i++) {
+        int ballDefenderID = getClosestDefender(robots, world, Vector2(world.ball.pos), angleOffsets.at(i));
 
         RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
         delete_from_vector(robots, ballDefenderID);
@@ -103,6 +110,8 @@ void Jim_MultipleDefendersPlay::Initialize() {
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
         bb.SetDouble("SimpleKeeper_A_distanceFromGoal", 1.35);
+        bb.SetDouble("SimpleKeeper_A_angleOffset", angleOffsets.at(i));
+        bb.SetBool("SimpleKeeper_A_avoidRobots", false);
 
         // Create message
         rd.tree = "rtt_jim/AggDefRole";
@@ -117,8 +126,6 @@ void Jim_MultipleDefendersPlay::Initialize() {
         pub.publish(rd);
     }
 
-    // ROS_INFO_STREAM("robots vector size: " << robots.size());
-    std::cout << "robots vector: ";
     for (size_t i = 0; i < robots.size(); i++) {
         std::cout << robots.at(i) << " ";
     }
@@ -127,20 +134,19 @@ void Jim_MultipleDefendersPlay::Initialize() {
     int numRobotDefenders = std::min((int) robots.size(), 3);
     int numDangerousOpps = 0;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
-        if (world.dangerScores.at(i) >= 2.5) {
+        if (world.dangerScores.at(i) >= 3.2) {
             numDangerousOpps++;
         }
     }
     numRobotDefenders = std::min(numRobotDefenders, numDangerousOpps);
-    ROS_INFO_STREAM("numRobotDefenders: " << numRobotDefenders);
+    RTT_DEBUGLN("numRobotDefenders: %i", numRobotDefenders);
 
 
     // Create the robot defender roles
     for (int i = 0; i < numRobotDefenders; i++) {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = world.dangerList.at(i);
-        int defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos));
-        // ROS_INFO_STREAM("attPos:" << Vector2(mostDangerousRobot.pos) << " id: " << defenderID);
+        int defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
 
         RTT_DEBUGLN("Initializing Defender %i", defenderID);
         delete_from_vector(robots, defenderID);
@@ -160,6 +166,45 @@ void Jim_MultipleDefendersPlay::Initialize() {
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
+
+    ROS_INFO_STREAM("numLeftOver: " << robots.size());
+    int robotsLeftOver = robots.size();
+
+    for (int i = 0; i < robotsLeftOver; i++) {
+        int leftOverID = robots.at(i);
+
+        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+        // ROS_INFO_STREAM("leftover " << leftOverID << " gotox " << -1.0 - (0.3*leftOverID));
+        // delete_from_vector(robots, leftOverID);
+        RobotDealer::claim_robot(leftOverID);
+
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = leftOverID;
+        activeRobots.push_back(leftOverID);
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", leftOverID);
+        bb.SetInt("KEEPER_ID", keeperID);
+
+        bb.SetDouble("GoToPos_A_xGoal", -0.5 - (0.3*leftOverID));
+        bb.SetDouble("GoToPos_A_yGoal", 3.2);
+        bb.SetDouble("GoToPos_A_angleGoal", 0.0);
+        bb.SetBool("GoToPos_A_avoidRobots", true);
+
+        // Create message
+        rd.tree = "rtt_jim/GoToPosRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

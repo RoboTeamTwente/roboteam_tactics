@@ -33,7 +33,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         , getBall("", blackboard)
         , kick("", blackboard) {
     hasBall = whichRobotHasBall();
-    ros::param::set("readyToReceiveBall", false);
+    
     prevCheck = now();
     computedTargetPos = false;
 }
@@ -46,6 +46,8 @@ void ReceiveBall::Initialize() {
 	} else {
 		acceptableDeviation = 1.0;
 	}
+
+	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 
 	// Read the blackboard info about where to receive the ball 
 	if ((HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
@@ -136,6 +138,15 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	Vector2 otherRobotLooksAt = Vector2(1, 0);
 	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
+
+	// If the robot with the ball is facing away from us, we should not rotate to receive the ball from him
+	double ballDir = otherRobotLooksAt.dot(receiveBallAtPos - ballPosNow);
+	if (ballDir <= 0) {
+		interceptPose.interceptPos = receiveBallAtPos;
+		interceptPose.interceptAngle = (ballPosNow - receiveBallAtPos).angle();
+		return interceptPose;
+	}
+
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 	double projectionOnBallTrajectory = ballToCenter.dot(otherRobotLooksAt);
 	Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
@@ -224,8 +235,11 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	Vector2 posError = receiveBallAtPos - robotPos;
-	if (posError.length() < acceptableDeviation && GetBool("setSignal")) {
-		ros::param::set("readyToReceiveBall", true);
+	if (posError.length() < acceptableDeviation) {
+		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
+		private_bb->SetBool("avoidRobots", false);
+	} else {
+		private_bb->SetBool("avoidRobots", true);
 	}
 
 
@@ -286,7 +300,6 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", true);
         private_bb->SetBool("avoidDefenseAreas", true);
 
         boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();

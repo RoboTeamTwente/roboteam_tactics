@@ -126,8 +126,6 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
 
-        bb.SetBool("Kick_A_wait_for_signal", true);
-
         // Create message
         rd.tree = "rtt_jim/GetBallRole";
         rd.blackboard = bb.toMsg();

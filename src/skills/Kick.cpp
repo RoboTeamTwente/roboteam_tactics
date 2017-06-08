@@ -34,15 +34,15 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-    if (HasBool("wait_for_signal")) {
-    	if (GetBool("wait_for_signal")) {
-    		bool readyToPass = false;
-    		ros::param::get("readyToReceiveBall", readyToPass);
-    		if (!readyToPass) {
-    			return Status::Running;
-    		}
-    	}
-    }
+    // if (HasBool("wait_for_signal")) {
+    // 	if (GetBool("wait_for_signal")) {
+    // 		bool readyToPass = false;
+    // 		ros::param::get("readyToReceiveBall", readyToPass);
+    // 		if (!readyToPass) {
+    // 			return Status::Running;
+    // 		}
+    // 	}
+    // }
 
     cycleCounter++;
     if (cycleCounter > 40) {
