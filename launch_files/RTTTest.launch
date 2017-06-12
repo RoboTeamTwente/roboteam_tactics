@@ -1,0 +1,28 @@
+<launch>
+    <arg name="legacy_packets" default="false" />
+    <param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+
+    <arg name="robot_output_target" default="grsim" />
+    <param name="robot_output_target" type="string" value="$(arg robot_output_target)" />
+
+    <arg name="should_normalize_field" default="true" />
+    <param name="normalize_field" type="boolean" value="$(arg should_normalize_field)" />
+
+    <arg name="our_field_side" default="left" />
+    <param name="our_side" type="string" value="$(arg our_field_side)" />
+
+    <param name="robot0/robotType" type="str" value="grsim" />
+    <param name="robot1/robotType" type="str" value="grsim" />
+    <param name="robot2/robotType" type="str" value="grsim" />
+    <param name="robot3/robotType" type="str" value="grsim" />
+    <param name="robot4/robotType" type="str" value="grsim" />
+    <param name="robot5/robotType" type="str" value="grsim" />
+
+    <param name="robotClaimedBall" type="int" value="-1" />
+
+    <node pkg="roboteam_world" type="filtered_world" name="world" />
+    <node pkg="roboteam_vision" type="roboteam_vision" name="vision"/>
+    <!-- <param name="serialOut" type="string" value="/dev/ttyACM0" /> -->
+    <node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+    <node pkg="roboteam_rqt_view" type="run_world_view.py" name="world_view" output="screen" />
+</launch>

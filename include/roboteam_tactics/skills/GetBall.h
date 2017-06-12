@@ -98,6 +98,8 @@ private:
 	int whichRobotHasBall();
 	void publishStopCommand();
     void publishKickCommand();
+    bool canClaimBall();
+    void releaseBall();
     
 	int robotID;
 	int hasBall;

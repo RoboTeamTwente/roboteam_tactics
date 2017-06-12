@@ -34,31 +34,35 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-    if (HasBool("wait_for_signal")) {
-    	if (GetBool("wait_for_signal")) {
-    		bool readyToPass = false;
-    		ros::param::get("readyToReceiveBall", readyToPass);
-    		if (!readyToPass) {
-    			return Status::Running;
-    		}
-    	}
-    }
+    // if (HasBool("wait_for_signal")) {
+    // 	if (GetBool("wait_for_signal")) {
+    // 		bool readyToPass = false;
+    // 		ros::param::get("readyToReceiveBall", readyToPass);
+    // 		if (!readyToPass) {
+    // 			return Status::Running;
+    // 		}
+    // 	}
+    // }
 
     cycleCounter++;
-    if (cycleCounter > 20) {
+    if (cycleCounter > 40) {
+        ROS_INFO_STREAM("Kick Failure");
         return bt::Node::Status::Failure;
     }
 
 	roboteam_msgs::World world = LastWorld::get();
     Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
+    // ROS_INFO_STREAM("oldBallVelAngle: " << oldBallVel.angle() << " currentBallVelAngle: " << currentBallVel.angle());
+
     if (oldBallVel.length() < 0.1) {
-        // ROS_INFO_STREAM("oldBallVel: " << oldBallVel << " currentBallVel: " << currentBallVel);
         if ((currentBallVel.length() - oldBallVel.length()) > 0.1) {
+            ROS_INFO_STREAM("Kick Success");
             return bt::Node::Status::Success;
         }
     } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.3) {
-        // ROS_INFO_STREAM("oldBallVelAngle: " << oldBallVel.angle() << " currentBallVelAngle: " << currentBallVel.angle());
+        
+        ROS_INFO_STREAM("Kick Success");
         return bt::Node::Status::Success;
     }
 

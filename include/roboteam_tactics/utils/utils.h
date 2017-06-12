@@ -224,10 +224,27 @@ bool is_digits(const std::string &str);
 int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
 
 /**
+ * \brief Gets the id of whichever robot is closest to a given point
+ * \param robots The robots to consider
+ * \param point The point to search near
+ * \return The id of the robot closest to the point
+ */
+int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point);
+
+/**
  * \brief Gets the id of whichever robot is closest to the opponents' goal
  * \param robots The robots to consider
  */
 int get_robot_closest_to_their_goal(std::vector<int> robots);
+
+
+/**
+ * \brief Gets the id of whichever robot is closest to our goal
+ * \param robots The robots to consider
+ */
+// int get_robot_closest_to_our_goal(std::vector<roboteam_msgs::WorldRobot> robots);
+int get_robot_closest_to_our_goal(std::vector<int> robots);
+
 
 /**
  * \brief Gets the id of whichever robot is closest to the ball

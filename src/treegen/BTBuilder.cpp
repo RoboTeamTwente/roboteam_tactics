@@ -444,6 +444,10 @@ void BTBuilder::define_dec(std::string name, std::string type, json data) {
         type = "bt::UntilSuccess";
     } else if (type == "Inverter") {
         type = "bt::Inverter";
+    } else if (type == "FailerDec") {
+    	type = "bt::Failer";
+    } else if (type == "SucceederDec") {
+    	type = "bt::Succeeder";
     } else {
         params = "bb";
     }
