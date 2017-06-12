@@ -202,7 +202,6 @@ bt::Node::Status GetBall::Update (){
         
     }
 
-
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp

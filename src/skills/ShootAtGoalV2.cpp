@@ -34,12 +34,13 @@ bt::Node::Status ShootAtGoalV2::Update() {
     ROS_INFO("targetAngle: %f", targetAngle);
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
-        bb->SetInt("ROBOT_ID", bot->id);
-        bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
-        bb->SetDouble("targetAngle", targetAngle);
-        bb->SetBool("SAGV2_GetBall_passOn", true);
-    	aimer = std::make_unique<GetBall>("SAGV2_GetBall", bb);
+        private_bb->SetInt("ROBOT_ID", bot->id);
+        private_bb->SetBool("SAGV2_GetBall_passOn", true);
+    	aimer = std::make_unique<GetBall>("SAGV2_GetBall", private_bb);
     }
+    private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
+    private_bb->SetDouble("targetAngle", targetAngle);
+
     return aimer->Update();
     /*
     if (fabs(targetAngle - orientation) < ACCEPTABLE_DEVIATION
