@@ -8,6 +8,7 @@
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/Jim_MultipleStrikersPlay.h"
+#include "roboteam_tactics/tactics/Jim_MultipleDefendersPlay.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
@@ -36,6 +37,8 @@ void Jim_MultipleStrikersPlay::Initialize() {
         // TODO: Want to pass failure here as well!
         return;
     }
+
+    roboteam_msgs::World world = LastWorld::get();
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     int keeperID = RobotDealer::get_keeper();
@@ -54,31 +57,31 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
 
     // Create the Keeper
-    {
-        RTT_DEBUGLN("Initializing Keeper %i", keeperID);
-        delete_from_vector(robots, keeperID);
-        RobotDealer::claim_robot(keeperID);
+    // {
+    //     RTT_DEBUGLN("Initializing Keeper %i", keeperID);
+    //     delete_from_vector(robots, keeperID);
+    //     RobotDealer::claim_robot(keeperID);
 
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = keeperID;
-        // activeRobots.push_back(keeperID);
-        bt::Blackboard bb;
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = keeperID;
+    //     // activeRobots.push_back(keeperID);
+    //     bt::Blackboard bb;
 
-        bb.SetInt("ROBOT_ID", keeperID);
-        bb.SetInt("KEEPER_ID", keeperID);
+    //     bb.SetInt("ROBOT_ID", keeperID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
 
-        // Create message
-        rd.tree = "rtt_jim/DefenderRole";
-        rd.blackboard = bb.toMsg();
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        rd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        pub.publish(rd);
-    }
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // }
 
 
     // Ball Defender: drives towards the ball to block as much as possible of the view of goal of the attackers
@@ -144,12 +147,15 @@ void Jim_MultipleStrikersPlay::Initialize() {
     std::vector<Vector2> strikersDefaultPositions;
     strikersDefaultPositions.push_back(Vector2(1.5, 1.5));
     strikersDefaultPositions.push_back(Vector2(1.5, -1.5));
+    // strikersDefaultPositions.push_back(Vector2(4.0, -2.0));
+
+    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);
 
     
     for (int i = 0; i < numStrikers; i++) {
 
-        int strikerID = get_robot_closest_to_their_goal(robots);
-        RTT_DEBUGLN("Initializing Striker %i", strikerID);
+        int strikerID = strikerIDs.at(i);
+        // RTT_DEBUGLN("Initializing Striker %i", strikerID);
         delete_from_vector(robots, strikerID);
         claim_robot(strikerID);
 

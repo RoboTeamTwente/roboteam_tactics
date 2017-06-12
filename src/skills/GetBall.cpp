@@ -71,7 +71,7 @@ void GetBall::publishStopCommand() {
 
 void GetBall::publishKickCommand(){
 
-    double kicker_vel = 5.0;
+    double kicker_vel = 8.0;
     if (HasDouble("kickerVel")) {
         kicker_vel = GetDouble("kickerVel");
     }

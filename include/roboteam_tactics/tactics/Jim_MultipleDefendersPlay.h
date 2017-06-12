@@ -11,7 +11,8 @@ namespace rtt {
 class Jim_MultipleDefendersPlay : public Tactic {
     public:
     Jim_MultipleDefendersPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-    int getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
+    static int getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
+    static std::vector<int> getClosestRobots(std::vector<int> robots, std::vector<Vector2> points, roboteam_msgs::World& world);
 
     void Initialize();
     void ReleaseAllBots();
@@ -20,10 +21,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
 
     private:
     std::vector<boost::uuids::uuid> tokens;
-    time_point start;
 
-    time_point lastUpdate;
-    time_point finishTime;
+    time_point start;
 
     std::vector<roboteam_msgs::WorldRobot> dangerOrder;
     std::vector<roboteam_msgs::WorldRobot> prevDangerOrder;

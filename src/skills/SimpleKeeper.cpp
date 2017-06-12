@@ -99,16 +99,16 @@ bt::Node::Status SimpleKeeper::Update() {
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
 
-    if (fabs(defendPos.x) > (field.field_length/2) || fabs(defendPos.y) > (field.field_width/2)) {
-        targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);
-        private_bb->SetInt("ROBOT_ID", robotID);
-        private_bb->SetDouble("xGoal", targetPos.x);
-        private_bb->SetDouble("yGoal", targetPos.y);
-        private_bb->SetDouble("angleGoal", (Vector2(0.0, 0.0)-goalPos).angle());
-        private_bb->SetBool("avoidRobots", true);
-        goToPos.Update();
-        return Status::Running;
-    } else {   
+    // if (fabs(defendPos.x) > (field.field_length/2) || fabs(defendPos.y) > (field.field_width/2)) {
+        // targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);
+        // private_bb->SetInt("ROBOT_ID", robotID);
+        // private_bb->SetDouble("xGoal", targetPos.x);
+        // private_bb->SetDouble("yGoal", targetPos.y);
+        // private_bb->SetDouble("angleGoal", (Vector2(0.0, 0.0)-goalPos).angle());
+        // private_bb->SetBool("avoidRobots", true);
+        // goToPos.Update();
+        // return Status::Running;
+    // } else {   
         
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetDouble("receiveBallAtX", targetPos.x);
@@ -117,7 +117,7 @@ bt::Node::Status SimpleKeeper::Update() {
         private_bb->SetDouble("dribblerDist", dribblerDist);
 
         return receiveBall.Tick();
-    }
+    // }
 }
 
 } // rtt
