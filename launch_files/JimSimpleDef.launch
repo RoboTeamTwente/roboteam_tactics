@@ -1,0 +1,13 @@
+<launch>
+	<!--
+	<group ns="blue">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/SimpleAttStrat" output="screen" /> 
+	</group>
+	-->
+
+	
+	<group ns="yellow">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/SimpleDefStrat" output="screen" /> 
+	</group>
+	
+</launch>

@@ -31,7 +31,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     Vector2 target = largest->center;
     double targetAngle = (target - ownPos).angle();
     
-    // ROS_INFO("targetAngle: %f, orientation; %f", targetAngle, orientation);
+    ROS_INFO("targetAngle: %f", targetAngle);
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
         bb->SetInt("ROBOT_ID", bot->id);

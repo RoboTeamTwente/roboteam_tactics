@@ -336,6 +336,22 @@ int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::Wor
     return closest_robot;
 }
 
+int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    for (roboteam_msgs::WorldRobot worldRobot : robots) {
+        Vector2 pos(worldRobot.pos);
+
+        if ((pos - point).length() < closest_robot_ds) {
+           closest_robot = worldRobot.id;
+           closest_robot_ds = (pos - point).length();
+        }
+    }
+
+    return closest_robot;
+}
+
 int get_robot_closest_to_ball(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_ball(robots, lw);
@@ -350,6 +366,19 @@ int get_robot_closest_to_their_goal(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_their_goal(robots, lw);
 }
+
+// int get_robot_closest_to_our_goal(std::vector<roboteam_msgs::WorldRobot> robots) {
+//     Vector2 ourGoalCenter = LastWorld::get_our_goal_center();
+//     return get_robot_closest_to_point(robots, ourGoalCenter);
+// }
+
+int get_robot_closest_to_our_goal(std::vector<int> robots) {
+    roboteam_msgs::World lw = LastWorld::get();
+    Vector2 ourGoal = LastWorld::get_our_goal_center();
+    return get_robot_closest_to_point(robots, lw, ourGoal);
+    // return get_robot_closest_to_their_goal(robots, lw);
+}
+
 
 int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
     int side = LastWorld::get_our_goal_center().x;
