@@ -88,6 +88,18 @@ bt::Node::Status StarAttackTactic::Update() {
         return error ? bt::Node::Status::Invalid : (failure ? bt::Node::Status::Failure : bt::Node::Status::Success);
     }
 
+    int shooterId = -1;
+    ros::param::get("signal_starRobotPicked", shooterId);
+    if (shooterId >= 0) {
+    	BotParams params = botParams.at(shooterId);
+    	if (feedbacks.find(params.token) != feedbacks.end()) {
+    		auto stat = feedbacks.at(params.token);
+    		if (stat == bt::Node::Status::Success) {
+    			return stat;
+    		}
+    	}
+    }
+
     return bt::Node::Status::Running;
 }
 
@@ -131,6 +143,10 @@ void StarAttackTactic::initBot(int botID, int posID) {
 	rd.tree = "rtt_dennis/StarAttackRole";
 	rd.blackboard = bb.toMsg();
 	pub.publish(rd);
+}
+
+void StarAttackTactic::Terminate(Status) {
+	ros::param::del("signal_starRobotPicked");
 }
 
 }

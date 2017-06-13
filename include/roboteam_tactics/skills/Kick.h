@@ -52,7 +52,7 @@ private:
     Vector2 ballStartPos;
     Vector2 oldBallVel;
     bool goneForward;
-
+    time_point waitStart;
 
     int cycleCounter;
 
