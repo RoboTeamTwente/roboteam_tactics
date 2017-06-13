@@ -102,6 +102,8 @@ SET_DEBUG_FOR(Bob_KickoffWithRunPlay, true);
 SET_DEBUG_FOR(Jim_StandReadyPlay, true);
 SET_DEBUG_FOR(Jim_MultipleStrikersPlay, true);
 SET_DEBUG_FOR(Jim_MultipleDefendersPlay, true);
+SET_DEBUG_FOR(BallPlacementThemPlay, true);
+SET_DEBUG_FOR(BallPlacementUsPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

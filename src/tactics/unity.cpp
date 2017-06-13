@@ -94,3 +94,9 @@
 
 #include "Jim_MultipleDefendersPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "BallPlacementUsPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "BallPlacementThemPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
