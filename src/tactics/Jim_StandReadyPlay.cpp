@@ -8,6 +8,7 @@
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_tactics/tactics/Jim_StandReadyPlay.h"
+#include "roboteam_tactics/tactics/Jim_MultipleDefendersPlay.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/debug_print.h"
@@ -37,18 +38,23 @@ void Jim_StandReadyPlay::Initialize() {
         return;
     }
     
+    roboteam_msgs::World world = LastWorld::get();
     std::vector<int> robots = RobotDealer::get_available_robots();
     int keeper = RobotDealer::get_keeper();
-    Vector2 keeperPos = Vector2(-4.0, -0.0);
+    // Vector2 keeperPos = Vector2(-4.0, -0.0);
+    Vector2 centerPos = Vector2(-2.0, 0.0);
+    Vector2 posOnCircle = Vector2(-0.6, 0.0);
+    Vector2 keeperPos = centerPos + posOnCircle;
 
     ROS_INFO_STREAM("n_robots: " << robots.size());
 
     std::vector<Vector2> posList;
-    posList.push_back(Vector2(-2.5, -1.0));
-    posList.push_back(Vector2(-2.5, 1.0));
-    posList.push_back(Vector2(-1.5, 0.0));
-    posList.push_back(Vector2(-0.5, -2.5));
-    posList.push_back(Vector2(-0.5, 2.5));
+
+    for (size_t i = 0; i < robots.size(); i++) {
+        posList.push_back(centerPos + posOnCircle.rotate( (i + 1) *  2*M_PI / (robots.size() + 1) ));
+    }
+
+    std::vector<int> closestRobots = Jim_MultipleDefendersPlay::getClosestRobots(robots, posList, world);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -84,19 +90,19 @@ void Jim_StandReadyPlay::Initialize() {
 
 
     // Initialize the other players
-    for (size_t i = 0; i < robots.size(); i++) {
-        ROS_INFO_STREAM("i: " << i << " robotID: " << robots.at(i));
+    for (size_t i = 0; i < closestRobots.size(); i++) {
+        ROS_INFO_STREAM("i: " << i << " robotID: " << closestRobots.at(i));
 
         if (i >= posList.size()) {
             break;
         }
 
-        claim_robot(robots.at(i));
+        claim_robot(closestRobots.at(i));
 
         roboteam_msgs::RoleDirective rd;
         bt::Blackboard bb;
 
-        bb.SetInt("ROBOT_ID", robots.at(i));
+        bb.SetInt("ROBOT_ID", closestRobots.at(i));
         bb.SetInt("KEEPER_ID", keeper);
 
         bb.SetDouble("GoToPos_A_xGoal", posList.at(i).x);
@@ -104,7 +110,7 @@ void Jim_StandReadyPlay::Initialize() {
         bb.SetDouble("GoToPos_A_angleGoal", 0.0);
 
         // Create message
-        rd.robot_id = robots.at(i);
+        rd.robot_id = closestRobots.at(i);
         rd.tree = "rtt_jim/StandReadyRole";
         rd.blackboard = bb.toMsg();
 
@@ -119,6 +125,7 @@ void Jim_StandReadyPlay::Initialize() {
 
     start = rtt::now();
 }
+
 
 bt::Node::Status Jim_StandReadyPlay::Update() {
     bool allSucceeded = true;

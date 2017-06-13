@@ -94,3 +94,6 @@
 
 #include "Jim_MultipleDefendersPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Jim_GetBallPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
