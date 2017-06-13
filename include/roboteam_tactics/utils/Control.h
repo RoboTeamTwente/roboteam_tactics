@@ -21,7 +21,6 @@ enum class RobotType {
     GRSIM
 } ;
 
-
 class Control {
 public:
     Control();
