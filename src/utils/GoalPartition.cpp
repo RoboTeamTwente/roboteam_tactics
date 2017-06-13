@@ -11,7 +11,7 @@ GoalPartition::GoalPartition() : goalSection(calcSection()) {}
 
 Section GoalPartition::calcSection() {
 	auto geom = LastWorld::get_field();
-	double x = geom.field_width;
+	double x = geom.field_length / 2;
 	double halfY = geom.goal_width / 2;
 	return Section(x, halfY, x, -halfY);
 }
@@ -119,11 +119,13 @@ void GoalPartition::draw() const {
 
 	d.setColor(255, 0, 0);
 	for (const Section& sec : blocked) {
+		//ROS_INFO("Blocked: (%f, %f) -> (%f, %f)", sec.a.x, sec.a.y, sec.b.x, sec.b.y);
 		d.drawLineAbs("SAGV2-Line" + std::to_string(++lineCounter), sec.a, sec.b);
 	}
 
 	d.setColor(0, 255, 0);
 	for (const Section& sec : open) {
+		//ROS_INFO("Open: (%f, %f) -> (%f, %f)", sec.a.x, sec.a.y, sec.b.x, sec.b.y);
 		d.drawLineAbs("SAGV2-Line" + std::to_string(++lineCounter), sec.a, sec.b);
 	}
 }

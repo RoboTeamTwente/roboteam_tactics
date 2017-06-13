@@ -90,7 +90,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::GRSIM) {
         pGainPosition = 1.5;
         iGainPosition = 0.0;
-        pGainRotation = 1.5;
+        pGainRotation = 1.0;
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 6.0;

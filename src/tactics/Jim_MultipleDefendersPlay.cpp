@@ -133,17 +133,19 @@ void Jim_MultipleDefendersPlay::Initialize() {
     numBallDefenders = std::min(numBallDefenders, numRobots - numRobotDefenders);
 
     RTT_DEBUGLN("numRobotDefenders: %i, numBallDefenders: %i", numRobotDefenders, numBallDefenders);
-    
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 
+
+    // =========================
     // Initialize the Keeper
+    // =========================
     {
         RTT_DEBUGLN("Initializing Keeper %i", keeperID);
         delete_from_vector(robots, keeperID);
-        RobotDealer::claim_robot(keeperID);
+        claim_robot(keeperID);
 
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = keeperID;
@@ -167,7 +169,9 @@ void Jim_MultipleDefendersPlay::Initialize() {
     }
 
 
+    // ====================================
     // Initialize the Ball Defenders!
+    // ====================================
     std::vector<double> angleOffsets;
     
     if (numBallDefenders == 1) {
@@ -192,7 +196,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
 
         // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
         delete_from_vector(robots, ballDefenderID);
-        RobotDealer::claim_robot(ballDefenderID);
+        claim_robot(ballDefenderID);
 
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = ballDefenderID;
@@ -209,7 +213,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
         bb.SetBool("SimpleKeeper_A_avoidRobots", false);
 
         // Create message
-        rd.tree = "rtt_jim/AggDefRole";
+        rd.tree = "rtt_jim/DefenderRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -222,14 +226,9 @@ void Jim_MultipleDefendersPlay::Initialize() {
     }
 
 
-
+    // ==================================
     // Initialize the Robot Defenders!
-    
-    
-    // numRobotDefenders = std::min(numRobotDefenders, numDangerousOpps);
-
-
-    // Create the robot defender roles
+    // ==================================
     for (int i = 0; i < numRobotDefenders; i++) {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = world.dangerList.at(i);
@@ -237,7 +236,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
 
         // RTT_DEBUGLN("Initializing Defender %i", defenderID);
         delete_from_vector(robots, defenderID);
-        RobotDealer::claim_robot(defenderID);
+        claim_robot(defenderID);
 
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = defenderID;
@@ -264,46 +263,6 @@ void Jim_MultipleDefendersPlay::Initialize() {
         pub.publish(rd);
     }
 
-
-
-
-    // ROS_INFO_STREAM("numLeftOver: " << robots.size());
-    // int robotsLeftOver = robots.size();
-
-    // for (int i = 0; i < robotsLeftOver; i++) {
-    //     int leftOverID = robots.at(i);
-
-    //     // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
-    //     // ROS_INFO_STREAM("leftover " << leftOverID << " gotox " << -1.0 - (0.3*leftOverID));
-    //     // delete_from_vector(robots, leftOverID);
-    //     RobotDealer::claim_robot(leftOverID);
-
-    //     roboteam_msgs::RoleDirective rd;
-    //     rd.robot_id = leftOverID;
-    //     activeRobots.push_back(leftOverID);
-    //     bt::Blackboard bb;
-
-    //     // Set the robot ID
-    //     bb.SetInt("ROBOT_ID", leftOverID);
-    //     bb.SetInt("KEEPER_ID", keeperID);
-
-    //     bb.SetDouble("GoToPos_A_xGoal", -0.5 - (0.3*leftOverID));
-    //     bb.SetDouble("GoToPos_A_yGoal", 3.2);
-    //     bb.SetDouble("GoToPos_A_angleGoal", 0.0);
-    //     bb.SetBool("GoToPos_A_avoidRobots", true);
-
-    //     // Create message
-    //     rd.tree = "rtt_jim/GoToPosRole";
-    //     rd.blackboard = bb.toMsg();
-
-    //     // Add random token and save it for later
-    //     boost::uuids::uuid token = unique_id::fromRandom();
-    //     tokens.push_back(token);
-    //     rd.token = unique_id::toMsg(token);
-
-    //     // Send to rolenode
-    //     pub.publish(rd);
-    // }
     double timeLapsed = time_difference_milliseconds(startInit, now()).count();
     std::cout << "Initializing took: " << timeLapsed << " ms \n";
 
@@ -330,44 +289,10 @@ void Jim_MultipleDefendersPlay::ReleaseAllBots() {
 bt::Node::Status Jim_MultipleDefendersPlay::Update() {
 
     if (time_difference_milliseconds(start, now()).count() >= 1000) {
-        ReleaseAllBots();
-        // RTT_DEBUGLN("Reinitializing Jim_MultipleDefendersPlay...");
+        // ReleaseAllBots();
+        Terminate(Status::Running);
         Initialize();
     }
-
-    // if ()
-
-    // roboteam_msgs::World world = LastWorld::get();
-    // dangerOrder = world.dangerList;
-    // if (dangerOrder.size() >= 1 && prevDangerOrder.size() >= 1) {
-    //     if (dangerOrder.at(0).id != prevDangerOrder.at(0).id) {
-    //         Stop();
-    //         Initialize();
-    //     }
-    // }
-   
-    // prevDangerOrder = dangerOrder;
-
-    // int successCount = 0;
-
-    // for (auto token : tokens) {
-    //     if (feedbacks.find(token) != feedbacks.end()) {
-    //         Status status = feedbacks.at(token);
-    //         if (status == bt::Node::Status::Success) {
-    //             successCount++;
-    //         }
-    //     }
-    // }
-
-    // if (successCount >= 2) {
-    //     RTT_DEBUGLN("Jim_MultipleDefendersPlay succeeded!");
-    //     return Status::Success;
-    // }
-
-    // auto duration = time_difference_seconds(start, now());
-    // if (duration.count() >= 25) {
-    //     return Status::Failure;
-    // }
 
     return Status::Running;
 }

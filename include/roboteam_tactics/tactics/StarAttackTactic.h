@@ -14,6 +14,7 @@ public:
 	StarAttackTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 	void Initialize() override;
 	Status Update() override;
+	void Terminate(Status) override;
 
 private:
 	static constexpr double DEVIATION_RANGE = .25;

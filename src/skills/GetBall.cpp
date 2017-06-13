@@ -96,15 +96,21 @@ void GetBall::publishKickCommand(){
 
 bool GetBall::canClaimBall() {
     int robotClaimedBall;
-    ros::param::getCached("robotClaimedBall", robotClaimedBall);
 
-    if (robotClaimedBall == robotID) {
-        return true;
-    } else if (robotClaimedBall == -1) {
+    if (ros::param::has("robotClaimedBall")) {
+        ros::param::getCached("robotClaimedBall", robotClaimedBall);
+
+        if (robotClaimedBall == robotID) {
+            return true;
+        } else if (robotClaimedBall == -1) {
+            ros::param::set("robotClaimedBall", robotID);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
         ros::param::set("robotClaimedBall", robotID);
         return true;
-    } else {
-        return false;
     }
 }
 
@@ -201,7 +207,6 @@ bt::Node::Status GetBall::Update (){
         }
         
     }
-
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (HasString("aimAt")) {

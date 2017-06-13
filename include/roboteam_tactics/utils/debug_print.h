@@ -66,6 +66,7 @@ SET_DEBUG_FOR(Harass, true);
 SET_DEBUG_FOR(Wander, true);
 SET_DEBUG_FOR(BlockGoal, true);
 SET_DEBUG_FOR(SelectStarAttackShooter, true);
+SET_DEBUG_FOR(ShootAway, true);
 
 // Conditions
 SET_DEBUG_FOR(CanSeeRobot, false);
@@ -104,6 +105,7 @@ SET_DEBUG_FOR(Jim_MultipleStrikersPlay, true);
 SET_DEBUG_FOR(Jim_MultipleDefendersPlay, true);
 SET_DEBUG_FOR(BallPlacementThemPlay, true);
 SET_DEBUG_FOR(BallPlacementUsPlay, true);
+SET_DEBUG_FOR(Jim_GetBallPlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);
