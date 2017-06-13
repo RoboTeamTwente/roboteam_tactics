@@ -32,7 +32,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     tokens.clear();
 
     RTT_DEBUGLN_TEAM("Initializing Jim_MultipleStrikersPlay");    
-    if (RobotDealer::get_available_robots().size() < 2) {
+    if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -42,7 +42,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
+    int numStrikers = std::max((int) RobotDealer::get_available_robots().size(), 1);
     RTT_DEBUGLN("numStrikers: %i", numStrikers);
 
 
