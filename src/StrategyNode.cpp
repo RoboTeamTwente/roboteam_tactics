@@ -92,7 +92,13 @@ int main(int argc, char *argv[]) {
     // Only continue if arguments were given
     if (arguments.size() > 0) {
         if (arguments[0] == "mainStrategy") {
-            strategy = std::make_shared<bt::BehaviorTree>(rtt::StrategyComposer::getMainStrategy());
+            strategy = rtt::StrategyComposer::getMainStrategy();
+
+            std::cout << "mainStrategy: " << strategy << "\n";
+            if (!strategy) {
+                std::cerr << "There was an error initializing the main strategy tree (StrategyComposer). Aborting.\n";
+                return 1;
+            }
         } else {
             // Get all available trees
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();

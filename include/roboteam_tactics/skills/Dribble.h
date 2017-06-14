@@ -18,10 +18,10 @@ namespace rtt {
  *   - ROBOT_ID:
  *       Type: Int
  *       Descr: The id of the robot
- *   - goalx:
+ *   - xGoal:
  *       Type: Double
  *       Descr: The x-coordinate of the goal position
- *   - goaly:
+ *   - yGoal:
  *       Type: Double
  *       Descr: The y-coordinate of the goal position
  */
@@ -35,15 +35,6 @@ public:
 	double cleanAngle(double angle);
     Vector2 worldToRobotFrame(Vector2 requiredv, double rotation);
     Vector2 saveDribbleDeceleration(Vector2 reqspeed);
-    
-    /*
-    static VerificationMap required_params() {
-        VerificationMap params;
-        params["ROBOT_ID"] = BBArgumentType::Int;
-        params["goalx"] = BBArgumentType::Double;
-        params["goaly"] = BBArgumentType::Double;
-        return params;
-    }*/
     
     std::string node_name() { return "Dribble"; }
 private:

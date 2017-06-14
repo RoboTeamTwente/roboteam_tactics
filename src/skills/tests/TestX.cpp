@@ -274,6 +274,10 @@ How to use:
 
     double updateRate = 30;
     ros::param::get("role_iterations_per_second", updateRate);
+    if (updateRate == 0) {
+        ROS_ERROR_STREAM("role_iterations_per_second == 0. Aborting!");
+        return 1;
+    }
     ros::Rate fps(updateRate);
     std::cout << "[TestX] Updating at " << updateRate << "Hz\n";
 

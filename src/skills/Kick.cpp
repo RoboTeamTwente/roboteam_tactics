@@ -97,7 +97,7 @@ bt::Node::Status Kick::Update() {
     if (HasDouble("kickVel")) {
     	kickVel = GetDouble("kickVel");
     } else {
-    	kickVel = 6;
+    	kickVel = 5.0;
     }
 
     // if (HasBool("wait") && GetBool("wait")) {

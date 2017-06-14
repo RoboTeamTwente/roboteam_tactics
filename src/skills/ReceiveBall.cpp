@@ -34,7 +34,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         , kick("", blackboard) {
     hasBall = whichRobotHasBall();
     
-    prevCheck = now();
+    prevComputedPoint = now();
     computedTargetPos = false;
 }
 
@@ -56,20 +56,31 @@ void ReceiveBall::Initialize() {
 		double receiveBallAtY = GetDouble("receiveBallAtY");
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	} else if (GetBool("computePoint")) {
-		if (!computedTargetPos) {
-			passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
-			if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
-				passPoint.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
-			}
-			receiveBallAtPos = passPoint.computeBestPassPoint();
-			ROS_INFO_STREAM("robot: " << robotID << " point: " << receiveBallAtPos);
-			prevCheck = now();
-			computedTargetPos = true;
-		}
+		receiveBallAtPos = computePoint();
+		// if (!computedTargetPos) {
+			// passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
+			// if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
+				// passPoint.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
+			// }
+			// receiveBallAtPos = passPoint.computeBestPassPoint();
+			// ROS_INFO_STREAM("robot: " << robotID << " point: " << receiveBallAtPos);
+			// prevComputedPoint = now();
+			// computedTargetPos = true;
+		// }
 	} else {
 		roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 		receiveBallAtPos = Vector2(robot.pos);
 	}
+}
+
+Vector2 ReceiveBall::computePoint() {
+	passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
+	if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
+		passPoint.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
+	}
+	Vector2 receiveBallAtPos = passPoint.computeBestPassPoint();
+	prevComputedPoint = now();
+	return receiveBallAtPos;
 }
 
 int ReceiveBall::whichRobotHasBall() {
@@ -185,6 +196,12 @@ bt::Node::Status ReceiveBall::Update() {
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	}
 
+	// if (HasBool("computePoint")) {
+	// 	if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
+	// 		receiveBallAtPos = computePoint();
+	// 	}
+	// }
+
 	// Wait for the first world message
 	while (world.us.size() == 0) {
 		return Status::Running;
@@ -213,7 +230,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	InterceptPose interceptPose;
-	if (hasBall == -1) {
+	if (hasBall == -1 || hasBall == robotID) {
 		interceptPose = deduceInterceptPosFromBall();
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
@@ -254,7 +271,7 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	} else {
 		Vector2 ballVel(ball.vel);
-		if (ballHasBeenClose || (distanceToBall < acceptableDeviation && ballVel.length() < 0.5)) {
+		if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2) {
 			ballHasBeenClose = true;
 			return getBall.Update();
 		}
