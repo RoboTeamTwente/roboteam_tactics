@@ -34,7 +34,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
-            safetyMarginGoalAreas = 0.0;
+            safetyMarginGoalAreas = 0.2;
             marginOutsideField = -0.1;
             avoidRobotsGain = 0.2;
         }
@@ -193,19 +193,18 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
     if (ROBOT_ID != KEEPER_ID) {
-        // TODO: Doesn't work if normalize_field (rosparam in mini.launch) is true. Disabled until further notice    
 
-        // // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        // if (isWithinDefenseArea("our defense area", newTargetPos)) {
-            // Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
-            // newTargetPos = newTargetPos + distToOurDefenseArea;
-        // }
+        // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
+        if (isWithinDefenseArea("our defense area", newTargetPos)) {
+            Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+            newTargetPos = newTargetPos + distToOurDefenseArea;
+        }
 
-        // // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        // if (isWithinDefenseArea("their defense area", newTargetPos)) {
-            // Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
-            // newTargetPos = newTargetPos + distToTheirDefenseArea;
-        // }
+        // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
+        if (isWithinDefenseArea("their defense area", newTargetPos)) {
+            Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+            newTargetPos = newTargetPos + distToTheirDefenseArea;
+        }
     }
 
     // Check if we have to stay on our side of the field
@@ -277,6 +276,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
+    // drawer.drawPoint("targetPosOld_" + std::to_string(ROBOT_ID), targetPos);
+
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
@@ -293,7 +294,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;

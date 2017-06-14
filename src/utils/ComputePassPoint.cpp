@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -40,6 +40,7 @@ void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string targe
 		distToRobotThreshold = weightsVector.at(7);
 		distOppToBallTrajThreshold = weightsVector.at(8);
 		distOppToBallToTargetTrajThreshold = weightsVector.at(9);
+		viewOfGoalThreshold = weightsVector.at(10);
 	} else {
 		RTT_DEBUG("Unable to open file \n");
 	}
@@ -224,8 +225,13 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 		return boost::none;
 	}
 
-	double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
-	if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
+	// double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
+	// if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
+	// 	return boost::none;
+	// }
+
+	double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world));
+	if (viewOfGoal < viewOfGoalThreshold) {
 		return boost::none;
 	}
 
@@ -234,7 +240,7 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
-	double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world)); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	// double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world)); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
 	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 	
 	double score = - distToGoal*distToGoalWeight 

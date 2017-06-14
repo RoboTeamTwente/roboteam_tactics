@@ -54,8 +54,8 @@ void Jim_MultipleStrikersPlay::Initialize() {
     // Create the striker roles
     // ===========================
     std::vector<Vector2> strikersDefaultPositions;
-    strikersDefaultPositions.push_back(Vector2(1.5, 1.5));
-    strikersDefaultPositions.push_back(Vector2(1.5, -1.5));
+    strikersDefaultPositions.push_back(Vector2(2.5, 1.5));
+    strikersDefaultPositions.push_back(Vector2(2.5, -1.5));
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);
 
@@ -121,10 +121,10 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
         return Status::Success;
     }
 
-    auto duration = time_difference_seconds(start, now());
-    if (duration.count() >= 25) {
-        return Status::Failure;
-    }
+    // auto duration = time_difference_seconds(start, now());
+    // if (duration.count() >= 25) {
+        // return Status::Failure;
+    // }
 
     return Status::Running;
 }
