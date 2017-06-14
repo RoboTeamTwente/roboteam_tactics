@@ -37,15 +37,15 @@ namespace rtt {
  *         - robot: The robot determined by aimAtRobot and ourTeam
  *       Descr: Determines where to aim after getting the ball
  *
- *       - aimAtRobot:
- *           Type: Int
- *           Used when: aimAt == robot
- *           Descr: The id of an opponent robot to aim at
+ *   - aimAtRobot:
+ *       Type: Int
+ *       Used when: aimAt == robot
+ *       Descr: The id of an opponent robot to aim at
  *
- *       - ourTeam:
- *           Type: Bool
- *           Used when: aimAt == robot
- *           Descr: True if the robot we should aim at is from our team
+ *   - ourTeam:
+ *       Type: Bool
+ *       Used when: aimAt == robot
+ *       Descr: True if the robot we should aim at is from our team
  *
  *    - targetAngle:
  *        Type: Double

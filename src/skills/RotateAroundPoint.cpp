@@ -30,6 +30,10 @@ RotateAroundPoint::RotateAroundPoint(std::string name, bt::Blackboard::Ptr black
 
 void RotateAroundPoint::stoprobot(int robotID) {
 
+    if (HasBool("quiet") && GetBool("quiet")) {
+        return;
+    }
+
 	roboteam_msgs::RobotCommand cmd;
 	cmd.id = robotID;
 	cmd.active = true;
@@ -226,11 +230,11 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			// velocity in towards and away from ball (x) and around ball (y)
 			
-			double maxv=1.0;
+			double maxv= HasDouble("maxv") ? GetDouble("maxv") : 1.0;
 			double maxrot=4.0;
 
 			
-			double radiusDiff=(worldposDiff.length()-radius);
+			double radiusDiff=(worldposDiff.length() - radius);
 			double radiusReq=radiusDiff*radiusPconstant;
 			
 			radiusdirection=radiusdirection.scale(radiusReq);
@@ -239,8 +243,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 			double turnDiff=worldrotDiff;
 			double turnReq=turnDiff*turnPconstant;
 			
-
-
 			if(turnReq > rotw){
 				turnReq=rotw;
 			}
@@ -254,10 +256,13 @@ bt::Node::Status RotateAroundPoint::Update (){
 			
 			robotrequiredv=worldToRobotFrame(radiusdirection+turndirection, robot.angle);
 			
-			// ROS_INFO("robotrequiredv x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
+            // ROS_INFO("----DEBUGGING-----");
+            // ROS_INFO("robotrequiredv x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
 			
 			Vector2 extrav(GetDouble("extravx"),GetDouble("extravy"));
 			robotrequiredv=robotrequiredv+extrav;
+
+            // ROS_INFO("robotrequiredv after: x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
 			
 			bool forceExtrav=false;
 			if(HasBool("forceExtrav") && GetBool("forceExtrav")){ // for demonstration purposes
@@ -268,8 +273,12 @@ bt::Node::Status RotateAroundPoint::Update (){
 			if(robotrequiredv.length() > maxv && !forceExtrav){
 				robotrequiredv=robotrequiredv/robotrequiredv.length()*maxv;
 			}
+
+            // ROS_INFO("robotrequiredv after max: x:%f, y:%f", robotrequiredv.x,robotrequiredv.y);
 			
-			// rotation controller (w)
+            /////////////////////////////
+			// rotation controller (w) //
+            /////////////////////////////
 		
 			double reqRobotrot=worldposDiff.angle();
 
@@ -299,7 +308,6 @@ bt::Node::Status RotateAroundPoint::Update (){
 
 			// ROS_INFO_STREAM("worldrotDiff: " << worldrotDiff);
 			if (fabs(worldrotDiff) > successAngle or fabs(radiusReq) > successDist) { // robot not finished yet
-			
 				// send command
 				roboteam_msgs::RobotCommand cmd;
 				cmd.id = robotID;

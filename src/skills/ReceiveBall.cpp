@@ -41,6 +41,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
 void ReceiveBall::Initialize() {
 
 	robotID = blackboard->GetInt("ROBOT_ID");	
+	ROS_INFO_STREAM("receiveBall robotID: " << robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	} else {

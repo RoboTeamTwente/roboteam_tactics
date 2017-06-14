@@ -16,7 +16,7 @@
 
 namespace rtt {
 
-Control::Control()
+Control::Control() : updateRateParam("role_iterations_per_second")
         {
             ros::NodeHandle n;
             myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
@@ -209,8 +209,16 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
 
     // Integral term
-    double updateRate;
-    ros::param::get("role_iterations_per_second", updateRate);
+    double updateRate = updateRateParam();
+    if (!updateRateParam.isSet() || updateRate == 0) {
+        if (updateRate == 0) {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second set to 0! changing to 30.");
+        } else {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second not set! Assuming 30.");
+        }
+        updateRate = 30;
+    }
+
     double timeStep = 1 / updateRate;
     if (angleError < 0.15*M_PI) {
         angleErrorI = angleErrorI * 0.9 + angleError * timeStep;

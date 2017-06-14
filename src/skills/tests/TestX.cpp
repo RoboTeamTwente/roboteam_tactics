@@ -27,6 +27,8 @@
 
 static volatile bool may_update = false;
 
+namespace {
+
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 
     auto uuid = unique_id::fromMsg(msg->token);
@@ -62,6 +64,27 @@ void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
+
+void stopRolenode(int const id) {
+    auto & pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+    roboteam_msgs::RoleDirective rd;
+    rd.robot_id = id;
+    rd.tree = rd.STOP_EXECUTING_TREE;
+
+    pub.publish(rd);
+}
+
+void stopRobot(int const id) {
+    auto & pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+
+    roboteam_msgs::RobotCommand rc;
+    rc.id = id;
+
+    pub.publish(rc);
+}
+
+} // anonymous namespace
 
 int main(int argc, char **argv) {
     std::vector<std::string> arguments(argv + 1, argv + argc);
@@ -250,8 +273,13 @@ How to use:
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     double updateRate = 30;
-    ros::param::set("role_iterations_per_second", updateRate);
+    ros::param::get("role_iterations_per_second", updateRate);
+    if (updateRate == 0) {
+        ROS_ERROR_STREAM("role_iterations_per_second == 0. Aborting!");
+        return 1;
+    }
     ros::Rate fps(updateRate);
+    std::cout << "[TestX] Updating at " << updateRate << "Hz\n";
 
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
@@ -280,6 +308,13 @@ How to use:
     } else {
         node->Initialize();
 
+        std::vector<int> claimedRobots;
+
+        if (rtt::factories::isTactic(testClass)) {
+            auto tacticNode = std::static_pointer_cast<rtt::Tactic>(node);
+            claimedRobots = tacticNode->get_claimed_robots();
+        }
+
         bt::Node::Status status = bt::Node::Status::Invalid;
         while (ros::ok()) {
             ros::spinOnce();
@@ -296,6 +331,11 @@ How to use:
         std::cout << "Terminating. Final status: " << bt::statusToString(status) << "\n";
 
         node->Terminate(status);
+
+        for (auto id : claimedRobots) {
+            stopRolenode(id);
+            stopRobot(id);
+        }
     }
 
     // Gracefully close all the publishers.

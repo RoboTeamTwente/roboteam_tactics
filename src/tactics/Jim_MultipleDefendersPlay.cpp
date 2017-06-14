@@ -116,6 +116,11 @@ void Jim_MultipleDefendersPlay::Initialize() {
     }
     
     std::vector<int> robots = RobotDealer::get_available_robots();
+    std::cout << "robot ids: ";
+    for (int i = 0; i < robots.size(); i++) {
+    	std::cout << robots.at(i) << " ";
+    }
+    std::cout << "\n";
     activeRobots.clear();
     
     int keeperID = RobotDealer::get_keeper();
@@ -128,9 +133,24 @@ void Jim_MultipleDefendersPlay::Initialize() {
             numDangerousOpps++;
         }
     }
-    int numRobotDefenders = std::min(numRobots - 1, numDangerousOpps);
-    int numBallDefenders = std::max(1, numDangerousOpps);
-    numBallDefenders = std::min(numBallDefenders, numRobots - numRobotDefenders);
+
+    int numBallDefenders = 0;
+    int numRobotDefenders = 0;
+    if (numDangerousOpps >= 1) {
+    	numRobotDefenders = 1;
+    	numBallDefenders = 1;
+    }
+    else {
+    	numRobotDefenders = 0;
+    	numBallDefenders = 2;
+    }
+
+    // int numRobotDefenders = std::min(numDangerousOpps, 2);
+    // int numBallDefenders = std::max(robots.size() - numRobotDefenders, );
+
+    if ((numRobotDefenders + numBallDefenders) > robots.size()) {
+    	ROS_WARN("number of robots bigger than available....");
+    }
 
     RTT_DEBUGLN("numRobotDefenders: %i, numBallDefenders: %i", numRobotDefenders, numBallDefenders);
 
