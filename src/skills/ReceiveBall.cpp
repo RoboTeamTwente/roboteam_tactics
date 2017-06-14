@@ -116,6 +116,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
+		enableComputePoint = true;
 		return interceptPose;
 	} else {
 		Vector2 ballTrajectory = ballVel.scale(5.0 / ballVel.length());
@@ -131,6 +132,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
 
+		enableComputePoint = false;
 		return interceptPose;
 	}
 }
@@ -138,6 +140,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 // Predict intercept pos by looking at the robot that has the ball
 InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	
+	enableComputePoint = true;
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
@@ -196,15 +199,17 @@ bt::Node::Status ReceiveBall::Update() {
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	}
 
-	// if (HasBool("computePoint")) {
-	// 	if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
-	// 		receiveBallAtPos = computePoint();
-	// 	}
-	// }
+	
 
 	// Wait for the first world message
 	while (world.us.size() == 0) {
 		return Status::Running;
+	}
+
+	if (HasBool("computePoint") && enableComputePoint) {
+		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
+			receiveBallAtPos = computePoint();
+		}
 	}
 
 
@@ -235,6 +240,8 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
+
+
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
 
@@ -243,6 +250,7 @@ bt::Node::Status ReceiveBall::Update() {
 	if (GetBool("shootAtGoal")) {
 		drawer.setColor(255, 0, 0);
 		targetAngle = cleanAngle((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle());
+		// targetAngle = cleanAngle( ((ballPos - robotPos).angle() + (LastWorld::get_their_goal_center() - robotPos).angle()) / 2.0 );
 		Vector2 robotRadius(0.09, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
@@ -264,7 +272,7 @@ bt::Node::Status ReceiveBall::Update() {
 	// If the ball is within reach and lying still or moving slowy, we should drive towards it
 	double distanceToBall = (ballPos-receiveBallAtPos).length();
 	if (GetBool("shootAtGoal")) {
-		if ((ballPos-receiveBallAtPos).length() < 0.05) {
+		if ((ballPos-receiveBallAtPos).length() < 0.1) {
 			startKicking = true;
 			kick.Initialize();
 			return kick.Update();
