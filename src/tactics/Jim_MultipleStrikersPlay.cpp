@@ -80,7 +80,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
         bb.SetDouble("ReceiveBall_A_computePointCloseToX", strikersDefaultPositions.at(i).x);
         bb.SetDouble("ReceiveBall_A_computePointCloseToY", strikersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_A_setSignal", true);
-        bb.SetBool("ReceiveBall_A_shootAtGoal", false);
+        bb.SetBool("ReceiveBall_A_shootAtGoal", true);
 
         // Create message
         rd.tree = "rtt_jim/StrikerRole";
