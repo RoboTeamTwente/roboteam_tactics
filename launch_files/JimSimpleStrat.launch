@@ -7,7 +7,7 @@
 
 	
 	<group ns="yellow">
-		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/SimpleCombStrat" output="screen" /> 
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/SimpleAttStrat" output="screen" /> 
 	</group>
 	
 </launch>
