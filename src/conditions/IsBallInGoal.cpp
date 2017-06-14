@@ -28,21 +28,21 @@ bt::Node::Status IsBallInGoal::Update() {
 	std::string our_side = get_our_side();
 
 	if (GetBool("our_goal")) {
-		if(our_side == "left"){
+		// if(our_side == "left"){
 			Vector2 goalPos = Vector2(field.field_length/-2.0, 0);
 			if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		} else {
-			Vector2 goalPos = Vector2(field.field_length/2.0, 0);
-			if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		}
+		// } else {
+			// Vector2 goalPos = Vector2(field.field_length/2.0, 0);
+			// if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
+		// }
 	} else {
-		if(our_side == "left"){
+		// if(our_side == "left"){
 			Vector2 goalPos = Vector2(field.field_length/2.0, 0);
 			if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		} else {
-			Vector2 goalPos = Vector2(field.field_length/-2.0, 0);
-			if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		}
+		// } else {
+			// Vector2 goalPos = Vector2(field.field_length/-2.0, 0);
+			// if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
+		// }
 	}
 	return Status::Failure;
 }

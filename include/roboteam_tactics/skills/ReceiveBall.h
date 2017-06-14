@@ -51,6 +51,7 @@ class ReceiveBall : public Skill {
 public:
     ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
+    Vector2 computePoint();
     Status Update();
     
     static VerificationMap required_params() {
@@ -85,7 +86,7 @@ private:
     time_point initialBallContact;
 
     PassPoint passPoint;
-    time_point prevCheck;
+    time_point prevComputedPoint;
     Vector2 receiveBallAtPos;
 
     bool computedTargetPos;

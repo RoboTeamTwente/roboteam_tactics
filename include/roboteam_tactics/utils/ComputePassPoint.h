@@ -46,6 +46,7 @@ private:
 	double distToRobotThreshold;
 	double distOppToBallTrajThreshold;
 	double distOppToBallToTargetTrajThreshold;
+	double viewOfGoalThreshold;
 
 	// The ID of the robot for which are trying to find a good point to stand on the field
 	int ROBOT_ID;
