@@ -11,6 +11,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
+#include "roboteam_utils/SlowParam.h"
 
 
 namespace rtt {
@@ -84,6 +85,8 @@ private:
     ros::Publisher myPosTopic;
     ros::Publisher myVelTopic;
     ros::Publisher myTargetPosTopic;
+
+    SlowParam<double> updateRateParam;
 } ;
 
 } // rtt

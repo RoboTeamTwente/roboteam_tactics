@@ -48,6 +48,12 @@ namespace rtt {
  *       Type: Double
  *       Used when: center == point
  *       Descr: The distance to keep from the rotation center
+ *   - maxv:
+ *       Type: Double
+ *       Descr: Indicates maximum speed. Default: 1 m/s
+ *   - quiet:
+ *       Type: Bool
+ *       Descr: Stops the skill from sending stop commands
  */
 class RotateAroundPoint : public Skill {
 public:
@@ -69,7 +75,7 @@ private:
 	Vector2 faceTowardsPos;
 	double rotw;
 	Vector2 center;
-   	double radius=radius;
+   	double radius;
    	GoToPos goToPos;
    	double rotPconstant;
 	double radiusPconstant;
