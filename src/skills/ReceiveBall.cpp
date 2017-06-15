@@ -249,8 +249,10 @@ bt::Node::Status ReceiveBall::Update() {
 
 	if (GetBool("shootAtGoal")) {
 		drawer.setColor(255, 0, 0);
-		targetAngle = cleanAngle((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle());
-		// targetAngle = cleanAngle( ((ballPos - robotPos).angle() + (LastWorld::get_their_goal_center() - robotPos).angle()) / 2.0 );
+		// double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
+		// targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
+		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle();
+
 		Vector2 robotRadius(0.09, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
@@ -271,9 +273,11 @@ bt::Node::Status ReceiveBall::Update() {
 
 	// If the ball is within reach and lying still or moving slowy, we should drive towards it
 	double distanceToBall = (ballPos-receiveBallAtPos).length();
+	ROS_INFO_STREAM("dist: " << distanceToBall);
 	if (GetBool("shootAtGoal")) {
-		if ((ballPos-receiveBallAtPos).length() < 0.1) {
+		if ((ballPos-receiveBallAtPos).length() < 0.2) {
 			startKicking = true;
+			ROS_INFO_STREAM("KICK!");
 			kick.Initialize();
 			return kick.Update();
 		}
