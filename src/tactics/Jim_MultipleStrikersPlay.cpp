@@ -43,6 +43,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
 
     int numStrikers = std::max((int) RobotDealer::get_available_robots().size(), 1);
+    numStrikers = std::min(numStrikers, 2);
     RTT_DEBUGLN("numStrikers: %i", numStrikers);
 
 
@@ -76,14 +77,14 @@ void Jim_MultipleStrikersPlay::Initialize() {
         bb.SetInt("KEEPER_ID", 5);
 
         // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
-        bb.SetBool("ReceiveBall_A_computePoint", true);
+        // bb.SetBool("ReceiveBall_A_computePoint", true);
         bb.SetDouble("ReceiveBall_A_computePointCloseToX", strikersDefaultPositions.at(i).x);
         bb.SetDouble("ReceiveBall_A_computePointCloseToY", strikersDefaultPositions.at(i).y);
-        bb.SetBool("ReceiveBall_A_setSignal", true);
-        bb.SetBool("ReceiveBall_A_shootAtGoal", true);
+        // bb.SetBool("ReceiveBall_A_setSignal", true);
+        // bb.SetBool("ReceiveBall_A_shootAtGoal", true);
 
         // Create message
-        rd.tree = "rtt_jim/StrikerRole";
+        rd.tree = "rtt_jim/DirectStrikerRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -101,30 +102,22 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
 
-    int successCount = 0;
+    // int successCount = 0;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == bt::Node::Status::Success) {
-                successCount++;
+                RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
+                return Status::Success;
             }
-            // if (status == bt::Node::Status::Failure) {
-            //     RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
-            //     return Status::Failure;
-            // }
+
+            if (status == bt::Node::Status::Failure) {
+                RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
+                return Status::Failure;
+            }
         }
     }
-
-    if (successCount >= 1) {
-        RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
-        return Status::Success;
-    }
-
-    // auto duration = time_difference_seconds(start, now());
-    // if (duration.count() >= 25) {
-        // return Status::Failure;
-    // }
 
     return Status::Running;
 }
