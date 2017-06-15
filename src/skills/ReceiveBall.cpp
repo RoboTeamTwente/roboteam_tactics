@@ -41,7 +41,6 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
 void ReceiveBall::Initialize() {
 
 	robotID = blackboard->GetInt("ROBOT_ID");	
-	ROS_INFO_STREAM("receiveBall robotID: " << robotID);
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	} else {
@@ -57,16 +56,6 @@ void ReceiveBall::Initialize() {
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	} else if (GetBool("computePoint")) {
 		receiveBallAtPos = computePoint();
-		// if (!computedTargetPos) {
-			// passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
-			// if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
-				// passPoint.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
-			// }
-			// receiveBallAtPos = passPoint.computeBestPassPoint();
-			// ROS_INFO_STREAM("robot: " << robotID << " point: " << receiveBallAtPos);
-			// prevComputedPoint = now();
-			// computedTargetPos = true;
-		// }
 	} else {
 		roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 		receiveBallAtPos = Vector2(robot.pos);
@@ -228,6 +217,7 @@ bt::Node::Status ReceiveBall::Update() {
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 ballVel(world.ball.vel);
 	
 	Vector2 targetPos;
 	double targetAngle;
@@ -249,9 +239,9 @@ bt::Node::Status ReceiveBall::Update() {
 
 	if (GetBool("shootAtGoal")) {
 		drawer.setColor(255, 0, 0);
-		// double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
-		// targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
-		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle();
+		double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
+		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
+		// targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle();
 
 		Vector2 robotRadius(0.09, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
@@ -272,23 +262,30 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	// If the ball is within reach and lying still or moving slowy, we should drive towards it
-	double distanceToBall = (ballPos-receiveBallAtPos).length();
-	ROS_INFO_STREAM("dist: " << distanceToBall);
+	double role_iterations_per_second = 0.0;
+	ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
+	double timeStep;
+	if (role_iterations_per_second == 0.0) {
+		timeStep = 1.0 / 30.0;
+	} else {
+		timeStep = 1.0 / role_iterations_per_second;
+	}
+	
+
+	double distanceToBall = (ballPos-interceptPos).length();
 	if (GetBool("shootAtGoal")) {
-		if ((ballPos-receiveBallAtPos).length() < 0.2) {
+		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 3.0)) {
 			startKicking = true;
-			ROS_INFO_STREAM("KICK!");
 			kick.Initialize();
 			return kick.Update();
 		}
-	} else {
-		Vector2 ballVel(ball.vel);
-		if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2) {
-			ballHasBeenClose = true;
-			return getBall.Update();
-		}
 	}
-	
+
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.5 || ballHasBeenClose) {
+		ballHasBeenClose = true;
+		return getBall.Update();
+	}
+
 	
 	// If the ball gets close, turn on the dribbler
 	double dribblerDist = acceptableDeviation * 2.0;

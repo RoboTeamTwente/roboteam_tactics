@@ -101,10 +101,13 @@ bt::Node::Status Jim_GetBallPlay::Update() {
     //     Terminate(Status::Running);
     //     Initialize();
     // }
-
+ 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
+            if (status == Status::Success) {
+                RTT_DEBUGLN("Jim_GetBallPlay Success!");
+            }
             return status;
         }
     }
