@@ -133,7 +133,7 @@ bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // if (!canClaimBall()) {return Status::Failure;}
+    if (!canClaimBall()) {return Status::Failure;}
 
 
     if (finalStage){
