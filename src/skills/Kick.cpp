@@ -35,40 +35,8 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-/*
-    if (GetBool("wait_for_signal", false)) {
-    	bool timeOut;
-    	if (!GetBool("ignore_timeout", false)) {
-    		if (waitStart == time_point::min()) {
-    			waitStart == now();
-    		}
-    		if ((now() - waitStart).count() / 1000000000 > 2) {
-    			timeOut = false;
-    		} else {
-    			timeOut = true;
-    		}
-    	} else {
-    		timeOut = false;
-    	}
-    	bool readyToPass = false;
-    	ros::param::get("readyToReceiveBall", readyToPass);
-    	if (!(readyToPass || timeOut)) {
-    		return Status::Running;
-    	}
-    }
-*/
-	// if (HasBool("wait_for_signal")) {
-    // 	if (GetBool("wait_for_signal")) {
-    // 		bool readyToPass = false;
-    // 		ros::param::get("readyToReceiveBall", readyToPass);
-    // 		if (!readyToPass) {
-    // 			return Status::Running;
-    // 		}
-    // 	}
-    // }
-
     cycleCounter++;
-    if (cycleCounter > 40) {
+    if (cycleCounter > 20) {
         ROS_INFO_STREAM("Kick Failure");
         return bt::Node::Status::Failure;
     }
