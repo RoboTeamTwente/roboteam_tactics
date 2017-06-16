@@ -115,6 +115,7 @@ add_subdirectory(src)
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
+    src/treegen/TreeChecker.cpp
     )
 add_dependencies(converter
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
