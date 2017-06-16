@@ -312,7 +312,6 @@ std::tuple<CheckResult, b::optional<std::string>> checkTree(json const & treeDat
     // TODO: Read out nt warnings
     
     if (rootIt->is_null()) {
-        std::cout << "EMPTY!!\n";
         return std::make_tuple(CheckResult::Good, b::none);
     }
 

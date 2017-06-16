@@ -77,6 +77,8 @@ Options:
         Indicates that the implementation of the c++ code should be generated
     -decl
         Indicates that the declaration of the implementation (forward declaration of the function) should be generated.
+    -no-mp, --no-mem-principle
+        Turns off checking of the mem principle. See documentation.
 
 )V0G0N";
 
@@ -107,6 +109,9 @@ int main(int argc, char** argv) {
     bool appendMode = cmdOptionExists(args, "-a");
     bool doImpl = cmdOptionExists(args, "-impl");
     bool doDecl = cmdOptionExists(args, "-decl");
+    bool noMemPrinciple = cmdOptionExists(args, "-no-mp")
+        || cmdOptionExists(args, "--no-mem-principle")
+        ;
 
     bool doNamespace = cmdOptionExists(args, "-namespace");
     bool doFolder = cmdOptionExists(args, "-f");
@@ -209,24 +214,26 @@ int main(int argc, char** argv) {
                 title = titleIt->get<std::string>();
             }
 
-            auto checkResult = rtt::checkTree(jsonTree, customNodes);
+            if (!noMemPrinciple) {
+                auto checkResult = rtt::checkTree(jsonTree, customNodes);
 
-            auto success = std::get<0>(checkResult);
-            auto msgOpt = std::get<1>(checkResult);
+                auto success = std::get<0>(checkResult);
+                auto msgOpt = std::get<1>(checkResult);
 
-            if (success == rtt::CheckResult::Error && msgOpt) {
-                // Error!
-                cmakeErr(heading + "tree \"" + title + "\": " + *msgOpt);
+                if (success == rtt::CheckResult::Error && msgOpt) {
+                    // Error!
+                    cmakeErr(heading + "tree \"" + title + "\": " + *msgOpt);
 
-                return 1;
-            } else if (success == rtt::CheckResult::Bad) {
-                cmakeErr(heading + "tree \"" + title + "\" violates the Mem-principle!");
+                    return 1;
+                } else if (success == rtt::CheckResult::Bad) {
+                    cmakeErr(heading + "tree \"" + title + "\" violates the Mem-principle!");
 
-                return 1;
-            } else if (success == rtt::CheckResult::Good && msgOpt) {
-                // Warning!
-                cmakeWarn(heading + "tree \"" + title + "\": " + *msgOpt);
-            } 
+                    return 1;
+                } else if (success == rtt::CheckResult::Good && msgOpt) {
+                    // Warning!
+                    cmakeWarn(heading + "tree \"" + title + "\": " + *msgOpt);
+                } 
+            }
 
             rtt::BTBuilder builder;
 
