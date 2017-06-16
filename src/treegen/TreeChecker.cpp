@@ -6,12 +6,58 @@
 #include "roboteam_tactics/treegen/json.hpp"
 #include "roboteam_tactics/treegen/TreeChecker.h"
 
+/**
+ * This file contains all the logic to check trees for the mem principle.
+ *
+ * ***********************
+ * ** The mem principle **
+ * ***********************
+ *
+ * When you have a sequence (not a mem-sequence!) which has two skills/actions
+ * (nodes that can return running), what happens when the first node returns success,
+ * the second node returns running? The node will be paused, and the following frame
+ * updated again. Now this is where the problem happens: instead of running the 
+ * action which returned running the previous frame, it runs the first node (the
+ * one that returned success last frame)! Normally this is not a problem, but
+ * once the actions start allocating resources (e.g. Plays do this when they allocate
+ * players or the keeper via RobotDealer!) this might bite you. Therefore, to adhere 
+ * to the mem principle, every tree must ensure that:
+ *
+ * Every sequence or priority has either:
+ * - only conditions
+ * - or only conditions, with exception of the last child, which is allowed to
+ *   return running.
+ *
+ * That way the scenario described above can never occur.
+ *
+ * ***************
+ * ** Structure **
+ * ***************
+ *
+ * The idea is that checkTree just returns a boolean whether or not the tree obeys
+ * the mem-principle. However, since we're dealing with JSON here, there can be errors
+ * (members missing, null members, etc.). So anywhere where a weird error occurs,
+ * be it a JSON error or something else, a runtime error can be thrown with a textual
+ * description of the problem. This exception is then caught in the toplevel checkTree
+ * function, which can return a sum-like either type with the results.
+ *
+ * Why was this way picked and not a proper either type (without the monad, because
+ * c++ does not support that)? Then the results of the checktree
+ * and isNonMem function would have to be unpacked everywhere, which is noisy and doesn't
+ * add any real value to the code. In a constrained environment like this an exception
+ * is a nice analogy to the Either monad.
+ *
+ */
+
 namespace {
 
 using nlohmann::json;
 namespace b = boost;
 using namespace std::string_literals;
 
+/**
+ * Enum used to denote a node type in a Behavior3 behavior tree.
+ */
 enum class NodeType {
     Condition,
     Action,
@@ -19,6 +65,16 @@ enum class NodeType {
     Decorator
 } ;
 
+/**
+ * Class that, given a list of custom nodes used in a tree, can tell you based
+ * on the node data, what type the node is.
+ *
+ * Criteria:
+ * - If it has a children member, it's a composite.
+ * - If it has a child member, it's a decorator.
+ * - If its name occurs in the actions category, it's an action
+ * - If its name occurs in the condition category, it's a condition.
+ */
 class NodeTyper {
 public:
     NodeTyper(json const & customNodes) :
@@ -90,6 +146,9 @@ private:
     std::vector<std::string> warnings;
 } ;
 
+/**
+ * Returns the name of the node if it's there.
+ */
 b::optional<std::string> getNodeName(json const & node) {
     auto nameIt = node.find("name");
     if (nameIt != node.end()) {
@@ -99,6 +158,9 @@ b::optional<std::string> getNodeName(json const & node) {
     return b::none;
 }
 
+/**
+ * Returns a list of children node id's if it's there.
+ */
 b::optional<std::vector<std::string>> getChildren(json const & node) {
     auto childrenIt = node.find("children");
     if (childrenIt != node.end()) {
@@ -116,6 +178,9 @@ b::optional<std::vector<std::string>> getChildren(json const & node) {
     return b::none;
 }
 
+/**
+ * Returns the child id if it's there.
+ */
 b::optional<std::string> getChild(json const & node) {
     auto nameIt = node.find("child");
     if (nameIt != node.end()) {
@@ -127,12 +192,16 @@ b::optional<std::string> getChild(json const & node) {
 
 bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & currentID);
 
+/**
+ * Returns true if checkTree returns true for all the children if the given node.
+ */
 bool childrenAreOkay(NodeTyper const & typer, json const & nodes, std::string const & currentID, json const & currentNode) {
     if (auto const childrenOpt = getChildren(currentNode)) {
         bool okay = true;
 
         for (auto const & child : *childrenOpt) {
             okay = okay && checkTree(typer, nodes, child);
+            if (!okay) break;
         }
 
         return okay;
@@ -142,12 +211,14 @@ bool childrenAreOkay(NodeTyper const & typer, json const & nodes, std::string co
 
 }
 
+/**
+ * Checks whether or not a node is "non-mem", i.e. whether or not
+ * it can return Running. A node is non-mem when:
+ * - It's a condition
+ * - When it's a non-mem composite (Sequence or Priority) and it's children are all non-mem
+ * - An inverter decorator whose child is also non-mem.
+ */
 bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & nodeID) {
-    // isNonMem holds when:
-    // - it's a condition
-    // - when it's a non-mem composite and it's children are all nonmem except the last one
-    // - or an inverter decorator
-    
     auto nodeIt = nodes.find(nodeID);
 
     if (nodeIt == nodes.end()) {
@@ -192,8 +263,7 @@ bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & n
                             auto const children = *childrenOpt;
 
                             bool okay = true;
-                            for (size_t i = 0; i < children.size() - 1; ++i) {
-                                auto const & child = children.at(i);
+                            for (auto const & child : children) {
                                 okay = okay && isNonMem(typer, nodes, child);
                                 if (!okay) break;
                             }
@@ -224,6 +294,9 @@ bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & n
     }
 }
 
+/**
+ * Checks if the subtree starting from currentID obeys the mem-principle.
+ */
 bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & currentID) {
     auto currentIt = nodes.find(currentID);
     if (currentIt == nodes.end()) {
@@ -297,7 +370,9 @@ bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & 
 namespace rtt {
 
 /**
- * Checks if the Mem-variant holds for the given json tree
+ * Checks if the mem-principle holds for the given json tree. The customnodes list
+ * can either be found in the tree or in the project, depending on if just a tree
+ * is processed or a whole project.
  */
 std::tuple<CheckResult, b::optional<std::string>> checkTree(json const & treeData, json const & customNodes) {
     auto nodesIt = treeData.find("nodes");
