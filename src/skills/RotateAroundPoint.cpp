@@ -185,13 +185,20 @@ bt::Node::Status RotateAroundPoint::Update (){
 
 		return Status::Running;
 	}
-	if (world.header.seq==prevworldseq and !firstworld){
-		return Status::Running;
-	}
-	else {
-		firstworld=false;
-		prevworldseq=world.header.seq;
-	}
+
+    if (!LastWorld::have_received_first_world()) {
+        return Status::Running;
+    }
+
+	// if (world.header.seq==prevworldseq and !firstworld){
+        // std::cout << "Same world seq!\n";
+		// return Status::Running;
+	// }
+	// else {
+		// firstworld=false;
+		// prevworldseq=world.header.seq;
+	// }
+    
 	robot = *getWorldBot(robotID);
 	ball = world.ball;
 

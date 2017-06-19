@@ -7,6 +7,14 @@ namespace rtt {
 /**
  * \class ScopedBB
  * \brief Provides a convenient interface for building blackboards with a prefix
+ *
+ * Usage:
+ *
+ * bt::Blackboard bb;
+ * rtt::ScopedBB(bb, "GetBall_")
+ *      .setDouble("targetAngle", lookAng)
+ *      .setBool("passOn", false)
+ *      ;
  */
 class ScopedBB {
 public:
