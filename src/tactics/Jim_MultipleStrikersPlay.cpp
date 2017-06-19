@@ -77,14 +77,14 @@ void Jim_MultipleStrikersPlay::Initialize() {
         bb.SetInt("KEEPER_ID", 5);
 
         // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
-        // bb.SetBool("ReceiveBall_A_computePoint", true);
+        bb.SetBool("ReceiveBall_A_computePoint", true);
         bb.SetDouble("ReceiveBall_A_computePointCloseToX", strikersDefaultPositions.at(i).x);
         bb.SetDouble("ReceiveBall_A_computePointCloseToY", strikersDefaultPositions.at(i).y);
         // bb.SetBool("ReceiveBall_A_setSignal", true);
         // bb.SetBool("ReceiveBall_A_shootAtGoal", true);
 
         // Create message
-        rd.tree = "rtt_jim/DirectStrikerRole";
+        rd.tree = "rtt_jim/StrikerRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
