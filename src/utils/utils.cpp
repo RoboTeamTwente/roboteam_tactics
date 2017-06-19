@@ -197,14 +197,15 @@ Vector2 predictRobotPos(uint robot_id, bool our_team, double seconds) {
 }
 
 bool bot_has_ball(const roboteam_msgs::WorldRobot& bot, const roboteam_msgs::WorldBall& ball) {
-    Vector2 ball_vec(ball.pos.x, ball.pos.y), bot_vec(bot.pos.x, bot.pos.y);
+
+    Vector2 ball_vec(ball.pos), bot_vec(bot.pos);
     Vector2 ball_norm = (ball_vec - bot_vec);
 
     double dist = ball_norm.length();
     double angle = ball_norm.angle();
-
+    
     // Within 11 cm and .3 radians (of center of dribbler)
-    return dist <= .11 && fabs(angle - bot.angle) <= .3;
+    return dist <= .13 && fabs(angle - bot.angle) <= .4;
 }
 
 void print_blackboard(const bt::Blackboard::Ptr bb, std::ostream& out) {
