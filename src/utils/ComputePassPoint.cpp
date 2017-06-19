@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -322,15 +322,15 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	// double maxScore = *max_element(scores.begin(), scores.end());
-	// double minScore = *min_element(scores.begin(), scores.end());
+	double maxScore = *max_element(scores.begin(), scores.end());
+	double minScore = *min_element(scores.begin(), scores.end());
 
-	// for (size_t i = 0; i < passPoints.size(); i++) {
-	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-	// 	drawer.setColor(255 - relScore, 0, relScore);
-	// 	drawer.drawPoint(names.at(i), passPoints.at(i));
-	// 	// ros::spinOnce();
-	// }
+	for (size_t i = 0; i < passPoints.size(); i++) {
+		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
+		drawer.setColor(255 - relScore, 0, relScore);
+		drawer.drawPoint(names.at(i), passPoints.at(i));
+		// ros::spinOnce();
+	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
