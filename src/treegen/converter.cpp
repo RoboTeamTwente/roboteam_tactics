@@ -6,6 +6,7 @@
 
 #include "roboteam_tactics/treegen/BTBuilder.h"
 #include "roboteam_tactics/treegen/json.hpp"
+#include "roboteam_tactics/treegen/TreeChecker.h"
 
 namespace {
 
@@ -76,6 +77,8 @@ Options:
         Indicates that the implementation of the c++ code should be generated
     -decl
         Indicates that the declaration of the implementation (forward declaration of the function) should be generated.
+    -no-mp, --no-mem-principle
+        Turns off checking of the mem principle. See documentation.
 
 )V0G0N";
 
@@ -106,6 +109,9 @@ int main(int argc, char** argv) {
     bool appendMode = cmdOptionExists(args, "-a");
     bool doImpl = cmdOptionExists(args, "-impl");
     bool doDecl = cmdOptionExists(args, "-decl");
+    bool noMemPrinciple = cmdOptionExists(args, "-no-mp")
+        || cmdOptionExists(args, "--no-mem-principle")
+        ;
 
     bool doNamespace = cmdOptionExists(args, "-namespace");
     bool doFolder = cmdOptionExists(args, "-f");
@@ -136,6 +142,13 @@ int main(int argc, char** argv) {
         input = buffer.str();
     }
 
+    std::string heading;
+    if (inputFile) {
+        heading = "File error (" + *inputFile +"): ";
+    } else {
+        heading = "File error (stdin): ";
+    }
+
     nlohmann::json info = nlohmann::json::parse(input);
 
     bool isTree = false;
@@ -146,13 +159,6 @@ int main(int argc, char** argv) {
     } else if (info.find("data")  != info.end()) {
         isProject = true;
     } else {
-        std::string heading = "File error: ";
-        if (inputFile) {
-            heading = "File error (" + *inputFile +"): ";
-        } else {
-            heading = "File error (stdin): ";
-        }
-
         cmakeErr(heading + "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project.\n");
 
         return 1;
@@ -165,16 +171,26 @@ int main(int argc, char** argv) {
     } else if (isProject) {
         allTrees = info["data"]["trees"];
     } else {
-        std::string heading = "File error: ";
-        if (inputFile) {
-            heading = "File error (" + *inputFile +"): ";
-        } else {
-            heading = "File error (stdin): ";
-        }
-
         cmakeErr(heading + "JSON is not a B3 json structure; it doesn't have a nodes entry nor a data entry, and is therefore not a tree nor a project.\n");
 
         return 1;
+    }
+
+    nlohmann::json customNodes;
+
+    if (isProject) {
+        auto dataIt = info.find("data");
+        if (dataIt != info.end()) {
+            auto customNodesIt = dataIt->find("custom_nodes");
+            if (customNodesIt != dataIt->end()) {
+                customNodes = *customNodesIt;
+            } else {
+                cmakeWarn(heading + "Project has no custom nodes section. The file is probably broken.");
+            }
+        } else {
+            cmakeErr(heading + "JSON has no data entry even though it is a project.");
+            return 1;
+        }
     }
 
     if (doImpl) {
@@ -182,6 +198,43 @@ int main(int argc, char** argv) {
         
         std::stringstream ss;
         for (auto& jsonTree : allTrees) {
+
+            if (isTree) {
+                auto customNodesIt = jsonTree.find("custom_nodes");
+                if (customNodesIt != jsonTree.end()) {
+                    customNodes = *customNodesIt;
+                } else {
+                    cmakeWarn(heading + "Tree has no custom nodes section. The file is probably broken.");
+                }
+            }
+
+            auto titleIt = jsonTree.find("title"); 
+            std::string title;
+            if (titleIt != jsonTree.end()) {
+                title = titleIt->get<std::string>();
+            }
+
+            if (!noMemPrinciple) {
+                auto checkResult = rtt::checkTree(jsonTree, customNodes);
+
+                auto success = std::get<0>(checkResult);
+                auto msgOpt = std::get<1>(checkResult);
+
+                if (success == rtt::CheckResult::Error && msgOpt) {
+                    // Error!
+                    cmakeErr(heading + "tree \"" + title + "\": " + *msgOpt);
+
+                    return 1;
+                } else if (success == rtt::CheckResult::Bad) {
+                    cmakeErr(heading + "tree \"" + title + "\" violates the Mem-principle!");
+
+                    return 1;
+                } else if (success == rtt::CheckResult::Good && msgOpt) {
+                    // Warning!
+                    cmakeWarn(heading + "tree \"" + title + "\": " + *msgOpt);
+                } 
+            }
+
             rtt::BTBuilder builder;
 
             auto resultOp = builder.build(jsonTree, baseNamespace, namespaces);

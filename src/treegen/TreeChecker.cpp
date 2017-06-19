@@ -4,32 +4,60 @@
 #include <set>
 
 #include "roboteam_tactics/treegen/json.hpp"
+#include "roboteam_tactics/treegen/TreeChecker.h"
 
-// checkTree :: Tree -> Bool
-// checkTree tree = checkTree' tree (root tree)
-// 
-// checkTree' :: Tree -> (Maybe Node) -> Bool
-// checkTree' tree current = case current of
-//     Sequence || Priority, geen children -> true
-//     Sequence || Priority, 1 child -> checkTree child
-//     Sequence || Priority, 2 child -> (allNonMem || onlyLastNonMem) && childrenAreOK
-//         where
-//             allNonMem = foldl1 (&&) $ map isNonMem children
-//             onlyLastNonMem = foldl1 (&&) $ map isNonmem $ init children
-//             childrenAreOK = foldl1 (&&) $ map checkTree children
-//     Any other composite -> foldl1 (&&) $ map checkTree children
+/**
+ * This file contains all the logic to check trees for the mem principle.
+ *
+ * ***********************
+ * ** The mem principle **
+ * ***********************
+ *
+ * When you have a sequence (not a mem-sequence!) which has two skills/actions
+ * (nodes that can return running), what happens when the first node returns success,
+ * the second node returns running? The node will be paused, and the following frame
+ * updated again. Now this is where the problem happens: instead of running the 
+ * action which returned running the previous frame, it runs the first node (the
+ * one that returned success last frame)! Normally this is not a problem, but
+ * once the actions start allocating resources (e.g. Plays do this when they allocate
+ * players or the keeper via RobotDealer!) this might bite you. Therefore, to adhere 
+ * to the mem principle, every tree must ensure that:
+ *
+ * Every sequence or priority has either:
+ * - only conditions
+ * - or only conditions, with exception of the last child, which is allowed to
+ *   return running.
+ *
+ * That way the scenario described above can never occur.
+ *
+ * ***************
+ * ** Structure **
+ * ***************
+ *
+ * The idea is that checkTree just returns a boolean whether or not the tree obeys
+ * the mem-principle. However, since we're dealing with JSON here, there can be errors
+ * (members missing, null members, etc.). So anywhere where a weird error occurs,
+ * be it a JSON error or something else, a runtime error can be thrown with a textual
+ * description of the problem. This exception is then caught in the toplevel checkTree
+ * function, which can return a sum-like either type with the results.
+ *
+ * Why was this way picked and not a proper either type (without the monad, because
+ * c++ does not support that)? Then the results of the checktree
+ * and isNonMem function would have to be unpacked everywhere, which is noisy and doesn't
+ * add any real value to the code. In a constrained environment like this an exception
+ * is a nice analogy to the Either monad.
+ *
+ */
+
+namespace {
 
 using nlohmann::json;
 namespace b = boost;
 using namespace std::string_literals;
 
-// What we need:
-// - Function that gives back type (condition, action, composite, decorator
-//     - Condition: custom node
-//     - Action: custom node
-//     - composite: children array entry
-//     - decorator: child entry
-
+/**
+ * Enum used to denote a node type in a Behavior3 behavior tree.
+ */
 enum class NodeType {
     Condition,
     Action,
@@ -37,35 +65,49 @@ enum class NodeType {
     Decorator
 } ;
 
+/**
+ * Class that, given a list of custom nodes used in a tree, can tell you based
+ * on the node data, what type the node is.
+ *
+ * Criteria:
+ * - If it has a children member, it's a composite.
+ * - If it has a child member, it's a decorator.
+ * - If its name occurs in the actions category, it's an action
+ * - If its name occurs in the condition category, it's a condition.
+ */
 class NodeTyper {
 public:
-    NodeTyper(json const & treeData) {
-        // Create conditions/actions database
-        auto customNodesIt = treeData.find("customNodes");
-        if (customNodesIt != treeData.end()) {
-            auto customNodes = *customNodesIt;
-            for (auto const & customNode : customNodes) {
-                auto nameIt = customNode.find("name");
-                if (nameIt == customNode.end()) {
-                    warnings.push_back("A custom node has no name attribute.");
-                    continue;
-                }
-                auto const name = nameIt->get<std::string>();
+    NodeTyper(json const & customNodes) :
+            actions {
+                "Failer",
+                "Succeeder",
+                "Error",
+                "Runner"
+            },
+            conditions {
+                // No default conditions
+            } {
+        for (auto const & customNode : customNodes) {
+            auto nameIt = customNode.find("name");
+            if (nameIt == customNode.end()) {
+                warnings.push_back("A custom node has no name attribute.");
+                continue;
+            }
+            auto const name = nameIt->get<std::string>();
 
-                auto categoryIt = customNode.find("category");
-                if (categoryIt == customNode.end()) {
-                    warnings.push_back("Custom node with name \"" + name + "\" has no category.");
-                    continue;
-                }
-                auto const category = categoryIt->get<std::string>();
+            auto categoryIt = customNode.find("category");
+            if (categoryIt == customNode.end()) {
+                warnings.push_back("Custom node with name \"" + name + "\" has no category.");
+                continue;
+            }
+            auto const category = categoryIt->get<std::string>();
 
-                if (category == "action") {
-                    actions.insert(name);
-                } else if (category == "condition") {
-                    actions.insert(name);
-                } else {
-                    warnings.push_back("Custom node with name " + name + " has unknown category \"" + category + "\".");
-                }
+            if (category == "action") {
+                actions.insert(name);
+            } else if (category == "condition") {
+                conditions.insert(name);
+            } else {
+                warnings.push_back("Custom node with name " + name + " has unknown category \"" + category + "\".");
             }
         }
     }
@@ -104,6 +146,9 @@ private:
     std::vector<std::string> warnings;
 } ;
 
+/**
+ * Returns the name of the node if it's there.
+ */
 b::optional<std::string> getNodeName(json const & node) {
     auto nameIt = node.find("name");
     if (nameIt != node.end()) {
@@ -113,6 +158,9 @@ b::optional<std::string> getNodeName(json const & node) {
     return b::none;
 }
 
+/**
+ * Returns a list of children node id's if it's there.
+ */
 b::optional<std::vector<std::string>> getChildren(json const & node) {
     auto childrenIt = node.find("children");
     if (childrenIt != node.end()) {
@@ -130,6 +178,9 @@ b::optional<std::vector<std::string>> getChildren(json const & node) {
     return b::none;
 }
 
+/**
+ * Returns the child id if it's there.
+ */
 b::optional<std::string> getChild(json const & node) {
     auto nameIt = node.find("child");
     if (nameIt != node.end()) {
@@ -141,29 +192,45 @@ b::optional<std::string> getChild(json const & node) {
 
 bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & currentID);
 
+/**
+ * Returns true if checkTree returns true for all the children if the given node.
+ */
 bool childrenAreOkay(NodeTyper const & typer, json const & nodes, std::string const & currentID, json const & currentNode) {
     if (auto const childrenOpt = getChildren(currentNode)) {
         bool okay = true;
+
         for (auto const & child : *childrenOpt) {
             okay = okay && checkTree(typer, nodes, child);
+            if (!okay) break;
         }
+
+        return okay;
     } else {
         throw std::runtime_error("Node ID " + currentID + " has no children attribute.");
     }
+
 }
 
+/**
+ * Checks whether or not a node is "non-mem", i.e. whether or not
+ * it can return Running. A node is non-mem when:
+ * - It's a condition
+ * - When it's a non-mem composite (Sequence or Priority) and it's children are all non-mem
+ * - An inverter decorator whose child is also non-mem.
+ */
 bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & nodeID) {
-    // isNonMem holds when:
-    // - it's a condition
-    // - when it's a non-mem composite and it's children are all nonmem
-    // - or an inverter decorator
     auto nodeIt = nodes.find(nodeID);
 
     if (nodeIt == nodes.end()) {
-        throw std::runtime_error("Node ID " + nodeID + " does not exist in this tree.");
+        throw std::runtime_error("Node ID \"" + nodeID + "\" does not exist in this tree.");
     }
 
     auto const node = *nodeIt;
+
+    b::optional<std::string> name;
+    if (node.find("title") != node.end()) {
+        name = node["title"].get<std::string>();
+    }
 
     if (auto nodeTypeOpt = typer.getType(node)) {
         auto const nodeType = *nodeTypeOpt;
@@ -181,6 +248,8 @@ bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & n
                     } else {
                         return false;
                     }
+                } else {
+                    throw std::runtime_error("Node ID \"" + nodeID + "\" has no node name");
                 }
 
                 break;
@@ -195,11 +264,13 @@ bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & n
 
                             bool okay = true;
                             for (auto const & child : children) {
-                                okay = okay && isNonMem(typer, node, child);
+                                okay = okay && isNonMem(typer, nodes, child);
                                 if (!okay) break;
                             }
 
                             return okay;
+                        } else {
+                            throw std::runtime_error("Node ID \"" + nodeID + "\" has no children even though it is a sequence or priority. This is a broken tree.");
                         }
                     } else {
                         return false;
@@ -212,11 +283,20 @@ bool isNonMem(NodeTyper const & typer, json const & nodes, std::string const & n
             case NodeType::Action:
                 return false;
         }
+
+        throw std::runtime_error("Node ID \"" + nodeID + "\" did not match a type in isNonMem. This is a bug!");
     } else {
-        throw std::runtime_error("Node ID " + nodeID + " has no derivable type.");
+        if (name) {
+            throw std::runtime_error("Node \"" + *name + "\" has no derivable type.");
+        } else {
+            throw std::runtime_error("Node ID " + nodeID + " has no derivable type.");
+        }
     }
 }
 
+/**
+ * Checks if the subtree starting from currentID obeys the mem-principle.
+ */
 bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & currentID) {
     auto currentIt = nodes.find(currentID);
     if (currentIt == nodes.end()) {
@@ -224,6 +304,11 @@ bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & 
     }
 
     auto const & currentNode = *currentIt;
+
+    b::optional<std::string> name;
+    if (currentNode.find("title") != currentNode.end()) {
+        name = currentNode["title"].get<std::string>();
+    }
 
     if (auto const nodeTypeOpt = typer.getType(currentNode)) {
         auto const nodeType = *nodeTypeOpt;
@@ -269,29 +354,53 @@ bool checkTree(NodeTyper const & typer, json const & nodes, std::string const & 
                 }
                 break;
         }
+
+        throw std::runtime_error("Node ID \"" + currentID + "\" did not match a node type in checkTree. This is a bug!");
     } else {
-        throw std::runtime_error("Node ID " + currentID + " has no derivable type."); 
+        if (name) {
+            throw std::runtime_error("Node \"" + *name + "\" has no derivable type."); 
+        } else {
+            throw std::runtime_error("Node ID \"" + currentID + "\" has no derivable type."); 
+        }
     }
 }
 
+} // anonymous namespace
+
+namespace rtt {
+
 /**
- * Checks if the Mem-variant holds for the given json tree
+ * Checks if the mem-principle holds for the given json tree. The customnodes list
+ * can either be found in the tree or in the project, depending on if just a tree
+ * is processed or a whole project.
  */
-std::tuple<b::optional<bool>, b::optional<std::string>> checkTree(json const & treeData) {
+std::tuple<CheckResult, b::optional<std::string>> checkTree(json const & treeData, json const & customNodes) {
     auto nodesIt = treeData.find("nodes");
     auto rootIt = treeData.find("root");
 
     if (nodesIt == treeData.end() || rootIt == treeData.end()) {
-        return std::make_tuple<b::optional<bool>, b::optional<std::string>>(b::none, "No root or nodes dictionary entry found"s);
+        return std::make_tuple<CheckResult, b::optional<std::string>>(CheckResult::Error, "No root or nodes dictionary entry found"s);
     }
 
-    NodeTyper nt(treeData);
+    NodeTyper nt(customNodes);
 
     // TODO: Read out nt warnings
+    
+    if (rootIt->is_null()) {
+        return std::make_tuple(CheckResult::Good, b::none);
+    }
+
+    if (!rootIt->is_string()) {
+        return std::make_tuple<CheckResult, b::optional<std::string>>(CheckResult::Error, "Root node ID is not a string!"s);
+    }
 
     try {
-        return std::make_tuple(checkTree(nt, *nodesIt, rootIt->get<std::string>()), b::none);
+        bool res = checkTree(nt, *nodesIt, rootIt->get<std::string>());
+
+        return std::make_tuple(res ? CheckResult::Good : CheckResult::Bad, b::none);
     } catch (std::runtime_error const & e) {
-        return std::make_tuple<b::optional<bool>, b::optional<std::string>>(b::none, std::string(e.what()));
+        return std::make_tuple<CheckResult, b::optional<std::string>>(CheckResult::Error, std::string(e.what()));
     }
 }
+
+} // rtt
