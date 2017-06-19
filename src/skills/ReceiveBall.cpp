@@ -198,6 +198,7 @@ bt::Node::Status ReceiveBall::Update() {
 	if (HasBool("computePoint") && enableComputePoint) {
 		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
 			receiveBallAtPos = computePoint();
+			// ROS_INFO_STREAM("Robot " << robotID << " computed point: " << receiveBallAtPos);
 		}
 	}
 
@@ -235,9 +236,9 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
 
+	bool canSeeGoal = passPoint.calcViewOfGoal(robotPos, world) >= 0.3;
 
-
-	if (GetBool("shootAtGoal")) {
+	if (GetBool("shootAtGoal") && canSeeGoal) {
 		drawer.setColor(255, 0, 0);
 		double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
 		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
