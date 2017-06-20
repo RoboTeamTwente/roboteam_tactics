@@ -35,63 +35,48 @@ void Kick::Initialize() {
 
 bt::Node::Status Kick::Update() {
 
-/*
-    if (GetBool("wait_for_signal", false)) {
-    	bool timeOut;
-    	if (!GetBool("ignore_timeout", false)) {
-    		if (waitStart == time_point::min()) {
-    			waitStart == now();
-    		}
-    		if ((now() - waitStart).count() / 1000000000 > 2) {
-    			timeOut = false;
-    		} else {
-    			timeOut = true;
-    		}
-    	} else {
-    		timeOut = false;
-    	}
-    	bool readyToPass = false;
-    	ros::param::get("readyToReceiveBall", readyToPass);
-    	if (!(readyToPass || timeOut)) {
-    		return Status::Running;
-    	}
-    }
-*/
-	// if (HasBool("wait_for_signal")) {
-    // 	if (GetBool("wait_for_signal")) {
-    // 		bool readyToPass = false;
-    // 		ros::param::get("readyToReceiveBall", readyToPass);
-    // 		if (!readyToPass) {
-    // 			return Status::Running;
-    // 		}
-    // 	}
-    // }
-
     cycleCounter++;
-    if (cycleCounter > 40) {
+    if (cycleCounter > 20) {
         ROS_INFO_STREAM("Kick Failure");
         return bt::Node::Status::Failure;
     }
 
 	roboteam_msgs::World world = LastWorld::get();
-    Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    
+    boost::optional<roboteam_msgs::WorldRobot> robotPointer = getWorldBot(robotID);
+    roboteam_msgs::WorldRobot robot;
+    if (robotPointer) {
+        robot = *robotPointer;
+    } else {
+        ROS_WARN("Kick: Robot not found");
+        return Status::Failure;
+    }
+
+    
 
     // ROS_INFO_STREAM("oldBallVelAngle: " << oldBallVel.angle() << " currentBallVelAngle: " << currentBallVel.angle());
+    // ROS_INFO_STREAM("oldBallVel: " << oldBallVel.length() << " currentBallVel: " << currentBallVel.length());
+    Vector2 robotDirVector = Vector2(1.0, 0.0).rotate(robot.angle);
+    Vector2 currentBallVel(world.ball.vel);
+    double currentBallVelInRobotDir = currentBallVel.dot(robotDirVector);
+    double oldBallVelInRobotDir = oldBallVel.dot(robotDirVector);
 
-    if (oldBallVel.length() < 0.1) {
-        if ((currentBallVel.length() - oldBallVel.length()) > 0.1) {
+    ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
+
+    if (oldBallVelInRobotDir < 0.1) {
+        if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2) {
             ROS_INFO_STREAM("Kick Success");
             return bt::Node::Status::Success;
         }
-    } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.3) {
-        
-        ROS_INFO_STREAM("Kick Success");
-        return bt::Node::Status::Success;
+    // } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.05) {
+    //     ROS_INFO_STREAM("Kick Success");
+    //     return bt::Node::Status::Success;
     }
 
     oldBallVel = currentBallVel;
 
-    int robotID = blackboard->GetInt("ROBOT_ID");
+    
     
     double kickVel;
     if (HasDouble("kickVel")) {

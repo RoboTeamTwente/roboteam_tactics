@@ -11,6 +11,8 @@
     <arg name="our_field_side" default="left" />
     <param name="our_side" type="string" value="$(arg our_field_side)" />
 
+    <param name="role_iterations_per_second" type="int" value="30" />
+
     <param name="robot0/robotType" type="str" value="grsim" />
     <param name="robot1/robotType" type="str" value="grsim" />
     <param name="robot2/robotType" type="str" value="grsim" />

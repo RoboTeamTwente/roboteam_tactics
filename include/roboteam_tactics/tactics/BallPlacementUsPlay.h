@@ -7,6 +7,11 @@
 
 namespace rtt {
 
+/**
+ * Max distance ball can be from placement point in meters.
+ */
+double const MAX_DISTANCE_FROM_END_POINT = 0.1;
+
 class BallPlacementUsPlay : public Tactic {
 public:
     BallPlacementUsPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
@@ -17,7 +22,9 @@ public:
     std::string node_name() override { return "BallPlacementUsPlay"; }
 
 private:
-    std::vector<boost::uuids::uuid> tokens;
+    boost::uuids::uuid token;
+    bool failed;
+    bool succeeded;
 
 } ;
 

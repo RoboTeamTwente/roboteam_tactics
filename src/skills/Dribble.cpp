@@ -24,11 +24,13 @@ RTT_REGISTER_SKILL(Dribble);
 Dribble::Dribble(std::string name, bt::Blackboard::Ptr blackboard)
             : Skill(name, blackboard)
             , rotateAroundPoint("", private_bb) { 
-        pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
+        // pubDebugpoints = n.advertise<roboteam_msgs::DebugPoint>(TOPIC_DEBUG_POINTS, 1000);
         ROS_INFO("Dribbling");
 	}
 
 void Dribble::stoprobot(int robotID) {
+    std::cout << "Stopping robot!\n";
+
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(stop_command(robotID));
 }
 Vector2 Dribble::worldToRobotFrame(Vector2 requiredv, double rotation){
@@ -72,7 +74,6 @@ Vector2 Dribble::saveDribbleDeceleration(Vector2 reqspeed){
 	
 	return speed;
 }
-
 
 bt::Node::Status Dribble::Update() {
 	roboteam_msgs::World world = LastWorld::get();
@@ -132,15 +133,15 @@ bt::Node::Status Dribble::Update() {
 		
 		double radius=(rotatearoundPos-robotPos).length();
 		// debug points;
-		roboteam_msgs::DebugPoint debugpoint;
-		debugpoint.name = "rotatearound";
-		debugpoint.remove = false;
-		debugpoint.pos.x = rotatearoundPos.x;
-		debugpoint.pos.y = rotatearoundPos.y;
-		debugpoint.color.r = 255;
-		debugpoint.color.g = 0;
-		debugpoint.color.b = 0;
-		pubDebugpoints.publish(debugpoint);
+		// roboteam_msgs::DebugPoint debugpoint;
+		// debugpoint.name = "rotatearound";
+		// debugpoint.remove = false;
+		// debugpoint.pos.x = rotatearoundPos.x;
+		// debugpoint.pos.y = rotatearoundPos.y;
+		// debugpoint.color.r = 255;
+		// debugpoint.color.g = 0;
+		// debugpoint.color.b = 0;
+		// pubDebugpoints.publish(debugpoint);
 		
 		
 		private_bb->SetInt("ROBOT_ID", robotID);
@@ -175,25 +176,25 @@ bt::Node::Status Dribble::Update() {
 		
 		robotvtogoal = worldToRobotFrame(vtogoal, robot.angle);
 			
-		debugpoint.name = "oldrobotvtogoal";
-		debugpoint.remove = false;
-		debugpoint.pos.x = robotvtogoal.x;
-		debugpoint.pos.y = robotvtogoal.y;
-		debugpoint.color.r = 0;
-		debugpoint.color.g = 0;
-		debugpoint.color.b = 255;
-		pubDebugpoints.publish(debugpoint);
+		// debugpoint.name = "oldrobotvtogoal";
+		// debugpoint.remove = false;
+		// debugpoint.pos.x = robotvtogoal.x;
+		// debugpoint.pos.y = robotvtogoal.y;
+		// debugpoint.color.r = 0;
+		// debugpoint.color.g = 0;
+		// debugpoint.color.b = 255;
+		// pubDebugpoints.publish(debugpoint);
 		
 		robotvtogoal = saveDribbleDeceleration(robotvtogoal);
 		
-		debugpoint.name = "robotvtogoal";
-		debugpoint.remove = false;
-		debugpoint.color.r = 0;
-		debugpoint.color.g = 0;
-		debugpoint.color.b = 255;
-		debugpoint.pos.x = robotvtogoal.x;
-		debugpoint.pos.y = robotvtogoal.y;
-		pubDebugpoints.publish(debugpoint);
+		// debugpoint.name = "robotvtogoal";
+		// debugpoint.remove = false;
+		// debugpoint.color.r = 0;
+		// debugpoint.color.g = 0;
+		// debugpoint.color.b = 255;
+		// debugpoint.pos.x = robotvtogoal.x;
+		// debugpoint.pos.y = robotvtogoal.y;
+		// pubDebugpoints.publish(debugpoint);
 		
 		private_bb->SetDouble("extravx", robotvtogoal.x);
 		private_bb->SetDouble("extravy", robotvtogoal.y);

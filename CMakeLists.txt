@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 if(NOT WIN32)
     string(ASCII 27 Esc)
     set(BLUE_TEXT "${Esc}[34m")
+    set(RED_TEXT "${Esc}[31m")
     set(BOLD_TEXT  "${Esc}[1m")
     set(RESET_TEXT "${Esc}[0m")
 endif()
@@ -46,6 +47,10 @@ find_package(Boost
         filesystem
     )
 
+####################
+## Build settings ##
+####################
+
 # Only enable this one if you're just testing one skill
 set(BUILD_TESTX TRUE)
 
@@ -61,7 +66,13 @@ set(ENABLE_DEBUG_GRAPHICS TRUE)
 # Build machine learning components
 set(BUILD_LEARNING TRUE)
 
-# Set defines based on settings
+# Turn mem principle checking on or off
+set(ENABLE_MEM_PRINCIPLE_CHECKING FALSE)
+
+###################################
+## Set defines based on settings ##
+###################################
+
 if (ENABLE_BT_TRACE)
     add_definitions(-DRTT_ENABLE_BT_RQT_TRACE)
 endif (ENABLE_BT_TRACE)
@@ -97,6 +108,14 @@ else (ENABLE_PROFILING)
 ")
 endif (ENABLE_PROFILING)
 
+if (ENABLE_MEM_PRINCIPLE_CHECKING)
+    set(MEM_PRINCIPLE_FLAG "")
+    MESSAGE("-- Trees are being checked for the mem principle")
+else (ENABLE_MEM_PRINCIPLE_CHECKING)
+    set(MEM_PRINCIPLE_FLAG "--no-mem-principle")
+    MESSAGE("-- " ${RED_TEXT} ${BOLD_TEXT} "Trees are NOT being checked for the mem principle" ${RESET_TEXT})
+endif (ENABLE_MEM_PRINCIPLE_CHECKING)
+
 catkin_package(
     INCLUDE_DIRS 
         include
@@ -115,6 +134,7 @@ add_subdirectory(src)
 add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
+    src/treegen/TreeChecker.cpp
     )
 add_dependencies(converter
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -163,7 +183,7 @@ add_custom_command(
     OUTPUT
         # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
         ${alltrees_output_file}
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh ${MEM_PRINCIPLE_FLAG}
     DEPENDS
         ${JSON_FILES}
         converter
@@ -204,7 +224,7 @@ foreach(json_project ${JSON_PROJECTS})
             # ${timestamp_file}
             ${output_files}
         COMMAND
-            ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json_project.sh ${json_project}
+            ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json_project.sh ${json_project} ${MEM_PRINCIPLE_FLAG}
         DEPENDS
             ${json_project}
             converter

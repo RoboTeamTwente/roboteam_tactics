@@ -71,7 +71,7 @@ void GetBall::publishStopCommand() {
 
 void GetBall::publishKickCommand(){
 
-    double kicker_vel = 8.0;
+    double kicker_vel = 5.0;
     if (HasDouble("kickerVel")) {
         kicker_vel = GetDouble("kickerVel");
     }
@@ -133,7 +133,7 @@ bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // if (!canClaimBall()) {return Status::Failure;}
+    if (!canClaimBall()) {return Status::Failure;}
 
 
     if (finalStage){
