@@ -54,20 +54,20 @@
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
 		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
-		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
+		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" /> 
 		<node pkg="roboteam_rqt_view" type="run_world_view.py" name="world_view" />
 
 		<param name="role_iterations_per_second" type="int" value="30" />
 		<param name="robot_output_target" type="str" value="grsim" />
-		<param name="num_role_nodes" type="int" value="6" />
+		<param name="num_role_nodes" type="int" value="4" />
 		<param name="normalize_field" type="bool" value="true" />
 
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<!-- <node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" /> -->
 	</group>
 	
 </launch>

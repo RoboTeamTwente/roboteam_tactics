@@ -67,7 +67,7 @@ set(ENABLE_DEBUG_GRAPHICS TRUE)
 set(BUILD_LEARNING TRUE)
 
 # Turn mem principle checking on or off
-set(ENABLE_MEM_PRINCIPLE_CHECKING TRUE)
+set(ENABLE_MEM_PRINCIPLE_CHECKING FALSE)
 
 ###################################
 ## Set defines based on settings ##

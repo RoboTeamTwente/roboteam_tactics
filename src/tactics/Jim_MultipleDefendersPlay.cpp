@@ -57,7 +57,7 @@ std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> ro
     std::vector< std::vector<double> > distances;
     // std::cout << "points: \n";
     for (size_t i = 0; i < points.size(); i++) {
-        // std::cout << points.at(i).x << " " << points.at(i).y << " \n";
+        std::cout << points.at(i).x << " " << points.at(i).y << " \n";
         std::vector<double> dists;
         for (size_t j = 0; j < worldRobots.size(); j++) {
             double dist = (Vector2(worldRobots.at(j).pos) - points.at(i)).length();
@@ -132,7 +132,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             if (bot_has_ball(opp, ball)) {
                 // RTT_DEBUGLN("dangerousOpp %i has the ball", opp.id);
-                int minBallDefenders = 2;
+                minBallDefenders = 2;
             } else {
                 dangerousOpps.push_back(opp);
                 // RTT_DEBUGLN("treating robot %i as dangerousOpp", opp.id);

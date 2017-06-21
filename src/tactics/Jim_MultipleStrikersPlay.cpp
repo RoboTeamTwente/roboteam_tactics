@@ -39,10 +39,11 @@ void Jim_MultipleStrikersPlay::Initialize() {
     }
 
     roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballPos(world.ball.pos);
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
+    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 1);
     // int numDirectStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
     
     RTT_DEBUGLN("numStrikers: %i", numStrikers);
@@ -55,16 +56,27 @@ void Jim_MultipleStrikersPlay::Initialize() {
     // ===========================
     // Create the striker roles
     // ===========================
+    std::vector<Vector2> defaultPositions;
+    defaultPositions.push_back(Vector2(2.0, 1.5));
+    defaultPositions.push_back(Vector2(2.0, -1.5));
+    defaultPositions.push_back(Vector2(3.5, 2.0));
+    defaultPositions.push_back(Vector2(3.5, -2.0));
+
     std::vector<Vector2> strikersDefaultPositions;
-    strikersDefaultPositions.push_back(Vector2(2.0, 1.0));
-    strikersDefaultPositions.push_back(Vector2(2.0, -1.0));
+    for (size_t i = 0; i < defaultPositions.size(); i++) {
+        if ((ballPos - defaultPositions.at(i)).length() > 1.5) {
+            strikersDefaultPositions.push_back(defaultPositions.at(i));
+            if (strikersDefaultPositions.size() >= numStrikers) {
+                break;
+            }
+        }
+    }
 
     // std::vector<Vector2> strikersDefaultPositions;
     // strikersDefaultPositions.push_back(Vector2(3.7, 2.0));
     // strikersDefaultPositions.push_back(Vector2(3.7, -2.0));
 
-    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);
-    
+    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);    
     
     for (int i = 0; i < numStrikers; i++) {
 
@@ -89,7 +101,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
-        rd.tree = "rtt_jim/StrikerRole";
+        rd.tree = "rtt_jim/DirectStrikerRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

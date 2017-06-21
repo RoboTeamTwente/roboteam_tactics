@@ -181,8 +181,8 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
 
 bool isWithinDefenseArea(std::string whichArea, Vector2 point) {
     GeometryFieldSize field = LastWorld::get_field();
-    std::string our_side;
-    ros::param::get("our_side", our_side);
+    // std::string our_side;
+    // ros::param::get("our_side", our_side);
     Vector2 distToDefenseArea = getDistToDefenseArea(whichArea, point, 0.0);
     if (whichArea == "our defense area") {
         // if (our_side == "left") {

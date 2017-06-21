@@ -46,6 +46,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         distanceFromBallWhenDribbling = 0.105;
     }
     choseRobotToPassTo = false;
+    // passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -133,7 +134,7 @@ bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    if (!canClaimBall()) {return Status::Failure;}
+    // if (!canClaimBall()) {return Status::Failure;}
 
 
     if (finalStage){
@@ -175,10 +176,15 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
     Vector2 posDiff = ballPos - robotPos; 
 
+    double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+    // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
+    bool canSeeGoal = viewOfGoal >= 0.2;
+    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
+
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
-    if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo) {
-        double maxScore = std::numeric_limits<double>::min();
+    if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        double maxScore = -std::numeric_limits<double>::max();
 
         for (size_t i = 0; i < (world.us.size()); i++) {
 
@@ -188,25 +194,23 @@ bt::Node::Status GetBall::Update (){
 
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
                 passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
-                boost::optional<double> scorePointer = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
-                if (scorePointer) {
-                    double score = *scorePointer;
-                    if (score > maxScore) {
-                        maxScore = score;
-                        maxScoreID = world.us.at(i).id;
-
-                        ROS_INFO_STREAM("evaluating: " << i << " score: " << score);
-                    }
+                double score = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
+                // ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score << " maxScore: " << maxScore);
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxScoreID = world.us.at(i).id;
                 }
             }
         }
         
-        if (maxScore > std::numeric_limits<double>::min()) {
+        if (maxScore > -std::numeric_limits<double>::max()) {
             choseRobotToPassTo = true;
             ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
         }
         
     }
+
+    
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (HasString("aimAt")) {
@@ -215,6 +219,8 @@ bt::Node::Status GetBall::Update (){
         targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
     } else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
+    } else if (shootAtGoal) {
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
     } else {
         targetAngle = posDiff.angle();
     }
@@ -279,6 +285,11 @@ bt::Node::Status GetBall::Update (){
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
+
+        if (GetBool("passToBestAttacker") && !choseRobotToPassTo) {
+            return Status::Running;
+        }
+        
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
             ballCloseFrameCount++;
             return Status::Running;
