@@ -43,7 +43,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 1);
+    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
     // int numDirectStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
     
     RTT_DEBUGLN("numStrikers: %i", numStrikers);

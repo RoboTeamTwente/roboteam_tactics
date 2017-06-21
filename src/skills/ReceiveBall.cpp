@@ -47,7 +47,7 @@ void ReceiveBall::Initialize() {
 		acceptableDeviation = 1.0;
 	}
 
-	
+	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 
 	// Read the blackboard info about where to receive the ball 
 	if ((HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
@@ -259,7 +259,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	Vector2 posError = receiveBallAtPos - robotPos;
 	if (posError.length() < acceptableDeviation) {
-		ROS_INFO_STREAM("robot " << robotID << " readyToReceiveBall");
+		// ROS_INFO_STREAM("robot " << robotID << " readyToReceiveBall");
 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
 		private_bb->SetBool("avoidRobots", false);
 	} else {
@@ -316,6 +316,7 @@ bt::Node::Status ReceiveBall::Update() {
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
     	ROS_INFO("ReceiveBall success");
+    	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {
     		ROS_INFO("Start kicking");
     		startKicking = true;
@@ -323,7 +324,6 @@ bt::Node::Status ReceiveBall::Update() {
     	}
 		RTT_DEBUGLN("ReceiveBall skill completed.");
 		publishStopCommand();
-		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
