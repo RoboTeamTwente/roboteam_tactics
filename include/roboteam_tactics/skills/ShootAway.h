@@ -13,6 +13,10 @@ namespace rtt {
 
  //TODO: ASAP does not work well yet; it needs better control (custom or GoToPos)
 
+ //TODO: Ricochet (for HIGH) is not implemented. Is it even feasible?
+
+ //TODO: GetBall is very accurate, but also quite slow. We need speed more than precision, here.
+
 /*
  * Descr: |
  *   Gets the ball away from where it is now, not caring much about where it ends up.
@@ -55,7 +59,6 @@ private:
 
 	bool asapPushDecided;
 	bool asapPush;
-	Vector2 asapGoal;
 	double asapPushAngle;
 	Control asapController;
     std::unique_ptr<GetBall> asapGetBall;
