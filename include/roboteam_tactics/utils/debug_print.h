@@ -43,7 +43,7 @@ SET_DEBUG_FOR(RoleNode, true);
 SET_DEBUG_FOR(StrategyNode, true);
 
 // Building blocks
-SET_DEBUG_FOR(ParallelTactic, false);
+SET_DEBUG_FOR(ParallelTactic, true);
 SET_DEBUG_FOR(RobotDealer, false);
 SET_DEBUG_FOR(Tactic, false);
 
@@ -106,6 +106,7 @@ SET_DEBUG_FOR(Jim_MultipleDefendersPlay, true);
 SET_DEBUG_FOR(BallPlacementThemPlay, true);
 SET_DEBUG_FOR(BallPlacementUsPlay, true);
 SET_DEBUG_FOR(Jim_GetBallPlay, true);
+SET_DEBUG_FOR(KickoffDefensePlay, true);
 
 // Other
 SET_DEBUG_FOR(ComputePassPoint, true);

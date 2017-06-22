@@ -27,6 +27,21 @@ bt::Node::Status ShootAway::Update() {
 	return updateHIGH();
 }
 
+Vector2 targetBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
+    Vector2 diff = ballPos - myPos;
+    double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
+
+    if (theta < (0.5 * M_PI)) {
+        if (fabs(theta) < .00001) theta = 0.01;
+        // double force = theta / (0.5 * M_PI);
+        Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
+        Vector2 ballForce = projectedBall - ballPos;
+        sumOfForces = sumOfForces + ballForce * -15;
+    }
+
+    return sumOfForces;
+}
+
 bt::Node::Status ShootAway::updateASAP() {
 	auto world = LastWorld::get();
 	auto bot = *getWorldBot(GetInt("ROBOT_ID"), true);
@@ -42,7 +57,6 @@ bt::Node::Status ShootAway::updateASAP() {
     	if (asapPush) {
     		ROS_WARN("ShootAway: Robot %d is going to ram the ball (priority=ASAP)! Break out the spares!",
     				GetInt("ROBOT_ID"));
-    		asapGoal = (ballPos - botPos) * 1.2 + botPos;
     		asapPushAngle = bot.angle;
     	} else {
     		private_bb->SetBool("ShootAway_ASAP_GetBall_passOn", true);
@@ -52,13 +66,14 @@ bt::Node::Status ShootAway::updateASAP() {
     }
 
 	if (asapPush) {
-    	if (botPos.dist(asapGoal) < .05) {
+    	if (botPos.dist(ballPos) < .05) {
     		pub.publish(stop_command(GetInt("ROBOT_ID")));
     		return Status::Success;
     	}
-    	Vector2 vel = (asapGoal - botPos).stretchToLength(8.0);
+    	Vector2 vel = (ballPos - botPos).stretchToLength(8.0);
     	double w = asapController.rotationController(bot.angle, asapPushAngle, Vector2());
     	vel = worldToRobotFrame(vel, bot.angle);
+    	//vel = targetBall(ballPos, botPos, vel);
     	roboteam_msgs::RobotCommand cmd;
     	cmd.id = GetInt("ROBOT_ID");
     	cmd.x_vel = vel.x;

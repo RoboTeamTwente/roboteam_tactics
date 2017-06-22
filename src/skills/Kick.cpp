@@ -64,15 +64,15 @@ bt::Node::Status Kick::Update() {
 
     ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
 
-    if (oldBallVelInRobotDir < 0.1) {
-        if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2) {
+    // if (oldBallVelInRobotDir < 0.1) {
+        if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2 && currentBallVelInRobotDir >= 0.1) {
             ROS_INFO_STREAM("Kick Success");
             return bt::Node::Status::Success;
         }
     // } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.05) {
     //     ROS_INFO_STREAM("Kick Success");
     //     return bt::Node::Status::Success;
-    }
+    // }
 
     oldBallVel = currentBallVel;
 

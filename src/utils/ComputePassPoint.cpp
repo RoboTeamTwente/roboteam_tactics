@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -208,42 +208,56 @@ void PassPoint::setCloseToPos(Vector2 closeToPos) {
 }
 
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
-boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
+// boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
+double PassPoint::computePassPointScore(Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
 
-	if (world.us.size() == 0) {
-		return boost::none;
-	}
+	// if (world.us.size() == 0) {
+	// 	return boost::none;
+	// }
 
-	double distToRobot = calcDistToRobot(testPosition, world);
-	if (distToRobot > distToRobotThreshold) {
-		return boost::none;
-	}
+	// double distToRobot = calcDistToRobot(testPosition, world);
+	// if (distToRobot > distToRobotThreshold) {
+	// 	return boost::none;
+	// }
+
+	
+	double score = 0.0;
 
 	double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
 	if (distOppToBallTraj < distOppToBallTrajThreshold) {
-		return boost::none;
+		score -= distOppToBallTrajWeight;
 	}
+
 
 	// double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
 	// if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
 	// 	return boost::none;
 	// }
 
-	double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world));
-	if (viewOfGoal < viewOfGoalThreshold) {
-		return boost::none;
-	}
+	// double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world));
+	// if (viewOfGoal < viewOfGoalThreshold) {
+	// 	return boost::none;
+	// }
 
 
 	Vector2 ballPos(world.ball.pos);
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
-	// double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world)); // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
+	double distToRobot = calcDistToRobot(testPosition, world);
 	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+
+	angleDiffRobotTarget -= (90.0 / 180.0 * M_PI);
+	angleDiffRobotTarget = fabs(angleDiffRobotTarget);
+
+	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
+		// angleDiffRobotTarget = M_PI;
+	// }
 	
-	double score = - distToGoal*distToGoalWeight 
+	score += - distToGoal*distToGoalWeight 
 				   + distToOpp*distToOppWeight 
 				   - distToBall*distToBallWeight 
 				   + viewOfGoal*viewOfGoalWeight
@@ -258,10 +272,11 @@ boost::optional<double> PassPoint::computePassPointScore(Vector2 testPosition) {
 // also draws a 'heat map' in rqt_view
 Vector2 PassPoint::computeBestPassPoint() {
 	
+	roboteam_msgs::World world = LastWorld::get();
 	targetPos = getTargetPos(target, targetID, true);
 
-	int x_steps = 45;
-	int y_steps = 30;
+	int x_steps = 60;
+	int y_steps = 40;
 
 	// Remove all the old drawn points
 	// for (int x_step = 1; x_step < x_steps; x_step++) {
@@ -296,12 +311,17 @@ Vector2 PassPoint::computeBestPassPoint() {
 
 			// calculate the score of this point:
 			Vector2 point(x, y);
-			if (!isWithinDefenseArea("their defense area", point, our_side, field)) {
+			double dist = calcDistToRobot(point, world);
+			Vector2 ballPos(world.ball.pos);
+			double distToBall = (point - ballPos).length();
+
+			if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
 				
-				boost::optional<double> score = computePassPointScore(point);
-				if (score) {
+				// boost::optional<double> score = computePassPointScore(point);
+				double score = computePassPointScore(point);
+				// if (score) {
 					passPoints.push_back(point);
-					scores.push_back(*score);
+					scores.push_back(score);
 
 					// generate a name:
 					std::string x_string = std::to_string(x_step);
@@ -312,7 +332,7 @@ Vector2 PassPoint::computeBestPassPoint() {
 					name.append("y");
 					name.append(y_string);
 					names.push_back(name);
-				}
+				// }
 			}
 		}
 	}
@@ -322,15 +342,15 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	double maxScore = *max_element(scores.begin(), scores.end());
-	double minScore = *min_element(scores.begin(), scores.end());
+	// double maxScore = *max_element(scores.begin(), scores.end());
+	// double minScore = *min_element(scores.begin(), scores.end());
 
-	for (size_t i = 0; i < passPoints.size(); i++) {
-		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-		drawer.setColor(255 - relScore, 0, relScore);
-		drawer.drawPoint(names.at(i), passPoints.at(i));
-		// ros::spinOnce();
-	}
+	// for (size_t i = 0; i < passPoints.size(); i++) {
+	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
+	// 	drawer.setColor(255 - relScore, 0, relScore);
+	// 	drawer.drawPoint(names.at(i), passPoints.at(i));
+	// 	// ros::spinOnce();
+	// }
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

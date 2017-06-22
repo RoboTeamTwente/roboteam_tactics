@@ -57,7 +57,7 @@ std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> ro
     std::vector< std::vector<double> > distances;
     // std::cout << "points: \n";
     for (size_t i = 0; i < points.size(); i++) {
-        // std::cout << points.at(i).x << " " << points.at(i).y << " \n";
+        std::cout << points.at(i).x << " " << points.at(i).y << " \n";
         std::vector<double> dists;
         for (size_t j = 0; j < worldRobots.size(); j++) {
             double dist = (Vector2(worldRobots.at(j).pos) - points.at(i)).length();
@@ -132,7 +132,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             if (bot_has_ball(opp, ball)) {
                 // RTT_DEBUGLN("dangerousOpp %i has the ball", opp.id);
-                int minBallDefenders = 2;
+                minBallDefenders = 2;
             } else {
                 dangerousOpps.push_back(opp);
                 // RTT_DEBUGLN("treating robot %i as dangerousOpp", opp.id);
@@ -144,7 +144,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
     int numBallDefenders = std::min((int) robots.size(), minBallDefenders); // start with a number of ball defenders
     int numRobotDefenders = std::min(numDangerousOpps, (int) robots.size() - numBallDefenders); // limit robot defenders to dangerous opps or to available robots
     numBallDefenders = std::max(numBallDefenders, (int) robots.size() - numRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
-    numBallDefenders = std::min(numBallDefenders, 3); // max 3 ball defenders
+    numBallDefenders = std::min(numBallDefenders, 2); // max 3 ball defenders
 
     if ((numRobotDefenders + numBallDefenders) > robots.size()) {
     	ROS_WARN("number of robots bigger than available....");

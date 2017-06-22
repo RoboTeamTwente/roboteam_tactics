@@ -198,6 +198,7 @@ bt::Node::Status ReceiveBall::Update() {
 	if (HasBool("computePoint") && enableComputePoint) {
 		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
 			receiveBallAtPos = computePoint();
+			// ROS_INFO_STREAM("Robot " << robotID << " computed point: " << receiveBallAtPos);
 		}
 	}
 
@@ -235,9 +236,13 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
 
+	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+	// ROS_INFO_STREAM("robot " << robotID << " receiveBall viewOfGoal: " << viewOfGoal);
+	bool canSeeGoal = viewOfGoal >= 0.2;
+	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
+	// ROS_INFO_STREAM("receiveBall shootAtGoal: " << shootAtGoal);
 
-
-	if (GetBool("shootAtGoal")) {
+	if (shootAtGoal) {
 		drawer.setColor(255, 0, 0);
 		double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
 		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
@@ -254,6 +259,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	Vector2 posError = receiveBallAtPos - robotPos;
 	if (posError.length() < acceptableDeviation) {
+		// ROS_INFO_STREAM("robot " << robotID << " readyToReceiveBall");
 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
 		private_bb->SetBool("avoidRobots", false);
 	} else {
@@ -273,27 +279,24 @@ bt::Node::Status ReceiveBall::Update() {
 	
 
 	double distanceToBall = (ballPos-interceptPos).length();
-	if (GetBool("shootAtGoal")) {
-		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 3.0)) {
+	if (shootAtGoal) {
+		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
 			startKicking = true;
 			kick.Initialize();
 			return kick.Update();
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.5 || ballHasBeenClose) {
-		ballHasBeenClose = true;
+	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.5)|| ballHasBeenClose) {
+		// ballHasBeenClose = true;
 		return getBall.Update();
 	}
 
 	
 	// If the ball gets close, turn on the dribbler
 	double dribblerDist = acceptableDeviation * 2.0;
-	if (GetBool("shootAtGoal")) {
+	if (shootAtGoal) {
 		dribblerDist = 0.0;
-	}
-	if (HasDouble("dribblerDist")) {
-		dribblerDist = GetDouble("dribblerDist");
 	}
 
 	if (distanceToBall < dribblerDist) {
@@ -313,7 +316,8 @@ bt::Node::Status ReceiveBall::Update() {
 
     if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
     	ROS_INFO("ReceiveBall success");
-    	if (GetBool("shootAtGoal")) {
+    	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
+    	if (shootAtGoal) {
     		ROS_INFO("Start kicking");
     		startKicking = true;
     		return kick.Update();
