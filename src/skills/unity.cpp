@@ -46,6 +46,9 @@
 #include "KeeperBlock.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "KeepPosition.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Kick.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
