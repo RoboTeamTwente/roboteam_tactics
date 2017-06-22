@@ -26,6 +26,9 @@
 #include "InterceptorsTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "KickoffDefensePlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "PassToTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
