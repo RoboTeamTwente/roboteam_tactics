@@ -315,7 +315,7 @@ Vector2 PassPoint::computeBestPassPoint() {
 			Vector2 ballPos(world.ball.pos);
 			double distToBall = (point - ballPos).length();
 
-			if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
+			if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point) && distToBall >= 0.5) {
 				
 				// boost::optional<double> score = computePassPointScore(point);
 				double score = computePassPointScore(point);
@@ -349,7 +349,6 @@ Vector2 PassPoint::computeBestPassPoint() {
 	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
 	// 	drawer.setColor(255 - relScore, 0, relScore);
 	// 	drawer.drawPoint(names.at(i), passPoints.at(i));
-	// 	// ros::spinOnce();
 	// }
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

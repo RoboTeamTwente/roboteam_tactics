@@ -116,6 +116,8 @@ bt::Node::Status SimpleKeeper::Update() {
         private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
         private_bb->SetDouble("dribblerDist", dribblerDist);
 
+        private_bb->SetBool("dontDriveToBall", true);
+
         return receiveBall.Tick();
     // }
 }

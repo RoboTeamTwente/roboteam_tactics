@@ -102,14 +102,13 @@ std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> ro
     return closestRobots;
 }
 
+void Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
 
-void Jim_MultipleDefendersPlay::Initialize() {
-    time_point startInit = now();
+	roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballPos(world.ball.pos);
+    Vector2 ourGoalPos = LastWorld::get_our_goal_center();
 
-    tokens.clear();
-    roboteam_msgs::World world = LastWorld::get();
-
-    RTT_DEBUGLN_TEAM("Initializing Jim_MultipleDefendersPlay");    
+       
     if (RobotDealer::get_available_robots().size() < 2) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
@@ -117,57 +116,74 @@ void Jim_MultipleDefendersPlay::Initialize() {
     }
     
     std::vector<int> robots = RobotDealer::get_available_robots();
-    activeRobots.clear();
     
-    int keeperID = RobotDealer::get_keeper();
+    int numRobots = robots.size() + activeRobots.size();
 
-    int numRobots = robots.size();
-
-    // int numDangerousOpps = 0;
     int minBallDefenders = 1;
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
-    roboteam_msgs::WorldBall ball = world.ball;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
         if (world.dangerScores.at(i) >= 3.2) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-            if (bot_has_ball(opp, ball)) {
-                // RTT_DEBUGLN("dangerousOpp %i has the ball", opp.id);
+            double angleDiff = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+            if (angleDiff <= 0.15) {
                 minBallDefenders = 2;
             } else {
                 dangerousOpps.push_back(opp);
-                // RTT_DEBUGLN("treating robot %i as dangerousOpp", opp.id);
             }
         }
     }
     int numDangerousOpps = dangerousOpps.size();
 
-    int numBallDefenders = std::min((int) robots.size(), minBallDefenders); // start with a number of ball defenders
-    int numRobotDefenders = std::min(numDangerousOpps, (int) robots.size() - numBallDefenders); // limit robot defenders to dangerous opps or to available robots
-    numBallDefenders = std::max(numBallDefenders, (int) robots.size() - numRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
-    numBallDefenders = std::min(numBallDefenders, 2); // max 3 ball defenders
+    int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
+    int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
+    newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
+    newNumBallDefenders = std::min(newNumBallDefenders, 2); // max 2 ball defenders
+    
+    double distBallToGoal = (ballPos - LastWorld::get_our_goal_center()).length();
+    bool distBallToGoalHasChanged = (distBallToGoal <= distBallToGoalThreshold && prevDistBallToGoal > distBallToGoalThreshold) || 
+    								(distBallToGoal > distBallToGoalThreshold && prevDistBallToGoal <= distBallToGoalThreshold);
+     
+    prevDistBallToGoal = distBallToGoal;
 
-    if ((numRobotDefenders + numBallDefenders) > robots.size()) {
-    	ROS_WARN("number of robots bigger than available....");
+    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || distBallToGoalHasChanged) {
+    	Terminate(Status::Running);
+    	reInitialize(newNumBallDefenders, newNumRobotDefenders, dangerousOpps);
     }
 
-    RTT_DEBUGLN("numRobotDefenders: %i, numBallDefenders: %i", numRobotDefenders, numBallDefenders);
+    return;
+}
+
+void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps) {
+	time_point startInit = now();
+
+	numBallDefenders = newNumBallDefenders;
+	numRobotDefenders = newNumRobotDefenders;
+
+	RTT_DEBUGLN_TEAM("Initializing Jim_MultipleDefendersPlay"); 
+	RTT_DEBUGLN("newNumBallDefenders: %i, newNumRobotDefenders: %i", newNumBallDefenders, newNumRobotDefenders);
+	
+	roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballPos(world.ball.pos);
+
+	std::vector<int> robots = RobotDealer::get_available_robots();
+	activeRobots.clear();
+
+	int keeperID = RobotDealer::get_keeper();
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
-
 
     // =========================
     // Initialize the Keeper
     // =========================
     {
-        RTT_DEBUGLN("Initializing Keeper %i", keeperID);
+        // RTT_DEBUGLN("Initializing Keeper %i", keeperID);
         delete_from_vector(robots, keeperID);
         claim_robot(keeperID);
 
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = keeperID;
-        activeRobots.push_back(keeperID);
+        // activeRobots.push_back(keeperID);
         bt::Blackboard bb;
 
         bb.SetInt("ROBOT_ID", keeperID);
@@ -186,6 +202,42 @@ void Jim_MultipleDefendersPlay::Initialize() {
         pub.publish(rd);
     }
 
+    RTT_DEBUGLN("Done with keeper");
+
+
+    double distBallToGoal = (ballPos - LastWorld::get_our_goal_center()).length();
+    if (numBallDefenders > 0 &&  distBallToGoal <= 4.0) {
+    	numBallDefenders -= 1;
+    	int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    	delete_from_vector(robots, ballGetterID);
+    	// RTT_DEBUGLN("ballGetterID: %i", ballGetterID);
+
+    	// =============================
+	    // Initialize the Ball Getter
+	    // =============================
+	    {
+	        roboteam_msgs::RoleDirective rd;
+	        rd.robot_id = ballGetterID;
+	        bt::Blackboard bb;
+	        claim_robot(ballGetterID);
+	        activeRobots.push_back(ballGetterID);
+
+	        bb.SetInt("ROBOT_ID", ballGetterID);
+	        bb.SetInt("KEEPER_ID", keeperID);
+
+	        // Create message
+	        rd.tree = "rtt_jim/GetBallRole";
+	        rd.blackboard = bb.toMsg();
+
+	        // Add random token and save it for later
+	        boost::uuids::uuid token = unique_id::fromRandom();
+	        tokens.push_back(token);
+	        rd.token = unique_id::toMsg(token);
+
+	        // Send to rolenode
+	        pub.publish(rd);
+	    }
+    }
 
     // ====================================
     // Initialize the Ball Defenders!
@@ -243,6 +295,9 @@ void Jim_MultipleDefendersPlay::Initialize() {
         pub.publish(rd);
     }
 
+    // Dirty solution, but works
+    numBallDefenders = newNumBallDefenders;
+
 
     // ==================================
     // Initialize the Robot Defenders!
@@ -252,7 +307,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
         roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
         int defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
 
-        // RTT_DEBUGLN("Initializing Defender %i", defenderID);
+        // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
         delete_from_vector(robots, defenderID);
         claim_robot(defenderID);
 
@@ -284,15 +339,252 @@ void Jim_MultipleDefendersPlay::Initialize() {
     double timeLapsed = time_difference_milliseconds(startInit, now()).count();
     std::cout << "Initializing took: " << timeLapsed << " ms \n";
 
-    start = now();
+    return;
 }
 
-void Jim_MultipleDefendersPlay::ReleaseAllBots() {
+
+void Jim_MultipleDefendersPlay::Initialize() {
+
+	numBallDefenders = 0;
+	numRobotDefenders = 0;
+	distBallToGoalThreshold = 4.0;
+	prevDistBallToGoal = 5.0;
+	reInitializeWhenNeeded();
+
+    // time_point startInit = now();
+
+    // tokens.clear();
+    // roboteam_msgs::World world = LastWorld::get();
+    // Vector2 ballPos(world.ball.pos);
+    // Vector2 ourGoalPos = LastWorld::get_our_goal_center();
+
+    // RTT_DEBUGLN_TEAM("Initializing Jim_MultipleDefendersPlay");    
+    // if (RobotDealer::get_available_robots().size() < 2) {
+    //     RTT_DEBUG("Not enough robots, cannot initialize... \n");
+    //     // TODO: Want to pass failure here as well!
+    //     return;
+    // }
+    
+    // std::vector<int> robots = RobotDealer::get_available_robots();
+    // activeRobots.clear();
+    
+    // int keeperID = RobotDealer::get_keeper();
+
+    // int numRobots = robots.size();
+
+    // // int numDangerousOpps = 0;
+    // int minBallDefenders = 1;
+    // std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
+    // roboteam_msgs::WorldBall ball = world.ball;
+    // for (size_t i = 0; i < world.dangerList.size(); i++) {
+    //     if (world.dangerScores.at(i) >= 3.2) {
+    //         roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
+    //         double angleDiff = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+    //         if (angleDiff <= 0.15) {
+    //             // RTT_DEBUGLN("dangerousOpp %i has the ball", opp.id);
+    //             minBallDefenders = 2;
+    //         } else {
+    //             dangerousOpps.push_back(opp);
+    //             // RTT_DEBUGLN("treating robot %i as dangerousOpp", opp.id);
+    //         }
+    //     }
+    // }
+    // int numDangerousOpps = dangerousOpps.size();
+
+    // int numBallDefenders = std::min((int) robots.size(), minBallDefenders); // start with a number of ball defenders
+    // int numRobotDefenders = std::min(numDangerousOpps, (int) robots.size() - numBallDefenders); // limit robot defenders to dangerous opps or to available robots
+    // numBallDefenders = std::max(numBallDefenders, (int) robots.size() - numRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
+    // numBallDefenders = std::min(numBallDefenders, 2); // max 3 ball defenders
+
+    // if ((numRobotDefenders + numBallDefenders) > robots.size()) {
+    // 	ROS_WARN("number of robots bigger than available....");
+    // }
+
+    // RTT_DEBUGLN("numRobotDefenders: %i, numBallDefenders: %i", numRobotDefenders, numBallDefenders);
+
+    // // Get the default roledirective publisher
+    // auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+
+
+    // // =========================
+    // // Initialize the Keeper
+    // // =========================
+    // {
+    //     RTT_DEBUGLN("Initializing Keeper %i", keeperID);
+    //     delete_from_vector(robots, keeperID);
+    //     claim_robot(keeperID);
+
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = keeperID;
+    //     activeRobots.push_back(keeperID);
+    //     bt::Blackboard bb;
+
+    //     bb.SetInt("ROBOT_ID", keeperID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
+
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
+
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
+
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // }
+
+
+
+    
+    // double distBallToGoal = (ballPos - LastWorld::get_our_goal_center()).length();
+    // if (numBallDefenders > 0 &&  distBallToGoal <= 4.0) {
+    // 	numBallDefenders -= 1;
+    // 	int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    // 	delete_from_vector(robots, ballGetterID);
+    // 	RTT_DEBUGLN("ballGetterID: %i", ballGetterID);
+
+    // 	// =============================
+	   //  // Initialize the Ball Getter
+	   //  // =============================
+	   //  {
+	   //      roboteam_msgs::RoleDirective rd;
+	   //      rd.robot_id = ballGetterID;
+	   //      bt::Blackboard bb;
+	   //      claim_robot(ballGetterID);
+	   //      activeRobots.push_back(ballGetterID);
+
+	   //      bb.SetInt("ROBOT_ID", ballGetterID);
+	   //      bb.SetInt("KEEPER_ID", 5);
+
+	   //      // bb.SetBool("GetBall_A_passToBestAttacker", true); 
+
+	   //      // Create message
+	   //      rd.tree = "rtt_jim/GetBallRole";
+	   //      rd.blackboard = bb.toMsg();
+
+	   //      // Add random token and save it for later
+	   //      boost::uuids::uuid token = unique_id::fromRandom();
+	   //      tokens.push_back(token);
+	   //      rd.token = unique_id::toMsg(token);
+
+	   //      // Send to rolenode
+	   //      pub.publish(rd);
+	   //  }
+
+    // }
+
+
+    
+    // // ====================================
+    // // Initialize the Ball Defenders!
+    // // ====================================
+    // std::vector<double> angleOffsets;
+    
+    // if (numBallDefenders == 1) {
+    //     angleOffsets.push_back(0.0);
+    // } else if (numBallDefenders == 2) {
+    //     angleOffsets.push_back(0.1);
+    //     angleOffsets.push_back(-0.1);
+    // } else if (numBallDefenders == 3) {
+    //     angleOffsets.push_back(0.0);
+    //     angleOffsets.push_back(0.2);
+    //     angleOffsets.push_back(-0.2);
+    // }
+
+    // std::vector<Vector2> ballDefendersPositions;
+    // for (int i = 0; i < numBallDefenders; i++) {
+    //     ballDefendersPositions.push_back(SimpleKeeper::computeDefensePoint(world.ball.pos, true, 1.35, angleOffsets.at(i)));
+    // }
+    // std::vector<int> ballDefenders = getClosestRobots(robots, ballDefendersPositions, world);
+
+    // for (size_t i = 0; i < ballDefenders.size(); i++) {
+    //     int ballDefenderID = ballDefenders.at(i);
+
+    //     // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+    //     delete_from_vector(robots, ballDefenderID);
+    //     claim_robot(ballDefenderID);
+
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = ballDefenderID;
+    //     activeRobots.push_back(ballDefenderID);
+    //     bt::Blackboard bb;
+
+    //     // Set the robot ID
+    //     bb.SetInt("ROBOT_ID", ballDefenderID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
+
+    //     bb.SetDouble("DistanceXToY_A_distance", 2.0);
+    //     bb.SetDouble("SimpleKeeper_A_distanceFromGoal", 1.35);
+    //     bb.SetDouble("SimpleKeeper_A_angleOffset", angleOffsets.at(i));
+    //     bb.SetBool("SimpleKeeper_A_avoidRobots", false);
+
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
+
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
+
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // }
+
+
+    // // ==================================
+    // // Initialize the Robot Defenders!
+    // // ==================================
+    // for (int i = 0; i < numRobotDefenders; i++) {
+
+    //     roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
+    //     int defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+
+    //     // RTT_DEBUGLN("Initializing Defender %i", defenderID);
+    //     delete_from_vector(robots, defenderID);
+    //     claim_robot(defenderID);
+
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = defenderID;
+    //     activeRobots.push_back(defenderID);
+    //     bt::Blackboard bb;
+
+    //     // Set the robot ID
+    //     bb.SetInt("ROBOT_ID", defenderID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
+
+    //     bb.SetInt("SimpleKeeper_A_defendRobot", mostDangerousRobot.id);
+    //     bb.SetDouble("SimpleKeeper_A_distanceFromGoal", 1.35);
+
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
+
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
+
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // }
+
+    // double timeLapsed = time_difference_milliseconds(startInit, now()).count();
+    // std::cout << "Initializing took: " << timeLapsed << " ms \n";
+
+    // start = now();
+}
+
+void Jim_MultipleDefendersPlay::releaseAllBots() {
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     for (size_t i = 0; i < activeRobots.size(); i++) {
+    	RTT_DEBUGLN("Releasing robot %i", activeRobots.at(i));
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = activeRobots.at(i);
         rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
@@ -306,11 +598,13 @@ void Jim_MultipleDefendersPlay::ReleaseAllBots() {
 
 bt::Node::Status Jim_MultipleDefendersPlay::Update() {
 
-    if (time_difference_milliseconds(start, now()).count() >= 1000) {
-        // ReleaseAllBots();
-        Terminate(Status::Running);
-        Initialize();
-    }
+	reInitializeWhenNeeded();
+
+    // if (time_difference_milliseconds(start, now()).count() >= 1000) {
+    //     // ReleaseAllBots();
+    //     Terminate(Status::Running);
+    //     Initialize();
+    // }
 
     return Status::Running;
 }

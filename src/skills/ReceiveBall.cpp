@@ -238,7 +238,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
 	// ROS_INFO_STREAM("robot " << robotID << " receiveBall viewOfGoal: " << viewOfGoal);
-	bool canSeeGoal = viewOfGoal >= 0.2;
+	bool canSeeGoal = viewOfGoal >= 0.1;
 	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
 	// ROS_INFO_STREAM("receiveBall shootAtGoal: " << shootAtGoal);
 
@@ -287,9 +287,11 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.5)|| ballHasBeenClose) {
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 2.0 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
 		// ballHasBeenClose = true;
 		return getBall.Update();
+	// } else if (ballHasBeenClose) {
+		// return Status::Failure;
 	}
 
 	

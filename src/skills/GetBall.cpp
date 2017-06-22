@@ -178,7 +178,7 @@ bt::Node::Status GetBall::Update (){
 
     double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
     // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
-    bool canSeeGoal = viewOfGoal >= 0.2;
+    bool canSeeGoal = viewOfGoal >= 0.1;
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
 
 
@@ -286,7 +286,7 @@ bt::Node::Status GetBall::Update (){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
 
-        if (GetBool("passToBestAttacker") && !choseRobotToPassTo) {
+        if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
             return Status::Running;
         }
         
