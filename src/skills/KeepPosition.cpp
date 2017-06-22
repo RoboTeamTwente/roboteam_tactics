@@ -74,8 +74,6 @@ Vector2 KeepPosition::getNearestObject(Vector2 ownPos) const {
 	std::vector<Vector2> v = {closestUs, closestThem, ball};
 	std::sort(v.begin(), v.end(), DistToPosSorter{ownPos});
 
-	ROS_INFO_STREAM("Closest: " << v.at(0));
-
 	return v.at(0);
 }
 
