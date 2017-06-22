@@ -308,12 +308,14 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", false);
 
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    } 
     
     // @DEBUG for robot testing purposes we like to change the maxSpeed sometimes manually
     // if (HasDouble("maxSpeed")) {
     // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     // }
-
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;

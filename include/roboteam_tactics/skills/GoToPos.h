@@ -65,6 +65,10 @@ namespace rtt {
  *          Type: Double
  *          Descr: Sets the maximum robot speed in the controller
  *
+ *      - enterDefenseAreas:
+ *          Type: Bool
+ *          Descr: When true allows GoToPos to go into the defense areas of both teams.
+ *
  */
 class GoToPos : public Skill {
 public:

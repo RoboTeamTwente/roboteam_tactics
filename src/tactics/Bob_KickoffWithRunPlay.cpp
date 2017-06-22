@@ -32,6 +32,10 @@ void Bob_KickoffWithRunPlay::Initialize() {
     RTT_DEBUGLN_TEAM("Initializing Bob_KickoffWithRunPlay");
     
     std::vector<int> robots = RobotDealer::get_available_robots();
+    Vector2 receivePos(4.5 / 2, 3 / -2.0);
+    Vector2 startPos(-3, 3 / -2.0);
+    Vector2 thresholdPos(-1, 3 / -2.0);
+    Vector2 rendezvous(3, -2);
 
     if (robots.size() < 2) {
         RTT_DEBUGLN("Less than two robots detected; cannot use play!");
@@ -39,19 +43,20 @@ void Bob_KickoffWithRunPlay::Initialize() {
         return;
     }
 
-    int takerID = robots[0];
-    int receiverID = robots[1];
+    // int takerID = robots[0];
+    int takerID = get_robot_closest_to_ball(robots);
+    robots.erase(std::remove(robots.begin(), robots.end(), takerID), robots.end());
+
+    // int receiverID = robots[1];
+    int receiverID = get_robot_closest_to_point(robots, LastWorld::get(), startPos);
+    robots.erase(std::remove(robots.begin(), robots.end(), receiverID), robots.end());
+
     int keeperID = RobotDealer::get_keeper();
 
-    RobotDealer::claim_robots({takerID, receiverID});
+    claim_robots({takerID, receiverID});
 
     taker.robot_id = takerID;
     receiver.robot_id = receiverID;
-
-    Vector2 receivePos(4.5 / 2, 3 / -2.0);
-    Vector2 startPos(-3, 3 / -2.0);
-    Vector2 thresholdPos(-1, 3 / -2.0);
-    Vector2 rendezvous(3, -2);
 
     drawer.drawPoint("threshold!", thresholdPos);
     drawer.drawPoint("rendezvous!", rendezvous);
@@ -118,7 +123,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", takerID);
+        bb.SetInt("ROBOT_ID", receiverID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GoToStartPos")
@@ -126,6 +131,11 @@ void Bob_KickoffWithRunPlay::Initialize() {
             .setDouble("yGoal", startPos.y)
             .setDouble("angleGoal", (rendezvous - startPos).angle())
             .setBool("avoidRobots", true)
+            ;
+
+        ScopedBB(bb, "TakerHasBall")
+            .setInt("me", takerID)
+            .setBool("our_team", true)
             ;
 
         ScopedBB(bb, "ReceiveBallAtRendezVous")
@@ -169,11 +179,11 @@ bt::Node::Status Bob_KickoffWithRunPlay::Update() {
 
             if (status == bt::Node::Status::Success) {
                 if (token == unique_id::fromMsg(taker.token)) {
-                    std::cout << "First attacker succeeded!\n";
+                    // std::cout << "First attacker succeeded!\n";
                     takerSucceeded = true;
                 }
                 if (token == unique_id::fromMsg(receiver.token)) {
-                    std::cout << "Second attacker succeeded!\n";
+                    // std::cout << "Second attacker succeeded!\n";
                     receiverSucceeded = true;
                 }
             } 
