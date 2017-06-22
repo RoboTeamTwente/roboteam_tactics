@@ -111,6 +111,12 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
+// void wsDummy(const roboteam_msgs::WorldConstPtr& w) {
+    // if (ROBOT_ID == 1) {
+        // std::cout << "    Receiving world state! Seq: " << w->header.seq << "\n";
+    // }
+// }
+
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
@@ -150,8 +156,18 @@ int main(int argc, char *argv[]) {
 
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 
+    // auto worldStateDummySub = n.subscribe<roboteam_msgs::World>("/world_state", 1, &wsDummy, ros::TransportHints().tcpNoDelay());
+
     while (ros::ok()) {
+        // if (ROBOT_ID == 1) {
+            // std::cout << "Spinning. LW Seq: " << rtt::LastWorld::get().header.seq << "\n";
+        // }
+
         ros::spinOnce();
+
+        // if (ROBOT_ID == 1) {
+            // std::cout << "Done spinning! Seq: " << rtt::LastWorld::get().header.seq << "\n";
+        // }
 
         sleeprate.sleep();
 
