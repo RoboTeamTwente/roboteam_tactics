@@ -21,7 +21,6 @@ class Jim_MultipleDefendersPlay : public Tactic {
     private:
     void reInitializeWhenNeeded();
     void reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps);
-    void releaseAllBots();
 
     ros::NodeHandle n;
 
