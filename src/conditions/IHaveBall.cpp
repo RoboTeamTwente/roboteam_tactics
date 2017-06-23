@@ -36,6 +36,7 @@ bt::Node::Status IHaveBall::Update() {
     }
     bool has = bot_has_ball(*opt_bot, world.ball);
     auto res = has ? Status::Success : Status::Failure;
+
     return res;
 }
 

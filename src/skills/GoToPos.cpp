@@ -192,8 +192,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     Vector2 newTargetPos(xGoal, yGoal);
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
-    if (ROBOT_ID != KEEPER_ID) {
-
+    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea("our defense area", newTargetPos)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
@@ -205,7 +204,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
-    }
+    } 
 
     // Check if we have to stay on our side of the field
     if (HasString("stayOnSide")) {
@@ -362,9 +361,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Defense area avoidance
-    // if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
-    sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    // }
+    if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
+        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    } 
 
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {

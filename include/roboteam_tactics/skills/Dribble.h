@@ -45,6 +45,7 @@ private:
 	Vector2 robotvtogoal=Vector2(0.0,0.0);
 	RotateAroundPoint rotateAroundPoint;
 	Vector2 prevspeed=Vector2(0.0,0.0);
+    roboteam_msgs::World::_header_type::_seq_type prevSeq;
 };
 
 

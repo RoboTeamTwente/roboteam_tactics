@@ -31,25 +31,6 @@ void BallPlacementUsPlay::Initialize() {
 
     auto robots = RobotDealer::get_available_robots();
 
-    // if (RobotDealer::get_keeper_available()) {
-        // robots.push_back(RobotDealer::get_keeper());
-    // }
-
-    // int KEEPER_ID = RobotDealer::get_keeper();
-
-    // for (auto const ROBOT_ID : robots) {
-        // bt::Blackboard bb;
-        // bb.SetInt("ROBOT_ID", ROBOT_ID);
-        // bb.SetInt("KEEPER_ID", KEEPER_ID);
-
-        // roboteam_msgs::RoleDirective rd;
-        // rd.robot_id = ROBOT_ID;
-        // rd.tree = "rtt_bob/TwirlTree";
-        // rd.blackboard = bb.toMsg();
-
-        // pub.publish(rd);
-    // }
-    
     if (robots.size() == 0) {
         RTT_DEBUGLN("No robots left to claim!");
         failed = true;
@@ -78,6 +59,7 @@ void BallPlacementUsPlay::Initialize() {
     rtt::ScopedBB(bb, "GetBall_")
         .setDouble("targetAngle", lookAng)
         .setBool("passOn", false)
+        .setBool("enterDefenseAreas", true)
         ;
 
     rtt::ScopedBB(bb, "Dribble_")
