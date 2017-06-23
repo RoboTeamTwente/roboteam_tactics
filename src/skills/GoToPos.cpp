@@ -293,7 +293,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;

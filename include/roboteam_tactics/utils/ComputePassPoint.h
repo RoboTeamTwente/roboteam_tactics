@@ -21,6 +21,7 @@ public:
 	PassPoint();
 	void Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID);
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
@@ -37,9 +38,12 @@ private:
 	// Weights for determining the score of a point on the field
 	double distToGoalWeight;
 	double distToOppWeight;
+	double distToTeammateWeight;
 	double distToBallWeight;
 	double viewOfGoalWeight;
 	double distOppToBallTrajWeight;
+	double distOppToBallToTargetTrajWeight;
+
 	double distToRobotWeight;
 	double angleDiffRobotTargetWeight;
 

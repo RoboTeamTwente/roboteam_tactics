@@ -192,6 +192,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	// Wait for the first world message
 	while (world.us.size() == 0) {
+		ROS_INFO_STREAM("ReceiveBall, empty world...");
 		return Status::Running;
 	}
 
@@ -238,8 +239,9 @@ bt::Node::Status ReceiveBall::Update() {
 
 	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
 	// ROS_INFO_STREAM("robot " << robotID << " receiveBall viewOfGoal: " << viewOfGoal);
-	bool canSeeGoal = viewOfGoal >= 0.1;
-	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
+	bool canSeeGoal = viewOfGoal >= 0.2;
+	double angleDiffBallGoal = fabs(cleanAngle((LastWorld::get_their_goal_center() - robotPos).angle() - (ballPos - robotPos).angle())); 
+	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal && angleDiffBallGoal <= 0.7*M_PI;
 	// ROS_INFO_STREAM("receiveBall shootAtGoal: " << shootAtGoal);
 
 	if (shootAtGoal) {
@@ -248,7 +250,7 @@ bt::Node::Status ReceiveBall::Update() {
 		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
 		// targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle();
 
-		Vector2 robotRadius(0.09, 0.0);
+		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
 	} else {
@@ -280,7 +282,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	double distanceToBall = (ballPos-interceptPos).length();
 	if (shootAtGoal) {
-		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
+		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 7.0)) {
 			startKicking = true;
 			kick.Initialize();
 			return kick.Update();
@@ -339,6 +341,11 @@ bt::Node::Status ReceiveBall::Update() {
 	    if (command) {
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	        pub.publish(*command);
+	    } else {
+	    	roboteam_msgs::RobotCommand emptyCommand;
+	    	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	    	pub.publish(emptyCommand);
+	    	// ROS_INFO_STREAM("ReceiveBall, no command from GoToPos...");
 	    }
 
 	    return Status::Running;		

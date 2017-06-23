@@ -221,6 +221,8 @@ void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNum
 	        bb.SetInt("ROBOT_ID", ballGetterID);
 	        bb.SetInt("KEEPER_ID", keeperID);
 
+	        bb.SetString("GetBall_A_aimAt", "theirgoal");
+
 	        // Create message
 	        rd.tree = "rtt_jim/GetBallRole";
 	        rd.blackboard = bb.toMsg();
@@ -277,6 +279,7 @@ void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNum
         bb.SetDouble("SimpleKeeper_A_distanceFromGoal", 1.35);
         bb.SetDouble("SimpleKeeper_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleKeeper_A_avoidRobots", false);
+        bb.SetBool("SimpleKeeper_A_dontDriveToBall", true);
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";

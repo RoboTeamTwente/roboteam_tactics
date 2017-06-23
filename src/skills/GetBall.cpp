@@ -178,7 +178,7 @@ bt::Node::Status GetBall::Update (){
 
     double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
     // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
-    bool canSeeGoal = viewOfGoal >= 0.1;
+    bool canSeeGoal = viewOfGoal >= 0.2;
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
 
 
@@ -206,6 +206,8 @@ bt::Node::Status GetBall::Update (){
         if (maxScore > -std::numeric_limits<double>::max()) {
             choseRobotToPassTo = true;
             ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
+        } else {
+            SetString("aimAt", "theirgoal");
         }
         
     }
@@ -213,11 +215,13 @@ bt::Node::Status GetBall::Update (){
     
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
-    if (HasString("aimAt")) {
-		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
-	} else if (choseRobotToPassTo) {
+    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+    } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
-    } else if (HasDouble("targetAngle")) {
+    } else if (HasString("aimAt")) {
+		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+	} else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
     } else if (shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
@@ -266,7 +270,7 @@ bt::Node::Status GetBall::Update (){
     }
    
 
-	if (posDiff.length() > 0.3 || fabs(angleDiff) > successAngle) { // posDiff > 0.25 for protoBots
+	if (posDiff.length() > 0.4 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
