@@ -27,7 +27,6 @@
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -40,13 +39,13 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
-        std::cout << "Received a feedback on token " << uuid << ": failure.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
-        std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
-        std::cout << "Received a feedback on token " << uuid << ": success.\n";
+        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
@@ -54,36 +53,10 @@ void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
 }
 
-namespace rtt {
-
-bool dangerFinderCallback(DFService::Request& req, DFService::Response& res) {
-    ROS_INFO("DF Request: %d %d", req.immediate, req.mostDangerousOnly);
-    DangerResult dr = req.immediate ? dangerFinder.getImmediateUpdate() : dangerFinder.currentResult();
-    res.mostDangerous.present = (bool) dr.mostDangerous;
-    if (dr.mostDangerous) {
-        res.mostDangerous.robot = *dr.mostDangerous;
-    }
-    if (!req.mostDangerousOnly) {
-        res.charging.present = (bool) dr.charging;
-        if (dr.charging) {
-            res.charging.robot = *dr.charging;
-        }
-        res.secondMostDangerous.present = (bool) dr.secondMostDangerous;
-        if (dr.secondMostDangerous) {
-            res.secondMostDangerous.robot = *dr.secondMostDangerous;
-        }
-        res.robots = dr.dangerList;
-    }
-    return true;
-}
-
-}
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
-    
-    ros::ServiceServer dfServer = n.advertiseService("dangerFinder", rtt::dangerFinderCallback);
     
     namespace f = rtt::factories;
 
@@ -119,7 +92,13 @@ int main(int argc, char *argv[]) {
     // Only continue if arguments were given
     if (arguments.size() > 0) {
         if (arguments[0] == "mainStrategy") {
-            strategy = std::make_shared<bt::BehaviorTree>(rtt::StrategyComposer::getMainStrategy());
+            strategy = rtt::StrategyComposer::getMainStrategy();
+
+            std::cout << "mainStrategy: " << strategy << "\n";
+            if (!strategy) {
+                std::cerr << "There was an error initializing the main strategy tree (StrategyComposer). Aborting.\n";
+                return 1;
+            }
         } else {
             // Get all available trees
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
@@ -170,7 +149,15 @@ int main(int argc, char *argv[]) {
     }
 
     // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
-    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+    // rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+
+    roboteam_msgs::World world = rtt::LastWorld::get();
+    std::vector<int> initializeBots;
+    initializeBots.clear();
+    for (size_t i = 1; i < world.us.size(); i++) {
+        initializeBots.push_back(world.us.at(i).id);
+    }
+    rtt::RobotDealer::initialize_robots(0, initializeBots);
 
     RTT_DEBUGLN("More than one robot found. Starting!");
     
@@ -180,13 +167,13 @@ int main(int argc, char *argv[]) {
         ros::spinOnce();
 
         //bt::Node::Status status =
-        strategy->Update();
+        bt::Node::Status status = strategy->Update();
 
-        // if (status != bt::Node::Status::Running) {
-            // auto statusStr = bt::statusToString(status);
-            // RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
-            // // break;
-        // }
+        if (status != bt::Node::Status::Running) {
+            auto statusStr = bt::statusToString(status);
+            RTT_DEBUG("Strategy result: %s. Shutting down...\n", statusStr.c_str());
+            break;
+        }
         rate.sleep();
     }
     

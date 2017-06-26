@@ -29,9 +29,6 @@ FreeKickDefenceTactic::FreeKickDefenceTactic(std::string name, bt::Blackboard::P
 }
 
 void FreeKickDefenceTactic::Initialize() {
-    if (!dangerFinder.isRunning()) {
-        dangerFinder.run(100);
-    }
     tokens.clear();
     ros::Duration(.1).sleep();
     RTT_DEBUGLN("Initializing FreeKickDefence");
@@ -69,14 +66,14 @@ void FreeKickDefenceTactic::Initialize() {
     }
     
     // Set defender: blocks most dangerous opponent
-    auto most_dangerous_opt = dangerFinder.getImmediateUpdate().mostDangerous;
+    auto most_dangerous_opt = getBotFromDangerList(0);
     if (!most_dangerous_opt) {
         RTT_DEBUGLN("Cannot find most dangerous bot...");
         return;
     }
     auto most_dangerous = *most_dangerous_opt;
     if (most_dangerous.id == free_kick_taker.id) {
-        most_dangerous = *(dangerFinder.currentResult().secondMostDangerous);
+        most_dangerous = *(getBotFromDangerList(1));
     }
     defender = get_robot_closest_to_point(available, world, most_dangerous.pos);
     {

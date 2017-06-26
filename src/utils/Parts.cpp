@@ -81,11 +81,17 @@ void Tactic::Terminate(Status) {
 
     // Stop every robot
     for (auto robotID : robots) {
+        if (robotID == RobotDealer::get_keeper()) {
+            // std::cout << "releasing keeper \n";
+        } else {
+            // std::cout << "releasing robot " << robotID << " \n";
+        }
         directive.robot_id = robotID;
         pub.publish(directive);
     }
 
     RTT_DEBUGLN("Releasing tactic robots!\n");
+    // std::cout << "terminate tactic " << name << " \n";
 
     RobotDealer::release_robots(robots);
     claimed_robots.clear();

@@ -27,14 +27,17 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
 }
 
 bt::Node::Status IHaveBall::Update() {
-    me = GetInt("me");
+    me = GetInt("me", GetInt("ROBOT_ID", -1));
     us = GetBool("our_team");
     roboteam_msgs::World world = LastWorld::get();
     auto opt_bot = getWorldBot(me, us);
     if (!opt_bot) {
         return Status::Failure;
     }
-    return bot_has_ball(*opt_bot, world.ball) ? Status::Success : Status::Failure;
+    bool has = bot_has_ball(*opt_bot, world.ball);
+    auto res = has ? Status::Success : Status::Failure;
+
+    return res;
 }
 
 std::vector<roboteam_msgs::World> IHaveBall::success_states() const {

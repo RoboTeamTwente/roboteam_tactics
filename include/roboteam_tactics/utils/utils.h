@@ -61,6 +61,7 @@ std::string getMyNamespace();
  * \brief Calculates the target angle for GetBall. See its documentation for details.
  */
 double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool target_our_team);
+Vector2 getTargetPos(std::string target, int theirID, bool target_our_team);
 
 /**
  * \brief Gets the robot which currently holds the ball, if one does.
@@ -79,7 +80,8 @@ boost::optional<std::pair<roboteam_msgs::WorldRobot, bool>> getBallHolder();
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRobot& bot,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
-                                                    bool sight_only = false);
+                                                    bool sight_only = false,
+													bool ignore_both_ends = false);
                                                     
 /**
  * \brief Gets all robots on a line between two points
@@ -92,7 +94,8 @@ std::vector<roboteam_msgs::WorldRobot> getObstacles(const roboteam_msgs::WorldRo
 std::vector<roboteam_msgs::WorldRobot> getObstacles(const Vector2& bot_pos,
                                                     const Vector2& point,
                                                     const roboteam_msgs::World* world_ptr = nullptr,
-                                                    bool sight_only = false);
+                                                    bool sight_only = false,
+													bool ignore_both_ends = false);
 
 /**
  * \brief Gets all robots within a conical area
@@ -221,10 +224,27 @@ bool is_digits(const std::string &str);
 int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
 
 /**
+ * \brief Gets the id of whichever robot is closest to a given point
+ * \param robots The robots to consider
+ * \param point The point to search near
+ * \return The id of the robot closest to the point
+ */
+int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point);
+
+/**
  * \brief Gets the id of whichever robot is closest to the opponents' goal
  * \param robots The robots to consider
  */
 int get_robot_closest_to_their_goal(std::vector<int> robots);
+
+
+/**
+ * \brief Gets the id of whichever robot is closest to our goal
+ * \param robots The robots to consider
+ */
+// int get_robot_closest_to_our_goal(std::vector<roboteam_msgs::WorldRobot> robots);
+int get_robot_closest_to_our_goal(std::vector<int> robots);
+
 
 /**
  * \brief Gets the id of whichever robot is closest to the ball
@@ -255,6 +275,8 @@ int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::Worl
  *    -3.0 <= Y <= 3.0
  */
 bool robotIsWithinBounds(const TeamRobot& bot, const roboteam_msgs::World& world);
+
+boost::optional<roboteam_msgs::WorldRobot> getBotFromDangerList(unsigned dangerIndex);
 
 /**
  * \class GlobalPublisher
@@ -328,6 +350,15 @@ boost::optional<roboteam_msgs::WorldRobot> getWorldBot(unsigned int id, bool our
  * @return An optional containing the robot, or an empty optional if it was not found
  */
 boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam = true, const roboteam_msgs::World& world = LastWorld::get());
+
+/**
+ * \brief Checks whether the parameter is the NaN value.
+ */
+constexpr bool isNaN(double	 t) {
+	return t != t;
+}
+
+bool weAreLeft();
 
 } // rtt
 

@@ -4,10 +4,12 @@
 
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
+#include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
+#include "roboteam_tactics/utils/ComputePassPoint.h"
 
 namespace rtt {
 
@@ -41,14 +43,16 @@ namespace rtt {
  */
 
 struct InterceptPose {
-	Vector2 interceptPos;
-	double interceptAngle;
+    Vector2 interceptPos;
+    double interceptAngle;
 } ;
 
 class ReceiveBall : public Skill {
 public:
     ReceiveBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
-	Status Update();
+    void Initialize();
+    Vector2 computePoint();
+    Status Update();
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -61,23 +65,32 @@ public:
     
     std::string node_name() { return "ReceiveBall"; }
 private:
-	int whichRobotHasBall();
-	void publishStopCommand();
-	InterceptPose deduceInterceptPosFromBall(double receiveBallAtX, double receiveBallAtY);
-	InterceptPose deduceInterceptPosFromRobot(double receiveBallAtX, double receiveBallAtY);
-	
-	int robotID;
-	int hasBall;
-	bool our_team;
-	double acceptableDeviation = 1.0;
+    int whichRobotHasBall();
+    void publishStopCommand();
+    InterceptPose deduceInterceptPosFromBall();
+    InterceptPose deduceInterceptPosFromRobot();
+    
+    int robotID;
+    int hasBall;
+    bool our_team;
+    double acceptableDeviation = 1.0;
 
-	GoToPos goToPos;
-	GetBall getBall;
-	Draw drawer;
-	bool ballHasBeenClose = false;
+    GoToPos goToPos;
+    GetBall getBall;
+    Draw drawer;
+    Kick kick;
+    bool ballHasBeenClose = false;
+    bool startKicking = false;
+    bool enableComputePoint = true;
 
     bool touchedBall = false;
     time_point initialBallContact;
+
+    PassPoint passPoint;
+    time_point prevComputedPoint;
+    Vector2 receiveBallAtPos;
+
+    bool computedTargetPos;
 };
 
 } // rtt

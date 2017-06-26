@@ -100,6 +100,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         ros::NodeHandle n;
         currentTreeName = msg->tree;
         currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
+
         if (!currentTree)  {
             ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
             return;
@@ -107,8 +108,14 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     }
     currentToken = msg->token;
 
-    RTT_SEND_RQT_BT_TRACE(msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+    RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
+
+// void wsDummy(const roboteam_msgs::WorldConstPtr& w) {
+    // if (ROBOT_ID == 1) {
+        // std::cout << "    Receiving world state! Seq: " << w->header.seq << "\n";
+    // }
+// }
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
@@ -135,7 +142,7 @@ int main(int argc, char *argv[]) {
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
-    
+
     // Create world & geom callbacks
     rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
@@ -149,9 +156,19 @@ int main(int argc, char *argv[]) {
 
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 
+    // auto worldStateDummySub = n.subscribe<roboteam_msgs::World>("/world_state", 1, &wsDummy, ros::TransportHints().tcpNoDelay());
+
     while (ros::ok()) {
+        // if (ROBOT_ID == 1) {
+            // std::cout << "Spinning. LW Seq: " << rtt::LastWorld::get().header.seq << "\n";
+        // }
+
         ros::spinOnce();
-        
+
+        // if (ROBOT_ID == 1) {
+            // std::cout << "Done spinning! Seq: " << rtt::LastWorld::get().header.seq << "\n";
+        // }
+
         sleeprate.sleep();
 
         if (!currentTree){
@@ -188,7 +205,7 @@ int main(int argc, char *argv[]) {
             }
 
             currentTree = nullptr;
-            
+
             // Stop the robot in its tracks
             pub.publish(rtt::stop_command(ROBOT_ID));
         }

@@ -30,9 +30,7 @@ TwoAttackersTactic::TwoAttackersTactic(std::string name, bt::Blackboard::Ptr bla
 void TwoAttackersTactic::Initialize() {
     tokens.clear();
 
-    RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");
-    // ROS_INFO("Initializing TwoAttackersTactic");
-    
+    RTT_DEBUGLN_TEAM("Initializing TwoAttackersTactic");    
     // if (RobotDealer::get_available_robots().size() < 1) {
     //     RTT_DEBUG("Not enough robots, cannot initialize... \n");
     //     // TODO: Want to pass failure here as well!
@@ -41,23 +39,13 @@ void TwoAttackersTactic::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    int firstAttackerID = 0;
-    int secondAttackerID = 1;
+    firstAttackerID = 0;
+    secondAttackerID = 1;
+    thirdAttackerID = 2;
     firstAttacker.robot_id = firstAttackerID;
     secondAttacker.robot_id = secondAttackerID;
+    thirdAttacker.robot_id = thirdAttackerID;
 
-    Vector2 standFreePos;
-    std::string ourSide;
-    ros::param::get("our_side", ourSide);
-    if (ourSide == "left") {
-        standFreePos = Vector2(1.5, 1.5);
-    } else if (ourSide == "right") {
-        standFreePos = Vector2(-1.5, -1.5);
-    } else {
-        ROS_WARN("TwoAttackersTactic: something went wrong in getting param ourSide");
-        standFreePos = Vector2(-1.5, -1.5);
-    }
-    
     // delete_from_vector(robots, attackerID);
     // claim_robots({firstAttackerID, secondAttackerID});
 
@@ -72,16 +60,14 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("ROBOT_ID", firstAttackerID);
         bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetString("GetBall_A_AimAt", "robot");
-        bb.SetInt("GetBall_A_AimAtRobot", secondAttackerID);
-        bb.SetBool("GetBall_A_AimAtRobotOurTeam", true);
+        // bb.SetString("GetBall_A_aimAt", "robot");
+        bb.SetBool("GetBall_A_passToBestAttacker", true); 
+        // bb.SetInt("GetBall_A_aimAtRobot", secondAttackerID);
 
-        bb.SetString("AimAt_secondAttacker_At", "robot");
-        bb.SetInt("AimAt_secondAttacker_AtRobot", secondAttackerID);
+        // bb.SetString("AimAt_A_At", "robot");
+        // bb.SetInt("AimAt_A_AtRobot", secondAttackerID);
 
-        bb.SetString("ParamCheck_canIShoot_signal", "readyToReceiveBall");
-        bb.SetString("ParamCheck_canIShoot_mode", "eq");
-        bb.SetString("ParamCheck_canIShoot_value", "ready");
+        bb.SetBool("Kick_A_wait_for_signal", true);
 
         // Create message
         firstAttacker.tree = "qualification/TwoAttackersFirstRole";
@@ -105,25 +91,9 @@ void TwoAttackersTactic::Initialize() {
         bb.SetInt("ROBOT_ID", secondAttackerID);
         bb.SetInt("KEEPER_ID", 5);
 
-        bb.SetString("ParamSet_default_signal", "readyToReceiveBall");
-        bb.SetString("ParamSet_default_value", "nope");
-
-        bb.SetInt("StandFree_A_theirID", firstAttackerID);
-        bb.SetString("StandFree_A_whichTeam", "us");
-        bb.SetDouble("StandFree_A_xGoal", standFreePos.x);
-        bb.SetDouble("StandFree_A_yGoal", standFreePos.y);
-        bb.SetBool("StandFree_A_seeGoal", true);
-
-        bb.SetString("ParamSet_readyToReceive_signal", "readyToReceiveBall");
-        bb.SetString("ParamSet_readyToReceive_value", "ready");
-
-        // bb.SetDouble("ShootAtGoal_A_kickVel", 5.0);
-        
-        ScopedBB(bb, "AimAt_A")
-            .setString("At", "theirgoal")
-            ;
-
-        bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", true);
+        // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
+        bb.SetBool("ReceiveBall_A_computePoint", true);
+        bb.SetBool("ReceiveBall_A_setSignal", true);
 
         // Create message
         secondAttacker.tree = "qualification/TwoAttackersSecondRole";
@@ -138,6 +108,31 @@ void TwoAttackersTactic::Initialize() {
         pub.publish(secondAttacker);
     }
 
+    // Create the third Attacker Role
+    {
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", thirdAttackerID);
+        bb.SetInt("KEEPER_ID", 5);
+
+        // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
+        bb.SetBool("ReceiveBall_A_computePoint", true);
+        bb.SetBool("ReceiveBall_A_setSignal", true);
+
+        // Create message
+        thirdAttacker.tree = "qualification/TwoAttackersSecondRole";
+        thirdAttacker.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        thirdAttacker.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(thirdAttacker);
+    }
+
     isThisYourFirstTimeHere = true;
     start = rtt::now();
 }
@@ -145,6 +140,7 @@ void TwoAttackersTactic::Initialize() {
 bt::Node::Status TwoAttackersTactic::Update() {
     bool firstAttackerSucceeded = false;
     bool secondAttackerSucceeded = false;
+    bool thirdAttackerSucceeded = false;
     bool oneFailed = false;
 
     for (auto token : tokens) {
@@ -158,6 +154,9 @@ bt::Node::Status TwoAttackersTactic::Update() {
                 if (token == unique_id::fromMsg(secondAttacker.token)) {
                     secondAttackerSucceeded = true;
                 }
+                if (token == unique_id::fromMsg(thirdAttacker.token)) {
+                    thirdAttackerSucceeded = true;
+                }
             } 
             if (status == bt::Node::Status::Failure) {
                 oneFailed = true;
@@ -165,7 +164,7 @@ bt::Node::Status TwoAttackersTactic::Update() {
         }
     }
 
-    if (firstAttackerSucceeded && secondAttackerSucceeded) {
+    if (firstAttackerSucceeded && secondAttackerSucceeded && thirdAttackerSucceeded) {
         RTT_DEBUGLN("Both roles succeeded, so tactic succeeded");
         return bt::Node::Status::Success;
     }

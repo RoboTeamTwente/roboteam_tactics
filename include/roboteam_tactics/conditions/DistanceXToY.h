@@ -3,11 +3,13 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 
 namespace rtt {
 
 Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
 bool isWithinDefenseArea(std::string whichArea, Vector2 point);
+bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_side, roboteam_msgs::GeometryFieldSize field);
 
 /**
  * \class DistanceXToY

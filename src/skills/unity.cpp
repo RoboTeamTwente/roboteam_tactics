@@ -40,17 +40,20 @@
 #include "GoToPos.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
-#include "GoToPosAlt.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
-
 #include "Harass.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "KeeperBlock.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "KeepPosition.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Kick.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
+
+#include "MirrorOpponent.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "NaiveBlockGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
@@ -76,11 +79,17 @@
 #include "SecondaryKeeper.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "SelectStarAttackShooter.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "ShootAtGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "ShootAtGoalV2.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
+
+#include "ShootAway.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "SimpleKeeper.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 

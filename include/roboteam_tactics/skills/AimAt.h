@@ -20,6 +20,7 @@ namespace rtt {
  *        - theirgoal:  Aim at their goal 
  *        - ourgoal:    Aim at our goal
  *        - position:   Aim at a position
+ *        - paramrobot: Aim at a robot, indicated by the ROS (int) param '/<name>_targetBot'
  *     Descr: What thing to aim at
  *
  * - xGoal:

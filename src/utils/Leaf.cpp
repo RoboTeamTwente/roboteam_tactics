@@ -1,6 +1,7 @@
 #include <string>
 
 #include "roboteam_tactics/Leaf.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
@@ -14,6 +15,8 @@ bt::Node::Status Leaf::Tick() {
 
     roboteam_msgs::Blackboard bb;
 
+    int bot_id = GetInt("ROBOT_ID", -1);
+
     if (newStatus != bt::Node::Status::Running) {
         roboteam_msgs::BtDebugInfo::_type_type msgStatus;
 
@@ -25,10 +28,10 @@ bt::Node::Status Leaf::Tick() {
             msgStatus = roboteam_msgs::BtStatus::INVALID;
         }
 
-        RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
+        RTT_SEND_RQT_BT_TRACE(bot_id, name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
     } else if (newStatus != previousStatus) {
         roboteam_msgs::BtDebugInfo::_type_type msgStatus = roboteam_msgs::BtStatus::STARTUP;
-        RTT_SEND_RQT_BT_TRACE(name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
+        RTT_SEND_RQT_BT_TRACE(bot_id, name, roboteam_msgs::BtDebugInfo::TYPE_LEAF, msgStatus, bb);
     }
 
     return newStatus;
@@ -153,6 +156,13 @@ std::string Leaf::getPrefixedId(std::string id) const {
     }
 
     return name + "_" + id;
+}
+
+bt::Blackboard::Ptr Leaf::newSubBlackboard() const {
+	bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
+	merge_blackboards(bb, blackboard);
+	merge_blackboards(bb, private_bb);
+	return bb;
 }
 
 } // rtt

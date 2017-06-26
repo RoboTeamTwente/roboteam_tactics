@@ -2,7 +2,7 @@
 
 # Usage:
 #
-# Command: ./generate_cpp_from_json.sh
+# Command: ./generate_cpp_from_json.sh [--no-mem-principle]
 # Generates the files alltrees.h and alltrees.cpp, containing
 # functions that construct all the behavior trees in the JSON folder.
 
@@ -48,11 +48,11 @@ printf "$headerPreamble" >> $treeHeader
 # And append them to the sourc and header files
 for filepath in src/trees/json/*.json; do
     # Generate implementations
-    rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt
+    rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt $1
     printf "\n" >> $treeSource
 
     # Generated header declarations
-    rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt
+    rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt $1
     printf "\n" >> $treeHeader
 done
 

@@ -1,0 +1,10 @@
+distToGoalWeight 0.0
+distToOppWeight 1.0
+distToBallWeight 0.0
+viewOfGoalWeight 0.0
+distOppToBallTrajWeight 0.0
+distToRobotWeight 2.0
+angleDiffRobotTargetWeight 0.0
+distToRobotThreshold 1.0
+distOppToBallTrajThreshold 0.2
+distOppToBallToTargetTrajThreshold 0.0

@@ -4,7 +4,6 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
-#include "roboteam_tactics/utils/DangerFinder.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
 
@@ -69,7 +68,7 @@ void TwoVTwoDefenseTactic::Initialize() {
         if (holder && !holder->second) {
             tgt = holder->first.id;
         } else {
-            tgt = dangerFinder.getImmediateUpdate().mostDangerous->id;
+            tgt = getBotFromDangerList(0)->id;
         }
         bt::Blackboard bb;
         bb.SetInt("ROBOT_ID", harasser.robot_id);

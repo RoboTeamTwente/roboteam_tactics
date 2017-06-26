@@ -16,7 +16,7 @@
 
 namespace rtt {
 
-Control::Control()
+Control::Control() : updateRateParam("role_iterations_per_second")
         {
             ros::NodeHandle n;
             myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
@@ -83,17 +83,17 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 1.0; 
         iGainRotation = 1.0;
         pGainVelocity = 0.5;
-        maxSpeed = 0.6;
+        maxSpeed = 1.0;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;
+        pGainPosition = 1.5;
         iGainPosition = 0.0;
-        pGainRotation = 4.0;
+        pGainRotation = 1.0;
         iGainRotation = 0.0;
-        maxSpeed = 1.5;
-        maxAngularVel = 10.0;
+        maxSpeed = 2.0;
+        maxAngularVel = 6.0;
 
         robotType = RobotType::GRSIM;
     } else {
@@ -209,8 +209,16 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
 
     // Integral term
-    double updateRate;
-    ros::param::get("role_iterations_per_second", updateRate);
+    double updateRate = updateRateParam();
+    if (!updateRateParam.isSet() || updateRate == 0) {
+        if (updateRate == 0) {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second set to 0! changing to 30.");
+        } else {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second not set! Assuming 30.");
+        }
+        updateRate = 30;
+    }
+
     double timeStep = 1 / updateRate;
     if (angleError < 0.15*M_PI) {
         angleErrorI = angleErrorI * 0.9 + angleError * timeStep;

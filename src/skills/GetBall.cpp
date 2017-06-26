@@ -4,6 +4,8 @@
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
+#include "roboteam_tactics/conditions/CanClaimBall.h"
+// #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -21,6 +23,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <boost/optional.hpp>
 
 #define RTT_CURRENT_DEBUG_TAG GetBall
 
@@ -33,15 +36,17 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb) {
     hasBall = whichRobotHasBall();
 
-            std::string robot_output_target = "";
-            ros::param::getCached("robot_output_target", robot_output_target);
-            if (robot_output_target == "grsim") {
-                distanceFromBallWhenDribbling = 0.105;
-            } else if (robot_output_target == "serial") {
-                distanceFromBallWhenDribbling = 0.08;
-            } else {
-                distanceFromBallWhenDribbling = 0.105;
-            }
+    std::string robot_output_target = "";
+    ros::param::getCached("robot_output_target", robot_output_target);
+    if (robot_output_target == "grsim") {
+        distanceFromBallWhenDribbling = 0.105;
+    } else if (robot_output_target == "serial") {
+        distanceFromBallWhenDribbling = 0.08;
+    } else {
+        distanceFromBallWhenDribbling = 0.105;
+    }
+    choseRobotToPassTo = false;
+    // passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -90,14 +95,49 @@ void GetBall::publishKickCommand(){
     pub.publish(command);  
 }
 
+bool GetBall::canClaimBall() {
+    int robotClaimedBall;
+
+    if (ros::param::has("robotClaimedBall")) {
+        ros::param::getCached("robotClaimedBall", robotClaimedBall);
+
+        if (robotClaimedBall == robotID) {
+            return true;
+        } else if (robotClaimedBall == -1) {
+            ros::param::set("robotClaimedBall", robotID);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        ros::param::set("robotClaimedBall", robotID);
+        return true;
+    }
+}
+
+void GetBall::releaseBall() {
+    ros::param::set("robotClaimedBall", -1);
+    return;
+}
+
 
 void GetBall::Initialize() {
     ballCloseFrameCount = 0;
+    finalStage = false;
+    countFinalMessages = 0;
+
+    
 }
+
 
 bt::Node::Status GetBall::Update (){
 
-    if(finalStage){
+	roboteam_msgs::World world = LastWorld::get();
+	robotID = blackboard->GetInt("ROBOT_ID");
+    // if (!canClaimBall()) {return Status::Failure;}
+
+
+    if (finalStage){
         if(countFinalMessages < 10){
             publishKickCommand();
             countFinalMessages=countFinalMessages+1;
@@ -105,15 +145,10 @@ bt::Node::Status GetBall::Update (){
         }
         else {
             publishStopCommand();
+            releaseBall();
             return Status::Success;
         }
     }
-
-	roboteam_msgs::World world = LastWorld::get();
-	robotID = blackboard->GetInt("ROBOT_ID");
-	if (HasDouble("acceptableDeviation")) {
-		acceptableDeviation = GetDouble("acceptableDeviation");
-	}
 
 
 	// Wait for the first world message
@@ -139,19 +174,65 @@ bt::Node::Status GetBall::Update (){
 	Vector2 robotVel(robot.vel);
 	Vector2 targetPos;
 	double targetAngle;
+    Vector2 posDiff = ballPos - robotPos; 
 
+    double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+    // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
+    bool canSeeGoal = viewOfGoal >= 0.2;
+    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
+
+
+    // If we should pass on to the best available attacker, we should find which one has the highest score
+    if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        double maxScore = -std::numeric_limits<double>::max();
+
+        for (size_t i = 0; i < (world.us.size()); i++) {
+
+            std::string paramName = "robot" + std::to_string(world.us.at(i).id) + "/readyToReceiveBall";
+            bool readyToReceiveBall = false;
+            ros::param::getCached(paramName, readyToReceiveBall);
+
+            if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
+                passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
+                double score = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
+                // ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score << " maxScore: " << maxScore);
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxScoreID = world.us.at(i).id;
+                }
+            }
+        }
+        
+        if (maxScore > -std::numeric_limits<double>::max()) {
+            choseRobotToPassTo = true;
+            ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
+        } else {
+            SetString("aimAt", "theirgoal");
+        }
+        
+    }
+
+    
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
-    if (HasString("aimAt")) {
+    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+    } else if (choseRobotToPassTo) {
+        targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
+    } else if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
-	} else {
-		if (HasDouble("targetAngle")) {
-			targetAngle = GetDouble("targetAngle");
-		} else {
-			Vector2 posdiff = ballPos - robotPos;
-			targetAngle = posdiff.angle();
-		}
-	}
+	} else if (HasDouble("targetAngle")) {
+        targetAngle = GetDouble("targetAngle");
+    } else if (shootAtGoal) {
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+    } else {
+        targetAngle = posDiff.angle();
+    }
+
+    if (GetBool("aimAwayFromTarget")) {
+        targetAngle = targetAngle + M_PI;
+    }
+
 	targetAngle = cleanAngle(targetAngle);
 
 
@@ -161,57 +242,58 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.1*M_PI) {
+	if (angleDiff > 0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.1*M_PI) {
+	} else if (angleDiff < -0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
     }
 	
+    
 	// Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	double posDiff = (ballPos - robotPos).length(); 
-
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     double successDist = 0.0;
     double successAngle = 0.0;
     double getBallDist;
+    double distAwayFromBall = 0.2; // 0.2 for protoBots??
     if (robot_output_target == "grsim") {
-        successDist = 0.13;
-        successAngle = 0.3;
-        getBallDist = 0.11;
+        successDist = 0.11;
+        successAngle = 0.1;
+        getBallDist = 0.08 ;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.3;
         getBallDist = 0.06;
     }
+   
 
-    double distAwayFromBall = 0.2;
-    if (HasDouble("distAwayFromBall")) {
-         distAwayFromBall = GetDouble("distAwayFromBall");
-    }
-
-    // ROS_INFO_STREAM("posDiff: " << posDiff << " angleDiff: " << angleDiff << " intermediateAngle: " << intermediateAngle);
-    // bool noYVel = false;
-	if (posDiff > 0.25 || fabs(angleDiff) > successAngle){
+	if (posDiff.length() > 0.4 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
-        private_bb->SetDouble("maxSpeed", 0.6);
-        // noYVel = true;
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
+        if (robot_output_target == "serial") {
+            private_bb->SetDouble("maxSpeed", 0.6);
+        }
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
 	}
     
     double angleError = cleanAngle(robot.angle - targetAngle);
 
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
+    // std::cout << (ballPos - robotPos).length()
 
+	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         int ballCloseFrameCountTo = 3;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
+
+        if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+            return Status::Running;
+        }
+        
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
             ballCloseFrameCount++;
             return Status::Running;
@@ -227,28 +309,17 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
-    
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", false);
-    private_bb->SetString("whichBot", GetString("whichBot"));
+
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    } 
     
-    // @HACK for robot testing purposes
-    if (HasDouble("maxSpeed")) {
-    	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
-    }
-    if (HasDouble("pGainRotation")) {
-    	private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
-    }
-    if (HasDouble("iGainRotation")) {
-        private_bb->SetDouble("iGainRotation", GetDouble("iGainRotation"));
-    }
-    if (HasDouble("pGainPosition")) {
-    	private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    }
-    if (HasBool("smoothDriving")) {
-        private_bb->SetBool("smoothDriving", GetBool("smoothDriving"));
-        private_bb->SetDouble("smoothingNumber", GetDouble("smoothingNumber"));
-    }
+    // @DEBUG for robot testing purposes we like to change the maxSpeed sometimes manually
+    // if (HasDouble("maxSpeed")) {
+    // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+    // }
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
@@ -258,26 +329,16 @@ bt::Node::Status GetBall::Update (){
     	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
     }
 
-    if (HasBool("matchBallVel") && GetBool("matchBallVel")) {
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 4.0) {
-          newVelCommand.scale(4.0 / newVelCommand.length());
-        }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;    
-    }
-
-    Vector2 velCommand = Vector2(command.x_vel, command.y_vel);
-    ROS_INFO_STREAM("velCommand: " << velCommand);
-
-    // if (noYVel) {
-    //     command.y_vel = 0.0;
+    // if (HasBool("matchBallVel") && GetBool("matchBallVel")) {
+    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+    //     if (newVelCommand.length() > 4.0) {
+    //       newVelCommand.scale(4.0 / newVelCommand.length());
+    //     }
+    //     command.x_vel = newVelCommand.x;
+    //     command.y_vel = newVelCommand.y;    
     // }
-
-    // ROS_INFO_STREAM("xvel: " << command.x_vel << " yvel: " << command.y_vel << " w: " << command.w);
     
-
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);	

@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <ros/ros.h>
+#include <signal.h>
 
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
@@ -24,11 +25,22 @@
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/RobotDealer.h"
 
 static volatile bool may_update = false;
 
+namespace {
+
+bool mustShutdown = false;
+
+void mySigintHandler(int sig) {
+    mustShutdown = true;
+
+    std::cout << "Sig: " << sig << "\n";
+}
+
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
-    
+
     auto uuid = unique_id::fromMsg(msg->token);
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
@@ -62,6 +74,27 @@ void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
+
+void stopRolenode(int const id) {
+    auto & pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+    roboteam_msgs::RoleDirective rd;
+    rd.robot_id = id;
+    rd.tree = rd.STOP_EXECUTING_TREE;
+
+    pub.publish(rd);
+}
+
+void stopRobot(int const id) {
+    auto & pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+
+    roboteam_msgs::RobotCommand rc;
+    rc.id = id;
+
+    pub.publish(rc);
+}
+
+} // anonymous namespace
 
 int main(int argc, char **argv) {
     std::vector<std::string> arguments(argv + 1, argv + argc);
@@ -123,6 +156,10 @@ How to use:
 
 	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
+
+    // Install our own signal handler to ensure that publishers
+    // are closed at the end of main instead of when ctrl-c is pressed
+    signal(SIGINT, mySigintHandler);
 
     ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
         rtt::TOPIC_ROLE_FEEDBACK,
@@ -204,7 +241,7 @@ How to use:
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
-    
+
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -228,14 +265,14 @@ How to use:
     if (rtt::factories::isTactic(testClass)) {
         std::cout << "Testing a tactic! Please ensure that 6 role nodes are available...\n";
         std::cout << "(For example by using mini_rolenodes.launch from roboteam_utils)\n";
-        
+
         auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
         ros::Rate fps60(60);
-        while ((int) directivePub.getNumSubscribers() < 6) {
+        while ((int) directivePub.getNumSubscribers() < 2) {
             ros::spinOnce();
             fps60.sleep();
 
-            if (!ros::ok()) {
+            if (!mustShutdown) {
                 std::cout << "Interrupt received, exiting...";
                 return 0;
             }
@@ -248,16 +285,25 @@ How to use:
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    
+
     double updateRate = 30;
-    ros::param::set("role_iterations_per_second", updateRate);
+    ros::param::get("role_iterations_per_second", updateRate);
+    if (updateRate == 0) {
+        ROS_ERROR_STREAM("role_iterations_per_second == 0. Aborting!");
+        return 1;
+    }
     ros::Rate fps(updateRate);
+    std::cout << "[TestX] Updating at " << updateRate << "Hz\n";
 
     rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
 
     if (rtt::factories::isTree(testClass)) {
+        int bot_id = -1;
+        if (bb->HasInt("ROBOT_ID")) {
+            bot_id = bb->GetInt("ROBOT_ID");
+        }
         // Notify the tree debugger that we're running a tree.
-        RTT_SEND_RQT_BT_TRACE(testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+        RTT_SEND_RQT_BT_TRACE(bot_id, testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 
         bt::BehaviorTree* bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
 
@@ -267,7 +313,7 @@ How to use:
 		runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
             fps.sleep();
-            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
+            return !mustShutdown && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
 
         // TODO: This is a hack, and if the thing above this is just a while loop
@@ -276,8 +322,15 @@ How to use:
     } else {
         node->Initialize();
 
+        std::vector<int> claimedRobots;
+
+        if (rtt::factories::isTactic(testClass)) {
+            auto tacticNode = std::static_pointer_cast<rtt::Tactic>(node);
+            claimedRobots = tacticNode->get_claimed_robots();
+        }
+
         bt::Node::Status status = bt::Node::Status::Invalid;
-        while (ros::ok()) {
+        while (!mustShutdown) {
             ros::spinOnce();
 
             status = node->Update();
@@ -289,9 +342,19 @@ How to use:
             fps.sleep();
         }
 
-        std::cout << "Terminating. Final status: " << bt::statusToString(status) << "\n";
-
         node->Terminate(status);
+
+        // for (auto id : claimedRobots) {
+            // stopRolenode(id);
+            // stopRobot(id);
+        // }
+    }
+
+    // Give ros some time to send the stop messages
+    ros::Rate rate(60);
+    for (int i = 0; i < 15; i++) {
+        rate.sleep();
+        ros::spinOnce();
     }
 
     // Gracefully close all the publishers.

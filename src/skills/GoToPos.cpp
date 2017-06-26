@@ -34,7 +34,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
-            safetyMarginGoalAreas = 0.0;
+            safetyMarginGoalAreas = 0.2;
             marginOutsideField = -0.1;
             avoidRobotsGain = 0.2;
         }
@@ -98,7 +98,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     antenna = antenna.scale(myVel.length()*1.5); // magic scaling constant
 
     // Draw the antenna in rqt-view
-    drawer.drawLine("antenna", myPos, antenna);
+    // drawer.drawLine("antenna", myPos, antenna);
 
     // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
@@ -156,8 +156,8 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) 
     double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
 
     if (theta < (0.5 * M_PI)) {
-        if (theta == 0) theta = 0.01;
-        double force = theta / (0.5 * M_PI);
+        if (fabs(theta) < .00001) theta = 0.01;
+        // double force = theta / (0.5 * M_PI);
         Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
         Vector2 ballForce = projectedBall - ballPos;
         sumOfForces = sumOfForces + ballForce * 5;
@@ -192,21 +192,19 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     Vector2 newTargetPos(xGoal, yGoal);
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
-    if (ROBOT_ID != KEEPER_ID) {
-        // TODO: Doesn't work if normalize_field (rosparam in mini.launch) is true. Disabled until further notice    
+    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
+        // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
+        if (isWithinDefenseArea("our defense area", newTargetPos)) {
+            Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+            newTargetPos = newTargetPos + distToOurDefenseArea;
+        }
 
-        // // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        // if (isWithinDefenseArea("our defense area", newTargetPos)) {
-            // Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
-            // newTargetPos = newTargetPos + distToOurDefenseArea;
-        // }
-
-        // // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        // if (isWithinDefenseArea("their defense area", newTargetPos)) {
-            // Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
-            // newTargetPos = newTargetPos + distToTheirDefenseArea;
-        // }
-    }
+        // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
+        if (isWithinDefenseArea("their defense area", newTargetPos)) {
+            Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+            newTargetPos = newTargetPos + distToTheirDefenseArea;
+        }
+    } 
 
     // Check if we have to stay on our side of the field
     if (HasString("stayOnSide")) {
@@ -257,6 +255,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
+
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
     }
@@ -276,22 +275,26 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
+    // drawer.drawPoint("targetPosOld_" + std::to_string(ROBOT_ID), targetPos);
+
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
     } else {
         targetPos = checkTargetPos(targetPos);
         prevTargetPos = targetPos;
-    }
-
-    // Draw the target position in RQT-view
-    drawer.setColor(0, 0, 0);
-    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    }  
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+
+    // Draw the line towards the target position
+    drawer.setColor(0, 100, 100);
+    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.setColor(0, 0, 0);
 
     double angleGoal;
     if (HasDouble("angleGoal")) {
@@ -315,6 +318,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     targetPosPub.angle = angleGoal;
     myTargetPosTopic.publish(targetPosPub);
 
+    // Determine how close we should get to the targetPos before we succeed
     double successDist;
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
@@ -341,6 +345,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos);
 
+
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError);
 
@@ -356,9 +361,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Defense area avoidance
-    if (HasBool("avoidDefenseAreas") && GetBool("avoidDefenseAreas")) {
+    if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    }
+    } 
 
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {
@@ -367,9 +372,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-    drawer.setColor(0, 0, 0);
+    // drawer.setColor(255, 0, 0);
+    // drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    // drawer.setColor(0, 0, 0);
 
     // Rotate the commands from world frame to robot frame 
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
@@ -383,16 +388,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     myVelTopic.publish(myVelRobot); 
 
     // Velocity controller
-    Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+    // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+    Vector2 velCommand = velTarget;
 
     // Limit angular and linear velocity
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
 
-
-
-    double drivingAngle = velCommand.angle();
-    // ROS_INFO_STREAM("drivingAngle: " << drivingAngle);
+    
+    // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
+    // wheels remain still
+    // double drivingAngle = velCommand.angle();
     // if (drivingAngle >= ((30.0-20.0)/180.0*M_PI) && drivingAngle <= ((30.0+40.0)/180.0*M_PI)) {
     //     ROS_INFO_STREAM("limiting drive direction pos y");
     //     velCommand = Vector2(1.0, 0.0).rotate(30.0/180.0*M_PI).scale(velCommand.length());
@@ -400,28 +406,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     //     ROS_INFO_STREAM("limiting drive direction neg y");
     //     velCommand = Vector2(1.0, 0.0).rotate(330.0/180.0*M_PI).scale(velCommand.length());
     // }
-
-    // ROS_INFO_STREAM("velcommand length: " << velCommand.length());
-
-    // if (velCommand.x == 0.0 && velCommand.y == 0.0 && angularVelTarget == 0.0) {
-    //     failure = true;
-    //     succeeded = false;
-    //     return boost::none;
-    // }
-
-    // @TODO: find out if this is useful and perhaps move it to utils/Control
-    // if (GetBool("smoothDriving")) {
-    //     if ((velCommand.length() - prevVelCommand.length()) > GetDouble("smoothingNumber")) {
-    //         ROS_INFO_STREAM("limiting acceleration!");
-    //         velCommand = velCommand.scale((prevVelCommand.length() + 0.1) / velCommand.length());
-    //     }
-    //     if ((fabs(angularVelTarget) - fabs(prevAngularVelTarget)) > 0.5) {
-    //         ROS_INFO_STREAM("limiting angular acc " << angularVelTarget);
-    //         angularVelTarget = prevAngularVelTarget + (0.5 * signum(angularVelTarget));
-    //         ROS_INFO_STREAM("new angular vel: " << angularVelTarget);
-    //     }
-    // }
-    // prevAngularVelTarget = angularVelTarget;
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
@@ -440,6 +424,10 @@ bt::Node::Status GoToPos::Update() {
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        if (command->x_vel != command->x_vel) {
+        	ROS_ERROR("Tried to send NAN");
+        	return Status::Invalid;
+        }
         pub.publish(*command);
         return Status::Running;
     } else {

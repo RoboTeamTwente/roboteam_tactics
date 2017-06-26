@@ -115,6 +115,8 @@ done
 entry ParallelTactic composite
 entry ParallelSequence composite
 entry Repeat decorator
+entry SuccederDec decorator
+entry FailerDec decrator
 
 result=$(join_by , "${allNodes[@]}")
 

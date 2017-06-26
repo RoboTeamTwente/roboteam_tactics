@@ -13,6 +13,7 @@
 #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/ComputePassPoint.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG CanSeeTheirGoal
@@ -28,29 +29,25 @@ CanSeeTheirGoal::CanSeeTheirGoal(std::string name, bt::Blackboard::Ptr blackboar
 bt::Node::Status CanSeeTheirGoal::Update() {
 	RTT_DEBUG("called CanSeeTheirGoal");
 	roboteam_msgs::World world = LastWorld::get();
-	auto field = LastWorld::get_field();
 
-	std::string our_side = get_our_side();
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	boost::optional<roboteam_msgs::WorldRobot> robotPointer = getWorldBot(robotID);
+    roboteam_msgs::WorldRobot robot;
+    if (robotPointer) {
+        robot = *robotPointer;
+    } else {
+        ROS_WARN("Kick: Robot not found");
+        return Status::Failure;
+    }
+    Vector2 robotPos(robot.pos);
+    PassPoint passPoint;
+	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
 
-	Vector2 goalPos = Vector2(field.field_length/2.0, 0);
-
-	auto bb2 = std::make_shared<bt::Blackboard>();
-    bb2->SetInt("me", blackboard->GetInt("ROBOT_ID"));
-    bb2->SetDouble("x_coor", goalPos.x);
-    bb2->SetDouble("y_coor", goalPos.y);
-    bb2->SetBool("check_move", true);
-	CanSeePoint canSeePoint("", bb2);
-
-	if (canSeePoint.Update() == bt::Node::Status::Success) {
-		RTT_DEBUG("i can see the goal!");
-		return bt::Node::Status::Success;
+	if (viewOfGoal >= 0.3) {
+		return Status::Success;
+	} else {
+		return Status::Failure;
 	}
-	if (canSeePoint.Update() == bt::Node::Status::Failure) {
-		RTT_DEBUG("i cannot see the goal :(");
-		return bt::Node::Status::Failure;
-	}
-
-	return canSeePoint.Update();
 }
 
-}
+} // rtt

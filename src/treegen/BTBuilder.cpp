@@ -34,6 +34,12 @@ std::string folderConcat(std::string left, std::string right) {
     }
 }
 
+/*
+ *
+ * @Bug: When not run in the root of roboteam_tactics, it cannot find the skills, conditions, tactics
+ * because of the relative path. Only a mild nuisance while debugging. Can be fixed by using rospack.
+ *
+ */
 std::vector<std::string> get_all_recursively(std::string category, std::string folders, bool recurse = true) {
     bf::path categoryPath(folderConcat("src/" + category, folders));
 
@@ -155,13 +161,25 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
     initializeSet(allconditions_set, allconditions_list);
     initializeSet(alltactics_set, alltactics_list);
 
-    std::stack<std::string> stack;
-    try {
-    stack.push(json["root"]);
-    } catch (...) {
-        std::cout << json;
-        throw;
+    auto rootIt = json.find("root");
+    if (rootIt == json.end()) {
+        cmakeErrTree("No root entry found.");
+        return boost::none;
+    } else if (rootIt->is_null()) {
+        cmakeWarnTree("Empty tree, if unused should be deleted.");
+        return std::string();
     }
+
+    std::stack<std::string> stack;
+    stack.push(rootIt->get<std::string>());
+    // try {
+        // std::cout << json["root"] << "\n";
+        // stack.push(json["root"]);
+    // } catch (...) {
+        // std::cout << json;
+        // throw;
+    // }
+
     std::set<std::string> usedSkills, usedConditions, usedTactics, usedTitles;
 
     // auto& skillRepo = getRepo<Factory<Skill>>();
@@ -444,6 +462,10 @@ void BTBuilder::define_dec(std::string name, std::string type, json data) {
         type = "bt::UntilSuccess";
     } else if (type == "Inverter") {
         type = "bt::Inverter";
+    } else if (type == "FailerDec") {
+    	type = "bt::Failer";
+    } else if (type == "SucceederDec") {
+    	type = "bt::Succeeder";
     } else {
         params = "bb";
     }

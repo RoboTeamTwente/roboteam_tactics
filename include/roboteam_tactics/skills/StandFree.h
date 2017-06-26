@@ -19,28 +19,41 @@ namespace rtt {
  * Params:
  *   - ROBOT_ID:
  *       Type: Int
- *       Descr: The id of the robot
+ *       Descr: The ID of the robot
+ *
+ *	 - KEEPER_ID
+ *		 Type: Int
+ *		 Descr: The ID of the keeper
+ *
  *   - theirID:
  *       Type: Int
- *       Used when: xGoal or yGoal is not set
- *       Descr: The id of the robot who should be able to pass to the current one
- *   - whichTeam:
- *       Type: String
- *       Can be:
- *         - us: Our team
- *         - them: Their team
- *       Used when: xGoal or yGoal is not set
- *       Descr: What team the robot with id theirID is on
+ *       Descr: The ID of the robot we should remain in line of sight of
+ *
+ *   - ourTeam:
+ *       Type: Bool
+ *       Descr: True if the robot specified with theirID is on our team, defaults to true
+ *
  *   - xGoal:
  *       Type: Double
- *       Descr: The x-coordinate of the point to maintain line of sight to
+ *       Descr: The x-coordinate of the point we should find a free spot close to (and drive towards if it is free)
+ *
  *   - yGoal:
  *       Type: Double
- *       Descr: The y-coordinate of the point to maintain line of sight to
+ *       Descr: The y-coordinate of the point we should find a free spot close to (and drive towards if it is free)
+ *
+ *	 - closeToX:
+ *	 	 Type: Double
+ *		 Descr: The x-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
+ *
+ *	 - closeToY;
+ *		 Type: Double
+ *		 Descr: The y-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
+ *
  *   - distanceFromPoint:
  *       Type: Double
- *       Descr: The distance to maintain to other robots
+ *       Descr: The perpendicular distance between the line between the two robots, and robots from the opposing team
  */
+
 class StandFree : public Skill {
 
 public:
@@ -51,7 +64,6 @@ private:
 	GoToPos goToPos;
     Draw drawer;
     Vector2 targetPos;
-    bool setFirstTargetPos = false;
 };
     
 }
