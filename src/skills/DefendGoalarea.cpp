@@ -78,7 +78,6 @@ void DefendGoalarea::SetOffsets(){
 
 bt::Node::Status DefendGoalarea::Update() {
 	ros::param::get("our_side", our_side);
-	
 	double spacingfromline=0.05;
 	radius=1.00+spacingfromline;
 	SetOffsets();
@@ -103,7 +102,6 @@ bt::Node::Status DefendGoalarea::Update() {
 
 
 	if(robot.pos.y > -0.25 && robot.pos.y < 0.25 && !forceonarc){ // on the straight
-		ROS_INFO("middle circle");
 		goto_bb->SetInt("ROBOT_ID", robotID);
 		
 		goto_bb->SetBool("dribbler",false);
