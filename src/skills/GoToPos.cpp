@@ -256,9 +256,25 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
 
+    if (HasDouble("pGainPosition")) {
+        controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
+    }
+    if (HasDouble("iGainPosition")) {
+        controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
+    }
+    if (HasDouble("pGainRotation")) {
+        controller.setControlParam("pGainRotation", GetDouble("pGainRotation"));
+    }
+    if (HasDouble("iGainRotation")) {
+        controller.setControlParam("iGainRotation", GetDouble("iGainRotation"));
+    }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
     }
+    if (HasDouble("maxAngularVel")) {
+        controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
+    }
+
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
