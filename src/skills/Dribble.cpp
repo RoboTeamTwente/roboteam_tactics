@@ -79,6 +79,16 @@ bt::Node::Status Dribble::Update() {
 	roboteam_msgs::World world = LastWorld::get();
     int robotID = blackboard->GetInt("ROBOT_ID");
 
+    if (!LastWorld::have_received_first_world()) {
+        return Status::Running;
+    }
+
+    if (world.header.seq == prevSeq) {
+        return Status::Running;
+    } else {
+        prevSeq = world.header.seq;
+    }
+
 	roboteam_msgs::WorldBall ball = world.ball;
 
 	// Check is world contains a sensible message. Otherwise wait, it might the case that GoToPos::Update 

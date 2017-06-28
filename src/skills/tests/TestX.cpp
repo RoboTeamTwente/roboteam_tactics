@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <ros/ros.h>
+#include <signal.h>
 
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/World.h"
@@ -24,10 +25,19 @@
 #include "roboteam_tactics/utils/BTRunner.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
+#include "roboteam_tactics/utils/RobotDealer.h"
 
 static volatile bool may_update = false;
 
 namespace {
+
+bool mustShutdown = false;
+
+void mySigintHandler(int sig) {
+    mustShutdown = true;
+
+    std::cout << "Sig: " << sig << "\n";
+}
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 
@@ -147,6 +157,10 @@ How to use:
 	ros::init(argc, argv, "TestX", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 
+    // Install our own signal handler to ensure that publishers
+    // are closed at the end of main instead of when ctrl-c is pressed
+    signal(SIGINT, mySigintHandler);
+
     ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
         rtt::TOPIC_ROLE_FEEDBACK,
         10,
@@ -258,7 +272,7 @@ How to use:
             ros::spinOnce();
             fps60.sleep();
 
-            if (!ros::ok()) {
+            if (!mustShutdown) {
                 std::cout << "Interrupt received, exiting...";
                 return 0;
             }
@@ -299,7 +313,7 @@ How to use:
 		runner.run_until([&](bt::Node::Status previousStatus) {
             ros::spinOnce();
             fps.sleep();
-            return ros::ok() && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
+            return !mustShutdown && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
         });
 
         // TODO: This is a hack, and if the thing above this is just a while loop
@@ -316,7 +330,7 @@ How to use:
         }
 
         bt::Node::Status status = bt::Node::Status::Invalid;
-        while (ros::ok()) {
+        while (!mustShutdown) {
             ros::spinOnce();
 
             status = node->Update();
@@ -328,14 +342,19 @@ How to use:
             fps.sleep();
         }
 
-        std::cout << "Terminating. Final status: " << bt::statusToString(status) << "\n";
-
         node->Terminate(status);
 
-        for (auto id : claimedRobots) {
-            stopRolenode(id);
-            stopRobot(id);
-        }
+        // for (auto id : claimedRobots) {
+            // stopRolenode(id);
+            // stopRobot(id);
+        // }
+    }
+
+    // Give ros some time to send the stop messages
+    ros::Rate rate(60);
+    for (int i = 0; i < 15; i++) {
+        rate.sleep();
+        ros::spinOnce();
     }
 
     // Gracefully close all the publishers.

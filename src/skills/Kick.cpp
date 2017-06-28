@@ -62,7 +62,7 @@ bt::Node::Status Kick::Update() {
     double currentBallVelInRobotDir = currentBallVel.dot(robotDirVector);
     double oldBallVelInRobotDir = oldBallVel.dot(robotDirVector);
 
-    ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
+    // ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
 
     // if (oldBallVelInRobotDir < 0.1) {
         if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2 && currentBallVelInRobotDir >= 0.1) {

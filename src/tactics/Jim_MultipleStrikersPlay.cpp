@@ -43,7 +43,11 @@ void Jim_MultipleStrikersPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-    unsigned int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 1);
+
+    // int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    // delete_from_vector(robots, ballGetterID);
+
+    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
     // int numDirectStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
     
     RTT_DEBUGLN("numStrikers: %i", numStrikers);
@@ -53,28 +57,62 @@ void Jim_MultipleStrikersPlay::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 
+    
+
+    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
+
+
+    // // =============================
+    // // Initialize the Ball Getter
+    // // =============================
+    // {
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = ballGetterID;
+    //     bt::Blackboard bb;
+    //     claim_robot(ballGetterID);
+
+    //     bb.SetInt("ROBOT_ID", ballGetterID);
+    //     bb.SetInt("KEEPER_ID", 5);
+
+    //     bb.SetBool("GetBall_A_passToBestAttacker", true); 
+
+    //     // Create message
+    //     rd.tree = "rtt_jim/GetBallRole";
+    //     rd.blackboard = bb.toMsg();
+
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
+
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // }
+
+
+
     // ===========================
     // Create the striker roles
     // ===========================
-    std::vector<Vector2> defaultPositions;
-    defaultPositions.push_back(Vector2(2.0, 1.5));
-    defaultPositions.push_back(Vector2(2.0, -1.5));
-    defaultPositions.push_back(Vector2(3.5, 2.0));
-    defaultPositions.push_back(Vector2(3.5, -2.0));
-
-    std::vector<Vector2> strikersDefaultPositions;
-    for (size_t i = 0; i < defaultPositions.size(); i++) {
-        if ((ballPos - defaultPositions.at(i)).length() > 1.5) {
-            strikersDefaultPositions.push_back(defaultPositions.at(i));
-            if (strikersDefaultPositions.size() >= numStrikers) {
-                break;
-            }
-        }
-    }
+    // std::vector<Vector2> defaultPositions;
+    // defaultPositions.push_back(Vector2(2.0, 1.5));
+    // defaultPositions.push_back(Vector2(2.0, -1.5));
+    // // defaultPositions.push_back(Vector2(3.5, 2.0));
+    // // defaultPositions.push_back(Vector2(3.5, -2.0));
 
     // std::vector<Vector2> strikersDefaultPositions;
-    // strikersDefaultPositions.push_back(Vector2(3.7, 2.0));
-    // strikersDefaultPositions.push_back(Vector2(3.7, -2.0));
+    // for (size_t i = 0; i < defaultPositions.size(); i++) {
+    //     if ((ballPos - defaultPositions.at(i)).length() > 1.5) {
+    //         strikersDefaultPositions.push_back(defaultPositions.at(i));
+    //         if (strikersDefaultPositions.size() >= numStrikers) {
+    //             break;
+    //         }
+    //     }
+    // }
+
+    std::vector<Vector2> strikersDefaultPositions;
+    strikersDefaultPositions.push_back(Vector2(2.2, 1.5));
+    strikersDefaultPositions.push_back(Vector2(2.2, -1.5));
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);    
     
@@ -98,6 +136,8 @@ void Jim_MultipleStrikersPlay::Initialize() {
         bb.SetDouble("ReceiveBall_A_computePointCloseToX", strikersDefaultPositions.at(i).x);
         bb.SetDouble("ReceiveBall_A_computePointCloseToY", strikersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_A_setSignal", true);
+        bb.SetBool("ReceiveBall_A_shouldFail", true);
+        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.2);
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
@@ -113,51 +153,13 @@ void Jim_MultipleStrikersPlay::Initialize() {
         pub.publish(rd);
     }
 
-    // std::vector<int> directStrikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, directStrikersDefaultPositions, world);
-
-    // for (int i = 0; i < numDirectStrikers; i++) {
-
-    //     int strikerID = directStrikerIDs.at(i);
-    //     // RTT_DEBUGLN("Initializing Striker %i", strikerID);
-    //     delete_from_vector(robots, strikerID);
-    //     claim_robot(strikerID);
-
-    //     roboteam_msgs::RoleDirective rd;
-    //     rd.robot_id = strikerID;
-    //     bt::Blackboard bb;
-
-    //     // Set the robot ID
-    //     bb.SetInt("ROBOT_ID", strikerID);
-    //     bb.SetInt("KEEPER_ID", 5);
-
-    //     // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
-    //     // bb.SetBool("ReceiveBall_A_computePoint", true);
-    //     bb.SetDouble("ReceiveBall_A_computePointCloseToX", directStrikersDefaultPositions.at(i).x);
-    //     bb.SetDouble("ReceiveBall_A_computePointCloseToY", directStrikersDefaultPositions.at(i).y);
-    //     // bb.SetBool("ReceiveBall_A_setSignal", true);
-    //     // bb.SetBool("ReceiveBall_A_shootAtGoal", true);
-
-    //     // Create message
-    //     rd.tree = "rtt_jim/DirectStrikerRole";
-        
-    //     rd.blackboard = bb.toMsg();
-
-    //     // Add random token and save it for later
-    //     boost::uuids::uuid token = unique_id::fromRandom();
-    //     tokens.push_back(token);
-    //     rd.token = unique_id::toMsg(token);
-
-    //     // Send to rolenode
-    //     pub.publish(rd);
-    // }
-
     start = rtt::now();
 }
 
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
 
-    // int successCount = 0;
+    int successCount = 0;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
@@ -165,14 +167,20 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
             if (status == bt::Node::Status::Success) {
                 RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
                 return Status::Success;
+                // successCount++;
             }
 
-            // if (status == bt::Node::Status::Failure) {
-            //     RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
-            //     return Status::Failure;
-            // }
+            if (status == bt::Node::Status::Failure) {
+                RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
+                return Status::Failure;
+            }
         }
     }
+
+    // if (successCount >= 2) {
+        // RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
+        // return Status::Success;
+    // }
 
     return Status::Running;
 }

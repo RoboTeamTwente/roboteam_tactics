@@ -96,12 +96,7 @@ void Jim_GetBallPlay::ReleaseAllBots() {
 
 
 bt::Node::Status Jim_GetBallPlay::Update() {
-
-    // if (time_difference_milliseconds(start, now()).count() >= 1000) {
-    //     Terminate(Status::Running);
-    //     Initialize();
-    // }
- 
+    
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);

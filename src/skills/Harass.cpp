@@ -23,10 +23,6 @@ bt::Blackboard::Ptr make_bb(const bt::Blackboard::Ptr base, int blockId, const s
 Harass::Harass(std::string name, bt::Blackboard::Ptr bb) : Skill(name, bb) {
     assert_valid<Harass>(name);
     target = GetInt("TGT_ID");
-    ROS_INFO("GO: %d - GF: %d - PO: %d - PF: %d", GetInt("TGT_ID", BlackboardPolicy::GLOBAL_ONLY),
-                                                 GetInt("TGT_ID", BlackboardPolicy::GLOBAL_FIRST),
-                                                 GetInt("TGT_ID", BlackboardPolicy::PRIVATE_ONLY),
-                                                 GetInt("TGT_ID", BlackboardPolicy::PRIVATE_FIRST));
     {
         std::string nodeName = (name == "" ? "" : name + "_") + "Block_Kick";
         bt::Blackboard::Ptr subBB = make_bb(bb, 1, nodeName, true, HasBool("selfHarassment"));

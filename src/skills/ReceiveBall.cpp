@@ -98,6 +98,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
+	ballIsComing = false;
 
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
@@ -105,13 +106,14 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
-		enableComputePoint = true;
+		
 		return interceptPose;
 	} else {
 		Vector2 ballTrajectory = ballVel.scale(5.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
+			ballIsComing = true;
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
 		} else {
@@ -121,7 +123,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
 
-		enableComputePoint = false;
+		
 		return interceptPose;
 	}
 }
@@ -129,7 +131,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 // Predict intercept pos by looking at the robot that has the ball
 InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	
-	enableComputePoint = true;
+	ballIsComing = false;
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
@@ -187,18 +189,19 @@ bt::Node::Status ReceiveBall::Update() {
 		double receiveBallAtY = GetDouble("receiveBallAtY");
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	}
-
 	
 
 	// Wait for the first world message
 	while (world.us.size() == 0) {
+		ROS_INFO_STREAM("ReceiveBall, empty world...");
 		return Status::Running;
 	}
 
-	if (HasBool("computePoint") && enableComputePoint) {
-		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 100000) {
+
+	// If we should use "opportunity finder" to compute a point to stand free, do it once per second
+	if (HasBool("computePoint") && !ballIsComing) {
+		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
 			receiveBallAtPos = computePoint();
-			// ROS_INFO_STREAM("Robot " << robotID << " computed point: " << receiveBallAtPos);
 		}
 	}
 
@@ -223,6 +226,7 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 targetPos;
 	double targetAngle;
 	
+	bool ballWasComing = ballIsComing;
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	InterceptPose interceptPose;
@@ -232,23 +236,28 @@ bt::Node::Status ReceiveBall::Update() {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
 
+	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
+		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
+		return Status::Failure;
+	}
 
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
 
-	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
-	// ROS_INFO_STREAM("robot " << robotID << " receiveBall viewOfGoal: " << viewOfGoal);
-	bool canSeeGoal = viewOfGoal >= 0.2;
-	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
-	// ROS_INFO_STREAM("receiveBall shootAtGoal: " << shootAtGoal);
 
+	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
+	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+	bool canSeeGoal = viewOfGoal >= 0.2;
+	double angleDiffBallGoal = fabs(cleanAngle((LastWorld::get_their_goal_center() - robotPos).angle() - (ballPos - robotPos).angle())); 
+	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal && angleDiffBallGoal <= 0.7*M_PI;
+
+
+	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
 	if (shootAtGoal) {
 		drawer.setColor(255, 0, 0);
 		double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
 		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
-		// targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle();
-
-		Vector2 robotRadius(0.09, 0.0);
+		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
 	} else {
@@ -257,17 +266,19 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
+	// Set the readyToReceiveBall param once we're close
 	Vector2 posError = receiveBallAtPos - robotPos;
 	if (posError.length() < acceptableDeviation) {
-		// ROS_INFO_STREAM("robot " << robotID << " readyToReceiveBall");
-		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
+		if (GetBool("setSignal")) {
+			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
+		}
 		private_bb->SetBool("avoidRobots", false);
 	} else {
 		private_bb->SetBool("avoidRobots", true);
 	}
 
 
-	// If the ball is within reach and lying still or moving slowy, we should drive towards it
+	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
 	double role_iterations_per_second = 0.0;
 	ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
 	double timeStep;
@@ -276,7 +287,6 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 		timeStep = 1.0 / role_iterations_per_second;
 	}
-	
 
 	double distanceToBall = (ballPos-interceptPos).length();
 	if (shootAtGoal) {
@@ -287,9 +297,11 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.5)|| ballHasBeenClose) {
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 2.0 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
 		// ballHasBeenClose = true;
 		return getBall.Update();
+	// } else if (ballHasBeenClose) {
+		// return Status::Failure;
 	}
 
 	
@@ -312,13 +324,14 @@ bt::Node::Status ReceiveBall::Update() {
 	bb3->SetBool("our_team", true);
 	IHaveBall iHaveBall2("", bb3);
 
-	double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
+	// double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
-    if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
+    // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
+    if (iHaveBall2.Update() == Status::Success) {
     	ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {
-    		ROS_INFO("Start kicking");
+    		// ROS_INFO("Start kicking");
     		startKicking = true;
     		return kick.Update();
     	}
@@ -337,6 +350,11 @@ bt::Node::Status ReceiveBall::Update() {
 	    if (command) {
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	        pub.publish(*command);
+	    } else {
+	    	roboteam_msgs::RobotCommand emptyCommand;
+	    	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	    	pub.publish(emptyCommand);
+	    	// ROS_INFO_STREAM("ReceiveBall, no command from GoToPos...");
 	    }
 
 	    return Status::Running;		

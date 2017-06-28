@@ -26,6 +26,12 @@
 #include "InterceptorsTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "KeepPositionPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "KickoffDefensePlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "PassToTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -102,4 +108,7 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Jim_GetBallPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "Bob_ChipoffAtGoalPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

@@ -64,6 +64,10 @@ namespace rtt {
  *    - maxSpeed:
  *        Type: Double
  *        Descr: For debugging purposes, a maxSpeed parameter can be set here and will be passed on to GoToPos
+ *
+ *    - enterDefenseAreas:
+ *        Type: Bool
+ *        Descr: When true allows GoToPos to go into the defense areas of both teams. Is passed on to GoToPos.
  */
 
 

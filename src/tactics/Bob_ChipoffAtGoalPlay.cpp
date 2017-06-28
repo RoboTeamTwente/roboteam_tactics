@@ -7,7 +7,7 @@
 
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
-#include "roboteam_tactics/tactics/Bob_KickoffWithRunPlay.h"
+#include "roboteam_tactics/tactics/Bob_ChipoffAtGoalPlay.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
@@ -15,21 +15,21 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
-#define RTT_CURRENT_DEBUG_TAG Bob_KickoffWithRunPlay
+#define RTT_CURRENT_DEBUG_TAG Bob_ChipoffAtGoalPlay
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC(Bob_KickoffWithRunPlay);
+RTT_REGISTER_TACTIC(Bob_ChipoffAtGoalPlay);
 
-Bob_KickoffWithRunPlay::Bob_KickoffWithRunPlay(std::string name, bt::Blackboard::Ptr blackboard)
+Bob_ChipoffAtGoalPlay::Bob_ChipoffAtGoalPlay(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-void Bob_KickoffWithRunPlay::Initialize() {
+void Bob_ChipoffAtGoalPlay::Initialize() {
     tokens.clear();
     failImmediately = false;
 
-    RTT_DEBUGLN_TEAM("Initializing Bob_KickoffWithRunPlay");
+    RTT_DEBUGLN_TEAM("Initializing Bob_ChipoffAtGoalPlay");
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     Vector2 receivePos(4.5 / 2, 3 / -2.0);
@@ -166,7 +166,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
     start = rtt::now();
 }
 
-bt::Node::Status Bob_KickoffWithRunPlay::Update() {
+bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
     if (failImmediately) return Status::Failure;
 
     bool takerSucceeded = false;

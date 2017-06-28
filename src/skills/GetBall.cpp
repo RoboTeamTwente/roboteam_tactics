@@ -107,6 +107,7 @@ bool GetBall::canClaimBall() {
             ros::param::set("robotClaimedBall", robotID);
             return true;
         } else {
+            ros::param::set("robotClaimedBall", -1);
             return false;
         }
     } else {
@@ -195,7 +196,7 @@ bt::Node::Status GetBall::Update (){
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
                 passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
                 double score = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
-                // ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score << " maxScore: " << maxScore);
+                ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score);
                 if (score > maxScore) {
                     maxScore = score;
                     maxScoreID = world.us.at(i).id;
@@ -206,6 +207,8 @@ bt::Node::Status GetBall::Update (){
         if (maxScore > -std::numeric_limits<double>::max()) {
             choseRobotToPassTo = true;
             ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
+        } else {
+            SetString("aimAt", "theirgoal");
         }
         
     }
@@ -213,11 +216,13 @@ bt::Node::Status GetBall::Update (){
     
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
-    if (HasString("aimAt")) {
-		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
-	} else if (choseRobotToPassTo) {
+    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+    } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
-    } else if (HasDouble("targetAngle")) {
+    } else if (HasString("aimAt")) {
+		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+	} else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
     } else if (shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
@@ -266,7 +271,7 @@ bt::Node::Status GetBall::Update (){
     }
    
 
-	if (posDiff.length() > 0.3 || fabs(angleDiff) > successAngle) { // posDiff > 0.25 for protoBots
+	if (posDiff.length() > 0.4 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
@@ -286,7 +291,7 @@ bt::Node::Status GetBall::Update (){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
 
-        if (GetBool("passToBestAttacker") && !choseRobotToPassTo) {
+        if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
             return Status::Running;
         }
         
@@ -308,12 +313,14 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", false);
 
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    } 
     
     // @DEBUG for robot testing purposes we like to change the maxSpeed sometimes manually
     // if (HasDouble("maxSpeed")) {
     // 	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     // }
-
 
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
