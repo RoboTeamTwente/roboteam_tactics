@@ -121,7 +121,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
     
     int keeperID = RobotDealer::get_keeper();
 
-    int numRobots = robots.size();
+    // int numRobots = robots.size();
 
     // int numDangerousOpps = 0;
     int minBallDefenders = 1;

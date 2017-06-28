@@ -196,7 +196,7 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	if (HasBool("computePoint") && enableComputePoint) {
-		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 1000) {
+		if (time_difference_milliseconds(prevComputedPoint, now()).count() > 100000) {
 			receiveBallAtPos = computePoint();
 			// ROS_INFO_STREAM("Robot " << robotID << " computed point: " << receiveBallAtPos);
 		}

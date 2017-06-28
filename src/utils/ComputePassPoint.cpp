@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -275,8 +275,8 @@ Vector2 PassPoint::computeBestPassPoint() {
 	roboteam_msgs::World world = LastWorld::get();
 	targetPos = getTargetPos(target, targetID, true);
 
-	int x_steps = 60;
-	int y_steps = 40;
+	int x_steps = 180;
+	int y_steps = 120;
 
 	// Remove all the old drawn points
 	// for (int x_step = 1; x_step < x_steps; x_step++) {
@@ -342,24 +342,24 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	// double maxScore = *max_element(scores.begin(), scores.end());
-	// double minScore = *min_element(scores.begin(), scores.end());
+	double maxScore = *max_element(scores.begin(), scores.end());
+	double minScore = *min_element(scores.begin(), scores.end());
 
-	// for (size_t i = 0; i < passPoints.size(); i++) {
-	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-	// 	drawer.setColor(255 - relScore, 0, relScore);
-	// 	drawer.drawPoint(names.at(i), passPoints.at(i));
-	// 	// ros::spinOnce();
-	// }
+	for (size_t i = 0; i < passPoints.size(); i++) {
+		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
+		drawer.setColor(255 - relScore, 0, relScore);
+		drawer.drawPoint(names.at(i), passPoints.at(i));
+		// ros::spinOnce();
+	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	// drawer.removePoint(winningPointName);
+	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	drawer.removePoint(winningPointName);
 
-	// std::string name = "bestPosition";
-	// name.append(std::to_string(ROBOT_ID));
-	// drawer.setColor(255, 255, 255);
-	// drawer.drawPoint(name, bestPosition);
+	std::string name = "bestPosition";
+	name.append(std::to_string(ROBOT_ID));
+	drawer.setColor(255, 255, 255);
+	drawer.drawPoint(name, bestPosition);
 	return bestPosition;
 }
 

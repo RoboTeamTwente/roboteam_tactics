@@ -1,6 +1,6 @@
 <launch>
 	
-	
+	<!--
 	<group ns="blue">
 		<arg name="legacy_packets" default="false" />
 		<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
@@ -33,7 +33,7 @@
 		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 	</group>
-	
+	-->
 	
 	
 	<group ns="yellow">
@@ -73,8 +73,8 @@
 		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<!-- <node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" /> -->
+		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
 	</group>
 	
 </launch>
