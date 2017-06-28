@@ -143,10 +143,12 @@ void Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
      
     prevDistBallToGoal = distBallToGoal;
 
-    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || distBallToGoalHasChanged) {
+    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || numRobots != prevNumRobots || distBallToGoalHasChanged) {
     	Terminate(Status::Running);
     	reInitialize(newNumBallDefenders, newNumRobotDefenders, dangerousOpps);
     }
+
+    prevNumRobots = numRobots;
 
     return;
 }

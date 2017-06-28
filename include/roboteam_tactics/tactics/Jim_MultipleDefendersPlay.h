@@ -37,6 +37,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
     int numRobotDefenders;
     double prevDistBallToGoal;
     double distBallToGoalThreshold;
+
+    int prevNumRobots;
 };
 
 }

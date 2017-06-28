@@ -107,6 +107,7 @@ bool GetBall::canClaimBall() {
             ros::param::set("robotClaimedBall", robotID);
             return true;
         } else {
+            ros::param::set("robotClaimedBall", -1);
             return false;
         }
     } else {
@@ -195,7 +196,7 @@ bt::Node::Status GetBall::Update (){
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
                 passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
                 double score = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
-                // ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score << " maxScore: " << maxScore);
+                ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score);
                 if (score > maxScore) {
                     maxScore = score;
                     maxScoreID = world.us.at(i).id;
