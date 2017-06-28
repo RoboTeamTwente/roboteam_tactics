@@ -3,6 +3,7 @@
 #include "unique_id/unique_id.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/conditions/WeHaveBall.h"
 
 #include "roboteam_msgs/RoleDirective.h"
 
@@ -21,6 +22,9 @@ class Jim_MultipleStrikersPlay : public Tactic {
 
     time_point lastUpdate;
     time_point finishTime;
+    time_point lastTimeWeHadBall;
+
+    WeHaveBall weHaveBall;
 };
 
 }

@@ -327,7 +327,7 @@ bt::Node::Status GetBall::Update (){
     if (commandPtr) {
     	command = *commandPtr;
     } else {
-    	ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
+    	// ROS_WARN("GoToPos returned an empty command message! Maybe we are already there :O");
     }
 
     // if (HasBool("matchBallVel") && GetBool("matchBallVel")) {

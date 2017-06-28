@@ -118,7 +118,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
 		} else {
 			interceptPos = receiveBallAtPos;
-			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
+			interceptAngle = (ballPos - receiveBallAtPos).angle();
 		}
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
@@ -183,20 +183,18 @@ bt::Node::Status ReceiveBall::Update() {
 
     // Get the last world information and some blackboard info
 	roboteam_msgs::World world = LastWorld::get();
-	// robotID = blackboard->GetInt("ROBOT_ID");
 	if ((HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		double receiveBallAtX = GetDouble("receiveBallAtX");
 		double receiveBallAtY = GetDouble("receiveBallAtY");
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	}
-	
 
+	
 	// Wait for the first world message
 	while (world.us.size() == 0) {
 		ROS_INFO_STREAM("ReceiveBall, empty world...");
 		return Status::Running;
 	}
-
 
 	// If we should use "opportunity finder" to compute a point to stand free, do it once per second
 	if (HasBool("computePoint") && !ballIsComing) {
@@ -204,7 +202,6 @@ bt::Node::Status ReceiveBall::Update() {
 			receiveBallAtPos = computePoint();
 		}
 	}
-
 
 	// Check if the same robot still has the ball
 	auto bb2 = std::make_shared<bt::Blackboard>();
@@ -215,18 +212,18 @@ bt::Node::Status ReceiveBall::Update() {
 		hasBall = whichRobotHasBall();
 	}
 
-
 	// Store some info about the world state
 	roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
-	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
-	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
+	Vector2 robotPos(robot.pos);
+	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
 	
 	Vector2 targetPos;
 	double targetAngle;
 	
 	bool ballWasComing = ballIsComing;
+
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	InterceptPose interceptPose;
@@ -236,10 +233,17 @@ bt::Node::Status ReceiveBall::Update() {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
 
+
 	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
 		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
 		return Status::Failure;
 	}
+
+	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail")) {
+		ROS_INFO_STREAM("ball is probably not for us " << robotID);
+		return Status::Failure;
+	}
+
 
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
@@ -298,10 +302,7 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	if (distanceToBall < acceptableDeviation && ballVel.length() < 2.0 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
-		// ballHasBeenClose = true;
 		return getBall.Update();
-	// } else if (ballHasBeenClose) {
-		// return Status::Failure;
 	}
 
 	
@@ -354,7 +355,7 @@ bt::Node::Status ReceiveBall::Update() {
 	    	roboteam_msgs::RobotCommand emptyCommand;
 	    	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	    	pub.publish(emptyCommand);
-	    	// ROS_INFO_STREAM("ReceiveBall, no command from GoToPos...");
+	    	// ROS_INFO_STREAM("ReceiveBall robot " << robotID << ", no command from GoToPos...");
 	    }
 
 	    return Status::Running;		

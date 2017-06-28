@@ -16,6 +16,8 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
+
+
 #define RTT_CURRENT_DEBUG_TAG Jim_MultipleStrikersPlay
 
 namespace rtt {
@@ -23,13 +25,18 @@ namespace rtt {
 RTT_REGISTER_TACTIC(Jim_MultipleStrikersPlay);
 
 Jim_MultipleStrikersPlay::Jim_MultipleStrikersPlay(std::string name, bt::Blackboard::Ptr blackboard)
-        : Tactic(name, blackboard) 
+        : Tactic(name, blackboard)
+        , weHaveBall("", blackboard)
         {}
 
 
 
 void Jim_MultipleStrikersPlay::Initialize() {
     tokens.clear();
+
+
+    // auto bb = std::make_shared<bt::Blackboard>();
+    // weHaveBall("", bb);
 
     RTT_DEBUGLN_TEAM("Initializing Jim_MultipleStrikersPlay");    
     if (RobotDealer::get_available_robots().size() < 1) {
@@ -153,13 +160,23 @@ void Jim_MultipleStrikersPlay::Initialize() {
         pub.publish(rd);
     }
 
-    start = rtt::now();
+    lastTimeWeHadBall = now();
 }
 
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
 
+    // if (weHaveBall.Update() == Status::Success) {
+    //     lastTimeWeHadBall = now();
+    // }
+
+    // if (time_difference_milliseconds(lastTimeWeHadBall, now()).count() > 10000) {
+    //     RTT_DEBUGLN("Jim_MultipleStrikersPlay failed because we lost the ball");
+    //     return Status::Failure;
+    // }
+
     int successCount = 0;
+    int failureCount = 0;
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
@@ -171,16 +188,16 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
             }
 
             if (status == bt::Node::Status::Failure) {
-                RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
-                return Status::Failure;
+                // RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
+                // return Status::Failure;
+                failureCount++;
             }
         }
     }
 
-    // if (successCount >= 2) {
-        // RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
-        // return Status::Success;
-    // }
+    if (failureCount >= 2) {
+        return Status::Failure;
+    }
 
     return Status::Running;
 }
