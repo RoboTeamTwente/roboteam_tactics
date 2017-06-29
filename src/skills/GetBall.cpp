@@ -243,9 +243,9 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.3*M_PI) { // 0.1*M_PI for real-life robots!!
+	if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.3*M_PI) { // 0.1*M_PI for real-life robots!!
+	} else if (angleDiff < -0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;

@@ -78,12 +78,12 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0;
-        iGainPosition = 0.15; 
-        pGainRotation = 1.0; 
+        pGainPosition = 3.0;
+        iGainPosition = 0.4; 
+        pGainRotation = 4.0; 
         iGainRotation = 1.0;
         pGainVelocity = 0.5;
-        maxSpeed = 1.0;
+        maxSpeed = 2.5;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
@@ -129,8 +129,23 @@ void Control::setPresetControlParams(
 }
 
 void Control::setControlParam(std::string paramName, double paramValue) {
+    if (paramName == "pGainPosition") {
+        this->pGainPosition = paramValue;
+    }
+    if (paramName == "iGainPosition") {
+        this->iGainPosition = paramValue;
+    }
+    if (paramName == "pGainRotation") {
+        this->pGainRotation = paramValue;
+    }
+    if (paramName == "iGainRotation") {
+        this->iGainRotation = paramValue;
+    }
     if (paramName == "maxSpeed") {
         this->maxSpeed = paramValue;
+    }
+    if (paramName == "maxAngularVel") {
+        this->maxAngularVel = paramValue;
     }
 }
 
