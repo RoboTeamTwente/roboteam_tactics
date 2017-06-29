@@ -31,6 +31,9 @@
 #include "IHaveBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "IsBallInDefenseArea.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "IsBallInGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

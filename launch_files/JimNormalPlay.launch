@@ -1,0 +1,5 @@
+<launch>
+	
+	<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/NormalPlay" output="screen" />
+	
+</launch>

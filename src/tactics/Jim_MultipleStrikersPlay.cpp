@@ -117,9 +117,14 @@ void Jim_MultipleStrikersPlay::Initialize() {
     //     }
     // }
 
+
+    double xPos = std::min(ballPos.x + 2.5, 2.2);
+
+
+
     std::vector<Vector2> strikersDefaultPositions;
-    strikersDefaultPositions.push_back(Vector2(2.2, 1.5));
-    strikersDefaultPositions.push_back(Vector2(2.2, -1.5));
+    strikersDefaultPositions.push_back(Vector2(xPos, 1.5));
+    strikersDefaultPositions.push_back(Vector2(xPos, -1.5));
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);    
     

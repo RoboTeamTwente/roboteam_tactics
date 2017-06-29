@@ -7,9 +7,9 @@
 
 namespace rtt {
 
-Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin);
-bool isWithinDefenseArea(std::string whichArea, Vector2 point);
-bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_side, roboteam_msgs::GeometryFieldSize field);
+Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin);
+// bool isWithinDefenseArea(std::string whichArea, Vector2 point);
+// bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_side, roboteam_msgs::GeometryFieldSize field);
 
 /**
  * \class DistanceXToY

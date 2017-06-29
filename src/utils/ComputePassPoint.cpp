@@ -1,7 +1,7 @@
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_utils/Math.h"
-#include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
 #include <iostream>
@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -336,7 +336,7 @@ Vector2 PassPoint::computeBestPassPoint() {
 			Vector2 ballPos(world.ball.pos);
 			double distToBall = (point - ballPos).length();
 
-			if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point) && distToBall >= 1.0) {
+			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point) && distToBall >= 1.0) {
 			// if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
 				
 				// boost::optional<double> score = computePassPointScore(point);

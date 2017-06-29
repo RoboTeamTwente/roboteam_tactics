@@ -16,6 +16,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 
+
 #define RTT_CURRENT_DEBUG_TAG GoToPos
 
 namespace rtt {
@@ -194,13 +195,13 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
     if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("our defense area", newTargetPos)) {
+        if (isWithinDefenseArea(true, newTargetPos)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("their defense area", newTargetPos)) {
+        if (isWithinDefenseArea(false, newTargetPos)) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
