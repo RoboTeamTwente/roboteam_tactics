@@ -33,9 +33,9 @@ namespace rtt {
  *          Otherwise it defaults to the SSL field
  */
 
-class SimpleKeeper : public Skill {
+class SimpleDefender : public Skill {
 public:
-	SimpleKeeper(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+	SimpleDefender(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     static Vector2 computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset);
 	Status Update();
 
@@ -45,7 +45,7 @@ public:
         return params;
     }
 
-    std::string node_name() override { return "SimpleKeeper"; }
+    std::string node_name() override { return "SimpleDefender"; }
 private:
     
 	int robotID;

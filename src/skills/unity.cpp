@@ -91,7 +91,7 @@
 #include "ShootAway.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
-#include "SimpleKeeper.cpp"
+#include "SimpleDefender.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "Sleep.cpp"
