@@ -37,7 +37,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = -0.1;
-            avoidRobotsGain = 0.2;
+            avoidRobotsGain = 0.05;
         }
 
 
@@ -58,26 +58,14 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
     Vector2 posError = targetPos - myPos;
 
     Vector2 ahead = myPos + antenna;
-    if ((ahead - otherRobotPos).length() < 0.2) {
-        Vector2 force = ahead - otherRobotPos;
-        force = force.scale(avoidRobotsGain / (force.length() * force.length()));
-        force = limitAngleDiff(force, posError, 0.5*M_PI);
+    Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
+
+    double dist = (closestPoint - otherRobotPos).length();
+    if (closestPoint != myPos && closestPoint != ahead && dist <= 0.3) {
+        Vector2 force = closestPoint - otherRobotPos;
+        force = force.scale(avoidRobotsGain / (force.length() * force.length()) );
+        force = force.scale(1.0 / (closestPoint - myPos).length());
         forceVector = force;
-    }
-
-    Vector2 ahead2 = myPos + antenna.scale(0.5);
-    if ((ahead2 - otherRobotPos).length() < 0.2) {
-        Vector2 force = ahead2 - otherRobotPos;
-        force = force.scale(avoidRobotsGain / (force.length() * force.length()));
-        force = limitAngleDiff(force, posError, 0.5*M_PI);
-        forceVector = forceVector + force;
-    }
-
-    if ((myPos - otherRobotPos).length() < 0.3) {
-        Vector2 force = myPos - otherRobotPos;
-        force = force.scale((avoidRobotsGain) / (force.length() * force.length()));
-        force = limitAngleDiff(force, posError, 0.5*M_PI);
-        forceVector = forceVector + force;
     }
 
     return forceVector;
@@ -89,17 +77,18 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 0.5; // default
+    double lookingDistance = 1.0; // default
     if (lookingDistance > (posError.length())) {
         lookingDistance = posError.length();
     }
     
     // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.5); // magic scaling constant
+    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
 
     // Draw the antenna in rqt-view
-    // drawer.drawLine("antenna", myPos, antenna);
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("antenna", myPos, antenna);
 
     // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
@@ -119,6 +108,10 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             sumOfForces = sumOfForces + forceVector; 
         }
     }
+
+    drawer.setColor(0, 255, 255);
+    drawer.drawLine("sumOfForces", myPos, sumOfForces);
+    drawer.setColor(0, 0, 0);
 
     return sumOfForces;
 }
@@ -309,7 +302,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
-    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
+    // drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
     drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
