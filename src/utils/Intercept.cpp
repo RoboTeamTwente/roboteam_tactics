@@ -27,7 +27,7 @@ InterceptResult calculateInterception(InterceptQuery query) {
 
 inline bool isValid(const Vector2& iPos, double iTime) {
 	return iPos.x >= -4.5 && iPos.x <= 4.5 && iPos.y >= -3 && iPos.y <= 3
-			&& iTime > 0 && iTime < ICEPT_MAX_TIME && iPos.isNotNaN() && iTime == iTime;
+			&& iTime > 0 && iTime < ICEPT_MAX_TIME && iPos.isNotNaN() && !isNaN(iTime);
 }
 
 std::pair<double, double> solve(InterceptQuery query, Vector2 far, double init,

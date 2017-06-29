@@ -52,6 +52,9 @@
 #include "Kick.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "KickPenalty.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "MirrorOpponent.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 

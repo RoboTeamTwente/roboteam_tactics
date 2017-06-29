@@ -94,7 +94,7 @@ bt::Node::Status Block::Update() {
         goal.rot -= M_PI;
     //if (mypos.location().dist(goal.location()) < .1) return bt::Node::Status::Running;
 
-    if (!goal.real()) return bt::Node::Status::Running;
+    if (!goal.isNotNaN()) return bt::Node::Status::Running;
 
     ScopedBB(*blackboard, "")
         .setDouble("xGoal", goal.x)
