@@ -41,11 +41,17 @@ int Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots, robot
 
 std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> robots, std::vector<Vector2> points, roboteam_msgs::World& world) {
     
+    // If the number of points is larger than the number of robots, choose the first points to drive to
+	if (points.size() > robots.size()) {
+		points.resize(robots.size());
+	}
+
     if (points.size() == 0) {
         std::vector<int> emptyVec; 
         return emptyVec;
     }
 
+    // Make a vector containing all the robots in the WorldRobot message type
     std::vector<roboteam_msgs::WorldRobot> worldRobots;
     for (size_t i = 0; i < robots.size(); i++) {
         boost::optional<roboteam_msgs::WorldRobot> robot = getWorldBot(robots.at(i), true, world);
@@ -54,6 +60,7 @@ std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> ro
         }
     }
 
+    // Make a matrix (vector (y) of a vector (x)) containing the distances between the robots and the points
     std::vector< std::vector<double> > distances;
     // std::cout << "points: \n";
     for (size_t i = 0; i < points.size(); i++) {
@@ -65,6 +72,7 @@ std::vector<int> Jim_MultipleDefendersPlay::getClosestRobots(std::vector<int> ro
         }
         distances.push_back(dists);
     }
+
 
     std::vector<int> optimalCombination;
     double lowestDist = std::numeric_limits<double>::max();

@@ -46,6 +46,7 @@ void Jim_GetBallPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
+    RTT_DEBUGLN_TEAM("Initializing Jim_GetBallPlay"); 
     RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
 
 

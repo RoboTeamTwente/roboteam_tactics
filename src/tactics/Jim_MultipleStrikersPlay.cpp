@@ -34,10 +34,6 @@ Jim_MultipleStrikersPlay::Jim_MultipleStrikersPlay(std::string name, bt::Blackbo
 void Jim_MultipleStrikersPlay::Initialize() {
     tokens.clear();
 
-
-    // auto bb = std::make_shared<bt::Blackboard>();
-    // weHaveBall("", bb);
-
     RTT_DEBUGLN_TEAM("Initializing Jim_MultipleStrikersPlay");    
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -50,13 +46,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
 
-
-    // int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
-    // delete_from_vector(robots, ballGetterID);
-
-    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
-    // int numDirectStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);
-    
+    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);    
     RTT_DEBUGLN("numStrikers: %i", numStrikers);
 
 
@@ -64,58 +54,6 @@ void Jim_MultipleStrikersPlay::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 
-    
-
-    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
-
-
-    // // =============================
-    // // Initialize the Ball Getter
-    // // =============================
-    // {
-    //     roboteam_msgs::RoleDirective rd;
-    //     rd.robot_id = ballGetterID;
-    //     bt::Blackboard bb;
-    //     claim_robot(ballGetterID);
-
-    //     bb.SetInt("ROBOT_ID", ballGetterID);
-    //     bb.SetInt("KEEPER_ID", 5);
-
-    //     bb.SetBool("GetBall_A_passToBestAttacker", true); 
-
-    //     // Create message
-    //     rd.tree = "rtt_jim/GetBallRole";
-    //     rd.blackboard = bb.toMsg();
-
-    //     // Add random token and save it for later
-    //     boost::uuids::uuid token = unique_id::fromRandom();
-    //     tokens.push_back(token);
-    //     rd.token = unique_id::toMsg(token);
-
-    //     // Send to rolenode
-    //     pub.publish(rd);
-    // }
-
-
-
-    // ===========================
-    // Create the striker roles
-    // ===========================
-    // std::vector<Vector2> defaultPositions;
-    // defaultPositions.push_back(Vector2(2.0, 1.5));
-    // defaultPositions.push_back(Vector2(2.0, -1.5));
-    // // defaultPositions.push_back(Vector2(3.5, 2.0));
-    // // defaultPositions.push_back(Vector2(3.5, -2.0));
-
-    // std::vector<Vector2> strikersDefaultPositions;
-    // for (size_t i = 0; i < defaultPositions.size(); i++) {
-    //     if ((ballPos - defaultPositions.at(i)).length() > 1.5) {
-    //         strikersDefaultPositions.push_back(defaultPositions.at(i));
-    //         if (strikersDefaultPositions.size() >= numStrikers) {
-    //             break;
-    //         }
-    //     }
-    // }
 
 
     double xPos = std::min(ballPos.x + 2.5, 2.2);
@@ -171,17 +109,12 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
 
-    // if (weHaveBall.Update() == Status::Success) {
-    //     lastTimeWeHadBall = now();
-    // }
-
-    // if (time_difference_milliseconds(lastTimeWeHadBall, now()).count() > 10000) {
-    //     RTT_DEBUGLN("Jim_MultipleStrikersPlay failed because we lost the ball");
-    //     return Status::Failure;
-    // }
-
-    int successCount = 0;
     int failureCount = 0;
+    bool allFailed = true;
+
+    if (tokens.size() == 0) {
+        allFailed = false;
+    }
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
@@ -189,18 +122,15 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
             if (status == bt::Node::Status::Success) {
                 RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
                 return Status::Success;
-                // successCount++;
             }
 
-            if (status == bt::Node::Status::Failure) {
-                // RTT_DEBUGLN("Jim_MultipleStrikersPlay failed :(");
-                // return Status::Failure;
-                failureCount++;
-            }
+            allFailed &= status == bt::Node::Status::Failure;
+        } else {
+            allFailed = false;
         }
     }
 
-    if (failureCount >= 2) {
+    if (allFailed) {
         return Status::Failure;
     }
 
