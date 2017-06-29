@@ -143,7 +143,7 @@ Vector2 distPointToLine(FieldLineSegment line, Vector2 point, double safetyMargi
 }
 
 
-Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargin) {
+Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
     FieldLineSegment line;
     FieldCircularArc top_arc;
     FieldCircularArc bottom_arc;
@@ -153,15 +153,16 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     double safetyMarginLine = safetyMargin;
 
     GeometryFieldSize field = LastWorld::get_field();
-    if (name == "their defense area") {
+
+    if (ourDefenseArea) {
+        line = field.left_penalty_line;
+        top_arc = field.top_left_penalty_arc;
+        bottom_arc = field.bottom_left_penalty_arc;
+    } else {
         line = field.right_penalty_line;
         top_arc = field.top_right_penalty_arc;
         bottom_arc = field.bottom_right_penalty_arc;
         safetyMarginLine = safetyMarginLine * -1; // on the right side of the field we need to subtract the safety margin instead of add it.
-    } else if (name == "our defense area") {
-        line = field.left_penalty_line;
-        top_arc = field.top_left_penalty_arc;
-        bottom_arc = field.bottom_left_penalty_arc;
     }
 
     Vector2 distToLine = distPointToLine(line, point, safetyMarginLine);
@@ -179,51 +180,37 @@ Vector2 getDistToDefenseArea(std::string name, Vector2 point, double safetyMargi
     return shortestDistance;
 }
 
-bool isWithinDefenseArea(std::string whichArea, Vector2 point) {
-    GeometryFieldSize field = LastWorld::get_field();
-    // std::string our_side;
-    // ros::param::get("our_side", our_side);
-    Vector2 distToDefenseArea = getDistToDefenseArea(whichArea, point, 0.0);
-    if (whichArea == "our defense area") {
-        // if (our_side == "left") {
-            if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
-            else return false;
-        // }
-        // if (our_side == "right") {
-            // if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
-            // else return false;
-        // }
-    } else if (whichArea == "their defense area") {
-        // if (our_side == "left") {
-            if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
-            else return false;
-        // }
-        // if (our_side == "right") {
-            // if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
-            // else return false;
-        // }
-    }
-    ROS_WARN("DistanceXToY/isWithinDefenseArea you probably entered a wrong name");
-    return false;
-}
+// bool isWithinDefenseArea(std::string whichArea, Vector2 point) {
+//     GeometryFieldSize field = LastWorld::get_field();
+//     Vector2 distToDefenseArea = getDistToDefenseArea(whichArea, point, 0.0);
+//     if (whichArea == "our defense area") {
+//         if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+//         else return false;
+//     } else if (whichArea == "their defense area") {
+//         if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
+//         else return false;
+//     }
+//     ROS_WARN("DistanceXToY/isWithinDefenseArea you probably entered a wrong name");
+//     return false;
+// }
 
-bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_side, roboteam_msgs::GeometryFieldSize field) {
+// bool isWithinDefenseArea(std::string whichArea, Vector2 point, std::string our_side, roboteam_msgs::GeometryFieldSize field) {
 
-    if (whichArea == "our defense area" || whichArea == "both") {
-        if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return true;
-        else if ((Vector2(field.bottom_left_penalty_arc.center) - point).length() < field.bottom_left_penalty_arc.radius) return true;
-        else if (point.x < field.left_penalty_line.begin.x && fabs(point.y) < field.left_penalty_line.begin.x) return true;
-    }
+//     if (whichArea == "our defense area" || whichArea == "both") {
+//         if ((Vector2(field.top_left_penalty_arc.center) - point).length() < field.top_left_penalty_arc.radius) return true;
+//         else if ((Vector2(field.bottom_left_penalty_arc.center) - point).length() < field.bottom_left_penalty_arc.radius) return true;
+//         else if (point.x < field.left_penalty_line.begin.x && fabs(point.y) < field.left_penalty_line.begin.x) return true;
+//     }
 
-    if (whichArea == "their defense area" || whichArea == "both") {
+//     if (whichArea == "their defense area" || whichArea == "both") {
 
-        if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return true;
-        else if ((Vector2(field.bottom_right_penalty_arc.center) - point).length() < field.bottom_right_penalty_arc.radius) return true;
-        else if (point.x > field.right_penalty_line.begin.x && fabs(point.y) < field.right_penalty_line.begin.x) return true;
-    }
+//         if ((Vector2(field.top_right_penalty_arc.center) - point).length() < field.top_right_penalty_arc.radius) return true;
+//         else if ((Vector2(field.bottom_right_penalty_arc.center) - point).length() < field.bottom_right_penalty_arc.radius) return true;
+//         else if (point.x > field.right_penalty_line.begin.x && fabs(point.y) < field.right_penalty_line.begin.x) return true;
+//     }
 
-    return false;
-}
+//     return false;
+// }
 
 double getDistToSide(std::string name, Vector2 point, double marginOutsideField) {
     GeometryFieldSize field = LastWorld::get_field();
@@ -264,13 +251,18 @@ bt::Node::Status DistanceXToY::Update() {
     auto vecY = getPointOfInterest(Y, ROBOT_ID);
     double dist;
 
-    if ((X == "our defense area" || X == "their defense area") && X != Y) {
-        dist = getDistToDefenseArea(X, vecY, 0.2).length();
-    } else if ((Y == "our defense area" || Y == "their defense area") && X != Y) {
-        dist = getDistToDefenseArea(Y, vecX, 0.2).length();
+    if (X == "our defense area" && X != Y) {
+        dist = getDistToDefenseArea(true, vecY, 0.2).length();
+    } else if (X == "their defense area" && X != Y) {
+        dist = getDistToDefenseArea(false, vecY, 0.2).length();
+    } else if (Y == "our defense area" && X != Y) {
+        dist = getDistToDefenseArea(true, vecX, 0.2).length();
+    } else if (Y == "their defense area" && X != Y) {
+        dist = getDistToDefenseArea(false, vecX, 0.2).length();
     } else {
         dist = vecX.dist(vecY);
     }
+
 
     bool result = false;
 

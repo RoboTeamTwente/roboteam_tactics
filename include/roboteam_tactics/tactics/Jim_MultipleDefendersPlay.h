@@ -19,8 +19,9 @@ class Jim_MultipleDefendersPlay : public Tactic {
     Status Update();
 
     private:
-    void reInitializeWhenNeeded();
-    void reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps);
+    bool reInitializeWhenNeeded();
+    // void reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps);
+    void reInitialize();
 
     ros::NodeHandle n;
 
@@ -37,6 +38,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
     int numRobotDefenders;
     double prevDistBallToGoal;
     double distBallToGoalThreshold;
+
+    int prevNumRobots;
 };
 
 }

@@ -16,6 +16,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 
+
 #define RTT_CURRENT_DEBUG_TAG GoToPos
 
 namespace rtt {
@@ -194,13 +195,13 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
     if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("our defense area", newTargetPos)) {
+        if (isWithinDefenseArea(true, newTargetPos)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea("their defense area", newTargetPos)) {
+        if (isWithinDefenseArea(false, newTargetPos)) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
@@ -256,9 +257,25 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
 
+    if (HasDouble("pGainPosition")) {
+        controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
+    }
+    if (HasDouble("iGainPosition")) {
+        controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
+    }
+    if (HasDouble("pGainRotation")) {
+        controller.setControlParam("pGainRotation", GetDouble("pGainRotation"));
+    }
+    if (HasDouble("iGainRotation")) {
+        controller.setControlParam("iGainRotation", GetDouble("iGainRotation"));
+    }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
     }
+    if (HasDouble("maxAngularVel")) {
+        controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
+    }
+
 
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
@@ -293,7 +310,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;

@@ -81,7 +81,7 @@ private:
     Kick kick;
     bool ballHasBeenClose = false;
     bool startKicking = false;
-    bool enableComputePoint = true;
+    bool ballIsComing = false;
 
     bool touchedBall = false;
     time_point initialBallContact;

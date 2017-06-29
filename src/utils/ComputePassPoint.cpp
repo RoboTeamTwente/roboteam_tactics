@@ -1,7 +1,7 @@
 #include "roboteam_tactics/utils/ComputePassPoint.h"
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_utils/Math.h"
-#include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
 
 #include <iostream>
@@ -15,7 +15,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/robo/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
+	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
 	std::string filePath = filePrefix.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -32,15 +32,17 @@ void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string targe
 
 		distToGoalWeight = weightsVector.at(0);
 		distToOppWeight = weightsVector.at(1);
-		distToBallWeight = weightsVector.at(2);
-		viewOfGoalWeight = weightsVector.at(3);
-		distOppToBallTrajWeight = weightsVector.at(4);
-		distToRobotWeight = weightsVector.at(5);
-		angleDiffRobotTargetWeight = weightsVector.at(6);
-		distToRobotThreshold = weightsVector.at(7);
-		distOppToBallTrajThreshold = weightsVector.at(8);
-		distOppToBallToTargetTrajThreshold = weightsVector.at(9);
-		viewOfGoalThreshold = weightsVector.at(10);
+		distToTeammateWeight = weightsVector.at(2);
+		distToBallWeight = weightsVector.at(3);
+		viewOfGoalWeight = weightsVector.at(4);
+		distOppToBallTrajWeight = weightsVector.at(5);
+		distOppToBallToTargetTrajWeight = weightsVector.at(6);
+		distToRobotWeight = weightsVector.at(7);
+		angleDiffRobotTargetWeight = weightsVector.at(8);
+		distToRobotThreshold = weightsVector.at(9);
+		distOppToBallTrajThreshold = weightsVector.at(10);
+		distOppToBallToTargetTrajThreshold = weightsVector.at(11);
+		viewOfGoalThreshold = weightsVector.at(12);
 	} else {
 		RTT_DEBUG("Unable to open file \n");
 	}
@@ -57,6 +59,19 @@ double PassPoint::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::Worl
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
 	for (size_t i = 1; i < world.them.size(); i++) {
 		double testDistance = (Vector2(world.them.at(i).pos) - testPosition).length();
+		if (testDistance < shortestDistance) {
+			shortestDistance = testDistance;
+		}
+	}
+	return shortestDistance;
+}
+
+
+// Calculates the distance between the closest opponent and the testPosition
+double PassPoint::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
+	double shortestDistance = (Vector2(world.us.at(0).pos) - testPosition).length();
+	for (size_t i = 1; i < world.us.size(); i++) {
+		double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
 		if (testDistance < shortestDistance) {
 			shortestDistance = testDistance;
 		}
@@ -194,6 +209,7 @@ double PassPoint::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World wor
 	}	
 }
 
+
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
 // If this angle is low, it means that a robot standing on the testPosition can more easily shoot the ball at the goal directly after receiving the ball
 double PassPoint::calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world) {
@@ -230,10 +246,10 @@ double PassPoint::computePassPointScore(Vector2 testPosition) {
 	}
 
 
-	// double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
-	// if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
-	// 	return boost::none;
-	// }
+	double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
+	if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
+		score -= distOppToBallToTargetTrajWeight;
+	}
 
 	// double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world));
 	// if (viewOfGoal < viewOfGoalThreshold) {
@@ -242,15 +258,19 @@ double PassPoint::computePassPointScore(Vector2 testPosition) {
 
 
 	Vector2 ballPos(world.ball.pos);
+	time_point currenTime = now();
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
+	double distToTeammate = sqrt(calcDistToClosestTeammate(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
 	double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
 	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
 	double distToRobot = calcDistToRobot(testPosition, world);
 	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 
-	angleDiffRobotTarget -= (90.0 / 180.0 * M_PI);
+
+
+	angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
 	angleDiffRobotTarget = fabs(angleDiffRobotTarget);
 
 	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
@@ -259,9 +279,10 @@ double PassPoint::computePassPointScore(Vector2 testPosition) {
 	
 	score += - distToGoal*distToGoalWeight 
 				   + distToOpp*distToOppWeight 
-				   - distToBall*distToBallWeight 
+				   + distToTeammate*distToTeammateWeight
+				   + distToBall*distToBallWeight 
 				   + viewOfGoal*viewOfGoalWeight
-				   + distOppToBallTraj*distOppToBallTrajWeight
+				   // + distOppToBallTraj*distOppToBallTrajWeight
 				   - distToRobot*distToRobotWeight
 				   - angleDiffRobotTarget*angleDiffRobotTargetWeight;
 
@@ -315,7 +336,8 @@ Vector2 PassPoint::computeBestPassPoint() {
 			Vector2 ballPos(world.ball.pos);
 			double distToBall = (point - ballPos).length();
 
-			if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point) && distToBall >= 0.5) {
+			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point) && distToBall >= 1.0) {
+			// if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
 				
 				// boost::optional<double> score = computePassPointScore(point);
 				double score = computePassPointScore(point);
@@ -342,8 +364,9 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	// double maxScore = *max_element(scores.begin(), scores.end());
-	// double minScore = *min_element(scores.begin(), scores.end());
+	double maxScore = *max_element(scores.begin(), scores.end());
+	double minScore = *min_element(scores.begin(), scores.end());
+
 
 	// for (size_t i = 0; i < passPoints.size(); i++) {
 	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
@@ -352,13 +375,13 @@ Vector2 PassPoint::computeBestPassPoint() {
 	// }
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	// drawer.removePoint(winningPointName);
+	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
+	drawer.removePoint(winningPointName);
 
-	// std::string name = "bestPosition";
-	// name.append(std::to_string(ROBOT_ID));
-	// drawer.setColor(255, 255, 255);
-	// drawer.drawPoint(name, bestPosition);
+	std::string name = "bestPosition";
+	name.append(std::to_string(ROBOT_ID));
+	drawer.setColor(255, 255, 255);
+	drawer.drawPoint(name, bestPosition);
 	return bestPosition;
 }
 
