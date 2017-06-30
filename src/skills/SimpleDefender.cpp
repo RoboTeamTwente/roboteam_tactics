@@ -7,7 +7,7 @@
 #include "roboteam_utils/world_analysis.h"
 
 #include "roboteam_tactics/Parts.h"
-#include "roboteam_tactics/skills/SimpleKeeper.h"
+#include "roboteam_tactics/skills/SimpleDefender.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -18,19 +18,19 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
 
-#define RTT_CURRENT_DEBUG_TAG SimpleKeeper
+#define RTT_CURRENT_DEBUG_TAG SimpleDefender
 
 namespace rtt {
 
-RTT_REGISTER_SKILL(SimpleKeeper);
+RTT_REGISTER_SKILL(SimpleDefender);
 
 
-SimpleKeeper::SimpleKeeper(std::string name, bt::Blackboard::Ptr blackboard)
+SimpleDefender::SimpleDefender(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , receiveBall("", private_bb)
         , goToPos("", private_bb) { }
 
-Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
+Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
     
     Vector2 goalPos;
     if (ourSide) {
@@ -48,7 +48,7 @@ Vector2 SimpleKeeper::computeDefensePoint(Vector2 defendPos, bool ourSide, doubl
     return targetPos;
 }
 
-bt::Node::Status SimpleKeeper::Update() {
+bt::Node::Status SimpleDefender::Update() {
     
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();

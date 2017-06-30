@@ -109,7 +109,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		
 		return interceptPose;
 	} else {
-		Vector2 ballTrajectory = ballVel.scale(5.0 / ballVel.length());
+		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {

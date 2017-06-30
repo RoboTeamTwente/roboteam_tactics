@@ -87,7 +87,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
         bb.SetDouble("ReceiveBall_A_computePointCloseToY", strikersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_A_setSignal", true);
         bb.SetBool("ReceiveBall_A_shouldFail", true);
-        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.2);
+        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.4);
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
