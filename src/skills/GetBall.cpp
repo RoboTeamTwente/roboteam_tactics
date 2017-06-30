@@ -243,9 +243,9 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
+	if (angleDiff > 0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.1*M_PI) { // 0.1*M_PI for real-life robots!!
+	} else if (angleDiff < -0.3*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
@@ -259,7 +259,7 @@ bt::Node::Status GetBall::Update (){
     double successDist = 0.0;
     double successAngle = 0.0;
     double getBallDist;
-    double distAwayFromBall = 0.2; // 0.2 for protoBots??
+    double distAwayFromBall = 0.4; // 0.2 for protoBots??
     if (robot_output_target == "grsim") {
         successDist = 0.11;
         successAngle = 0.1;
@@ -271,7 +271,7 @@ bt::Node::Status GetBall::Update (){
     }
    
 
-	if (posDiff.length() > 0.4 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
+	if (posDiff.length() > 0.5 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);

@@ -111,6 +111,7 @@ bt::Node::Status SimpleDefender::Update() {
     // } else {   
         
         private_bb->SetInt("ROBOT_ID", robotID);
+        private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
         private_bb->SetDouble("receiveBallAtX", targetPos.x);
         private_bb->SetDouble("receiveBallAtY", targetPos.y);
         private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
