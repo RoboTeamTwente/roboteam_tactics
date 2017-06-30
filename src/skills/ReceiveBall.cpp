@@ -109,7 +109,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		
 		return interceptPose;
 	} else {
-		Vector2 ballTrajectory = ballVel.scale(5.0 / ballVel.length());
+		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
@@ -221,9 +221,7 @@ bt::Node::Status ReceiveBall::Update() {
 	
 	Vector2 targetPos;
 	double targetAngle;
-	
 	bool ballWasComing = ballIsComing;
-
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	InterceptPose interceptPose;

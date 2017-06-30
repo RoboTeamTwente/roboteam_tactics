@@ -35,6 +35,9 @@
 #include "PassToTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "PenaltyUsPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "SecondaryKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

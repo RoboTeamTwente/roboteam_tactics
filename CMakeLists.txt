@@ -271,7 +271,8 @@ catkin_add_gtest(tactics_test
     test/VerificationTest.cpp
     test/SpaceTest.cpp
     test/ParamsStressTest.cpp
-    test/ShootAtGoalTest.cpp
+    #test/ShootAtGoalTest.cpp
+    test/InterceptTest.cpp
     $<TARGET_OBJECTS:analysis>
     $<TARGET_OBJECTS:conditions>
     $<TARGET_OBJECTS:tactics>

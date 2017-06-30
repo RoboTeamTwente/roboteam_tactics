@@ -354,7 +354,7 @@ boost::optional<TeamRobot> getTeamBot(unsigned int id, bool ourTeam = true, cons
 /**
  * \brief Checks whether the parameter is the NaN value.
  */
-constexpr bool isNaN(double	 t) {
+constexpr bool isNaN(double	t) {
 	return t != t;
 }
 
