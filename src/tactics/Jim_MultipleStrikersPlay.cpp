@@ -53,12 +53,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-
-
-
     double xPos = std::min(ballPos.x + 2.5, 2.2);
-
-
 
     std::vector<Vector2> strikersDefaultPositions;
     strikersDefaultPositions.push_back(Vector2(xPos, 1.5));

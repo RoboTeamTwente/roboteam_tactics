@@ -340,11 +340,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.02;
+        successDist = 0.04;
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.1) {
+    if (posError.length() < successDist && fabs(angleError) < 0.2) {
         successCounter++;
         if (successCounter >= 4) {
             sendStopCommand(ROBOT_ID);
