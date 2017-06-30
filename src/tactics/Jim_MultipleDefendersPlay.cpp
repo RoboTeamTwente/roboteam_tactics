@@ -195,14 +195,15 @@ void Jim_MultipleDefendersPlay::reInitialize() {
     int maxBallDefenders = 2;
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
-    if (ballPos.x < 0.0) {
+
+    bool ballOnOurSide = ballPos.x < 0.0;
+
+    if (ballOnOurSide) {
     	minDangerScore = 3.2;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
-    	// maxBallDefenders = 2;
     } else {
     	minDangerScore = 4.5;
-    	// maxBallDefenders = 1;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(3.00);
     }
@@ -277,20 +278,30 @@ void Jim_MultipleDefendersPlay::reInitialize() {
     // ====================================
     std::vector<double> angleOffsets;
     
-    if (numBallDefenders == 1) {
-        angleOffsets.push_back(0.0);
-    } else if (numBallDefenders == 2) {
-        angleOffsets.push_back(0.1);
-        angleOffsets.push_back(-0.1);
-    } else if (numBallDefenders == 3) {
-        angleOffsets.push_back(0.0);
-        angleOffsets.push_back(0.2);
-        angleOffsets.push_back(-0.2);
+    if (ballOnOurSide) {
+    	if (numBallDefenders == 1) {
+	        angleOffsets.push_back(0.0);
+	    } else if (numBallDefenders == 2) {
+	        angleOffsets.push_back(0.1);
+	        angleOffsets.push_back(-0.1);
+	    } else if (numBallDefenders == 3) {
+	        angleOffsets.push_back(0.0);
+	        angleOffsets.push_back(0.2);
+	        angleOffsets.push_back(-0.2);
+	    }
+    } else {
+		if (numBallDefenders == 1) {
+	        angleOffsets.push_back(0.0);
+	    } else if (numBallDefenders == 2) {
+	        angleOffsets.push_back(0.0);
+	        angleOffsets.push_back(-0.0);
+	    }
     }
+    
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
-        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 1.35, angleOffsets.at(i)));
+        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distancesBallDefendersFromGoal.at(i), angleOffsets.at(i)));
     }
     std::vector<int> ballDefenders = getClosestRobots(robots, ballDefendersPositions, world);
 
