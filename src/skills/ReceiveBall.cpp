@@ -21,8 +21,6 @@
 #include <vector>
 #include <string>
 
-#include "roboteam_tactics/utils/Intercept.h"
-
 #define RTT_CURRENT_DEBUG_TAG ReceiveBall
 
 namespace rtt {
@@ -224,17 +222,6 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 targetPos;
 	double targetAngle;
 	bool ballWasComing = ballIsComing;
-
-	InterceptQuery query = buildNormalInterceptQuery({robotPos.x, robotPos.y, robot.angle}
-	, robot.vel, ball.pos, ball.vel);
-	InterceptResult intercept = calculateInterception(query);
-	if (intercept.success)
-		drawer.drawPoint("interceptPoint", intercept.pos);
-	ROS_INFO_STREAM("InterceptQuery: botPos=" << query.botPos.location() << " botVel="
-			<< query.botVel << " botAcc=" << query.botAcc << " ballPos=" << query.ballPos
-			<< " ballVel=" << query.ballVel << " ballAcc=" << query.ballAcc);
-
-	ROS_INFO("InterceptResult: success=%d, pos=(%f, %f), time=%f", intercept.success, intercept.pos.x, intercept.pos.y, intercept.time);
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	InterceptPose interceptPose;
