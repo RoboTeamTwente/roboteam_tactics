@@ -256,22 +256,24 @@ bt::Node::Status GetBall::Update (){
 	// at a distance of 30 cm of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
-    double successDist = 0.0;
-    double successAngle = 0.0;
+    double successDist;
+    double successAngle;
     double getBallDist;
-    double distAwayFromBall = 0.4; // 0.2 for protoBots??
+    double distAwayFromBall;
     if (robot_output_target == "grsim") {
         successDist = 0.11;
-        successAngle = 0.1;
-        getBallDist = 0.08 ;
+        successAngle = 0.2;
+        getBallDist = 0.00 ;
+        distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.3;
         getBallDist = 0.06;
+        distAwayFromBall = 0.4;
     }
    
 
-	if (posDiff.length() > 0.5 || fabs(angleDiff) > (successAngle*2)) { // posDiff > 0.25 for protoBots
+	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle*2)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);

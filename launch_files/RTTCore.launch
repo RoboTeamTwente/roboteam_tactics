@@ -26,7 +26,7 @@
 	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
 	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
 
-	<param name="role_iterations_per_second" type="int" value="50" />
+	<param name="role_iterations_per_second" type="int" value="60" />
 	<param name="robot_output_target" type="str" value="grsim" />
 	<param name="num_role_nodes" type="int" value="6" />
 	<param name="normalize_field" type="bool" value="true" />

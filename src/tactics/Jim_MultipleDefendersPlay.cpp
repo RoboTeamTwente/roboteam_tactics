@@ -133,6 +133,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     	minDangerScore = 3.2;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
+    	distancesBallDefendersFromGoal.push_back(1.35);
     } else {
     	minDangerScore = 4.5;
     	distancesBallDefendersFromGoal.push_back(1.35);
@@ -143,11 +144,23 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     for (size_t i = 0; i < world.dangerList.size(); i++) {
         if (world.dangerScores.at(i) >= minDangerScore) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-            double angleDiff = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
-            if (angleDiff <= 0.15) {
+            double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+            if (angleDiffBall <= 0.15) {
                 minBallDefenders = 2;
             } else {
-                dangerousOpps.push_back(opp);
+
+            	bool addDangerousOpp = true;
+            	for (size_t j = 0; j < dangerousOpps.size(); j++) {
+            		double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
+            		if (angleDiffRobot <= 0.15) {
+            			addDangerousOpp = false;
+            			break;
+            		}
+            	}
+            	
+            	if (addDangerousOpp) {
+            		dangerousOpps.push_back(opp);
+            	}
             }
         }
     }
@@ -158,14 +171,13 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
     newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
 
-
     double distBallToGoal = (ballPos - LastWorld::get_our_goal_center()).length();
-    bool distBallToGoalHasChanged = (distBallToGoal <= distBallToGoalThreshold && prevDistBallToGoal > distBallToGoalThreshold) || 
-    								(distBallToGoal > distBallToGoalThreshold && prevDistBallToGoal <= distBallToGoalThreshold);
-     
-    prevDistBallToGoal = distBallToGoal;
 
-    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders) {
+    bool ballPosHasChanged = (ballPos.x > 0 && prevBallPos.x < 0) || (ballPos.x < 0 && prevBallPos.x > 0)
+    						|| (ballPos.y > 0 && prevBallPos.y < 0) || (ballPos.y < 0 && prevBallPos.y > 0);
+    prevBallPos = ballPos;
+     
+    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || ballPosHasChanged) {
         return true;
     }
 
@@ -212,11 +224,23 @@ void Jim_MultipleDefendersPlay::reInitialize() {
     for (size_t i = 0; i < world.dangerList.size(); i++) {
         if (world.dangerScores.at(i) >= minDangerScore) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-            double angleDiff = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
-            if (angleDiff <= 0.15) {
+            double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+            if (angleDiffBall <= 0.15) {
                 minBallDefenders = 2;
             } else {
-                dangerousOpps.push_back(opp);
+
+            	bool addDangerousOpp = true;
+            	for (size_t j = 0; j < dangerousOpps.size(); j++) {
+            		double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
+            		if (angleDiffRobot <= 0.15) {
+            			addDangerousOpp = false;
+            			break;
+            		}
+            	}
+            	
+            	if (addDangerousOpp) {
+            		dangerousOpps.push_back(opp);
+            	}
             }
         }
     }
@@ -293,8 +317,13 @@ void Jim_MultipleDefendersPlay::reInitialize() {
 		if (numBallDefenders == 1) {
 	        angleOffsets.push_back(0.0);
 	    } else if (numBallDefenders == 2) {
-	        angleOffsets.push_back(0.0);
-	        angleOffsets.push_back(-0.0);
+	    	if (ballPos.y >= 0) {
+	    		angleOffsets.push_back(0.15);
+	        	angleOffsets.push_back(-0.05);
+	    	} else {
+	    		angleOffsets.push_back(-0.15);
+	        	angleOffsets.push_back(0.05);
+	    	}
 	    }
     }
     
@@ -391,8 +420,6 @@ void Jim_MultipleDefendersPlay::Initialize() {
 	numBallDefenders = 0;
 	numRobotDefenders = 0;
 	distBallToGoalThreshold = 4.0;
-	prevDistBallToGoal = 5.0;
-	reInitializeWhenNeeded();
     reInitialize();
 	return;
 }
