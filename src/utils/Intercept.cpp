@@ -1,4 +1,5 @@
 #include "roboteam_tactics/utils/Intercept.h"
+#include "roboteam_tactics/utils/utils.h"
 
 namespace rtt {
 
