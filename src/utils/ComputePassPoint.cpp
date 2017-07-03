@@ -3,11 +3,14 @@
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "ros/package.h"
 
 #include <iostream>
 #include <fstream>
 
+
 #define RTT_CURRENT_DEBUG_TAG ComputePassPoint
+#define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/PassPointWeights/")
 
 namespace rtt {
 
@@ -15,8 +18,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
-	std::string filePath = filePrefix.append(fileName);
+	std::string filePath = PASS_POINT_WEIGHTS_DIRECTORY.append(fileName);
 
 	std::vector<float> weightsVector;
 	std::string line;
