@@ -11,6 +11,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG ComputePassPoint
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/PassPointWeights/")
+#define DRAW_PASS_POINT_GRID false
 
 namespace rtt {
 
@@ -369,11 +370,12 @@ Vector2 PassPoint::computeBestPassPoint() {
 	double maxScore = *max_element(scores.begin(), scores.end());
 	double minScore = *min_element(scores.begin(), scores.end());
 
-
-	for (size_t i = 0; i < passPoints.size(); i++) {
-		double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-		drawer.setColor(255 - relScore, 0, relScore);
-		drawer.drawPoint(names.at(i), passPoints.at(i));
+	if (DRAW_PASS_POINT_GRID) {
+		for (size_t i = 0; i < passPoints.size(); i++) {
+			double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
+			drawer.setColor(255 - relScore, 0, relScore);
+			drawer.drawPoint(names.at(i), passPoints.at(i));
+		}
 	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
