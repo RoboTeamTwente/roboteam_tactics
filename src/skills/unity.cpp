@@ -22,6 +22,9 @@
 #include "DefendGoalarea.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "DefendPenalty.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Dribble.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
