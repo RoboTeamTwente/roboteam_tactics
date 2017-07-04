@@ -405,6 +405,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
 
+    double maxVel = GetDouble("maxVelocity", 299792458.0);
+    if (velCommand.length() > maxVel) {
+    	velCommand = velCommand.stretchToLength(maxVel);
+    }
+
     
     // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
     // wheels remain still
