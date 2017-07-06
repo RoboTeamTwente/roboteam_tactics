@@ -64,6 +64,8 @@ bt::Node::Status DefendPenalty::Update() {
 				shooterPos.location().angle());
 		Section shooterAimSection { shooterPos.location(), shooterAimVector };
 		Vector2 intersection = goalSection.intersection(shooterAimSection);
+		ROS_INFO_STREAM("Shooter Aim: " << shooterAimSection.a << " -- " << shooterAimSection.b);
+		ROS_INFO_STREAM("Intersection: " << intersection);
 		if (goalSection.pointOnLine(intersection)) {
 			tgtVector = intersection;
 		} else {

@@ -59,7 +59,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::TIMEOUT_US            , "rtt_dennis/WanderStrategy"s         } ,
         { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s         } ,
         { RefState::GOAL_US               , b::none                              } ,
-        { RefState::GOAL_THEM             , b::none                              } ,
+        { RefState::GOAL_THEM             , "rtt_bob/prepare_kickoff_us"s        } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
         { RefState::BALL_PLACEMENT_THEM   , "rtt_bob/BallPlacementThemStrategy"s } ,
 
