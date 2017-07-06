@@ -17,6 +17,9 @@
 #include "DemoTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "FormationPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "FreeKickDefenceTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

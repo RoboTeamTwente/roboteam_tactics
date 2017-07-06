@@ -18,6 +18,8 @@
 
 namespace rtt {
 
+#define STOP_STATE_MAX_VELOCITY 1.3 // Actually 1.5 m/s, but there's no point in pushing the limit here.
+
 /**
  * \class GoToPos
  * \brief See YAML
