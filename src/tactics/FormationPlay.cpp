@@ -62,7 +62,7 @@ void FormationPlay::Initialize() {
 
 	for (unsigned i = 0; i < count; i++) {
 		int id = robots.at(i);
-		RobotDealer::claim_robot(id);
+		claim_robot(id);
 		Position pos = formation->positions.at(i);
 		roboteam_msgs::RoleDirective rd;
 		rd.robot_id = id;

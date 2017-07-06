@@ -67,9 +67,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Our custom refstates //
         //////////////////////////
         
-        // qualification/StandByStrategy
-        // rtt_bob/NormalStrategy
-        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithRunStrategy"s    } ,
+        // rtt_bob/KickoffWithRunStrategy
+        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_dennis/KickoffDefenseStrategy"s } ,
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
