@@ -56,7 +56,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,
-        { RefState::TIMEOUT_US            , "rtt_dennis/WanderStrategy"s         } ,
+        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s         } ,
         { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s         } ,
         { RefState::GOAL_US               , b::none                              } ,
         { RefState::GOAL_THEM             , b::none                              } ,

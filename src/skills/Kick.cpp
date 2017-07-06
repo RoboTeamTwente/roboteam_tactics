@@ -31,6 +31,7 @@ void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
     oldBallVel = Vector2(vel.x, vel.y);
     ballStartPos = LastWorld::get().ball.pos;
+    cycleCounter = 0;
 }
 
 bt::Node::Status Kick::Update() {
@@ -62,7 +63,7 @@ bt::Node::Status Kick::Update() {
     double currentBallVelInRobotDir = currentBallVel.dot(robotDirVector);
     double oldBallVelInRobotDir = oldBallVel.dot(robotDirVector);
 
-    // ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
+    ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
 
     // if (oldBallVelInRobotDir < 0.1) {
         if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2 && currentBallVelInRobotDir >= 0.1) {
