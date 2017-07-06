@@ -367,10 +367,13 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	double maxScore = *max_element(scores.begin(), scores.end());
-	double minScore = *min_element(scores.begin(), scores.end());
+	
+
 
 	if (DRAW_PASS_POINT_GRID) {
+
+		double maxScore = *max_element(scores.begin(), scores.end());
+		double minScore = *min_element(scores.begin(), scores.end());
 		for (size_t i = 0; i < passPoints.size(); i++) {
 			double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
 			drawer.setColor(255 - relScore, 0, relScore);
@@ -380,12 +383,12 @@ Vector2 PassPoint::computeBestPassPoint() {
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	drawer.removePoint(winningPointName);
+	// drawer.removePoint(winningPointName);
 
-	std::string name = "bestPosition";
-	name.append(std::to_string(ROBOT_ID));
-	drawer.setColor(255, 255, 255);
-	drawer.drawPoint(name, bestPosition);
+	// std::string name = "bestPosition";
+	// name.append(std::to_string(ROBOT_ID));
+	// drawer.setColor(255, 255, 255);
+	// drawer.drawPoint(name, bestPosition);
 	return bestPosition;
 }
 
