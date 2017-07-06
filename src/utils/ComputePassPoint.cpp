@@ -3,11 +3,15 @@
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "ros/package.h"
 
 #include <iostream>
 #include <fstream>
 
+
 #define RTT_CURRENT_DEBUG_TAG ComputePassPoint
+#define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/PassPointWeights/")
+#define DRAW_PASS_POINT_GRID false
 
 namespace rtt {
 
@@ -15,8 +19,7 @@ PassPoint::PassPoint() {}
 
 void PassPoint::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	std::string filePrefix = "/home/jim/catkin_ws/src/roboteam_tactics/src/utils/PassPointWeights/";
-	std::string filePath = filePrefix.append(fileName);
+	std::string filePath = PASS_POINT_WEIGHTS_DIRECTORY.append(fileName);
 
 	std::vector<float> weightsVector;
 	std::string line;
@@ -364,15 +367,19 @@ Vector2 PassPoint::computeBestPassPoint() {
 		return Vector2(0.0, 0.0);
 	}
 
-	// double maxScore = *max_element(scores.begin(), scores.end());
-	// double minScore = *min_element(scores.begin(), scores.end());
+	
 
 
-	// for (size_t i = 0; i < passPoints.size(); i++) {
-	// 	double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
-	// 	drawer.setColor(255 - relScore, 0, relScore);
-	// 	drawer.drawPoint(names.at(i), passPoints.at(i));
-	// }
+	if (DRAW_PASS_POINT_GRID) {
+
+		double maxScore = *max_element(scores.begin(), scores.end());
+		double minScore = *min_element(scores.begin(), scores.end());
+		for (size_t i = 0; i < passPoints.size(); i++) {
+			double relScore = (scores.at(i) - minScore) / (maxScore - minScore) * 255;
+			drawer.setColor(255 - relScore, 0, relScore);
+			drawer.drawPoint(names.at(i), passPoints.at(i));
+		}
+	}
 
 	Vector2 bestPosition = passPoints.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

@@ -70,7 +70,10 @@ namespace rtt {
  *      - enterDefenseAreas:
  *          Type: Bool
  *          Descr: When true allows GoToPos to go into the defense areas of both teams.
- *
+ *      - maxVelocity:
+ *          Type: Double
+ *          Descr: The maximum velocity the robot is allowed to achieve.
+ *          Default: 299792458
  */
 class GoToPos : public Skill {
 public:
