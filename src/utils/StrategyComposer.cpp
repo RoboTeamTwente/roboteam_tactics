@@ -31,7 +31,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
         
-        { RefState::NORMAL_START          , "rtt_jim/SimpleCombStrat"s     } ,
+        { RefState::NORMAL_START          , "rtt_jim/SimpleAttStrat"s      } ,
         { RefState::FORCED_START          , b::none                        } ,
         
         ////////////////////////////////////////////////////
@@ -56,12 +56,12 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,
-        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s         } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s         } ,
-        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s                             } ,
-        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s        } ,
+        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_bob/BallPlacementThemStrategy"s } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_jim/TimeOutStrat"s              } ,
 
         //////////////////////////
         // Our custom refstates //
@@ -74,7 +74,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
 
-        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleCombStrat"s           } ,
+        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleAttStrat"s            } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
