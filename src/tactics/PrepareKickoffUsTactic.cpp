@@ -16,16 +16,16 @@ namespace rtt {
 RTT_REGISTER_TACTIC(PrepareKickoffUsTactic);
 
 PrepareKickoffUsTactic::PrepareKickoffUsTactic(std::string name, bt::Blackboard::Ptr blackboard)
-        : Tactic(name, blackboard) 
+        : Tactic(name, blackboard)
         {}
 
 void PrepareKickoffUsTactic::Initialize() {
     tokens.clear();
-    
+
     RTT_DEBUGLN("Preparing Kickoff...");
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-    
+
     // Position the keeper
     int const KEEPER_ID = RobotDealer::get_keeper();
     {
@@ -38,7 +38,7 @@ void PrepareKickoffUsTactic::Initialize() {
         Vector2 lookAtVec = Vector2(0, 0) - Vector2(-4, 0);
 
         ScopedBB(bb, "_GoToPos")
-            .setBool("isKeeper", true)
+            .setBool("enterDefenseAreas", true)
             .setDouble("angleGoal", lookAtVec.angle())
             .setDouble("xGoal", -4)
             .setDouble("yGoal", 0)
@@ -84,7 +84,7 @@ void PrepareKickoffUsTactic::Initialize() {
         wd.tree = "rtt_bob/GetBallAndStay";
         wd.blackboard = bb.toMsg();
         wd.token = unique_id::toMsg(unique_id::fromRandom());
-        
+
         pub.publish(wd);
 
         claim_robot(ROBOT_ID);
@@ -126,7 +126,7 @@ void PrepareKickoffUsTactic::Initialize() {
         wd.tree = "rtt_bob/GoToPosAndStay";
         wd.blackboard = bb.toMsg();
         wd.token = unique_id::toMsg(unique_id::fromRandom());
-        
+
         pub.publish(wd);
 
         claim_robot(ROBOT_ID);
@@ -141,4 +141,3 @@ bt::Node::Status PrepareKickoffUsTactic::Update() {
 
 
 } // rtt
-

@@ -10,6 +10,7 @@ class KeepPosition : public Skill {
 public:
 	KeepPosition(std::string name, bt::Blackboard::Ptr bb);
 	Status Update() override;
+    const float MINIMUM_ROBOT_DISTANCE = 0.5;
 private:
 	std::unique_ptr<GoToPos> gtp;
 	bool updateGoalPosition();

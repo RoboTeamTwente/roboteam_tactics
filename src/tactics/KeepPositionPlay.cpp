@@ -24,7 +24,7 @@ void KeepPositionPlay::Initialize() {
 		pub.publish(rd);
 	}
 
-	RobotDealer::claim_robots(available);
+	claim_robots(available);
 }
 
 bt::Node::Status KeepPositionPlay::Update() {
