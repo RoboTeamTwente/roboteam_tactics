@@ -31,9 +31,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
 
-        { RefState::NORMAL_START          , "rtt_jim/SimpleAttStrat"s      } ,
-        { RefState::FORCED_START          , b::none                        } ,
-
+        { RefState::NORMAL_START          , "rtt_jim/NormalPlay"s                } ,
+        { RefState::FORCED_START          , "rtt_jim/NormalPlay"s                } ,
         ////////////////////////////////////////////////////
         // Ref states that have a specific implementation //
         ////////////////////////////////////////////////////
@@ -67,6 +66,10 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Our custom refstates //
         //////////////////////////
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 13fee8109cc877dd46d5e5ec4f88a156ffbf1093
 =======
 
 >>>>>>> 13fee8109cc877dd46d5e5ec4f88a156ffbf1093
