@@ -65,14 +65,6 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         //////////////////////////
         // Our custom refstates //
         //////////////////////////
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 13fee8109cc877dd46d5e5ec4f88a156ffbf1093
-=======
-
->>>>>>> 13fee8109cc877dd46d5e5ec4f88a156ffbf1093
 
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
