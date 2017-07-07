@@ -115,6 +115,7 @@ void FormationPlay::Initialize() {
 		bb.SetDouble("GoToPos_A_yGoal", pos.y);
 		bb.SetDouble("GoToPos_A_angleGoal", pos.rot);
 		bb.SetDouble("GoToPos_A_maxVelocity", STOP_STATE_MAX_VELOCITY);
+		bb.SetBool("GoToPos_A_avoidBall", true);
 		// bb.SetBool("GoToPos_A_stayAwayFromBall", true);
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
@@ -138,6 +139,7 @@ void FormationPlay::Initialize() {
 		bb.SetDouble("GoToPos_A_angleGoal", pos.rot);
 		bb.SetDouble("GoToPos_A_maxVelocity", STOP_STATE_MAX_VELOCITY);
 		bb.SetBool("GoToPos_A_enterDefenseAreas", true);
+		bb.SetBool("GoToPos_A_avoidBall", true);
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 	}

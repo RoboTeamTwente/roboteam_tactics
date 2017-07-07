@@ -36,7 +36,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
             safetyMarginGoalAreas = 0.2;
-            marginOutsideField = -0.1;
+            marginOutsideField = 0.3;
             avoidRobotsGain = 0.05;
         }
 
@@ -145,17 +145,29 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
 }
 
 
-Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
-    Vector2 diff = ballPos - myPos;
-    double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
+Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel) {
+    // Vector2 diff = ballPos - myPos;
+    // double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
 
-    if (theta < (0.5 * M_PI)) {
-        if (fabs(theta) < .00001) theta = 0.01;
-        // double force = theta / (0.5 * M_PI);
-        Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
-        Vector2 ballForce = projectedBall - ballPos;
-        sumOfForces = sumOfForces + ballForce * 5;
-    }
+    // if (theta < (0.5 * M_PI)) {
+    //     if (fabs(theta) < .00001) theta = 0.01;
+    //     // double force = theta / (0.5 * M_PI);
+    //     Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
+    //     Vector2 ballForce = projectedBall - ballPos;
+    //     sumOfForces = sumOfForces + ballForce * 5;
+    // }
+
+    // roboteam_msgs::World world = LastWorld::get();
+    // Vector2 ballVel(world.ball.)
+
+    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
+    double lookingDistance = 1.0;
+    Vector2 posError = targetPos - myPos;
+
+    Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
+    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
+
+    sumOfForces = sumOfForces + getForceVectorFromRobot(myPos, ballPos, antenna, targetPos);
 
     return sumOfForces;
 }
@@ -389,7 +401,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {
         Vector2 ballPos = Vector2(world.ball.pos);
-        sumOfForces = avoidBall(ballPos, myPos, sumOfForces);
+        sumOfForces = avoidBall(ballPos, myPos, sumOfForces, targetPos, myVel);
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
