@@ -128,15 +128,15 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     int minBallDefenders = 1;
     int maxBallDefenders = 2;
     double minDangerScore;
-    minDangerScore = 1.0;
+    // minDangerScore = 1.0;
     std::vector<double> distancesBallDefendersFromGoal;
     if (ballPos.x < 0.0) {
-    	// minDangerScore = 3.2;
+    	minDangerScore = 3.2;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     } else {
-    	// minDangerScore = 4.5;
+    	minDangerScore = 4.5;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(3.00);
     }
