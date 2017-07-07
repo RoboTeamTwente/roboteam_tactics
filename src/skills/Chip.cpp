@@ -31,6 +31,8 @@ void Chip::Initialize() {
 }
 
 bt::Node::Status Chip::Update() {
+    std::cout << "Chippin! " << cycleCounter << "\n";
+
     cycleCounter++;
     if (cycleCounter > 10) {
         RTT_DEBUGLN("Too many cycles: aborting!");
@@ -41,11 +43,12 @@ bt::Node::Status Chip::Update() {
 
     Vector2 currentBallVel(world.ball.vel.x, world.ball.vel.y);
 
-    if ((currentBallVel - oldBallVel).length() >= 0.1) {
+    if ((currentBallVel - oldBallVel).length() >= 0.05) {
         RTT_DEBUGLN("Velocity difference was enough");
+        std::cout << (currentBallVel - oldBallVel).length() << "\n";
         return bt::Node::Status::Success;
-    }
-
+    } 
+    
     oldBallVel = currentBallVel;
 
     int robotID = blackboard->GetInt("ROBOT_ID");
@@ -67,7 +70,7 @@ bt::Node::Status Chip::Update() {
 	rotDiff = cleanAngle(rotDiff);
 
 	if (posDiff.length() < 0.12) { // ball is close
-		if(rotDiff < 0.1 and rotDiff > -0.1){ // ball in front
+		if(rotDiff < 0.2 and rotDiff > -0.2){ // ball in front
 			roboteam_msgs::RobotCommand command;
 			command.id = robotID;
             //command.active = true;
