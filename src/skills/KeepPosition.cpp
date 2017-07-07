@@ -43,6 +43,7 @@ bool KeepPosition::updateGoalPosition() {
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
+	private_bb->SetDouble("KeepPosition_GTP_maxVelocity", STOP_STATE_MAX_VELOCITY);
 	return true;
 }
 

@@ -17,6 +17,9 @@
 #include "DemoTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "FormationPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "FreeKickDefenceTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -105,9 +108,6 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "BallPlacementUsPlay.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
-
-#include "BallPlacementThemPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Jim_GetBallPlay.cpp"

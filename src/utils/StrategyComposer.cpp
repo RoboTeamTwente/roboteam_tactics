@@ -1,4 +1,4 @@
-#include <map>
+	#include <map>
 #include <boost/optional.hpp>
 #include <string>
 
@@ -31,7 +31,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
         
-        { RefState::NORMAL_START          , "rtt_jim/SimpleCombStrat"s     } ,
+        { RefState::NORMAL_START          , "rtt_jim/SimpleAttStrat"s      } ,
         { RefState::FORCED_START          , b::none                        } ,
         
         ////////////////////////////////////////////////////
@@ -40,10 +40,10 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
         { RefState::STOP                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::PREPARE_KICKOFF_US    , "rtt_bob/prepare_kickoff_us"s        } ,
-        { RefState::PREPARE_KICKOFF_THEM  , "rtt_bob/IdleStrategy"s              } ,
-        { RefState::PREPARE_PENALTY_US    , "rtt_bob/IdleStrategy"s              } ,
-        { RefState::PREPARE_PENALTY_THEM  , "rtt_bob/IdleStrategy"s              } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_PENALTY_US    , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_PENALTY_THEM  , "rtt_dennis/StopStrategy"s           } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
         { RefState::DIRECT_FREE_US        , "rtt_bob/W5_DirectFreeUs"s           } ,
@@ -56,25 +56,25 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,
-        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s         } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s         } ,
-        { RefState::GOAL_US               , b::none                              } ,
-        { RefState::GOAL_THEM             , b::none                              } ,
+        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_bob/BallPlacementThemStrategy"s } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_jim/TimeOutStrat"s              } ,
 
         //////////////////////////
         // Our custom refstates //
         //////////////////////////
         
-        // qualification/StandByStrategy
-        // rtt_bob/NormalStrategy
-        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithRunStrategy"s    } ,
+
+        // rtt_bob/KickoffWithRunStrategy
+        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s } ,
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
 
-        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleCombStrat"s           } ,
+        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleAttStrat"s            } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
