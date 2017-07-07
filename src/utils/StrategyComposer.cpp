@@ -1,4 +1,4 @@
-#include <map>
+	#include <map>
 #include <boost/optional.hpp>
 #include <string>
 
@@ -9,8 +9,8 @@
 namespace b = boost;
 
 namespace rtt {
-    
-bool StrategyComposer::initialized = false;    
+
+bool StrategyComposer::initialized = false;
 // const std::string UNSET = "<<UNSET>>";
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
 
@@ -30,20 +30,19 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ///////////////////////////////////////////////////////////////////////
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
-        
-        { RefState::NORMAL_START          , "rtt_jim/SimpleCombStrat"s     } ,
-        { RefState::FORCED_START          , b::none                        } ,
-        
+
+        { RefState::NORMAL_START          , "rtt_jim/NormalPlay"s                } ,
+        { RefState::FORCED_START          , "rtt_jim/NormalPlay"s                } ,
         ////////////////////////////////////////////////////
         // Ref states that have a specific implementation //
         ////////////////////////////////////////////////////
-        
+
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
         { RefState::STOP                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::PREPARE_KICKOFF_US    , "rtt_bob/prepare_kickoff_us"s        } ,
-        { RefState::PREPARE_KICKOFF_THEM  , "rtt_bob/IdleStrategy"s              } ,
-        { RefState::PREPARE_PENALTY_US    , "rtt_bob/IdleStrategy"s              } ,
-        { RefState::PREPARE_PENALTY_THEM  , "rtt_bob/IdleStrategy"s              } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_PENALTY_US    , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::PREPARE_PENALTY_THEM  , "rtt_wybe/ThemPenaltyStrategy"s      } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
         { RefState::DIRECT_FREE_US        , "rtt_bob/W5_DirectFreeUs"s           } ,
@@ -56,25 +55,24 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,
-        { RefState::TIMEOUT_US            , "rtt_dennis/WanderStrategy"s         } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/WanderStrategy"s         } ,
-        { RefState::GOAL_US               , b::none                              } ,
-        { RefState::GOAL_THEM             , b::none                              } ,
+        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_bob/BallPlacementThemStrategy"s } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategy"s           } ,
 
         //////////////////////////
         // Our custom refstates //
         //////////////////////////
-        
-        // qualification/StandByStrategy
-        // rtt_bob/NormalStrategy
-        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithRunStrategy"s    } ,
-        { RefState::DEFEND_KICKOFF        , "rtt_dennis/KickoffDefenseStrategy"s } ,
+
+        // rtt_bob/KickoffWithRunStrategy
+        { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
+        { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s } ,
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
 
-        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleCombStrat"s           } ,
+        { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
@@ -89,7 +87,7 @@ void StrategyComposer::init() {
     // Construct the global bb and the refstate switch
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>(bt::Blackboard());
     std::shared_ptr<RefStateSwitch> rss = std::make_shared<RefStateSwitch>();
-    
+
     // Get the factory that stores all the behavior trees
     namespace f = ::rtt::factories;
     auto const & repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
@@ -119,7 +117,7 @@ void StrategyComposer::init() {
                   << "or a non-existent tree was selected.\n";
         return;
     }
-    
+
     for (auto refState : ALL_REFSTATES) {
         // Get the name of the desired strategy
         auto stratNameOpt = MAPPING.at(refState);
@@ -150,18 +148,18 @@ void StrategyComposer::init() {
                 return;
             }
         }
-        
+
     }
-    
+
     // The main strategy is now properly initialized
     mainStrategy = std::make_shared<bt::BehaviorTree>();
     mainStrategy->SetRoot(rss);
     initialized = true;
-}    
-    
+}
+
 StrategyComposer::Forwarder::Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target) : bt::Leaf(bb), target(target) {}
 bt::Node::Status StrategyComposer::Forwarder::Update() { return target->Update(); }
 void StrategyComposer::Forwarder::Initialize() { target->Initialize(); }
-void StrategyComposer::Forwarder::Terminate(bt::Node::Status status) { target->Terminate(status); }    
-    
+void StrategyComposer::Forwarder::Terminate(bt::Node::Status status) { target->Terminate(status); }
+
 }

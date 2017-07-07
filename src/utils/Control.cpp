@@ -80,7 +80,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 2.0;
         iGainPosition = 0.4; 
-        pGainRotation = 3.0; 
+        pGainRotation = 1.0; 
         iGainRotation = 1.0;
         pGainVelocity = 0.0;
         maxSpeed = 2.5;

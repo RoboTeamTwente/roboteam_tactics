@@ -27,14 +27,14 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 
-static volatile bool may_update = false;
-
 namespace {
 
 bool mustShutdown = false;
 
 void mySigintHandler(int sig) {
-    mustShutdown = true;
+    if (sig == SIGINT) {
+        mustShutdown = true;
+    }
 
     std::cout << "Sig: " << sig << "\n";
 }
@@ -272,7 +272,9 @@ How to use:
             ros::spinOnce();
             fps60.sleep();
 
-            if (!mustShutdown) {
+            std::cout << "mustShutdown = " << mustShutdown << "\n";
+
+            if (mustShutdown) {
                 std::cout << "Interrupt received, exiting...";
                 return 0;
             }

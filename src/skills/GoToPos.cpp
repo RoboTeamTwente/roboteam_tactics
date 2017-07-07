@@ -25,7 +25,7 @@ RTT_REGISTER_SKILL(GoToPos);
 
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        
+
         {
             succeeded = false;
             failure = false;
@@ -81,7 +81,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     if (lookingDistance > (posError.length())) {
         lookingDistance = posError.length();
     }
-    
+
     // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
     antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
@@ -105,7 +105,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         Vector2 otherRobotPos(world.them.at(i).pos);
         if ((otherRobotPos - myPos).length() <= lookingDistance) {
             Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
-            sumOfForces = sumOfForces + forceVector; 
+            sumOfForces = sumOfForces + forceVector;
         }
     }
 
@@ -170,7 +170,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
 
     // We should not go outside the field close to the goal areas
     if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
-        marginOutsideField = 0.0; 
+        marginOutsideField = 0.0;
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
@@ -198,7 +198,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
-    } 
+    }
 
     // Check if we have to stay on our side of the field
     if (HasString("stayOnSide")) {
@@ -231,7 +231,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             }
             if (newTargetPos.x > right) {
                 newTargetPos.x = right;
-            } 
+            }
             if (newTargetPos.y < bottom) {
                 newTargetPos.y = bottom;
             }
@@ -240,12 +240,23 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             }
         }
     }
+
+
+    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        roboteam_msgs::World world = LastWorld::get();
+        Vector2 ballPos(world.ball.pos);
+        if ((ballPos - newTargetPos).length() < 0.7) {
+            Vector2 diffVecNorm = (newTargetPos - ballPos).normalize();
+            newTargetPos = ballPos + diffVecNorm.scale(0.7);
+        }
+    }
+
     return newTargetPos;
 }
 
 
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
-    
+
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = GetInt("KEEPER_ID", 100);
@@ -293,7 +304,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         targetPos = checkTargetPos(targetPos);
         prevTargetPos = targetPos;
-    }  
+    }
 
     // Store some variables for easy access
     Vector2 myPos(me.pos);
@@ -320,7 +331,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     double myAngle = me.angle;
     double angleError = angleGoal - myAngle;
 
-    // @DEBUG info: 
+    // @DEBUG info:
     myPosTopic.publish(me);
     roboteam_msgs::WorldRobot targetPosPub;
     targetPosPub.pos.x = targetPos.x;
@@ -373,7 +384,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Defense area avoidance
     if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    } 
+    }
 
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {
@@ -386,7 +397,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
     // drawer.setColor(0, 0, 0);
 
-    // Rotate the commands from world frame to robot frame 
+    // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
 
     // @DEBUG info
@@ -395,7 +406,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     myVelRobot.pos.x = myVelRobotFrame.x;
     myVelRobot.pos.y = myVelRobotFrame.y;
     myVelRobot.w = me.w;
-    myVelTopic.publish(myVelRobot); 
+    myVelTopic.publish(myVelRobot);
 
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
@@ -405,7 +416,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     velCommand = controller.limitVel(velCommand);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
 
-    
+    double maxVel = GetDouble("maxVelocity", 299792458.0);
+    if (velCommand.length() > maxVel) {
+    	velCommand = velCommand.stretchToLength(maxVel);
+    }
+
+
     // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
     // wheels remain still
     // double drivingAngle = velCommand.angle();
@@ -430,7 +446,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 bt::Node::Status GoToPos::Update() {
-    
+
     boost::optional<roboteam_msgs::RobotCommand> command = getVelCommand();
     if (command) {
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

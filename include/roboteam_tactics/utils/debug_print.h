@@ -107,6 +107,8 @@ SET_DEBUG_FOR(Jim_MultipleDefendersPlay, true);
 SET_DEBUG_FOR(BallPlacementThemPlay, true);
 SET_DEBUG_FOR(BallPlacementUsPlay, true);
 SET_DEBUG_FOR(Jim_GetBallPlay, true);
+SET_DEBUG_FOR(Jim_TimeOut, true);
+SET_DEBUG_FOR(Jim_KickOffDefense, true);
 SET_DEBUG_FOR(KickoffDefensePlay, true);
 
 // Other

@@ -275,7 +275,7 @@ bt::Node::Status GetBall::Update (){
     }
    
 
-	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle*2)) { // TUNE THIS STUFF FOR FINAL ROBOT
+	if (posDiff.length() > (distAwayFromBall + 0.1) || fabs(angleDiff) > (successAngle*2)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
@@ -290,7 +290,7 @@ bt::Node::Status GetBall::Update (){
     // std::cout << (ballPos - robotPos).length()
 
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        int ballCloseFrameCountTo = 3;
+        int ballCloseFrameCountTo = 1;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }

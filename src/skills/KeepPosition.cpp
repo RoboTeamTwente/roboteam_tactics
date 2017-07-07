@@ -39,10 +39,11 @@ bool KeepPosition::updateGoalPosition() {
 	Vector2 ownPos { bot->pos };
 	Vector2 nearest = getNearestObject(ownPos);
 	Vector2 diff = nearest - ownPos;
-	Vector2 goal = diff.length() > 1 ? ownPos : diff.rotate(M_PI) + ownPos;
+	Vector2 goal = diff.length() > MINIMUM_ROBOT_DISTANCE ? ownPos : diff.rotate(M_PI) + ownPos;
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
+	private_bb->SetDouble("KeepPosition_GTP_maxVelocity", STOP_STATE_MAX_VELOCITY);
 	return true;
 }
 

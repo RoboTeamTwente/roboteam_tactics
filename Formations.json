@@ -1,0 +1,64 @@
+[
+
+{
+  "name": "BasicDefendingFormation",
+  "minimumRobots": 0,
+  "positions": [
+    {
+      "x": -0.5,
+      "y": 2,
+      "rot": 0
+    },{
+      "x": -0.5,
+      "y": -2,
+      "rot": 0
+    },{
+      "x": -0.75,
+      "y": 0,
+      "rot": 0
+    },{
+      "x": -3,
+      "y": 0.5,
+      "rot": 0
+    },{
+      "x": -3,
+      "y": -0.5,
+      "rot": 0
+    },{
+      "x": -4,
+      "y": 0,
+      "rot": 0,
+      "isKeeper": true
+    }
+  ]
+},
+
+{
+  "name": "ThemPenaltyFormation",
+  "minimumRobots": 0,
+  "positions": [
+    {
+      "x": -0.8,
+      "y": 1.5,
+      "rot": 3.1415
+    },{
+        "x": -0.8,
+        "y": -1.5,
+      "rot": 3.1415
+    },{
+      "x": -1,
+      "y": 0,
+      "rot": 3.1415
+    },{
+      "x": 0.5,
+      "y": 0.7,
+      "rot": 3.1415
+    },{
+      "x": 0.5,
+      "y": -0.7,
+      "rot": 3.1415
+    }
+  ]
+}
+
+]

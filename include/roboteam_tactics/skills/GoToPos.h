@@ -18,6 +18,8 @@
 
 namespace rtt {
 
+#define STOP_STATE_MAX_VELOCITY 1.3 // Actually 1.5 m/s, but there's no point in pushing the limit here.
+
 /**
  * \class GoToPos
  * \brief See YAML
@@ -70,7 +72,10 @@ namespace rtt {
  *      - enterDefenseAreas:
  *          Type: Bool
  *          Descr: When true allows GoToPos to go into the defense areas of both teams.
- *
+ *      - maxVelocity:
+ *          Type: Double
+ *          Descr: The maximum velocity the robot is allowed to achieve.
+ *          Default: 299792458
  */
 class GoToPos : public Skill {
 public:

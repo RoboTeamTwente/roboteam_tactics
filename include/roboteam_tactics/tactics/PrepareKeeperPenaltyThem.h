@@ -7,14 +7,14 @@
 
 namespace rtt {
 
-class BallPlacementThemPlay : public Tactic {
+class PrepareKeeperPenaltyThem : public Tactic {
 public:
-    BallPlacementThemPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    PrepareKeeperPenaltyThem(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
     void Initialize() override;
     Status Update() override;
-    
-    std::string node_name() override { return "BallPlacementThemPlay"; }
+
+    std::string node_name() override { return "PrepareKeeperPenaltyThem"; }
 
 private:
     std::vector<boost::uuids::uuid> tokens;
@@ -22,5 +22,3 @@ private:
 } ;
 
 } // rtt
-
-
