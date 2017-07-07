@@ -56,12 +56,12 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,
-        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s         } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s         } ,
-        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s                             } ,
-        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s        } ,
+        { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_bob/BallPlacementThemStrategy"s } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategy"s           } ,
 
         //////////////////////////
         // Our custom refstates //
