@@ -28,6 +28,7 @@ struct Formation {
 	std::vector<Position> positions;
 	unsigned minimumRobots;
 	std::string name;
+	boost::optional<unsigned> keeperIdx;
 	Formation(const nlohmann::json& json, Vector2 scaleFactors);
 	Formation(const Formation& other);
 	Formation();
