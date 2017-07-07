@@ -177,10 +177,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     bool ballPosHasChanged = (ballPos.x > 0 && prevBallPos.x < 0) || (ballPos.x < 0 && prevBallPos.x > 0)
     						|| (ballPos.y > 0 && prevBallPos.y < 0) || (ballPos.y < 0 && prevBallPos.y > 0);
     prevBallPos = ballPos;
-    // if (HasBool("alwaysOnGoalLine") && GetBool("alwaysOnGoalLine")) {
-    //     ballPosHasChanged = false;
-    // }
-
      
     if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || ballPosHasChanged) {
         return true;

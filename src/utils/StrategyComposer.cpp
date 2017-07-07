@@ -32,7 +32,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ///////////////////////////////////////////////////////////////////////
         
         { RefState::NORMAL_START          , "rtt_jim/NormalPlay"s                } ,
-        { RefState::FORCED_START          , b::none                              } ,
+        { RefState::FORCED_START          , "rtt_jim/NormalPlay"s                } ,
         
         ////////////////////////////////////////////////////
         // Ref states that have a specific implementation //
