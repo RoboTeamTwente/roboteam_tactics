@@ -344,6 +344,12 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
         private_bb->SetBool("avoidDefenseAreas", true);
+        if (HasString("stayOnSide")) {
+        	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
+        }
+        if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        	private_bb->SetBool("stayAwayFromBall", true);
+        }
 
         boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
 	    if (command) {

@@ -148,11 +148,13 @@ int main(int argc, char *argv[]) {
     rtt::LastWorld::wait_for_first_messages();
 
     // For receiving trees
+    RTT_DEBUG("RoleNode %i subscribing... ", ROBOT_ID);
     ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
         rtt::TOPIC_ROLE_DIRECTIVE,
         1000,
         &roleDirectiveCallback
         );
+    RTT_DEBUG("done \n");
 
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 

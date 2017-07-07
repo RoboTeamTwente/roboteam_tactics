@@ -240,6 +240,17 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
             }
         }
     }
+
+
+    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        roboteam_msgs::World world = LastWorld::get();
+        Vector2 ballPos(world.ball.pos);
+        if ((ballPos - newTargetPos).length() < 0.7) {
+            Vector2 diffVecNorm = (newTargetPos - ballPos).normalize();
+            newTargetPos = ballPos + diffVecNorm.scale(0.7);
+        }
+    }
+
     return newTargetPos;
 }
 

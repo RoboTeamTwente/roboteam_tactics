@@ -128,14 +128,15 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     int minBallDefenders = 1;
     int maxBallDefenders = 2;
     double minDangerScore;
+    minDangerScore = 1.0;
     std::vector<double> distancesBallDefendersFromGoal;
     if (ballPos.x < 0.0) {
-    	minDangerScore = 3.2;
+    	// minDangerScore = 3.2;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     } else {
-    	minDangerScore = 4.5;
+    	// minDangerScore = 4.5;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(3.00);
     }
@@ -176,6 +177,10 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded() {
     bool ballPosHasChanged = (ballPos.x > 0 && prevBallPos.x < 0) || (ballPos.x < 0 && prevBallPos.x > 0)
     						|| (ballPos.y > 0 && prevBallPos.y < 0) || (ballPos.y < 0 && prevBallPos.y > 0);
     prevBallPos = ballPos;
+    // if (HasBool("alwaysOnGoalLine") && GetBool("alwaysOnGoalLine")) {
+    //     ballPosHasChanged = false;
+    // }
+
      
     if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || ballPosHasChanged) {
         return true;
@@ -208,10 +213,17 @@ void Jim_MultipleDefendersPlay::reInitialize() {
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
 
-    bool ballOnOurSide = ballPos.x < 0.0;
 
+    bool ballOnOurSide = ballPos.x < 0.0;
+    // if (HasBool("alwaysOnGoalLine") && GetBool("alwaysOnGoalLine")) {
+    //     ballOnOurSide = true;
+    // }
+
+    // minDangerScore = 1.0;
+    
     if (ballOnOurSide) {
     	minDangerScore = 3.2;
+
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     } else {

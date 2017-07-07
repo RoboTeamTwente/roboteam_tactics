@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
         RTT_DEBUGLN("Waiting for %i robot nodes to come online", numNodes);
        
         while ((int) directivePub.getNumSubscribers() < numNodes) {
+            RTT_DEBUGLN("Current num subsribers: %i", (int) directivePub.getNumSubscribers());
             ros::spinOnce();
             rate.sleep();
 
