@@ -179,9 +179,7 @@ bt::Node::Status GetBall::Update (){
     Vector2 posDiff = ballPos - robotPos; 
 
     double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
-    // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
-    // bool canSeeGoal = viewOfGoal >= 0.2; @ HACK: remove this after presentation
-    bool canSeeGoal = true;
+    bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
 
 
@@ -210,7 +208,7 @@ bt::Node::Status GetBall::Update (){
             choseRobotToPassTo = true;
             ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
         } else {
-            SetString("aimAt", "ourgoal"); // @HACK: ourgoal should be theirgoal
+            SetString("aimAt", "theirgoal");
         }
         
     }
@@ -219,7 +217,7 @@ bt::Node::Status GetBall::Update (){
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-        targetAngle = GetTargetAngle(ballPos, "ourgoal", 0, false); // @HACK: ourgoal should be theirgoal
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
     } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
     } else if (HasString("aimAt")) {
@@ -227,7 +225,7 @@ bt::Node::Status GetBall::Update (){
 	} else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
     } else if (shootAtGoal) {
-        targetAngle = GetTargetAngle(ballPos, "ourgoal", 0, false); // @HACK: ourgoal should be theirgoal
+        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
     } else {
         targetAngle = posDiff.angle();
     }
