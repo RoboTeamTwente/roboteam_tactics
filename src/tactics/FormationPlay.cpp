@@ -1,5 +1,6 @@
 #include "roboteam_tactics/tactics/FormationPlay.h"
 #include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_utils/LastWorld.h"
 #include <fstream>
 
 namespace rtt {
@@ -9,25 +10,37 @@ RTT_REGISTER_TACTIC(FormationPlay);
 bool FormationPlay::formationsInitialized = false;
 std::map<std::string, Formation> FormationPlay::allFormations;
 
+inline Vector2 scaleFactors(Vector2 actualDimensions) {
+	return actualDimensions / STANDARD_FIELD_DIMENSIONS;
+}
+
 void FormationPlay::initFormations() {
 	if (formationsInitialized) return;
 	formationsInitialized = true;
+
+	auto field = LastWorld::get_field();
+	Vector2 fieldDims { field.field_length, field.field_width };
+	Vector2 scale = scaleFactors(fieldDims);
+
 	std::ifstream fileStream(FORMATION_DEF_FILE);
 	nlohmann::json allFormationDefs;
 	allFormationDefs << fileStream;
+
 	for (const nlohmann::json& json : allFormationDefs) {
-		Formation f(json);
+		Formation f(json, scale);
 		allFormations[f.name] = f;
 	}
 }
 
-Formation::Formation(const nlohmann::json& json) {
+Formation::Formation(const nlohmann::json& json, Vector2 scaleFactors) {
 	minimumRobots = json.at("minimumRobots");
 	name = json.at("name");
 	nlohmann::json::array_t posDefs = json.at("positions");
 	for (const auto& def : posDefs) {
-		double x = def.at("x");
-		double y = def.at("y");
+		// These casts are to get nlohmann::json's type inference to work properly.
+		// Without them, gcc assumes def.at("x") is a std::complex...
+		double x = static_cast<double>(def.at("x")) * scaleFactors.x;
+		double y = static_cast<double>(def.at("y")) * scaleFactors.y;
 		double rot = def.at("rot");
 		positions.push_back({ x, y, rot });
 	}
