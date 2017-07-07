@@ -61,19 +61,23 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
         { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_jim/TimeOutStrat"s              } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategy"s           } ,
 
         //////////////////////////
         // Our custom refstates //
         //////////////////////////
+<<<<<<< HEAD
+=======
+
+>>>>>>> 13fee8109cc877dd46d5e5ec4f88a156ffbf1093
 
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
-        { RefState::DEFEND_KICKOFF        , "rtt_dennis/KickoffDefenseStrategy"s } ,
+        { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s } ,
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
 
-        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleAttStrat"s            } ,
+        { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
