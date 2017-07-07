@@ -31,8 +31,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // Explicitly unused states that should redirect towards normal play //
         ///////////////////////////////////////////////////////////////////////
         
-        { RefState::NORMAL_START          , "rtt_jim/SimpleAttStrat"s      } ,
-        { RefState::FORCED_START          , b::none                        } ,
+        { RefState::NORMAL_START          , "rtt_jim/NormalPlay"s                } ,
+        { RefState::FORCED_START          , b::none                              } ,
         
         ////////////////////////////////////////////////////
         // Ref states that have a specific implementation //
@@ -74,7 +74,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DO_PENALTY            , "rtt_bob/W5_DoPenalty"s              } ,
         { RefState::DEFEND_PENALTY        , "rtt_bob/W5_DefendPenalty"s          } ,
 
-        { RefState::NORMAL_PLAY           , "rtt_jim/SimpleAttStrat"s            } ,
+        { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {

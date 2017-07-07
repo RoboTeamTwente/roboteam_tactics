@@ -45,15 +45,16 @@ void Jim_TimeOut::Initialize() {
     int keeper = RobotDealer::get_keeper();
     robots.push_back(keeper);
 
-    double distanceBetweenRobots = 0.5;
+    double distanceBetweenRobots = 0.3;
 
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-    Vector2 corner = Vector2(-field.field_length / 2, -field.field_width / 2);
 
     std::vector<Vector2> posList;
 
     for (size_t i = 0; i < robots.size(); i++) {
-        posList.push_back(corner + Vector2(distanceBetweenRobots * i, 0.0));
+        Vector2 targetPos(-(field.field_length / 2) + 0.6, ((double) i + 0.5 - (double) robots.size()/2) * distanceBetweenRobots);
+        ROS_INFO_STREAM("position: " << targetPos);
+        posList.push_back(targetPos);
     }
 
     std::vector<int> closestRobots = Jim_MultipleDefendersPlay::getClosestRobots(robots, posList, world);
@@ -79,7 +80,7 @@ void Jim_TimeOut::Initialize() {
 
         bb.SetDouble("GoToPos_A_xGoal", posList.at(i).x);
         bb.SetDouble("GoToPos_A_yGoal", posList.at(i).y);
-        bb.SetDouble("GoToPos_A_angleGoal", -1.56);
+        bb.SetDouble("GoToPos_A_angleGoal", 0.0);
         bb.SetBool("GoToPos_A_avoidRobots", true);
 
         // Create message
