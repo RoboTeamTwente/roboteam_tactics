@@ -9,7 +9,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
-#include "roboteam_tactics/utils/ComputePassPoint.h"
+#include "roboteam_tactics/utils/OpportunityFinder.h"
 
 namespace rtt {
 
@@ -86,7 +86,7 @@ private:
     bool touchedBall = false;
     time_point initialBallContact;
 
-    PassPoint passPoint;
+    OpportunityFinder opportunityFinder;
     time_point prevComputedPoint;
     Vector2 receiveBallAtPos;
 

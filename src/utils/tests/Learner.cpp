@@ -13,7 +13,7 @@
 #include "roboteam_utils/grSim_Replacement.pb.h"
 #include "roboteam_utils/Vector2.h"
 
-#include "roboteam_tactics/utils/ComputePassPoint.h"
+#include "roboteam_tactics/utils/OpportunityFinder.h"
 #include "roboteam_tactics/tactics/PassToTactic.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
@@ -153,9 +153,9 @@ int main(int argc, char **argv) {
 	std::string target = "theirgoal";
 	int targetID = 2;
 
-	// PassPoint, for the functions for calculating the best pass point and adapting the weights
-	rtt::PassPoint passPoint;
-	passPoint.Initialize(fileName, robotID, target, targetID);
+	// OpportunityFinder, for the functions for calculating the best pass point and adapting the weights
+	rtt::OpportunityFinder opportunityFinder;
+	opportunityFinder.Initialize(fileName, robotID, target, targetID);
 
 	ros::Subscriber sub = n.subscribe<roboteam_msgs::World> ("world_state", 1000, &worldCallback);
 	ros::Subscriber geom_sub = n.subscribe<roboteam_msgs::GeometryData> ("vision_geometry", 1000, fieldCallback);	
@@ -177,8 +177,8 @@ int main(int argc, char **argv) {
 	// int nIterations = 100;
 	// std::vector<int> times;
 	// while (count < nIterations) {
-	// 	passPoint.Initialize(fileName);
-	// 	passPoint.computeBestPassPoint(ROBOT_ID, target, targetID);
+	// 	opportunityFinder.Initialize(fileName);
+	// 	opportunityFinder.computeBestOpportunity(ROBOT_ID, target, targetID);
 	// 	ros::spinOnce();
 	// 	int timePast = rtt::time_difference_milliseconds(start, rtt::now()).count();
 	// 	times.push_back(timePast);
@@ -192,8 +192,8 @@ int main(int argc, char **argv) {
 
 	while (ros::ok()) {
 		if (rtt::time_difference_milliseconds(start, rtt::now()).count() > 500) {
-			passPoint.Initialize(fileName, robotID, target, targetID);
-			passPoint.computeBestPassPoint();
+			opportunityFinder.Initialize(fileName, robotID, target, targetID);
+			opportunityFinder.computeBestOpportunity();
 			ros::spinOnce();
 			start = rtt::now();
 		}

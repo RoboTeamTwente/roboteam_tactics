@@ -112,7 +112,7 @@ SET_DEBUG_FOR(Jim_KickOffDefense, true);
 SET_DEBUG_FOR(KickoffDefensePlay, true);
 
 // Other
-SET_DEBUG_FOR(ComputePassPoint, true);
+SET_DEBUG_FOR(OpportunityFinder, true);
 SET_DEBUG_FOR(Learner, true);
 SET_DEBUG_FOR(DangerFinder, true);
 

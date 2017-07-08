@@ -3,7 +3,7 @@ add_library(utils OBJECT
     BBParser.cpp
     BTRunner.cpp
     BtDebug.cpp
-    ComputePassPoint.cpp
+    OpportunityFinder.cpp
     Control.cpp
     FeedbackCollector.cpp
     Leaf.cpp

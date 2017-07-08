@@ -11,7 +11,6 @@
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/utils/ComputePassPoint.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/conditions/IsBallInGoal.h"
 #include "roboteam_utils/Vector2.h"

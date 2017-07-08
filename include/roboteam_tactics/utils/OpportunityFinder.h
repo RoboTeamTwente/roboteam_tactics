@@ -15,10 +15,10 @@
 
 namespace rtt {
 
-class PassPoint {
+class OpportunityFinder {
 
 public:
-	PassPoint();
+	OpportunityFinder();
 	void Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID);
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
@@ -31,8 +31,8 @@ public:
 
 	void setCloseToPos(Vector2 closeToPos);
 	// boost::optional<double> computePassPointScore(Vector2 testPosition);
-	double computePassPointScore(Vector2 testPosition);
-	Vector2 computeBestPassPoint();
+	double computeScore(Vector2 testPosition);
+	Vector2 computeBestOpportunity();
 private:
 
 	// Weights for determining the score of a point on the field

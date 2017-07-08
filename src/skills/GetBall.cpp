@@ -46,7 +46,6 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         distanceFromBallWhenDribbling = 0.105;
     }
     choseRobotToPassTo = false;
-    // passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
 }
 
 int GetBall::whichRobotHasBall() {
@@ -178,7 +177,7 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
     Vector2 posDiff = ballPos - robotPos; 
 
-    double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+    double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
     // ROS_INFO_STREAM("GetBall viewOfGoal: " << viewOfGoal);
     // bool canSeeGoal = viewOfGoal >= 0.2; @ HACK: remove this after presentation
     bool canSeeGoal = true;
@@ -196,8 +195,8 @@ bt::Node::Status GetBall::Update (){
             ros::param::getCached(paramName, readyToReceiveBall);
 
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
-                passPoint.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
-                double score = passPoint.computePassPointScore(Vector2(world.us.at(i).pos));
+                opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
+                double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos));
                 ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score);
                 if (score > maxScore) {
                     maxScore = score;

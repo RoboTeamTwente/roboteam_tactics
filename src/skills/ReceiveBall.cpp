@@ -63,11 +63,11 @@ void ReceiveBall::Initialize() {
 }
 
 Vector2 ReceiveBall::computePoint() {
-	passPoint.Initialize("spits.txt",robotID, "theirgoal", 0);
+	opportunityFinder.Initialize("spits.txt",robotID, "theirgoal", 0);
 	if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
-		passPoint.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
+		opportunityFinder.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
 	}
-	Vector2 receiveBallAtPos = passPoint.computeBestPassPoint();
+	Vector2 receiveBallAtPos = opportunityFinder.computeBestOpportunity();
 	prevComputedPoint = now();
 	return receiveBallAtPos;
 }
@@ -248,7 +248,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
-	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+	double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
 	bool canSeeGoal = viewOfGoal >= 0.2;
 	double angleDiffBallGoal = fabs(cleanAngle((LastWorld::get_their_goal_center() - robotPos).angle() - (ballPos - robotPos).angle())); 
 	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal && angleDiffBallGoal <= 0.7*M_PI;
