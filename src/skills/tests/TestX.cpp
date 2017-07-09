@@ -357,6 +357,13 @@ How to use:
 
         node->Terminate(status);
 
+        if (status == bt::Node::Status::Success) {
+            std::cout << "Final Status: Success";
+        }
+        if (status == bt::Node::Status::Failure) {
+            std::cout << "Final Status: Failure";
+        }
+
         // for (auto id : claimedRobots) {
             // stopRolenode(id);
             // stopRobot(id);
@@ -374,5 +381,6 @@ How to use:
     n.shutdown();
 
     std::cout << "Test of " << testClass << " completed!\n";
+
 	return 0;
 }

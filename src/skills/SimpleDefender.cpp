@@ -119,6 +119,9 @@ bt::Node::Status SimpleDefender::Update() {
         private_bb->SetBool("shouldFail", false);
         private_bb->SetBool("dontDriveToBall", GetBool("dontDriveToBall"));
         private_bb->SetBool("setSignal", false);
+        if (HasBool("avoidBallsFromOurRobots") && GetBool("avoidBallsFromOurRobots")) {
+            private_bb->SetBool("avoidBallsFromOurRobots", true);
+        }
         if (HasString("stayOnSide")) {
             private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }

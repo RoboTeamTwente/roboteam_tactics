@@ -289,9 +289,9 @@ bt::Node::Status GetBall::Update (){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
 
-        if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-            return Status::Running;
-        }
+        // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+        //     return Status::Running;
+        // }
         
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
             ballCloseFrameCount++;

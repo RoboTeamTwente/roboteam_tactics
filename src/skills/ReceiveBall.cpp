@@ -100,9 +100,12 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	roboteam_msgs::World world = LastWorld::get();
 	ballIsComing = false;
 
+	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
+
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
 	double ballDir = ballVel.dot(receiveBallAtPos - ballPos);
+
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
@@ -116,6 +119,11 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 			ballIsComing = true;
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
+
+			if (avoidBall) {
+				interceptPos = closestPoint + (receiveBallAtPos - closestPoint).normalize();
+			}
+
 		} else {
 			interceptPos = receiveBallAtPos;
 			interceptAngle = (ballPos - receiveBallAtPos).angle();
@@ -138,6 +146,9 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	roboteam_msgs::World world = LastWorld::get();
 
 	roboteam_msgs::WorldRobot otherRobot = *getWorldBot(hasBall, our_team);
+
+	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
+
 
 	// If the other robot would shoot now, use its orientation to estimate the ball trajectory, and then the closest
 	// point on this trajectory to our robot, so he can receive the ball there
@@ -165,6 +176,11 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 		} else {
 			interceptAngle = otherRobot.angle + M_PI;
 		}
+
+		if (avoidBall) {
+			interceptPos = closestPoint + (receiveBallAtPos - closestPoint).normalize();
+		}
+
 	} else {
 		interceptPos = receiveBallAtPos;
 		interceptAngle = (ballPosNow - receiveBallAtPos).angle();
@@ -230,21 +246,11 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
-
-
-	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
-		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
-		return Status::Failure;
-	}
-
-	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail")) {
-		ROS_INFO_STREAM("ball is probably not for us " << robotID);
-		return Status::Failure;
-	}
-
+	
 
 	Vector2 interceptPos = interceptPose.interceptPos;
 	double interceptAngle = interceptPose.interceptAngle;
+
 
 
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
@@ -278,6 +284,18 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 		private_bb->SetBool("avoidRobots", true);
 	}
+
+
+	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
+		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
+		return Status::Failure;
+	}
+
+	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail")) {
+		ROS_INFO_STREAM("ball is probably not for us " << robotID);
+		return Status::Failure;
+	}
+
 
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
