@@ -87,7 +87,7 @@ void ReceiveBall::publishStopCommand() {
 	command.x_vel = 0.0;
 	command.y_vel = 0.0;
 	command.w = 0.0;
-	command.dribbler = true;
+	command.dribbler = false;
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
 }
 
@@ -299,7 +299,7 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 2.0 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
 		return getBall.Update();
 	}
 

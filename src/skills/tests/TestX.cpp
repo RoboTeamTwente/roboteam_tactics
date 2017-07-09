@@ -94,6 +94,17 @@ void stopRobot(int const id) {
     pub.publish(rc);
 }
 
+void reportNodeFailure(std::string const & testClass) {
+    using namespace rtt::factories;
+    auto& treeRepo = getRepo<Factory<bt::BehaviorTree>>();
+
+    ROS_ERROR("Test for \"%s\" could not be constructred. Aborting.", testClass.c_str());
+
+    if (treeRepo.size() == 0) {
+        ROS_ERROR("Also, no trees have been found. If the build is configured properly you need to run refresh_b3_projects.sh in roboteam_tactics to make sure the build system links in all the trees. If you're unsure if you've added your trees check if you've added your Behavior3 project or tree to the proper CMakeLists.txt in src/trees/json or src/trees/projects in roboteam_tactics."); 
+    }
+}
+
 } // anonymous namespace
 
 int main(int argc, char **argv) {
@@ -258,7 +269,7 @@ How to use:
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
     if (!node) {
-        ROS_ERROR("Test for \"%s\" could not be constructred. Aborting.", testClass.c_str());
+        reportNodeFailure(testClass);
         return 1;
     }
 
