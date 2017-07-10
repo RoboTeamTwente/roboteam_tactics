@@ -3,6 +3,7 @@
 #include "roboteam_tactics/Parts.h"
 #include "GoToPos.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Position.h"
 
 namespace rtt {
 
@@ -13,7 +14,8 @@ public:
 private:
 	std::unique_ptr<GoToPos> gtp;
 	bool updateGoalPosition();
-	Vector2 getNearestObject(Vector2 ownPos) const;
+	Vector2 getNearestObject(Vector2 ownPos);
+	boost::optional<Position> initialPos;
 };
 
 }
