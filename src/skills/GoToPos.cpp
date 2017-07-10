@@ -198,7 +198,8 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     Vector2 newTargetPos(xGoal, yGoal);
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
-    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
+    if (ROBOT_ID != KEEPER_ID) {
+    // if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(true, newTargetPos)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
@@ -271,7 +272,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
-    KEEPER_ID = GetInt("KEEPER_ID", 100);
+    KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));

@@ -18,6 +18,7 @@ bt::Node::Status KeepPosition::Update() {
 			initialPos = Position(*bot);
 		}
 		private_bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+		private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
 		private_bb->SetDouble("KeepPosition_GTP_targetAngle", bot->angle);
 		private_bb->SetBool("KeepPosition_GTP_avoidRobots", true);
 		gtp = std::make_unique<GoToPos>("KeepPosition_GTP", private_bb);
@@ -44,7 +45,7 @@ bool KeepPosition::updateGoalPosition() {
 	Vector2 diff = nearest - ownPos;
 	Vector2 goal = diff.length() > MINIMUM_ROBOT_DISTANCE ? ownPos : diff.rotate(M_PI) + ownPos;
 
-	ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
+	// ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
