@@ -36,6 +36,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     
     prevComputedPoint = now();
     computedTargetPos = false;
+    startTime = now();
 }
 
 void ReceiveBall::Initialize() {
@@ -286,16 +287,16 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
-	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
+	// double minRunTime = 2000;
+	if (ballWasComing && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
 		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
 		return Status::Failure;
 	}
 
-	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail")) {
+	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
 		ROS_INFO_STREAM("ball is probably not for us " << robotID);
 		return Status::Failure;
 	}
-
 
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
