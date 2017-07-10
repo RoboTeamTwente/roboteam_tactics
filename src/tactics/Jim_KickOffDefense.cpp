@@ -133,18 +133,13 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
-
-
-
-
     int numRobotDefenders = std::min((int) RobotDealer::get_available_robots().size(), 3);    
-    RTT_DEBUGLN("num KickOffDefenders: %i", numRobotDefenders);
-    int minDangerScore = 1.5;
+    
 
 
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
-        if (world.dangerScores.at(i) >= minDangerScore) {
+        // if (world.dangerScores.at(i) >= minDangerScore) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
             if (angleDiffBall <= 0.15) {
@@ -164,11 +159,13 @@ void Jim_KickOffDefense::Initialize() {
                     dangerousOpps.push_back(opp);
                 }
             }
-        }
+        // }
     }
 
     std::vector<Vector2> defenderPositions;
+
     double distanceFromGoal = 4.0;
+
     for (size_t i = 0; i < dangerousOpps.size(); i++) {
         Vector2 defensePoint = SimpleDefender::computeDefensePoint(Vector2(dangerousOpps.at(i).pos), true, distanceFromGoal, 0.0);    
         defenderPositions.push_back(defensePoint);
@@ -179,8 +176,12 @@ void Jim_KickOffDefense::Initialize() {
     // ==================================
     // Initialize the Robot Defenders!
     // ==================================
-    std::vector<int> defenderIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, defenderPositions, world);
+    
     numRobotDefenders = std::min(numRobotDefenders, (int) dangerousOpps.size()); 
+
+    std::vector<int> defenderIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, defenderPositions, world);
+
+    RTT_DEBUGLN("num KickOffDefenders: %i", numRobotDefenders);
 
     for (int i = 0; i < numRobotDefenders; i++) {
 
@@ -219,45 +220,46 @@ void Jim_KickOffDefense::Initialize() {
         // Send to rolenode
         pub.publish(rd);
     }
-
-
-
-    
-
-
-
-    
 }
 
 
 bt::Node::Status Jim_KickOffDefense::Update() {
 
-    int failureCount = 0;
-    bool allFailed = true;
+    roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballVel(world.ball.vel);
 
-    if (tokens.size() == 0) {
-        allFailed = false;
-    }
-
-    for (auto token : tokens) {
-        if (feedbacks.find(token) != feedbacks.end()) {
-            Status status = feedbacks.at(token);
-            if (status == bt::Node::Status::Success) {
-                RTT_DEBUGLN("Jim_KickOffDefense succeeded!");
-                return Status::Success;
-            }
-
-            allFailed &= status == bt::Node::Status::Failure;
-        } else {
-            allFailed = false;
-        }
-    }
-
-    if (allFailed) {
-        return Status::Failure;
+    if (ballVel.length() > 0.5) {
+        return Status::Success;
     }
 
     return Status::Running;
+
+    // int failureCount = 0;
+    // bool allFailed = true;
+
+    // if (tokens.size() == 0) {
+    //     allFailed = false;
+    // }
+
+    // for (auto token : tokens) {
+    //     if (feedbacks.find(token) != feedbacks.end()) {
+    //         Status status = feedbacks.at(token);
+    //         if (status == bt::Node::Status::Success) {
+    //             RTT_DEBUGLN("Jim_KickOffDefense succeeded!");
+    //             return Status::Success;
+    //         }
+
+    //         allFailed &= status == bt::Node::Status::Failure;
+    //     } else {
+    //         allFailed = false;
+    //     }
+    // }
+
+    // if (allFailed) {
+    //     return Status::Failure;
+    // }
+
+    // return Status::Running;
 }
 
 } // rtt

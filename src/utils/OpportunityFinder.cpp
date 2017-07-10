@@ -261,7 +261,6 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 
 
 	Vector2 ballPos(world.ball.pos);
-	time_point currenTime = now();
 	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToTeammate = sqrt(calcDistToClosestTeammate(testPosition, world));

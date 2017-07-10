@@ -33,13 +33,17 @@ SimpleDefender::SimpleDefender(std::string name, bt::Blackboard::Ptr blackboard)
 Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
     
     Vector2 goalPos;
-    if (ourSide) {
+    // if (ourSide) {
         goalPos = LastWorld::get_our_goal_center();
-    } else {
-        goalPos = LastWorld::get_their_goal_center();
-    }
+    // } else {
+        // goalPos = LastWorld::get_their_goal_center();
+    // }
     
     double angle = (defendPos - goalPos).angle() + angleOffset;
+
+    if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
+        distanceFromGoal = (defendPos - goalPos).length() - 0.5;
+    }
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
@@ -99,38 +103,27 @@ bt::Node::Status SimpleDefender::Update() {
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
 
-    // if (fabs(defendPos.x) > (field.field_length/2) || fabs(defendPos.y) > (field.field_width/2)) {
-        // targetPos = goalPos - Vector2(distanceFromGoal, 0.0) * signum(goalPos.x);
-        // private_bb->SetInt("ROBOT_ID", robotID);
-        // private_bb->SetDouble("xGoal", targetPos.x);
-        // private_bb->SetDouble("yGoal", targetPos.y);
-        // private_bb->SetDouble("angleGoal", (Vector2(0.0, 0.0)-goalPos).angle());
-        // private_bb->SetBool("avoidRobots", true);
-        // goToPos.Update();
-        // return Status::Running;
-    // } else {   
         
-        private_bb->SetInt("ROBOT_ID", robotID);
-        private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
-        private_bb->SetDouble("receiveBallAtX", targetPos.x);
-        private_bb->SetDouble("receiveBallAtY", targetPos.y);
-        private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
-        private_bb->SetDouble("dribblerDist", dribblerDist);
-        private_bb->SetBool("shouldFail", false);
-        private_bb->SetBool("dontDriveToBall", GetBool("dontDriveToBall"));
-        private_bb->SetBool("setSignal", false);
-        if (HasBool("avoidBallsFromOurRobots") && GetBool("avoidBallsFromOurRobots")) {
-            private_bb->SetBool("avoidBallsFromOurRobots", true);
-        }
-        if (HasString("stayOnSide")) {
-            private_bb->SetString("stayOnSide", GetString("stayOnSide"));
-        }
-        if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
-            private_bb->SetBool("stayAwayFromBall", true);
-        }
+    private_bb->SetInt("ROBOT_ID", robotID);
+    private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
+    private_bb->SetDouble("receiveBallAtX", targetPos.x);
+    private_bb->SetDouble("receiveBallAtY", targetPos.y);
+    private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
+    private_bb->SetDouble("dribblerDist", dribblerDist);
+    private_bb->SetBool("shouldFail", false);
+    private_bb->SetBool("dontDriveToBall", GetBool("dontDriveToBall"));
+    private_bb->SetBool("setSignal", false);
+    if (HasBool("avoidBallsFromOurRobots") && GetBool("avoidBallsFromOurRobots")) {
+        private_bb->SetBool("avoidBallsFromOurRobots", true);
+    }
+    if (HasString("stayOnSide")) {
+        private_bb->SetString("stayOnSide", GetString("stayOnSide"));
+    }
+    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        private_bb->SetBool("stayAwayFromBall", true);
+    }
 
-        return receiveBall.Tick();
-    // }
+    return receiveBall.Tick();
 }
 
 } // rtt

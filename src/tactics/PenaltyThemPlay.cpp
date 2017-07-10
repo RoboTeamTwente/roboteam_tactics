@@ -4,7 +4,7 @@
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC(PenaltyUsPlay);
+RTT_REGISTER_TACTIC(PenaltyThemPlay);
 
 PenaltyThemPlay::PenaltyThemPlay(std::string name, bt::Blackboard::Ptr bb) : Tactic(name, bb),
 		shooterId{-1}, shootoutPenalty{false}, valid{false} {}

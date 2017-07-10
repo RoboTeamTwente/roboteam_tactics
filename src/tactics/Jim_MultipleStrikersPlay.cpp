@@ -60,7 +60,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);    
     
-    for (size_t i = 0; i < numStrikers; i++) {
+    for (size_t i = 0; i < (size_t) numStrikers; i++) {
 
         int strikerID = strikerIDs.at(i);
         // RTT_DEBUGLN("Initializing Striker %i", strikerID);
@@ -103,7 +103,6 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
 
-    int failureCount = 0;
     bool allFailed = true;
 
     if (tokens.size() == 0) {

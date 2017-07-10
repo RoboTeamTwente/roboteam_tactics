@@ -8,9 +8,9 @@
 
 namespace rtt {
 
-class Jim_GetBallPlay : public Tactic {
+class Jim_PenaltyPlay : public Tactic {
     public:
-    Jim_GetBallPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    Jim_PenaltyPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
     void ReleaseAllBots();
     Status Update();
