@@ -242,7 +242,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     	weAreAttackingCounter = 0;
     }
 
-    ROS_INFO_STREAM("weAreAttacking " << weAreAttacking);
+    // ROS_INFO_STREAM("weAreAttacking " << weAreAttacking);
     // if (HasBool("alwaysOnGoalLine") && GetBool("alwaysOnGoalLine")) {
     //     ballOnOurSide = true;
     // }

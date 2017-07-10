@@ -145,6 +145,9 @@ bt::Node::Status GetBall::Update (){
             ROS_INFO_STREAM("GetBall Success robot " << robotID);
             publishStopCommand();
             releaseBall();
+            // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+            //     return Status::Failure;
+            // }
             return Status::Success;
         }
     }
@@ -177,7 +180,9 @@ bt::Node::Status GetBall::Update (){
 
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
     bool canSeeGoal = viewOfGoal >= 0.2; 
-    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal;
+    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal && !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
+
+
 
 
     // If we should pass on to the best available attacker, we should find which one has the highest score

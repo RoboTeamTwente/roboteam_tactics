@@ -45,13 +45,13 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::PREPARE_PENALTY_THEM  , "rtt_wybe/ThemPenaltyStrategy"s      } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::DIRECT_FREE_US        , "rtt_bob/W5_DirectFreeUs"s           } ,
+        { RefState::DIRECT_FREE_US        , "rtt_jim/NormalPlay"s           } ,
 
         // FreeKickDefenceStrategy
         { RefState::DIRECT_FREE_THEM      , "rtt_bob/W5_DirectFreeThem"s         } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::INDIRECT_FREE_US      , "rtt_bob/W5_IndirectFreeUs"s         } ,
+        { RefState::INDIRECT_FREE_US      , "rtt_jim/IndirectStrat"s         } ,
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_bob/W5_IndirectFreeThem"s       } ,

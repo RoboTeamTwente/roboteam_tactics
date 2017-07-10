@@ -37,7 +37,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.05;
+            avoidRobotsGain = 0.1;
         }
 
 
