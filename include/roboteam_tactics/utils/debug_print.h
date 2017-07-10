@@ -110,6 +110,7 @@ SET_DEBUG_FOR(Jim_GetBallPlay, true);
 SET_DEBUG_FOR(Jim_IndirectGetBallPlay, true);
 SET_DEBUG_FOR(Jim_TimeOut, true);
 SET_DEBUG_FOR(Jim_KickOffDefense, true);
+SET_DEBUG_FOR(Jim_PenaltyPlay, true);
 SET_DEBUG_FOR(KickoffDefensePlay, true);
 
 // Other

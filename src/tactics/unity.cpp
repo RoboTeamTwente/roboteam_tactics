@@ -122,6 +122,9 @@
 #include "Jim_KickOffDefense.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Jim_PenaltyPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Bob_ChipoffAtGoalPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
