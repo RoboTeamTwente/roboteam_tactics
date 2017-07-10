@@ -3,14 +3,6 @@
 #include "roboteam_utils/LastWorld.h"
 #include <fstream>
 
-/*
- * TODO
- * Make keepFormation parameter:
- * If false, keep current behaviour
- * If true, have robots maintain their orientation and return to
- *  their positions after they have evaded an obstacle
- */
-
 namespace rtt {
 
 RTT_REGISTER_TACTIC (FormationPlay);
