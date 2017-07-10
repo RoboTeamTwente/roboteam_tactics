@@ -229,7 +229,6 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// Store some info about the world state
-	roboteam_msgs::WorldBall ball = world.ball;
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 robotPos(robot.pos);
 	Vector2 ballPos(world.ball.pos);

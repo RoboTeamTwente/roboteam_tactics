@@ -55,7 +55,6 @@ void GoToPos::sendStopCommand(uint id) {
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos) {
 
     Vector2 forceVector;
-    Vector2 posError = targetPos - myPos;
 
     Vector2 ahead = myPos + antenna;
     Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
