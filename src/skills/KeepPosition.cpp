@@ -42,7 +42,7 @@ bool KeepPosition::updateGoalPosition() {
 	Vector2 ownPos = initialPos ? initialPos->location() : Vector2{ bot->pos };
 	Vector2 nearest = getNearestObject(ownPos);
 	Vector2 diff = nearest - ownPos;
-	Vector2 goal = diff.length() > 1 ? ownPos : diff.rotate(M_PI) + ownPos;
+	Vector2 goal = diff.length() > MINIMUM_ROBOT_DISTANCE ? ownPos : diff.rotate(M_PI) + ownPos;
 
 	ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
 

@@ -4,6 +4,7 @@ set(JSON_PROJECTS
     ${CMAKE_CURRENT_SOURCE_DIR}/rtt_dennis.b3
     ${CMAKE_CURRENT_SOURCE_DIR}/rtt_ewoud.b3
     ${CMAKE_CURRENT_SOURCE_DIR}/rtt_jim.b3
+    ${CMAKE_CURRENT_SOURCE_DIR}/rtt_wybe.b3
     )
 
 set(JSON_PROJECTS

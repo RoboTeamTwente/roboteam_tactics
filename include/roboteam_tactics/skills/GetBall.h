@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "roboteam_tactics/skills/GoToPos.h"
-#include "roboteam_tactics/utils/ComputePassPoint.h"
+#include "roboteam_tactics/utils/OpportunityFinder.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 
@@ -112,7 +112,7 @@ private:
 
 	GoToPos goToPos;
     Draw drawer;
-    PassPoint passPoint;
+    OpportunityFinder opportunityFinder;
     bool choseRobotToPassTo;
     int maxScoreID;
     int ballCloseFrameCount = 0;

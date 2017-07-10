@@ -13,7 +13,7 @@
 #include "roboteam_tactics/conditions/CanSeeTheirGoal.h"
 #include "roboteam_tactics/conditions/CanSeePoint.h"
 #include "roboteam_tactics/utils/debug_print.h"
-#include "roboteam_tactics/utils/ComputePassPoint.h"
+#include "roboteam_tactics/utils/OpportunityFinder.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 
 #define RTT_CURRENT_DEBUG_TAG CanSeeTheirGoal
@@ -40,8 +40,8 @@ bt::Node::Status CanSeeTheirGoal::Update() {
         return Status::Failure;
     }
     Vector2 robotPos(robot.pos);
-    PassPoint passPoint;
-	double viewOfGoal = passPoint.calcViewOfGoal(robotPos, world);
+    OpportunityFinder opportunityFinder;
+	double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
 
 	if (viewOfGoal >= 0.3) {
 		return Status::Success;

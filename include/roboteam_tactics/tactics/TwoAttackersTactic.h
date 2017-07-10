@@ -30,8 +30,6 @@ class TwoAttackersTactic : public Tactic {
     int firstAttackerID;
     int secondAttackerID;
     int thirdAttackerID;
-
-    // PassPoint passPoint;
 };
 
 }

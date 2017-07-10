@@ -34,7 +34,6 @@ Jim_MultipleStrikersPlay::Jim_MultipleStrikersPlay(std::string name, bt::Blackbo
 void Jim_MultipleStrikersPlay::Initialize() {
     tokens.clear();
 
-    RTT_DEBUGLN_TEAM("Initializing Jim_MultipleStrikersPlay");    
     if (RobotDealer::get_available_robots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
@@ -47,13 +46,13 @@ void Jim_MultipleStrikersPlay::Initialize() {
     std::vector<int> robots = RobotDealer::get_available_robots();
 
     int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);    
-    RTT_DEBUGLN("numStrikers: %i", numStrikers);
+    RTT_DEBUGLN("Initializing numStrikers: %i", numStrikers);    
 
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    double xPos = std::min(ballPos.x + 2.5, 2.2);
+    double xPos = std::min(ballPos.x + 4.5, 2.2);
 
     std::vector<Vector2> strikersDefaultPositions;
     strikersDefaultPositions.push_back(Vector2(xPos, 1.5));
@@ -115,7 +114,7 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == bt::Node::Status::Success) {
-                RTT_DEBUGLN("Jim_MultipleStrikersPlay succeeded!");
+                RTT_DEBUGLN_TEAM("Strikers succeeded!");
                 return Status::Success;
             }
 
@@ -126,7 +125,10 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
     }
 
     if (allFailed) {
+        RTT_DEBUGLN_TEAM("Strikers failed!");
         return Status::Failure;
+
+
     }
 
     return Status::Running;

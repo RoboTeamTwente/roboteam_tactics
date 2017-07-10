@@ -46,8 +46,8 @@ void Jim_GetBallPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    RTT_DEBUGLN_TEAM("Initializing Jim_GetBallPlay"); 
-    RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
+    RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
+    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
 
 
     // =============================
@@ -102,7 +102,10 @@ bt::Node::Status Jim_GetBallPlay::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == Status::Success) {
-                RTT_DEBUGLN("Jim_GetBallPlay Success!");
+                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Success!");
+            }
+            if (status == Status::Failure) {
+                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Failed!");
             }
             return status;
         }

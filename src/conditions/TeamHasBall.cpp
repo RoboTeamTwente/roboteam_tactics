@@ -20,12 +20,14 @@ bt::Node::Status TeamHasBall::Update() {
     bt::Blackboard::Ptr tmp_ptr = std::make_shared<bt::Blackboard>(tmp);
     std::string tmp_name = "tmp_ihb";
     for (const auto& bot : bots) {
-        tmp_ptr->SetInt("me", bot.id);
+        tmp_ptr->SetInt("ROBOT_ID", bot.id);
+        tmp_ptr->SetBool("our_team", our_team);
         IHaveBall ihb(tmp_name, tmp_ptr);
-        if (ihb.Update() == Status::Failure)
-            return Status::Failure;
+        if (ihb.Update() == Status::Success) {
+            return Status::Success;
+        }
     }
-    return Status::Success;
+    return Status::Failure;
 }
 
 }

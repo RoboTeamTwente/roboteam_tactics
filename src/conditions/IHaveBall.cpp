@@ -27,7 +27,7 @@ boost::optional<roboteam_msgs::WorldRobot> IHaveBall::find_bot_pos(const robotea
 }
 
 bt::Node::Status IHaveBall::Update() {
-    me = GetInt("me", GetInt("ROBOT_ID", -1));
+    me = GetInt("me", blackboard->GetInt("ROBOT_ID"));
     us = GetBool("our_team");
     roboteam_msgs::World world = LastWorld::get();
     auto opt_bot = getWorldBot(me, us);
