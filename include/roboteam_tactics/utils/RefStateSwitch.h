@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <chrono>
 
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_utils/LastRef.h"
@@ -36,6 +37,7 @@ public:
 
     bt::Node::Ptr getCurrentChild();
     bt::Node::Ptr getPreviousChild();
+    boost::optional<std::string> getCurrentStrategyTreeName() const;
 
     void AddStrategy(RefState refState, Node::Ptr child);
 

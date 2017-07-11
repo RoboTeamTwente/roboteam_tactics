@@ -27,6 +27,7 @@
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
+#include "roboteam_tactics/utils/BtDebug.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -108,6 +109,17 @@ int main(int argc, char *argv[]) {
                 auto treeFactory = repo.at(arguments[0]);
                 // Create the tree
                 strategy = treeFactory("", nullptr);
+
+                roboteam_msgs::Blackboard bb;
+
+                RTT_SEND_RQT_BT_TRACE(
+                        roboteam_msgs::BtDebugInfo::ID_STRATEGY_NODE, 
+                        arguments[0],
+                        roboteam_msgs::BtDebugInfo::TYPE_STRATEGY,
+                        roboteam_msgs::BtStatus::STARTUP,
+                        bb
+                        );
+
             } else {
                 ROS_ERROR("\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
                 return 1;

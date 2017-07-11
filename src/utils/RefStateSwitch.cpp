@@ -5,6 +5,7 @@
 #include "roboteam_tactics/utils/RefStateSwitch.h"
 #include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/RefLookup.h"
+#include "roboteam_tactics/utils/StrategyComposer.h"
 
 namespace b = boost;
 
@@ -67,7 +68,21 @@ bt::Node::Status RefStateSwitch::Update() {
     }
 
     if (needToInitialize) {
+        needToInitialize = false;
+
         getCurrentChild()->Initialize();
+
+        using roboteam_msgs::BtDebugInfo;
+        roboteam_msgs::Blackboard bb;
+        if (auto treeNameOpt = getCurrentStrategyTreeName()) {
+            RTT_SEND_RQT_BT_TRACE(
+                    BtDebugInfo::ID_STRATEGY_NODE,
+                    *treeNameOpt,
+                    BtDebugInfo::TYPE_STRATEGY,
+                    roboteam_msgs::BtStatus::STARTUP,
+                    bb
+                    );
+        }
     }
 
     bt::Node::Status currentStatus = getCurrentChild()->Update();
@@ -79,6 +94,54 @@ bt::Node::Status RefStateSwitch::Update() {
     }
 
     return bt::Node::Status::Running;
+}
+
+namespace {
+
+b::optional<std::string> tryFind(RefState const & r) {
+    auto const it = StrategyComposer::MAPPING.find(r);
+    if (it != StrategyComposer::MAPPING.end()) {
+        return it->second;
+    }
+
+    return b::none;
+}
+
+}
+
+b::optional<std::string> RefStateSwitch::getCurrentStrategyTreeName() const {
+    std::string previousCmdName = "none yet";
+    std::string currentCmdName = "none yet";
+
+    if (currentCmd) {
+        currentCmdName = refStateToString(*currentCmd);
+    }
+
+    if (previousCmd) {
+        previousCmdName = refStateToString(*previousCmd);
+    }
+
+    if (isTwoState(previousCmd, *currentCmd)) {
+        if (!finishedOnce) {
+            if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
+                return tryFind(*targetStateOpt);
+            } else {
+                ROS_ERROR("PreviousCmd and currentCmd are twoState states, but getFirstState "
+                          "returned nothing! PreviousCmd: %s, currentCmd: %s",
+                          previousCmdName.c_str(),
+                          currentCmdName.c_str()
+                          );
+
+                return b::none;
+            }
+        } else {
+            return tryFind(RefState::NORMAL_START);
+        }
+    } else if (!currentCmd) {
+        return b::none;
+    } else {
+        return tryFind(*currentCmd);
+    }
 }
 
 bt::Node::Ptr RefStateSwitch::getCurrentChild() {
