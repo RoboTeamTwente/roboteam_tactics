@@ -113,10 +113,16 @@
 #include "Jim_GetBallPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Jim_IndirectGetBallPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Jim_TimeOut.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Jim_KickOffDefense.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "Jim_PenaltyPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Bob_ChipoffAtGoalPlay.cpp"

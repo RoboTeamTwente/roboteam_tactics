@@ -86,6 +86,7 @@ void FormationPlay::Initialize() {
 	unsigned count = std::min(robots.size(), formation->positions.size());
 
 	bool hasKeeperPosition = static_cast<bool>(formation->keeperIdx);
+	bool keepFormation = GetBool("keepFormation", false);
 
 	if (hasKeeperPosition && !RobotDealer::get_keeper_available()) {
 		ROS_WARN(
@@ -111,12 +112,13 @@ void FormationPlay::Initialize() {
 		bt::Blackboard bb;
 		bb.SetInt("ROBOT_ID", id);
 		bb.SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
+
 		bb.SetDouble("GoToPos_A_xGoal", pos.x);
 		bb.SetDouble("GoToPos_A_yGoal", pos.y);
 		bb.SetDouble("GoToPos_A_angleGoal", pos.rot);
 		bb.SetDouble("GoToPos_A_maxVelocity", STOP_STATE_MAX_VELOCITY);
+		bb.SetBool("KeepPosition_A_returnToInitialPos", keepFormation);
 		bb.SetBool("GoToPos_A_avoidBall", true);
-		// bb.SetBool("GoToPos_A_stayAwayFromBall", true);
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 
@@ -139,6 +141,7 @@ void FormationPlay::Initialize() {
 		bb.SetDouble("GoToPos_A_angleGoal", pos.rot);
 		bb.SetDouble("GoToPos_A_maxVelocity", STOP_STATE_MAX_VELOCITY);
 		bb.SetBool("GoToPos_A_enterDefenseAreas", true);
+		bb.SetBool("KeepPosition_A_returnToInitialPos", keepFormation);
 		bb.SetBool("GoToPos_A_avoidBall", true);
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);

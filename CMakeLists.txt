@@ -64,7 +64,7 @@ set(ENABLE_BT_TRACE TRUE)
 set(ENABLE_DEBUG_GRAPHICS TRUE)
 
 # Build machine learning components
-set(BUILD_LEARNING TRUE)
+set(BUILD_LEARNING FALSE)
 
 # Turn mem principle checking on or off
 set(ENABLE_MEM_PRINCIPLE_CHECKING FALSE)
@@ -342,6 +342,7 @@ target_link_libraries(bt_test
     bt
     )
 
+if (BUILD_LEARNING)
    add_executable(Learner
         src/utils/tests/Learner.cpp
         $<TARGET_OBJECTS:treegen>
@@ -362,6 +363,7 @@ target_link_libraries(bt_test
 	${QT_LIBRARIES}
 	bt
         )
+endif (BUILD_LEARNING)
 
 if (BUILD_PRACTICE_TESTS)
 

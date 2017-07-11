@@ -7,7 +7,7 @@
 
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/RoleDirective.h"
-#include "roboteam_tactics/tactics/Jim_GetBallPlay.h"
+#include "roboteam_tactics/tactics/Jim_PenaltyPlay.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/debug_print.h"
@@ -16,21 +16,21 @@
 #include "roboteam_utils/Vector2.h"
 #include "unique_id/unique_id.h" 
 
-#define RTT_CURRENT_DEBUG_TAG Jim_GetBallPlay
+#define RTT_CURRENT_DEBUG_TAG Jim_PenaltyPlay
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC(Jim_GetBallPlay);
+RTT_REGISTER_TACTIC(Jim_PenaltyPlay);
 
-Jim_GetBallPlay::Jim_GetBallPlay(std::string name, bt::Blackboard::Ptr blackboard)
+Jim_PenaltyPlay::Jim_PenaltyPlay(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-void Jim_GetBallPlay::Initialize() {
+void Jim_PenaltyPlay::Initialize() {
     tokens.clear();
     success = false;
 
-    // RTT_DEBUG("Initializing Jim_GetBallPlay \n");
+    // RTT_DEBUG("Initializing Jim_PenaltyPlay \n");
 
     roboteam_msgs::World world = LastWorld::get();
 
@@ -42,12 +42,12 @@ void Jim_GetBallPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     Vector2 ballPos = Vector2(world.ball.pos);
-    int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    int penaltyTakerID = get_robot_closest_to_point(robots, world, ballPos);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
+    RTT_DEBUGLN("Initializing Jim_PenaltyPlay"); 
     // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
 
 
@@ -56,18 +56,18 @@ void Jim_GetBallPlay::Initialize() {
     // =============================
     {
         roboteam_msgs::RoleDirective rd;
-        rd.robot_id = ballGetterID;
+        rd.robot_id = penaltyTakerID;
         bt::Blackboard bb;
-        claim_robot(ballGetterID);
-        activeRobot = ballGetterID;
+        claim_robot(penaltyTakerID);
+        activeRobot = penaltyTakerID;
 
-        bb.SetInt("ROBOT_ID", ballGetterID);
+        bb.SetInt("ROBOT_ID", penaltyTakerID);
         bb.SetInt("KEEPER_ID", 5);
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
 
         // Create message
-        rd.tree = "rtt_jim/GetBallRole";
+        rd.tree = "rtt_jim/ShootAtGoalRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -82,44 +82,18 @@ void Jim_GetBallPlay::Initialize() {
     start = rtt::now();
 }
 
-void Jim_GetBallPlay::ReleaseAllBots() {
 
-    // Get the default roledirective publisher
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
-    roboteam_msgs::RoleDirective rd;
-    rd.robot_id = activeRobot;
-    rd.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
-    pub.publish(rd);
-    RobotDealer::release_robot(activeRobot);
-
-    return;
-}
-
-
-bt::Node::Status Jim_GetBallPlay::Update() {
+bt::Node::Status Jim_PenaltyPlay::Update() {
     
-    // if (success) {
-    //     if ((now() - successTime).count() >= 1000) {
-    //         RTT_DEBUGLN_TEAM("Jim_GetBallPlay Success!");
-    //         return Status::Success;
-    //     } else {
-    //         return Status::Running;
-    //     }
-    // }
-
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == Status::Success) {
-                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Success!");
-                // return Status::Success;
-                // success = true;
-                // successTime = now();
+                RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Success!");
+
             }
             if (status == Status::Failure) {
-                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Failed!");
-                // return Status::Failure;
+                RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Failed!");
             }
             return status;
         }

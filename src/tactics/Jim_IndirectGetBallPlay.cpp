@@ -7,7 +7,7 @@
 
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/RoleDirective.h"
-#include "roboteam_tactics/tactics/Jim_GetBallPlay.h"
+#include "roboteam_tactics/tactics/Jim_IndirectGetBallPlay.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_tactics/utils/debug_print.h"
@@ -16,21 +16,21 @@
 #include "roboteam_utils/Vector2.h"
 #include "unique_id/unique_id.h" 
 
-#define RTT_CURRENT_DEBUG_TAG Jim_GetBallPlay
+#define RTT_CURRENT_DEBUG_TAG Jim_IndirectGetBallPlay
 
 namespace rtt {
 
-RTT_REGISTER_TACTIC(Jim_GetBallPlay);
+RTT_REGISTER_TACTIC(Jim_IndirectGetBallPlay);
 
-Jim_GetBallPlay::Jim_GetBallPlay(std::string name, bt::Blackboard::Ptr blackboard)
+Jim_IndirectGetBallPlay::Jim_IndirectGetBallPlay(std::string name, bt::Blackboard::Ptr blackboard)
         : Tactic(name, blackboard) 
         {}
 
-void Jim_GetBallPlay::Initialize() {
+void Jim_IndirectGetBallPlay::Initialize() {
     tokens.clear();
     success = false;
 
-    // RTT_DEBUG("Initializing Jim_GetBallPlay \n");
+    // RTT_DEBUG("Initializing Jim_IndirectGetBallPlay \n");
 
     roboteam_msgs::World world = LastWorld::get();
 
@@ -47,7 +47,7 @@ void Jim_GetBallPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
+    RTT_DEBUGLN("Initializing Jim_IndirectGetBallPlay"); 
     // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
 
 
@@ -65,6 +65,7 @@ void Jim_GetBallPlay::Initialize() {
         bb.SetInt("KEEPER_ID", 5);
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
+        bb.SetBool("GetBall_A_dontShootAtGoal", true);
 
         // Create message
         rd.tree = "rtt_jim/GetBallRole";
@@ -82,7 +83,7 @@ void Jim_GetBallPlay::Initialize() {
     start = rtt::now();
 }
 
-void Jim_GetBallPlay::ReleaseAllBots() {
+void Jim_IndirectGetBallPlay::ReleaseAllBots() {
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -97,7 +98,7 @@ void Jim_GetBallPlay::ReleaseAllBots() {
 }
 
 
-bt::Node::Status Jim_GetBallPlay::Update() {
+bt::Node::Status Jim_IndirectGetBallPlay::Update() {
     
     // if (success) {
     //     if ((now() - successTime).count() >= 1000) {
@@ -112,13 +113,13 @@ bt::Node::Status Jim_GetBallPlay::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == Status::Success) {
-                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Success!");
+                RTT_DEBUGLN_TEAM("Jim_IndirectGetBallPlay Success!");
                 // return Status::Success;
                 // success = true;
                 // successTime = now();
             }
             if (status == Status::Failure) {
-                RTT_DEBUGLN_TEAM("Jim_GetBallPlay Failed!");
+                RTT_DEBUGLN_TEAM("Jim_IndirectGetBallPlay Failed!");
                 // return Status::Failure;
             }
             return status;

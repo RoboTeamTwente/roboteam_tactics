@@ -150,6 +150,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     } else {
     	weAreAttackingCounter = 0;
     }
+
     
     if (weAreAttacking) {
     	minDangerScore = 8.0;
@@ -194,11 +195,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
 
     if (justChecking) {
-    	double distBallToGoal = (ballPos - LastWorld::get_our_goal_center()).length();
-	    bool ballPosHasChanged = (ballPos.x > 0 && prevBallPos.x < 0) || (ballPos.x < 0 && prevBallPos.x > 0)
-	    						|| (ballPos.y > 0 && prevBallPos.y < 0) || (ballPos.y < 0 && prevBallPos.y > 0);
-	    prevBallPos = ballPos;
-	   
 	    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders) {
 	        return true;
 	    } else {
