@@ -1,4 +1,6 @@
 {
+  "version": "0.3.0",
+  "scope": "tree",
   "id": "ccc95a81-e376-440c-8c4a-14809390ac4e",
   "title": "AttackerStrategy",
   "description": "",
@@ -27,7 +29,7 @@
     "2079ce16-3852-42ca-8d2e-f70dfdcf9821": {
       "id": "2079ce16-3852-42ca-8d2e-f70dfdcf9821",
       "name": "BasicDefenseTactic",
-      "title": "BasicDefenseTactic",
+      "title": "BasicDefenseTactic_",
       "description": "",
       "properties": {},
       "display": {
@@ -38,18 +40,18 @@
     "261f2e73-b4b1-409a-87de-cc85344661fc": {
       "id": "261f2e73-b4b1-409a-87de-cc85344661fc",
       "name": "BasicKeeperTactic",
-      "title": "BasicKeeperTactic",
+      "title": "BasicKeeperTactic_",
       "description": "",
       "properties": {},
       "display": {
-        "x": 264,
+        "x": 252,
         "y": 168
       }
     },
     "77fab948-26ba-48de-8c11-ff1a1ba92b92": {
       "id": "77fab948-26ba-48de-8c11-ff1a1ba92b92",
       "name": "AttackerTactic",
-      "title": "AttackerTactic",
+      "title": "AttackerTactic_",
       "description": "",
       "properties": {},
       "display": {
@@ -59,14 +61,16 @@
     }
   },
   "display": {
-    "camera_x": 469.7799999974668,
-    "camera_y": 337.96999999973923,
+    "camera_x": 597.7799999974668,
+    "camera_y": 382.96999999973923,
     "camera_z": 1,
     "x": -72,
     "y": -12
   },
   "custom_nodes": [
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "AimAt",
       "category": "action",
       "title": "AimAt",
@@ -76,6 +80,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "AvoidRobots",
       "category": "action",
       "title": "AvoidRobots",
@@ -86,6 +92,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BackUp",
       "category": "action",
       "title": "BackUp",
@@ -93,6 +101,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Block",
       "category": "action",
       "title": "Block",
@@ -108,6 +118,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Chip",
       "category": "action",
       "title": "Chip",
@@ -115,6 +127,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Dribble",
       "category": "action",
       "title": "Dribble",
@@ -125,6 +139,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "FollowPath",
       "category": "action",
       "title": "FollowPath",
@@ -136,6 +152,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "GetBall",
       "category": "action",
       "title": "GetBall",
@@ -147,6 +165,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "GoToPos",
       "category": "action",
       "title": "GoToPos",
@@ -160,6 +180,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "KeeperBlock",
       "category": "action",
       "title": "KeeperBlock",
@@ -169,6 +191,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Kick",
       "category": "action",
       "title": "Kick",
@@ -176,6 +200,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "NaiveBlockGoal",
       "category": "action",
       "title": "NaiveBlockGoal",
@@ -183,6 +209,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "ParamSet",
       "category": "action",
       "title": "ParamSet",
@@ -193,6 +221,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "RandomDrive",
       "category": "action",
       "title": "RandomDrive",
@@ -200,6 +230,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "RotateAroundPoint",
       "category": "action",
       "title": "RotateAroundPoint",
@@ -207,6 +239,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "SecondaryKeeper",
       "category": "action",
       "title": "SecondaryKeeper",
@@ -216,6 +250,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Sleep",
       "category": "action",
       "title": "Sleep",
@@ -223,6 +259,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "StandFree",
       "category": "action",
       "title": "StandFree",
@@ -230,6 +268,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BallOnOurSide",
       "category": "condition",
       "title": "BallOnOurSide",
@@ -237,6 +277,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanInterceptBall",
       "category": "condition",
       "title": "CanInterceptBall",
@@ -246,6 +288,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanPassSafely",
       "category": "condition",
       "title": "CanPassSafely",
@@ -253,6 +297,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanReachPoint",
       "category": "condition",
       "title": "CanReachPoint",
@@ -260,6 +306,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanSeePoint",
       "category": "condition",
       "title": "CanSeePoint",
@@ -272,6 +320,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanSeeRobot",
       "category": "condition",
       "title": "CanSeeRobot",
@@ -279,6 +329,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "CanSeeTheirGoal",
       "category": "condition",
       "title": "CanSeeTheirGoal",
@@ -286,6 +338,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "DistanceXToY",
       "category": "condition",
       "title": "DistanceXToY",
@@ -298,6 +352,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "IHaveBall",
       "category": "condition",
       "title": "IHaveBall",
@@ -308,6 +364,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "IsBallInGoal",
       "category": "condition",
       "title": "IsBallInGoal",
@@ -315,6 +373,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "IsBallInZone",
       "category": "condition",
       "title": "IsBallInZone",
@@ -322,6 +382,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "IsRefCommand",
       "category": "condition",
       "title": "IsRefCommand",
@@ -329,6 +391,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "IsRefStage",
       "category": "condition",
       "title": "IsRefStage",
@@ -336,6 +400,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "ParamCheck",
       "category": "condition",
       "title": "ParamCheck",
@@ -347,6 +413,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "TeamHasBall",
       "category": "condition",
       "title": "TeamHasBall",
@@ -356,6 +424,8 @@
       }
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "TheyHaveBall",
       "category": "condition",
       "title": "TheyHaveBall",
@@ -363,6 +433,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "WeHaveBall",
       "category": "condition",
       "title": "WeHaveBall",
@@ -370,6 +442,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "AttackerTactic",
       "category": "action",
       "title": "AttackerTactic",
@@ -377,6 +451,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BasicAttackTactic",
       "category": "action",
       "title": "BasicAttackTactic",
@@ -384,6 +460,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BasicDefenseTactic",
       "category": "action",
       "title": "BasicDefenseTactic",
@@ -391,6 +469,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BasicKeeperTactic",
       "category": "action",
       "title": "BasicKeeperTactic",
@@ -398,6 +478,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "DemoTactic",
       "category": "action",
       "title": "DemoTactic",
@@ -405,6 +487,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "GoToSideTactic",
       "category": "action",
       "title": "GoToSideTactic",
@@ -412,6 +496,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "ParallelTactic",
       "category": "composite",
       "title": "ParallelTactic",
@@ -419,6 +505,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "ParallelSequence",
       "category": "composite",
       "title": "ParallelSequence",
@@ -426,6 +514,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "Repeat",
       "category": "decorator",
       "title": "Repeat",
@@ -433,6 +523,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BallInsideField",
       "category": "condition",
       "title": "BallInsideField",
@@ -440,6 +532,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "BallOutsideField",
       "category": "condition",
       "title": "BallOutsideField",
@@ -447,6 +541,8 @@
       "properties": {}
     },
     {
+      "version": "0.3.0",
+      "scope": "node",
       "name": "OneRobotGetsBallTactic",
       "category": "action",
       "title": "OneRobotGetsBallTactic",
