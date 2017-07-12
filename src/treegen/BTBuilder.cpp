@@ -172,13 +172,6 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
 
     std::stack<std::string> stack;
     stack.push(rootIt->get<std::string>());
-    // try {
-        // std::cout << json["root"] << "\n";
-        // stack.push(json["root"]);
-    // } catch (...) {
-        // std::cout << json;
-        // throw;
-    // }
 
     std::set<std::string> usedSkills, usedConditions, usedTactics, usedTitles;
 
@@ -195,6 +188,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
         if (usedTitles.find(title) != usedTitles.end()) {
             cmakeErrTree("Nodename \"" + title + "\" appears more than once in the tree. Please use unique names, or the nodes might be unaddressable.");
             encountered_error = true;
+            return boost::none;
         }
 
         if (allskills_set.find(element["name"].get<std::string>()) != allskills_set.end()) {
@@ -203,6 +197,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
             if (allskills_set.find(title) != allskills_set.end()) {
                 cmakeErrTree("Skill \"" + title + "\" has the same name as the skill type. Please use a leaf name different from the skill name (e.g. " + title + "_A, " + title + "_1)");
                 encountered_error = true;
+                return boost::none;
             }
         }
 
@@ -212,15 +207,24 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
             if (allconditions_set.find(title) != allconditions_set.end()) {
                 cmakeErrTree("Condition \"" + title + "\" has the same name as the condition type. Please use a leaf name different from the condition name (e.g. " + title + "_A, " + title + "_1)");
                 encountered_error = true;
+                return boost::none;
             }
         }
 
         if (alltactics_set.find(element["name"].get<std::string>()) != alltactics_set.end()) {
             usedTactics.insert(element["name"].get<std::string>());
+
+            if (element["name"].get<std::string>() == title) {
+                cmakeErrTree("Title of play node is the same as it's type");
+                encountered_error = true;
+                return boost::none;
+            }
         }
 
         if (allskills_set.find(element["name"]) == allskills_set.end()
-                && allconditions_set.find(element["name"]) == allconditions_set.end()) {
+                && allconditions_set.find(element["name"]) == allconditions_set.end()
+                && alltactics_set.find(element["name"]) == alltactics_set.end()
+                ) {
             // Get title and append ctr
             title += "_" + std::to_string(ctr++);
         }
@@ -286,6 +290,7 @@ boost::optional<std::string> BTBuilder::build(nlohmann::json json, std::string b
                 || title.find("/") != std::string::npos) {
             cmakeErrTree("Non-alphanumeric-or-underscore characters found in behavior tree name!");
             encountered_error = true;
+            return boost::none;
         }
 
     }

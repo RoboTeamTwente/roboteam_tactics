@@ -15,7 +15,7 @@ bt::Node::Status Leaf::Tick() {
 
     roboteam_msgs::Blackboard bb;
 
-    int bot_id = GetInt("ROBOT_ID", -1);
+    int bot_id = GetInt("ROBOT_ID", roboteam_msgs::BtDebugInfo::ID_STRATEGY_NODE);
 
     if (newStatus != bt::Node::Status::Running) {
         roboteam_msgs::BtDebugInfo::_type_type msgStatus;
