@@ -15,6 +15,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/constants.h"
+#include "roboteam_msgs/StrategyDebugInfo.h"
 
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
@@ -28,8 +29,11 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/BtDebug.h"
+#include "roboteam_tactics/utils/RefStateSwitch.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
+
+namespace {
 
 std::random_device rd;
 std::mt19937 rng(rd());
@@ -54,6 +58,42 @@ void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
 }
 
+class StrategyDebugInfo {
+public:
+    StrategyDebugInfo() {
+        ros::NodeHandle n;
+
+        strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
+    }
+
+    ros::Publisher strategyInfoPub;
+
+// string interpretedRefState
+// string currentStrategy
+// PlayDebugInfo[] activePlays
+
+    void doUpdate(std::shared_ptr<bt::BehaviorTree> tree) {
+        auto root = tree->GetRoot();
+        if (auto rss = std::dynamic_pointer_cast<rtt::RefStateSwitch>(root)) {
+            // It's a refstate switch!
+            
+            roboteam_msgs::StrategyDebugInfo sdi;
+            if (auto refStateOpt = rss->getCurrentRefState()) {
+                sdi.interpreted_ref_command = rtt::refStateToString(*refStateOpt);
+            }
+
+            if (auto treeNameOpt = rss->getCurrentStrategyTreeName()) {
+                sdi.current_strategy = *treeNameOpt;
+            }
+
+            strategyInfoPub.publish(sdi);
+        } else {
+            // Not a refstate switch, so we ignore it.
+        }
+    }
+} ;
+
+}
 
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
@@ -88,6 +128,8 @@ int main(int argc, char *argv[]) {
     rtt::LastWorld::wait_for_first_messages();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
+
+    StrategyDebugInfo stratDebugInfo;
 
     std::shared_ptr<bt::BehaviorTree> strategy;
     // Only continue if arguments were given
@@ -188,6 +230,8 @@ int main(int argc, char *argv[]) {
             break;
         }
         rate.sleep();
+
+        stratDebugInfo.doUpdate(strategy);
     }
     
     // Terminate if needed

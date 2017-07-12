@@ -38,6 +38,10 @@ void BehaviorTree::SetRoot(const Node::Ptr &node) {
     root = node; 
 }
 
+Node::Ptr BehaviorTree::GetRoot() {
+    return root;
+}
+
 Blackboard::Ptr BehaviorTree::GetBlackboard() const {
     return blackboard; 
 }

@@ -15,7 +15,8 @@ RefStateSwitch::RefStateSwitch() : validated(false)
                                  // , previousCmd(-1)
                                  // , currentCmd(-1)
                                  , finishedOnce(false)
-                                 , needToInitialize(false) {
+                                 , needToInitialize(false)
+                                 , startedNewStrategy(false) {
                                  // , runningImplicitNormalStartRefCommand(false)
                                  // , switchedToNormal(false) {
 }
@@ -50,6 +51,8 @@ bt::Node::Status RefStateSwitch::Update() {
         return Status::Running;
     }
 
+    startedNewStrategy = false;
+
     auto cmd = LastRef::getState();
 
     if (currentCmd != cmd) {
@@ -65,6 +68,7 @@ bt::Node::Status RefStateSwitch::Update() {
         }
 
         needToInitialize = true;
+        startedNewStrategy = true;
     }
 
     if (needToInitialize) {
@@ -96,20 +100,7 @@ bt::Node::Status RefStateSwitch::Update() {
     return bt::Node::Status::Running;
 }
 
-namespace {
-
-b::optional<std::string> tryFind(RefState const & r) {
-    auto const it = StrategyComposer::MAPPING.find(r);
-    if (it != StrategyComposer::MAPPING.end()) {
-        return it->second;
-    }
-
-    return b::none;
-}
-
-}
-
-b::optional<std::string> RefStateSwitch::getCurrentStrategyTreeName() const {
+b::optional<RefState> RefStateSwitch::getCurrentRefState() const {
     std::string previousCmdName = "none yet";
     std::string currentCmdName = "none yet";
 
@@ -121,10 +112,10 @@ b::optional<std::string> RefStateSwitch::getCurrentStrategyTreeName() const {
         previousCmdName = refStateToString(*previousCmd);
     }
 
-    if (isTwoState(previousCmd, *currentCmd)) {
+    if (currentCmd && isTwoState(previousCmd, *currentCmd)) {
         if (!finishedOnce) {
             if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
-                return tryFind(*targetStateOpt);
+                return *targetStateOpt;
             } else {
                 ROS_ERROR("PreviousCmd and currentCmd are twoState states, but getFirstState "
                           "returned nothing! PreviousCmd: %s, currentCmd: %s",
@@ -135,13 +126,28 @@ b::optional<std::string> RefStateSwitch::getCurrentStrategyTreeName() const {
                 return b::none;
             }
         } else {
-            return tryFind(RefState::NORMAL_START);
+            // Second state of a twostate pair is always normal play
+            return RefState::NORMAL_START;
         }
     } else if (!currentCmd) {
         return b::none;
     } else {
-        return tryFind(*currentCmd);
+        return *currentCmd;
     }
+}
+
+b::optional<std::string> RefStateSwitch::getCurrentStrategyTreeName() const {
+    if (auto refStateOpt = getCurrentRefState()) {
+        auto const it = StrategyComposer::MAPPING.find(*refStateOpt);
+        if (it != StrategyComposer::MAPPING.end()) {
+            return it->second;
+        }
+    }
+
+    // This is not an error, because if there is a none in the
+    // strategy composer then it should just run the
+    // normal play in that case
+    return b::none;
 }
 
 bt::Node::Ptr RefStateSwitch::getCurrentChild() {
@@ -156,52 +162,20 @@ bt::Node::Ptr RefStateSwitch::getCurrentChild() {
         previousCmdName = refStateToString(*previousCmd);
     }
 
-    if (isTwoState(previousCmd, *currentCmd)) {
-        if (!finishedOnce) {
-            if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
-                auto stateIt = refStateStrategies.find(*targetStateOpt);
-                if (stateIt != refStateStrategies.end()) {
-                    return stateIt->second;
-                } else {
-                    ROS_ERROR("No strategy tree found! Previouscmd: %s, currentCmd: %s",
-                            previousCmdName.c_str(),
-                            currentCmdName.c_str()
-                            );
-                    
-                    return nullptr;
-                }
-            } else {
-                ROS_ERROR( "PreviousCmd and currentCmd are twoState states, but getFirstState "
-                           "returned nothing! PreviousCmd: %s, currentCmd: %s",
-                           previousCmdName.c_str(),
-                           currentCmdName.c_str()
-                           );
-
-                return nullptr;
-            }
-        } else {
-            auto stateIt = refStateStrategies.find(RefState::NORMAL_START);
-            
-            if (stateIt != refStateStrategies.end()) {
-                return stateIt->second;
-            } else {
-                ROS_ERROR("No strategy found for NORMAL_START!");
-                return nullptr;
-            }
-        }
-    } 
-
-    if (!currentCmd) {
-        ROS_ERROR("No ref command set!");
-        return nullptr;
-    } else {
-        auto stateIt = refStateStrategies.find(*currentCmd);
+    if (auto targetStateOpt = getCurrentRefState()) {
+        auto stateIt = refStateStrategies.find(*targetStateOpt);
         if (stateIt != refStateStrategies.end()) {
             return stateIt->second;
         } else {
-            ROS_ERROR("No strategy found for: %s!", currentCmdName.c_str());
+            ROS_ERROR("No strategy tree found! Previouscmd: %s, currentCmd: %s",
+                    previousCmdName.c_str(),
+                    currentCmdName.c_str()
+                    );
+            
             return nullptr;
         }
+    } else {
+        return nullptr;
     }
 }
 
