@@ -76,7 +76,12 @@ Vector2 KeepPosition::getNearestObject(Vector2 ownPos) {
 	std::sort(them.begin(), them.end(), DistToPosSorter{ownPos});
 
 	Vector2 closestUs{us.at(0).pos};
-	Vector2 closestThem{them.at(0).pos};
+	Vector2 closestThem;
+	if (them.size() == 0) {
+		closestThem = LastWorld::get_their_goal_center();
+	} else {
+		closestThem = them.at(0).pos;
+	}
 	Vector2 ball{world.ball.pos};
 
 	std::vector<Vector2> v {closestUs, closestThem, ball};

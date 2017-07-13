@@ -274,12 +274,12 @@ How to use:
     }
 
     if (rtt::factories::isTactic(testClass)) {
-        std::cout << "Testing a tactic! Please ensure that 6 role nodes are available...\n";
+        std::cout << "Testing a tactic! Please ensure that at least 1 role nodes is available...\n";
         std::cout << "(For example by using mini_rolenodes.launch from roboteam_utils)\n";
 
         auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
         ros::Rate fps60(60);
-        while ((int) directivePub.getNumSubscribers() < 2) {
+        while ((int) directivePub.getNumSubscribers() < 1) {
             ros::spinOnce();
             fps60.sleep();
 

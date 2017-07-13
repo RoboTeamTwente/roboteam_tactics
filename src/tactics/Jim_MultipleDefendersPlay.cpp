@@ -123,6 +123,8 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
     int numRobots = robots.size() + activeRobots.size();
+
+
        
     if (numRobots < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -134,12 +136,17 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int maxBallDefenders = 2;
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
+    distancesBallDefendersFromGoal.clear();
 
     bool ballOnTheirSide = ballPos.x > 0.0 || ballVel.x > 0.5;
 
     auto bb = std::make_shared<bt::Blackboard>();
     WeHaveBall weHaveBall("", bb);
     bool weAreAttacking = ballOnTheirSide || (weHaveBall.Update() == Status::Success);
+
+    
+    
+    // LowPass Filter
     if (weAreAttacking != weWereAttacking) {
     	weAreAttackingCounter++;
     	if (weAreAttackingCounter >= 3) {
@@ -195,14 +202,13 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
 
     if (justChecking) {
-	    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders) {
+	    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || weAreAttacking != weWereAttacking) {
 	        return true;
 	    } else {
 	    	return false;
 	    }
     }
     
-
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
@@ -299,6 +305,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
+        ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
@@ -371,6 +378,7 @@ void Jim_MultipleDefendersPlay::Initialize() {
 	numRobotDefenders = 0;
 	distBallToGoalThreshold = 4.0;
 	weAreAttackingCounter = 0;
+    weWereAttacking = false;
     reInitializeWhenNeeded(false);
 	return;
 }

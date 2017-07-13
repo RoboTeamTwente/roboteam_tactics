@@ -30,12 +30,14 @@ public:
     roboteam_msgs::RobotCommand getStopCommand(uint id, bool dribbler);
 
     Vector2 positionController(Vector2 myPos, Vector2 targetPos);
+    Vector2 positionController(Vector2 myPos, Vector2 targetPos, Vector2 myVel);
     Vector2 velocityController(Vector2 myVelRobotFrame, Vector2 targetVel);
     double rotationController(double myAngle, double angleGoal, Vector2 posError);
+    double rotationController(double myAngle, double angleGoal, Vector2 posError, double myAngularVel);
     Vector2 velocityController();
     double angularVelController();
 
-    Vector2 limitVel(Vector2 sumOfForces);
+    Vector2 limitVel(Vector2 sumOfForces, double angularVelTarget);
     double limitAngularVel(double angularVelTarget);
     void Initialize(int ROBOT_ID);
     
@@ -62,8 +64,10 @@ private:
     // Control parameters
     double pGainPosition;
     double iGainPosition;
+    double dGainPosition;
     double pGainRotation;
     double iGainRotation;
+    double dGainRotation;
     double pGainVelocity;
 
     // Min and max speeds
