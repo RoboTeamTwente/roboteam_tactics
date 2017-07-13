@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "boost/interprocess/sync/interprocess_mutex.hpp"
 
 namespace rtt {
 
@@ -38,22 +39,22 @@ public:
     /**
      * \brief Marks the given id as claimed
      */
-    static void claim_robot(int id);
+    static bool claim_robot(int id);
     
     /**
      * \brief Marks the given id as unclaimed
      */
-    static void release_robot(int id);
+    static bool release_robot(int id);
     
     /**
      * \brief Marks the given ids as claimed
      */
-    static void claim_robots(std::vector<int> ids);
+    static bool claim_robots(std::vector<int> ids);
     
     /**
      * \brief Marks the given ids as unclaimed
      */
-    static void release_robots(std::vector<int> ids);
+    static bool release_robots(std::vector<int> ids);
 
 private:
     static std::set<int> taken_robots;
@@ -63,6 +64,8 @@ private:
     
     friend class HaltTactic;
     static void halt_override();
+
+    static boost::interprocess::interprocess_mutex mutex;
 } ;
 
 } // rtt
