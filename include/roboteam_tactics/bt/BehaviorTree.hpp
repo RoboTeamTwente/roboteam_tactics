@@ -18,6 +18,7 @@ public:
     void Terminate(Status s) override;
     
     void SetRoot(const Node::Ptr &node);
+    Node::Ptr GetRoot();
     Blackboard::Ptr GetBlackboard() const;
     Blackboard::Ptr GetSharedBlackboard() const;
     void SetSharedBlackboard(const Blackboard::Ptr &shared);

@@ -81,17 +81,11 @@ void Tactic::Terminate(Status) {
 
     // Stop every robot
     for (auto robotID : robots) {
-        if (robotID == RobotDealer::get_keeper()) {
-            // std::cout << "releasing keeper \n";
-        } else {
-            // std::cout << "releasing robot " << robotID << " \n";
-        }
         directive.robot_id = robotID;
         pub.publish(directive);
     }
 
     RTT_DEBUGLN("Releasing tactic robots!\n");
-    // std::cout << "terminate tactic " << name << " \n";
 
     RobotDealer::release_robots(robots);
     claimed_robots.clear();
@@ -99,12 +93,11 @@ void Tactic::Terminate(Status) {
     if (getStatus() == bt::Node::Status::Running) {
         setStatus(bt::Node::Status::Failure);
     }
-    // std::cout << "Terminating tactic!\n";
 }
 
 void Tactic::claim_robot(int id) {
     if (claimed_robots.find(id) != claimed_robots.end()) {
-        ROS_ERROR("Robot %d is already claimed by this tactic!\n", id);
+        ROS_ERROR("Robot %d is already claimed by tactic %s!\n", id, name.c_str());
         for (const int ROBOT_ID : claimed_robots) {
             ROS_ERROR("Claimed robot: %d", ROBOT_ID);
         }
@@ -112,7 +105,7 @@ void Tactic::claim_robot(int id) {
 
     claimed_robots.insert(id);
 
-    RobotDealer::claim_robot(id);
+    RobotDealer::claim_robot_for_tactic(id, name);
 }
 
 void Tactic::claim_robots(std::vector<int> ids) {

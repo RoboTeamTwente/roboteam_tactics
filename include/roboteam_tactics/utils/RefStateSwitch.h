@@ -36,6 +36,9 @@ public:
 
     bt::Node::Ptr getCurrentChild();
     bt::Node::Ptr getPreviousChild();
+    boost::optional<std::string> getCurrentStrategyTreeName() const;
+    boost::optional<RefState> getCurrentRefState() const;
+    bool hasStartedNewStrategy() const;
 
     void AddStrategy(RefState refState, Node::Ptr child);
 
@@ -45,6 +48,7 @@ private:
     boost::optional<RefState> currentCmd;
     bool finishedOnce;
     bool needToInitialize;
+    bool startedNewStrategy;
 
     // bool runningImplicitNormalStartRefCommand;
     

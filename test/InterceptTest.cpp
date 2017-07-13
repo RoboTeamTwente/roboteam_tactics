@@ -8,7 +8,7 @@
 TEST(InterceptTest, InterceptTest) {
 
 	std::vector<double> posX, posY, velX, velY, bPosX, bPosY, bVelX, bVelY;
-	unsigned iterations = 1000000;
+	unsigned iterations = 10000;
 
 	for (unsigned i = 0; i < iterations; i++) {
 		posX.push_back(rtt::get_rand_real(-9, 9));

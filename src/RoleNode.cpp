@@ -111,12 +111,6 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
-// void wsDummy(const roboteam_msgs::WorldConstPtr& w) {
-    // if (ROBOT_ID == 1) {
-        // std::cout << "    Receiving world state! Seq: " << w->header.seq << "\n";
-    // }
-// }
-
 int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;

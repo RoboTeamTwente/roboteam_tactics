@@ -27,9 +27,6 @@ private:
     
     static constexpr unsigned int CASE_COUNT = 19;
     
-    // SET THIS IN StrategyComposer.cpp !!
-    static const std::map<RefState, boost::optional<std::string>> MAPPING;
-    
     class Forwarder final : public bt::Leaf {
         public:
         Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target);
@@ -41,6 +38,9 @@ private:
     };
 public:
     static std::shared_ptr<bt::BehaviorTree> getMainStrategy();
+    
+    // SET THIS IN StrategyComposer.cpp !!
+    static const std::map<RefState, boost::optional<std::string>> MAPPING;
 };
     
 }

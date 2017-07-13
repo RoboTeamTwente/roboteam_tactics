@@ -48,11 +48,11 @@ printf "$headerPreamble" >> $treeHeader
 # And append them to the sourc and header files
 for filepath in src/trees/json/*.json; do
     # Generate implementations
-    rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt $1
+    rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt $1 || { exit 1; }
     printf "\n" >> $treeSource
 
     # Generated header declarations
-    rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt $1
+    rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt $1 || { exit 1; }
     printf "\n" >> $treeHeader
 done
 

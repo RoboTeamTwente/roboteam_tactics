@@ -273,6 +273,7 @@ catkin_add_gtest(tactics_test
     test/ParamsStressTest.cpp
     #test/ShootAtGoalTest.cpp
     test/InterceptTest.cpp
+    test/RobotDealerTest.cpp
     $<TARGET_OBJECTS:analysis>
     $<TARGET_OBJECTS:conditions>
     $<TARGET_OBJECTS:tactics>
