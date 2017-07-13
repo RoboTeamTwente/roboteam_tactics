@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "boost/interprocess/sync/interprocess_mutex.hpp"
+#include <map>
 
 namespace rtt {
 
@@ -40,6 +41,23 @@ public:
      * \brief Marks the given id as claimed
      */
     static bool claim_robot(int id);
+
+    /**
+     * Claims a robot for a tactic while simultanously also adding it to a list
+     * of owners.
+     */
+    static void claim_robot_for_tactic(int id, std::string const & playName);
+
+    /**
+     * Claims a bunch of robots under the name of the given tactic.
+     */
+    static void claim_robot_for_tactic(std::vector<int> ids, std::string const & playName);
+
+    /**
+     * Returns a list of mappings from a tactics name to the set of robots that it owns
+     * at the moment.
+     */
+    static std::map<std::string, std::set<int>> const & getRobotOwnerList();
     
     /**
      * \brief Marks the given id as unclaimed
@@ -57,10 +75,19 @@ public:
     static bool release_robots(std::vector<int> ids);
 
 private:
+
+    /**
+     * Only removes the robot from the owner list, but not from the actual
+     * taken/available lists. Used internally.
+     */
+    static void removeRobotFromOwnerList(int id);
+
     static std::set<int> taken_robots;
     static std::set<int> available_robots;
+    static std::map<std::string, std::set<int>> robot_owners;
     static int keeper;
     static bool keeper_available;
+    static void printRobotDistribution();
     
     friend class HaltTactic;
     static void halt_override();

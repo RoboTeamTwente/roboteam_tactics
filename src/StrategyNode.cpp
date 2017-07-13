@@ -3,6 +3,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "ros/ros.h"
 #include "std_msgs/Empty.h"
@@ -17,6 +18,7 @@
 #include "roboteam_utils/constants.h"
 #include "roboteam_msgs/StrategyDebugInfo.h"
 
+#include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/generated/alltrees.h"
@@ -66,32 +68,62 @@ public:
         strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
     }
 
+
     ros::Publisher strategyInfoPub;
 
-// string interpretedRefState
-// string currentStrategy
-// PlayDebugInfo[] activePlays
+    using Clock = std::chrono::steady_clock;
+    using timepoint = std::chrono::steady_clock::time_point;
+    using milliseconds = std::chrono::milliseconds;
+
+    timepoint lastDebugMsg = timepoint::min();
+
+    static milliseconds const MSG_INTERVAL;
+
+    bool timeSinceLastMessagePassed() {
+        using namespace std::chrono;
+        return duration_cast<milliseconds>(Clock::now() - lastDebugMsg) >= MSG_INTERVAL;
+    }
 
     void doUpdate(std::shared_ptr<bt::BehaviorTree> tree) {
         auto root = tree->GetRoot();
+
         if (auto rss = std::dynamic_pointer_cast<rtt::RefStateSwitch>(root)) {
             // It's a refstate switch!
             
-            roboteam_msgs::StrategyDebugInfo sdi;
-            if (auto refStateOpt = rss->getCurrentRefState()) {
-                sdi.interpreted_ref_command = rtt::refStateToString(*refStateOpt);
-            }
+            if (rss->hasStartedNewStrategy() || timeSinceLastMessagePassed()) {
+                roboteam_msgs::StrategyDebugInfo sdi;
 
-            if (auto treeNameOpt = rss->getCurrentStrategyTreeName()) {
-                sdi.current_strategy = *treeNameOpt;
-            }
+                if (auto refStateOpt = rss->getCurrentRefState()) {
+                    sdi.interpreted_ref_command = rtt::refStateToString(*refStateOpt);
+                }
 
-            strategyInfoPub.publish(sdi);
+                if (auto treeNameOpt = rss->getCurrentStrategyTreeName()) {
+                    sdi.current_strategy = *treeNameOpt;
+                }
+
+                auto const & robotOwnerMap = rtt::RobotDealer::getRobotOwnerList();
+                for (auto const & entry : robotOwnerMap) {
+                    // Create a new entry
+                    sdi.active_plays.emplace_back();
+                    // Get a reference to the new entry
+                    auto & playDebugInfo = sdi.active_plays.back();
+                    // Fill in the info
+                    playDebugInfo.play_name = entry.first;
+                    playDebugInfo.active_robots.insert(playDebugInfo.active_robots.end(), entry.second.begin(), entry.second.end());
+                }
+    
+                // Publish it!
+                strategyInfoPub.publish(sdi);
+
+                lastDebugMsg = Clock::now();
+            }
         } else {
             // Not a refstate switch, so we ignore it.
         }
     }
 } ;
+
+StrategyDebugInfo::milliseconds const StrategyDebugInfo::MSG_INTERVAL(200);
 
 }
 

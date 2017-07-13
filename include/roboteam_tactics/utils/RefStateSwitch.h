@@ -38,6 +38,7 @@ public:
     bt::Node::Ptr getPreviousChild();
     boost::optional<std::string> getCurrentStrategyTreeName() const;
     boost::optional<RefState> getCurrentRefState() const;
+    bool hasStartedNewStrategy() const;
 
     void AddStrategy(RefState refState, Node::Ptr child);
 

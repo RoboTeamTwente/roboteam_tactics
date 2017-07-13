@@ -1,6 +1,7 @@
 #include <vector>
 #include <set>
 #include <ros/ros.h>
+#include <boost/optional.hpp>
 
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
@@ -14,6 +15,7 @@ namespace rtt {
 
 std::set<int> RobotDealer::taken_robots;
 std::set<int> RobotDealer::available_robots;
+std::map<std::string, std::set<int>> RobotDealer::robot_owners;
 int RobotDealer::keeper;
 bool RobotDealer::keeper_available;
 boost::interprocess::interprocess_mutex RobotDealer::mutex;
@@ -81,6 +83,8 @@ bool RobotDealer::release_robot(int id) {
 	LOCK_THIS_FUNCTION
     RTT_DEBUGLN("Releasing robot %i", id);
 
+    removeRobotFromOwnerList(id);
+
     if (id == keeper) {
         if (keeper_available) {
             ROS_ERROR("Goalkeeper was not claimed! ID: %i", keeper);
@@ -100,10 +104,67 @@ bool RobotDealer::release_robot(int id) {
     	ROS_ERROR("Tried to release an unclaimed robot: %d!", id);
     	return false;
     }
-    
+
     available_robots.insert(id);
     taken_robots.erase(id);
     return true;
+}
+
+void RobotDealer::claim_robot_for_tactic(int id, std::string const & playName) {
+    claim_robot(id);
+
+    robot_owners[playName].insert(id);
+}
+
+void RobotDealer::claim_robot_for_tactic(std::vector<int> ids, std::string const & playName) {
+    for (auto const id : ids) {
+        claim_robot_for_tactic(id, playName);
+    }
+}
+
+std::map<std::string, std::set<int>> const & RobotDealer::getRobotOwnerList() {
+    return robot_owners;
+}
+
+void RobotDealer::printRobotDistribution() {
+    std::cout << "[RobotDistribution]\n";
+    for (auto const & entry : robot_owners) {
+        std::cout << entry.first << ":\n";
+        for (auto const & id : entry.second) {
+            std::cout << "\t- " << id << "\n";
+        }
+    }
+}
+
+/**
+ * Remove robots from robot owner list.
+ */
+void RobotDealer::removeRobotFromOwnerList(int id) {
+    boost::optional<std::string> playToRemove;
+
+    // For each robot set list...
+    for (auto & entry : robot_owners) {
+        // Get the set
+        auto & robotSet = entry.second;
+        // Check if the robot is in there
+        auto robotIt = robotSet.find(id);
+        if (robotIt != robotSet.end()) {
+            // If so, erase it
+            robotSet.erase(robotIt);
+
+            // And if the set is then empty, mark it for removal from the map
+            if (robotSet.size() == 0) {
+                playToRemove = entry.first;
+            }
+
+            break;
+        }
+    }
+
+    // If there was a set empty after removal, remove it from the map
+    if (playToRemove) {
+        robot_owners.erase(*playToRemove);
+    }
 }
 
 bool RobotDealer::claim_robots(std::vector<int> ids) {

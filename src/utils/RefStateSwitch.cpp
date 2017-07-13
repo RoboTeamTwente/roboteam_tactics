@@ -100,6 +100,10 @@ bt::Node::Status RefStateSwitch::Update() {
     return bt::Node::Status::Running;
 }
 
+bool RefStateSwitch::hasStartedNewStrategy() const {
+    return startedNewStrategy;
+}
+
 b::optional<RefState> RefStateSwitch::getCurrentRefState() const {
     std::string previousCmdName = "none yet";
     std::string currentCmdName = "none yet";
