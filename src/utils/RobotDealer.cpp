@@ -110,16 +110,21 @@ bool RobotDealer::release_robot(int id) {
     return true;
 }
 
-void RobotDealer::claim_robot_for_tactic(int id, std::string const & playName) {
-    claim_robot(id);
+bool RobotDealer::claim_robot_for_tactic(int id, std::string const & playName) {
+    bool success = claim_robot(id);
 
-    robot_owners[playName].insert(id);
+    if (success) {
+    	robot_owners[playName].insert(id);
+    }
+    return success;
 }
 
-void RobotDealer::claim_robot_for_tactic(std::vector<int> ids, std::string const & playName) {
-    for (auto const id : ids) {
-        claim_robot_for_tactic(id, playName);
+bool RobotDealer::claim_robot_for_tactic(std::vector<int> ids, std::string const & playName) {
+    bool allClaimed = true;
+	for (auto const id : ids) {
+        allClaimed &= claim_robot_for_tactic(id, playName);
     }
+	return allClaimed;
 }
 
 std::map<std::string, std::set<int>> const & RobotDealer::getRobotOwnerList() {

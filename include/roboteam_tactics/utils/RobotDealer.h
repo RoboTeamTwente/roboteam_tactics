@@ -46,12 +46,12 @@ public:
      * Claims a robot for a tactic while simultanously also adding it to a list
      * of owners.
      */
-    static void claim_robot_for_tactic(int id, std::string const & playName);
+    static bool claim_robot_for_tactic(int id, std::string const & playName);
 
     /**
      * Claims a bunch of robots under the name of the given tactic.
      */
-    static void claim_robot_for_tactic(std::vector<int> ids, std::string const & playName);
+    static bool claim_robot_for_tactic(std::vector<int> ids, std::string const & playName);
 
     /**
      * Returns a list of mappings from a tactics name to the set of robots that it owns
