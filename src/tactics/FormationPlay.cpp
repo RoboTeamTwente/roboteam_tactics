@@ -145,6 +145,9 @@ void FormationPlay::Initialize() {
 		bb.SetBool("GoToPos_A_avoidBall", true);
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
+
+		std::cout << "Sending robot " << keeperId << " to " << Vector2(pos.x, pos.y)
+				<< "\n";
 	}
 }
 
