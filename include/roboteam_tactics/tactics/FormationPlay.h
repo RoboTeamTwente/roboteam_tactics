@@ -6,13 +6,14 @@
 #include "roboteam_utils/json.hpp"
 
 #include "ros/package.h"
+#include "roboteam_msgs/World.h"
 
 #include <vector>
 #include <map>
 #include <string>
 
 #define FORMATION_DEF_FILE ros::package::getPath("roboteam_tactics") + "/Formations.json"
-
+#define CURRENT_POSITIONS_FORMATION "<current positions>"
 /*
  * Coordinates in Formations.json should assume a field with the standard dimensions defined below.
  * All formations will be scaled according to the actual field size at runtime.
@@ -32,6 +33,7 @@ struct Formation {
 	Formation(const nlohmann::json& json, Vector2 scaleFactors);
 	Formation(const Formation& other);
 	Formation();
+	Formation(const roboteam_msgs::World& world, boost::optional<int> keeperIdx = boost::none);
 };
 
 class FormationPlay : public Tactic {
