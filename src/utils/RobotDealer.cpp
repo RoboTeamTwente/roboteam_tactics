@@ -113,6 +113,7 @@ bool RobotDealer::release_robot(int id) {
 bool RobotDealer::claim_robot_for_tactic(int id, std::string const & playName) {
     bool success = claim_robot(id);
 
+    LOCK_THIS_FUNCTION
     if (success) {
     	robot_owners[playName].insert(id);
     }
@@ -132,6 +133,7 @@ std::map<std::string, std::set<int>> const & RobotDealer::getRobotOwnerList() {
 }
 
 void RobotDealer::printRobotDistribution() {
+	LOCK_THIS_FUNCTION
     std::cout << "[RobotDistribution]\n";
     for (auto const & entry : robot_owners) {
         std::cout << entry.first << ":\n";
@@ -145,6 +147,7 @@ void RobotDealer::printRobotDistribution() {
  * Remove robots from robot owner list.
  */
 void RobotDealer::removeRobotFromOwnerList(int id) {
+	LOCK_THIS_FUNCTION
     boost::optional<std::string> playToRemove;
 
     // For each robot set list...
