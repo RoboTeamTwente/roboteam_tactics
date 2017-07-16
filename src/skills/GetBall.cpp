@@ -244,9 +244,9 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.3*M_PI) { // 0.1*M_PI for real-life robots!!
+	if (angleDiff > 0.2*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.3*M_PI) { // 0.1*M_PI for real-life robots!!
+	} else if (angleDiff < -0.2*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
@@ -267,15 +267,15 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
-        successAngle = 0.3;
-        getBallDist = 0.06;
+        successAngle = 0.2;
+        getBallDist = 0.00;
         distAwayFromBall = 0.3;
     }
    
 
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle*1.5)) { // TUNE THIS STUFF FOR FINAL ROBOT
+	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
 	} else {
         private_bb->SetBool("dribbler", true);
@@ -289,7 +289,7 @@ bt::Node::Status GetBall::Update (){
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        int ballCloseFrameCountTo = 10;
+        int ballCloseFrameCountTo = 1;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }

@@ -347,9 +347,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     double myAngle = me.angle;
-    double angleError = angleGoal - myAngle;
+    double angleError = cleanAngle(angleGoal - myAngle);
     double myAngularVel = me.w;
-    ROS_INFO_STREAM("myAngularVel: " << myAngularVel);
 
     // @DEBUG info:
     myPosTopic.publish(me);
@@ -368,9 +367,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.2) {
+    ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
+    if (posError.length() < successDist && fabs(angleError) < 0.1) {
         successCounter++;
-        if (successCounter >= 1) {
+        if (successCounter >= 3) {
             sendStopCommand(ROBOT_ID);
             succeeded = true;
             failure = false;
