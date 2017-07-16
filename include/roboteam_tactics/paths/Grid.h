@@ -231,6 +231,7 @@ public:
     }
 
     void placeRobot(Pos const & pos, int rad) {
+        std::cout << "Placing robot at: " << pos << "\n";
         setOccupiedCircle(pos, rad);
     }
 

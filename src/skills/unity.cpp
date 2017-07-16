@@ -117,3 +117,6 @@
 
 #include "Twirl.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
+
+#include "FindPath.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
