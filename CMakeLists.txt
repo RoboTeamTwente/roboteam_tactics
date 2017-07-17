@@ -31,6 +31,20 @@ set(QT_USE_QTNETWORK TRUE)
 find_package(Qt REQUIRED)
 include(${QT_USE_FILE})
 
+# ncurses is used to print error messages when the system crashes.
+# It's installed by default in Ubuntu, so it should be there.
+# If it's not, then that's not a big problem.
+find_package(Curses REQUIRED)
+if(${CURSES_HAVE_NCURSES_H})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DCURSES_HAVE_NCURSES_H)
+  include_directories( ${CURSES_INCLUDE_DIRS} )
+else(${CURSES_HAVE_NCURSES_H})
+  if (${CURSES_HAVE_NCURSES_NCURSES_H})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DCURSES_HAVE_NCURSES_NCURSES_H)
+    include_directories( ${CURSES_INCLUDE_DIRS} )
+  endif(${CURSES_HAVE_NCURSES_NCURSES_H})
+endif(${CURSES_HAVE_NCURSES_H})
+
 # Of what we use, only filesystem requires linking
 # and is therefore mentoined as component. Mostly
 # everything else is header only, and thus doesn't
@@ -314,6 +328,7 @@ if (BUILD_STRATEGYNODE)
 
     add_executable(StrategyNode
         src/StrategyNode.cpp
+        src/utils/CrashHandler.cpp
         $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
@@ -331,6 +346,7 @@ if (BUILD_STRATEGYNODE)
         ${catkin_LIBRARIES}
         bt
         )
+      target_link_libraries(StrategyNode ${CURSES_LIBRARIES})
 
 endif (BUILD_STRATEGYNODE)
 

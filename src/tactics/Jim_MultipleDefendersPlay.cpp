@@ -124,7 +124,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
     int numRobots = robots.size() + activeRobots.size();
-    ROS_INFO("available robots: %i, activeRobots %i, numRobots: %i",robots.size(),activeRobots.size(),numRobots);
+    ROS_INFO("available robots: %lu, activeRobots %i, numRobots: %lu",robots.size(),activeRobots.size(),numRobots);
 
        
     if (numRobots < 1) {
@@ -162,7 +162,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
-        ROS_INFO("opponent %i, danger score: %f",i,world.dangerScores.at(i));
+        ROS_INFO("opponent %lu, danger score: %f",i,world.dangerScores.at(i));
         if (world.dangerScores.at(i) >= minDangerScore) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));

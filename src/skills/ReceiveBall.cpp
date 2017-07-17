@@ -346,7 +346,9 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall")) || ballHasBeenClose) {
+	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.2)
+			&& !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))
+			|| ballHasBeenClose) {
 		ballHasBeenClose = true;
 		return getBall.Update();
 	}

@@ -32,6 +32,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/utils/RefStateSwitch.h"
+#include "roboteam_tactics/utils/CrashHandler.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
 
@@ -128,6 +129,8 @@ StrategyDebugInfo::milliseconds const StrategyDebugInfo::MSG_INTERVAL(200);
 }
 
 int main(int argc, char *argv[]) {
+	rtt::crash::registerAll();
+	std::quick_exit(4);
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
     

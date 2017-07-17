@@ -91,7 +91,7 @@ bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
     if (failImmediately) return Status::Failure;
 
     bool takerSucceeded = false;
-    bool receiverSucceeded = false;
+   // bool receiverSucceeded = false;
     bool oneFailed = false;
 
     for (auto token : tokens) {
@@ -105,7 +105,7 @@ bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
                 }
                 if (token == unique_id::fromMsg(receiver.token)) {
                     // std::cout << "Second attacker succeeded!\n";
-                    receiverSucceeded = true;
+                    //receiverSucceeded = true;
                 }
             } 
 
