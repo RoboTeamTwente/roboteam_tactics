@@ -48,7 +48,7 @@ Pos FindPath::convertPosition(roboteam_msgs::Vector2f pos) {
 }
 
 void FindPath::findPath() {
-    int const ROBOT_ID = GetInt("ROBOT_ID");
+    unsigned int const ROBOT_ID = GetInt("ROBOT_ID");
     double const xGoal = GetDouble("xGoal");
     double const yGoal = GetDouble("yGoal");
 
