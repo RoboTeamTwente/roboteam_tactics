@@ -320,20 +320,21 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 }
 
 int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point) {
-    int closest_robot = -1;
+    int closest_robot = -1; 
+    if (robots.size()==0){
+        ROS_ERROR("you gave get_robot_closest_to_point an empty list too chose from you silly");
+    }
     double closest_robot_ds = std::numeric_limits<double>::max();
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
         Vector2 pos(worldRobot.pos);
-
-        if ((pos - point).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+        if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+            if ((pos - point).length() < closest_robot_ds) {
                 closest_robot = worldRobot.id;
                 closest_robot_ds = (pos - point).length();
             }
         }
     }
-
     return closest_robot;
 }
 
