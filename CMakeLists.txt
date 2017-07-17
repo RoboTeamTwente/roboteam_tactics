@@ -348,6 +348,8 @@ if (BUILD_STRATEGYNODE)
         )
       target_link_libraries(StrategyNode ${CURSES_LIBRARIES})
 
+    install(PROGRAMS scripts/run_StrategyNode.sh  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 endif (BUILD_STRATEGYNODE)
 
 catkin_add_gtest(bt_test

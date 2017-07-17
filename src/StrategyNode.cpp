@@ -130,7 +130,6 @@ StrategyDebugInfo::milliseconds const StrategyDebugInfo::MSG_INTERVAL(200);
 
 int main(int argc, char *argv[]) {
 	rtt::crash::registerAll();
-	std::quick_exit(4);
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
     

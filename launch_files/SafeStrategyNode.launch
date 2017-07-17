@@ -1,0 +1,3 @@
+<launch>
+	<node name="Strategy" pkg="roboteam_tactics" type="run_StrategyNode.sh" output="screen"/>
+</launch>
