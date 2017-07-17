@@ -44,7 +44,17 @@ Vector2 targetBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces) {
 
 bt::Node::Status ShootAway::updateASAP() {
 	auto world = LastWorld::get();
-	auto bot = *getWorldBot(GetInt("ROBOT_ID"), true);
+
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot bot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        bot = *findBot;
+    } else {
+        ROS_WARN("ShootAway could not find robot");
+        return Status::Failure;
+    }
+
 	Vector2 botPos(bot.pos);
 	Vector2 ballPos(world.ball.pos);
 	double toBallAngle = (ballPos - botPos).angle();
@@ -90,7 +100,17 @@ bt::Node::Status ShootAway::updateASAP() {
 bt::Node::Status ShootAway::updateHIGH() {
 	RTT_DEBUGLN("Updating...");
 	auto world = LastWorld::get();
-	auto bot = *getWorldBot(GetInt("ROBOT_ID"), true);
+
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot bot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        bot = *findBot;
+    } else {
+        ROS_WARN("ShootAway could not find robot");
+        return Status::Failure;
+    }
+
 	Vector2 botPos(bot.pos);
 	Vector2 ballPos(world.ball.pos);
 	double toBallAngle = (ballPos - botPos).angle();

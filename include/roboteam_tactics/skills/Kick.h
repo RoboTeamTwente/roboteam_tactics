@@ -56,8 +56,8 @@ private:
 
     int cycleCounter;
 
-    void doKick();
-    void goForward();
+    // void doKick();
+    // void goForward();
 };
 
 

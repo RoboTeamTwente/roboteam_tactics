@@ -61,7 +61,17 @@ bt::Node::Status Chip::Update() {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+
+	roboteam_msgs::WorldRobot robot;
+
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("Chip could not find robot");
+        return Status::Failure;
+    }
+
 	Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	Vector2 posDiff = ballPos-robotPos;

@@ -78,12 +78,12 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 5.0;
+        pGainPosition = 3.0;
         iGainPosition = 0.0; 
-        dGainPosition = 1.0; 
+        dGainPosition = 0.5; 
         pGainRotation = 3.0; 
         iGainRotation = 1.0;
-        dGainRotation = 0.5;
+        dGainRotation = 0.0;
         pGainVelocity = 0.0;
         maxSpeed = 4.0;
         maxAngularVel = 10.0;
@@ -225,6 +225,12 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
+    if (velTarget.length() < 0.3) {
+        if (velTarget.length() > 0.07) {
+            velTarget = velTarget.scale(0.3 / velTarget.length());  
+        }
+    }
+
     
 
     return velTarget;
@@ -330,6 +336,12 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Limit the angular velocity target
     if (fabs(angularVelTarget) > maxAngularVel) {
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
+    }
+
+    if (fabs(angularVelTarget) < 2.3) {
+        if (fabs(angularVelTarget) > 0.7) {
+            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.3;
+        }
     }
 
 

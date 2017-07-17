@@ -16,8 +16,18 @@ ShootAtGoalV2::ShootAtGoalV2(std::string name, bt::Blackboard::Ptr blackboard)
 
 bt::Node::Status ShootAtGoalV2::Update() {
     const roboteam_msgs::World world = LastWorld::get();
-    auto bot = getWorldBot(blackboard->GetInt("ROBOT_ID"));
-    const Vector2 ownPos(bot->pos);
+
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    roboteam_msgs::WorldRobot bot;
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        bot = *findBot;
+    } else {
+        ROS_WARN("ShootAtGoalV2 could not find robot");
+        return Status::Failure;
+    }
+
+    const Vector2 ownPos(bot.pos);
     // const double orientation = bot->angle;
     
     partition.reset();
@@ -34,7 +44,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     ROS_INFO("targetAngle: %f", targetAngle);
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
-        private_bb->SetInt("ROBOT_ID", bot->id);
+        private_bb->SetInt("ROBOT_ID", bot.id);
         private_bb->SetBool("SAGV2_GetBall_passOn", true);
     	aimer = std::make_unique<GetBall>("SAGV2_GetBall", private_bb);
     }

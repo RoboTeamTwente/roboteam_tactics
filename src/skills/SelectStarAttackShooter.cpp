@@ -51,9 +51,20 @@ struct Sorter {
 boost::optional<std::pair<int, Section>> SelectStarAttackShooter::selectBest() const {
 	std::vector<std::pair<int, Section>> sections;
 	auto world = LastWorld::get();
-	Vector2 shooterPos(getWorldBot(blackboard->GetInt("ROBOT_ID"))->pos);
+
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID); 
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("SelectStarAttackShooter could not find robot");
+        return boost::none;
+    }
+
+	Vector2 shooterPos(robot.pos);
 	for (const auto& pair : largestOpenSections()) {
-		if (pair.second && getObstacles(*getWorldBot(pair.first), shooterPos, &world, true, true).empty()) {
+		if (pair.second && getObstacles(*getWorldBot(pair.first), shooterPos, &world, true, true).empty()) { // Dennis? Misschien beter niet standaard getWorldBot dereferencen
 			sections.push_back({pair.first, *pair.second});
 		}
 	}
@@ -65,10 +76,20 @@ boost::optional<std::pair<int, Section>> SelectStarAttackShooter::selectBest() c
 }
 
 bool SelectStarAttackShooter::hasBall() {
-	auto self = *getWorldBot(blackboard->GetInt("ROBOT_ID"));
+
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("SelectStarAttackShooter could not find robot");
+        return false;
+    }
+
 	auto ball = LastWorld::get().ball;
 
-	return bot_has_ball(self, ball)	;
+	return bot_has_ball(robot, ball)	;
 }
 
 bt::Node::Status SelectStarAttackShooter::Update() {

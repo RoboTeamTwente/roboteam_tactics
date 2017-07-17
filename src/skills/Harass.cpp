@@ -41,7 +41,20 @@ bt::Node::Status Harass::Update() {
     auto world = LastWorld::get();
     auto ball = world.ball;
     Vector2 ballPos(ball.pos);
-    Vector2 myPos(getWorldBot(blackboard->GetInt("ROBOT_ID"))->pos);
+
+    roboteam_msgs::WorldRobot robot;
+
+    int robotID = blackboard->GetInt("ROBOT_ID");
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("Harass could not find robot");
+        return Status::Failure;
+    }
+
+
+    Vector2 myPos(robot.pos);
     if (bot_has_ball(target, HasBool("selfHarassment"), LastWorld::get().ball)) {
         bt::Node::Status s = block_kick->Update();
         if (s == bt::Node::Status::Failure) {
