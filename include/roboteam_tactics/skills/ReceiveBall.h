@@ -10,6 +10,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
 #include "roboteam_tactics/utils/OpportunityFinder.h"
+#include <boost/optional.hpp>
 
 namespace rtt {
 
@@ -65,13 +66,13 @@ public:
     
     std::string node_name() { return "ReceiveBall"; }
 private:
-    int whichRobotHasBall();
+    boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
     InterceptPose deduceInterceptPosFromBall();
-    InterceptPose deduceInterceptPosFromRobot();
+    boost::optional<InterceptPose> deduceInterceptPosFromRobot();
     
     int robotID;
-    int hasBall;
+    boost::optional<int> hasBall;
     bool our_team;
     double acceptableDeviation = 1.0;
 

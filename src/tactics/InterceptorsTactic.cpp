@@ -46,14 +46,20 @@ void InterceptorsTactic::Initialize() {
     
     std::vector<int> opp_picked;
     
+    boost::optional<int> opt;
+
     auto holder = getBallHolder();
     bool has_holder = (bool) holder;
     if (has_holder) {
         RTT_DEBUGLN("Holder: %d", holder->first.id);
         auto opp = holder->first;
-        int own = get_robot_closest_to_point(available, world, opp.pos);
-        assert_and_erase(available, own);
-        assign(own, opp);
+        opt = get_robot_closest_to_point(available, world, opp.pos);
+        if (!opt) {
+        	failure = true;
+        	return;
+        }
+        assert_and_erase(available, *opt);
+        assign(*opt, opp);
         opp_picked.push_back(opp.id);
     } else RTT_DEBUGLN("No Holder");
     
@@ -63,16 +69,21 @@ void InterceptorsTactic::Initialize() {
         do {
             opp = *get_rand_element_seq<roboteam_msgs::WorldRobot>(world.them);
         } while (sequence_contains(opp_picked, opp.id));
-        int own = get_robot_closest_to_point(available, world, opp.pos);
-        RTT_DEBUGLN("Assigning extra bot %d to opponent %d", own, opp.id);
-        assert_and_erase(available, own);
+
+        opt = get_robot_closest_to_point(available, world, opp.pos);
+        if (!opt) {
+        	failure = true;
+        	return;
+        }
+        RTT_DEBUGLN("Assigning extra bot %d to opponent %d", *opt, opp.id);
+        assert_and_erase(available, *opt);
         opp_picked.push_back(opp.id);
-        assign(own, opp);
+        assign(*opt, opp);
     }
 }
 
 bt::Node::Status InterceptorsTactic::Update() {
-    return bt::Node::Status::Running;
+    return failure ? bt::Node::Status::Failure : bt::Node::Status::Running;
 }
     
 }

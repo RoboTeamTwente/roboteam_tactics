@@ -42,7 +42,11 @@ void Jim_PenaltyPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     Vector2 ballPos = Vector2(world.ball.pos);
-    int penaltyTakerID = get_robot_closest_to_point(robots, world, ballPos);
+    auto penaltyTakerID = get_robot_closest_to_point(robots, world, ballPos);
+
+    if (!penaltyTakerID) {
+    	return;
+    }
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -56,12 +60,12 @@ void Jim_PenaltyPlay::Initialize() {
     // =============================
     {
         roboteam_msgs::RoleDirective rd;
-        rd.robot_id = penaltyTakerID;
+        rd.robot_id = *penaltyTakerID;
         bt::Blackboard bb;
-        claim_robot(penaltyTakerID);
-        activeRobot = penaltyTakerID;
+        claim_robot(*penaltyTakerID);
+        activeRobot = *penaltyTakerID;
 
-        bb.SetInt("ROBOT_ID", penaltyTakerID);
+        bb.SetInt("ROBOT_ID", *penaltyTakerID);
         bb.SetInt("KEEPER_ID", 5);
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
@@ -84,7 +88,10 @@ void Jim_PenaltyPlay::Initialize() {
 
 
 bt::Node::Status Jim_PenaltyPlay::Update() {
-    
+    if (!success) {
+    	return Status::Failure;
+    }
+
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);

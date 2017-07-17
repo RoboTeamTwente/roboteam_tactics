@@ -33,10 +33,11 @@ Jim_MultipleDefendersPlay::Jim_MultipleDefendersPlay(std::string name, bt::Black
         : Tactic(name, blackboard) 
         {}
 
-int Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
+boost::optional<int> Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots,
+		roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
     double distanceFromGoal = 1.35;
     Vector2 defensePoint = SimpleDefender::computeDefensePoint(dangerPos, true, distanceFromGoal, angleOffset);
-    int defenderID = get_robot_closest_to_point(robots, world, defensePoint);
+    auto defenderID = get_robot_closest_to_point(robots, world, defensePoint);
     return defenderID;
 }
 
@@ -333,19 +334,23 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     for (int i = 0; i < numRobotDefenders; i++) {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
-        int defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+        auto defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+
+        if (!defenderID) {
+        	return false;
+        }
 
         // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
-        delete_from_vector(robots, defenderID);
-        claim_robot(defenderID);
+        delete_from_vector(robots, *defenderID);
+        claim_robot(*defenderID);
 
         roboteam_msgs::RoleDirective rd;
-        rd.robot_id = defenderID;
-        activeRobots.push_back(defenderID);
+        rd.robot_id = *defenderID;
+        activeRobots.push_back(*defenderID);
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", defenderID);
+        bb.SetInt("ROBOT_ID", *defenderID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);

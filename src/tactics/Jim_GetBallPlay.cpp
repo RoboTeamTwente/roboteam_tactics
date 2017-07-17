@@ -42,7 +42,10 @@ void Jim_GetBallPlay::Initialize() {
     
     std::vector<int> robots = RobotDealer::get_available_robots();
     Vector2 ballPos = Vector2(world.ball.pos);
-    int ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    auto ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
+    if (!ballGetterID) {
+    	return;
+    }
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -56,12 +59,12 @@ void Jim_GetBallPlay::Initialize() {
     // =============================
     {
         roboteam_msgs::RoleDirective rd;
-        rd.robot_id = ballGetterID;
+        rd.robot_id = *ballGetterID;
         bt::Blackboard bb;
-        claim_robot(ballGetterID);
-        activeRobot = ballGetterID;
+        claim_robot(*ballGetterID);
+        activeRobot = *ballGetterID;
 
-        bb.SetInt("ROBOT_ID", ballGetterID);
+        bb.SetInt("ROBOT_ID", *ballGetterID);
         bb.SetInt("KEEPER_ID", 5);
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
@@ -107,6 +110,10 @@ bt::Node::Status Jim_GetBallPlay::Update() {
     //         return Status::Running;
     //     }
     // }
+
+	if (!success) {
+		return Status::Failure;
+	}
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {

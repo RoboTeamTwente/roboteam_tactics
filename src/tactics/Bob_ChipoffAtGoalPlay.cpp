@@ -41,14 +41,17 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         return;
     }
 
-    int takerID = get_robot_closest_to_ball(robots);
+    auto takerID = get_robot_closest_to_ball(robots);
+    if (!takerID) {
+    	failImmediately = true;
+    }
     robots.erase(std::remove(robots.begin(), robots.end(), takerID), robots.end());
 
     int keeperID = RobotDealer::get_keeper();
 
-    claim_robots({takerID});
+    claim_robots({*takerID});
 
-    taker.robot_id = takerID;
+    taker.robot_id = *takerID;
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -58,7 +61,7 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", takerID);
+        bb.SetInt("ROBOT_ID", *takerID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GetBall_")

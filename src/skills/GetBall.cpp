@@ -33,8 +33,6 @@ RTT_REGISTER_SKILL(GetBall);
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb) {
-    hasBall = whichRobotHasBall();
-
     std::string robot_output_target = "";
     ros::param::getCached("robot_output_target", robot_output_target);
     if (robot_output_target == "grsim") {
@@ -45,15 +43,6 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         distanceFromBallWhenDribbling = 0.105;
     }
     choseRobotToPassTo = false;
-}
-
-int GetBall::whichRobotHasBall() {
-    auto holder = getBallHolder();
-    if (!holder) {
-        return -1;
-    }
-    our_team = holder->second;
-    return holder->first.id;
 }
 
 void GetBall::publishStopCommand() {

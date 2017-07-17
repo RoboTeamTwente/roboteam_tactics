@@ -47,13 +47,17 @@ void BallPlacementUsPlay::Initialize() {
         return;
     }
 
-    int const ROBOT_ID = get_robot_closest_to_ball(robots);
-    claim_robot(ROBOT_ID);
+    auto const ROBOT_ID = get_robot_closest_to_ball(robots);
+    if (!ROBOT_ID) {
+    	failed = true;
+    	return;
+    }
+    claim_robot(*ROBOT_ID);
 
     std::cout << "[BallPlacement] Placing ball at: " << endPos << "\n";
 
     bt::Blackboard bb;
-    bb.SetInt("ROBOT_ID", ROBOT_ID);
+    bb.SetInt("ROBOT_ID", *ROBOT_ID);
     bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
     rtt::ScopedBB(bb, "GetBall_")
@@ -77,7 +81,7 @@ void BallPlacementUsPlay::Initialize() {
         ;
 
     roboteam_msgs::RoleDirective rd;
-    rd.robot_id = ROBOT_ID;
+    rd.robot_id = *ROBOT_ID;
     rd.tree = "rtt_bob/PlaceBall";
     rd.blackboard = bb.toMsg();
 

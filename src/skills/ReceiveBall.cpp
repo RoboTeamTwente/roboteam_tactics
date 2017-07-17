@@ -72,10 +72,10 @@ Vector2 ReceiveBall::computePoint() {
 	return receiveBallAtPos;
 }
 
-int ReceiveBall::whichRobotHasBall() {
+boost::optional<int> ReceiveBall::whichRobotHasBall() {
     auto holder = getBallHolder();
     if (!holder) {
-        return -1;
+        return boost::none;
     }
     our_team = holder->second;
     return holder->first.id;
@@ -137,7 +137,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 }
 
 // Predict intercept pos by looking at the robot that has the ball
-InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
+boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	
 	ballIsComing = false;
 	InterceptPose interceptPose;
@@ -145,7 +145,11 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot otherRobot = *getWorldBot(hasBall, our_team);
+	auto otherRobot = hasBall ? getWorldBot(*hasBall, our_team) : boost::none;
+
+	if (!otherRobot) {
+		return boost::none;
+	}
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
@@ -153,7 +157,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	// If the other robot would shoot now, use its orientation to estimate the ball trajectory, and then the closest
 	// point on this trajectory to our robot, so he can receive the ball there
 	Vector2 otherRobotLooksAt = Vector2(1, 0);
-	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
+	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot->angle);
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
 
 	// If the robot with the ball is facing away from us, we should not rotate to receive the ball from him
@@ -171,10 +175,10 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
 	if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 		interceptPos = closestPoint;
-		if (otherRobot.angle > 0) {
-			interceptAngle = otherRobot.angle - M_PI;
+		if (otherRobot->angle > 0) {
+			interceptAngle = otherRobot->angle - M_PI;
 		} else {
-			interceptAngle = otherRobot.angle + M_PI;
+			interceptAngle = otherRobot->angle + M_PI;
 		}
 
 		if (avoidBall) {
@@ -220,14 +224,18 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// Check if the same robot still has the ball
+
+	if (hasBall) {
 	auto bb2 = std::make_shared<bt::Blackboard>();
-	bb2->SetInt("me", hasBall);
-	bb2->SetBool("our_team", our_team);
-	IHaveBall iHaveBall1("", bb2);
-	if (iHaveBall1.Update() != Status::Success) {
+		bb2->SetInt("me", *hasBall);
+		bb2->SetBool("our_team", our_team);
+		IHaveBall iHaveBall1("", bb2);
+		if (iHaveBall1.Update() != Status::Success) {
+			hasBall = whichRobotHasBall();
+		}
+	} else {
 		hasBall = whichRobotHasBall();
 	}
-
 	// Store some info about the world state
 	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
 	Vector2 robotPos(robot.pos);
@@ -239,16 +247,20 @@ bt::Node::Status ReceiveBall::Update() {
 	bool ballWasComing = ballIsComing;
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
-	InterceptPose interceptPose;
-	if (hasBall == -1 || hasBall == robotID) {
+	boost::optional<InterceptPose> interceptPose;
+	if (!hasBall || *hasBall == robotID) {
 		interceptPose = deduceInterceptPosFromBall();
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
 	
+	if (!interceptPose) {
+		ROS_WARN("Receive ball was unable to calculate an InterceptPose");
+		return Status::Failure;
+	}
 
-	Vector2 interceptPos = interceptPose.interceptPos;
-	double interceptAngle = interceptPose.interceptAngle;
+	Vector2 interceptPos = interceptPose->interceptPos;
+	double interceptAngle = interceptPose->interceptAngle;
 
 
 

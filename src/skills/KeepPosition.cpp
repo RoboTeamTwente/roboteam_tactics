@@ -81,7 +81,7 @@ Vector2 KeepPosition::getNearestObject(Vector2 ownPos) {
 	bool opponentsExist = them.size() > 0;
 
 	std::remove_if(us.begin(), us.end(),
-			[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == this->GetInt("ROBOT_ID");});
+			[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == (unsigned) this->GetInt("ROBOT_ID");});
 
 	std::sort(us.begin(), us.end(), DistToPosSorter { ownPos });
 	if (opponentsExist) {
