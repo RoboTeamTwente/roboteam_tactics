@@ -132,7 +132,7 @@ bt::Node::Status GetBall::Update (){
         }
         else {
             ROS_INFO_STREAM("GetBall Success robot " << robotID);
-            publishStopCommand();
+            //publishStopCommand();
             releaseBall();
             // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
             //     return Status::Failure;
@@ -258,11 +258,13 @@ bt::Node::Status GetBall::Update (){
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.15;
-        getBallDist = 0.00;
-        distAwayFromBall = 0.3;
+        getBallDist = 0.03;
+        distAwayFromBall = 0.2;
     }
    
-
+    if (HasDouble("getBallDist")){
+        getBallDist=GetDouble("getBallDist");
+    }
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
@@ -279,7 +281,7 @@ bt::Node::Status GetBall::Update (){
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        int ballCloseFrameCountTo = 1;
+        int ballCloseFrameCountTo = 20;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
         }
@@ -310,6 +312,13 @@ bt::Node::Status GetBall::Update (){
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
+    
+    if (HasDouble("pGainPosition")) {
+        private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    } 
+    if (HasDouble("pGainRotation")) {
+        private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+    }
 
     // Get the velocity command from GoToPos
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
