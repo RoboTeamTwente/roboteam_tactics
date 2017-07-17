@@ -58,8 +58,15 @@ void ReceiveBall::Initialize() {
 	} else if (GetBool("computePoint")) {
 		receiveBallAtPos = computePoint();
 	} else {
-		roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
-		receiveBallAtPos = Vector2(robot.pos);
+
+		roboteam_msgs::WorldRobot robot;
+		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+	    if (findBot) {
+	        robot = *findBot;
+	        receiveBallAtPos = Vector2(robot.pos);
+	    } else {
+	        ROS_WARN("ReceiveBall could not find robot");
+	    }
 	}
 }
 
@@ -146,7 +153,14 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot otherRobot = *getWorldBot(hasBall, our_team);
+	roboteam_msgs::WorldRobot otherRobot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(hasBall, our_team);
+    if (findBot) {
+        otherRobot = *findBot;
+    } else {
+        ROS_WARN("ReceiveBall could not find other robot");
+        return interceptPose;
+    }
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
@@ -230,7 +244,14 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// Store some info about the world state
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("ReceiveBall could not find robot");
+        return Status::Failure;
+    }
 	Vector2 robotPos(robot.pos);
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
@@ -317,7 +338,8 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall")) || ballHasBeenClose) {
+		ballHasBeenClose = true;
 		return getBall.Update();
 	}
 

@@ -339,7 +339,7 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     }
 
     if (fabs(angularVelTarget) < 2.3) {
-        if (fabs(angularVelTarget) > 0.5) {
+        if (fabs(angularVelTarget) > 0.7) {
             angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.3;
         }
     }

@@ -74,17 +74,33 @@ bt::Node::Status StandFree::Update() {
 	unsigned int theirID = GetInt("theirID");
 
     // Store some variables for easy access
-    Vector2 myPos = Vector2(getWorldBot(myID)->pos);
+    roboteam_msgs::WorldRobot robot;
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(myID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("StandFree could not find robot");
+        return Status::Failure;
+    }
+    Vector2 myPos = Vector2(robot.pos);
+
     Vector2 theirPos;
-    
+    boost::optional<roboteam_msgs::WorldRobot> otherRobot;
     if (HasBool("ourTeam")) {
         if (GetBool("ourTeam")) {
-            theirPos = Vector2(getWorldBot(theirID)->pos); 
+            otherRobot = getWorldBot(theirID);
         } else {
-            theirPos = Vector2(getWorldBot(theirID, false)->pos); 
+            otherRobot = getWorldBot(theirID, false);
         } 
     } else {
-        theirPos = Vector2(getWorldBot(theirID)->pos); 
+        otherRobot = getWorldBot(theirID);
+    }
+
+    if (otherRobot) {  
+        theirPos = Vector2(otherRobot->pos);
+    } else {
+        ROS_WARN("StandFree could not find robot");
+        return Status::Failure;
     }
 
     if (blackboard->HasDouble("xGoal") && blackboard->HasDouble("yGoal")) {

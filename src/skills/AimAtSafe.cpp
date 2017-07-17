@@ -32,7 +32,16 @@ bt::Node::Status AimAtSafe::Update (){
 	//bool setRosParam = GetBool("setRosParam");
 
 	int robotID = blackboard->GetInt("ROBOT_ID");
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("AimAtSafe could not find robot");
+        return Status::Failure;
+    }
+
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	
 	roboteam_msgs::WorldBall ball = world.ball;

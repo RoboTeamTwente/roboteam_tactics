@@ -90,14 +90,30 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
         return targetAngle;
     }
     if (target == "robot") {
-        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(theirID, target_our_team, w);
+        Vector2 theirPos;
+        if (findBot) {
+            theirPos = Vector2(findBot->pos);
+        } else {
+            ROS_WARN("GetTargetAngle (utils.cpp) could not find robot");
+            return 0.0;
+        }
         double targetAngle = (theirPos - startPos).angle();
         return targetAngle;
     }
     if (target == "param") {
     	int tgt;
     	if (ros::param::get("AimTargetBot", tgt)) {
-    		Vector2 theirPos(getWorldBot(tgt)->pos);
+
+            boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(tgt);
+            Vector2 theirPos;
+            if (findBot) {
+                theirPos = Vector2(findBot->pos);
+            } else {
+                ROS_WARN("GetTargetAngle (utils.cpp) could not find robot");
+                return 0.0;
+            }
+
     		double targetAngle = (theirPos - startPos).angle();
     		return targetAngle;
     	}
@@ -120,7 +136,16 @@ Vector2 getTargetPos(std::string target, int theirID, bool target_our_team) {
         return LastWorld::get_our_goal_center();
     }
     if (target == "robot") {
-        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(theirID, target_our_team, w);
+        Vector2 theirPos;
+        if (findBot) {
+            theirPos = Vector2(findBot->pos);
+        } else {
+            ROS_WARN("GetTargetPos (utils.cpp) could not find robot");
+            return Vector2(0.0, 0.0);
+        }
+
         return theirPos;
     }
     ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");

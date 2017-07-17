@@ -85,7 +85,15 @@ bt::Node::Status DefendGoalarea::Update() {
 	int robotID = blackboard->GetInt("ROBOT_ID");
 	roboteam_msgs::World world = LastWorld::get();
 
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("DefendGoalarea could not find robot");
+        return Status::Failure;
+    }
+
 	roboteam_msgs::WorldBall ball = world.ball;
 	
 	bool forceonarc=false;

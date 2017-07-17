@@ -83,7 +83,15 @@ bt::Node::Status FollowPath::Update () {
 		return Status::Running;
 	}
 
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+    roboteam_msgs::WorldRobot robot;
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("FollowPath could not find robot");
+        return Status::Failure;
+    }
+
 	Vector2 robotPos = Vector2(robot.pos.x, robot.pos.y);
 	Vector2 goalPos = Vector2(xGoal, yGoal);
 

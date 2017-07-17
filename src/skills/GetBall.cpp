@@ -166,6 +166,7 @@ bt::Node::Status GetBall::Update (){
         robot = *findBot;
     } else {
         ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
+        return Status::Failure;
     }  
 
 	// Store some info about the world state
@@ -267,7 +268,7 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
-        successAngle = 0.2;
+        successAngle = 0.15;
         getBallDist = 0.00;
         distAwayFromBall = 0.3;
     }
