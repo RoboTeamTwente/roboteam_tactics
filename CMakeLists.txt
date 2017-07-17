@@ -33,7 +33,7 @@ include(${QT_USE_FILE})
 
 # ncurses is used to print error messages when the system crashes.
 # It's installed by default in Ubuntu, so it should be there.
-find_package(Curses REQUIRED)
+#find_package(Curses REQUIRED)
 
 # Of what we use, only filesystem requires linking
 # and is therefore mentoined as component. Mostly

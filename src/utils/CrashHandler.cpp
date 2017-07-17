@@ -1,34 +1,36 @@
 #include "roboteam_tactics/utils/CrashHandler.h"
-#include <ncurses.h>
+//#include <ncurses.h>
 #include <unistd.h>
+#include <iostream>
 
 namespace rtt {
 namespace crash {
 
 void commonAlert(std::string source, bool restarting) {
-	initscr();
-	start_color();	
-	init_pair(1, COLOR_RED, COLOR_BLACK);
-	attron(COLOR_PAIR(1));
-	printw("\n\n\n\n\n\n\n\n\n\n");
-	printw("***********************************CRASH***********************************\n");
-	printw("*************************** The program crashed! **************************\n");
-	printw("******************** Cause: ");
-	printw(source.c_str());
-	printw("  ****************************\n");
+	//initscr();
+	//start_color();	
+	//init_pair(1, COLOR_RED, COLOR_BLACK);
+	//attron(COLOR_PAIR(1));
+	
+	std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
+	std::cout << "***********************************CRASH***********************************\n" << std::endl;
+	std::cout << "*************************** The program crashed! **************************\n" << std::endl;
+	std::cout << "******************** Cause: " << std::endl;
+	std::cout << source.c_str()<< std::endl;
+	std::cout << "  ****************************\n"<< std::endl;
 	if (restarting) {
-		printw("*********************** The program will now restart **********************\n");
+		std::cout << "*********************** The program will now restart **********************\n"<< std::endl;
 	} else {
-		printw("*********************** The program will NOT restart **********************\n");
+		std::cout << "*********************** The program will NOT restart **********************\n"<< std::endl;
 	}
-	printw("***********************************CRASH***********************************\n");
-	attroff(COLOR_PAIR(1));
-	refresh();
-	flash();
+	std::cout << "***********************************CRASH***********************************\n"<< std::endl;
+	//attroff(COLOR_PAIR(1));
+	//refresh();
+	//flash();
 	usleep(3000000);
-	flash();
-	refresh();
-	endwin();
+	//flash();
+	//refresh();
+	//endwin();
 	if (restarting) {
 		restartSystem();
 	}
