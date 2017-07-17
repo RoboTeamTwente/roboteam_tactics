@@ -35,6 +35,7 @@ void restartSystem();
 void atAbort(int);
 void atQuickExit();
 void atTerminate();
+void atSegfault(int);
 void registerAll();
 
 }

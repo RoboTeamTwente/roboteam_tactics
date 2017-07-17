@@ -33,17 +33,7 @@ include(${QT_USE_FILE})
 
 # ncurses is used to print error messages when the system crashes.
 # It's installed by default in Ubuntu, so it should be there.
-# If it's not, then that's not a big problem.
 find_package(Curses REQUIRED)
-if(${CURSES_HAVE_NCURSES_H})
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DCURSES_HAVE_NCURSES_H)
-  include_directories( ${CURSES_INCLUDE_DIRS} )
-else(${CURSES_HAVE_NCURSES_H})
-  if (${CURSES_HAVE_NCURSES_NCURSES_H})
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DCURSES_HAVE_NCURSES_NCURSES_H)
-    include_directories( ${CURSES_INCLUDE_DIRS} )
-  endif(${CURSES_HAVE_NCURSES_NCURSES_H})
-endif(${CURSES_HAVE_NCURSES_H})
 
 # Of what we use, only filesystem requires linking
 # and is therefore mentoined as component. Mostly

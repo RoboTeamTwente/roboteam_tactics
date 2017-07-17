@@ -1,22 +1,11 @@
 #include "roboteam_tactics/utils/CrashHandler.h"
-
-#ifdef CURSES_HAVE_NCURSES_H
 #include <ncurses.h>
-#elif CURSES_HAVE_NCURSES_NCURSES_H
-#include <ncurses/ncurses.h>
-#else
-//#warning "ncurses was not found, you won't see an error message if the program crashes and rtt::crash::registerAll has been called"
-//#define NO_NCURSES
-#include <ncurses.h>
-#endif
-
 #include <unistd.h>
 
 namespace rtt {
 namespace crash {
 
 void commonAlert(std::string source, bool restarting) {
-#ifndef NO_NCURSES
 	initscr();
 	start_color();	
 	init_pair(1, COLOR_RED, COLOR_BLACK);
@@ -40,7 +29,6 @@ void commonAlert(std::string source, bool restarting) {
 	flash();
 	refresh();
 	endwin();
-#endif
 	if (restarting) {
 		restartSystem();
 	}
@@ -58,10 +46,15 @@ void atTerminate() {
     commonAlert("std::terminate()");
 }
 
+void atSegfault(int) {
+	commonAlert("SEGFAULT!");
+}
+
 void registerAll() {
 	std::at_quick_exit(&atQuickExit);
 	std::set_terminate(&atTerminate);
 	std::signal(SIGABRT, &atAbort);
+	std::signal(SIGSEGV, &atSegfault);
 }
 
 void restartSystem() {
