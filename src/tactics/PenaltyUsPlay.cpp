@@ -23,7 +23,7 @@ void PenaltyUsPlay::Initialize() {
 		return;
 	}
 	shooterId = available.at(0);
-	RobotDealer::claim_robots(available);
+	claim_robots(available);
 
 	valid = true;
 
