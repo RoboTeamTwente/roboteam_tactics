@@ -241,10 +241,15 @@ int main(int argc, char *argv[]) {
     roboteam_msgs::World world = rtt::LastWorld::get();
     std::vector<int> initializeBots;
     initializeBots.clear();
-    for (size_t i = 1; i < world.us.size(); i++) {
+    for (size_t i = 0; i < world.us.size(); i++) {
         initializeBots.push_back(world.us.at(i).id);
+        RTT_DEBUGLN("Found robot %i", world.us.at(i).id);
     }
-    rtt::RobotDealer::initialize_robots(0, initializeBots);
+
+    int lowestID = initializeBots.at(distance(initializeBots.begin(), min_element(initializeBots.begin(), initializeBots.end())));
+    initializeBots.erase(min_element(initializeBots.begin(), initializeBots.end()));
+    RTT_DEBUGLN("Initializing keeper: %i", lowestID);
+    rtt::RobotDealer::initialize_robots(lowestID, initializeBots);
 
     RTT_DEBUGLN("More than one robot found. Starting!");
     

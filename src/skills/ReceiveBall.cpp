@@ -36,6 +36,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     
     prevComputedPoint = now();
     computedTargetPos = false;
+    startTime = now();
 }
 
 void ReceiveBall::Initialize() {
@@ -57,8 +58,15 @@ void ReceiveBall::Initialize() {
 	} else if (GetBool("computePoint")) {
 		receiveBallAtPos = computePoint();
 	} else {
-		roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
-		receiveBallAtPos = Vector2(robot.pos);
+
+		roboteam_msgs::WorldRobot robot;
+		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+	    if (findBot) {
+	        robot = *findBot;
+	        receiveBallAtPos = Vector2(robot.pos);
+	    } else {
+	        ROS_WARN("ReceiveBall could not find robot");
+	    }
 	}
 }
 
@@ -145,11 +153,14 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
-	auto otherRobot = hasBall ? getWorldBot(*hasBall, our_team) : boost::none;
-
-	if (!otherRobot) {
-		return boost::none;
-	}
+	roboteam_msgs::WorldRobot otherRobot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(*hasBall, our_team);
+    if (findBot) {
+        otherRobot = *findBot;
+    } else {
+        ROS_WARN("ReceiveBall could not find other robot");
+        return interceptPose;
+    }
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
@@ -157,7 +168,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	// If the other robot would shoot now, use its orientation to estimate the ball trajectory, and then the closest
 	// point on this trajectory to our robot, so he can receive the ball there
 	Vector2 otherRobotLooksAt = Vector2(1, 0);
-	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot->angle);
+	otherRobotLooksAt = otherRobotLooksAt.rotate(otherRobot.angle);
 	Vector2 ballPosNow(world.ball.pos.x, world.ball.pos.y);
 
 	// If the robot with the ball is facing away from us, we should not rotate to receive the ball from him
@@ -175,10 +186,10 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
 	if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 		interceptPos = closestPoint;
-		if (otherRobot->angle > 0) {
-			interceptAngle = otherRobot->angle - M_PI;
+		if (otherRobot.angle > 0) {
+			interceptAngle = otherRobot.angle - M_PI;
 		} else {
-			interceptAngle = otherRobot->angle + M_PI;
+			interceptAngle = otherRobot.angle + M_PI;
 		}
 
 		if (avoidBall) {
@@ -237,7 +248,14 @@ bt::Node::Status ReceiveBall::Update() {
 		hasBall = whichRobotHasBall();
 	}
 	// Store some info about the world state
-	roboteam_msgs::WorldRobot robot = *getWorldBot(robotID);
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("ReceiveBall could not find robot");
+        return Status::Failure;
+    }
 	Vector2 robotPos(robot.pos);
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
@@ -297,16 +315,16 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
-	if (ballWasComing && !ballIsComing && GetBool("shouldFail")) {
+	// double minRunTime = 2000;
+	if (ballWasComing && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
 		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
 		return Status::Failure;
 	}
 
-	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail")) {
+	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
 		ROS_INFO_STREAM("ball is probably not for us " << robotID);
 		return Status::Failure;
 	}
-
 
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
@@ -328,7 +346,8 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) {
+	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall")) || ballHasBeenClose) {
+		ballHasBeenClose = true;
 		return getBall.Update();
 	}
 

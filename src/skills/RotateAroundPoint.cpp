@@ -199,7 +199,14 @@ bt::Node::Status RotateAroundPoint::Update (){
 		// prevworldseq=world.header.seq;
 	// }
     
-	robot = *getWorldBot(robotID);
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("DefendGoalarea could not find robot");
+        return Status::Failure;
+    }
+
 	ball = world.ball;
 
 	Status status = checkAndSetArguments();

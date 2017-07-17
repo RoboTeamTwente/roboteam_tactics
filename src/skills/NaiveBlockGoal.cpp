@@ -151,6 +151,9 @@ bt::Node::Status NaiveBlockGoal::Update() {
         if (possibleRobot) {
             auto robot = *possibleRobot;
             angle = (ballPos - Vector2(robot.pos)).angle();
+        } else {
+            ROS_WARN("NaiveBlockGoal could not find robot...");
+            return Status::Failure;
         }
     }
 

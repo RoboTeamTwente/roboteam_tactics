@@ -1,0 +1,6 @@
+<launch>
+	<include file="$(find roboteam_tactics)/launch_files/RTTCore.launch">
+		<arg name="robot_output_target" value="grsim" />
+		<arg name="robot_type" value="grsim" />
+	</include>
+</launch>

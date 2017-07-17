@@ -167,39 +167,39 @@ bt::Node::Status Kick::Update() {
 // 	return Status::Success;
 // }
 
-void Kick::doKick() {
-	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	int id = GetInt("ROBOT_ID");
-	for (int i = 0; i < 10; i++) {
-		RTT_DEBUGLN("Kicking");
-		roboteam_msgs::RobotCommand command;
-		command.id = id;
-		command.dribbler = false;
-		command.kicker = true;
-		command.kicker_forced = false;//GetBool("forced", false);
-		command.kicker_vel = GetDouble("kickVel", 4.0);
-		command.x_vel = 0.0;
-		command.y_vel = 0.0;
-		command.w = 0.0;
-		pub.publish(command);
-	}
-}
+// void Kick::doKick() {
+// 	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+// 	int id = GetInt("ROBOT_ID");
+// 	for (int i = 0; i < 10; i++) {
+// 		RTT_DEBUGLN("Kicking");
+// 		roboteam_msgs::RobotCommand command;
+// 		command.id = id;
+// 		command.dribbler = false;
+// 		command.kicker = true;
+// 		command.kicker_forced = false;//GetBool("forced", false);
+// 		command.kicker_vel = GetDouble("kickVel", 4.0);
+// 		command.x_vel = 0.0;
+// 		command.y_vel = 0.0;
+// 		command.w = 0.0;
+// 		pub.publish(command);
+// 	}
+// }
 
-void Kick::goForward() {
-	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	Vector2 forward(.5, 0);
-	forward = forward.rotate(getWorldBot(robotID)->angle);
-	roboteam_msgs::RobotCommand command;
-	command.id = robotID;
-	command.dribbler = true;
-	command.kicker = false;
-	command.kicker_forced = false;
-	command.kicker_vel = 0.0;
-	command.x_vel = forward.x;
-	command.y_vel = forward.y;
-	command.w = 0.0;
-	pub.publish(command);
-	goneForward = true;
-}
+// void Kick::goForward() {
+// 	static auto& pub = GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+// 	Vector2 forward(.5, 0);
+// 	forward = forward.rotate(getWorldBot(robotID)->angle);
+// 	roboteam_msgs::RobotCommand command;
+// 	command.id = robotID;
+// 	command.dribbler = true;
+// 	command.kicker = false;
+// 	command.kicker_forced = false;
+// 	command.kicker_vel = 0.0;
+// 	command.x_vel = forward.x;
+// 	command.y_vel = forward.y;
+// 	command.w = 0.0;
+// 	pub.publish(command);
+// 	goneForward = true;
+// }
 
 } // rtt

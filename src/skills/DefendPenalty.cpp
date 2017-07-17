@@ -20,7 +20,17 @@ bool ballIsFarEnoughAway(Vector2 ballPos, double penaltyX) {
 
 bt::Node::Status DefendPenalty::Update() {
 	const auto& world = LastWorld::get();
-	const auto self = getWorldBot(GetInt("ROBOT_ID"));
+
+	int robotID = blackboard->GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("DefendPenalty could not find robot");
+        return Status::Failure;
+    }
+
 	double goalLineX = LastWorld::get_field().field_length / -2;
 	bool isShortRangePenalty = GetBool("isShortRangePenalty", true);
 	double penaltyX = LastWorld::get_field().field_length / -2
@@ -42,7 +52,7 @@ bt::Node::Status DefendPenalty::Update() {
 	}
 
 	if (ballUnderway) {
-		auto query = buildNormalInterceptQuery(Position { *self }, self->vel,
+		auto query = buildNormalInterceptQuery(Position { robot }, robot.vel,
 				world.ball.pos, world.ball.vel);
 		auto result = calculateInterception(query);
 		Vector2 tgtVector;

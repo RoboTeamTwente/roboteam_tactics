@@ -94,6 +94,7 @@ bt::Node::Status SimpleDefender::Update() {
             robot = *findBot;
         } else {
             ROS_WARN_STREAM("SimpleKeeper: robot with this ID not found, ID: " << robotID);
+            return Status::Failure;
         }  
         defendPos = Vector2(robot.pos);
     } else {

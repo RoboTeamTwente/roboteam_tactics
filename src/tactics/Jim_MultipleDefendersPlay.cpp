@@ -124,6 +124,8 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<int> robots = RobotDealer::get_available_robots();
     int numRobots = robots.size() + activeRobots.size();
+    ROS_INFO("available robots: %i, activeRobots %i, numRobots: %i",robots.size(),activeRobots.size(),numRobots);
+
        
     if (numRobots < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -135,30 +137,17 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int maxBallDefenders = 2;
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
+    distancesBallDefendersFromGoal.clear();
 
     bool ballOnTheirSide = ballPos.x > 0.0 || ballVel.x > 0.5;
 
     auto bb = std::make_shared<bt::Blackboard>();
     WeHaveBall weHaveBall("", bb);
     bool weAreAttacking = ballOnTheirSide || (weHaveBall.Update() == Status::Success);
-    if (weAreAttacking != weWereAttacking) {
-    	weAreAttackingCounter++;
-    	if (weAreAttackingCounter >= 3) {
-    		weWereAttacking = weAreAttacking;
-    	} else {
-    		weAreAttacking = weWereAttacking;
-    	}
-    } else {
-    	weAreAttackingCounter = 0;
-    }
 
-    // ROS_INFO_STREAM("weAreAttacking " << weAreAttacking);
-    // if (HasBool("alwaysOnGoalLine") && GetBool("alwaysOnGoalLine")) {
-    //     ballOnOurSide = true;
-    // }
-
-    // minDangerScore = 1.0;
     
+    // Filter removed because it was not working: when it changed to atacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
+
     if (weAreAttacking) {
     	minDangerScore = 8.0;
     	distancesBallDefendersFromGoal.push_back(1.35);
@@ -169,8 +158,11 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     	distancesBallDefendersFromGoal.push_back(1.35);
     }
 
+    ROS_INFO("minDangerScore: %f",minDangerScore);
+
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
+        ROS_INFO("opponent %i, danger score: %f",i,world.dangerScores.at(i));
         if (world.dangerScores.at(i) >= minDangerScore) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
@@ -188,28 +180,30 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             	}
             	
             	if (addDangerousOpp) {
-            		dangerousOpps.push_back(opp);
+                    dangerousOpps.push_back(opp);
             	}
             }
         }
+        
     }
     int numDangerousOpps = dangerousOpps.size();
-
+    ROS_INFO("!!!numDangerousOpps:%i",numDangerousOpps);
+ 
     int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
-    int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
+   int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
     newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
     newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
 
 
     if (justChecking) {
-	    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders) {
-	        return true;
-	    } else {
-	    	return false;
+	    if (newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders ) {
+	        ROS_INFO("new number of defenders not equal to old numbers of defenders: newBallDef:%i, BallDef:%i;  newRobotDef:%i, robotDef:%i",newNumBallDefenders,numBallDefenders,newNumRobotDefenders,numRobotDefenders);
+            return true;
+        } else {
+            return false;
 	    }
     }
     
-
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
@@ -229,6 +223,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     {
         // RTT_DEBUGLN("Initializing Keeper %i", keeperID);
         delete_from_vector(robots, keeperID);
+        ROS_INFO("claim on line 231");
         claim_robot(keeperID);
 
         roboteam_msgs::RoleDirective rd;
@@ -306,6 +301,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
+        ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
@@ -334,40 +330,42 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     for (int i = 0; i < numRobotDefenders; i++) {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
-        auto defenderID = getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+        if(robots.size()>0){
 
-        if (!defenderID) {
-        	return false;
+            int defenderID = *getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+
+            // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
+            delete_from_vector(robots, defenderID);
+            claim_robot(defenderID);
+
+            roboteam_msgs::RoleDirective rd;
+            rd.robot_id = defenderID;
+            activeRobots.push_back(defenderID);
+            bt::Blackboard bb;
+
+            // Set the robot ID
+            bb.SetInt("ROBOT_ID", defenderID);
+            bb.SetInt("KEEPER_ID", keeperID);
+
+            bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);
+            bb.SetDouble("SimpleDefender_A_distanceFromGoal", 1.35);
+            bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
+
+            // Create message
+            rd.tree = "rtt_jim/DefenderRole";
+            rd.blackboard = bb.toMsg();
+
+            // Add random token and save it for later
+            boost::uuids::uuid token = unique_id::fromRandom();
+            tokens.push_back(token);
+            rd.token = unique_id::toMsg(token);
+
+            // Send to rolenode
+            pub.publish(rd);
         }
-
-        // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
-        delete_from_vector(robots, *defenderID);
-        claim_robot(*defenderID);
-
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = *defenderID;
-        activeRobots.push_back(*defenderID);
-        bt::Blackboard bb;
-
-        // Set the robot ID
-        bb.SetInt("ROBOT_ID", *defenderID);
-        bb.SetInt("KEEPER_ID", keeperID);
-
-        bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 1.35);
-        bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
-
-        // Create message
-        rd.tree = "rtt_jim/DefenderRole";
-        rd.blackboard = bb.toMsg();
-
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        rd.token = unique_id::toMsg(token);
-
-        // Send to rolenode
-        pub.publish(rd);
+        else {
+            ROS_ERROR("there was a mistake in determining the number of defenders to use");
+        }
     }
 
     // double timeLapsed = time_difference_milliseconds(startInit, now()).count();
@@ -377,11 +375,13 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
 
 void Jim_MultipleDefendersPlay::Initialize() {
+    activeRobots.clear();
 
 	numBallDefenders = 0;
 	numRobotDefenders = 0;
 	distBallToGoalThreshold = 4.0;
 	weAreAttackingCounter = 0;
+    weWereAttacking = false;
     reInitializeWhenNeeded(false);
 	return;
 }

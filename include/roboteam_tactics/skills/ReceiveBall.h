@@ -86,6 +86,7 @@ private:
 
     bool touchedBall = false;
     time_point initialBallContact;
+    time_point startTime;
 
     OpportunityFinder opportunityFinder;
     time_point prevComputedPoint;

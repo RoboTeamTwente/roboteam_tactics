@@ -279,11 +279,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("iGainPosition")) {
         controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
     }
+    if (HasDouble("dGainPosition")) {
+        controller.setControlParam("dGainPosition", GetDouble("dGainPosition"));
+    }
     if (HasDouble("pGainRotation")) {
         controller.setControlParam("pGainRotation", GetDouble("pGainRotation"));
     }
     if (HasDouble("iGainRotation")) {
         controller.setControlParam("iGainRotation", GetDouble("iGainRotation"));
+    }
+    if (HasDouble("dGainRotation")) {
+        controller.setControlParam("dGainRotation", GetDouble("dGainRotation"));
     }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
@@ -325,8 +331,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
-    // drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
+    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;
@@ -341,7 +347,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     double myAngle = me.angle;
-    double angleError = angleGoal - myAngle;
+    double angleError = cleanAngle(angleGoal - myAngle);
+    double myAngularVel = me.w;
 
     // @DEBUG info:
     myPosTopic.publish(me);
@@ -356,13 +363,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.04;
+        successDist = 0.02;
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.2) {
+    ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
+    if (posError.length() < successDist && fabs(angleError) < 0.1) {
         successCounter++;
-        if (successCounter >= 4) {
+        if (successCounter >= 3) {
             sendStopCommand(ROBOT_ID);
             succeeded = true;
             failure = false;
@@ -376,11 +384,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 sumOfForces(0.0, 0.0);
 
     // Position controller to steer the robot towards the target position
-    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos);
+    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
 
     // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError);
+    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
 
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
@@ -425,7 +433,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 velCommand = velTarget;
 
     // Limit angular and linear velocity
-    velCommand = controller.limitVel(velCommand);
+    velCommand = controller.limitVel(velCommand, angularVelTarget);
     angularVelTarget = controller.limitAngularVel(angularVelTarget);
 
     double maxVel = GetDouble("maxVelocity", 299792458.0);

@@ -78,12 +78,14 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0;
-        iGainPosition = 0.4; 
-        pGainRotation = 1.0; 
+        pGainPosition = 3.0;
+        iGainPosition = 0.0; 
+        dGainPosition = 0.5; 
+        pGainRotation = 3.0; 
         iGainRotation = 1.0;
+        dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 2.5;
+        maxSpeed = 4.0;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
@@ -135,11 +137,17 @@ void Control::setControlParam(std::string paramName, double paramValue) {
     if (paramName == "iGainPosition") {
         this->iGainPosition = paramValue;
     }
+    if (paramName == "dGainPosition") {
+        this->dGainPosition = paramValue;
+    }
     if (paramName == "pGainRotation") {
         this->pGainRotation = paramValue;
     }
     if (paramName == "iGainRotation") {
         this->iGainRotation = paramValue;
+    }
+    if (paramName == "dGainRotation") {
+        this->dGainRotation = paramValue;
     }
     if (paramName == "maxSpeed") {
         this->maxSpeed = paramValue;
@@ -196,6 +204,38 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos) {
     return velTarget;
 }
 
+// PI position controller
+Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 myVel) {
+
+    Vector2 posError = targetPos - myPos;
+
+    // Integral term
+    if (posError.length() < 0.15) {
+        posErrorI = posErrorI.scale(0.95) + posError.scale(1);
+    } else {
+        posErrorI = Vector2(0.0, 0.0);
+    }
+
+
+    // Control equation
+    Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition - myVel*dGainPosition;
+    
+    // Limit velocity target to the maxSpeed
+    if (velTarget.length() > maxSpeed) {
+        velTarget = velTarget.scale(maxSpeed / velTarget.length());
+    }
+
+    if (velTarget.length() < 0.3) {
+        if (velTarget.length() > 0.07) {
+            velTarget = velTarget.scale(0.3 / velTarget.length());  
+        }
+    }
+
+    
+
+    return velTarget;
+}
+
 
 // Proportional velocity controller
 Vector2 Control::velocityController(Vector2 myVelRobotFrame, Vector2 velTarget) {
@@ -208,14 +248,11 @@ Vector2 Control::velocityController(Vector2 myVelRobotFrame, Vector2 velTarget) 
     return newCommand;
 }
 
-
 // Proportional rotation controller
 double Control::rotationController(double myAngle, double angleGoal, Vector2 posError) {
 
     bool forceAngle = false;
-    // if(HasBool("forceAngle") && GetBool("forceAngle")){
-    //     forceAngle = true;
-    // }
+
 
     if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
@@ -237,14 +274,12 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     }
 
     double timeStep = 1 / updateRate;
-    if (angleError < 0.15*M_PI) {
-        angleErrorI = angleErrorI * 0.9 + angleError * timeStep;
-    } else {
-        angleErrorI = 0;
-    }
+    // if (fabs(angleError) < 0.15*M_PI) {
+        angleErrorI = angleErrorI*0.9 + angleError * timeStep;
+    // } else {
+        // angleErrorI = 0;
+    // }
 
-    // ROS_INFO_STREAM("angleErrorI: " << angleErrorI);
-    
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation;
 
@@ -253,24 +288,99 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
 
-    // ROS_INFO_STREAM("angularVelTarget: " << angularVelTarget);
 
     return angularVelTarget;
 }
 
 
-Vector2 Control::limitVel(Vector2 sumOfForces) {
 
-    // Limit the robot velocity to the maximum speed
-    if (sumOfForces.length() > maxSpeed) {
-        if (sumOfForces.length() > 0.0) {
-            sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
+// Proportional rotation controller
+double Control::rotationController(double myAngle, double angleGoal, Vector2 posError, double myAngularVel) {
+
+    bool forceAngle = false;
+
+
+    if (posError.length() > 1.0 && !forceAngle) {
+        angleGoal = posError.angle();
+    }
+
+    double angleError = angleGoal - myAngle;
+    angleError = cleanAngle(angleError);
+    // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
+
+    // Integral term
+    double updateRate = updateRateParam();
+    if (!updateRateParam.isSet() || updateRate == 0) {
+        if (updateRate == 0) {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second set to 0! changing to 30.");
+        } else {
+            ROS_WARN_STREAM_THROTTLE(1, "role_iterations_per_second not set! Assuming 30.");
+        }
+        updateRate = 30;
+    }
+
+    double timeStep = 1 / updateRate;
+    // if (fabs(angleError) < 0.15*M_PI) {
+        angleErrorI = angleErrorI + angleError * timeStep;
+    // } else {
+        // angleErrorI = 0;
+    // }
+
+    if (fabs(angleError) < 0.1*M_PI) {
+        angleErrorI = 0.0;
+    }
+
+    // Control equation
+    double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
+
+    // Limit the angular velocity target
+    if (fabs(angularVelTarget) > maxAngularVel) {
+        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
+    }
+
+    if (fabs(angularVelTarget) < 2.3) {
+        if (fabs(angularVelTarget) > 0.7) {
+            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.3;
         }
     }
 
-    if (fabs(sumOfForces.y) > 1.4) {
-        sumOfForces = sumOfForces.scale(1.4 / fabs(sumOfForces.y));
+
+    return angularVelTarget;
+}
+
+
+Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
+
+    if (angularVelTarget >= 7.0) {
+
+        // Limit the robot velocity to the maximum speed
+        if (sumOfForces.length() > 1.5) {
+            if (sumOfForces.length() > 0.0) {
+                sumOfForces = sumOfForces.scale(1.5 / sumOfForces.length());
+            }
+        }
+
+    } else {
+
+        // Limit the robot velocity to the maximum speed
+        if (sumOfForces.length() > maxSpeed) {
+            if (sumOfForces.length() > 0.0) {
+                sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
+            }
+        }
+
     }
+
+
+    
+
+    if (fabs(sumOfForces.y) > 1.0) {
+        sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
+    }
+
+
+
+
 
     return sumOfForces;
 }

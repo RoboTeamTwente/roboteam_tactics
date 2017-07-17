@@ -90,14 +90,30 @@ double GetTargetAngle(Vector2 startPos, std::string target, int theirID, bool ta
         return targetAngle;
     }
     if (target == "robot") {
-        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(theirID, target_our_team, w);
+        Vector2 theirPos;
+        if (findBot) {
+            theirPos = Vector2(findBot->pos);
+        } else {
+            ROS_WARN("GetTargetAngle (utils.cpp) could not find robot");
+            return 0.0;
+        }
         double targetAngle = (theirPos - startPos).angle();
         return targetAngle;
     }
     if (target == "param") {
     	int tgt;
     	if (ros::param::get("AimTargetBot", tgt)) {
-    		Vector2 theirPos(getWorldBot(tgt)->pos);
+
+            boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(tgt);
+            Vector2 theirPos;
+            if (findBot) {
+                theirPos = Vector2(findBot->pos);
+            } else {
+                ROS_WARN("GetTargetAngle (utils.cpp) could not find robot");
+                return 0.0;
+            }
+
     		double targetAngle = (theirPos - startPos).angle();
     		return targetAngle;
     	}
@@ -120,7 +136,16 @@ Vector2 getTargetPos(std::string target, int theirID, bool target_our_team) {
         return LastWorld::get_our_goal_center();
     }
     if (target == "robot") {
-        Vector2 theirPos(getWorldBot(theirID, target_our_team, w)->pos);
+
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(theirID, target_our_team, w);
+        Vector2 theirPos;
+        if (findBot) {
+            theirPos = Vector2(findBot->pos);
+        } else {
+            ROS_WARN("GetTargetPos (utils.cpp) could not find robot");
+            return Vector2(0.0, 0.0);
+        }
+
         return theirPos;
     }
     ROS_WARN("cannot find TargetAngle, maybe your input arguments are wrong?");
@@ -321,19 +346,20 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
 
 boost::optional<int> get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point) {
     int closest_robot = -1;
+    if (robots.size()==0){
+        ROS_ERROR("you gave get_robot_closest_to_point an empty list too chose from you silly");
+    }
     double closest_robot_ds = std::numeric_limits<double>::max();
 
     for (roboteam_msgs::WorldRobot worldRobot : world.us) {
         Vector2 pos(worldRobot.pos);
-
-        if ((pos - point).length() < closest_robot_ds) {
-            if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+        if (std::find(robots.begin(), robots.end(), worldRobot.id) != robots.end()) {
+            if ((pos - point).length() < closest_robot_ds) {
                 closest_robot = worldRobot.id;
                 closest_robot_ds = (pos - point).length();
             }
         }
     }
-
     return closest_robot == -1 ? boost::none : boost::optional<int>(closest_robot);
 }
 
