@@ -44,6 +44,7 @@ void Jim_GetBallPlay::Initialize() {
     Vector2 ballPos = Vector2(world.ball.pos);
     auto ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
     if (!ballGetterID) {
+    	RTT_DEBUGLN("No ballGetterID");
     	return;
     }
 
@@ -83,6 +84,7 @@ void Jim_GetBallPlay::Initialize() {
     }
 
     start = rtt::now();
+    success = true;
 }
 
 void Jim_GetBallPlay::ReleaseAllBots() {
