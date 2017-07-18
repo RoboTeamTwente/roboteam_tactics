@@ -55,7 +55,7 @@ void Jim_StandReadyPlay::Initialize() {
         posList.push_back(centerPos + posOnCircle.rotate( (i + 1) *  2*M_PI / (robots.size() + 1) ));
     }
 
-    std::vector<int> closestRobots = Jim_MultipleDefendersPlay::getClosestRobots(robots, posList, world);
+    std::vector<int> closestRobots = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, posList, world);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
