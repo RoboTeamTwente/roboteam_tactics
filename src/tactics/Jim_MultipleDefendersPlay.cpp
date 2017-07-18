@@ -37,8 +37,16 @@ boost::optional<int> Jim_MultipleDefendersPlay::getClosestDefender(std::vector<i
 		roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
     double distanceFromGoal = 1.35;
     Vector2 defensePoint = SimpleDefender::computeDefensePoint(dangerPos, true, distanceFromGoal, angleOffset);
-    auto defenderID = get_robot_closest_to_point(robots, world, defensePoint);
-    return defenderID;
+    boost::optional<int> defenderID = get_robot_closest_to_point(robots, world, defensePoint);
+
+    if (defenderID) {
+        return *defenderID;
+    } else {
+        ROS_WARN("Found no defender"); 
+        return boost::none;
+    }
+
+    // return defenderID;
 }
 
 std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots,
