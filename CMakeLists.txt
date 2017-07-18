@@ -31,10 +31,6 @@ set(QT_USE_QTNETWORK TRUE)
 find_package(Qt REQUIRED)
 include(${QT_USE_FILE})
 
-# ncurses is used to print error messages when the system crashes.
-# It's installed by default in Ubuntu, so it should be there.
-#find_package(Curses REQUIRED)
-
 # Of what we use, only filesystem requires linking
 # and is therefore mentoined as component. Mostly
 # everything else is header only, and thus doesn't
@@ -336,7 +332,6 @@ if (BUILD_STRATEGYNODE)
         ${catkin_LIBRARIES}
         bt
         )
-      target_link_libraries(StrategyNode ${CURSES_LIBRARIES})
 
     install(PROGRAMS scripts/run_StrategyNode.sh  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

@@ -1,5 +1,4 @@
 #include "roboteam_tactics/utils/CrashHandler.h"
-//#include <ncurses.h>
 #include <unistd.h>
 #include <iostream>
 
@@ -7,11 +6,6 @@ namespace rtt {
 namespace crash {
 
 void commonAlert(std::string source, bool restarting) {
-	//initscr();
-	//start_color();	
-	//init_pair(1, COLOR_RED, COLOR_BLACK);
-	//attron(COLOR_PAIR(1));
-	
 	std::cout << "\n\n\n\n\n\n\n\n\n\n" << std::endl;
 	std::cout << "***********************************CRASH***********************************\n" << std::endl;
 	std::cout << "*************************** The program crashed! **************************\n" << std::endl;
@@ -24,20 +18,14 @@ void commonAlert(std::string source, bool restarting) {
 		std::cout << "*********************** The program will NOT restart **********************\n"<< std::endl;
 	}
 	std::cout << "***********************************CRASH***********************************\n"<< std::endl;
-	//attroff(COLOR_PAIR(1));
-	//refresh();
-	//flash();
 	usleep(3000000);
-	//flash();
-	//refresh();
-	//endwin();
 	if (restarting) {
 		restartSystem();
 	}
 }
 
 void atAbort(int) {
-	commonAlert("SIGABT", false); // Don't restart, it's probably a CTRL+C
+	commonAlert("SIGABRT", false);
 }
 
 void atQuickExit() {
