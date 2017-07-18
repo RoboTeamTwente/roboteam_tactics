@@ -93,8 +93,8 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainPosition = 3.0;
         iGainPosition = 0.0; 
         dGainPosition = 0.5; 
-        pGainRotation = 3.0; 
-        iGainRotation = 1.0;
+        pGainRotation = 2.5; 
+        iGainRotation = 0.0;
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
         maxSpeed = 4.0;
@@ -235,9 +235,9 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    if (velTarget.length() < 0.3) {
+    if (velTarget.length() < 0.25) {
         if (velTarget.length() > 0.07) {
-            velTarget = velTarget.scale(0.3 / velTarget.length());  
+            velTarget = velTarget.scale(0.25 / velTarget.length());  
         }
     }
 
@@ -346,9 +346,9 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
 
-    if (fabs(angularVelTarget) < 2.3) {
+    if (fabs(angularVelTarget) < 2.2) {
         if (fabs(angularVelTarget) > 0.7) {
-            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.3;
+            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
         }
     }
 
@@ -359,16 +359,16 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
 Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
 
-    if (angularVelTarget >= 7.0) {
+    // if (angularVelTarget >= 7.0) {
 
-        // Limit the robot velocity to the maximum speed
-        if (sumOfForces.length() > 1.5) {
-            if (sumOfForces.length() > 0.0) {
-                sumOfForces = sumOfForces.scale(1.5 / sumOfForces.length());
-            }
-        }
+    //     // Limit the robot velocity to the maximum speed
+    //     if (sumOfForces.length() > 1.5) {
+    //         if (sumOfForces.length() > 0.0) {
+    //             sumOfForces = sumOfForces.scale(1.5 / sumOfForces.length());
+    //         }
+    //     }
 
-    } else {
+    // } else {
 
         // Limit the robot velocity to the maximum speed
         if (sumOfForces.length() > maxSpeed) {
@@ -377,7 +377,7 @@ Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
             }
         }
 
-    }
+    // }
 
 
     

@@ -14,8 +14,8 @@
 #include "BasicKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
-#include "DemoTactic.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
+//#include "DemoTactic.cpp"
+//#undef RTT_CURRENT_DEBUG_TAG
 
 #include "FormationPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

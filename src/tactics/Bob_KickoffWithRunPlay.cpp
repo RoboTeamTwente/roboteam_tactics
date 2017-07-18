@@ -44,19 +44,28 @@ void Bob_KickoffWithRunPlay::Initialize() {
     }
 
     // int takerID = robots[0];
-    int takerID = get_robot_closest_to_ball(robots);
-    robots.erase(std::remove(robots.begin(), robots.end(), takerID), robots.end());
+    auto takerID = get_robot_closest_to_ball(robots);
+    if (!takerID) {
+    	failImmediately = true;
+    	return;
+    }
+    robots.erase(std::remove(robots.begin(), robots.end(), *takerID), robots.end());
 
     // int receiverID = robots[1];
-    int receiverID = get_robot_closest_to_point(robots, LastWorld::get(), startPos);
+    boost::optional<int> receiverID = get_robot_closest_to_point(robots, LastWorld::get(), startPos);
+    if (!receiverID) {
+    	failImmediately = true;
+    	return;
+    }
+
     robots.erase(std::remove(robots.begin(), robots.end(), receiverID), robots.end());
 
     int keeperID = RobotDealer::get_keeper();
 
-    claim_robots({takerID, receiverID});
+    claim_robots({*takerID, *receiverID});
 
-    taker.robot_id = takerID;
-    receiver.robot_id = receiverID;
+    taker.robot_id = *takerID;
+    receiver.robot_id = *receiverID;
 
     drawer.drawPoint("threshold!", thresholdPos);
     drawer.drawPoint("rendezvous!", rendezvous);
@@ -69,7 +78,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", takerID);
+        bb.SetInt("ROBOT_ID", *takerID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GetBallAndLookAtGoal")
@@ -79,7 +88,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
             ;
 
         ScopedBB(bb, "ReceiverPassedThreshold")
-            .setString("X", std::to_string(receiverID))
+            .setString("X", std::to_string(*receiverID))
             .setString("Y", "fixed point")
             .setDouble("px", thresholdPos.x)
             .setDouble("py", thresholdPos.y)
@@ -123,7 +132,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", receiverID);
+        bb.SetInt("ROBOT_ID", *receiverID);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GoToStartPos")
@@ -134,7 +143,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
             ;
 
         ScopedBB(bb, "TakerHasBall")
-            .setInt("me", takerID)
+            .setInt("me", *takerID)
             .setBool("our_team", true)
             ;
 

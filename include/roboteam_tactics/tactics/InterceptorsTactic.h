@@ -18,14 +18,14 @@ class InterceptorsTactic : public Tactic {
     
     public:
     InterceptorsTactic(std::string name, bt::Blackboard::Ptr blackboard = nullptr)
-        : Tactic(name, blackboard) {}
+        : Tactic(name, blackboard), failure(false) {}
         
     void Initialize() override;
     Status Update() override;
     
     private:
     std::vector<boost::uuids::uuid> tokens;
-    
+    bool failure;
     void assign(int own, const roboteam_msgs::WorldRobot& opp);
     
 };

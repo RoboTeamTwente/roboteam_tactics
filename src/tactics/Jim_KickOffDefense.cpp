@@ -97,7 +97,7 @@ void Jim_KickOffDefense::Initialize() {
     for (int i = 0; i < numBallDefenders; i++) {
         ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 1.5, angleOffsets.at(i)));
     }
-    std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::getClosestRobots(robots, ballDefendersPositions, world);
+    std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
 
     for (size_t i = 0; i < ballDefenders.size(); i++) {
         int ballDefenderID = ballDefenders.at(i);
@@ -179,7 +179,7 @@ void Jim_KickOffDefense::Initialize() {
     
     numRobotDefenders = std::min(numRobotDefenders, (int) dangerousOpps.size()); 
 
-    std::vector<int> defenderIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, defenderPositions, world);
+    std::vector<int> defenderIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, defenderPositions, world);
 
     RTT_DEBUGLN("num KickOffDefenders: %i", numRobotDefenders);
 

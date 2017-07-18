@@ -64,7 +64,9 @@ boost::optional<std::pair<int, Section>> SelectStarAttackShooter::selectBest() c
 
 	Vector2 shooterPos(robot.pos);
 	for (const auto& pair : largestOpenSections()) {
-		if (pair.second && getObstacles(*getWorldBot(pair.first), shooterPos, &world, true, true).empty()) { // Dennis? Misschien beter niet standaard getWorldBot dereferencen
+		auto bot = getWorldBot(pair.first);
+		if (pair.second && bot &&
+				getObstacles(*bot, shooterPos, &world, true, true).empty()) {
 			sections.push_back({pair.first, *pair.second});
 		}
 	}

@@ -344,8 +344,8 @@ roboteam_msgs::RobotCommand stop_command(unsigned int id) {
     return cmd;
 }
 
-int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point) {
-    int closest_robot = -1; 
+boost::optional<int> get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point) {
+    int closest_robot = -1;
     if (robots.size()==0){
         ROS_ERROR("you gave get_robot_closest_to_point an empty list too chose from you silly");
     }
@@ -360,10 +360,10 @@ int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::Wor
             }
         }
     }
-    return closest_robot;
+    return closest_robot == -1 ? boost::none : boost::optional<int>(closest_robot);
 }
 
-int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point) {
+boost::optional<int> get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point) {
     int closest_robot = -1;
     double closest_robot_ds = std::numeric_limits<double>::max();
 
@@ -376,20 +376,20 @@ int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, co
         }
     }
 
-    return closest_robot;
+    return closest_robot == -1 ? boost::none : boost::optional<int>(closest_robot);
 }
 
-int get_robot_closest_to_ball(std::vector<int> robots) {
+boost::optional<int> get_robot_closest_to_ball(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_ball(robots, lw);
 }
 
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
+boost::optional<int> get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world) {
     Vector2 ball_pos(world.ball.pos);
     return get_robot_closest_to_point(robots, world, ball_pos);
 }
 
-int get_robot_closest_to_their_goal(std::vector<int> robots) {
+boost::optional<int> get_robot_closest_to_their_goal(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_their_goal(robots, lw);
 }
@@ -399,7 +399,7 @@ int get_robot_closest_to_their_goal(std::vector<int> robots) {
 //     return get_robot_closest_to_point(robots, ourGoalCenter);
 // }
 
-int get_robot_closest_to_our_goal(std::vector<int> robots) {
+boost::optional<int> get_robot_closest_to_our_goal(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     Vector2 ourGoal = LastWorld::get_our_goal_center();
     return get_robot_closest_to_point(robots, lw, ourGoal);
@@ -407,7 +407,7 @@ int get_robot_closest_to_our_goal(std::vector<int> robots) {
 }
 
 
-int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
+boost::optional<int> get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world) {
     int side = LastWorld::get_our_goal_center().x;
 
     int furthest_robot = -1;
@@ -422,7 +422,7 @@ int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs
         }
     }
 
-    return furthest_robot;
+    return furthest_robot == -1 ? boost::none : boost::optional<int>(furthest_robot);
 }
 
 std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& world) {

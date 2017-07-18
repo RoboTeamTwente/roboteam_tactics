@@ -1,6 +1,7 @@
 #include "roboteam_tactics/tactics/FormationPlay.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/Position.h"
 #include <fstream>
 
 namespace rtt {
@@ -62,6 +63,13 @@ Formation::Formation() :
 				boost::none) {
 }
 
+Formation::Formation(const roboteam_msgs::World& world, boost::optional<int> keeperIdx)
+    : positions(), minimumRobots(0), name(CURRENT_POSITIONS_FORMATION), keeperIdx(keeperIdx) {
+	for (const auto& bot : world.us) {
+		positions.push_back({bot});
+	}
+}
+
 FormationPlay::FormationPlay(std::string name, bt::Blackboard::Ptr bb) :
 		Tactic(name, bb) {
 }
@@ -73,15 +81,19 @@ void FormationPlay::Initialize() {
 		return;
 	}
 	std::string name = GetString("formation");
-	if (allFormations.find(name) == allFormations.end()) {
+
+	if (allFormations.find(name) == allFormations.end() && name != CURRENT_POSITIONS_FORMATION) {
 		ROS_ERROR("FormationPlay: Formation '%s' was not found", name.c_str());
+		name = CURRENT_POSITIONS_FORMATION;
 	}
 
-	formation = std::make_unique<Formation>(allFormations.at(name));
+	formation = std::make_unique<Formation>(name == CURRENT_POSITIONS_FORMATION
+			? Formation(LastWorld::get(), HasInt("KEEPER_ID") ? boost::optional<int>(GetInt("KEEPER_ID")) : boost::none)
+			: allFormations.at(name));
+
 	std::vector<int> robots = RobotDealer::get_available_robots();
 	if (robots.size() < formation->minimumRobots) {
-		ROS_WARN(
-				"FormationPlay: Not enough robots available, continuing anyway");
+		ROS_WARN("FormationPlay: Not enough robots available, continuing anyway");
 	}
 	unsigned count = std::min(robots.size(), formation->positions.size());
 

@@ -1,0 +1,4 @@
+<launch>
+	<arg name="cmdline"/>
+	<node name="Strategy" pkg="roboteam_tactics" type="run_StrategyNode.sh" output="screen" args="$(arg cmdline)"/>
+</launch>

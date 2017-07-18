@@ -327,6 +327,7 @@ if (BUILD_STRATEGYNODE)
 
     add_executable(StrategyNode
         src/StrategyNode.cpp
+        src/utils/CrashHandler.cpp
         $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
@@ -344,6 +345,8 @@ if (BUILD_STRATEGYNODE)
         ${catkin_LIBRARIES}
         bt
         )
+
+    install(PROGRAMS scripts/run_StrategyNode.sh  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 endif (BUILD_STRATEGYNODE)
 

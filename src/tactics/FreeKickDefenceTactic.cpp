@@ -58,7 +58,13 @@ void FreeKickDefenceTactic::Initialize() {
         return;
     }
     auto free_kick_taker = free_kick_taker_opt->first;
-    harasser = get_robot_closest_to_point(available, world, free_kick_taker.pos);
+
+
+    auto opt = get_robot_closest_to_point(available, world, free_kick_taker.pos);
+    if (!opt) {
+    	return;
+    }
+    harasser = *opt;
     {
         auto it = std::find(available.begin(), available.end(), harasser);
         assert(it != available.end());
@@ -75,7 +81,12 @@ void FreeKickDefenceTactic::Initialize() {
     if (most_dangerous.id == free_kick_taker.id) {
         most_dangerous = *(getBotFromDangerList(1));
     }
-    defender = get_robot_closest_to_point(available, world, most_dangerous.pos);
+
+    opt = get_robot_closest_to_point(available, world, most_dangerous.pos);
+    if (!opt) {
+    	return;
+    }
+    defender = *opt;
     {
         auto it = std::find(available.begin(), available.end(), defender);
         (it != available.end());
@@ -88,7 +99,11 @@ void FreeKickDefenceTactic::Initialize() {
         do {
             additional_tgt_1 = *get_rand_element_seq<roboteam_msgs::WorldRobot>(world.them);
         } while (additional_tgt_1.id == free_kick_taker.id || additional_tgt_1.id == most_dangerous.id);
-        interceptor1 = get_robot_closest_to_point(available, world, additional_tgt_1.pos);
+        opt = get_robot_closest_to_point(available, world, additional_tgt_1.pos);
+        if (!opt) {
+        	return;
+        }
+        interceptor1 = *opt;
         auto it = std::find(available.begin(), available.end(), interceptor1);
         assert(it != available.end());
         available.erase(it);
@@ -98,7 +113,11 @@ void FreeKickDefenceTactic::Initialize() {
             additional_tgt_2 = *get_rand_element_seq<roboteam_msgs::WorldRobot>(world.them);
         } while (additional_tgt_2.id == free_kick_taker.id || additional_tgt_2.id == most_dangerous.id
                  || additional_tgt_2.id == additional_tgt_1.id);
-        interceptor2 = get_robot_closest_to_point(available, world, additional_tgt_2.pos);
+        opt = get_robot_closest_to_point(available, world, additional_tgt_2.pos);
+        if (!opt) {
+          	return;
+        }
+        interceptor2 = *opt;
         auto it = std::find(available.begin(), available.end(), interceptor2);
         assert(it != available.end());
         available.erase(it);
@@ -190,7 +209,7 @@ void FreeKickDefenceTactic::Initialize() {
 }
 
 bt::Node::Status FreeKickDefenceTactic::Update() {
-    return bt::Node::Status::Running;
+    return isInitialized ? bt::Node::Status::Running : bt::Node::Status::Failure;
 }
 
 }

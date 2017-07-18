@@ -99,14 +99,13 @@ public:
     std::string node_name() override { return "GetBall"; }
 
 private:
-	int whichRobotHasBall();
+	boost::optional<int> whichRobotHasBall();
 	void publishStopCommand();
     void publishKickCommand();
     bool canClaimBall();
     void releaseBall();
     
 	int robotID;
-	int hasBall;
 	bool our_team;
     bool waiting = true;
 

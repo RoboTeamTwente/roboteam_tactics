@@ -58,7 +58,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     strikersDefaultPositions.push_back(Vector2(xPos, 1.5));
     strikersDefaultPositions.push_back(Vector2(xPos, -1.5));
 
-    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::getClosestRobots(robots, strikersDefaultPositions, world);    
+    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, strikersDefaultPositions, world);    
     
     for (size_t i = 0; i < (size_t) numStrikers; i++) {
 

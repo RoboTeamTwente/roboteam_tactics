@@ -80,10 +80,10 @@ Vector2 ReceiveBall::computePoint() {
 	return receiveBallAtPos;
 }
 
-int ReceiveBall::whichRobotHasBall() {
+boost::optional<int> ReceiveBall::whichRobotHasBall() {
     auto holder = getBallHolder();
     if (!holder) {
-        return -1;
+        return boost::none;
     }
     our_team = holder->second;
     return holder->first.id;
@@ -145,7 +145,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 }
 
 // Predict intercept pos by looking at the robot that has the ball
-InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
+boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	
 	ballIsComing = false;
 	InterceptPose interceptPose;
@@ -154,7 +154,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromRobot() {
 	roboteam_msgs::World world = LastWorld::get();
 
 	roboteam_msgs::WorldRobot otherRobot;
-	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(hasBall, our_team);
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(*hasBall, our_team);
     if (findBot) {
         otherRobot = *findBot;
     } else {
@@ -235,14 +235,18 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// Check if the same robot still has the ball
+
+	if (hasBall) {
 	auto bb2 = std::make_shared<bt::Blackboard>();
-	bb2->SetInt("me", hasBall);
-	bb2->SetBool("our_team", our_team);
-	IHaveBall iHaveBall1("", bb2);
-	if (iHaveBall1.Update() != Status::Success) {
+		bb2->SetInt("me", *hasBall);
+		bb2->SetBool("our_team", our_team);
+		IHaveBall iHaveBall1("", bb2);
+		if (iHaveBall1.Update() != Status::Success) {
+			hasBall = whichRobotHasBall();
+		}
+	} else {
 		hasBall = whichRobotHasBall();
 	}
-
 	// Store some info about the world state
 	roboteam_msgs::WorldRobot robot;
 	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
@@ -261,16 +265,20 @@ bt::Node::Status ReceiveBall::Update() {
 	bool ballWasComing = ballIsComing;
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
-	InterceptPose interceptPose;
-	if (hasBall == -1 || hasBall == robotID) {
+	boost::optional<InterceptPose> interceptPose;
+	if (!hasBall || *hasBall == robotID) {
 		interceptPose = deduceInterceptPosFromBall();
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
 	
+	if (!interceptPose) {
+		ROS_WARN("Receive ball was unable to calculate an InterceptPose");
+		return Status::Failure;
+	}
 
-	Vector2 interceptPos = interceptPose.interceptPos;
-	double interceptAngle = interceptPose.interceptAngle;
+	Vector2 interceptPos = interceptPose->interceptPos;
+	double interceptAngle = interceptPose->interceptAngle;
 
 
 
@@ -338,7 +346,9 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if (distanceToBall < acceptableDeviation && ballVel.length() < 0.2 && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall")) || ballHasBeenClose) {
+	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.2)
+			&& !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))
+			|| ballHasBeenClose) {
 		ballHasBeenClose = true;
 		return getBall.Update();
 	}

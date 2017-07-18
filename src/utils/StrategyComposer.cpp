@@ -12,6 +12,7 @@ namespace rtt {
 
 bool StrategyComposer::initialized = false;
 // const std::string UNSET = "<<UNSET>>";
+
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
 
 using namespace std::string_literals;
@@ -38,10 +39,10 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ////////////////////////////////////////////////////
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::STOP                  , "rtt_dennis/StopStrategy"s           } ,
-        { RefState::PREPARE_KICKOFF_US    , "rtt_dennis/StopStrategy"s           } ,
-        { RefState::PREPARE_KICKOFF_THEM  , "rtt_dennis/StopStrategy"s           } ,
-        { RefState::PREPARE_PENALTY_US    , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::STOP                  , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_dennis/StopStrategyKickoff"s    } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_dennis/StopStrategyKickoff"s    } ,
+        { RefState::PREPARE_PENALTY_US    , "rtt_dennis/StopStrategyKickoff"s           } ,
         { RefState::PREPARE_PENALTY_THEM  , "rtt_wybe/ThemPenaltyStrategy"s      } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
@@ -56,11 +57,11 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategy"s           } ,
-        { RefState::GOAL_US               , "rtt_dennis/StopStrategy"s           } ,
-        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::GOAL_US               , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::GOAL_THEM             , "rtt_dennis/StopStrategyKickoff"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategy"s           } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategyKickoff"s           } ,
 
         //////////////////////////
         // Our custom refstates //

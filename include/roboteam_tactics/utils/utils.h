@@ -221,7 +221,7 @@ bool is_digits(const std::string &str);
  * \param point The point to search near
  * \return The id of the robot closest to the point
  */
-int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
+boost::optional<int> get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::World& world, const Vector2& point);
 
 /**
  * \brief Gets the id of whichever robot is closest to a given point
@@ -229,13 +229,13 @@ int get_robot_closest_to_point(std::vector<int> robots, const roboteam_msgs::Wor
  * \param point The point to search near
  * \return The id of the robot closest to the point
  */
-int get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point);
+boost::optional<int> get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point);
 
 /**
  * \brief Gets the id of whichever robot is closest to the opponents' goal
  * \param robots The robots to consider
  */
-int get_robot_closest_to_their_goal(std::vector<int> robots);
+boost::optional<int> get_robot_closest_to_their_goal(std::vector<int> robots);
 
 
 /**
@@ -243,14 +243,14 @@ int get_robot_closest_to_their_goal(std::vector<int> robots);
  * \param robots The robots to consider
  */
 // int get_robot_closest_to_our_goal(std::vector<roboteam_msgs::WorldRobot> robots);
-int get_robot_closest_to_our_goal(std::vector<int> robots);
+boost::optional<int> get_robot_closest_to_our_goal(std::vector<int> robots);
 
 
 /**
  * \brief Gets the id of whichever robot is closest to the ball
  * \param robots The robots to consider
  */
-int get_robot_closest_to_ball(std::vector<int> robots);
+boost::optional<int> get_robot_closest_to_ball(std::vector<int> robots);
 
 /**
  * \brief Gets the id of whichever robot is closest to the opponents' goal
@@ -258,7 +258,7 @@ int get_robot_closest_to_ball(std::vector<int> robots);
  * \param world The world in which the robots exist
  * \return The id of the robot closest to the goal
  */
-int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
+boost::optional<int> get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs::World &world);
 
 /**
  * \brief Gets the id of whichever robot is closest to the ball
@@ -266,7 +266,7 @@ int get_robot_closest_to_their_goal(std::vector<int> robots, const roboteam_msgs
  * \param world The world in which the robots exist
  * \return The id of the robot closest to the ball
  */
-int get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world);
+boost::optional<int> get_robot_closest_to_ball(std::vector<int> robots, const roboteam_msgs::World &world);
 
 /**
  * \brief Tests whether a robot is within the bounds of the field. That is:
