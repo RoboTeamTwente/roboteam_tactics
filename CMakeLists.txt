@@ -116,6 +116,19 @@ else (ENABLE_MEM_PRINCIPLE_CHECKING)
     MESSAGE("-- " ${RED_TEXT} ${BOLD_TEXT} "Trees are NOT being checked for the mem principle" ${RESET_TEXT})
 endif (ENABLE_MEM_PRINCIPLE_CHECKING)
 
+##################################
+## General performance settings ##
+##################################
+
+    set(CMAKE_CXX_FLAGS "\
+--std=c++14 ${CMAKE_CXX_FLAGS} \
+-Wall \
+-Wno-unused-function \
+-Wsign-compare \
+-O2 \
+-march=native\
+")
+
 catkin_package(
     INCLUDE_DIRS 
         include

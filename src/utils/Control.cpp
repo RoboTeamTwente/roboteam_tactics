@@ -24,6 +24,17 @@ Control::Control() : updateRateParam("role_iterations_per_second")
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
             angleErrorI = 0.0;
             posErrorI = Vector2(0.0, 0.0);
+
+            // To be safe, initialize parameters to zero by default
+            pGainPosition = 0.0;
+            iGainPosition = 0.0; 
+            dGainPosition = 0.0; 
+            pGainRotation = 0.0; 
+            iGainRotation = 0.0;
+            dGainRotation = 0.0;
+            pGainVelocity = 0.0;
+            maxSpeed = 0.0;
+            maxAngularVel = 0.0;
         }
 
 RobotType Control::getRobotType() {
@@ -75,6 +86,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
+        dGainPosition = 0.0; 
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
@@ -96,6 +108,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 6.0;
+        dGainPosition = 0.0; 
 
         robotType = RobotType::GRSIM;
     } else {
@@ -199,8 +212,6 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    
-
     return velTarget;
 }
 
@@ -216,10 +227,9 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         posErrorI = Vector2(0.0, 0.0);
     }
 
-
     // Control equation
     Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition - myVel*dGainPosition;
-    
+
     // Limit velocity target to the maxSpeed
     if (velTarget.length() > maxSpeed) {
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
@@ -230,8 +240,6 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
             velTarget = velTarget.scale(0.25 / velTarget.length());  
         }
     }
-
-    
 
     return velTarget;
 }
