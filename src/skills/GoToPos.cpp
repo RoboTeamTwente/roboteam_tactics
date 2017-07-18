@@ -377,7 +377,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
-
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
 
