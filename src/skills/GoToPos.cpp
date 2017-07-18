@@ -367,7 +367,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
+    // ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
     if (posError.length() < successDist && fabs(angleError) < 0.1) {
         successCounter++;
         if (successCounter >= 3) {
@@ -385,7 +385,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
-
 
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);

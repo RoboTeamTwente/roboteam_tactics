@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <queue>
+#include <sys/resource.h>
 
 namespace std {
     template<
@@ -176,5 +177,26 @@ auto block = [](std::string content) {
 
     return w;
 } ;
+
+void setStackSize(uint64_t bytes) {
+    const rlim_t kStackSize = bytes;
+    struct rlimit rl;
+    int result;
+
+    result = getrlimit(RLIMIT_STACK, &rl);
+    if (result == 0)
+    {
+        if (rl.rlim_cur < kStackSize)
+        {
+            rl.rlim_cur = kStackSize;
+            result = setrlimit(RLIMIT_STACK, &rl);
+            if (result != 0)
+            {
+                fprintf(stderr, "Setting stack size failed! setrlimit returned result = %d\n", result);
+            }
+        }
+    }
+}
     
-} // rtt
+
+} // namespace rtt

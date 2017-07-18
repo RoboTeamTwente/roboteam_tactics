@@ -11,8 +11,6 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 
-#include "roboteam_tactics/paths/utils.h"
-
 namespace rtt {
 
 /**
@@ -44,25 +42,22 @@ public:
 
     using Clock = std::chrono::steady_clock;
 
-    Pos convertPosition(Vector2 pos);
-    Pos convertPosition(roboteam_msgs::Vector2f pos);
-    Vector2 convertPosition(Pos pos);
-
 private:
     void findPath();
     bt::Node::Status vanillaGoToPos();   
     bt::Node::Status followCurrentPath();
-    boost::optional<Vector2> getWaypoint(int index);
     bt::Node::Status runGoToPos(Vector2 pos);
 
     Clock::time_point lastPathSearch;
-    int pointIndex;
-    std::vector<Pos> currentPath;
+    unsigned int pointIndex;
+    std::vector<Vector2> currentPath;
     time_point start;
 
     Draw draw;
     std::shared_ptr<bt::Blackboard> gtpBb;
     GoToPos gtp;
+
+    bool wroteToFile = false;
 };
 
 

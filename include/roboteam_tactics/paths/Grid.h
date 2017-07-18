@@ -18,7 +18,7 @@ public:
     static size_t constexpr NUM_ELEMS = W * H;
 
     PropertyGrid() {}
-    PropertyGrid(T defaultValue) : defaultValue{defaultValue} 
+    PropertyGrid(uint8_t defaultValue) : defaultValue{defaultValue} 
             {
         clear();        
     }
@@ -37,7 +37,7 @@ public:
 
 private:
     std::array<T, NUM_ELEMS> elems {};
-    T const defaultValue {};
+    uint8_t const defaultValue {};
 } ;
 
 template<
@@ -165,6 +165,45 @@ public:
         }
     }
 
+    void getHortVertNeighboursAndCost(Pos const & pos, std::array<PosAndCost, 9> & out, int & outSize) const {
+        Pos d {1, 0};
+        // int outI = outSize;
+
+        for (int i = 0; i < 4; ++i) {
+            auto const newPos = pos + d;
+
+            if (isInGrid(newPos) && !isOccupied(newPos)) {
+                out[outSize++] = PosAndCost(newPos, 10);
+            }
+
+            d = d.rotate90();
+        }
+    }
+
+    void getDiagNeighboursAndCost(Pos const & pos, std::array<PosAndCost, 9> & out, int & outSize) const {
+        Pos d {1, 1};
+
+        for (int i = 0; i < 4; ++i) {
+            auto const newPos = pos + d;
+
+            if (isInGrid(newPos) && !isOccupied(newPos)) {
+                out[outSize++] = PosAndCost(newPos, 14);
+            }
+
+            d = d.rotate90();
+        }
+    }
+
+    void getNeighboursAndCostRandomlyOrdered(bool doSwitch, Pos const & pos, std::array<PosAndCost, 9> & out, int & outSize) const {
+        if (doSwitch) {
+            getHortVertNeighboursAndCost(pos, out, outSize);
+            getDiagNeighboursAndCost(pos, out, outSize);
+        } else {
+            getDiagNeighboursAndCost(pos, out, outSize);
+            getHortVertNeighboursAndCost(pos, out, outSize);
+        }
+    }
+
     void getNeighboursAndCost(Pos const & pos, std::array<PosAndCost, 9> & out, int & outSize) const {
         Pos d {1, 0};
         int outI = 0;
@@ -231,7 +270,6 @@ public:
     }
 
     void placeRobot(Pos const & pos, int rad) {
-        std::cout << "Placing robot at: " << pos << "\n";
         setOccupiedCircle(pos, rad);
     }
 
@@ -251,7 +289,7 @@ public:
         }
     }
 
-    std::string toString(int gridScale = -1, std::vector<Pos> const & path = {}, std::set<Pos> const & visitedPositions = {}) {
+    std::string toString(int gridScale = -1, std::vector<Pos> const & path = {}, std::set<Pos> const & visitedPositions = {}) const {
         std::string result;
         result.reserve((W + 1) * H);
 
