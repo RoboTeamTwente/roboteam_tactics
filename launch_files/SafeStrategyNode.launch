@@ -1,4 +1,10 @@
 <launch>
+	<!---
+	Launch this file like this (for example):
+            $ roslaunch SafeStrategyNode.launch cmdline:=mainStrategy
+        Or:
+            $ roslaunch SafeStrategyNode.launch cmdline:="rtt_jim/NormalPlayStrategy KEEPER_ID=4"
+	-->
 	<arg name="cmdline"/>
 	<node name="Strategy" pkg="roboteam_tactics" type="run_StrategyNode.sh" output="screen" args="$(arg cmdline)"/>
 </launch>
