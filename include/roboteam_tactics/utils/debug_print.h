@@ -112,6 +112,7 @@ SET_DEBUG_FOR(Jim_TimeOut, true);
 SET_DEBUG_FOR(Jim_KickOffDefense, true);
 SET_DEBUG_FOR(Jim_PenaltyPlay, true);
 SET_DEBUG_FOR(KickoffDefensePlay, true);
+SET_DEBUG_FOR(StopPlay, true);
 
 // Other
 SET_DEBUG_FOR(OpportunityFinder, true);

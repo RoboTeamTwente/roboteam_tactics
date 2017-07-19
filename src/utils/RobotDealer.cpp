@@ -55,7 +55,7 @@ bool RobotDealer::get_keeper_available() {
 bool RobotDealer::claim_robot(int id) {
 	LOCK_THIS_FUNCTION
 
-    ROS_INFO("claim_robot with id: %i",id);
+    RTT_DEBUGLN("claim_robot with id: %i",id);
     if (id == keeper) {
         if (!keeper_available) {
             ROS_ERROR("Keeper already taken! ID: %i", keeper);
