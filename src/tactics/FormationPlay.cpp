@@ -91,7 +91,7 @@ void FormationPlay::Initialize() {
 			? Formation(LastWorld::get(), HasInt("KEEPER_ID") ? boost::optional<int>(GetInt("KEEPER_ID")) : boost::none)
 			: allFormations.at(name));
 
-	std::vector<int> robots = RobotDealer::get_available_robots();
+	std::vector<int> robots = getAvailableRobots();
 	if (robots.size() < formation->minimumRobots) {
 		ROS_WARN("FormationPlay: Not enough robots available, continuing anyway");
 	}

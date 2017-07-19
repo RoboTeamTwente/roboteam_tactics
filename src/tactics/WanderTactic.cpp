@@ -27,7 +27,7 @@ bool fill(std::vector<int>& target, std::vector<int>& source, int max) {
 void WanderTactic::Initialize() {
     tokens.clear();
     
-    std::vector<int> available = RobotDealer::get_available_robots();
+    std::vector<int> available = getAvailableRobots();
     
     if (available.size() == 0) {
         valid = false;

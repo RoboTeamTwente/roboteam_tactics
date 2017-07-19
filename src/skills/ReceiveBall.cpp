@@ -45,7 +45,7 @@ void ReceiveBall::Initialize() {
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	} else {
-		acceptableDeviation = 1.0;
+		acceptableDeviation = 2.0;
 	}
 
 	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
@@ -106,7 +106,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	Vector2 interceptPos;
 	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
-	ballIsComing = false;
+	// ballIsComing = false;
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
@@ -115,6 +115,9 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	double ballDir = ballVel.dot(receiveBallAtPos - ballPos);
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
+
+		drawer.removeLine("ballTrajectory");
+		drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 		
@@ -122,6 +125,11 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	} else {
 		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
+
+		drawer.setColor(255,255,255);
+		drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
+		drawer.drawPoint("closestPointReceiveBall", closestPoint);
+		drawer.setColor(0,0,0);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 			ballIsComing = true;
@@ -147,7 +155,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 // Predict intercept pos by looking at the robot that has the ball
 boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	
-	ballIsComing = false;
+	// ballIsComing = false;
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
@@ -263,6 +271,7 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 targetPos;
 	double targetAngle;
 	bool ballWasComing = ballIsComing;
+	ballIsComing = false;
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	boost::optional<InterceptPose> interceptPose;
@@ -337,7 +346,7 @@ bt::Node::Status ReceiveBall::Update() {
 		timeStep = 1.0 / role_iterations_per_second;
 	}
 
-	double distanceToBall = (ballPos-interceptPos).length();
+	double distanceToBall = (ballPos-robotPos).length();
 	if (shootAtGoal) {
 		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
 			startKicking = true;
@@ -346,12 +355,11 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 	}
 
-	if ((distanceToBall < acceptableDeviation && ballVel.length() < 0.2)
-			&& !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))
-			|| ballHasBeenClose) {
-		ballHasBeenClose = true;
-		return getBall.Update();
-	}
+	// if ((distanceToBall < acceptableDeviation && !ballIsComing && !(HasBool("dontDriveToBall") && GetBool("dontDriveToBall"))) || ballHasBeenClose) {
+	// 	ballHasBeenClose = true;
+	// 	getBallbb->SetInt("ROBOT_ID", robotID);
+	// 	return getBall.Update();
+	// }
 
 	
 	// If the ball gets close, turn on the dribbler
@@ -361,8 +369,10 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	if (distanceToBall < dribblerDist) {
+		ROS_INFO_STREAM("dribbler on " << distanceToBall);
 		private_bb->SetBool("dribbler", true);
 	} else {
+		ROS_INFO_STREAM("dribbler off " << distanceToBall);
 		private_bb->SetBool("dribbler", false);
 	}
 
@@ -376,7 +386,16 @@ bt::Node::Status ReceiveBall::Update() {
 	// double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
     // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
-    if (iHaveBall2.Update() == Status::Success) {
+    // if (iHaveBall2.Update() == Status::Success) {
+	double angleError = cleanAngle(targetAngle - robot.angle);
+	ROS_INFO_STREAM("receiveBall, dist " << distanceToBall << " angleError " << fabs(angleError));
+
+	bool matchBallVel = false;
+	if (distanceToBall <= 0.6 && fabs(angleError) <= 0.2) {
+		matchBallVel = true;
+	}
+
+    if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
     	ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {
@@ -386,6 +405,7 @@ bt::Node::Status ReceiveBall::Update() {
     	}
 		RTT_DEBUGLN("ReceiveBall skill completed.");
 		publishStopCommand();
+		// return Status::Running;
 		return Status::Success;
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
@@ -393,6 +413,7 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
+        private_bb->SetDouble("pGainPosition", 4.0);
         private_bb->SetBool("avoidDefenseAreas", true);
         if (HasString("stayOnSide")) {
         	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
@@ -401,15 +422,28 @@ bt::Node::Status ReceiveBall::Update() {
         	private_bb->SetBool("stayAwayFromBall", true);
         }
 
-        boost::optional<roboteam_msgs::RobotCommand> command = goToPos.getVelCommand();
-	    if (command) {
+        boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+	    if (commandPtr) {
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	        pub.publish(*command);
+
+	        roboteam_msgs::RobotCommand command = *commandPtr;
+	        if (matchBallVel) {
+		        ROS_INFO_STREAM("robot " << robotID << " matching ball vel");
+		        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.75);
+		        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+		        if (newVelCommand.length() > 4.0) {
+		          newVelCommand.scale(4.0 / newVelCommand.length());
+		        }
+		        command.x_vel = newVelCommand.x;
+		        command.y_vel = newVelCommand.y;    
+		    }
+
+
+	        pub.publish(command);
 	    } else {
 	    	roboteam_msgs::RobotCommand emptyCommand;
 	    	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
 	    	pub.publish(emptyCommand);
-	    	// ROS_INFO_STREAM("ReceiveBall robot " << robotID << ", no command from GoToPos...");
 	    }
 
 	    return Status::Running;		

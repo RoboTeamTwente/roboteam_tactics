@@ -14,35 +14,43 @@
 namespace rtt {
 
 std::set<int> RobotDealer::taken_robots;
-std::set<int> RobotDealer::available_robots;
+// std::set<int> RobotDealer::available_robots;
 std::map<std::string, std::set<int>> RobotDealer::robot_owners;
 int RobotDealer::keeper;
-bool RobotDealer::keeper_available;
+bool RobotDealer::keeper_available = true;
 boost::interprocess::interprocess_mutex RobotDealer::mutex;
 
 #define LOCK_THIS_FUNCTION \
 	boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex>(RobotDealer::mutex);
 
-void RobotDealer::initialize_robots(int keeper, std::vector<int> ids) {
-	LOCK_THIS_FUNCTION
-    taken_robots.clear();
-    available_robots.clear();
-    available_robots.insert(ids.begin(), ids.end());
+// void RobotDealer::initialize_robots(int keeper, std::vector<int> ids) {
+	// LOCK_THIS_FUNCTION
+    // taken_robots.clear();
+    // available_robots.clear();
+    // available_robots.insert(ids.begin(), ids.end());
 
-    // Explicitly put namespace here s.t. shadowing does not mess up
-    // the assignment
-    RobotDealer::keeper = keeper;
-    keeper_available = true;
+    // // Explicitly put namespace here s.t. shadowing does not mess up
+    // // the assignment
+    // RobotDealer::keeper = keeper;
+    // keeper_available = true;
 
-    if (available_robots.find(keeper) != available_robots.end()) {
-    	ROS_WARN("RobotDealer: Keeper was included in the available id vector!");
-    }
+    // if (available_robots.find(keeper) != available_robots.end()) {
+        // ROS_WARN("RobotDealer: Keeper was included in the available id vector!");
+    // }
+// }
+
+std::vector<int> RobotDealer::getClaimedRobots() {
+    return std::vector<int>(taken_robots.begin(), taken_robots.end());
 }
 
-std::vector<int> RobotDealer::get_available_robots() {
-	LOCK_THIS_FUNCTION
-    return std::vector<int>(available_robots.begin(), available_robots.end());
+int RobotDealer::setKeeper(int id) {
+    keeper = id;
 }
+
+// std::vector<int> RobotDealer::get_available_robots() {
+	// LOCK_THIS_FUNCTION
+    // return std::vector<int>(available_robots.begin(), available_robots.end());
+// }
 
 int RobotDealer::get_keeper() {
     return keeper;
@@ -71,12 +79,12 @@ bool RobotDealer::claim_robot(int id) {
         return false;
     }
     
-    if (available_robots.find(id) == available_robots.end()) {
-    	ROS_ERROR("Tried to claim unavailable, unclaimed robot: %d", id);
-    	return false;
-    }
+    // if (available_robots.find(id) == available_robots.end()) {
+        // ROS_ERROR("Tried to claim unavailable, unclaimed robot: %d", id);
+        // return false;
+    // }
 
-    available_robots.erase(id);
+    // available_robots.erase(id);
     taken_robots.insert(id);
     return true;
 }
@@ -97,17 +105,17 @@ bool RobotDealer::release_robot(int id) {
         return true;
     }
 
-    if (available_robots.find(id) != available_robots.end()) {
-        ROS_ERROR("Robot %d is already available!", id);
-        return false;
-    }
+    // if (available_robots.find(id) != available_robots.end()) {
+        // ROS_ERROR("Robot %d is already available!", id);
+        // return false;
+    // }
 
     if (taken_robots.find(id) == taken_robots.end()) {
     	ROS_ERROR("Tried to release an unclaimed robot: %d!", id);
     	return false;
     }
 
-    available_robots.insert(id);
+    // available_robots.insert(id);
     taken_robots.erase(id);
     return true;
 }
@@ -119,6 +127,7 @@ bool RobotDealer::claim_robot_for_tactic(int id, std::string const & playName) {
     if (success) {
     	robot_owners[playName].insert(id);
     }
+
     return success;
 }
 
@@ -136,6 +145,7 @@ std::map<std::string, std::set<int>> const & RobotDealer::getRobotOwnerList() {
 
 void RobotDealer::printRobotDistribution() {
 	LOCK_THIS_FUNCTION
+
     std::cout << "[RobotDistribution]\n";
     for (auto const & entry : robot_owners) {
         std::cout << entry.first << ":\n";
@@ -196,7 +206,7 @@ bool RobotDealer::release_robots(std::vector<int> ids) {
 void RobotDealer::halt_override() {
 	LOCK_THIS_FUNCTION
     ROS_WARN("Overriding claims for all robots because of HALT");
-    available_robots.insert(taken_robots.begin(), taken_robots.end());
+    // available_robots.insert(taken_robots.begin(), taken_robots.end());
     taken_robots.clear();
 }
 

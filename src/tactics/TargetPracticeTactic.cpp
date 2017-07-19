@@ -12,11 +12,11 @@ TargetPracticeTactic::TargetPracticeTactic(std::string name, bt::Blackboard::Ptr
 void TargetPracticeTactic::Initialize() {
     tokens.clear();
     
-    if (!(valid = RobotDealer::get_available_robots().size() >= 2)) {
+    if (!(valid = getAvailableRobots().size() >= 2)) {
         return;
     }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     int keeperID = robots.at(0);
     int shooterID = robots.at(1);

@@ -17,7 +17,7 @@ void PenaltyUsPlay::Initialize() {
 		return;
 	}
 
-	auto available = RobotDealer::get_available_robots();
+	auto available = getAvailableRobots();
 	if (available.size() == 0) {
 		ROS_ERROR("PenaltyUsPlay: No shooter available!");
 		return;

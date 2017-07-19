@@ -12,6 +12,7 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
@@ -339,36 +340,27 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
     } else {
-        if (posError.length() > 0.5) {
-            angleGoal = posError.angle();
-        } else {
-            angleGoal = me.angle;
-        }
+        angleGoal = me.angle;
     }
+
+    if (posError.length() > 0.5) {
+        angleGoal = posError.angle();
+    } 
 
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);
     double myAngularVel = me.w;
-
-    // @DEBUG info:
-    myPosTopic.publish(me);
-    roboteam_msgs::WorldRobot targetPosPub;
-    targetPosPub.pos.x = targetPos.x;
-    targetPosPub.pos.y = targetPos.y;
-    targetPosPub.angle = angleGoal;
-    myTargetPosTopic.publish(targetPosPub);
 
     // Determine how close we should get to the targetPos before we succeed
     double successDist;
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.02;
+        successDist = 0.03;
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    //ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
-    if (posError.length() < successDist && fabs(angleError) < 0.1) {
+    if (posError.length() < successDist && fabs(angleError) < 0.08) {
         successCounter++;
         if (successCounter >= 3) {
             sendStopCommand(ROBOT_ID);
@@ -385,7 +377,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
-
 
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
@@ -420,13 +411,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
 
-    // @DEBUG info
-    Vector2 myVelRobotFrame = worldToRobotFrame(myVel, myAngle);
-    roboteam_msgs::WorldRobot myVelRobot;
-    myVelRobot.pos.x = myVelRobotFrame.x;
-    myVelRobot.pos.y = myVelRobotFrame.y;
-    myVelRobot.w = me.w;
-    myVelTopic.publish(myVelRobot);
 
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
@@ -441,17 +425,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
 
+    if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
+        if (velCommand.length() >= 1.5) {
+            velCommand = velCommand.scale(1.5 / velCommand.length());
+        }
+    }
 
-    // This may be useful for control purposes: it limits the driving direction when driving forwards-sideways such that it always drives with two wheels and the other
-    // wheels remain still
-    // double drivingAngle = velCommand.angle();
-    // if (drivingAngle >= ((30.0-20.0)/180.0*M_PI) && drivingAngle <= ((30.0+40.0)/180.0*M_PI)) {
-    //     ROS_INFO_STREAM("limiting drive direction pos y");
-    //     velCommand = Vector2(1.0, 0.0).rotate(30.0/180.0*M_PI).scale(velCommand.length());
-    // } else if (drivingAngle >= ((-30.0-40.0)/180.0*M_PI) && drivingAngle <= ((-30.0+20.0)/180.0*M_PI)) {
-    //     ROS_INFO_STREAM("limiting drive direction neg y");
-    //     velCommand = Vector2(1.0, 0.0).rotate(330.0/180.0*M_PI).scale(velCommand.length());
-    // }
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;

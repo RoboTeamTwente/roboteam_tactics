@@ -92,6 +92,8 @@ private:
     time_point prevComputedPoint;
     Vector2 receiveBallAtPos;
 
+    bt::Blackboard::Ptr getBallbb = std::make_shared<bt::Blackboard>();
+
     bool computedTargetPos;
 };
 

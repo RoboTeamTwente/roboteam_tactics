@@ -27,6 +27,7 @@ set(SKILL_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/Runner.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/DefendGoalarea.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/unity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FindPath.cpp
     )
 set(SKILL_SOURCES
     ${SKILL_SOURCES}

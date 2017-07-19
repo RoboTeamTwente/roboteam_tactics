@@ -308,7 +308,7 @@ How to use:
     ros::Rate fps(updateRate);
     std::cout << "[TestX] Updating at " << updateRate << "Hz\n";
 
-    rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+    rtt::RobotDealer::setKeeper(0);
 
     if (rtt::factories::isTree(testClass)) {
         int bot_id = -1;

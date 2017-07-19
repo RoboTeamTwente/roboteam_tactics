@@ -35,7 +35,7 @@ void Jim_KickOffDefense::Initialize() {
     tokens.clear();
 
     RTT_DEBUGLN_TEAM("Initializing Jim_KickOffDefense");    
-    if (RobotDealer::get_available_robots().size() < 4) {
+    if (getAvailableRobots().size() < 4) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -47,7 +47,7 @@ void Jim_KickOffDefense::Initialize() {
     std::vector<roboteam_msgs::WorldRobot> theirRobots = world.them;   
 
         
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int keeperID = RobotDealer::get_keeper();
 
 
@@ -88,15 +88,25 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders = 2;
+    int numBallDefenders = 3;
     std::vector<double> angleOffsets;
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
+    angleOffsets.push_back(0.0);
+
+    std::vector<double> distanceOffsets;
+    distanceOffsets.push_back(1.5);
+    distanceOffsets.push_back(1.5);
+    distanceOffsets.push_back(3.0);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
-        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 1.5, angleOffsets.at(i)));
+        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distanceOffsets.at(i), angleOffsets.at(i)));
     }
+    
+    // also add a robot located close to the middle circle
+    //ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 4.0, 0.0));
+
     std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
 
     for (size_t i = 0; i < ballDefenders.size(); i++) {
@@ -115,7 +125,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 1.5);
+        bb.SetDouble("SimpleDefender_A_distanceFromGoal", distanceOffsets.at(i));
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
@@ -133,7 +143,7 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
-    int numRobotDefenders = std::min((int) RobotDealer::get_available_robots().size(), 3);    
+    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 3);    
     
 
 
@@ -187,7 +197,7 @@ void Jim_KickOffDefense::Initialize() {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
         int defenderID = defenderIDs.at(i);
-
+        RTT_DEBUGLN("KickOffDenfer with id: %i",defenderID);
         // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
         delete_from_vector(robots, defenderID);
         claim_robot(defenderID);

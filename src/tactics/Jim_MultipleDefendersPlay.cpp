@@ -37,79 +37,75 @@ boost::optional<int> Jim_MultipleDefendersPlay::getClosestDefender(std::vector<i
 		roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
     double distanceFromGoal = 1.35;
     Vector2 defensePoint = SimpleDefender::computeDefensePoint(dangerPos, true, distanceFromGoal, angleOffset);
-    auto defenderID = get_robot_closest_to_point(robots, world, defensePoint);
-    return defenderID;
+    boost::optional<int> defenderID = get_robot_closest_to_point(robots, world, defensePoint);
+
+    if (defenderID) {
+        return *defenderID;
+    } else {
+        ROS_WARN("Found no defender"); 
+        return boost::none;
+    }
+
+    // return defenderID;
+}
+
+namespace {
+    
+// Calculates the length of the vector from each robot position to each point
+// and sums it
+int calcTotalCost(std::map<int, Vector2> const & currentPositions, std::vector<int> const & robots, std::vector<Vector2> const & points) {
+    int total = 0;
+    for (size_t i = 0; i < points.size(); ++i) {
+        total += currentPositions.at(robots[i]).dist(points[i]);
+    }
+    return total;
+}
+
 }
 
 std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots,
 		std::vector<Vector2> points, roboteam_msgs::World& world) {
-
     // If the number of points is larger than the number of robots, choose the first points to drive to
 	if (points.size() > robots.size()) {
 		points.resize(robots.size());
 	}
 
+    // If there are no points nor robots return the empty list
     if (points.size() == 0) {
         return {};
     }
 
-    // Make a vector containing all the robots in the WorldRobot message type
-    std::vector<roboteam_msgs::WorldRobot> worldRobots;
-    for (size_t i = 0; i < robots.size(); i++) {
-        boost::optional<roboteam_msgs::WorldRobot> robot = getWorldBot(robots.at(i), true, world);
-        if (robot) {
-            worldRobots.push_back(*robot);
+    // Cache robot positions or kick them out of the list if they can't be found
+    std::map<int, Vector2> currentPositions;
+    for (auto it = robots.begin(); it != robots.end();) {
+        if (auto botOpt = getWorldBot(*it, true, world)) {
+            currentPositions[*it] = botOpt->pos;
+            it++;
+        } else {
+            it = robots.erase(it);
+            points.pop_back();
         }
     }
 
-    // Make a matrix (vector (y) of a vector (x)) containing the distances between the robots and the points
-    std::vector< std::vector<double> > distances;
-    // std::cout << "points: \n";
-    for (size_t i = 0; i < points.size(); i++) {
-        // std::cout << points.at(i).x << " " << points.at(i).y << " \n";
-        std::vector<double> dists;
-        for (size_t j = 0; j < worldRobots.size(); j++) {
-            double dist = (Vector2(worldRobots.at(j).pos) - points.at(i)).length();
-            dists.push_back(dist);
+    // Sort the robots so it's a base case that the while loops stops at
+    std::sort(robots.begin(), robots.end());
+
+    std::vector<int> minAssignment = robots;
+    int minCost = calcTotalCost(currentPositions, robots, points);
+
+    while (std::next_permutation(robots.begin(), robots.end())) {
+        int candidateCost = calcTotalCost(currentPositions, robots, points);
+        if (candidateCost < minCost) {
+            minAssignment = robots;
+            minCost = candidateCost;
         }
-        distances.push_back(dists);
     }
 
-
-    std::vector<int> optimalCombination;
-    double lowestDist = std::numeric_limits<double>::max();
-
-    std::vector<int> testCombination;
-    for (size_t i = 0; i < worldRobots.size(); i++) {
-        testCombination.push_back(i);
+    if (minAssignment.size() > points.size()) {
+        minAssignment.resize(points.size());
     }
 
-    int prevNum = -1;
-    do {
-        if (testCombination.at(points.size()-1) != prevNum) {
-            // std::cout << "trying combination: ";
-            double totalDist = 0.0;
-            for (size_t i = 0; i < points.size(); i++) {
-                totalDist += distances.at(i).at(testCombination.at(i));
-                // std::cout << " p" << i << " r" << worldRobots.at(testCombination.at(i)).id;
-            }
-
-            if (totalDist < lowestDist) {
-                optimalCombination = testCombination;
-                lowestDist = totalDist;
-            }
-            // std::cout << " dist: " << totalDist << " \n";
-            prevNum = testCombination.at(points.size()-1);
-        }
-    } while (std::next_permutation(testCombination.begin(), testCombination.end()));
-
-    std::vector<int> closestRobots;
-    for (size_t i = 0; i < points.size(); i++) {
-        // std::cout << "robot " << worldRobots.at(optimalCombination.at(i)).id << " to x: " << points.at(i).x << " y: " << points.at(i).y << " \n";
-        closestRobots.push_back(worldRobots.at(optimalCombination.at(i)).id);
-    }
-
-    return closestRobots;
+    return minAssignment;
 }
 
 
@@ -127,7 +123,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     	return !getWorldBot(id, true, world);
     });
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
 
     if (numRobots < 1) {

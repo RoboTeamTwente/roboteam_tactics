@@ -131,7 +131,6 @@ bt::Node::Status GetBall::Update (){
             return Status::Running;
         }
         else {
-            ROS_INFO_STREAM("GetBall Success robot " << robotID);
             //publishStopCommand();
             releaseBall();
             // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
@@ -140,7 +139,6 @@ bt::Node::Status GetBall::Update (){
             return Status::Success;
         }
     }
-
 
 	// Wait for the first world message
 	while (world.us.size() == 0) {
@@ -258,19 +256,32 @@ bt::Node::Status GetBall::Update (){
     } else if (robot_output_target == "serial") {
         successDist = 0.11;
         successAngle = 0.15;
-        getBallDist = 0.03;
+        getBallDist = 0.06;
         distAwayFromBall = 0.2;
     }
    
     if (HasDouble("getBallDist")){
         getBallDist=GetDouble("getBallDist");
     }
+
+    bool matchBallVel = false;
+
+    // if (posDiff.length() < (distAwayFromBall + 0.5)) {
+    //     private_bb->SetBool("dribbler", true);
+    // } else {
+    //     private_bb->SetBool("dribbler", false);
+    // }
+
+    // ROS_INFO_STREAM("posDiff: " << posDiff.length() << " angleDiff: " << fabs(angleDiff));
+
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
+        private_bb->SetBool("dribbler", false);
 	} else {
         private_bb->SetBool("dribbler", true);
+        matchBallVel = true;
         // if (robot_output_target == "serial") {
         //     private_bb->SetDouble("maxSpeed", 0.6);
         // }
@@ -281,9 +292,11 @@ bt::Node::Status GetBall::Update (){
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        int ballCloseFrameCountTo = 20;
+        matchBallVel = false;
+        int ballCloseFrameCountTo = 10;
+        // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
-            ballCloseFrameCountTo=GetInt("ballCloseFrameCount");
+            ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
 
         // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
@@ -329,15 +342,15 @@ bt::Node::Status GetBall::Update (){
 
 
     // Optional feature after testing: match the ball velocity for easy ball interception
-    // if (HasBool("matchBallVel") && GetBool("matchBallVel")) {
-    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-    //     if (newVelCommand.length() > 4.0) {
-    //       newVelCommand.scale(4.0 / newVelCommand.length());
-    //     }
-    //     command.x_vel = newVelCommand.x;
-    //     command.y_vel = newVelCommand.y;    
-    // }
+    if (matchBallVel) {
+        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        if (newVelCommand.length() > 4.0) {
+          newVelCommand.scale(4.0 / newVelCommand.length());
+        }
+        command.x_vel = newVelCommand.x;
+        command.y_vel = newVelCommand.y;    
+    }
     
     // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
