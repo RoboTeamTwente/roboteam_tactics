@@ -188,6 +188,7 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 			viewOfGoal -= blockedAngle;
 		} else {
 			ROS_INFO_STREAM("hmm, this is probably not right..." << testPosition.x << " " << testPosition.y);
+            viewOfGoal = 0;
 		}
 	}
 

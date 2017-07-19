@@ -15,6 +15,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "unique_id/unique_id.h" 
+#include "roboteam_tactics/utils/RobotDealer.h"
 
 #define RTT_CURRENT_DEBUG_TAG Jim_GetBallPlay
 
@@ -52,8 +53,7 @@ void Jim_GetBallPlay::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
-    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
-
+    RTT_DEBUGLN("GetBall robot: %i ", *ballGetterID);
 
     // =============================
     // Initialize the Ball Getter
@@ -66,7 +66,7 @@ void Jim_GetBallPlay::Initialize() {
         activeRobot = *ballGetterID;
 
         bb.SetInt("ROBOT_ID", *ballGetterID);
-        bb.SetInt("KEEPER_ID", 5);
+        bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
 

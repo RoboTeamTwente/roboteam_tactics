@@ -26,13 +26,10 @@ Bob_ChipoffAtGoalPlay::Bob_ChipoffAtGoalPlay(std::string name, bt::Blackboard::P
         {}
 
 void Bob_ChipoffAtGoalPlay::Initialize() {
-    tokens.clear();
     failImmediately = false;
 
     std::cout << "ChipoffAtGoalPlay!\n";
 
-    RTT_DEBUGLN_TEAM("Initializing Bob_ChipoffAtGoalPlay");
-    
     std::vector<int> robots = getAvailableRobots();
 
     if (robots.size() < 1) {
@@ -41,17 +38,18 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         return;
     }
 
-    auto takerID = get_robot_closest_to_ball(robots);
-    if (!takerID) {
-    	failImmediately = true;
+    {
+        auto takerID = get_robot_closest_to_ball(robots);
+        if (!takerID) {
+            failImmediately = true;
+            return;
+        }
+        taker.robot_id = *takerID;
     }
-    robots.erase(std::remove(robots.begin(), robots.end(), takerID), robots.end());
+
+    claim_robot(taker.robot_id);
 
     int keeperID = RobotDealer::get_keeper();
-
-    claim_robots({*takerID});
-
-    taker.robot_id = *takerID;
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -61,7 +59,7 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         bt::Blackboard bb;
 
         // Set the robot ID
-        bb.SetInt("ROBOT_ID", *takerID);
+        bb.SetInt("ROBOT_ID", taker.robot_id);
         bb.SetInt("KEEPER_ID", keeperID);
 
         ScopedBB(bb, "GetBall_")
@@ -75,57 +73,20 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         taker.blackboard = bb.toMsg();
 
         // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        taker.token = unique_id::toMsg(token);
+        taker.token = unique_id::toMsg(unique_id::fromRandom());
 
         // Send to rolenode
         pub.publish(taker);
     }
-
-    isThisYourFirstTimeHere = true;
-    start = rtt::now();
 }
 
 bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
     if (failImmediately) return Status::Failure;
 
-    bool takerSucceeded = false;
-   // bool receiverSucceeded = false;
-    bool oneFailed = false;
-
-    for (auto token : tokens) {
-        if (feedbacks.find(token) != feedbacks.end()) {
-            Status status = feedbacks.at(token);
-
-            if (status == bt::Node::Status::Success) {
-                if (token == unique_id::fromMsg(taker.token)) {
-                    // std::cout << "First attacker succeeded!\n";
-                    takerSucceeded = true;
-                }
-                if (token == unique_id::fromMsg(receiver.token)) {
-                    // std::cout << "Second attacker succeeded!\n";
-                    //receiverSucceeded = true;
-                }
-            } 
-
-            if (status == bt::Node::Status::Failure) {
-                std::cout << "One failed!\n";
-                oneFailed = true;
-            }
-        }
+    auto feedbackIt = feedbacks.find(unique_id::fromMsg(taker.token));
+    if (feedbackIt != feedbacks.end()) {
+        return feedbackIt->second;
     }
-
-    if (takerSucceeded) {
-        return bt::Node::Status::Success;
-    }
-
-    if (oneFailed) {
-        RTT_DEBUGLN("One role failed, so tactic failed");
-        return bt::Node::Status::Failure;
-    }
-
-    lastUpdate = now();
 
     return bt::Node::Status::Running;
 }
