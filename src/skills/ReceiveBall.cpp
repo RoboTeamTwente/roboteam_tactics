@@ -112,6 +112,8 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
+
+	
 	double ballDir = ballVel.dot(receiveBallAtPos - ballPos);
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
