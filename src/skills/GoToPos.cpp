@@ -12,6 +12,7 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"

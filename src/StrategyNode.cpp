@@ -132,15 +132,6 @@ int main(int argc, char *argv[]) {
     rtt::crash::registerAll();
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
-    
-    namespace f = rtt::factories;
-
-    // Uncomment to check all the captured conditions, skills, tactics, strategies, & roles
-    // std::cout << "[Printing everything]\n";
-    // f::print_all<rtt::Condition>("Condition");
-    // f::print_all<rtt::Skill>("Skill");
-    // f::print_all<rtt::Tactic>("Tactic");
-    // f::print_all<bt::BehaviorTree>("bt::BehaviorTree");
 
     ros::Rate rate(60);
 
@@ -150,7 +141,6 @@ int main(int argc, char *argv[]) {
         &feedbackCallback
         );
 
-    auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
 
     // Construct the global role directive publisher & bt debug publisher if needed
     rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
@@ -178,6 +168,7 @@ int main(int argc, char *argv[]) {
             }
         } else {
             // Get all available trees
+            namespace f = rtt::factories;
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
             // If the given name exists...
             if (repo.find(arguments[0]) != repo.end()) {
@@ -213,6 +204,7 @@ int main(int argc, char *argv[]) {
 
         RTT_DEBUGLN("Waiting for %i robot nodes to come online", numNodes);
        
+        auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
         while ((int) directivePub.getNumSubscribers() < numNodes) {
             RTT_DEBUGLN("Current num subsribers: %i", (int) directivePub.getNumSubscribers());
             ros::spinOnce();
@@ -236,22 +228,9 @@ int main(int argc, char *argv[]) {
             return 0;
         }
     }
-
-    // Possibly initialize based on whatever is present in lastworld, and take the lowest for the keeper?
-    // rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
-
-    roboteam_msgs::World world = rtt::LastWorld::get();
-    std::vector<int> initializeBots;
-    initializeBots.clear();
-    for (size_t i = 0; i < world.us.size(); i++) {
-        initializeBots.push_back(world.us.at(i).id);
-        RTT_DEBUGLN("Found robot %i", world.us.at(i).id);
-    }
-
-    int lowestID = initializeBots.at(distance(initializeBots.begin(), min_element(initializeBots.begin(), initializeBots.end())));
-    initializeBots.erase(min_element(initializeBots.begin(), initializeBots.end()));
-    RTT_DEBUGLN("Initializing keeper: %i", lowestID);
-    rtt::RobotDealer::initialize_robots(lowestID, initializeBots);
+    
+    // This is overwritten as soon as the first RefereeCommand comes in, which has the actual keeper robot ID in it.
+    rtt::RobotDealer::setKeeper(0);
 
     RTT_DEBUGLN("More than one robot found. Starting!");
     
@@ -269,6 +248,11 @@ int main(int argc, char *argv[]) {
             break;
         }
         rate.sleep();
+
+        // Update the keeper according to the ref info
+        if (rtt::LastRef::hasReceivedFirstCommand()) {
+            rtt::RobotDealer::setKeeper(rtt::LastRef::get().us.goalie);
+        }
 
         stratDebugInfo.doUpdate(strategy);
     }
