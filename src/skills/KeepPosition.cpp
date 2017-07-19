@@ -27,10 +27,12 @@ bt::Node::Status KeepPosition::Update() {
 		gtp = std::make_unique<GoToPos>("KeepPosition_GTP", private_bb);
 	}
 	if (!updateGoalPosition()) {
+        ROS_ERROR("UpdateGoalPosition failed!\n");
 		return Status::Invalid;
 	}
 	auto subStatus = gtp->Update();
 	if (subStatus == Status::Invalid || subStatus == Status::Failure) {
+        ROS_ERROR("Substatus omg!\n");
 		return subStatus;
 	}
 	return Status::Running;
@@ -92,8 +94,10 @@ Vector2 KeepPosition::getNearestObject(Vector2 ownPos) {
 
 	bool opponentsExist = them.size() > 0;
 
-	std::remove_if(us.begin(), us.end(),
-			[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == (unsigned) this->GetInt("ROBOT_ID");});
+    us.erase(std::remove_if(us.begin(), us.end(),
+			[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == (unsigned) this->GetInt("ROBOT_ID");}),
+            us.end()
+            );
 
 	std::sort(us.begin(), us.end(), DistToPosSorter { ownPos });
 	if (opponentsExist) {
