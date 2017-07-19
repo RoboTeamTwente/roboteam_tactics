@@ -104,6 +104,27 @@ bool RefStateSwitch::hasStartedNewStrategy() const {
     return startedNewStrategy;
 }
 
+void RefStateSwitch::printRefStateInfo() const {
+    std::cout << "--- RefStateSwitch::printRefStateInfo ---\n";
+
+    std::string previousCmdName = "none yet";
+    std::string currentCmdName = "none yet";
+
+    if (currentCmd) {
+        currentCmdName = refStateToString(*currentCmd);
+    }
+
+    if (previousCmd) {
+        previousCmdName = refStateToString(*previousCmd);
+    }
+
+    std::cout << "CurrentCMDName: " << currentCmdName << "\n";
+    std::cout << "previousCMDName: " << previousCmdName << "\n";
+
+    std::cout << "isTwoState: " << isTwoState(previousCmd, *currentCmd) << "\n";
+    std::cout << "FinishedOnce: " << finishedOnce << "\n";
+}
+
 b::optional<RefState> RefStateSwitch::getCurrentRefState() const {
     std::string previousCmdName = "none yet";
     std::string currentCmdName = "none yet";

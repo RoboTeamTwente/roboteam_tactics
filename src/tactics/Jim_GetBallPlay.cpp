@@ -54,7 +54,6 @@ void Jim_GetBallPlay::Initialize() {
     RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
     // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
 
-
     // =============================
     // Initialize the Ball Getter
     // =============================
