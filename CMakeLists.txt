@@ -120,14 +120,16 @@ endif (ENABLE_MEM_PRINCIPLE_CHECKING)
 ## General performance settings ##
 ##################################
 
-    set(CMAKE_CXX_FLAGS "\
+set(CMAKE_CXX_FLAGS "\
 --std=c++14 ${CMAKE_CXX_FLAGS} \
 -Wall \
 -Wno-unused-function \
 -Wsign-compare \
--O2 \
--march=native\
 ")
+
+# -O2 \
+# -march=native\
+# ")
 
 catkin_package(
     INCLUDE_DIRS 

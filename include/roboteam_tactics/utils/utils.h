@@ -360,6 +360,8 @@ constexpr bool isNaN(double	t) {
 
 bool weAreLeft();
 
+std::vector<int> getVisibleAndAvailableRobots();
+
 } // rtt
 
 #include "roboteam_tactics/utils/utils.tcc"

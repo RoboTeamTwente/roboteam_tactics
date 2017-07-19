@@ -477,4 +477,15 @@ bool weAreLeft() {
     return tgt == "left";
 }
 
+std::vector<int> getVisibleAndAvailableRobots() {
+    std::vector<int> dealerRobots = RobotDealer::get_available_robots();
+    std::vector<int> availableRobots;
+    for (auto const & bot : LastWorld::get().us) {
+        if (std::find(dealerRobots.begin(), dealerRobots.end(), bot.id) != dealerRobots.end()) {
+            availableRobots.push_back(bot.id);
+        }
+    }
+    return availableRobots;
+}
+
 } // rtt

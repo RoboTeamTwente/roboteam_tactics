@@ -4,6 +4,7 @@
 #include <random>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 #include "unique_id/unique_id.h" 
 #include "roboteam_msgs/RoleDirective.h"
@@ -34,7 +35,8 @@ Jim_MultipleStrikersPlay::Jim_MultipleStrikersPlay(std::string name, bt::Blackbo
 void Jim_MultipleStrikersPlay::Initialize() {
     tokens.clear();
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    // if (RobotDealer::get_available_robots().size() < 1) {
+    if (getVisibleAndAvailableRobots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -43,11 +45,12 @@ void Jim_MultipleStrikersPlay::Initialize() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballPos(world.ball.pos);
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    // std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getVisibleAndAvailableRobots();
 
-    int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);    
+    // int numStrikers = std::min((int) RobotDealer::get_available_robots().size(), 2);    
+    int numStrikers = std::min((int) robots.size(), 2);    
     RTT_DEBUGLN("Initializing numStrikers: %i", numStrikers);    
-
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -59,7 +62,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     strikersDefaultPositions.push_back(Vector2(xPos, -1.5));
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, strikersDefaultPositions, world);    
-    
+
     for (size_t i = 0; i < (size_t) numStrikers; i++) {
 
         int strikerID = strikerIDs.at(i);
