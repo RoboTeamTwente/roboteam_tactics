@@ -395,7 +395,7 @@ bt::Node::Status ReceiveBall::Update() {
 		matchBallVel = true;
 	}
 
-    if (distanceToBall <= 0.15 && fabs(angleError) <= 0.2) {
+    if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
     	ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {
