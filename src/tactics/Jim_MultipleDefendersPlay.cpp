@@ -119,9 +119,9 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     Vector2 ourGoalPos = LastWorld::get_our_goal_center();
 
     // Check if any previously assigned robots have vanished
-    std::remove_if(activeRobots.begin(), activeRobots.end(), [&world](int id) {
+    activeRobots.erase(std::remove_if(activeRobots.begin(), activeRobots.end(), [&world](int id) {
     	return !getWorldBot(id, true, world);
-    });
+    }), activeRobots.end());
 
     std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
@@ -136,7 +136,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int maxBallDefenders = 2;
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
-    distancesBallDefendersFromGoal.clear();
 
     bool ballOnTheirSide = ballPos.x > 0.0 || ballVel.x > 0.5;
 
@@ -165,7 +164,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             if (angleDiffBall <= 0.15) {
                 minBallDefenders = 2;
             } else {
-
             	bool addDangerousOpp = true;
             	for (size_t j = 0; j < dangerousOpps.size(); j++) {
             		double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
@@ -185,7 +183,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int numDangerousOpps = dangerousOpps.size();
 
     int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
-   int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
+    int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
     newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
     newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
 
@@ -193,7 +191,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     if (justChecking) {
     	return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
     }
-
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
