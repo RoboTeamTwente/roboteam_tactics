@@ -168,9 +168,8 @@ bt::Node::Status GetBall::Update (){
 
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
     bool canSeeGoal = viewOfGoal >= 0.2; 
-    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal && !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
-
-
+    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
+    		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
@@ -186,7 +185,6 @@ bt::Node::Status GetBall::Update (){
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
                 opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
                 double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos));
-                ROS_INFO_STREAM("evaluating: " << world.us.at(i).id << " score: " << score);
                 if (score > maxScore) {
                     maxScore = score;
                     maxScoreID = world.us.at(i).id;
@@ -194,18 +192,17 @@ bt::Node::Status GetBall::Update (){
             }
         }
         
-        if (maxScore > -std::numeric_limits<double>::max() && !GetBool("dontShootAtGoal", false)) {
+        if (maxScore > -std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
             choseRobotToPassTo = true;
-            ROS_INFO_STREAM("passing towards robot: " << maxScoreID);
         } else {
-            SetString("aimAt", "theirgoal");
+        	SetString("aimAt", "theirgoal");
         }
         
     }
     
 
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
-    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
+    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
     } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);

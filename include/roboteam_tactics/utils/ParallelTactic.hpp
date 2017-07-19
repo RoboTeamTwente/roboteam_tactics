@@ -80,7 +80,7 @@ public:
 
         auto leftovers = getAvailableRobots();
         if (leftovers.size() > 0) {
-        	ROS_WARN("ParellelTactic: %lu robots remain unclaimed", leftovers.size());
+        	//ROS_WARN("ParallelTactic: %lu robots remain unclaimed", leftovers.size());
         }
 
         if (encounteredAnInvalid) {

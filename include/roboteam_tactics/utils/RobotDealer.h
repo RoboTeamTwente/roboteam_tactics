@@ -29,7 +29,7 @@ public:
     
     static std::vector<int> getClaimedRobots();
     
-    static int setKeeper(int id);
+    static void setKeeper(int id);
 
     /**
      * \brief Gets the id of the designated keeper

@@ -66,7 +66,7 @@ bt::Node::Status Kick::Update() {
     ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
 
     // if (oldBallVelInRobotDir < 0.1) {
-        if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.2 && currentBallVelInRobotDir >= 0.1) {
+        if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.5 && currentBallVelInRobotDir >= 0.5) {
             ROS_INFO_STREAM("Kick Success");
             return bt::Node::Status::Success;
         }
