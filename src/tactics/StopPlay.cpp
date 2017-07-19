@@ -87,7 +87,7 @@ bt::Node::Status StopPlay::Update() {
 }
 
 void StopPlay::Initialize() {
-	std::vector<int> available = RobotDealer::get_available_robots();
+	std::vector<int> available = getAvailableRobots();
 	if (available.size() == 0) {
 		return;
 	}
