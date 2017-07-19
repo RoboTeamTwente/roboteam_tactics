@@ -30,6 +30,7 @@ void sendRoleDirectives(const std::vector<int>& ids) {
 		bb.SetDouble("GoToPos_A_xGoal", bot->pos.x);
 		bb.SetDouble("GoToPos_A_yGoal", bot->pos.y);
 		bb.SetDouble("GoToPos_A_angleGoal", bot->angle);
+		bb.SetBool("GoToPos_A_avoidRobots", true);
 
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
