@@ -94,16 +94,22 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
             Vector2 otherRobotPos(currentRobot.pos);
-            if ((otherRobotPos - myPos).length() <= lookingDistance) {
-                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
+            Vector2 otherRobotVel(currentRobot.vel);
+            double distToRobot = (otherRobotPos - myPos).length();
+            Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
+            if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
+                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
                 sumOfForces = sumOfForces + forceVector;
             }
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
         Vector2 otherRobotPos(world.them.at(i).pos);
-        if ((otherRobotPos - myPos).length() <= lookingDistance) {
-            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, antenna, targetPos);
+        Vector2 otherRobotVel(world.them.at(i).vel);
+        double distToRobot = (otherRobotPos - myPos).length();
+        Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
+        if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
+            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
             sumOfForces = sumOfForces + forceVector;
         }
     }
