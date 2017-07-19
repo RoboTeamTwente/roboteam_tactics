@@ -16,7 +16,7 @@
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
-
+#include "roboteam_tactics/conditions/DistanceXToY.h"
 
 #define RTT_CURRENT_DEBUG_TAG GoToPos
 
@@ -122,8 +122,8 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
     Vector2 posError = targetPos - myPos;
 
     if (ROBOT_ID != KEEPER_ID) {
-        Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", myPos, 0.0);
-        if (fabs(distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
+        Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, 0.0);
+        if ((distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
             if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
                 sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
             } else {
@@ -132,8 +132,8 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
         }
     }
 
-    Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", myPos, 0.0);
-    if (fabs(distToTheirDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToTheirDefenseArea) > 0) {
+    Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, myPos, 0.0);
+    if ((distToTheirDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToTheirDefenseArea) > 0) {
         if (sumOfForces.dot(distToTheirDefenseArea.rotate(0.5*M_PI)) > 0) {
             sumOfForces = distToTheirDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
         } else {
