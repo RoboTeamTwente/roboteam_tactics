@@ -32,7 +32,7 @@ void FreeKickDefenceTactic::Initialize() {
     tokens.clear();
     ros::Duration(.1).sleep();
     RTT_DEBUGLN("Initializing FreeKickDefence");
-    std::vector<int> available = RobotDealer::get_available_robots();
+    std::vector<int> available = getAvailableRobots();
     roboteam_msgs::World world = LastWorld::get();
     bool has_keeper = RobotDealer::get_keeper_available();
     

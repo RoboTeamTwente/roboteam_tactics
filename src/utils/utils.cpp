@@ -482,7 +482,8 @@ std::vector<int> getAvailableRobots(roboteam_msgs::World const & world) {
     std::vector<int> availableRobots;
 
     for (auto const & bot : world.us) {
-        if (std::find(dealerRobots.begin(), dealerRobots.end(), bot.id) == dealerRobots.end()) {
+        if (bot.id != static_cast<unsigned int>(RobotDealer::get_keeper())
+                && std::find(dealerRobots.begin(), dealerRobots.end(), bot.id) == dealerRobots.end()) {
             availableRobots.push_back(bot.id);
         }
     }

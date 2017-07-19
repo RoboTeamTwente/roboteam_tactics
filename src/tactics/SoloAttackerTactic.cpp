@@ -31,13 +31,13 @@ void SoloAttackerTactic::Initialize() {
 
     // RTT_DEBUG("Initializing SoloAttackerTactic \n");
     
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
     }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     
     int attackerID = 7;
     int keeperID = 3;

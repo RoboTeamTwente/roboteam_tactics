@@ -153,6 +153,8 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
+    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
+
     StrategyDebugInfo stratDebugInfo;
 
     std::shared_ptr<bt::BehaviorTree> strategy;
@@ -165,6 +167,10 @@ int main(int argc, char *argv[]) {
             if (!strategy) {
                 std::cerr << "There was an error initializing the main strategy tree (StrategyComposer). Aborting.\n";
                 return 1;
+            }
+
+            if (!rtt::LastRef::waitForFirstRefCommand()) {
+                return 0;
             }
         } else {
             // Get all available trees
@@ -233,8 +239,6 @@ int main(int argc, char *argv[]) {
     rtt::RobotDealer::setKeeper(0);
 
     RTT_DEBUGLN("More than one robot found. Starting!");
-    
-    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
     
     while (ros::ok()) {
         ros::spinOnce();

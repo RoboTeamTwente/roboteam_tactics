@@ -123,7 +123,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     	return !getWorldBot(id, true, world);
     });
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
 
     if (numRobots < 1) {

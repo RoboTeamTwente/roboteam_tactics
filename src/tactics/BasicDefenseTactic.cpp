@@ -28,7 +28,7 @@ void BasicDefenseTactic::Initialize() {
     roboteam_msgs::World world = rtt::LastWorld::get();
 
     // Assign the remaining robots the secondary keeper role
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     // double yStep = LastWorld::get_field().field_width / (robots.size() + 1);
     // double startY = LastWorld::get_field().field_width / 2 - yStep;
 

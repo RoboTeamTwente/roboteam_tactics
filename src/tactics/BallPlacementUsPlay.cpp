@@ -29,7 +29,7 @@ void BallPlacementUsPlay::Initialize() {
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    auto robots = RobotDealer::get_available_robots();
+    auto robots = getAvailableRobots();
 
     if (robots.size() == 0) {
         RTT_DEBUGLN("No robots left to claim!");

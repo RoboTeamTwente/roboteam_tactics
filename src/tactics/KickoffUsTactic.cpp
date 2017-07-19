@@ -66,7 +66,7 @@ void KickoffUsTactic::Initialize() {
     }
 
     // Find robot closest to ball
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     auto world = LastWorld::get();
     Vector2 ballPos = world.ball.pos;
 

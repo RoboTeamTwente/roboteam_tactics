@@ -6,7 +6,7 @@ namespace rtt {
     
 void SecondaryKeeperTactic::Initialize() {
     auto world = LastWorld::get();
-    auto bots = RobotDealer::get_available_robots();
+    auto bots = getAvailableRobots();
     
     if (bots.size() == 0) {
         RTT_DEBUGLN("No robots available for SecondaryKeeperTactic...");

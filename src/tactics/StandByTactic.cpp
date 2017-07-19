@@ -32,13 +32,13 @@ void StandByTactic::Initialize() {
     RTT_DEBUG("Initializing StandByTactic \n");
 
     
-    // if (RobotDealer::get_available_robots().size() < 2) {
+    // if (getAvailableRobots().size() < 2) {
         // RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         // return;
     // }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     int firstRobotID = 0;
     int secondRobotID = 1;

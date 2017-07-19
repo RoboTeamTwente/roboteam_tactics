@@ -28,7 +28,7 @@ std::vector<roboteam_msgs::WorldRobot> getRobotsByProximity() {
 
 void KickoffDefensePlay::Initialize() {
 	RTT_DEBUGLN("KickoffDefensePlay initializing");
-	const auto availableBots = RobotDealer::get_available_robots();
+	const auto availableBots = getAvailableRobots();
 	if (availableBots.size() < 3) {
 		RTT_DEBUGLN("Not enough robots avaialble...");
 		return;

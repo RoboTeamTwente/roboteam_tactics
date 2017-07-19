@@ -17,7 +17,7 @@ std::set<int> RobotDealer::taken_robots;
 // std::set<int> RobotDealer::available_robots;
 std::map<std::string, std::set<int>> RobotDealer::robot_owners;
 int RobotDealer::keeper;
-bool RobotDealer::keeper_available;
+bool RobotDealer::keeper_available = true;
 boost::interprocess::interprocess_mutex RobotDealer::mutex;
 
 #define LOCK_THIS_FUNCTION \
@@ -43,7 +43,7 @@ std::vector<int> RobotDealer::getClaimedRobots() {
     return std::vector<int>(taken_robots.begin(), taken_robots.end());
 }
 
-int RobotDealer::set_keeper(int id) {
+int RobotDealer::setKeeper(int id) {
     keeper = id;
 }
 

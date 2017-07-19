@@ -33,7 +33,7 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
 
     RTT_DEBUGLN_TEAM("Initializing Bob_ChipoffAtGoalPlay");
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     if (robots.size() < 1) {
         RTT_DEBUGLN("Less than one robot detected; cannot use play!");

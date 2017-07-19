@@ -34,13 +34,13 @@ void Jim_GetBallPlay::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("No robots available, cannot initialize... \n");
         //TODO: Want to pass failure here as well!
         return;
     }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     Vector2 ballPos = Vector2(world.ball.pos);
     auto ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
     if (!ballGetterID) {
