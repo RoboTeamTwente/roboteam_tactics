@@ -112,6 +112,8 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
+
+	
 	double ballDir = ballVel.dot(receiveBallAtPos - ballPos);
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
@@ -369,10 +371,8 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	if (distanceToBall < dribblerDist) {
-		ROS_INFO_STREAM("dribbler on " << distanceToBall);
 		private_bb->SetBool("dribbler", true);
 	} else {
-		ROS_INFO_STREAM("dribbler off " << distanceToBall);
 		private_bb->SetBool("dribbler", false);
 	}
 
@@ -388,7 +388,6 @@ bt::Node::Status ReceiveBall::Update() {
     // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
     // if (iHaveBall2.Update() == Status::Success) {
 	double angleError = cleanAngle(targetAngle - robot.angle);
-	ROS_INFO_STREAM("receiveBall, dist " << distanceToBall << " angleError " << fabs(angleError));
 
 	bool matchBallVel = false;
 	if (distanceToBall <= 0.6 && fabs(angleError) <= 0.2) {

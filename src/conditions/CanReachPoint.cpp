@@ -82,15 +82,15 @@ bt::Node::Status CanReachPoint::Update() {
 	ROS_INFO_STREAM("estimatedTimeToPoint: " << estimatedTimeToPoint);
 
 	if (estimatedTimeToPoint < 0.0) {
-		ROS_INFO_STREAM("hmm, distance too short");
+		// ROS_INFO_STREAM("hmm, distance too short");
 		return Status::Failure;
 	} else {
 		double timeLimit = GetDouble("timeLimit");
 		if (estimatedTimeToPoint < timeLimit) {
-			ROS_INFO_STREAM("can reach point within time");
+			// ROS_INFO_STREAM("can reach point within time");
 			return Status::Success;
 		} else {
-			ROS_INFO_STREAM("cannot reach point within time");
+			// ROS_INFO_STREAM("cannot reach point within time");
 			return Status::Failure;
 		}
 	}
