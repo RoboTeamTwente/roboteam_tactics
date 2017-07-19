@@ -40,7 +40,7 @@ void OneTwoTactic::Initialize() {
     RTT_DEBUG("Initializing Tactic\n");
 
     // This tactic directs two robots
-    auto robots = RobotDealer::get_available_robots();
+    auto robots = getAvailableRobots();
 
     // Signalling failure should be easier for tactics
     // Either extend the bt framework or give tactic another helper method?

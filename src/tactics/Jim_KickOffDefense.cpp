@@ -35,7 +35,7 @@ void Jim_KickOffDefense::Initialize() {
     tokens.clear();
 
     RTT_DEBUGLN_TEAM("Initializing Jim_KickOffDefense");    
-    if (RobotDealer::get_available_robots().size() < 4) {
+    if (getAvailableRobots().size() < 4) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -47,7 +47,7 @@ void Jim_KickOffDefense::Initialize() {
     std::vector<roboteam_msgs::WorldRobot> theirRobots = world.them;   
 
         
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int keeperID = RobotDealer::get_keeper();
 
 
@@ -143,7 +143,7 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
-    int numRobotDefenders = std::min((int) RobotDealer::get_available_robots().size(), 3);    
+    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 3);    
     
 
 

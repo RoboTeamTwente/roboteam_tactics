@@ -9,7 +9,7 @@ KeepPositionPlay::KeepPositionPlay(std::string name, bt::Blackboard::Ptr bb) : T
 
 void KeepPositionPlay::Initialize() {
 
-	auto available = RobotDealer::get_available_robots();
+	auto available = getAvailableRobots();
 
 	auto& pub = GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 

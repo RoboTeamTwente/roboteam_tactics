@@ -26,7 +26,7 @@ void BasicKeeperTactic::Initialize() {
     RTT_DEBUGLN("%s\n", ss.str().c_str());
     
     // Assign the remaining robots the secondary keeper role
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     Vector2 theirGoalPos = LastWorld::get_our_goal_center();
     Vector2 keeperPos(theirGoalPos.x - 0.3*signum(theirGoalPos.x), theirGoalPos.y);

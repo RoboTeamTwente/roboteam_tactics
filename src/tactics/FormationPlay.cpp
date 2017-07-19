@@ -64,7 +64,7 @@ Formation::Formation() :
 }
 
 Formation::Formation(const roboteam_msgs::World& world, boost::optional<int> keeperIdx)
-    : positions(), minimumRobots(0), name(CURRENT_POSITIONS_FORMATION), keeperIdx(keeperIdx) {
+    : positions(world.us.size()), minimumRobots(0), name(CURRENT_POSITIONS_FORMATION), keeperIdx(keeperIdx) {
 	for (const auto& bot : world.us) {
 		positions.push_back({bot});
 	}
@@ -91,7 +91,7 @@ void FormationPlay::Initialize() {
 			? Formation(LastWorld::get(), HasInt("KEEPER_ID") ? boost::optional<int>(GetInt("KEEPER_ID")) : boost::none)
 			: allFormations.at(name));
 
-	std::vector<int> robots = RobotDealer::get_available_robots();
+	std::vector<int> robots = getAvailableRobots();
 	if (robots.size() < formation->minimumRobots) {
 		ROS_WARN("FormationPlay: Not enough robots available, continuing anyway");
 	}
@@ -134,8 +134,8 @@ void FormationPlay::Initialize() {
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 
-		std::cout << "Sending robot " << id << " to " << Vector2(pos.x, pos.y)
-				<< "\n";
+		//std::cout << "Sending robot " << id << " to " << Vector2(pos.x, pos.y)
+		//		<< "\n";
 	}
 
 	if (hasKeeperPosition) {
@@ -158,8 +158,8 @@ void FormationPlay::Initialize() {
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 
-		std::cout << "Sending robot " << keeperId << " to " << Vector2(pos.x, pos.y)
-				<< "\n";
+		//std::cout << "Sending robot " << keeperId << " to " << Vector2(pos.x, pos.y)
+		//		<< "\n";
 	}
 }
 

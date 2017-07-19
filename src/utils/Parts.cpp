@@ -95,7 +95,7 @@ void Tactic::Terminate(Status) {
     }
 }
 
-void Tactic::claim_robot(int id) {
+bool Tactic::claim_robot(int id) {
     if (claimed_robots.find(id) != claimed_robots.end()) {
         ROS_ERROR("Robot %d is already claimed by tactic %s!\n", id, name.c_str());
         for (const int ROBOT_ID : claimed_robots) {
@@ -105,13 +105,15 @@ void Tactic::claim_robot(int id) {
 
     claimed_robots.insert(id);
 
-    RobotDealer::claim_robot_for_tactic(id, name);
+    return RobotDealer::claim_robot_for_tactic(id, name);
 }
 
-void Tactic::claim_robots(std::vector<int> ids) {
+bool Tactic::claim_robots(std::vector<int> ids) {
+	bool allClaimed = true;
     for (int id : ids) {
-        claim_robot(id);
+        allClaimed &= claim_robot(id);
     }
+    return allClaimed;
 }
 
 std::vector<int> Tactic::get_claimed_robots() {
@@ -120,6 +122,22 @@ std::vector<int> Tactic::get_claimed_robots() {
 
 bool Tactic::is_claimed(int id) {
     return claimed_robots.find(id) != claimed_robots.end();
+}
+
+bool Tactic::release_robot(int id) {
+	if (RobotDealer::release_robot(id)) {
+		claimed_robots.erase(id);
+		return true;
+	}
+	return false;
+}
+
+bool Tactic::release_robots(std::vector<int> ids) {
+	bool allReleased = true;
+	for (int id : ids) {
+		allReleased &= release_robot(id);
+	}
+	return allReleased;
 }
 
 } // rtt

@@ -32,7 +32,7 @@ void AttackerTactic::Initialize() {
 
     RTT_DEBUG("Initializing\n");
     
-    // if (RobotDealer::get_available_robots().size() < 4) {
+    // if (getAvailableRobots().size() < 4) {
     //     RTT_DEBUG("Not enough robots, cannot initialize.\n");
     //     // TODO: Want to pass failure here as well!
     //     return;
@@ -44,7 +44,7 @@ void AttackerTactic::Initialize() {
     // int primaryAttacker = 0;
     int secondaryAttacker = 1;
 
-    // std::vector<int> robots = RobotDealer::get_available_robots();
+    // std::vector<int> robots = getAvailableRobots();
     
     // primaryAttacker = get_robot_closest_to_ball(robots);
     // delete_from_vector(robots, primaryAttacker);

@@ -477,14 +477,17 @@ bool weAreLeft() {
     return tgt == "left";
 }
 
-std::vector<int> getVisibleAndAvailableRobots() {
-    std::vector<int> dealerRobots = RobotDealer::get_available_robots();
+std::vector<int> getAvailableRobots(roboteam_msgs::World const & world) {
+    std::vector<int> dealerRobots = RobotDealer::getClaimedRobots();
     std::vector<int> availableRobots;
-    for (auto const & bot : LastWorld::get().us) {
-        if (std::find(dealerRobots.begin(), dealerRobots.end(), bot.id) != dealerRobots.end()) {
+
+    for (auto const & bot : world.us) {
+        if (bot.id != static_cast<unsigned int>(RobotDealer::get_keeper())
+                && std::find(dealerRobots.begin(), dealerRobots.end(), bot.id) == dealerRobots.end()) {
             availableRobots.push_back(bot.id);
         }
     }
+
     return availableRobots;
 }
 

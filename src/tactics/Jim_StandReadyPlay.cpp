@@ -33,14 +33,14 @@ void Jim_StandReadyPlay::Initialize() {
 
     RTT_DEBUG("Initializing Jim_StandReadyPlay \n");
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("No robots available, cannot initialize... \n");
         //TODO: Want to pass failure here as well!
         return;
     }
     
     roboteam_msgs::World world = LastWorld::get();
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int keeper = RobotDealer::get_keeper();
     // Vector2 keeperPos = Vector2(-4.0, -0.0);
     Vector2 centerPos = Vector2(-2.0, 0.0);

@@ -11,7 +11,7 @@ Qualification1v1Tactic::Qualification1v1Tactic(std::string name, bt::Blackboard:
     
 void Qualification1v1Tactic::Initialize() {
     tokens.clear();
-    auto robots = RobotDealer::get_available_robots();
+    auto robots = getAvailableRobots();
 
     if (robots.size() < 2) {
         canRun = false;

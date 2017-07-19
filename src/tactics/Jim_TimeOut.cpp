@@ -34,14 +34,14 @@ void Jim_TimeOut::Initialize() {
 
     RTT_DEBUG("Initializing Jim_TimeOut \n");
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("No robots available, cannot initialize... \n");
         //TODO: Want to pass failure here as well!
         return;
     }
     
     roboteam_msgs::World world = LastWorld::get();
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int keeper = RobotDealer::get_keeper();
     robots.push_back(keeper);
 

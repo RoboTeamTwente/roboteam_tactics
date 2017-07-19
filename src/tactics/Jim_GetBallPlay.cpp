@@ -15,6 +15,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Vector2.h"
 #include "unique_id/unique_id.h" 
+#include "roboteam_tactics/utils/RobotDealer.h"
 
 #define RTT_CURRENT_DEBUG_TAG Jim_GetBallPlay
 
@@ -34,13 +35,13 @@ void Jim_GetBallPlay::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("No robots available, cannot initialize... \n");
         //TODO: Want to pass failure here as well!
         return;
     }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     Vector2 ballPos = Vector2(world.ball.pos);
     auto ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
     if (!ballGetterID) {
@@ -52,8 +53,7 @@ void Jim_GetBallPlay::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     RTT_DEBUGLN("Initializing Jim_GetBallPlay"); 
-    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
-
+    RTT_DEBUGLN("GetBall robot: %i ", *ballGetterID);
 
     // =============================
     // Initialize the Ball Getter
@@ -66,7 +66,7 @@ void Jim_GetBallPlay::Initialize() {
         activeRobot = *ballGetterID;
 
         bb.SetInt("ROBOT_ID", *ballGetterID);
-        bb.SetInt("KEEPER_ID", 5);
+        bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
 

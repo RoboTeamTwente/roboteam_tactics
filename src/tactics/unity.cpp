@@ -133,3 +133,6 @@
 
 #include "PrepareKeeperPenaltyThem.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "StopPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

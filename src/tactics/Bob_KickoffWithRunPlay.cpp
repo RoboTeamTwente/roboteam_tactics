@@ -31,7 +31,7 @@ void Bob_KickoffWithRunPlay::Initialize() {
 
     RTT_DEBUGLN_TEAM("Initializing Bob_KickoffWithRunPlay");
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     Vector2 receivePos(4.5 / 2, 3 / -2.0);
     Vector2 startPos(-3, 3 / -2.0);
     Vector2 thresholdPos(-1, 3 / -2.0);

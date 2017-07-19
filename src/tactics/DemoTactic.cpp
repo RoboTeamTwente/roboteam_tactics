@@ -33,13 +33,13 @@ void DemoTactic::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
 
-    if (RobotDealer::get_available_robots().size() < 4) {
+    if (getAvailableRobots().size() < 4) {
         std::cout << "Not enough robots, cannot initialize.\n";
         // TODO: Want to pass failure here as well!
         return;
     }
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     int attack_bot = get_robot_closest_to_ball(robots, world);
     delete_from_vector(robots, attack_bot);
