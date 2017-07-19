@@ -221,7 +221,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetInt("KEEPER_ID", keeperID);
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/KeeperRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -238,6 +238,9 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     // Initialize the Ball Defenders!
     // ====================================
     std::vector<double> angleOffsets;
+    std::vector<Vector2> idlePositions;
+    idlePositions.push_back(Vector2(-3.0, 1.1));
+    idlePositions.push_back(Vector2(-3.0, -1.1));
 
     if (weAreAttacking) {
     	if (numBallDefenders == 1) {
@@ -286,6 +289,10 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", ballDefenderID);
         bb.SetInt("KEEPER_ID", keeperID);
+
+        bb.SetDouble("GoToPos_A_xGoal", idlePositions.at(i).x);
+        bb.SetDouble("GoToPos_A_yGoal", idlePositions.at(i).y);
+        bb.SetDouble("GoToPos_A_angleGoal", 0.0);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
         //ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
