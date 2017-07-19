@@ -220,8 +220,8 @@ public:
         std::string our_side;
 		ros::param::get("our_side", our_side);
 
-		Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", to_block, safetyMarginGoalAreas);
-		Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", to_block, safetyMarginGoalAreas);
+		Vector2 distToOurDefenseArea = getDistToDefenseArea(true, to_block, safetyMarginGoalAreas);
+		Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, to_block, safetyMarginGoalAreas);
 		ROS_INFO("distToOurDefensArea: x:%f, y:%f",distToOurDefenseArea.x,distToOurDefenseArea.y);
 		
 		Vector togoalarea;
