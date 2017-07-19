@@ -43,7 +43,7 @@ std::vector<int> RobotDealer::getClaimedRobots() {
     return std::vector<int>(taken_robots.begin(), taken_robots.end());
 }
 
-int RobotDealer::setKeeper(int id) {
+void RobotDealer::setKeeper(int id) {
     keeper = id;
 }
 

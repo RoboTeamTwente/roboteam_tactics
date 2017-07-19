@@ -208,13 +208,13 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     // if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(true, newTargetPos)) {
-            Vector2 distToOurDefenseArea = getDistToDefenseArea("our defense area", newTargetPos, safetyMarginGoalAreas);
+            Vector2 distToOurDefenseArea = getDistToDefenseArea(true, newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(false, newTargetPos)) {
-            Vector2 distToTheirDefenseArea = getDistToDefenseArea("their defense area", newTargetPos, safetyMarginGoalAreas);
+            Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
     }
