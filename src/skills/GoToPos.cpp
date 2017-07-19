@@ -359,7 +359,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    // ROS_INFO_STREAM("posError: " << posError << " angleError: " << angleError);
     if (posError.length() < successDist && fabs(angleError) < 0.08) {
         successCounter++;
         if (successCounter >= 3) {
