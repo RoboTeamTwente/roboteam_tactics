@@ -42,6 +42,8 @@ public:
 
     void AddStrategy(RefState refState, Node::Ptr child);
 
+    void printRefStateInfo() const;
+
 private:
     bool validated;
     boost::optional<RefState> previousCmd;

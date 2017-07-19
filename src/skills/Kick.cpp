@@ -38,7 +38,7 @@ bt::Node::Status Kick::Update() {
 
     cycleCounter++;
     if (cycleCounter > 20) {
-        ROS_INFO_STREAM("Kick Failure");
+        // ROS_INFO_STREAM("Kick Failure");
         return bt::Node::Status::Failure;
     }
 
@@ -63,11 +63,8 @@ bt::Node::Status Kick::Update() {
     double currentBallVelInRobotDir = currentBallVel.dot(robotDirVector);
     double oldBallVelInRobotDir = oldBallVel.dot(robotDirVector);
 
-    ROS_INFO_STREAM("currentVel: " << currentBallVelInRobotDir << " oldVel: " << oldBallVelInRobotDir);
-
     // if (oldBallVelInRobotDir < 0.1) {
         if ((currentBallVelInRobotDir - oldBallVelInRobotDir) > 0.5 && currentBallVelInRobotDir >= 0.5) {
-            ROS_INFO_STREAM("Kick Success");
             return bt::Node::Status::Success;
         }
     // } else if (fabs(currentBallVel.angle() - oldBallVel.angle()) > 0.05) {

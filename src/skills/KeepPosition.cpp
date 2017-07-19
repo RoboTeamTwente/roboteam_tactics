@@ -44,12 +44,24 @@ bool KeepPosition::updateGoalPosition() {
 		return false;
 	}
 
-	Vector2 ownPos = initialPos ? initialPos->location() : Vector2 { bot->pos };
-	Vector2 nearest = getNearestObject(ownPos);
-	Vector2 diff = nearest - ownPos;
-	Vector2 goal =
-			diff.length() > MINIMUM_ROBOT_DISTANCE ?
-					ownPos : diff.rotate(M_PI) + ownPos;
+    Vector2 ownPos = Vector2 { bot->pos };
+    Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
+    Vector2 nearest = getNearestObject(ownPos);
+    Vector2 diff = nearest - ownPos;
+
+    Vector2 goal;
+
+    if ((nearest - referencePos).length() > MINIMUM_ROBOT_DISTANCE) {
+        // All clear! We can go back to our designated position.
+        goal = referencePos;
+    } else if (diff.length() < MINIMUM_ROBOT_DISTANCE) {
+        // We're too close to something, let's move out of the way.
+        Vector2 desired_distance = diff.stretchToLength(MINIMUM_ROBOT_DISTANCE - diff.length());
+    	goal = desired_distance.rotate(M_PI) + ownPos;
+    } else {
+        // No need to move.
+        goal = ownPos;
+    }
 
 	// ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
 
