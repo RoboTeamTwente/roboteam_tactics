@@ -24,6 +24,7 @@ bt::Node::Status KeepPosition::Update() {
 		private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
 		private_bb->SetDouble("KeepPosition_GTP_targetAngle", bot->angle);
 		private_bb->SetBool("KeepPosition_GTP_avoidRobots", true);
+		private_bb->SetBool("KeepPosition_GTP_avoidBall", true);
 		gtp = std::make_unique<GoToPos>("KeepPosition_GTP", private_bb);
 	}
 	if (!updateGoalPosition()) {
