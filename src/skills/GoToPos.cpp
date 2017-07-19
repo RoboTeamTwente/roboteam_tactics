@@ -38,7 +38,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.2;
+            avoidRobotsGain = 0.1;
         }
 
 
@@ -87,8 +87,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
 
     // Draw the antenna in rqt-view
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("antenna", myPos, antenna);
+    // drawer.setColor(255, 0, 0);
+    // drawer.drawLine("antenna", myPos, antenna);
 
     // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
@@ -115,7 +115,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         }
     }
 
-    drawer.setColor(0, 255, 255);
+    drawer.setColor(255, 0, 0);
     drawer.drawLine("sumOfForces", myPos, sumOfForces);
     drawer.setColor(0, 0, 0);
 
@@ -338,8 +338,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
-    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    
+    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;
@@ -384,12 +384,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Position controller to steer the robot towards the target position
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
-    // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
-
     // Robot avoidance
     if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
-        sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        if (posError.length() >= 0.5) {
+            angleGoal = sumOfForces.angle();
+            angleError = cleanAngle(angleGoal - myAngle);
+        }
+        sumOfForces = newSumOfForces;
+        
         // Possibly necessary to scale the velocity to the maxSpeed again after avoidRobots:
         // if (posError.length() > 0.5) {
         //     if (sumOfForces.length() < maxSpeed) {
@@ -397,6 +400,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         //     }
         // }
     }
+
+    drawer.setColor(255,255,255);
+    drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+
+    // Rotation controller to make sure the robot reaches its angleGoal
+    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
+
+    
 
     // Defense area avoidance
     if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
