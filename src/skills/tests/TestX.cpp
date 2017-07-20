@@ -30,13 +30,19 @@
 namespace {
 
 bool mustShutdown = false;
+unsigned sigCounter = 0;
 
 void mySigintHandler(int sig) {
     if (sig == SIGINT) {
         mustShutdown = true;
+        sigCounter++;
     }
 
     std::cout << "Sig: " << sig << "\n";
+    if (sigCounter >= 3) {
+    	std::cout << "Received at least 3 SIGINTs, so stopping ungracefully\n";
+    	std::exit(0);
+    }
 }
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
