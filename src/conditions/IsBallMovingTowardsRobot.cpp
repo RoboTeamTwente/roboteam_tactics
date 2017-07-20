@@ -23,28 +23,37 @@ IsBallMovingTowardsRobot::IsBallMovingTowardsRobot(std::string name, bt::Blackbo
 bt::Node::Status IsBallMovingTowardsRobot::Update() {
 	// ROS_INFO("called IsBallMovingTowardsRobot");
 	roboteam_msgs::World world = LastWorld::get();
-	auto field = LastWorld::get_field();
-	Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
-	std::string our_side = get_our_side();
+	Vector2 ballVel(world.ball.vel);
+	Vector2 ballPos(world.ball.pos);
+	if (ballVel.length() <= 0.5) {
+    	return Status::Failure;
+    }
 
-	if (GetBool("our_goal")) {
-		// if(our_side == "left"){
-			Vector2 goalPos = Vector2(field.field_length/-2.0, 0);
-			if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		// } else {
-			// Vector2 goalPos = Vector2(field.field_length/2.0, 0);
-			// if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		// }
-	} else {
-		// if(our_side == "left"){
-			Vector2 goalPos = Vector2(field.field_length/2.0, 0);
-			if (ballPos.x >= goalPos.x && ballPos.x <= (goalPos.x+field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		// } else {
-			// Vector2 goalPos = Vector2(field.field_length/-2.0, 0);
-			// if (ballPos.x <= goalPos.x && ballPos.x >= (goalPos.x-field.goal_depth) && abs(ballPos.y) <= field.goal_width) return Status::Success;
-		// }
-	}
-	return Status::Failure;
+	int robotID = GetInt("ROBOT_ID");
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("IsBallMovingTowardsRobot could not find robot");
+        return Status::Failure;
+    }
+
+    Vector2 robotPos(robot.pos);
+    Vector2 ballVelUnit = ballVel.scale(1.0 / ballVel.length());
+    Vector2 posDiff = robotPos - ballPos;
+    if (posDiff.length() <= 0.05) {
+    	return Status::Failure;
+    }
+    Vector2 posDiffUnit = posDiff.scale(1.0 / posDiff.length());
+    double ballDir = ballVelUnit.dot(posDiffUnit);
+    ROS_INFO_STREAM("ballDir: " << ballDir);
+
+    if (ballDir >= 0.5) {
+    	return Status::Success;
+    } else {
+    	return Status::Failure;
+    }
 }
 
 }
