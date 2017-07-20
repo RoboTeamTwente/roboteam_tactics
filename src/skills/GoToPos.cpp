@@ -390,7 +390,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
     // Robot avoidance
-    if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
+    // if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
         Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         if (posError.length() >= 0.5) {
             angleGoal = sumOfForces.angle();
@@ -404,7 +404,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         //         sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
         //     }
         // }
-    }
+    // }
 
     drawer.setColor(255,255,255);
     drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);

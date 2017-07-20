@@ -55,6 +55,8 @@ void Jim_KickOffDefense::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 
+
+
     // =========================
     // Initialize the Keeper
     // =========================
@@ -84,11 +86,13 @@ void Jim_KickOffDefense::Initialize() {
     }
 
 
+
+
     // ====================================
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders = 3;
+    int numBallDefenders = 2;
     std::vector<double> angleOffsets;
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
@@ -97,15 +101,13 @@ void Jim_KickOffDefense::Initialize() {
     std::vector<double> distanceOffsets;
     distanceOffsets.push_back(1.5);
     distanceOffsets.push_back(1.5);
-    distanceOffsets.push_back(3.0);
+    distanceOffsets.push_back(4.0);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
         ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distanceOffsets.at(i), angleOffsets.at(i)));
     }
     
-    // also add a robot located close to the middle circle
-    //ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 4.0, 0.0));
 
     std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
 
@@ -143,10 +145,15 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
-    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 3);    
+
+
+
+
+    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 2);    
     
-
-
+    // ==================================
+    // Find the most dangerous opponents
+    // ==================================
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
         // if (world.dangerScores.at(i) >= minDangerScore) {
@@ -224,12 +231,53 @@ void Jim_KickOffDefense::Initialize() {
         boost::uuids::uuid token = unique_id::fromRandom();
         tokens.push_back(token);
         rd.token = unique_id::toMsg(token);
-
         
 
         // Send to rolenode
         pub.publish(rd);
     }
+
+
+
+    // ==================================================================
+    // Initialize the last Ball Defender! Will also be the kick off taker
+    // ==================================================================
+
+    if (getAvailableRobots().size() >= 1) {
+        int ballDefenderID = getAvailableRobots().at(0);
+
+        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+        delete_from_vector(robots, ballDefenderID);
+        claim_robot(ballDefenderID);
+
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = ballDefenderID;
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", ballDefenderID);
+        bb.SetInt("KEEPER_ID", keeperID);
+
+        bb.SetDouble("DistanceXToY_A_distance", 2.0);
+        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.5);
+        bb.SetBool("SimpleDefender_A_avoidRobots", false);
+        bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+
+        // Create message
+        rd.tree = "rtt_jim/DefenderRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
+
+
 }
 
 
@@ -243,33 +291,6 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     }
 
     return Status::Running;
-
-    // int failureCount = 0;
-    // bool allFailed = true;
-
-    // if (tokens.size() == 0) {
-    //     allFailed = false;
-    // }
-
-    // for (auto token : tokens) {
-    //     if (feedbacks.find(token) != feedbacks.end()) {
-    //         Status status = feedbacks.at(token);
-    //         if (status == bt::Node::Status::Success) {
-    //             RTT_DEBUGLN("Jim_KickOffDefense succeeded!");
-    //             return Status::Success;
-    //         }
-
-    //         allFailed &= status == bt::Node::Status::Failure;
-    //     } else {
-    //         allFailed = false;
-    //     }
-    // }
-
-    // if (allFailed) {
-    //     return Status::Failure;
-    // }
-
-    // return Status::Running;
 }
 
 } // rtt
