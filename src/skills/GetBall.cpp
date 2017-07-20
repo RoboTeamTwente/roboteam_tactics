@@ -175,6 +175,7 @@ bt::Node::Status GetBall::Update (){
         }
     }
 
+    boost::optional<int> maxScoreID = boost::none;
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
     if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
@@ -208,8 +209,8 @@ bt::Node::Status GetBall::Update (){
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
-    } else if (choseRobotToPassTo) {
-        targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
+    } else if (choseRobotToPassTo && maxScoreID) {
+        targetAngle = GetTargetAngle(ballPos, "robot", *maxScoreID, true);
     } else if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else if (HasDouble("targetAngle")) {

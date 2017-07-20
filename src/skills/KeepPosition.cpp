@@ -9,6 +9,39 @@ KeepPosition::KeepPosition(std::string name, bt::Blackboard::Ptr bb) :
 		Skill(name, bb) {
 }
 
+std::pair<boost::optional<Vector2>, boost::optional<Vector2>> circleIntersection(
+		Vector2 p1, double r1, Vector2 p2, double r2) {
+	double dist = p1.dist(p2);
+	if (dist > r1 + r2) {
+		// Too far apart
+		return {boost::none, boost::none};
+	} else if (dist < fabs(r1 - r2)) {
+		ROS_WARN(
+				"KeepPosition.cpp:circleIntersection - One circle is contained in another, this seems unlikely");
+		return {boost::none, boost::none};
+	} else if (dist < .001 && fabs(r1 - r2) < .001) {
+		// These circles are the same...
+		return {boost::none, boost::none};
+	} else {
+		double a = (r1 * r1 - r2 * r2 + dist * dist) / (2 * dist);
+		double h = sqrt(r1 * r1 - a * a);
+		Vector2 intBase { p1.x + a * (p2.x - p1.x) / dist, p1.y
+				+ a * (p2.y - p1.y) / dist };
+		Vector2 intA { intBase.x + h * (p2.y - p1.y) / dist, intBase.y
+				- h * (p2.x - p1.x) / dist };
+
+		if (fabs(dist - r1 + r2) < .001) {
+			// Single 'intersection'
+			return {intA, boost::none};
+		}
+
+		Vector2 intB { intBase.x - h * (p2.y - p1.y) / dist, intBase.y
+				+ h * (p2.x - p1.x) / dist };
+
+		return {intA, intB};
+	}
+}
+
 bt::Node::Status KeepPosition::Update() {
 	if (!gtp) {
 		const auto bot = getWorldBot(GetInt("ROBOT_ID"));
@@ -28,12 +61,12 @@ bt::Node::Status KeepPosition::Update() {
 		gtp = std::make_unique<GoToPos>("KeepPosition_GTP", private_bb);
 	}
 	if (!updateGoalPosition()) {
-        ROS_ERROR("UpdateGoalPosition failed!\n");
+		ROS_ERROR("UpdateGoalPosition failed!\n");
 		return Status::Invalid;
 	}
 	auto subStatus = gtp->Update();
 	if (subStatus == Status::Invalid || subStatus == Status::Failure) {
-        ROS_ERROR("Substatus omg!\n");
+		ROS_ERROR("Substatus omg!\n");
 		return subStatus;
 	}
 	return Status::Running;
@@ -47,31 +80,88 @@ bool KeepPosition::updateGoalPosition() {
 		return false;
 	}
 
-    Vector2 ownPos = Vector2 { bot->pos };
-    Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
-    Vector2 nearest = getNearestObject(ownPos);
-    Vector2 diff = nearest - ownPos;
+	Vector2 ownPos { bot->pos };
+	Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
+	Vector2 ballPos { LastWorld::get().ball.pos };
 
-    Vector2 goal;
+	std::vector<Vector2> obstacles;
 
-    if ((nearest - referencePos).length() > MINIMUM_ROBOT_DISTANCE) {
-        // All clear! We can go back to our designated position.
-        goal = referencePos;
-    } else if (diff.length() < MINIMUM_ROBOT_DISTANCE) {
-        // We're too close to something, let's move out of the way.
-        Vector2 desired_distance = diff.stretchToLength(MINIMUM_ROBOT_DISTANCE - diff.length());
-    	goal = desired_distance.rotate(M_PI) + ownPos;
-    } else {
-        // No need to move.
-        goal = ownPos;
-    }
+	auto bots = LastWorld::get().us;
+	auto them = LastWorld::get().them;
+	bots.insert(bots.end(), them.begin(), them.end());
 
-	// ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
+	ROS_INFO("Obstacles:");
+	if (ownPos.dist(ballPos) < MINIMUM_ROBOT_DISTANCE) {
+		obstacles.push_back(ballPos);
+		ROS_INFO_STREAM(ballPos);
+	}
+	for (const auto& bot : bots) {
+		Vector2 pos { bot.pos };
+		if (pos != ownPos && pos.dist(ownPos) < MINIMUM_ROBOT_DISTANCE) {
+			obstacles.push_back(pos);
+			ROS_INFO_STREAM(pos);
+		}
+	}
+	ROS_INFO("\nCandidates:");
+
+	Vector2 goal;
+	if (obstacles.size() == 0) {
+		goal = referencePos;
+	} else if (obstacles.size() == 1) {
+		Vector2 diff = obstacles.at(0) - ownPos;
+		Vector2 desired_distance = diff.stretchToLength(
+				MINIMUM_ROBOT_DISTANCE - diff.length());
+		goal = desired_distance.rotate(M_PI) + ownPos;
+	} else {
+		std::vector<Vector2> candidates;
+		for (unsigned i = 0; i < obstacles.size(); i++) {
+			for (unsigned j = 0; j < i; j++) {
+				std::pair<boost::optional<Vector2>, boost::optional<Vector2>> intersections =
+						circleIntersection(obstacles.at(i),
+								MINIMUM_ROBOT_DISTANCE, obstacles.at(j),
+								MINIMUM_ROBOT_DISTANCE);
+				ROS_INFO_STREAM(
+						obstacles.at(i) << "~" << obstacles.at(j) << ":");
+				if (intersections.first) {
+					bool clear = true;
+					for (const Vector2& obs : obstacles) {
+						if (intersections.first->dist(obs)
+								< MINIMUM_ROBOT_DISTANCE) {
+							clear = false;
+							break;
+						}
+					}
+					if (clear) {
+						candidates.push_back(*intersections.first);
+						ROS_INFO_STREAM(*intersections.first);
+					}
+				}
+				if (intersections.second) {
+					bool clear = true;
+					for (const Vector2& obs : obstacles) {
+						if (intersections.second->dist(obs)
+								< MINIMUM_ROBOT_DISTANCE) {
+							clear = false;
+							break;
+						}
+					}
+					if (clear) {
+						candidates.push_back(*intersections.second);
+						ROS_INFO_STREAM(*intersections.second);
+					}
+				}
+			}
+		}
+		goal = candidates.size() > 0 ? candidates.at(0) : ownPos;
+	}
+	ROS_INFO("\n\n");
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
 	private_bb->SetDouble("KeepPosition_GTP_angleGoal",
 			initialPos ? initialPos->rot : bot->angle);
+	private_bb->SetBool("KeepPosition_GTP_avoidRobots", true);
+	private_bb->SetBool("KeepPosition_GTP_avoidBall", true);
 	private_bb->SetDouble("KeepPosition_GTP_maxVelocity",
 			STOP_STATE_MAX_VELOCITY);
 	return true;
@@ -95,10 +185,10 @@ Vector2 KeepPosition::getNearestObject(Vector2 ownPos) {
 
 	bool opponentsExist = them.size() > 0;
 
-    us.erase(std::remove_if(us.begin(), us.end(),
-			[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == (unsigned) this->GetInt("ROBOT_ID");}),
-            us.end()
-            );
+	us.erase(
+			std::remove_if(us.begin(), us.end(),
+					[=](const roboteam_msgs::WorldRobot& bot) {return bot.id == (unsigned) this->GetInt("ROBOT_ID");}),
+			us.end());
 
 	std::sort(us.begin(), us.end(), DistToPosSorter { ownPos });
 	if (opponentsExist) {

@@ -3,7 +3,7 @@
 #include "unique_id/unique_id.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/utils.h"
-
+#include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_msgs/RoleDirective.h"
 
 namespace rtt {

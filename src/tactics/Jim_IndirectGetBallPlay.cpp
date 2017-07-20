@@ -66,6 +66,7 @@ void Jim_IndirectGetBallPlay::Initialize() {
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
         bb.SetBool("GetBall_A_dontShootAtGoal", true);
+        bb.SetBool("GetBall_A_passOn", true);
 
         // Create message
         rd.tree = "rtt_jim/GetBallRole";
