@@ -133,7 +133,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 
 	//double ballDir = ballVel.dot();
 
-	ROS_INFO("ballDir: %f",ballDir);
+	// ROS_INFO("ballDir: %f",ballDir);
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 
@@ -416,7 +416,7 @@ bt::Node::Status ReceiveBall::Update() {
 		matchBallVel = false;
 	}
 
-	ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
+	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
     if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
     	ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);

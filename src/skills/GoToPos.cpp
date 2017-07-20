@@ -402,8 +402,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-    drawer.setColor(255,255,255);
-    drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    // drawer.setColor(255,255,255);
+    // drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
 
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);

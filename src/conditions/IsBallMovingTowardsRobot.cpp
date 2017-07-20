@@ -47,7 +47,7 @@ bt::Node::Status IsBallMovingTowardsRobot::Update() {
     }
     Vector2 posDiffUnit = posDiff.scale(1.0 / posDiff.length());
     double ballDir = ballVelUnit.dot(posDiffUnit);
-    ROS_INFO_STREAM("ballDir: " << ballDir);
+    // ROS_INFO_STREAM("ballDir: " << ballDir);
 
     if (ballDir >= 0.5) {
     	return Status::Success;

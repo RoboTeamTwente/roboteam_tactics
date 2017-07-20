@@ -53,17 +53,20 @@ void Jim_IndependentAttackersPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    double xPos = std::min(ballPos.x + 4.5, 2.2);
+    // double xPos = std::min(ballPos.x + 4.5, );
 
-    // std::vector<Vector2> strikersDefaultPositions;
-    // strikersDefaultPositions.push_back(Vector2(xPos, 1.5));
-    // strikersDefaultPositions.push_back(Vector2(xPos, -1.5));
+    std::vector<Vector2> attackersDefaultPositions;
+    attackersDefaultPositions.push_back(Vector2(3.0, 1.5));
+    attackersDefaultPositions.push_back(Vector2(3.0, -1.5));
+    attackersDefaultPositions.push_back(Vector2(1.5, 0.0));
 
-    // std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, strikersDefaultPositions, world);    
+    std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, attackersDefaultPositions, world);    
+
+    numAttackers = std::min((int) strikerIDs.size(), numAttackers);    
 
     for (size_t i = 0; i < (size_t) numAttackers; i++) {
 
-        int strikerID = robots.at(i);
+        int strikerID = strikerIDs.at(i);
         // RTT_DEBUGLN("Initializing Striker %i", strikerID);
         // delete_from_vector(robots, strikerID);
         claim_robot(strikerID);
@@ -76,10 +79,9 @@ void Jim_IndependentAttackersPlay::Initialize() {
         bb.SetInt("ROBOT_ID", strikerID);
         bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
-        // bb.SetBool("ReceiveBall_A_receiveBallAtCurrentPos", false);
-        bb.SetBool("ReceiveBall_A_computePoint", true);
-        bb.SetDouble("ReceiveBall_B_computePointCloseToX", xPos);
-        bb.SetDouble("ReceiveBall_B_computePointCloseToY", 0.0);
+        // bb.SetBool("ReceiveBall_B_computePoint", true);
+        bb.SetDouble("ReceiveBall_B_computePointCloseToX", attackersDefaultPositions.at(i).x);
+        bb.SetDouble("ReceiveBall_B_computePointCloseToY", attackersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_B_setSignal", true);
         bb.SetBool("ReceiveBall_B_shouldFail", true);
         bb.SetDouble("ReceiveBall_B_acceptableDeviation", 0.5);

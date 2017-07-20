@@ -38,7 +38,7 @@
 
 	<param name="role_iterations_per_second" type="int" value="30" />
 	<param name="robot_output_target" type="string" value="$(arg robot_output_target)" />
-	<param name="num_role_nodes" type="int" value="3" />
+	<param name="num_role_nodes" type="int" value="10" />
 	<param name="normalize_field" type="bool" value="true" />
 
 	<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
