@@ -3,14 +3,15 @@
 #include "unique_id/unique_id.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/conditions/WeHaveBall.h"
+
 #include "roboteam_msgs/RoleDirective.h"
 
 namespace rtt {
 
-class Jim_TimeOut : public Tactic {
+class Jim_IndependentAttackersPlay : public Tactic {
     public:
-    Jim_TimeOut(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+    Jim_IndependentAttackersPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
     void Initialize();
     Status Update();
     ros::NodeHandle n;
@@ -18,6 +19,12 @@ class Jim_TimeOut : public Tactic {
     private:
     std::vector<boost::uuids::uuid> tokens;
     time_point start;
+
+    time_point lastUpdate;
+    time_point finishTime;
+    time_point lastTimeWeHadBall;
+
+    WeHaveBall weHaveBall;
 };
 
 }

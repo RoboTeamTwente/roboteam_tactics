@@ -58,7 +58,6 @@ void GetBall::publishStopCommand() {
 }
 
 void GetBall::publishKickCommand(double kickSpeed){
-
     if (HasDouble("kickerVel")) {
         kickSpeed = GetDouble("kickerVel");
     }
@@ -123,6 +122,8 @@ bt::Node::Status GetBall::Update (){
 	robotID = blackboard->GetInt("ROBOT_ID");
     // if (!canClaimBall()) {return Status::Failure;}
 
+    // ROS_INFO_STREAM("robot " << robotID << " in GetBall update");
+
     
 
 	// Wait for the first world message
@@ -156,12 +157,14 @@ bt::Node::Status GetBall::Update (){
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
+    // ROS_INFO_STREAM("Robot: " << robotID << " shootAtGoal: " << shootAtGoal << " viewOfGoal: " << viewOfGoal);
+
 
     if (finalStage){
         if(countFinalMessages < 10){
             if (choseRobotToPassTo) {
                 publishKickCommand(3.0);
-            } else if (shootAtGoal) {
+            } else {
                 publishKickCommand(8.0);
             }
             
@@ -174,6 +177,7 @@ bt::Node::Status GetBall::Update (){
         }
     }
 
+    boost::optional<int> maxScoreID = boost::none;
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
     if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
@@ -207,8 +211,8 @@ bt::Node::Status GetBall::Update (){
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
-    } else if (choseRobotToPassTo) {
-        targetAngle = GetTargetAngle(ballPos, "robot", maxScoreID, true);
+    } else if (choseRobotToPassTo && maxScoreID) {
+        targetAngle = GetTargetAngle(ballPos, "robot", *maxScoreID, true);
     } else if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else if (HasDouble("targetAngle")) {
@@ -249,12 +253,12 @@ bt::Node::Status GetBall::Update (){
     double getBallDist;
     double distAwayFromBall;
     if (robot_output_target == "grsim") {
-        successDist = 0.12;
+        successDist = 0.11;
         successAngle = 0.2;
-        getBallDist = 0.10 ;
+        getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.11;
+        successDist = 0.12 ;
         successAngle = 0.15;
         getBallDist = 0.06;
         distAwayFromBall = 0.2;
@@ -293,7 +297,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         matchBallVel = false;
-        int ballCloseFrameCountTo = 10;
+        int ballCloseFrameCountTo = 20;
         // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
@@ -309,9 +313,9 @@ bt::Node::Status GetBall::Update (){
         } else {
             finalStage = true;
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
-            } else if (shootAtGoal) {
-                publishKickCommand(8.0);
+                publishKickCommand(4.0); // 3.0
+            } else {
+                publishKickCommand(5.0); // 8.0
             }
         }
     } else {

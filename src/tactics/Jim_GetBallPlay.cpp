@@ -103,6 +103,20 @@ void Jim_GetBallPlay::ReleaseAllBots() {
 
 
 bt::Node::Status Jim_GetBallPlay::Update() {
+
+    roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballPos(world.ball.pos);
+    std::vector<int> robots = getAvailableRobots(world);
+    robots.push_back(activeRobot);
+    boost::optional<int> robotClosestToBallPtr = get_robot_closest_to_point(robots, world, ballPos);
+
+    if (robotClosestToBallPtr) {
+        int robotClosestToBall = *robotClosestToBallPtr;
+        ROS_INFO_STREAM("robotClosestToBall: " << robotClosestToBall);
+        if (robotClosestToBall != activeRobot) {
+            return Status::Failure;
+        }
+    }
     
     // if (success) {
     //     if ((now() - successTime).count() >= 1000) {
@@ -113,9 +127,9 @@ bt::Node::Status Jim_GetBallPlay::Update() {
     //     }
     // }
 
-	if (!success) {
-		return Status::Failure;
-	}
+	// if (!success) {
+	// 	return Status::Failure;
+	// }
 
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {

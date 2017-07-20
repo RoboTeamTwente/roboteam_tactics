@@ -46,6 +46,12 @@
 #include "IsRefStage.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "IsRobotClosestToBall.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "IsBallMovingTowardsRobot.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "ParamCheck.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

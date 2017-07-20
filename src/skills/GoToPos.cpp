@@ -343,8 +343,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
-    
-    drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
+    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
+    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;
@@ -402,8 +402,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-    drawer.setColor(255,255,255);
-    drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
+    // drawer.setColor(255,255,255);
+    // drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
 
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);

@@ -37,6 +37,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     prevComputedPoint = now();
     computedTargetPos = false;
     startTime = now();
+    prevballdist=0;
 }
 
 void ReceiveBall::Initialize() {
@@ -113,13 +114,31 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
 
-	
-	double ballDir = ballVel.dot(receiveBallAtPos - ballPos);
+	roboteam_msgs::WorldRobot robot;
+	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN("ReceiveBall could not find robot");
+    }
+	Vector2 robotPos(robot.pos);
+	Vector2 posdiff = robotPos - ballPos;
+	double balldist = posdiff.length();
+	double ballDir=1.0;
+	if (balldist > prevballdist){
+		ballDir=-1.0;
+	}
+
+	prevballdist=balldist;
+
+	//double ballDir = ballVel.dot();
+
+	// ROS_INFO("ballDir: %f",ballDir);
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 
-		drawer.removeLine("ballTrajectory");
-		drawer.removePoint("closestPointReceiveBall");
+		// drawer.removeLine("ballTrajectory");
+		// drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 		
@@ -128,10 +147,10 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
-		drawer.setColor(255,255,255);
-		drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
-		drawer.drawPoint("closestPointReceiveBall", closestPoint);
-		drawer.setColor(0,0,0);
+		// drawer.setColor(255,255,255);
+		// drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
+		// drawer.drawPoint("closestPointReceiveBall", closestPoint);
+		// drawer.setColor(0,0,0);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 			ballIsComing = true;
@@ -217,6 +236,8 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 }
 
 bt::Node::Status ReceiveBall::Update() {
+
+	// ROS_INFO_STREAM("robot " << robotID << " in ReceiveBall update");
 	
 	if (startKicking) {
 		return kick.Update();
@@ -393,7 +414,11 @@ bt::Node::Status ReceiveBall::Update() {
 	if (distanceToBall <= 0.6 && fabs(angleError) <= 0.2) {
 		matchBallVel = true;
 	}
+	if (shootAtGoal) {
+		matchBallVel = false;
+	}
 
+	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
     if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
     	ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
@@ -427,7 +452,6 @@ bt::Node::Status ReceiveBall::Update() {
 
 	        roboteam_msgs::RobotCommand command = *commandPtr;
 	        if (matchBallVel) {
-		        ROS_INFO_STREAM("robot " << robotID << " matching ball vel");
 		        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.75);
 		        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
 		        if (newVelCommand.length() > 4.0) {

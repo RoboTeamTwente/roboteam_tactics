@@ -81,6 +81,7 @@ void Jim_TimeOut::Initialize() {
         bb.SetDouble("GoToPos_A_xGoal", posList.at(i).x);
         bb.SetDouble("GoToPos_A_yGoal", posList.at(i).y);
         bb.SetDouble("GoToPos_A_angleGoal", 0.0);
+        bb.SetDouble("GoToPos_A_maxVelocity",STOP_STATE_MAX_VELOCITY);
         bb.SetBool("GoToPos_A_avoidRobots", true);
 
         // Create message
