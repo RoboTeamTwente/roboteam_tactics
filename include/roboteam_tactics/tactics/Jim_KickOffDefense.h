@@ -9,6 +9,16 @@
 
 namespace rtt {
 
+/**
+ * # Using the YAML multiline literal here
+ * Descr: |
+ *     Does kickoff defense.
+ *
+ * Params:
+ *     - allowSuccess
+ *         Type: Bool
+ *         Descr: If true, returns success when the ball moves. Otherwise the play will run forever.
+ */
 class Jim_KickOffDefense : public Tactic {
     public:
     Jim_KickOffDefense(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
