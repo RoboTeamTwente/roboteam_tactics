@@ -14,11 +14,15 @@ namespace rtt {
 RTT_REGISTER_CONDITION(CanSeePoint);
 
 CanSeePoint::CanSeePoint(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
-    assert_valid<CanSeePoint>(name);
-    threshold_dist = GetBool("check_move") ? .35 : .15;
+    // I have become death, destroyer of worlds.
+    /************************************/
+    /* assert_valid<CanSeePoint>(name); */
+    /************************************/
 }
 
 bt::Node::Status CanSeePoint::Update() {
+    threshold_dist = GetBool("check_move") ? .35 : .15;
+
     roboteam_msgs::WorldRobot* me = nullptr;
     roboteam_msgs::World world = LastWorld::get();
     unsigned int id = GetInt("ROBOT_ID");
@@ -34,7 +38,8 @@ bt::Node::Status CanSeePoint::Update() {
         return bt::Node::Status::Invalid;
     }
     Vector2 target = Vector2(GetDouble("x_coor"), GetDouble("y_coor"));
-    if (getObstacles(*me, target, &world, GetBool("check_move")).empty()) {
+    auto obstacles = getObstacles(*me, target, &world, GetBool("check_move"));
+    if (obstacles.empty()) {
         return bt::Node::Status::Success;
     }
     return bt::Node::Status::Failure;

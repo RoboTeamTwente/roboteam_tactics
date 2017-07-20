@@ -64,3 +64,6 @@
 #include "WeHaveBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "AimingAtOpponent.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
