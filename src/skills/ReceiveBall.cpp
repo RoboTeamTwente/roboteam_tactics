@@ -137,8 +137,8 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 
 	if (ballVel.length() < 0.1 || ballDir <= 0) {
 
-		drawer.removeLine("ballTrajectory");
-		drawer.removePoint("closestPointReceiveBall");
+		// drawer.removeLine("ballTrajectory");
+		// drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 		
@@ -147,10 +147,10 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
-		drawer.setColor(255,255,255);
-		drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
-		drawer.drawPoint("closestPointReceiveBall", closestPoint);
-		drawer.setColor(0,0,0);
+		// drawer.setColor(255,255,255);
+		// drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
+		// drawer.drawPoint("closestPointReceiveBall", closestPoint);
+		// drawer.setColor(0,0,0);
 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 			ballIsComing = true;
@@ -237,7 +237,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 
 bt::Node::Status ReceiveBall::Update() {
 
-	ROS_INFO_STREAM("robot " << robotID << " in ReceiveBall update");
+	// ROS_INFO_STREAM("robot " << robotID << " in ReceiveBall update");
 	
 	if (startKicking) {
 		return kick.Update();

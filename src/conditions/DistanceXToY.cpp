@@ -147,9 +147,7 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
     FieldLineSegment line;
     FieldCircularArc top_arc;
     FieldCircularArc bottom_arc;
-
-    std::string our_side = get_our_side();
-
+    
     double safetyMarginLine = safetyMargin;
 
     GeometryFieldSize field = LastWorld::get_field();

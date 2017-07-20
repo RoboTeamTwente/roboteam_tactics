@@ -266,15 +266,15 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToTeammate = sqrt(calcDistToClosestTeammate(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
-	double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	// double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
 	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-	double distToRobot = calcDistToRobot(testPosition, world);
-	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+	// double distToRobot = calcDistToRobot(testPosition, world);
+	// double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 
 
 
-	angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
-	angleDiffRobotTarget = fabs(angleDiffRobotTarget);
+	// angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
+	// angleDiffRobotTarget = fabs(angleDiffRobotTarget);
 
 	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
 		// angleDiffRobotTarget = M_PI;
@@ -283,11 +283,11 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	score += - distToGoal*distToGoalWeight 
 				   + distToOpp*distToOppWeight 
 				   + distToTeammate*distToTeammateWeight
-				   + distToBall*distToBallWeight 
-				   + viewOfGoal*viewOfGoalWeight
+				   + distToBall*distToBallWeight;
+				   // + viewOfGoal*viewOfGoalWeight
 				   // + distOppToBallTraj*distOppToBallTrajWeight
-				   - distToRobot*distToRobotWeight
-				   - angleDiffRobotTarget*angleDiffRobotTargetWeight;
+				   // - distToRobot*distToRobotWeight
+				   // - angleDiffRobotTarget*angleDiffRobotTargetWeight;
 
 	return score;
 }
@@ -295,6 +295,8 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity() {
+
+	time_point start = now();
 	
 	roboteam_msgs::World world = LastWorld::get();
 	targetPos = getTargetPos(target, targetID, true);
@@ -328,6 +330,10 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 	std::string our_side;
     ros::param::get("our_side", our_side);
 
+    if (ROBOT_ID == 1) {
+    	// ROS_INFO_STREAM("begin for loop");
+    }
+
 	for (int x_step = 1; x_step < x_steps; x_step++) {
 		double x = -field.field_length/2 + x_step*field.field_length/x_steps;
 		for (int y_step = 1; y_step < y_steps; y_step++) {
@@ -340,6 +346,13 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 			double distToBall = (point - ballPos).length();
 
 			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point) && distToBall >= 1.0) {
+			// if (dist < distToRobotThreshold && distToBall >= 1.0) {
+				
+
+				if (ROBOT_ID == 1) {
+			    	// ROS_INFO_STREAM("doing calc for point " << x << " " << y);;
+			    }
+
 			// if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
 				
 				// boost::optional<double> score = computePassPointScore(point);
@@ -362,6 +375,11 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 		}
 	}
 
+
+	if (ROBOT_ID == 1) {
+    	// ROS_INFO_STREAM("end for loop");
+    }
+
 	if (opportunities.size() == 0) {
 		ROS_WARN("No position found that meets the requirements :(");
 		return Vector2(0.0, 0.0);
@@ -381,9 +399,14 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 		}
 	}
 
+
+
 	Vector2 bestPosition = opportunities.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// drawer.removePoint(winningPointName);
+
+	int timePassed = time_difference_milliseconds(start, now()).count();
+	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// std::string name = "bestPosition";
 	// name.append(std::to_string(ROBOT_ID));

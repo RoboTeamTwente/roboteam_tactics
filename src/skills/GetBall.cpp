@@ -122,7 +122,7 @@ bt::Node::Status GetBall::Update (){
 	robotID = blackboard->GetInt("ROBOT_ID");
     // if (!canClaimBall()) {return Status::Failure;}
 
-    ROS_INFO_STREAM("robot " << robotID << " in GetBall update");
+    // ROS_INFO_STREAM("robot " << robotID << " in GetBall update");
 
     
 
