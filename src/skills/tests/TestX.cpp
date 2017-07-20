@@ -31,6 +31,14 @@ namespace {
 
 bool mustShutdown = false;
 
+// We have our own sigint handler here. Normally when you CTRL+C, ros shuts
+// down all the publishers, subscribers, and all other cool things needed
+// to use the ROS infrastructure. However, when someone CTRL+C's when TestX
+// is running, before closing TestX we'd like to send termination messages
+// (stop instructions/robotocommands) to the robots so they don't keep driving
+// after TestX is closed. So we need to trap the SigInt ourselves, so we
+// can shut down gracefully.
+
 void mySigintHandler(int sig) {
     if (sig == SIGINT) {
         mustShutdown = true;
