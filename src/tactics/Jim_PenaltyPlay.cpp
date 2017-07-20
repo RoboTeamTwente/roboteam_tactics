@@ -28,23 +28,24 @@ Jim_PenaltyPlay::Jim_PenaltyPlay(std::string name, bt::Blackboard::Ptr blackboar
 
 void Jim_PenaltyPlay::Initialize() {
     tokens.clear();
-    success = false;
+    success = true;
 
     // RTT_DEBUG("Initializing Jim_PenaltyPlay \n");
 
     roboteam_msgs::World world = LastWorld::get();
 
-    if (RobotDealer::get_available_robots().size() < 1) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("No robots available, cannot initialize... \n");
-        //TODO: Want to pass failure here as well!
+        success = false;
         return;
     }
     
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     Vector2 ballPos = Vector2(world.ball.pos);
     auto penaltyTakerID = get_robot_closest_to_point(robots, world, ballPos);
 
     if (!penaltyTakerID) {
+        success = false;
     	return;
     }
 
@@ -96,10 +97,12 @@ bt::Node::Status Jim_PenaltyPlay::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == Status::Success) {
+                std::cout << "Jim_PenaltyPlay succes!\n";
                 RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Success!");
 
             }
             if (status == Status::Failure) {
+                std::cout << "Jim_PenaltyPlay failure!\n";
                 RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Failed!");
             }
             return status;

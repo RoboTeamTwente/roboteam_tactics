@@ -20,13 +20,17 @@ public:
     /**
      * \brief Initialize the RobotDealer with a set of ids, and a keeper
      */
-    static void initialize_robots(int keeper, std::vector<int> ids);
+    // static void initialize_robots(int keeper, std::vector<int> ids);
     
     /**
      * \brief Gets all unclaimed robot ids
      */
-    static std::vector<int> get_available_robots();
+    // static std::vector<int> get_available_robots();
     
+    static std::vector<int> getClaimedRobots();
+    
+    static void setKeeper(int id);
+
     /**
      * \brief Gets the id of the designated keeper
      */
@@ -36,7 +40,7 @@ public:
      * \brief Checks whether or not the keeper has been claimed by a tactic
      */
     static bool get_keeper_available();
-    
+
     /**
      * \brief Marks the given id as claimed
      */
@@ -83,7 +87,7 @@ private:
     static void removeRobotFromOwnerList(int id);
 
     static std::set<int> taken_robots;
-    static std::set<int> available_robots;
+    // static std::set<int> available_robots;
     static std::map<std::string, std::set<int>> robot_owners;
     static int keeper;
     static bool keeper_available;

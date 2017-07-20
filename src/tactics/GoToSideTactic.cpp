@@ -29,7 +29,7 @@ void GoToSideTactic::Initialize() {
     std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
     std::cout << "Side :" << pos << "\n";
 
-    auto allRobots = RobotDealer::get_available_robots();
+    auto allRobots = getAvailableRobots();
     for (int i = 0; i < robot_count; ++i) {
         int random_index = get_rand_int(allRobots.size());
         std::cout << "Claiming " << std::to_string(allRobots.at(random_index)) << "\n";

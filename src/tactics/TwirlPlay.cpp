@@ -27,7 +27,7 @@ void TwirlPlay::Initialize() {
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    auto robots = RobotDealer::get_available_robots();
+    auto robots = getAvailableRobots();
 
     if (RobotDealer::get_keeper_available()) {
         robots.push_back(RobotDealer::get_keeper());

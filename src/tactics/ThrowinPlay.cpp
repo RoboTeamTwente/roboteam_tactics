@@ -31,7 +31,7 @@ void ThrowinPlay::Initialize() {
     std::cout << "Robot count: " << std::to_string(robot_count) << "\n";
     std::cout << "Side :" << pos << "\n";
 
-    auto allRobots = RobotDealer::get_available_robots();
+    auto allRobots = getAvailableRobots();
     claim_robot(allRobots.at(0));
     claim_robot(allRobots.at(1));
 

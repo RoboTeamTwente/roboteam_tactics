@@ -21,7 +21,7 @@ StarAttackTactic::StarAttackTactic(std::string name, bt::Blackboard::Ptr blackbo
 
 void StarAttackTactic::Initialize() {
 	static auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-	auto robots = RobotDealer::get_available_robots();
+	auto robots = getAvailableRobots();
 
 	if (robots.size() < 4) {
 		ROS_ERROR("StarAttackTactic: Insufficient robots (%lu)", robots.size());

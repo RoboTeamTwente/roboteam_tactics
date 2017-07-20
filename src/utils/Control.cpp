@@ -217,7 +217,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos) {
 
 // PI position controller
 Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 myVel) {
-
+ 
     Vector2 posError = targetPos - myPos;
 
     // Integral term

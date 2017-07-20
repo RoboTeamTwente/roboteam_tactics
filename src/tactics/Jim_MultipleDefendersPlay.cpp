@@ -119,11 +119,11 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     Vector2 ourGoalPos = LastWorld::get_our_goal_center();
 
     // Check if any previously assigned robots have vanished
-    std::remove_if(activeRobots.begin(), activeRobots.end(), [&world](int id) {
+    activeRobots.erase(std::remove_if(activeRobots.begin(), activeRobots.end(), [&world](int id) {
     	return !getWorldBot(id, true, world);
-    });
+    }), activeRobots.end());
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
 
     if (numRobots < 1) {
@@ -136,7 +136,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int maxBallDefenders = 2;
     double minDangerScore;
     std::vector<double> distancesBallDefendersFromGoal;
-    distancesBallDefendersFromGoal.clear();
 
     bool ballOnTheirSide = ballPos.x > 0.0 || ballVel.x > 0.5;
 
@@ -165,7 +164,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             if (angleDiffBall <= 0.15) {
                 minBallDefenders = 2;
             } else {
-
             	bool addDangerousOpp = true;
             	for (size_t j = 0; j < dangerousOpps.size(); j++) {
             		double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
@@ -185,7 +183,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     int numDangerousOpps = dangerousOpps.size();
 
     int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
-   int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
+    int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
     newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
     newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
 
@@ -193,7 +191,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     if (justChecking) {
     	return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
     }
-
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
@@ -213,7 +210,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     {
         // RTT_DEBUGLN("Initializing Keeper %i", keeperID);
         delete_from_vector(robots, keeperID);
-        ROS_INFO("claim on line 231");
+        //ROS_INFO("claim on line 231");
         claim_robot(keeperID);
 
         roboteam_msgs::RoleDirective rd;
@@ -224,7 +221,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetInt("KEEPER_ID", keeperID);
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/KeeperRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -241,6 +238,9 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     // Initialize the Ball Defenders!
     // ====================================
     std::vector<double> angleOffsets;
+    std::vector<Vector2> idlePositions;
+    idlePositions.push_back(Vector2(-3.0, 1.1));
+    idlePositions.push_back(Vector2(-3.0, -1.1));
 
     if (weAreAttacking) {
     	if (numBallDefenders == 1) {
@@ -290,8 +290,12 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetInt("ROBOT_ID", ballDefenderID);
         bb.SetInt("KEEPER_ID", keeperID);
 
+        bb.SetDouble("GoToPos_A_xGoal", idlePositions.at(i).x);
+        bb.SetDouble("GoToPos_A_yGoal", idlePositions.at(i).y);
+        bb.SetDouble("GoToPos_A_angleGoal", 0.0);
+
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
+        //ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);

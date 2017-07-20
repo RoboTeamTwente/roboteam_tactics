@@ -59,7 +59,7 @@ void PrepareKickoffUsTactic::Initialize() {
         claim_robot(KEEPER_ID);
     }
 
-    std::vector<int> robots = RobotDealer::get_available_robots();
+    std::vector<int> robots = getAvailableRobots();
 
     if (robots.size() == 0) return;
 

@@ -407,7 +407,6 @@ bt::Node::Status ReceiveBall::Update() {
     // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
     // if (iHaveBall2.Update() == Status::Success) {
 	double angleError = cleanAngle(targetAngle - robot.angle);
-	ROS_INFO_STREAM("receiveBall, dist " << distanceToBall << " angleError " << fabs(angleError));
 
 	bool matchBallVel = false;
 	if (distanceToBall <= 0.6 && fabs(angleError) <= 0.2) {

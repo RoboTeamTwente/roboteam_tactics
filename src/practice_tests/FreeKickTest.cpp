@@ -34,7 +34,8 @@ Result FreeKickTest::check(roboteam_msgs::World const & world, Side side, robote
 
 void FreeKickTest::beforeTest(roboteam_msgs::World const & world) {
     testStart = now();
-    ::rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+    // ::rtt::RobotDealer::initialize_robots(0, {1, 2, 3, 4, 5});
+    rtt::RobotDealer::setKeeper(0);
     //awaitWorld();
     while (ros::ok() && !tactic.isInitialized) {
         ros::Duration(.2).sleep();

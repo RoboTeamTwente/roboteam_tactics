@@ -17,16 +17,9 @@ class Bob_ChipoffAtGoalPlay : public Tactic {
     ros::NodeHandle n;
 
     private:
-    std::vector<boost::uuids::uuid> tokens;
-    time_point start;
-
     bool failImmediately;
-    bool isThisYourFirstTimeHere = true;
-    time_point lastUpdate;
-    time_point finishTime;
 
     roboteam_msgs::RoleDirective taker;
-    roboteam_msgs::RoleDirective receiver;
 
     Draw drawer;
 

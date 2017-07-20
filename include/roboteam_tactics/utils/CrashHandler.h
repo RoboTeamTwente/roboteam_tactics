@@ -1,10 +1,11 @@
 #pragma once
 
 #include <string>
-#include <csignal>
-#include <exception>
+#include <unistd.h>
 
 #define RESTART_EXIT_CODE 42
+#define CRASH_LOG_DIR get_current_dir_name()
+
 
 /*
 
@@ -30,6 +31,7 @@ To use this functionality, you need to do two things:
 namespace rtt {
 namespace crash{
 
+void writeLog(std::string source, bool hasException = false);
 void commonAlert(std::string source, bool restarting = true);
 void restartSystem();
 void atAbort(int);

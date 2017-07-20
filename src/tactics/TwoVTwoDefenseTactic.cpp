@@ -19,7 +19,7 @@ TwoVTwoDefenseTactic::TwoVTwoDefenseTactic(std::string name, bt::Blackboard::Ptr
 
 void TwoVTwoDefenseTactic::Initialize() {
     tokens.clear();
-    auto robots = RobotDealer::get_available_robots();
+    auto robots = getAvailableRobots();
     if (robots.size() < 2) {
         canRun = false;
         return;

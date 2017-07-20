@@ -37,7 +37,7 @@ void assert_and_erase(std::vector<int>& vec, int i) {
 void InterceptorsTactic::Initialize() {
     RTT_DEBUGLN("Initializing");
     roboteam_msgs::World world = LastWorld::get();
-    std::vector<int> available = RobotDealer::get_available_robots();
+    std::vector<int> available = getAvailableRobots();
     
     if (available.size() == 0) {
         RTT_DEBUGLN("No bots available for interceptor tactic");

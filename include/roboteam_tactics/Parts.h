@@ -78,13 +78,13 @@ class Tactic : public Leaf {
      * \brief Registers a robot as claimed by this tactic. See RobotDealer.
      * \param id The id of the robot to claim.
      */
-    virtual void claim_robot(int id);
+    virtual bool claim_robot(int id);
     
     /**
      * \brief Shortcut to claim multiple robots at once.
      * \param ids A vector of the ids to claim.
      */
-    virtual void claim_robots(std::vector<int> ids);
+    virtual bool claim_robots(std::vector<int> ids);
     
     /**
      * \brief Gets a vector of all robots claimed by this tactic.
@@ -96,6 +96,9 @@ class Tactic : public Leaf {
      * \param id The id to check.
      */
     virtual bool is_claimed(int id);
+
+    virtual bool release_robot(int id);
+    virtual bool release_robots(std::vector<int> ids);
 
     private:
     std::set<int> claimed_robots;
@@ -113,20 +116,20 @@ class SingleBotTactic : public Tactic {
             {}
     virtual ~SingleBotTactic() {}
     
-    void claim_robot(int id) final override {
+    bool claim_robot(int id) final override {
         if (bot == -1) {
             bot = id;
-            Tactic::claim_robot(id);
+            return Tactic::claim_robot(id);
         } else {
             ROS_ERROR("SingleBotTactic %s tried to claim bot %d, but it has already claimed %d.",
                 name.c_str(), id, bot);
             throw std::logic_error("SingleBotTactic multi-claim");
         }
     }
-    void claim_robots(std::vector<int> ids) final override {
-        if (ids.size() == 0) return;
+    bool claim_robots(std::vector<int> ids) final override {
+        if (ids.size() == 0) return true;
         if (ids.size() == 1) {
-            claim_robot(ids.at(0));
+            return claim_robot(ids.at(0));
         }
         ROS_ERROR("SingleBotTactic %s tried to claim multiple bots in one go.", name.c_str());
         throw std::logic_error("SingleBotTactic multi-claim");

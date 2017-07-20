@@ -6,6 +6,7 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "ros/ros.h"
+#include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG ParallelTactic
 
@@ -77,9 +78,9 @@ public:
             i++;
         }
 
-        auto leftovers = RobotDealer::get_available_robots();
+        auto leftovers = getAvailableRobots();
         if (leftovers.size() > 0) {
-        	ROS_WARN("ParellelTactic: %lu robots remain unclaimed", leftovers.size());
+        	//ROS_WARN("ParallelTactic: %lu robots remain unclaimed", leftovers.size());
         }
 
         if (encounteredAnInvalid) {
