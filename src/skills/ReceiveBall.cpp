@@ -236,6 +236,8 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 }
 
 bt::Node::Status ReceiveBall::Update() {
+
+	ROS_INFO_STREAM("robot " << robotID << " in ReceiveBall update");
 	
 	if (startKicking) {
 		return kick.Update();
