@@ -47,7 +47,7 @@ bool KeepPosition::updateGoalPosition() {
 		return false;
 	}
 
-    Vector2 ownPos = Vector2 { bot->pos };
+    Vector2 ownPos { bot->pos };
     Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
     Vector2 nearest = getNearestObject(ownPos);
     Vector2 diff = nearest - ownPos;
@@ -66,12 +66,12 @@ bool KeepPosition::updateGoalPosition() {
         goal = ownPos;
     }
 
-	// ROS_INFO_STREAM("ownPos=" << ownPos << " nearest=" << nearest << " diff=" << diff << " goal=" << goal);
-
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
 	private_bb->SetDouble("KeepPosition_GTP_angleGoal",
 			initialPos ? initialPos->rot : bot->angle);
+	private_bb->SetBool("KeepPosition_GTP_avoidRobots", true);
+	private_bb->SetBool("KeepPosition_GTP_avoidBall", true);
 	private_bb->SetDouble("KeepPosition_GTP_maxVelocity",
 			STOP_STATE_MAX_VELOCITY);
 	return true;
