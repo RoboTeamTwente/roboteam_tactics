@@ -293,7 +293,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         matchBallVel = false;
-        int ballCloseFrameCountTo = 10;
+        int ballCloseFrameCountTo = 20;
         // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
