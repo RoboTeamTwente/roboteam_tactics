@@ -122,6 +122,8 @@ bt::Node::Status GetBall::Update (){
 	robotID = blackboard->GetInt("ROBOT_ID");
     // if (!canClaimBall()) {return Status::Failure;}
 
+    ROS_INFO_STREAM("robot " << robotID << " in GetBall update");
+
     
 
 	// Wait for the first world message
@@ -154,6 +156,8 @@ bt::Node::Status GetBall::Update (){
     bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
+
+    // ROS_INFO_STREAM("Robot: " << robotID << " shootAtGoal: " << shootAtGoal << " viewOfGoal: " << viewOfGoal);
 
 
     if (finalStage){
@@ -249,9 +253,9 @@ bt::Node::Status GetBall::Update (){
     double getBallDist;
     double distAwayFromBall;
     if (robot_output_target == "grsim") {
-        successDist = 0.12;
+        successDist = 0.11;
         successAngle = 0.2;
-        getBallDist = 0.10 ;
+        getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
         successDist = 0.12 ;
@@ -294,7 +298,7 @@ bt::Node::Status GetBall::Update (){
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         matchBallVel = false;
         int ballCloseFrameCountTo = 20;
-        ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
+        // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
@@ -309,9 +313,9 @@ bt::Node::Status GetBall::Update (){
         } else {
             finalStage = true;
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
-            } else if (shootAtGoal) {
-                publishKickCommand(8.0);
+                publishKickCommand(4.0); // 3.0
+            } else {
+                publishKickCommand(5.0); // 8.0
             }
         }
     } else {
