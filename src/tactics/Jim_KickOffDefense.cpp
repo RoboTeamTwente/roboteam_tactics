@@ -286,7 +286,9 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-    if (ballVel.length() > 0.5) {
+
+
+    if (ballVel.length() > 1.0) {
         return Status::Success;
     }
 
