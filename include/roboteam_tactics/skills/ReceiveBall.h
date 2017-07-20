@@ -70,7 +70,7 @@ private:
     void publishStopCommand();
     InterceptPose deduceInterceptPosFromBall();
     boost::optional<InterceptPose> deduceInterceptPosFromRobot();
-    
+    double prevballdist;
     int robotID;
     boost::optional<int> hasBall;
     bool our_team;
@@ -95,6 +95,7 @@ private:
     bt::Blackboard::Ptr getBallbb = std::make_shared<bt::Blackboard>();
 
     bool computedTargetPos;
+    
 };
 
 } // rtt
