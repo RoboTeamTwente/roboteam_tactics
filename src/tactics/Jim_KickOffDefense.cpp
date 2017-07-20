@@ -279,9 +279,6 @@ void Jim_KickOffDefense::Initialize() {
     } else {
         std::cout << "No robots available for the last Ball Defender!\n";
     }
-
-
-
 }
 
 

@@ -317,8 +317,7 @@ bt::Node::Status ReceiveBall::Update() {
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
 	double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
 	bool canSeeGoal = viewOfGoal >= 0.2;
-	double angleDiffBallGoal = fabs(cleanAngle((LastWorld::get_their_goal_center() - robotPos).angle() - (ballPos - robotPos).angle())); 
-	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal && angleDiffBallGoal <= 0.7*M_PI;
+	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
 
 
 	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
@@ -348,15 +347,15 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	// double minRunTime = 2000;
-	if (ballWasComing && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
-		ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
-		return Status::Failure;
-	}
+	// if (ballWasComing && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
+	// 	ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
+	// 	return Status::Failure;
+	// }
 
-	if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
-		ROS_INFO_STREAM("ball is probably not for us " << robotID);
-		return Status::Failure;
-	}
+	// if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
+	// 	ROS_INFO_STREAM("ball is probably not for us " << robotID);
+	// 	return Status::Failure;
+	// }
 
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on

@@ -48,7 +48,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
     Vector2 ballPos(world.ball.pos);
     
     int numAttackers = std::min((int) robots.size(), 3);    
-    RTT_DEBUGLN("Initializing numAttackers: %i", numAttackers);    
+    RTT_DEBUGLN("Initializing Jim_IndependentAttackersPlay numAttackers: %i", numAttackers);    
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -58,7 +58,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
     std::vector<Vector2> attackersDefaultPositions;
     attackersDefaultPositions.push_back(Vector2(3.0, 1.5));
     attackersDefaultPositions.push_back(Vector2(3.0, -1.5));
-    attackersDefaultPositions.push_back(Vector2(1.5, 0.0));
+    attackersDefaultPositions.push_back(Vector2(1.0, 0.0));
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, attackersDefaultPositions, world);    
 

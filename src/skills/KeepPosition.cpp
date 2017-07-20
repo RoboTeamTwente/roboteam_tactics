@@ -90,19 +90,19 @@ bool KeepPosition::updateGoalPosition() {
 	auto them = LastWorld::get().them;
 	bots.insert(bots.end(), them.begin(), them.end());
 
-	ROS_INFO("Obstacles:");
+	// ROS_INFO("Obstacles:");
 	if (ownPos.dist(ballPos) < MINIMUM_ROBOT_DISTANCE) {
 		obstacles.push_back(ballPos);
-		ROS_INFO_STREAM(ballPos);
+		// ROS_INFO_STREAM(ballPos);
 	}
 	for (const auto& bot : bots) {
 		Vector2 pos { bot.pos };
 		if (pos != ownPos && pos.dist(ownPos) < MINIMUM_ROBOT_DISTANCE) {
 			obstacles.push_back(pos);
-			ROS_INFO_STREAM(pos);
+			// ROS_INFO_STREAM(pos);
 		}
 	}
-	ROS_INFO("\nCandidates:");
+	// ROS_INFO("\nCandidates:");
 
 	Vector2 goal;
 	if (obstacles.size() == 0) {

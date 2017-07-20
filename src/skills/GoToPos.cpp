@@ -129,8 +129,8 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
     Vector2 posError = targetPos - myPos;
 
     if (ROBOT_ID != KEEPER_ID) {
-        Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, 0.0);
-        if (isWithinDefenseArea(true, myPos)) {
+        Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, safetyMarginGoalAreas);
+        if (isWithinDefenseArea(true, myPos, safetyMarginGoalAreas)) {
             // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
         } else if ((distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
             if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
@@ -141,8 +141,8 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
         }
     }
 
-    Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, myPos, 0.0);
-    if (isWithinDefenseArea(false, myPos)) {
+    Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, myPos, safetyMarginGoalAreas);
+    if (isWithinDefenseArea(false, myPos, safetyMarginGoalAreas)) {
         // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
     } else if ((distToTheirDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToTheirDefenseArea) > 0) {
         if (sumOfForces.dot(distToTheirDefenseArea.rotate(0.5*M_PI)) > 0) {
@@ -193,7 +193,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
 
     // We should not go outside the field close to the goal areas
     if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
-        marginOutsideField = 0.0;
+        marginOutsideField = -0.1;
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
@@ -212,13 +212,13 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     if (ROBOT_ID != KEEPER_ID) {
     // if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea(true, newTargetPos)) {
+        if (isWithinDefenseArea(true, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea(true, newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea(false, newTargetPos)) {
+        if (isWithinDefenseArea(false, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, newTargetPos, safetyMarginGoalAreas);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }

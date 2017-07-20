@@ -6,6 +6,7 @@
 namespace rtt {
 
 bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point);
+bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin);
 
 /**
  * \class IsBallInDefenseArea

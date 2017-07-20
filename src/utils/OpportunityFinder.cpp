@@ -266,15 +266,15 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
 	double distToTeammate = sqrt(calcDistToClosestTeammate(testPosition, world));
 	double distToBall = (testPosition - ballPos).length();
-	// double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
 	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-	// double distToRobot = calcDistToRobot(testPosition, world);
-	// double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+	double distToRobot = calcDistToRobot(testPosition, world);
+	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 
 
 
-	// angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
-	// angleDiffRobotTarget = fabs(angleDiffRobotTarget);
+	angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
+	angleDiffRobotTarget = fabs(angleDiffRobotTarget);
 
 	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
 		// angleDiffRobotTarget = M_PI;
@@ -284,10 +284,10 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 				   + distToOpp*distToOppWeight 
 				   + distToTeammate*distToTeammateWeight
 				   + distToBall*distToBallWeight;
-				   // + viewOfGoal*viewOfGoalWeight
-				   // + distOppToBallTraj*distOppToBallTrajWeight
-				   // - distToRobot*distToRobotWeight
-				   // - angleDiffRobotTarget*angleDiffRobotTargetWeight;
+				   + viewOfGoal*viewOfGoalWeight
+				   + distOppToBallTraj*distOppToBallTrajWeight
+				   - distToRobot*distToRobotWeight
+				   - angleDiffRobotTarget*angleDiffRobotTargetWeight;
 
 	return score;
 }
@@ -335,9 +335,9 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
     }
 
 	for (int x_step = 1; x_step < x_steps; x_step++) {
-		double x = -field.field_length/2 + x_step*field.field_length/x_steps;
+		double x = -(field.field_length - 0.2)/2 + x_step*(field.field_length - 0.2)/x_steps;
 		for (int y_step = 1; y_step < y_steps; y_step++) {
-			double y = -field.field_width/2 + y_step*field.field_width/y_steps;
+			double y = -(field.field_width - 0.2)/2 + y_step*(field.field_width - 0.2)/y_steps;
 
 			// calculate the score of this point:
 			Vector2 point(x, y);
@@ -345,7 +345,7 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 			Vector2 ballPos(world.ball.pos);
 			double distToBall = (point - ballPos).length();
 
-			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point) && distToBall >= 1.0) {
+			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point, 0.5) && distToBall >= 1.0) {
 			// if (dist < distToRobotThreshold && distToBall >= 1.0) {
 				
 

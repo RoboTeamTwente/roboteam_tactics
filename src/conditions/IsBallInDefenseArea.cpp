@@ -27,6 +27,18 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point) {
     }
 }
 
+bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
+    GeometryFieldSize field = LastWorld::get_field();
+    Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, safetyMargin);
+    if (ourDefenseArea) {
+        if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+        else return false;
+    } else {
+        if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
+        else return false;
+    }
+}
+
 
 RTT_REGISTER_CONDITION(IsBallInDefenseArea);
 
