@@ -113,7 +113,6 @@ private:
     Draw drawer;
     OpportunityFinder opportunityFinder;
     bool choseRobotToPassTo;
-    int maxScoreID;
     int ballCloseFrameCount = 0;
 
     double distanceFromBallWhenDribbling;
