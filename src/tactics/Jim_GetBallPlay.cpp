@@ -71,7 +71,7 @@ void Jim_GetBallPlay::Initialize() {
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
 
         // Create message
-        rd.tree = "rtt_jim/GetBallRole";
+        rd.tree = "rtt_bob/GetBallChipKickRole";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

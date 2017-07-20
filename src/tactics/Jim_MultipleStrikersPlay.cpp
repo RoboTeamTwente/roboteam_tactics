@@ -110,6 +110,10 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
         allFailed = false;
     }
 
+    if ((std::chrono::steady_clock::now() - lastTimeWeHadBall) >= std::chrono::milliseconds(2000)) {
+        return Status::Failure;
+    }
+
     for (auto token : tokens) {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
@@ -127,8 +131,6 @@ bt::Node::Status Jim_MultipleStrikersPlay::Update() {
     if (allFailed) {
         RTT_DEBUGLN_TEAM("Strikers failed!");
         return Status::Failure;
-
-
     }
 
     return Status::Running;

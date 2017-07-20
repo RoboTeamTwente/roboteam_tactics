@@ -114,13 +114,17 @@ void FormationPlay::Initialize() {
 	for (unsigned i = 0, posIdx = 0; i < count; i++) {
 		int id = robots.at(i);
 		claim_robot(id);
+
 		if (hasKeeperPosition && i == *formation->keeperIdx) {
 			posIdx++; // skip this position, it's for the keeper.
 		}
+
 		Position pos = formation->positions.at(posIdx++);
+
 		roboteam_msgs::RoleDirective rd;
 		rd.robot_id = id;
 		rd.tree = "rtt_dennis/KeepPositionRole";
+
 		bt::Blackboard bb;
 		bb.SetInt("ROBOT_ID", id);
 		bb.SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
@@ -129,9 +133,12 @@ void FormationPlay::Initialize() {
 		bb.SetDouble("GoToPos_A_yGoal", pos.y);
 		bb.SetDouble("GoToPos_A_angleGoal", pos.rot);
 		bb.SetDouble("GoToPos_A_maxVelocity", STOP_STATE_MAX_VELOCITY);
-		bb.SetBool("KeepPosition_A_returnToInitialPos", keepFormation);
 		bb.SetBool("GoToPos_A_avoidBall", true);
+
+		bb.SetBool("KeepPosition_A_returnToInitialPos", keepFormation);
+
 		rd.blackboard = bb.toMsg();
+
 		pub.publish(rd);
 
 		//std::cout << "Sending robot " << id << " to " << Vector2(pos.x, pos.y)
