@@ -62,14 +62,14 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         bb.SetInt("ROBOT_ID", taker.robot_id);
         bb.SetInt("KEEPER_ID", keeperID);
 
-        ScopedBB(bb, "GetBall_")
-            .setString("aimAt", "theirgoal")
-            .setBool("passOn", true)
-            .setString("stayOnSide", "ourSide")
-            ;
+        // ScopedBB(bb, "GetBall_")
+        //     .setString("aimAt", "theirgoal")
+        //     .setBool("passOn", false)
+        //     .setString("stayOnSide", "ourSide")
+        //     ;
 
         // Create message
-        taker.tree = "rtt_bob/ChipAtGoal";
+        taker.tree = "rtt_jim/KickOffTaker";
         taker.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -85,8 +85,16 @@ bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
 
     auto feedbackIt = feedbacks.find(unique_id::fromMsg(taker.token));
     if (feedbackIt != feedbacks.end()) {
+        if (feedbackIt->second == bt::Node::Status::Success) {
+            ROS_INFO("Bob_ChipoffAtGoalPlay return success");
+        }
+        if (feedbackIt->second == bt::Node::Status::Failure) {
+            ROS_INFO("Bob_ChipoffAtGoalPlay return failure");
+        }
         return feedbackIt->second;
     }
+
+
 
     return bt::Node::Status::Running;
 }
