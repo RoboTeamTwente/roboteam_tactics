@@ -101,7 +101,7 @@ public:
 private:
 	boost::optional<int> whichRobotHasBall();
 	void publishStopCommand();
-    void publishKickCommand();
+    void publishKickCommand(double kickVel);
     bool canClaimBall();
     void releaseBall();
     

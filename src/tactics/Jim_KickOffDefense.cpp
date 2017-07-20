@@ -259,7 +259,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.5);
+        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
 

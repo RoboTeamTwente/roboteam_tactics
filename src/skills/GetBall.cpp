@@ -57,18 +57,17 @@ void GetBall::publishStopCommand() {
     pub.publish(command);
 }
 
-void GetBall::publishKickCommand(){
+void GetBall::publishKickCommand(double kickSpeed){
 
-    double kicker_vel = 5.0;
     if (HasDouble("kickerVel")) {
-        kicker_vel = GetDouble("kickerVel");
+        kickSpeed = GetDouble("kickerVel");
     }
     
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
     command.kicker = GetBool("passOn");
     command.kicker_forced = GetBool("passOn");
-    command.kicker_vel = GetBool("passOn") ? kicker_vel : 0;
+    command.kicker_vel = GetBool("passOn") ? kickSpeed : 0;
 
     command.x_vel = 0;
     command.y_vel = 0;
@@ -124,21 +123,7 @@ bt::Node::Status GetBall::Update (){
 	robotID = blackboard->GetInt("ROBOT_ID");
     // if (!canClaimBall()) {return Status::Failure;}
 
-    if (finalStage){
-        if(countFinalMessages < 10){
-            publishKickCommand();
-            countFinalMessages=countFinalMessages+1;
-            return Status::Running;
-        }
-        else {
-            //publishStopCommand();
-            releaseBall();
-            // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-            //     return Status::Failure;
-            // }
-            return Status::Success;
-        }
-    }
+    
 
 	// Wait for the first world message
 	while (world.us.size() == 0) {
@@ -170,6 +155,24 @@ bt::Node::Status GetBall::Update (){
     bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
+
+
+    if (finalStage){
+        if(countFinalMessages < 10){
+            if (choseRobotToPassTo) {
+                publishKickCommand(3.0);
+            } else if (shootAtGoal) {
+                publishKickCommand(8.0);
+            }
+            
+            countFinalMessages=countFinalMessages+1;
+            return Status::Running;
+        }
+        else {
+            releaseBall();
+            return Status::Success;
+        }
+    }
 
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
@@ -305,7 +308,11 @@ bt::Node::Status GetBall::Update (){
             return Status::Running;
         } else {
             finalStage = true;
-            publishKickCommand();
+            if (choseRobotToPassTo) {
+                publishKickCommand(3.0);
+            } else if (shootAtGoal) {
+                publishKickCommand(8.0);
+            }
         }
     } else {
         ballCloseFrameCount = 0;
