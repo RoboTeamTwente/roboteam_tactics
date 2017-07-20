@@ -390,21 +390,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
     // Robot avoidance
-    // if (HasBool("avoidRobots") && GetBool("avoidRobots")) {
+    if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {
+        // AvoidRobots defaults to true if not set
+    } else {
         Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
         if (posError.length() >= 0.5) {
             angleGoal = sumOfForces.angle();
             angleError = cleanAngle(angleGoal - myAngle);
         }
         sumOfForces = newSumOfForces;
-        
-        // Possibly necessary to scale the velocity to the maxSpeed again after avoidRobots:
-        // if (posError.length() > 0.5) {
-        //     if (sumOfForces.length() < maxSpeed) {
-        //         sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
-        //     }
-        // }
-    // }
+    }
+
 
     drawer.setColor(255,255,255);
     drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);

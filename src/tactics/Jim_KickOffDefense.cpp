@@ -244,6 +244,8 @@ void Jim_KickOffDefense::Initialize() {
     // ==================================================================
 
     if (getAvailableRobots().size() >= 1) {
+        std::cout << "Initializing ball defender!\n";
+
         int ballDefenderID = getAvailableRobots().at(0);
 
         // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
@@ -259,7 +261,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.5);
+        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
 
@@ -274,6 +276,8 @@ void Jim_KickOffDefense::Initialize() {
 
         // Send to rolenode
         pub.publish(rd);
+    } else {
+        std::cout << "No robots available for the last Ball Defender!\n";
     }
 
 
@@ -286,7 +290,7 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-    if (ballVel.length() > 0.5) {
+    if (ballVel.length() > 0.5 || (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
         return Status::Success;
     }
 

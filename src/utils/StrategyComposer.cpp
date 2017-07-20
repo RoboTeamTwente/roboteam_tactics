@@ -40,8 +40,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
         { RefState::STOP                  , "rtt_dennis/StopStrategyKickoff"s           } ,
-        { RefState::PREPARE_KICKOFF_US    , "rtt_jim/KickOffDefenseStrat"s    } ,
-        { RefState::PREPARE_KICKOFF_THEM  , "rtt_jim/KickOffDefenseStrat"s    } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_jim/PrepareKickOff"s    } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_jim/PrepareKickOff"s    } ,
         { RefState::PREPARE_PENALTY_US    , "rtt_dennis/StopStrategyKickoff"s           } ,
         { RefState::PREPARE_PENALTY_THEM  , "rtt_wybe/ThemPenaltyStrategy"s      } ,
 
