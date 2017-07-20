@@ -58,7 +58,6 @@ void GetBall::publishStopCommand() {
 }
 
 void GetBall::publishKickCommand(double kickSpeed){
-
     if (HasDouble("kickerVel")) {
         kickSpeed = GetDouble("kickerVel");
     }
@@ -161,7 +160,7 @@ bt::Node::Status GetBall::Update (){
         if(countFinalMessages < 10){
             if (choseRobotToPassTo) {
                 publishKickCommand(3.0);
-            } else if (shootAtGoal) {
+            } else {
                 publishKickCommand(8.0);
             }
             
@@ -294,7 +293,7 @@ bt::Node::Status GetBall::Update (){
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         matchBallVel = false;
         int ballCloseFrameCountTo = 20;
-        // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
+        ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
