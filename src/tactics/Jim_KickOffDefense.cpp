@@ -244,6 +244,8 @@ void Jim_KickOffDefense::Initialize() {
     // ==================================================================
 
     if (getAvailableRobots().size() >= 1) {
+        std::cout << "Initializing ball defender!\n";
+
         int ballDefenderID = getAvailableRobots().at(0);
 
         // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
@@ -274,6 +276,8 @@ void Jim_KickOffDefense::Initialize() {
 
         // Send to rolenode
         pub.publish(rd);
+    } else {
+        std::cout << "No robots available for the last Ball Defender!\n";
     }
 
 
@@ -286,7 +290,8 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-    if (ballVel.length() > 0.5) {
+    if (ballVel.length() > 0.5 || (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
+        std::cout << "Stopping because of ball vel!\n";
         return Status::Success;
     }
 
