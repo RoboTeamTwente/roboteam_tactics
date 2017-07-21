@@ -92,7 +92,13 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders = 2;
+    int numBallDefenders;
+    if (robots.size() <= 4) {
+        numBallDefenders = 2;
+    } else {
+        numBallDefenders = 3;
+    }
+    
     std::vector<double> angleOffsets;
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
@@ -243,42 +249,42 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the last Ball Defender! Will also be the kick off taker
     // ==================================================================
 
-    if (getAvailableRobots().size() >= 1) {
-        std::cout << "Initializing ball defender!\n";
+    // if (getAvailableRobots().size() >= 1) {
+    //     std::cout << "Initializing ball defender!\n";
 
-        int ballDefenderID = getAvailableRobots().at(0);
+    //     int ballDefenderID = getAvailableRobots().at(0);
 
-        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
-        delete_from_vector(robots, ballDefenderID);
-        claim_robot(ballDefenderID);
+    //     // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+    //     delete_from_vector(robots, ballDefenderID);
+    //     claim_robot(ballDefenderID);
 
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = ballDefenderID;
-        bt::Blackboard bb;
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = ballDefenderID;
+    //     bt::Blackboard bb;
 
-        // Set the robot ID
-        bb.SetInt("ROBOT_ID", ballDefenderID);
-        bb.SetInt("KEEPER_ID", keeperID);
+    //     // Set the robot ID
+    //     bb.SetInt("ROBOT_ID", ballDefenderID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
 
-        bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
-        bb.SetBool("SimpleDefender_A_avoidRobots", false);
-        bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+    //     bb.SetDouble("DistanceXToY_A_distance", 2.0);
+    //     bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
+    //     bb.SetBool("SimpleDefender_A_avoidRobots", false);
+    //     bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
 
-        // Create message
-        rd.tree = "rtt_jim/DefenderRole";
-        rd.blackboard = bb.toMsg();
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        rd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        pub.publish(rd);
-    } else {
-        std::cout << "No robots available for the last Ball Defender!\n";
-    }
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // } else {
+    //     std::cout << "No robots available for the last Ball Defender!\n";
+    // }
 }
 
 

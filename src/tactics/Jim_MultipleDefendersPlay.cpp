@@ -303,7 +303,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/DefenderRoleGetBall";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -346,7 +346,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
             // Create message
-            rd.tree = "rtt_jim/DefenderRole";
+            rd.tree = "rtt_jim/DefenderRoleGetBall";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later

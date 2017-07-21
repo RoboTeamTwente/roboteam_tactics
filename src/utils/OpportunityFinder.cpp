@@ -11,7 +11,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID false
+#define DRAW_PASS_POINT_GRID true
 
 namespace rtt {
 
@@ -283,7 +283,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	score += - distToGoal*distToGoalWeight 
 				   + distToOpp*distToOppWeight 
 				   + distToTeammate*distToTeammateWeight
-				   + distToBall*distToBallWeight;
+				   + distToBall*distToBallWeight
 				   + viewOfGoal*viewOfGoalWeight
 				   + distOppToBallTraj*distOppToBallTrajWeight
 				   - distToRobot*distToRobotWeight
@@ -296,7 +296,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity() {
 
-	time_point start = now();
+	// time_point start = now();
 	
 	roboteam_msgs::World world = LastWorld::get();
 	targetPos = getTargetPos(target, targetID, true);
@@ -405,8 +405,8 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// drawer.removePoint(winningPointName);
 
-	int timePassed = time_difference_milliseconds(start, now()).count();
-	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	// int timePassed = time_difference_milliseconds(start, now()).count();
+	// ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// std::string name = "bestPosition";
 	// name.append(std::to_string(ROBOT_ID));

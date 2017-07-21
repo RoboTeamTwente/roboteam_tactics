@@ -151,7 +151,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		// drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
 		// drawer.drawPoint("closestPointReceiveBall", closestPoint);
 		// drawer.setColor(0,0,0);
-
+		// ROS_INFO_STREAM("robot " << robotID << " acceptableDeviation: " << acceptableDeviation); 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 			ballIsComing = true;
 			interceptPos = closestPoint;
@@ -419,7 +419,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
     if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
-    	ROS_INFO("ReceiveBall success");
+    	// ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {
     		// ROS_INFO("Start kicking");

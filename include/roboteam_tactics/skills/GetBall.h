@@ -114,6 +114,7 @@ private:
     OpportunityFinder opportunityFinder;
     bool choseRobotToPassTo;
     int ballCloseFrameCount = 0;
+    int passToRobot;
 
     double distanceFromBallWhenDribbling;
     bool finalStage=false;
