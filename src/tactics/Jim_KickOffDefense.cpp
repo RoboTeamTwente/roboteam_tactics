@@ -35,7 +35,7 @@ void Jim_KickOffDefense::Initialize() {
     tokens.clear();
 
     RTT_DEBUGLN_TEAM("Initializing Jim_KickOffDefense");    
-    if (getAvailableRobots().size() < 4) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -92,22 +92,17 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders;
-    if (robots.size() <= 4) {
-        numBallDefenders = 2;
-    } else {
-        numBallDefenders = 3;
-    }
-    
+    int numBallDefenders = std::min((int) robots.size(), 3);
+
     std::vector<double> angleOffsets;
+    angleOffsets.push_back(0.0);
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
-    angleOffsets.push_back(0.0);
-
+    
     std::vector<double> distanceOffsets;
+    distanceOffsets.push_back(3.8);
     distanceOffsets.push_back(1.5);
     distanceOffsets.push_back(1.5);
-    distanceOffsets.push_back(4.0);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
@@ -187,7 +182,7 @@ void Jim_KickOffDefense::Initialize() {
 
     std::vector<Vector2> defenderPositions;
 
-    double distanceFromGoal = 4.0;
+    double distanceFromGoal = 3.8;
 
     for (size_t i = 0; i < dangerousOpps.size(); i++) {
         Vector2 defensePoint = SimpleDefender::computeDefensePoint(Vector2(dangerousOpps.at(i).pos), true, distanceFromGoal, 0.0);    
