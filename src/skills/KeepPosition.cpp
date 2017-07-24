@@ -120,8 +120,8 @@ bool KeepPosition::updateGoalPosition() {
 						circleIntersection(obstacles.at(i),
 								MINIMUM_ROBOT_DISTANCE, obstacles.at(j),
 								MINIMUM_ROBOT_DISTANCE);
-				ROS_INFO_STREAM(
-						obstacles.at(i) << "~" << obstacles.at(j) << ":");
+				// ROS_INFO_STREAM(
+						// obstacles.at(i) << "~" << obstacles.at(j) << ":");
 				if (intersections.first) {
 					bool clear = true;
 					for (const Vector2& obs : obstacles) {
@@ -133,7 +133,7 @@ bool KeepPosition::updateGoalPosition() {
 					}
 					if (clear) {
 						candidates.push_back(*intersections.first);
-						ROS_INFO_STREAM(*intersections.first);
+						// ROS_INFO_STREAM(*intersections.first);
 					}
 				}
 				if (intersections.second) {
@@ -147,7 +147,7 @@ bool KeepPosition::updateGoalPosition() {
 					}
 					if (clear) {
 						candidates.push_back(*intersections.second);
-						ROS_INFO_STREAM(*intersections.second);
+						// ROS_INFO_STREAM(*intersections.second);
 					}
 				}
 			}
