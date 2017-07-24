@@ -198,9 +198,12 @@ bt::Node::Status GetBall::Update (){
         }
         
         if (maxScore > -std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
-            choseRobotToPassTo = true;
-            passToRobot = *maxScoreID;
-            // ROS_INFO_STREAM("chose to pass to robot " << passToRobot);
+            if (maxScoreID) {
+                choseRobotToPassTo = true;
+                passToRobot = *maxScoreID;
+            } else {
+                ROS_WARN("GetBall found no robot to pass to");
+            }
         } else {
         	SetString("aimAt", "theirgoal");
         }
