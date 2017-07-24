@@ -216,7 +216,7 @@ void Jim_KickOffDefense::Initialize() {
 
         // Set the robot ID
         bb.SetInt("ROBOT_ID", defenderID);
-        // bb.SetInt("KEEPER_ID", keeperID);
+        bb.SetInt("KEEPER_ID", keeperID);
 
         bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);
         bb.SetDouble("SimpleDefender_A_distanceFromGoal", distanceFromGoal);

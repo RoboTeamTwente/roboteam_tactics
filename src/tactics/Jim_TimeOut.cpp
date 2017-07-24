@@ -43,7 +43,8 @@ void Jim_TimeOut::Initialize() {
     roboteam_msgs::World world = LastWorld::get();
     std::vector<int> robots = getAvailableRobots();
     int keeper = RobotDealer::get_keeper();
-    robots.push_back(keeper);
+    // robots.push_back(keeper);
+    Vector2 keeperPos(LastWorld::get_our_goal_center().x + 0.5, 0.0);
 
     double distanceBetweenRobots = 0.3;
 
@@ -52,7 +53,7 @@ void Jim_TimeOut::Initialize() {
     std::vector<Vector2> posList;
 
     for (size_t i = 0; i < robots.size(); i++) {
-        Vector2 targetPos(-(field.field_length / 2) + 0.6, ((double) i + 0.5 - (double) robots.size()/2) * distanceBetweenRobots);
+        Vector2 targetPos(-(field.field_length / 2) + 0.3, ((double) i + 0.5 - (double) robots.size()/2) * distanceBetweenRobots);
         ROS_INFO_STREAM("position: " << targetPos);
         posList.push_back(targetPos);
     }
@@ -61,6 +62,38 @@ void Jim_TimeOut::Initialize() {
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+    // Initialize the keeper
+    {
+        claim_robot(keeper);
+
+        roboteam_msgs::RoleDirective rd;
+        bt::Blackboard bb;
+
+        bb.SetInt("ROBOT_ID", keeper);
+        bb.SetInt("KEEPER_ID", keeper);
+
+        bb.SetDouble("GoToPos_A_xGoal", keeperPos.x);
+        bb.SetDouble("GoToPos_A_yGoal", keeperPos.y);
+        bb.SetDouble("GoToPos_A_angleGoal", 0.0);
+        bb.SetDouble("GoToPos_A_maxVelocity",STOP_STATE_MAX_VELOCITY);
+        bb.SetBool("GoToPos_A_avoidRobots", true);
+        bb.SetBool("GoToPos_A_enterDefenseAreas", true);
+
+        // Create message
+        rd.robot_id = keeper;
+        rd.tree = "rtt_jim/GoToPosRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
 
 
     // Initialize the roles
@@ -83,6 +116,7 @@ void Jim_TimeOut::Initialize() {
         bb.SetDouble("GoToPos_A_angleGoal", 0.0);
         bb.SetDouble("GoToPos_A_maxVelocity",STOP_STATE_MAX_VELOCITY);
         bb.SetBool("GoToPos_A_avoidRobots", true);
+        bb.SetBool("GoToPos_A_enterDefenseAreas", true);
 
         // Create message
         rd.robot_id = closestRobots.at(i);
