@@ -30,7 +30,7 @@ void PrepareKeeperPenaltyThem::Initialize() {
 
         // The back of the robot should touch the goal line.
         auto left_line = LastWorld::get_field().left_line;
-        double goal_line_x = ((left_line.begin.x + left_line.end.x) / 2) + 0.8;
+        double goal_line_x = ((left_line.begin.x + left_line.end.x) / 2) + 0.08;
 
         bb.SetInt("ROBOT_ID", KEEPER_ID);
         bb.SetInt("KEEPER_ID", KEEPER_ID);

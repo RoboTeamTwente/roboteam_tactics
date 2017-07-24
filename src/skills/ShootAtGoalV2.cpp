@@ -41,42 +41,20 @@ bt::Node::Status ShootAtGoalV2::Update() {
     Vector2 target = largest->center;
     double targetAngle = (target - ownPos).angle();
     
-    ROS_INFO("targetAngle: %f", targetAngle);
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
         private_bb->SetInt("ROBOT_ID", bot.id);
-        private_bb->SetBool("SAGV2_GetBall_passOn", true);
+        private_bb->SetBool("SAGV2_GetBall_passOn", !GetBool("waitForDO_PENALTY", false));
     	aimer = std::make_unique<GetBall>("SAGV2_GetBall", private_bb);
+    }
+    if (GetBool("waitForDO_PENALTY", false)) {
+    	ROS_INFO("still waiting...");
+    	private_bb->SetBool("SAGV2_GetBall_passOn", LastRef::getState() == RefState::DO_PENALTY);
     }
     private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
     private_bb->SetDouble("targetAngle", targetAngle);
 
     return aimer->Update();
-    /*
-    if (fabs(targetAngle - orientation) < ACCEPTABLE_DEVIATION
-    		&& ownPos.dist(Vector2(world.ball.pos))) {
-    	bb->SetInt("ROBOT_ID", bot->id);
-        ScopedBB(*bb, "SAGV2_kick")
-            .setInt("ROBOT_ID", bot->id)
-            .setBool("wait_for_signal", false)
-            .setDouble("kickVel", KICK_VEL);
-        Kick kick("SAGV2_kick", bb);
-        ROS_INFO("SAGV2 kicking");
-        return kick.Update();
-    } else {
-    	bb->SetInt("ROBOT_ID", bot->id);
-        ScopedBB(*bb, "SAGV2_rotate")
-            .setInt("ROBOT_ID", bot->id)
-            .setString("center", "ball")
-            .setDouble("faceTowardsPosx", target.x)
-            .setDouble("faceTowardsPosy", target.y)
-            .setDouble("w", 2.0);
-        RotateAroundPoint rap("SAGV2_rotate", bb);
-        ROS_INFO("SAGV2 rotating");
-        auto res = rap.Update();
-        return res == bt::Node::Status::Invalid || res == bt::Node::Status::Failure ? res : bt::Node::Status::Running;
-    }
-   */
 
 }
     

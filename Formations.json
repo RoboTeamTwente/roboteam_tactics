@@ -38,24 +38,24 @@
   "minimumRobots": 0,
   "positions": [
     {
-      "x": -0.8,
-      "y": 1.5,
-      "rot": 3.1415
+      "x": -2,
+      "y": 2.5,
+      "rot": 4
     },{
-        "x": -0.8,
-        "y": -1.5,
-      "rot": 3.1415
+        "x": -2,
+        "y": -2.5,
+      "rot": 2.5
     },{
       "x": -1,
       "y": 0,
       "rot": 3.1415
     },{
-      "x": 0.5,
-      "y": 0.7,
+      "x": 1.5,
+      "y": 1.3,
       "rot": 3.1415
     },{
-      "x": 0.5,
-      "y": -0.7,
+      "x": 1.5,
+      "y": -1.3,
       "rot": 3.1415
     }
   ]
@@ -91,33 +91,28 @@
 
 {
   "name": "UsNormalPenaltyFormation",
-  "minimumRobots": 1,
+  "minimumRobots": 0,
   "positions": [
-    {
-      "x": 3,
-      "y": 0,
-      "rot": 0
-    },
     {
       "x": 2,
       "y": 2,
-      "rot": 0
+      "rot": -0.5
     },
     {
       "x": 2,
       "y": -2,
-      "rot": 0
+      "rot": 0.5
     },
     {
-      "x": -3,
-      "y": 0.5,
+      "x": -1,
+      "y": 0.7,
       "rot": 0
     },{
-      "x": -3,
-      "y": -0.5,
+      "x": -1,
+      "y": -0.7,
       "rot": 0
     },{
-      "x": -4,
+      "x": -3.7,
       "y": 0,
       "rot": 0,
       "isKeeper": true
@@ -127,13 +122,8 @@
 
 {
   "name": "UsShootoutPenaltyFormation",
-  "minimumRobots": 1,
+  "minimumRobots": 0,
   "positions": [
-    {
-      "x": -2,
-      "y": 0,
-      "rot": 0
-    },
     {
       "x": -4,
       "y": 1,

@@ -70,6 +70,7 @@ void Jim_PenaltyPlay::Initialize() {
         bb.SetInt("KEEPER_ID", 5);
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
+        bb.SetBool("ShootAtGoalV2_A_waitForDO_PENALTY", true);
 
         // Create message
         rd.tree = "rtt_jim/ShootAtGoalRole";

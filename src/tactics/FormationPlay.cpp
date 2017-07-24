@@ -117,6 +117,11 @@ void FormationPlay::Initialize() {
 
 		if (hasKeeperPosition && i == *formation->keeperIdx) {
 			posIdx++; // skip this position, it's for the keeper.
+			if (posIdx == formation->positions.size()) {
+				// We ran out of positions...
+				release_robot(id);
+				break;
+			}
 		}
 
 		Position pos = formation->positions.at(posIdx++);

@@ -90,19 +90,15 @@ bool KeepPosition::updateGoalPosition() {
 	auto them = LastWorld::get().them;
 	bots.insert(bots.end(), them.begin(), them.end());
 
-	// ROS_INFO("Obstacles:");
 	if (ownPos.dist(ballPos) < MINIMUM_ROBOT_DISTANCE) {
 		obstacles.push_back(ballPos);
-		// ROS_INFO_STREAM(ballPos);
 	}
 	for (const auto& bot : bots) {
 		Vector2 pos { bot.pos };
 		if (pos != ownPos && pos.dist(ownPos) < MINIMUM_ROBOT_DISTANCE) {
 			obstacles.push_back(pos);
-			// ROS_INFO_STREAM(pos);
 		}
 	}
-	// ROS_INFO("\nCandidates:");
 
 	Vector2 goal;
 	if (obstacles.size() == 0) {
@@ -120,8 +116,6 @@ bool KeepPosition::updateGoalPosition() {
 						circleIntersection(obstacles.at(i),
 								MINIMUM_ROBOT_DISTANCE, obstacles.at(j),
 								MINIMUM_ROBOT_DISTANCE);
-				ROS_INFO_STREAM(
-						obstacles.at(i) << "~" << obstacles.at(j) << ":");
 				if (intersections.first) {
 					bool clear = true;
 					for (const Vector2& obs : obstacles) {
@@ -133,7 +127,6 @@ bool KeepPosition::updateGoalPosition() {
 					}
 					if (clear) {
 						candidates.push_back(*intersections.first);
-						ROS_INFO_STREAM(*intersections.first);
 					}
 				}
 				if (intersections.second) {
@@ -147,14 +140,12 @@ bool KeepPosition::updateGoalPosition() {
 					}
 					if (clear) {
 						candidates.push_back(*intersections.second);
-						ROS_INFO_STREAM(*intersections.second);
 					}
 				}
 			}
 		}
 		goal = candidates.size() > 0 ? candidates.at(0) : ownPos;
 	}
-	// ROS_INFO("\n\n");
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);
