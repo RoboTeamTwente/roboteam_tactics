@@ -304,6 +304,7 @@ if (BUILD_ROBOTNODE)
 
     add_executable(RoleNode
         src/RoleNode.cpp
+        src/utils/CrashHandler.cpp
         $<TARGET_OBJECTS:analysis>
         $<TARGET_OBJECTS:treegen>
         $<TARGET_OBJECTS:alltrees>
@@ -322,6 +323,7 @@ if (BUILD_ROBOTNODE)
         ${catkin_LIBRARIES}
         bt
         )
+    install(PROGRAMS scripts/run_RoleNode.sh  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 endif (BUILD_ROBOTNODE)
 
@@ -349,7 +351,6 @@ if (BUILD_STRATEGYNODE)
         )
 
     install(PROGRAMS scripts/run_StrategyNode.sh  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 endif (BUILD_STRATEGYNODE)
 
 catkin_add_gtest(bt_test
