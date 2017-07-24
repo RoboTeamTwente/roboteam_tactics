@@ -125,6 +125,11 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
+    int totalNumRobots = world.us.size();
+
+    if (numRobots >= (totalNumRobots - 1)) {
+        numRobots = totalNumRobots - 2;
+    }
 
     if (numRobots < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -189,8 +194,15 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
 
     if (justChecking) {
+        if (weAreAttacking != weWereAttacking) {
+            weWereAttacking = weAreAttacking;
+            return true;
+        }
+        weWereAttacking = weAreAttacking;
     	return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
     }
+
+    weWereAttacking = weAreAttacking;
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
@@ -303,7 +315,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
         bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/DefenderRoleGetBall";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -346,7 +358,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
             // Create message
-            rd.tree = "rtt_jim/DefenderRole";
+            rd.tree = "rtt_jim/DefenderRoleGetBall";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later

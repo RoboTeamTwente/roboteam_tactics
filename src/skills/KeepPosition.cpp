@@ -154,7 +154,7 @@ bool KeepPosition::updateGoalPosition() {
 		}
 		goal = candidates.size() > 0 ? candidates.at(0) : ownPos;
 	}
-	ROS_INFO("\n\n");
+	// ROS_INFO("\n\n");
 
 	private_bb->SetDouble("KeepPosition_GTP_xGoal", goal.x);
 	private_bb->SetDouble("KeepPosition_GTP_yGoal", goal.y);

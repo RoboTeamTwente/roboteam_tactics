@@ -43,6 +43,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         distanceFromBallWhenDribbling = 0.105;
     }
     choseRobotToPassTo = false;
+    passToRobot = 0;
 }
 
 void GetBall::publishStopCommand() {
@@ -120,10 +121,6 @@ bt::Node::Status GetBall::Update (){
 
 	roboteam_msgs::World world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
-    // if (!canClaimBall()) {return Status::Failure;}
-
-    // ROS_INFO_STREAM("robot " << robotID << " in GetBall update");
-
     
 
 	// Wait for the first world message
@@ -157,8 +154,6 @@ bt::Node::Status GetBall::Update (){
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
-    // ROS_INFO_STREAM("Robot: " << robotID << " shootAtGoal: " << shootAtGoal << " viewOfGoal: " << viewOfGoal);
-
 
     if (finalStage){
         if(countFinalMessages < 10){
@@ -180,11 +175,9 @@ bt::Node::Status GetBall::Update (){
 
     boost::optional<int> maxScoreID = boost::none;
 
-    // ROS_INFO_STREAM("robot " << robotID << " passToBestAttacker: " << GetBool("passToBestAttacker") << " choseRobotToPassTo: " << choseRobotToPassTo << " shootAtGoal: " << shootAtGoal);
-
     // If we should pass on to the best available attacker, we should find which one has the highest score
     if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-        ROS_INFO_STREAM("robot: " << robotID << " checking passToBestAttacker options");
+        // ROS_INFO_STREAM("robot: " << robotID << " checking passToBestAttacker options");
         double maxScore = -std::numeric_limits<double>::max();
 
         for (size_t i = 0; i < (world.us.size()); i++) {
@@ -194,7 +187,7 @@ bt::Node::Status GetBall::Update (){
             ros::param::getCached(paramName, readyToReceiveBall);
 
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
-                ROS_INFO_STREAM("getball " << robotID << " robot " << world.us.at(i).id << " readyToReceiveBall");
+                // ROS_INFO_STREAM("getball " << robotID << " robot " << world.us.at(i).id << " readyToReceiveBall");
                 opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
                 double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos));
                 if (score > maxScore) {
@@ -206,7 +199,8 @@ bt::Node::Status GetBall::Update (){
         
         if (maxScore > -std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
             choseRobotToPassTo = true;
-            ROS_INFO_STREAM("chose to pass to robot " << *maxScoreID);
+            passToRobot = *maxScoreID;
+            // ROS_INFO_STREAM("chose to pass to robot " << passToRobot);
         } else {
         	SetString("aimAt", "theirgoal");
         }
@@ -217,10 +211,8 @@ bt::Node::Status GetBall::Update (){
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
-    } else if (choseRobotToPassTo && maxScoreID) {
-        ROS_INFO_STREAM("passing to robot " << *maxScoreID);
-        targetAngle = GetTargetAngle(ballPos, "robot", *maxScoreID, true);
-        ROS_INFO_STREAM("targetAngle: " << targetAngle);
+    } else if (choseRobotToPassTo) {
+        targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
     } else if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else if (HasDouble("targetAngle")) {
@@ -287,7 +279,6 @@ bt::Node::Status GetBall::Update (){
     //     private_bb->SetBool("dribbler", false);
     // }
 
-    // ROS_INFO_STREAM("posDiff: " << posDiff.length() << " angleDiff: " << fabs(angleDiff));
 
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
@@ -309,7 +300,6 @@ bt::Node::Status GetBall::Update (){
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         matchBallVel = false;
         int ballCloseFrameCountTo = 20;
-        // ROS_INFO_STREAM("GetBall robot " << robotID << " ballCloseFrameCount: " << ballCloseFrameCount);
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
@@ -340,7 +330,6 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
-    ROS_INFO_STREAM("targetAngle: " << targetAngle << " choseRobotToPassTo: " << choseRobotToPassTo);
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", false);
     if (HasBool("enterDefenseAreas")) {

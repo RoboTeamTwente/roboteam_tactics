@@ -35,7 +35,7 @@ void Jim_KickOffDefense::Initialize() {
     tokens.clear();
 
     RTT_DEBUGLN_TEAM("Initializing Jim_KickOffDefense");    
-    if (getAvailableRobots().size() < 4) {
+    if (getAvailableRobots().size() < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
         // TODO: Want to pass failure here as well!
         return;
@@ -92,16 +92,17 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders = 2;
+    int numBallDefenders = std::min((int) robots.size(), 3);
+
     std::vector<double> angleOffsets;
+    angleOffsets.push_back(0.0);
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
-    angleOffsets.push_back(0.0);
-
+    
     std::vector<double> distanceOffsets;
+    distanceOffsets.push_back(3.8);
     distanceOffsets.push_back(1.5);
     distanceOffsets.push_back(1.5);
-    distanceOffsets.push_back(4.0);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
@@ -181,7 +182,7 @@ void Jim_KickOffDefense::Initialize() {
 
     std::vector<Vector2> defenderPositions;
 
-    double distanceFromGoal = 4.0;
+    double distanceFromGoal = 3.8;
 
     for (size_t i = 0; i < dangerousOpps.size(); i++) {
         Vector2 defensePoint = SimpleDefender::computeDefensePoint(Vector2(dangerousOpps.at(i).pos), true, distanceFromGoal, 0.0);    
@@ -243,42 +244,42 @@ void Jim_KickOffDefense::Initialize() {
     // Initialize the last Ball Defender! Will also be the kick off taker
     // ==================================================================
 
-    if (getAvailableRobots().size() >= 1) {
-        std::cout << "Initializing ball defender!\n";
+    // if (getAvailableRobots().size() >= 1) {
+    //     std::cout << "Initializing ball defender!\n";
 
-        int ballDefenderID = getAvailableRobots().at(0);
+    //     int ballDefenderID = getAvailableRobots().at(0);
 
-        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
-        delete_from_vector(robots, ballDefenderID);
-        claim_robot(ballDefenderID);
+    //     // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+    //     delete_from_vector(robots, ballDefenderID);
+    //     claim_robot(ballDefenderID);
 
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = ballDefenderID;
-        bt::Blackboard bb;
+    //     roboteam_msgs::RoleDirective rd;
+    //     rd.robot_id = ballDefenderID;
+    //     bt::Blackboard bb;
 
-        // Set the robot ID
-        bb.SetInt("ROBOT_ID", ballDefenderID);
-        bb.SetInt("KEEPER_ID", keeperID);
+    //     // Set the robot ID
+    //     bb.SetInt("ROBOT_ID", ballDefenderID);
+    //     bb.SetInt("KEEPER_ID", keeperID);
 
-        bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
-        bb.SetBool("SimpleDefender_A_avoidRobots", false);
-        bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+    //     bb.SetDouble("DistanceXToY_A_distance", 2.0);
+    //     bb.SetDouble("SimpleDefender_A_distanceFromGoal", 3.7);
+    //     bb.SetBool("SimpleDefender_A_avoidRobots", false);
+    //     bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
 
-        // Create message
-        rd.tree = "rtt_jim/DefenderRole";
-        rd.blackboard = bb.toMsg();
+    //     // Create message
+    //     rd.tree = "rtt_jim/DefenderRole";
+    //     rd.blackboard = bb.toMsg();
 
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        rd.token = unique_id::toMsg(token);
+    //     // Add random token and save it for later
+    //     boost::uuids::uuid token = unique_id::fromRandom();
+    //     tokens.push_back(token);
+    //     rd.token = unique_id::toMsg(token);
 
-        // Send to rolenode
-        pub.publish(rd);
-    } else {
-        std::cout << "No robots available for the last Ball Defender!\n";
-    }
+    //     // Send to rolenode
+    //     pub.publish(rd);
+    // } else {
+    //     std::cout << "No robots available for the last Ball Defender!\n";
+    // }
 }
 
 
