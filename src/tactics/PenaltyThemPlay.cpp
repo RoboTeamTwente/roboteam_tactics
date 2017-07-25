@@ -1,17 +1,20 @@
 #include "roboteam_tactics/tactics/PenaltyThemPlay.h"
 #include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_utils/LastRef.h"
 
 namespace rtt {
 
 RTT_REGISTER_TACTIC(PenaltyThemPlay);
 
 PenaltyThemPlay::PenaltyThemPlay(std::string name, bt::Blackboard::Ptr bb) : Tactic(name, bb),
-		shooterId{-1}, shootoutPenalty{false}, valid{false} {}
+		shooterId{-1}, shootoutPenalty{false}, valid{false}, formationPlay("", nullptr) {}
 
 void PenaltyThemPlay::Initialize() {
 	if (HasBool("isShootout")) {
 		shootoutPenalty = GetBool("isShootout");
+    } else if (LastRef::get().stage.stage == roboteam_msgs::RefereeStage::PENALTY_SHOOTOUT) {
+        shootoutPenalty = true;
 	} else {
 		ROS_ERROR("PenaltyThemPlay: No bool 'isShootout' in blackboard!");
 		return;
@@ -41,10 +44,24 @@ void PenaltyThemPlay::Initialize() {
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 	}
+
+    // std::cout << "Initializing formation play!\n";
+    // formationPlayBB = std::make_shared<bt::Blackboard>();
+    // formationPlay.SetBlackboard(formationPlayBB);
+    // formationPlayBB->SetString("formation", "ThemShootoutPenaltyFormation");
+
+    // formationPlay.Initialize();
 }
 
 bt::Node::Status PenaltyThemPlay::Update() {
 	if (!valid) return Status::Invalid;
 	return Status::Running;
 }
+
+void PenaltyThemPlay::Terminate(Status s) {
+    // formationPlay.Terminate(formationPlay.getStatus());
+
+    Tactic::Terminate(s);
+}
+
 }
