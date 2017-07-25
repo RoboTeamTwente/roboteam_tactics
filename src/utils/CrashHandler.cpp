@@ -103,7 +103,7 @@ void atSegfault(int) {
 	restartSystem();
 }
 
-void registerAll() {
+void registerCrashHandlers() {
 	std::at_quick_exit(&atQuickExit);
 	std::set_terminate(&atTerminate);
 	std::signal(SIGABRT, &atAbort);

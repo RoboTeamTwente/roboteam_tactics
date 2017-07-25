@@ -114,7 +114,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 }
 
 int main(int argc, char *argv[]) {
-	rtt::crash::registerAll();
+	rtt::crash::registerCrashHandlers();
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
