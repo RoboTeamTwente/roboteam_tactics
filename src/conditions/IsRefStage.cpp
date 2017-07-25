@@ -38,10 +38,8 @@ bt::Node::Status IsRefStage::Update() {
 	
 	
 	if(refstage.stage == testStage){
-		ROS_INFO("ja, stage: %ld", (long)refstage.stage);
 		return Status::Success;
 	} else {
-		ROS_INFO("nee, stage: %ld", (long)refstage.stage);
 		return Status::Failure;
 	}
 }

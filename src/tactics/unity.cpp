@@ -139,3 +139,6 @@
 
 #include "StopPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Bob_PenaltyShootOutPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG

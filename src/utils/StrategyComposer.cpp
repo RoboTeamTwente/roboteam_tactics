@@ -11,7 +11,6 @@ namespace b = boost;
 namespace rtt {
 
 bool StrategyComposer::initialized = false;
-// const std::string UNSET = "<<UNSET>>";
 
 std::shared_ptr<bt::BehaviorTree> StrategyComposer::mainStrategy;
 
