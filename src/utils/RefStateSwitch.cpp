@@ -16,7 +16,8 @@ RefStateSwitch::RefStateSwitch() : validated(false)
                                  // , currentCmd(-1)
                                  , finishedOnce(false)
                                  , needToInitialize(false)
-                                 , startedNewStrategy(false) {
+                                 , startedNewStrategy(false)
+                                 , lastKnownBotCount(-1) {
                                  // , runningImplicitNormalStartRefCommand(false)
                                  // , switchedToNormal(false) {
 }
@@ -50,6 +51,18 @@ bt::Node::Status RefStateSwitch::Update() {
         ROS_WARN_STREAM("Have not yet received a ref command, so not executing any strategy tree.");
         return Status::Running;
     }
+
+    auto world = rtt::LastWorld::get();
+
+	unsigned botCount = world.us.size();
+	if (botCount != lastKnownBotCount) {
+		lastKnownBotCount = world.us.size();
+
+		if (auto child = getCurrentChild()) {
+			child->Terminate(Status::Invalid);
+			child->Initialize();
+		}
+	}
 
     startedNewStrategy = false;
 
