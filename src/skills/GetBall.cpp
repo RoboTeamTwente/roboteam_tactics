@@ -158,7 +158,7 @@ bt::Node::Status GetBall::Update (){
     if (finalStage){
         if(countFinalMessages < 10){
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
+                publishKickCommand(2.0);
             } else {
                 publishKickCommand(8.0);
             }
@@ -264,8 +264,8 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12 ;
-        successAngle = 0.30; // was: 0.15
+        successDist = 0.115 ;
+        successAngle = 0.15; 
         getBallDist = 0.06;
         distAwayFromBall = 0.2;
     }
@@ -297,6 +297,12 @@ bt::Node::Status GetBall::Update (){
     if (fabs(angleDiff) > 0.5*M_PI) {
         matchBallVel = true;
     }
+
+    double addBallSpeed = ballVel.length() * 0.3;
+    if (addBallSpeed > 1.7) {
+        addBallSpeed = 1.7;
+    }
+    distAwayFromBall = distAwayFromBall + addBallSpeed;
 
 
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 

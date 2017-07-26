@@ -72,11 +72,14 @@ void ReceiveBall::Initialize() {
 }
 
 Vector2 ReceiveBall::computePoint() {
-	opportunityFinder.Initialize("spits.txt",robotID, "theirgoal", 0);
-	if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
-		opportunityFinder.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
-	}
-	Vector2 receiveBallAtPos = opportunityFinder.computeBestOpportunity();
+	// opportunityFinder.Initialize("spits.txt",robotID, "theirgoal", 0);
+	// if (HasDouble("computePointCloseToX") && HasDouble("computePointCloseToY")) {
+	// 	opportunityFinder.setCloseToPos(Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY")));
+	// }
+
+	receiveBallAtPos = Vector2(GetDouble("computePointCloseToX"), GetDouble("computePointCloseToY"));
+
+	// Vector2 receiveBallAtPos = opportunityFinder.computeBestOpportunity();
 	prevComputedPoint = now();
 	return receiveBallAtPos;
 }

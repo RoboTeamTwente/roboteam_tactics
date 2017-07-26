@@ -67,7 +67,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
     for (size_t i = 0; i < (size_t) numAttackers; i++) {
 
         int strikerID = strikerIDs.at(i);
-        // RTT_DEBUGLN("Initializing Striker %i", strikerID);
+        RTT_DEBUGLN("Initializing Striker %i", strikerID);
         // delete_from_vector(robots, strikerID);
         claim_robot(strikerID);
 
