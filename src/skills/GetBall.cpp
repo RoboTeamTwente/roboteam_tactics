@@ -262,13 +262,25 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
         successDist = 0.12 ;
-        successAngle = 0.15;
+        successAngle = 0.30; // was: 0.15
         getBallDist = 0.06;
         distAwayFromBall = 0.2;
     }
+
+    if (HasDouble("distAwayFromBall")) {
+        distAwayFromBall = GetDouble("distAwayFromBall");
+    }
+
+    if (HasDouble("successAngle")) {
+        successAngle = GetDouble("successAngle");
+    }
    
-    if (HasDouble("getBallDist")){
+    if (HasDouble("getBallDist")) {
         getBallDist=GetDouble("getBallDist");
+    }
+
+    if (HasDouble("successDist")) {
+        successDist=GetDouble("successDist");
     }
 
     bool matchBallVel = false;
@@ -279,15 +291,20 @@ bt::Node::Status GetBall::Update (){
     //     private_bb->SetBool("dribbler", false);
     // }
 
+    if (fabs(angleDiff) > 0.5*M_PI) {
+        matchBallVel = true;
+    }
+
 
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
         private_bb->SetBool("dribbler", false);
-	} else {
-        private_bb->SetBool("dribbler", true);
         matchBallVel = true;
+	} else {
+        private_bb->SetBool("dribbler", true); 
+        // matchBallVel = true;
         // if (robot_output_target == "serial") {
         //     private_bb->SetDouble("maxSpeed", 0.6);
         // }
@@ -297,8 +314,9 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
+    ROS_INFO_STREAM("GetBall posDiff: " << (ballPos - robotPos).length());
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        matchBallVel = false;
+        // matchBallVel = false;
         int ballCloseFrameCountTo = 20;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");

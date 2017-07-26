@@ -97,7 +97,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 4.0;
+        maxSpeed = 1.5;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;
@@ -235,9 +235,9 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    if (velTarget.length() < 0.25) {
+    if (velTarget.length() < 0.30) {
         if (velTarget.length() > 0.07) {
-            velTarget = velTarget.scale(0.25 / velTarget.length());  
+            velTarget = velTarget.scale(0.30 / velTarget.length());  
         }
     }
 
@@ -347,7 +347,7 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     }
 
     if (fabs(angularVelTarget) < 2.2) {
-        if (fabs(angularVelTarget) > 0.7) {
+        if (fabs(angularVelTarget) > 0.5) {
             angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
         }
     }
