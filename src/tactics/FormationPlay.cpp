@@ -43,7 +43,12 @@ Formation::Formation(const nlohmann::json& json, Vector2 scaleFactors) {
 		// Without them, gcc assumes def.at("x") is a std::complex...
 		double x = static_cast<double>(def.at("x")) * scaleFactors.x;
 		double y = static_cast<double>(def.at("y")) * scaleFactors.y;
-		double rot = def.at("rot");
+		double rot = 0;
+
+        if (def.find("rot") != def.end()) {
+            rot = def.at("rot");
+        }
+
 		if (def.find("isKeeper") != def.end() && def.at("isKeeper")) {
 			keeperIdx = positions.size();
 		} else {

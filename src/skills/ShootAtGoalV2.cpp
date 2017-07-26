@@ -1,9 +1,12 @@
+#include <iostream>
+
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include <iostream>
 
+#include "roboteam_utils/LastRef.h"
+#include "roboteam_utils/RefLookup.h"
 
 namespace rtt {
     
@@ -49,7 +52,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     }
     if (GetBool("waitForDO_PENALTY", false)) {
     	ROS_INFO("still waiting...");
-    	private_bb->SetBool("SAGV2_GetBall_passOn", LastRef::getState() == RefState::DO_PENALTY);
+    	private_bb->SetBool("SAGV2_GetBall_passOn", getExtendedState() == RefState::DO_PENALTY);
     }
     private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
     private_bb->SetDouble("targetAngle", targetAngle);
