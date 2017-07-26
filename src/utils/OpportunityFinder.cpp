@@ -59,6 +59,11 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
+
+	if (world.them.size() == 0) {
+		return 0.0;
+	}
+
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
 	for (size_t i = 1; i < world.them.size(); i++) {
 		double testDistance = (Vector2(world.them.at(i).pos) - testPosition).length();
@@ -72,6 +77,9 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
+
+	
+	
 	double shortestDistance = (Vector2(world.us.at(0).pos) - testPosition).length();
 	for (size_t i = 1; i < world.us.size(); i++) {
 		double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
@@ -86,6 +94,10 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballTraj = testPosition - ballPos;
+
+	if (world.them.size() == 0) {
+		return 0.0;
+	}
 
 	Vector2 oppPos = Vector2(world.them.at(0).pos);
 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
@@ -102,6 +114,10 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 // Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
 double OpportunityFinder::calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballToTargetTraj = targetPos - testPosition;
+
+	if (world.them.size() == 0) {
+		return 0.0;
+	}
 
 	Vector2 oppPos = Vector2(world.them.at(0).pos);
 	double shortestDistance = fabs((ballToTargetTraj.closestPointOnVector(testPosition, oppPos) - oppPos).length());

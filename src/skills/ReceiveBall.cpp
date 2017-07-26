@@ -466,9 +466,10 @@ bt::Node::Status ReceiveBall::Update() {
 
 	        pub.publish(command);
 	    } else {
-	    	roboteam_msgs::RobotCommand emptyCommand;
-	    	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	    	pub.publish(emptyCommand);
+	    	// roboteam_msgs::RobotCommand emptyCommand;
+	    	// auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	    	// pub.publish(emptyCommand);
+	    	publishStopCommand();
 	    }
 
 	    return Status::Running;		

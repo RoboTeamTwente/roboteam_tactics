@@ -2,6 +2,7 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <chrono>
 
 #include <ros/ros.h>
 #include "std_msgs/Empty.h"
@@ -67,6 +68,8 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
 
+        ROS_WARN("Received stop command for robot %i", ROBOT_ID);
+
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
 
@@ -124,6 +127,8 @@ int main(int argc, char *argv[]) {
     // Chop off the leading "/robot"
     std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
     // Convert to int
+
+
     try {
         ROBOT_ID = std::stoi(robotIDStr);
     } catch (...) {
@@ -156,6 +161,10 @@ int main(int argc, char *argv[]) {
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 
     // auto worldStateDummySub = n.subscribe<roboteam_msgs::World>("/world_state", 1, &wsDummy, ros::TransportHints().tcpNoDelay());
+
+    using namespace std::chrono;
+    steady_clock::time_point start = steady_clock::now();
+    int iters = 0;
 
     while (ros::ok()) {
         // if (ROBOT_ID == 1) {
@@ -207,6 +216,16 @@ int main(int argc, char *argv[]) {
 
             // Stop the robot in its tracks
             pub.publish(rtt::stop_command(ROBOT_ID));
+        }
+
+        iters++;
+
+        if ((steady_clock::now() - start) > milliseconds(2000)) {
+            start = steady_clock::now();
+            
+            std::cout << "RoleHZ for robot #" << ROBOT_ID << ": " << (iters / 2.0) << "\n";
+
+            iters = 0;
         }
     }
 

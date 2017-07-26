@@ -156,6 +156,7 @@ bt::Node::Status GetBall::Update (){
 
 
     if (finalStage){
+        ROS_INFO_STREAM("GetBall " << robotID << " finalStage");
         if(countFinalMessages < 10){
             if (choseRobotToPassTo) {
                 publishKickCommand(2.0);
@@ -346,6 +347,7 @@ bt::Node::Status GetBall::Update (){
             } else {
                 publishKickCommand(5.0); // 8.0
             }
+            return Status::Running;
         }
     } else {
         ballCloseFrameCount = 0;
@@ -375,25 +377,32 @@ bt::Node::Status GetBall::Update (){
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {
     	command = *commandPtr;
-    }
 
-
-    // Optional feature after testing: match the ball velocity for easy ball interception
-    if (matchBallVel) {
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 4.0) {
-          newVelCommand.scale(4.0 / newVelCommand.length());
+        // Optional feature after testing: match the ball velocity for easy ball interception
+        if (matchBallVel) {
+            Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+            Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+            if (newVelCommand.length() > 4.0) {
+              newVelCommand.scale(4.0 / newVelCommand.length());
+            }
+            command.x_vel = newVelCommand.x;
+            command.y_vel = newVelCommand.y;    
         }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;    
-    }
-    
-    // Get global robot command publisher, and publish the command
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-    pub.publish(command);	
+        
+        // Get global robot command publisher, and publish the command
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        pub.publish(command);   
+        ROS_INFO_STREAM("GetBall " << robotID << " OK");
 
-	return Status::Running;
+        return Status::Running;
+    } else {
+        ROS_INFO_STREAM("GetBall " << robotID << " stopping");
+        publishStopCommand();
+        return Status::Running;
+    }
+
+
+    
 }
 
 } // rtt
