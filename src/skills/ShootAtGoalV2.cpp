@@ -1,9 +1,12 @@
+#include <iostream>
+
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 #include "roboteam_tactics/skills/Kick.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
-#include <iostream>
 
+#include "roboteam_utils/LastRef.h"
+#include "roboteam_utils/RefLookup.h"
 
 namespace rtt {
     
@@ -17,6 +20,10 @@ ShootAtGoalV2::ShootAtGoalV2(std::string name, bt::Blackboard::Ptr blackboard)
 bt::Node::Status ShootAtGoalV2::Update() {
     const roboteam_msgs::World world = LastWorld::get();
 
+    std::cout << "ShootAtGoalV2: Begin!\n";
+    std::cout << "Current ref state: " << refStateToString(LastRef::getState()) << "\n";
+    std::cout << "Current extended ref state: " << refStateToString(getExtendedState()) << "\n";
+
     int robotID = blackboard->GetInt("ROBOT_ID");
     roboteam_msgs::WorldRobot bot;
     boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
@@ -26,6 +33,9 @@ bt::Node::Status ShootAtGoalV2::Update() {
         ROS_WARN("ShootAtGoalV2 could not find robot");
         return Status::Failure;
     }
+
+    std::cout << "Current ref state: " << refStateToString(LastRef::getState()) << "\n";
+    std::cout << "Current extended ref state: " << refStateToString(getExtendedState()) << "\n";
 
     const Vector2 ownPos(bot.pos);
     // const double orientation = bot->angle;
@@ -40,6 +50,9 @@ bt::Node::Status ShootAtGoalV2::Update() {
     
     Vector2 target = largest->center;
     double targetAngle = (target - ownPos).angle();
+
+    std::cout << "Current ref state: " << refStateToString(LastRef::getState()) << "\n";
+    std::cout << "Current extended ref state: " << refStateToString(getExtendedState()) << "\n";
     
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
@@ -49,7 +62,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
     }
     if (GetBool("waitForDO_PENALTY", false)) {
     	ROS_INFO("still waiting...");
-    	private_bb->SetBool("SAGV2_GetBall_passOn", LastRef::getState() == RefState::DO_PENALTY);
+    	private_bb->SetBool("SAGV2_GetBall_passOn", getExtendedState() == RefState::DO_PENALTY);
     }
     private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
     private_bb->SetDouble("targetAngle", targetAngle);

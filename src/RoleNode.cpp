@@ -13,8 +13,10 @@
 #include "roboteam_msgs/BtDebugInfo.h"
 #include "roboteam_msgs/BtStatus.h"
 #include "roboteam_msgs/RobotCommand.h"
+#include "roboteam_msgs/RefereeCommand.h"
 
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/constants.h"
 
 #include "roboteam_tactics/treegen/NodeFactory.h"
@@ -22,7 +24,6 @@
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/utils/CrashHandler.h"
-
 
 namespace {
 
@@ -41,6 +42,11 @@ std::string currentTreeName;
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
 bool ignoring_strategy_instructions = false;
+
+void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    rtt::LastRef::set(*refdata);
+    //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
+}
 
 void reset_tree() {
     currentToken = uuid_msgs::UniqueID();
@@ -140,9 +146,10 @@ int main(int argc, char *argv[]) {
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
 
-    // Create world & geom callbacks
+    // Create world, geom, and ref callbacks
     rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
+    ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
 
     // For receiving trees
     RTT_DEBUG("RoleNode %i subscribing... ", ROBOT_ID);
