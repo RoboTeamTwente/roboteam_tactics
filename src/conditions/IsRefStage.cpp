@@ -35,13 +35,11 @@ bt::Node::Status IsRefStage::Update() {
 		return Status::Failure;
 	}
 	
-	
-	
 	if(refstage.stage == testStage){
-		ROS_INFO("ja, stage: %ld", (long)refstage.stage);
+        // std::cout << "Refstage!\n";
 		return Status::Success;
 	} else {
-		ROS_INFO("nee, stage: %ld", (long)refstage.stage);
+        // std::cout << "Not refstage!\n";
 		return Status::Failure;
 	}
 }

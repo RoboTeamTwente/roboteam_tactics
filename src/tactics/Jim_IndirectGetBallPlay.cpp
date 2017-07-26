@@ -44,6 +44,11 @@ void Jim_IndirectGetBallPlay::Initialize() {
     Vector2 ballPos = Vector2(world.ball.pos);
     auto ballGetterID = get_robot_closest_to_point(robots, world, ballPos);
 
+    if (!ballGetterID) { 
+        ROS_WARN("Jim_IndirectGetBallPlay could not find a free robot");
+        return;
+    }
+
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 

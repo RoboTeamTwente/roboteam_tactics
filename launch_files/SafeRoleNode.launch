@@ -1,0 +1,11 @@
+<launch>
+	<arg name="cmdline" default=""/>
+	<arg name="name" default="anonymous-role-node"/>
+	<arg name="outputToScreen" default="true"/>
+	<group if="$(arg outputToScreen)">
+		<node name="$(arg name)" pkg="roboteam_tactics" type="run_RoleNode.sh" output="screen" args="$(arg cmdline)"/>
+	</group>
+	<group unless="$(arg outputToScreen)">
+		<node name="$(arg name)" pkg="roboteam_tactics" type="run_RoleNode.sh" output="screen" args="$(arg cmdline)"/>
+	</group>
+</launch>

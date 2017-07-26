@@ -4,7 +4,7 @@
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
 	<param name="our_side" type="str" value="left" />
-	<param name="our_color" type="str" value="yellow" />
+	<param name="our_color" type="str" value="blue" />
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />
@@ -41,15 +41,45 @@
 	<param name="num_role_nodes" type="int" value="10" />
 	<param name="normalize_field" type="bool" value="true" />
 
-	<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot6" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot7" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot8" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-	<node name="robot9" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot0"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot1"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot2"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot3"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot4"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot5"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot6"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot7"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot8"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot9"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
 
 </launch>

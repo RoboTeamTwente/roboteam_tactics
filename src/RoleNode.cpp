@@ -21,6 +21,8 @@
 #include "roboteam_tactics/bt.hpp"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/utils/BtDebug.h"
+#include "roboteam_tactics/utils/CrashHandler.h"
+
 
 namespace {
 
@@ -112,6 +114,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 }
 
 int main(int argc, char *argv[]) {
+	rtt::crash::registerCrashHandlers();
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 

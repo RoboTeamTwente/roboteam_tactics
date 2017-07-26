@@ -80,8 +80,9 @@ void commonAlert(std::string source, bool restarting) {
 }
 
 void atAbort(int) {
-	commonAlert("SIGABRT", false);
+	commonAlert("SIGABRT");
 	writeLog("SIGABRT");
+	restartSystem();
 }
 
 void atQuickExit() {
@@ -102,7 +103,7 @@ void atSegfault(int) {
 	restartSystem();
 }
 
-void registerAll() {
+void registerCrashHandlers() {
 	std::at_quick_exit(&atQuickExit);
 	std::set_terminate(&atTerminate);
 	std::signal(SIGABRT, &atAbort);
