@@ -8,7 +8,7 @@
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />
-	<param name="robot0/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot0/robotType" type="string" value="$(arg robot_type)" />
 	<param name="robot1/robotType" type="string" value="$(arg robot_type)" output="screen" />
 	<param name="robot2/robotType" type="string" value="$(arg robot_type)" output="screen" />
 	<param name="robot3/robotType" type="string" value="$(arg robot_type)" output="screen" />

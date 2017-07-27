@@ -67,6 +67,9 @@ void GetBall::publishKickCommand(double kickSpeed){
     command.id = robotID;
     command.kicker = GetBool("passOn");
     command.kicker_forced = GetBool("passOn");
+    command.chipper = GetBool("chipOn");
+    command.chipper_forced = GetBool("chipOn");
+    command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.kicker_vel = GetBool("passOn") ? kickSpeed : 0;
 
     command.x_vel = 0;
@@ -360,7 +363,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", false);
+    private_bb->SetBool("avoidRobots", true);
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
