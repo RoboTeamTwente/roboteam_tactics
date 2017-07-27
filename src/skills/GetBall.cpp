@@ -153,29 +153,10 @@ bt::Node::Status GetBall::Update (){
     Vector2 posDiff = ballPos - robotPos; 
 
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
-    bool canSeeGoal = viewOfGoal >= 0.2; 
+    bool canSeeGoal = viewOfGoal >= 0.1; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
-
-    if (finalStage){
-        ROS_INFO_STREAM("GetBall " << robotID << " finalStage");
-        if(countFinalMessages < 10){
-            if (choseRobotToPassTo) {
-                publishKickCommand(2.0);
-            } else {
-                publishKickCommand(8.0);
-            }
-            
-            countFinalMessages=countFinalMessages+1;
-            return Status::Running;
-        }
-        else {
-            choseRobotToPassTo = false;
-            releaseBall();
-            return Status::Success;
-        }
-    }
 
     boost::optional<int> maxScoreID = boost::none;
 
@@ -327,7 +308,6 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-    ROS_INFO_STREAM("GetBall posDiff: " << (ballPos - robotPos).length());
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // matchBallVel = false;
         int ballCloseFrameCountTo = 20;
@@ -344,12 +324,22 @@ bt::Node::Status GetBall::Update (){
             return Status::Running;
         } else {
 
-            finalStage = true;
             if (choseRobotToPassTo) {
-                publishKickCommand(4.0); // 3.0
+                publishKickCommand(3.0);
             } else {
-                publishKickCommand(5.0); // 8.0
+                publishKickCommand(8.0);
             }
+
+            if(countFinalMessages < 0){
+                countFinalMessages=countFinalMessages+1;
+                return Status::Running;
+            }
+            else {
+                choseRobotToPassTo = false;
+                releaseBall();
+                return Status::Success;
+            }
+
             return Status::Running;
         }
     } else {
@@ -395,11 +385,9 @@ bt::Node::Status GetBall::Update (){
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command);   
-        ROS_INFO_STREAM("GetBall " << robotID << " OK");
 
         return Status::Running;
     } else {
-        ROS_INFO_STREAM("GetBall " << robotID << " stopping");
         publishStopCommand();
         return Status::Running;
     }

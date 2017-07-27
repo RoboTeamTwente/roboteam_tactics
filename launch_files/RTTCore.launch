@@ -3,6 +3,9 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
+	<param name="referee_source_port" type="int" value="10033" />
+	<param name="vision_source_port" type="int" value="10036" />
+
 	<param name="our_side" type="str" value="right" />
 	<param name="our_color" type="str" value="yellow" />
 

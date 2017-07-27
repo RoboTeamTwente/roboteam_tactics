@@ -89,91 +89,6 @@ void Jim_KickOffDefense::Initialize() {
 
 
 
-    int numBallDefenders;
-    std::vector<double> angleOffsets;
-    std::vector<double> distanceOffsets;
-    if ((int) getAvailableRobots().size() <= 4) {
-        numBallDefenders = 3;
-
-        angleOffsets.push_back(0.1);
-        angleOffsets.push_back(-0.1);
-        angleOffsets.push_back(0.0);
-
-        distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(2.5);
-
-    } else {
-        numBallDefenders = 4;
-
-        angleOffsets.push_back(0.2);
-        angleOffsets.push_back(0.0);
-        angleOffsets.push_back(-0.2);
-        angleOffsets.push_back(0.0);
-
-        distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(3.7);
-    }
-
-
-
-
-    // ====================================
-    // Initialize the Ball Defenders!
-    // ====================================
-
-    numBallDefenders = std::min((int) robots.size(), numBallDefenders);
-
-    std::vector<Vector2> ballDefendersPositions;
-    for (int i = 0; i < numBallDefenders; i++) {
-        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distanceOffsets.at(i), angleOffsets.at(i)));
-    }
-    
-
-    std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
-
-    for (size_t i = 0; i < ballDefenders.size(); i++) {
-
-        int ballDefenderID = ballDefenders.at(i);
-
-        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
-        delete_from_vector(robots, ballDefenderID);
-        claim_robot(ballDefenderID);
-
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = ballDefenderID;
-        bt::Blackboard bb;
-
-        // Set the robot ID
-        bb.SetInt("ROBOT_ID", ballDefenderID);
-        bb.SetInt("KEEPER_ID", keeperID);
-
-        bb.SetDouble("DistanceXToY_A_distance", 2.0);
-        bb.SetDouble("SimpleDefender_A_distanceFromGoal", distanceOffsets.at(i));
-        bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
-        bb.SetBool("SimpleDefender_A_avoidRobots", false);
-        bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
-        bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
-
-        // Create message
-        rd.tree = "rtt_jim/DefenderRole";
-        rd.blackboard = bb.toMsg();
-
-        // Add random token and save it for later
-        boost::uuids::uuid token = unique_id::fromRandom();
-        tokens.push_back(token);
-        rd.token = unique_id::toMsg(token);
-
-        // Send to rolenode
-        pub.publish(rd);
-    }
-
-
-
-
-
 
 
     int numRobotDefenders = std::min((int) getAvailableRobots().size(), 2);
@@ -263,6 +178,102 @@ void Jim_KickOffDefense::Initialize() {
         // Send to rolenode
         pub.publish(rd);
     }
+
+
+
+
+
+
+
+
+    int numBallDefenders;
+    std::vector<double> angleOffsets;
+    std::vector<double> distanceOffsets;
+    if ((int) getAvailableRobots().size() <= 4) {
+        numBallDefenders = 3;
+
+        angleOffsets.push_back(0.1);
+        angleOffsets.push_back(-0.1);
+        angleOffsets.push_back(0.0);
+
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(2.5);
+
+    } else {
+        numBallDefenders = 4;
+
+        angleOffsets.push_back(0.2);
+        angleOffsets.push_back(0.0);
+        angleOffsets.push_back(-0.2);
+        angleOffsets.push_back(0.0);
+
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(3.7);
+    }
+
+
+
+
+    // ====================================
+    // Initialize the Ball Defenders!
+    // ====================================
+
+    numBallDefenders = std::min((int) robots.size(), numBallDefenders);
+
+    std::vector<Vector2> ballDefendersPositions;
+    for (int i = 0; i < numBallDefenders; i++) {
+        ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distanceOffsets.at(i), angleOffsets.at(i)));
+    }
+    
+
+    std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
+
+    for (size_t i = 0; i < ballDefenders.size(); i++) {
+
+        int ballDefenderID = ballDefenders.at(i);
+
+        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
+        delete_from_vector(robots, ballDefenderID);
+        claim_robot(ballDefenderID);
+
+        roboteam_msgs::RoleDirective rd;
+        rd.robot_id = ballDefenderID;
+        bt::Blackboard bb;
+
+        // Set the robot ID
+        bb.SetInt("ROBOT_ID", ballDefenderID);
+        bb.SetInt("KEEPER_ID", keeperID);
+
+        bb.SetDouble("DistanceXToY_A_distance", 2.0);
+        bb.SetDouble("SimpleDefender_A_distanceFromGoal", distanceOffsets.at(i));
+        bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
+        bb.SetBool("SimpleDefender_A_avoidRobots", false);
+        bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+        bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
+
+        // Create message
+        rd.tree = "rtt_jim/DefenderRole";
+        rd.blackboard = bb.toMsg();
+
+        // Add random token and save it for later
+        boost::uuids::uuid token = unique_id::fromRandom();
+        tokens.push_back(token);
+        rd.token = unique_id::toMsg(token);
+
+        // Send to rolenode
+        pub.publish(rd);
+    }
+
+
+
+
+
+
+
+   
 
     initTime = now();
     
