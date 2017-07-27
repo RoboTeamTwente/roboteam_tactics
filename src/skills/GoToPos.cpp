@@ -266,14 +266,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     }
 
 
-    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
-        roboteam_msgs::World world = LastWorld::get();
-        Vector2 ballPos(world.ball.pos);
-        if ((ballPos - newTargetPos).length() < 0.7) {
-            Vector2 diffVecNorm = (newTargetPos - ballPos).normalize();
-            newTargetPos = ballPos + diffVecNorm.scale(0.7);
-        }
-    }
+    
 
     return newTargetPos;
 }
@@ -334,6 +327,16 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         targetPos = checkTargetPos(targetPos);
         prevTargetPos = targetPos;
+    }
+
+
+    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        roboteam_msgs::World world = LastWorld::get();
+        Vector2 ballPos(world.ball.pos);
+        if ((ballPos - targetPos).length() < 0.7) {
+            Vector2 diffVecNorm = (targetPos - ballPos).normalize();
+            targetPos = ballPos + diffVecNorm.scale(0.7);
+        }
     }
 
     // Store some variables for easy access

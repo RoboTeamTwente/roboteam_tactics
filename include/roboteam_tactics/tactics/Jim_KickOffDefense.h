@@ -34,6 +34,8 @@ class Jim_KickOffDefense : public Tactic {
     time_point finishTime;
     time_point lastTimeWeHadBall;
 
+    time_point initTime;
+
     WeHaveBall weHaveBall;
 };
 

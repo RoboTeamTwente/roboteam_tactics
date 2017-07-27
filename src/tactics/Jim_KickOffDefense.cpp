@@ -62,7 +62,7 @@ void Jim_KickOffDefense::Initialize() {
     // =========================
     {
         // RTT_DEBUGLN("Initializing Keeper %i", keeperID);
-        delete_from_vector(robots, keeperID);
+        // delete_from_vector(robots, keeperID);
         claim_robot(keeperID);
 
         roboteam_msgs::RoleDirective rd;
@@ -88,21 +88,43 @@ void Jim_KickOffDefense::Initialize() {
 
 
 
+
+    int numBallDefenders;
+    std::vector<double> angleOffsets;
+    std::vector<double> distanceOffsets;
+    if ((int) getAvailableRobots().size() <= 4) {
+        numBallDefenders = 3;
+
+        angleOffsets.push_back(0.1);
+        angleOffsets.push_back(-0.1);
+        angleOffsets.push_back(0.0);
+
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(2.5);
+
+    } else {
+        numBallDefenders = 4;
+
+        angleOffsets.push_back(0.2);
+        angleOffsets.push_back(0.0);
+        angleOffsets.push_back(-0.2);
+        angleOffsets.push_back(0.0);
+
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(3.7);
+    }
+
+
+
+
     // ====================================
     // Initialize the Ball Defenders!
     // ====================================
 
-    int numBallDefenders = std::min((int) robots.size(), 3);
-
-    std::vector<double> angleOffsets;
-    angleOffsets.push_back(0.0);
-    angleOffsets.push_back(0.1);
-    angleOffsets.push_back(-0.1);
-    
-    std::vector<double> distanceOffsets;
-    distanceOffsets.push_back(2.5);
-    distanceOffsets.push_back(1.5);
-    distanceOffsets.push_back(1.5);
+    numBallDefenders = std::min((int) robots.size(), numBallDefenders);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
@@ -113,6 +135,7 @@ void Jim_KickOffDefense::Initialize() {
     std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
 
     for (size_t i = 0; i < ballDefenders.size(); i++) {
+
         int ballDefenderID = ballDefenders.at(i);
 
         // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
@@ -132,6 +155,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+        bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
@@ -150,7 +174,9 @@ void Jim_KickOffDefense::Initialize() {
 
 
 
-    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 2);    
+
+
+    int numRobotDefenders = std::min((int) getAvailableRobots().size(), 2);
     
     // ==================================
     // Find the most dangerous opponents
@@ -238,6 +264,9 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
+    initTime = now();
+    
+
 
 
     // ==================================================================
@@ -285,10 +314,13 @@ void Jim_KickOffDefense::Initialize() {
 
 bt::Node::Status Jim_KickOffDefense::Update() {
 
+    if (time_difference_milliseconds(initTime, now()).count() >= 1000) {
+        RTT_DEBUGLN("ReInitializing Jim_KickOffDefense");
+        return Status::Failure;
+    }
+
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
-
-
 
     if (ballVel.length() > 0.5 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
         ROS_INFO_STREAM("KickOff success because of moving ball!");

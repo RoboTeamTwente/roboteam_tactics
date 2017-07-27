@@ -39,7 +39,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ////////////////////////////////////////////////////
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::STOP                  , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::PREPARE_KICKOFF_US    , "rtt_jim/PrepareKickOff"s    } ,
         { RefState::PREPARE_KICKOFF_THEM  , "rtt_jim/PrepareKickOff"s    } ,
         { RefState::PREPARE_PENALTY_US    , "rtt_jim/TakePenalty"s           } ,
@@ -57,7 +57,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
-        { RefState::TIMEOUT_THEM          , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::TIMEOUT_THEM          , "rtt_jim/TimeOutStrat"s           } ,
         { RefState::GOAL_US               , "rtt_dennis/StopStrategyKickoff"s           } ,
         { RefState::GOAL_THEM             , "rtt_dennis/StopStrategyKickoff"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_bob/BallPlacementUsStrategy"s   } ,
