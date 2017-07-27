@@ -119,6 +119,7 @@ private:
     double distanceFromBallWhenDribbling;
     bool finalStage=false;
     int countFinalMessages=0;
+    bool ballWasClose = false;
 };
 
 } // rtt

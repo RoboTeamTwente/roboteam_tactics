@@ -30,6 +30,8 @@ class Jim_KickOffDefense : public Tactic {
     std::vector<boost::uuids::uuid> tokens;
     time_point start;
 
+    std::vector<roboteam_msgs::WorldRobot> prevDangerousOpps;
+
     time_point lastUpdate;
     time_point finishTime;
     time_point lastTimeWeHadBall;

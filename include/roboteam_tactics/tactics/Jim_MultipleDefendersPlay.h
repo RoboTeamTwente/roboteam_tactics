@@ -34,6 +34,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
     std::vector<roboteam_msgs::WorldRobot> dangerOrder;
     std::vector<roboteam_msgs::WorldRobot> prevDangerOrder;
 
+    std::vector<roboteam_msgs::WorldRobot> prevDangerousOpps;
+
     std::vector<int> activeRobots;
 
     int numBallDefenders;

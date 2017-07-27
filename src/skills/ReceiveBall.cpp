@@ -421,7 +421,7 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
-    if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing) {
+    if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall")) { // @HACK: pre-match quick fix
     	// ROS_INFO("ReceiveBall success");
     	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     	if (shootAtGoal) {

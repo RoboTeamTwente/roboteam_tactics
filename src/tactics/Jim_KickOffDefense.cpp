@@ -95,14 +95,15 @@ void Jim_KickOffDefense::Initialize() {
     int numBallDefenders = std::min((int) robots.size(), 3);
 
     std::vector<double> angleOffsets;
-    angleOffsets.push_back(0.0);
     angleOffsets.push_back(0.1);
     angleOffsets.push_back(-0.1);
+    angleOffsets.push_back(0.0);
     
     std::vector<double> distanceOffsets;
-    distanceOffsets.push_back(2.5);
+    
     distanceOffsets.push_back(1.5);
     distanceOffsets.push_back(1.5);
+    distanceOffsets.push_back(3.8);
 
     std::vector<Vector2> ballDefendersPositions;
     for (int i = 0; i < numBallDefenders; i++) {
@@ -132,6 +133,8 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+        bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
+        bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
@@ -180,6 +183,8 @@ void Jim_KickOffDefense::Initialize() {
         // }
     }
 
+    // prevDangerousOpps = dangerousOpps;
+
     std::vector<Vector2> defenderPositions;
 
     double distanceFromGoal = 3.8;
@@ -223,6 +228,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetString("SimpleDefender_A_stayOnSide", "ourSide");
         bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+        bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
@@ -288,12 +294,70 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-
-
     if (ballVel.length() > 0.5 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
         ROS_INFO_STREAM("KickOff success because of moving ball!");
         return Status::Success;
     }
+
+    Vector2 ourGoalPos = LastWorld::get_our_goal_center();
+    Vector2 ballPos = world.ball.pos;
+
+
+   // // ==================================
+   //  // Find the most dangerous opponents
+   //  // ==================================
+   //  std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
+   //  for (size_t i = 0; i < world.dangerList.size(); i++) {
+   //      // if (world.dangerScores.at(i) >= minDangerScore) {
+   //          roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
+   //          double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+   //          if (angleDiffBall <= 0.15) {
+   //              // minBallDefenders = 2;
+   //          } else {
+
+   //              bool addDangerousOpp = true;
+   //              for (size_t j = 0; j < dangerousOpps.size(); j++) {
+   //                  double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
+   //                  if (angleDiffRobot <= 0.15) {
+   //                      addDangerousOpp = false;
+   //                      break;
+   //                  }
+   //              }
+                
+   //              if (addDangerousOpp) {
+   //                  dangerousOpps.push_back(opp);
+   //              }
+   //          }
+   //      // }
+   //  }
+
+   //  ROS_INFO_STREAM("dangerousOpps: ");
+   //  for (auto bot : dangerousOpps) {
+   //      ROS_INFO_STREAM("botID: " << bot.id);
+   //  }
+
+   //  ROS_INFO_STREAM("prevDangerousOpps: ");
+   //  for (auto bot : prevDangerousOpps) {
+   //      ROS_INFO_STREAM("botID: " << bot.id);
+   //  }
+
+   //  bool dangerousOppsHasChanged = false;
+   //  if (dangerousOpps.size() != prevDangerousOpps.size()) {
+   //      dangerousOppsHasChanged = true;
+   //  } else {
+   //      for (size_t i = 0; i < dangerousOpps.size(); i++) {
+
+   //          if (dangerousOpps.at(i).id != prevDangerousOpps.at(i).id) {
+   //              dangerousOppsHasChanged = true;
+   //              break;
+   //          }
+   //      }
+   //  }
+
+   //  if (dangerousOppsHasChanged) {
+   //      ROS_INFO_STREAM("dangerousOppsHasChanged");
+   //      // return Status::Failure;
+   //  }
 
     return Status::Running;
 }
