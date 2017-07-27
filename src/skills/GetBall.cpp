@@ -67,6 +67,9 @@ void GetBall::publishKickCommand(double kickSpeed){
     command.id = robotID;
     command.kicker = GetBool("passOn");
     command.kicker_forced = GetBool("passOn");
+    command.chipper = GetBool("chipOn");
+    command.chipper_forced = GetBool("chipOn");
+    command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.kicker_vel = GetBool("passOn") ? kickSpeed : 0;
 
     command.x_vel = 0;
@@ -156,9 +159,10 @@ bt::Node::Status GetBall::Update (){
 
 
     if (finalStage){
+        ROS_INFO_STREAM("GetBall " << robotID << " finalStage");
         if(countFinalMessages < 10){
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
+                publishKickCommand(2.0);
             } else {
                 publishKickCommand(8.0);
             }
@@ -264,8 +268,8 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12 ;
-        successAngle = 0.30; // was: 0.15
+        successDist = 0.115 ;
+        successAngle = 0.15; 
         getBallDist = 0.06;
         distAwayFromBall = 0.2;
     }
@@ -297,6 +301,12 @@ bt::Node::Status GetBall::Update (){
     if (fabs(angleDiff) > 0.5*M_PI) {
         matchBallVel = true;
     }
+
+    double addBallSpeed = ballVel.length() * 0.3;
+    if (addBallSpeed > 1.7) {
+        addBallSpeed = 1.7;
+    }
+    distAwayFromBall = distAwayFromBall + addBallSpeed;
 
 
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
@@ -340,6 +350,7 @@ bt::Node::Status GetBall::Update (){
             } else {
                 publishKickCommand(5.0); // 8.0
             }
+            return Status::Running;
         }
     } else {
         ballCloseFrameCount = 0;
@@ -352,7 +363,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", false);
+    private_bb->SetBool("avoidRobots", true);
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
@@ -369,25 +380,32 @@ bt::Node::Status GetBall::Update (){
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {
     	command = *commandPtr;
-    }
 
-
-    // Optional feature after testing: match the ball velocity for easy ball interception
-    if (matchBallVel) {
-        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        if (newVelCommand.length() > 4.0) {
-          newVelCommand.scale(4.0 / newVelCommand.length());
+        // Optional feature after testing: match the ball velocity for easy ball interception
+        if (matchBallVel) {
+            Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+            Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+            if (newVelCommand.length() > 4.0) {
+              newVelCommand.scale(4.0 / newVelCommand.length());
+            }
+            command.x_vel = newVelCommand.x;
+            command.y_vel = newVelCommand.y;    
         }
-        command.x_vel = newVelCommand.x;
-        command.y_vel = newVelCommand.y;    
-    }
-    
-    // Get global robot command publisher, and publish the command
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-    pub.publish(command);	
+        
+        // Get global robot command publisher, and publish the command
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        pub.publish(command);   
+        ROS_INFO_STREAM("GetBall " << robotID << " OK");
 
-	return Status::Running;
+        return Status::Running;
+    } else {
+        ROS_INFO_STREAM("GetBall " << robotID << " stopping");
+        publishStopCommand();
+        return Status::Running;
+    }
+
+
+    
 }
 
 } // rtt

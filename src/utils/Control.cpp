@@ -97,7 +97,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 1.5;
+        maxSpeed = 4.0;
         maxAngularVel = 10.0;
 
         robotType = RobotType::PROTO;

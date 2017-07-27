@@ -100,7 +100,7 @@ void Jim_KickOffDefense::Initialize() {
     angleOffsets.push_back(-0.1);
     
     std::vector<double> distanceOffsets;
-    distanceOffsets.push_back(3.8);
+    distanceOffsets.push_back(2.5);
     distanceOffsets.push_back(1.5);
     distanceOffsets.push_back(1.5);
 
