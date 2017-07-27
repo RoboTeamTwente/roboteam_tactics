@@ -3,21 +3,21 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
-	<param name="our_side" type="str" value="left" />
-	<param name="our_color" type="str" value="blue" />
+	<param name="our_side" type="str" value="right" />
+	<param name="our_color" type="str" value="yellow" />
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />
 	<param name="robot0/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot1/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot2/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot3/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot4/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot5/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot6/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot7/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot8/robotType" type="string" value="$(arg robot_type)" />
-	<param name="robot9/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot1/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot2/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot3/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot4/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot5/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot6/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot7/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot8/robotType" type="string" value="$(arg robot_type)" output="screen" />
+	<param name="robot9/robotType" type="string" value="$(arg robot_type)" output="screen" />
 
 	<param name="robot0/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot1/readyToReceiveBall" type="bool" value="false" />
@@ -32,7 +32,7 @@
 
 	<param name="robotClaimedBall" type="int" value="-1" />
  
-	<node pkg="roboteam_world" type="run_World.sh" name="world" output="screen" />
+	<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
 	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
 	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
 

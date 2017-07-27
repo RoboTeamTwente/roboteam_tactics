@@ -44,7 +44,6 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
     }
     choseRobotToPassTo = false;
     passToRobot = 0;
-    ballWasClose = false;
 }
 
 void GetBall::publishStopCommand() {
@@ -66,30 +65,12 @@ void GetBall::publishKickCommand(double kickSpeed){
     
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-
-
-
     command.kicker = GetBool("passOn");
     command.kicker_forced = GetBool("passOn");
+    command.chipper = GetBool("chipOn");
+    command.chipper_forced = GetBool("chipOn");
+    command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.kicker_vel = GetBool("passOn") ? kickSpeed : 0;
-
-    command.chipper = GetBool("kickOn");
-    command.chipper_forced = GetBool("kickOn");
-    command.chipper_vel = GetBool("kickOn") ? kickSpeed : 0;
-
-    // if (GetBool("chipOn")) {
-    //     if (robotID == 8) { // SuperBeun
-    //         command.kicker = true;
-    //         command.kicker_forced = true;
-    //         command.kicker_vel = kickSpeed;
-    //     } else {
-    //         command.chipper = true;
-    //         command.chipper_forced = true;
-    //         command.chipper_vel = kickSpeed;
-    //     }
-    // }
-
-    
 
     command.x_vel = 0;
     command.y_vel = 0;
@@ -133,7 +114,9 @@ void GetBall::releaseBall() {
 void GetBall::Initialize() {
     ballCloseFrameCount = 0;
     finalStage = false;
-    countFinalMessages = 0;    
+    countFinalMessages = 0;
+
+    
 }
 
 
@@ -170,29 +153,29 @@ bt::Node::Status GetBall::Update (){
     Vector2 posDiff = ballPos - robotPos; 
 
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
-    bool canSeeGoal = viewOfGoal >= 0.075; 
+    bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
 
-    // if (finalStage){
-    //     ROS_INFO_STREAM("GetBall " << robotID << " finalStage");
-    //     if(countFinalMessages < 10){
-    //         if (choseRobotToPassTo) {
-    //             publishKickCommand(2.0);
-    //         } else {
-    //             publishKickCommand(8.0);
-    //         }
+    if (finalStage){
+        ROS_INFO_STREAM("GetBall " << robotID << " finalStage");
+        if(countFinalMessages < 10){
+            if (choseRobotToPassTo) {
+                publishKickCommand(2.0);
+            } else {
+                publishKickCommand(8.0);
+            }
             
-    //         countFinalMessages=countFinalMessages+1;
-    //         return Status::Running;
-    //     }
-    //     else {
-    //         choseRobotToPassTo = false;
-    //         releaseBall();
-    //         return Status::Success;
-    //     }
-    // }
+            countFinalMessages=countFinalMessages+1;
+            return Status::Running;
+        }
+        else {
+            choseRobotToPassTo = false;
+            releaseBall();
+            return Status::Success;
+        }
+    }
 
     boost::optional<int> maxScoreID = boost::none;
 
@@ -285,10 +268,10 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12; // 0.115 of 0.12
+        successDist = 0.115 ;
         successAngle = 0.15; 
-        getBallDist = 0.05;
-        distAwayFromBall = 0.3;
+        getBallDist = 0.06;
+        distAwayFromBall = 0.2;
     }
 
     if (HasDouble("distAwayFromBall")) {
@@ -344,13 +327,10 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-    // ROS_INFO_STREAM("GetBall posDiff: " << (ballPos - robotPos).length());
+    ROS_INFO_STREAM("GetBall posDiff: " << (ballPos - robotPos).length());
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-
-
         // matchBallVel = false;
-        ballWasClose = true;
-        int ballCloseFrameCountTo = 10;
+        int ballCloseFrameCountTo = 20;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
@@ -364,39 +344,15 @@ bt::Node::Status GetBall::Update (){
             return Status::Running;
         } else {
 
+            finalStage = true;
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
+                publishKickCommand(4.0); // 3.0
             } else {
-                publishKickCommand(8.0);
+                publishKickCommand(5.0); // 8.0
             }
-
-            if(countFinalMessages < 0){
-                countFinalMessages=countFinalMessages+1;
-                return Status::Running;
-            }
-            else {
-                choseRobotToPassTo = false;
-                releaseBall();
-                return Status::Success;
-            }
-
-
-
-            // finalStage = true;
-            // if (choseRobotToPassTo) {
-            //     publishKickCommand(3.0); // 3.0
-            // } else {
-            //     publishKickCommand(8.0); // 8.0
-            // }
-            // return Status::Running;
+            return Status::Running;
         }
     } else {
-
-        // if (GetBool("enableFail") && ballWasClose) {
-        //     // ROS_INFO_STREAM("GetBall " << robotID << " was close but not anymore");
-        //     return Status::Failure;
-        // }
-
         ballCloseFrameCount = 0;
     }
 

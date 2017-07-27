@@ -25,9 +25,6 @@
 
 #define RTT_CURRENT_DEBUG_TAG Jim_MultipleDefendersPlay
 
-
-
-
 namespace rtt {
 
 RTT_REGISTER_TACTIC(Jim_MultipleDefendersPlay);
@@ -111,6 +108,7 @@ std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<
     return minAssignment;
 }
 
+
 // void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps) {
 bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 	// time_point startInit = now();
@@ -127,14 +125,11 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     std::vector<int> robots = getAvailableRobots();
     int numRobots = robots.size() + activeRobots.size();
-
-    // RTT_DEBUGLN("numRobots: %i", numRobots);
-
     int totalNumRobots = world.us.size();
 
-    // if (numRobots >= (totalNumRobots - 1)) {
-    //     numRobots = totalNumRobots - 2;
-    // }
+    if (numRobots >= (totalNumRobots - 1)) {
+        numRobots = totalNumRobots - 2;
+    }
 
     if (numRobots < 1) {
         RTT_DEBUG("Not enough robots, cannot initialize... \n");
@@ -157,26 +152,18 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     // Filter removed because it was not working: when it changed to atacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
 
     if (weAreAttacking) {
-    	// ROS_INFO_STREAM("weAreAttacking: " << weAreAttacking);
-    	// minDangerScore = 8.0;
+    	minDangerScore = 8.0;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(3.00);
     } else {
-    	// minDangerScore = 3.2; // was 3.2
+    	minDangerScore = 3.2;
     	distancesBallDefendersFromGoal.push_back(1.35);
     	distancesBallDefendersFromGoal.push_back(1.35);
     }
 
-    minDangerScore = 3.2;
-
-
-    // RTT_DEBUGLN("dangerList size: %i ", world.dangerList.size());
     std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
     for (size_t i = 0; i < world.dangerList.size(); i++) {
         if (world.dangerScores.at(i) >= minDangerScore) {
-        	// RTT_DEBUGLN("in the dangerScore function");
-        	// ROS_INFO_STREAM("Robot " << world.dangerList.at(i).id << " has score " << world.dangerScores.at(i));
-        // if (world.dangerList.at(i).pos.x < 0.0) {
             roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
             double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
             if (angleDiffBall <= 0.15) {
@@ -200,24 +187,11 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     }
     int numDangerousOpps = dangerousOpps.size();
 
-    // RTT_DEBUGLN("numDangerousOpps %i", numDangerousOpps);
-
     int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
     int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
     newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
     newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
 
-    // bool dangerousOppsHasChanged = false;
-    // if (dangerousOpps.size() != prevDangerousOpps.size()) {
-    // 	dangerousOppsHasChanged = true;
-    // } else {
-    // 	for (size_t i = 0; i < dangerousOpps.size(); i++) {
-    // 		if (dangerousOpps.at(i).id != prevDangerousOpps.at(i).id) {
-    // 			dangerousOppsHasChanged = true;
-    // 			break;
-    // 		}
-    // 	}
-    // }
 
     if (justChecking) {
         if (weAreAttacking != weWereAttacking) {
@@ -225,9 +199,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
             return true;
         }
         weWereAttacking = weAreAttacking;
-
-        // RTT_DEBUGLN("newNumBallDefenders: %i, numBallDefenders: %i, newNumRobotDefenders: %i, numRobotDefenders: %i", newNumBallDefenders, numBallDefenders, newNumRobotDefenders, numRobotDefenders);
-
     	return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
     }
 
@@ -235,7 +206,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
     numBallDefenders = newNumBallDefenders;
 	numRobotDefenders = newNumRobotDefenders;
-	// prevDangerousOpps = dangerousOpps;
 
 	RTT_DEBUGLN("Initializing numBallDef: %i, numRobotDef: %i", numBallDefenders, numRobotDefenders);
 
@@ -385,7 +355,6 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
             bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);
             bb.SetDouble("SimpleDefender_A_distanceFromGoal", 1.35);
-            bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
             bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
             // Create message
@@ -419,7 +388,6 @@ void Jim_MultipleDefendersPlay::Initialize() {
 	distBallToGoalThreshold = 4.0;
 	weAreAttackingCounter = 0;
     weWereAttacking = false;
-    // prevDangerousOpps.clear();
     reInitializeWhenNeeded(false);
 	return;
 }
