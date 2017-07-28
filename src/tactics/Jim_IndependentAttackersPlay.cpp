@@ -80,12 +80,13 @@ void Jim_IndependentAttackersPlay::Initialize() {
         bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
         // bb.SetBool("ReceiveBall_B_computePoint", true);
-        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 0.5);
+        bb.SetDouble("ReceiveBall_A_acceptableDeviation", 1.0);
         bb.SetDouble("ReceiveBall_B_computePointCloseToX", attackersDefaultPositions.at(i).x);
         bb.SetDouble("ReceiveBall_B_computePointCloseToY", attackersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_B_setSignal", true);
         bb.SetBool("ReceiveBall_B_shouldFail", true);
-        bb.SetDouble("ReceiveBall_B_acceptableDeviation", 2.5);
+        bb.SetDouble("ReceiveBall_B_acceptableDeviation", 0.5);
+
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message

@@ -73,7 +73,7 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetInt("KEEPER_ID", keeperID);
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/DefenderRoleStop";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -169,7 +169,7 @@ void Jim_KickOffDefense::Initialize() {
         }
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/DefenderRoleStop";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
@@ -261,7 +261,7 @@ void Jim_KickOffDefense::Initialize() {
         }
 
         // Create message
-        rd.tree = "rtt_jim/DefenderRole";
+        rd.tree = "rtt_jim/DefenderRoleStop";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
