@@ -29,9 +29,9 @@ bt::Node::Status IsBallMovingTowardsRobot::Update() {
     	return Status::Failure;
     }
 
-	int robotID = GetInt("ROBOT_ID");
-	roboteam_msgs::WorldRobot robot;
-	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    int robotID = GetInt("ROBOT_ID");
+    roboteam_msgs::WorldRobot robot;
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
     if (findBot) {
         robot = *findBot;
     } else {
@@ -40,20 +40,42 @@ bt::Node::Status IsBallMovingTowardsRobot::Update() {
     }
 
     Vector2 robotPos(robot.pos);
-    Vector2 ballVelUnit = ballVel.scale(1.0 / ballVel.length());
-    Vector2 posDiff = robotPos - ballPos;
-    if (posDiff.length() <= 0.05) {
-    	return Status::Failure;
-    }
-    Vector2 posDiffUnit = posDiff.scale(1.0 / posDiff.length());
-    double ballDir = ballVelUnit.dot(posDiffUnit);
-    // ROS_INFO_STREAM("ballDir: " << ballDir);
 
-    if (ballDir >= 0.5) {
-    	return Status::Success;
-    } else {
-    	return Status::Failure;
+
+
+
+
+    Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
+    Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, robotPos);
+
+    double acceptableDeviation = 2.0;
+    if (HasDouble("acceptableDeviation")) {
+        acceptableDeviation = GetDouble("acceptableDeviation");
     }
+
+    if ((closestPoint - robotPos).length() <= acceptableDeviation) {
+        return Status::Success;
+    } else {
+        return Status::Failure;
+    }
+
+
+
+	
+    // Vector2 ballVelUnit = ballVel.scale(1.0 / ballVel.length());
+    // Vector2 posDiff = robotPos - ballPos;
+    // if (posDiff.length() <= 0.05) {
+    // 	return Status::Failure;
+    // }
+    // Vector2 posDiffUnit = posDiff.scale(1.0 / posDiff.length());
+    // double ballDir = ballVelUnit.dot(posDiffUnit);
+    // // ROS_INFO_STREAM("ballDir: " << ballDir);
+
+    // if (ballDir >= 0.5) {
+    // 	return Status::Success;
+    // } else {
+    // 	return Status::Failure;
+    // }
 }
 
 }

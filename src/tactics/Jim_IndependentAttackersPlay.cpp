@@ -85,7 +85,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
         bb.SetDouble("ReceiveBall_B_computePointCloseToY", attackersDefaultPositions.at(i).y);
         bb.SetBool("ReceiveBall_B_setSignal", true);
         bb.SetBool("ReceiveBall_B_shouldFail", true);
-        bb.SetDouble("ReceiveBall_B_acceptableDeviation", 2.0);
+        bb.SetDouble("ReceiveBall_B_acceptableDeviation", 2.5);
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
