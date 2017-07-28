@@ -104,6 +104,9 @@ bt::Node::Status SimpleDefender::Update() {
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
 
+
+    ROS_INFO_STREAM("Robot: " << robotID << " targetPos: " << targetPos);
+
         
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
