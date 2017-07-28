@@ -3,11 +3,8 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
-	<param name="referee_source_port" type="int" value="10033" />
-	<param name="vision_source_port" type="int" value="10036" />
-
-	<param name="our_side" type="str" value="right" />
-	<param name="our_color" type="str" value="yellow" />
+	<param name="our_side" type="str" value="left" />
+	<param name="our_color" type="str" value="blue" />
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />
@@ -35,7 +32,7 @@
 
 	<param name="robotClaimedBall" type="int" value="-1" />
  
-	<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
+	<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
 	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
 	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
 

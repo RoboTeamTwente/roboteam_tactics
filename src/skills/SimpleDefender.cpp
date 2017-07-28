@@ -123,6 +123,10 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         private_bb->SetBool("stayAwayFromBall", true);
     }
+    if (HasDouble("maxSpeed")) {
+        private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+    }
+
 
     return receiveBall.Tick();
 }

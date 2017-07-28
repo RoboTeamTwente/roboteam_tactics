@@ -331,6 +331,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        // ROS_INFO_STREAM("robot" << ROBOT_ID << " in stayAwayFromBall" );
         roboteam_msgs::World world = LastWorld::get();
         Vector2 ballPos(world.ball.pos);
         if ((ballPos - targetPos).length() < 0.7) {

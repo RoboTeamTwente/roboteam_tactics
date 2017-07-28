@@ -164,6 +164,9 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetString("SimpleDefender_A_stayOnSide", "ourSide");
         bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+        if (HasBool("driveSlow") && GetBool("driveSlow")) {
+            bb.SetDouble("SimpleDefender_A_maxSpeed", 1.3);
+        }
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
@@ -253,6 +256,9 @@ void Jim_KickOffDefense::Initialize() {
         bb.SetBool("SimpleDefender_A_avoidRobots", false);
         bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
         bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
+        if (HasBool("driveSlow") && GetBool("driveSlow")) {
+            bb.SetDouble("SimpleDefender_A_maxSpeed", 1.3);
+        }
 
         // Create message
         rd.tree = "rtt_jim/DefenderRole";
@@ -333,7 +339,7 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-    if (ballVel.length() > 0.5 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
+    if (ballVel.length() > 1.2 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
         ROS_INFO_STREAM("KickOff success because of moving ball!");
         return Status::Success;
     }

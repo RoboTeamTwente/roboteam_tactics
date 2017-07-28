@@ -447,6 +447,9 @@ bt::Node::Status ReceiveBall::Update() {
         if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         	private_bb->SetBool("stayAwayFromBall", true);
         }
+        if (HasDouble("maxSpeed")) {
+        	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+        }
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
 	    if (commandPtr) {
@@ -454,7 +457,7 @@ bt::Node::Status ReceiveBall::Update() {
 
 	        roboteam_msgs::RobotCommand command = *commandPtr;
 	        if (matchBallVel) {
-		        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.75);
+		        Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.5);
 		        Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
 		        if (newVelCommand.length() > 4.0) {
 		          newVelCommand.scale(4.0 / newVelCommand.length());

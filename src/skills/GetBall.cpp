@@ -283,7 +283,7 @@ bt::Node::Status GetBall::Update (){
         matchBallVel = true;
     }
 
-    double addBallSpeed = ballVel.length() * 0.3;
+    double addBallSpeed = ballVel.length() * 0.2;
     if (addBallSpeed > 1.7) {
         addBallSpeed = 1.7;
     }
@@ -310,7 +310,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
         // matchBallVel = false;
-        int ballCloseFrameCountTo = 20;
+        int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
@@ -330,7 +330,7 @@ bt::Node::Status GetBall::Update (){
                 publishKickCommand(8.0);
             }
 
-            if(countFinalMessages < 0){
+            if(countFinalMessages < 10){
                 countFinalMessages=countFinalMessages+1;
                 return Status::Running;
             }

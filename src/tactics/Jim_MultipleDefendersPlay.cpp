@@ -196,7 +196,7 @@ bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
     if (justChecking) {
         if (weAreAttacking != weWereAttacking) {
             weWereAttacking = weAreAttacking;
-            return true;
+            // return true;
         }
         weWereAttacking = weAreAttacking;
     	return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
