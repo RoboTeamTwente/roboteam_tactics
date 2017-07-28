@@ -53,8 +53,8 @@ namespace {
     
 // Calculates the length of the vector from each robot position to each point
 // and sums it
-int calcTotalCost(std::map<int, Vector2> const & currentPositions, std::vector<int> const & robots, std::vector<Vector2> const & points) {
-    int total = 0;
+double calcTotalCost(std::map<int, Vector2> const & currentPositions, std::vector<int> const & robots, std::vector<Vector2> const & points) {
+    double total = 0;
     for (size_t i = 0; i < points.size(); ++i) {
         total += currentPositions.at(robots[i]).dist(points[i]);
     }
@@ -91,10 +91,10 @@ std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<
     std::sort(robots.begin(), robots.end());
 
     std::vector<int> minAssignment = robots;
-    int minCost = calcTotalCost(currentPositions, robots, points);
+    double minCost = calcTotalCost(currentPositions, robots, points);
 
     while (std::next_permutation(robots.begin(), robots.end())) {
-        int candidateCost = calcTotalCost(currentPositions, robots, points);
+        double candidateCost = calcTotalCost(currentPositions, robots, points);
         if (candidateCost < minCost) {
             minAssignment = robots;
             minCost = candidateCost;
