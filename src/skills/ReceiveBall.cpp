@@ -419,6 +419,11 @@ bt::Node::Status ReceiveBall::Update() {
 	if (shootAtGoal) {
 		matchBallVel = false;
 	}
+	
+
+	if (robotID == blackboard->GetInt("KEEPER_ID")) {
+		matchBallVel = false;
+	}
 
 	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
     if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
