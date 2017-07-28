@@ -52,6 +52,9 @@
 #include "IsBallMovingTowardsRobot.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "IsBallMovingTowardsGoal.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "ParamCheck.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 

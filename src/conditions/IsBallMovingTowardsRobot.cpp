@@ -26,7 +26,7 @@ bt::Node::Status IsBallMovingTowardsRobot::Update() {
 	Vector2 ballVel(world.ball.vel);
 	Vector2 ballPos(world.ball.pos);
 	if (ballVel.length() <= 0.5) {
-        ROS_INFO_STREAM("IsBallMovingTowardsRobot failure");
+        // ROS_INFO_STREAM("IsBallMovingTowardsRobot failure");
     	return Status::Failure; 
     }
 
@@ -49,7 +49,7 @@ bt::Node::Status IsBallMovingTowardsRobot::Update() {
     Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
     Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, robotPos);
 
-    double acceptableDeviation = 1.0;
+    double acceptableDeviation = 2.0;
     if (HasDouble("acceptableDeviation")) {
         acceptableDeviation = GetDouble("acceptableDeviation");
     }
