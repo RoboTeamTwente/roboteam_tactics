@@ -251,7 +251,7 @@ bt::Node::Status GetBall::Update (){
     } else if (robot_output_target == "serial") {
         successDist = 0.115 ;
         successAngle = 0.15; 
-        getBallDist = 0.06;
+        getBallDist = 0.05;
         distAwayFromBall = 0.2;
     }
 

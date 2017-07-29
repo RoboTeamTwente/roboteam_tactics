@@ -192,7 +192,8 @@ void Jim_KickOffDefense::Initialize() {
     int numBallDefenders;
     std::vector<double> angleOffsets;
     std::vector<double> distanceOffsets;
-    if ((int) getAvailableRobots().size() <= 4) {
+    int availableRobots = getAvailableRobots().size();
+    if (availableRobots <= 3) {
         numBallDefenders = 3;
 
         angleOffsets.push_back(0.1);
@@ -203,7 +204,7 @@ void Jim_KickOffDefense::Initialize() {
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(2.5);
 
-    } else {
+    } else if (availableRobots == 4) {
         numBallDefenders = 4;
 
         angleOffsets.push_back(0.2);
@@ -211,6 +212,20 @@ void Jim_KickOffDefense::Initialize() {
         angleOffsets.push_back(-0.2);
         angleOffsets.push_back(0.0);
 
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(1.5);
+        distanceOffsets.push_back(3.7);
+    } else {
+        numBallDefenders = 5;
+
+        angleOffsets.push_back(0.3);
+        angleOffsets.push_back(0.1);
+        angleOffsets.push_back(-0.1);
+        angleOffsets.push_back(-0.3);
+        angleOffsets.push_back(0.0);
+
+        distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
