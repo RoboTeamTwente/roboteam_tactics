@@ -10,6 +10,9 @@
 #include "CanInterceptBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "CanKeeperMove.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "CanPassSafely.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -50,9 +53,6 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "IsBallMovingTowardsRobot.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
-
-#include "IsBallMovingTowardsGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "ParamCheck.cpp"

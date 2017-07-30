@@ -11,20 +11,22 @@ PenaltyThemPlay::PenaltyThemPlay(std::string name, bt::Blackboard::Ptr bb) : Tac
 		shooterId{-1}, shootoutPenalty{false}, valid{false}, formationPlay("", nullptr) {}
 
 void PenaltyThemPlay::Initialize() {
-	if (HasBool("isShootout")) {
-		shootoutPenalty = GetBool("isShootout");
-    } else if (LastRef::get().stage.stage == roboteam_msgs::RefereeStage::PENALTY_SHOOTOUT) {
-        shootoutPenalty = true;
-	} else {
-		ROS_ERROR("PenaltyThemPlay: No bool 'isShootout' in blackboard!");
-		return;
-	}
+	// if (HasBool("isShootout")) {
+	// 	shootoutPenalty = GetBool("isShootout");
+ //    } else if (LastRef::get().stage.stage == roboteam_msgs::RefereeStage::PENALTY_SHOOTOUT) {
+ //        shootoutPenalty = true;
+	// } else {
+	// 	ROS_ERROR("PenaltyThemPlay: No bool 'isShootout' in blackboard!");
+	// 	return;
+	// }
 
 	int keeperId = RobotDealer::get_keeper();
 
 	if (!RobotDealer::get_keeper_available()) {
 		ROS_WARN("PenaltyThemPlay: Keeper is unavailable, but since this is"
 				" a penalty I'm going to send him commands anyway");
+		release_robot(keeperId);
+		claim_robot(keeperId);
 	} else {
 		claim_robot(keeperId);
 	}
@@ -36,11 +38,19 @@ void PenaltyThemPlay::Initialize() {
 	{
 		roboteam_msgs::RoleDirective rd;
 		rd.robot_id = keeperId;
-		rd.tree = "rtt_dennis/DefendPenaltyRole";
+		rd.tree = "rtt_dennis/NormalPlayPenaltyDefenseRole";
+
+		double xGoal = LastWorld::get_field().field_length / -2.0 + 0.08;
 
 		bt::Blackboard bb;
 		bb.SetInt("ROBOT_ID", keeperId);
 		bb.SetInt("KEEPER_ID", keeperId);
+
+		bb.SetDouble("StayOnGoalLine_A_xGoal", xGoal);
+		bb.SetDouble("StayOnGoalLine_B_xGoal", xGoal);
+		bb.SetDouble("StayOnGoalLine_A_angleGoal", 0);
+		bb.SetDouble("StayOnGoalLine_B_angleGoal", 0);
+
 		rd.blackboard = bb.toMsg();
 		pub.publish(rd);
 	}

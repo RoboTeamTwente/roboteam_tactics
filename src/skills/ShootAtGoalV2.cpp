@@ -47,12 +47,21 @@ bt::Node::Status ShootAtGoalV2::Update() {
     if (!aimer) {
         bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
         private_bb->SetInt("ROBOT_ID", bot.id);
-        private_bb->SetBool("SAGV2_GetBall_passOn", !GetBool("waitForDO_PENALTY", false));
+        // private_bb->SetBool("SAGV2_GetBall_passOn", !GetBool("waitForDO_PENALTY", false));
+        if (LastRef::getState() == RefState::PREPARE_PENALTY_US || getExtendedState() == RefState::DO_PENALTY) {
+            private_bb->SetBool("SAGV2_GetBall_passOn", true);
+            private_bb->SetBool("passOn", true);
+
+        }
     	aimer = std::make_unique<GetBall>("SAGV2_GetBall", private_bb);
     }
     if (GetBool("waitForDO_PENALTY", false)) {
     	ROS_INFO("still waiting...");
     	private_bb->SetBool("SAGV2_GetBall_passOn", getExtendedState() == RefState::DO_PENALTY);
+        private_bb->SetBool("passOn", getExtendedState() == RefState::DO_PENALTY);
+    } else {
+        private_bb->SetBool("SAGV2_GetBall_passOn", true);
+        private_bb->SetBool("passOn", true);
     }
     private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
     private_bb->SetDouble("targetAngle", targetAngle);

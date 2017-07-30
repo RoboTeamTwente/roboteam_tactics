@@ -43,7 +43,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::PREPARE_KICKOFF_US    , "rtt_jim/PrepareKickOff"s    } ,
         { RefState::PREPARE_KICKOFF_THEM  , "rtt_jim/PrepareKickOff"s    } ,
         { RefState::PREPARE_PENALTY_US    , "rtt_jim/TakePenalty"s           } ,
-        { RefState::PREPARE_PENALTY_THEM  , "rtt_wybe/ThemPenaltyStrategy"s      } ,
+        { RefState::PREPARE_PENALTY_THEM  , "rtt_dennis/DefendPenaltyStrategy"s      } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
         { RefState::DIRECT_FREE_US        , "rtt_jim/NormalPlay"s           } ,
