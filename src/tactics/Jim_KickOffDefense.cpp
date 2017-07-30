@@ -354,7 +354,7 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballVel(world.ball.vel);
 
-    if (ballVel.length() > 1.2 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
+    if (ballVel.length() > 0.5 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
         ROS_INFO_STREAM("KickOff success because of moving ball!");
         return Status::Success;
     }

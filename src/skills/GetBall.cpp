@@ -256,13 +256,13 @@ bt::Node::Status GetBall::Update (){
     }
     
 
-    if (GetBool("beAggressive", false)) {
-    	successDist = 0.11 ;
-        successAngle = 0.15; 
-        getBallDist = 0.0;
-        distAwayFromBall = 0.2;
-        // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    }
+    // if (GetBool("beAggressive", false)) {
+    // 	successDist = 0.11 ;
+    //     successAngle = 0.15; 
+    //     getBallDist = 0.0;
+    //     distAwayFromBall = 0.2;
+    //     // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    // }
 
     if (HasDouble("distAwayFromBall")) {
         distAwayFromBall = GetDouble("distAwayFromBall");
@@ -367,15 +367,15 @@ bt::Node::Status GetBall::Update (){
     	command = *commandPtr;
 
         // Optional feature after testing: match the ball velocity for easy ball interception
-        if (matchBallVel) {
-            Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-            Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-            if (newVelCommand.length() > 4.0) {
-              newVelCommand.scale(4.0 / newVelCommand.length());
-            }
-            command.x_vel = newVelCommand.x;
-            command.y_vel = newVelCommand.y;    
-        }
+        // if (matchBallVel) {
+        //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+        //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+        //     if (newVelCommand.length() > 4.0) {
+        //       newVelCommand.scale(4.0 / newVelCommand.length());
+        //     }
+        //     command.x_vel = newVelCommand.x;
+        //     command.y_vel = newVelCommand.y;    
+        // }
         
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
