@@ -78,7 +78,7 @@ void Jim_TimeOut::Initialize() {
         bb.SetDouble("GoToPos_A_angleGoal", 0.0);
         bb.SetDouble("GoToPos_A_maxVelocity",STOP_STATE_MAX_VELOCITY);
         bb.SetBool("GoToPos_A_avoidRobots", true);
-        bb.SetBool("GoToPos_A_enterDefenseAreas", true);
+        // bb.SetBool("GoToPos_A_enterDefenseAreas", true);
 
         // Create message
         rd.robot_id = keeper;
@@ -116,7 +116,7 @@ void Jim_TimeOut::Initialize() {
         bb.SetDouble("GoToPos_A_angleGoal", 0.0);
         bb.SetDouble("GoToPos_A_maxVelocity",STOP_STATE_MAX_VELOCITY);
         bb.SetBool("GoToPos_A_avoidRobots", true);
-        bb.SetBool("GoToPos_A_enterDefenseAreas", true);
+        // bb.SetBool("GoToPos_A_enterDefenseAreas", true);
 
         // Create message
         rd.robot_id = closestRobots.at(i);

@@ -209,8 +209,8 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     Vector2 newTargetPos(xGoal, yGoal);
 
     // If the current robot is not a keeper, we should take into account that it cannot enter the defense area
-    if (ROBOT_ID != KEEPER_ID) {
-    // if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
+    // if (ROBOT_ID != KEEPER_ID) {
+    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(true, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea(true, newTargetPos, safetyMarginGoalAreas);
