@@ -378,7 +378,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (posError.length() < successDist && fabs(angleError) < 0.08) {
         successCounter++;
         if (successCounter >= 3) {
-            sendStopCommand(ROBOT_ID);
+            // sendStopCommand(ROBOT_ID);
             succeeded = true;
             failure = false;
             return boost::none;
