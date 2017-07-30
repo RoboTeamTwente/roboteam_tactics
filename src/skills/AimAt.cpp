@@ -93,7 +93,6 @@ bt::Node::Status AimAt::Update (){
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command); 
-        pub.publish(command);   
 
 		if (setRosParam) {
 			set_PARAM_KICKING(true);

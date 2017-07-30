@@ -326,7 +326,7 @@ bt::Node::Status RotateAroundPoint::Update (){
 				roboteam_msgs::RobotCommand cmd;
 				cmd.id = robotID;
 				cmd.active = true;
-				cmd.x_vel = robotrequiredv.x;
+				cmd.x_vel = robotrequiredv.x + 0.4;
 				cmd.y_vel = robotrequiredv.y;
 				cmd.w = requiredrotv;
 				//cmd.w=0.0;

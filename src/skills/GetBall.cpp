@@ -227,9 +227,9 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = (targetAngle - (ballPos - robotPos).angle());
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.2*M_PI) { // 0.1*M_PI for real-life robots!!
+	if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
-	} else if (angleDiff < -0.2*M_PI) { // 0.1*M_PI for real-life robots!!
+	} else if (angleDiff < -0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
@@ -254,6 +254,15 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.05;
         distAwayFromBall = 0.2;
     }
+    
+
+    if (GetBool("beAggressive", false)) {
+    	successDist = 0.11 ;
+        successAngle = 0.15; 
+        getBallDist = 0.0;
+        distAwayFromBall = 0.2;
+        // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    }
 
     if (HasDouble("distAwayFromBall")) {
         distAwayFromBall = GetDouble("distAwayFromBall");
@@ -272,12 +281,6 @@ bt::Node::Status GetBall::Update (){
     }
 
     bool matchBallVel = false;
-
-    // if (posDiff.length() < (distAwayFromBall + 0.5)) {
-    //     private_bb->SetBool("dribbler", true);
-    // } else {
-    //     private_bb->SetBool("dribbler", false);
-    // }
 
     if (fabs(angleDiff) > 0.5*M_PI) {
         matchBallVel = true;
@@ -298,10 +301,6 @@ bt::Node::Status GetBall::Update (){
         matchBallVel = true;
 	} else {
         private_bb->SetBool("dribbler", true); 
-        // matchBallVel = true;
-        // if (robot_output_target == "serial") {
-        //     private_bb->SetDouble("maxSpeed", 0.6);
-        // }
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
 	}
     
@@ -314,10 +313,6 @@ bt::Node::Status GetBall::Update (){
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
-
-        // if (GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-        //     return Status::Running;
-        // }
         
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
             ballCloseFrameCount++;

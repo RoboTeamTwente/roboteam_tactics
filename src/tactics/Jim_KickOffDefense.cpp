@@ -202,7 +202,7 @@ void Jim_KickOffDefense::Initialize() {
 
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(2.5);
+        distanceOffsets.push_back(10.0);
 
     } else if (availableRobots == 4) {
         numBallDefenders = 4;
@@ -215,7 +215,7 @@ void Jim_KickOffDefense::Initialize() {
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(3.7);
+        distanceOffsets.push_back(10.0);
     } else {
         numBallDefenders = 5;
 
@@ -229,7 +229,7 @@ void Jim_KickOffDefense::Initialize() {
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
         distanceOffsets.push_back(1.5);
-        distanceOffsets.push_back(3.7);
+        distanceOffsets.push_back(10.0);
     }
 
 
