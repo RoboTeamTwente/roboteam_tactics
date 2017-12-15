@@ -26,7 +26,6 @@ Kick::Kick(std::string name, bt::Blackboard::Ptr blackboard)
 		  waitStart{time_point::min()}{
         cycleCounter = 0;
         }
-
 void Kick::Initialize() {
     auto vel = LastWorld::get().ball.vel;
     oldBallVel = Vector2(vel.x, vel.y);
