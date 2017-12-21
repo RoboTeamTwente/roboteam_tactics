@@ -308,7 +308,7 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
 //ballplacement
     if (HasBool("ballPlacement")) {
 
-        controller.setControlParam("maxSpeed", 0.1);
+        controller.setControlParam("maxSpeed", 0.5);
 
 
 
@@ -316,9 +316,11 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         roboteam_msgs::World world = LastWorld::get();
 
         // Find the robot with the specified ID
-        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
+        boost::optional <roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
+
         roboteam_msgs::WorldBall ball = world.ball;
         roboteam_msgs::WorldRobot me;
+
         if (findBot) {
             me = *findBot;
         } else {
@@ -331,31 +333,31 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         // Store some variables for easy access
         Vector2 myPos(me.pos);
         Vector2 myVel(me.vel);
-        Vector2 posError = targetPos - myPos;
-        std::cout << "posError - x: " << posError.x << "y: " << posError.y <<std::endl;
+
 
         Vector2 ballPos = Vector2(ball.pos.x, ball.pos.y);
-        std::cout << "ballPos - x: " << ballPos.x << " y: " << ballPos.y << std::endl;
+
 
         Vector2 ballPosError = targetPos - ballPos;
-        std::cout << "ballPosError - x: " << ballPosError.x << "y: " << ballPosError.y <<std::endl;
 
-//        double lengthRobotTarget = (ballPosError.length() + 0.15);
-//        std::cout << "lengthRobotTarget: " << lengthRobotTarget << std::endl;
-//
-//        Vector2 robotTargetPos = Vector2(lengthRobotTarget, 0.0).rotate(ballPosError.angle());
-        Vector2 robotTargetPos = ballPosError;
 
-        std::cout << "robotTargetPos - x: " << robotTargetPos.x << "y: " << robotTargetPos.y <<std::endl;
-//        posError = robotTargetPos - myPos;
+        Vector2 robotTargetPos = myPos + ballPosError;
 
-//        posError.length() = posError.length() + 0.15;
-//        targetPos = posError + myPos;
+        Vector2 robotBallError = myPos - ballPos;
+
+        if (robotBallError.length() > 0.5){
+            ROS_WARN_STREAM("BallPlacementTest: robot " << ROBOT_ID << " lost ball");
+            sendStopCommand(ROBOT_ID);
+            failure = true;
+            succeeded = false;
+            return boost::none;
+        }
+
 
 
         // Draw the line towards the target position
         drawer.setColor(0, 100, 100);
-        drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, robotTargetPos);
+        drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, ballPosError);
         // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
         drawer.setColor(0, 0, 0);
 
@@ -371,16 +373,17 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         if (HasDouble("successDist")) {
             successDist = GetDouble("successDist");
         } else {
-            successDist = 0.03;
+            successDist = 0.06;
         }
 
         // If we are close enough to our target position and target orientation, then stop the robot and return success
-        if (ballPosError.length() < successDist && fabs(angleError) < 0.08) {
+        if (ballPosError.length() < successDist){
             successCounter++;
             if (successCounter >= 3) {
-                // sendStopCommand(ROBOT_ID);
+                 sendStopCommand(ROBOT_ID);
                 succeeded = true;
                 failure = false;
+
                 return boost::none;
             }
         } else {
@@ -400,11 +403,11 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         // Velocity controller
         // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
         Vector2 velCommand = velTarget;
-        std::cout << "velCommand - x: " << velCommand.x << "y: " << velCommand.y <<std::endl;
+        std::cout << "velCommand - x: " << velCommand.x << "y: " << velCommand.y << std::endl;
 
         // Limit angular and linear velocity
         velCommand = controller.limitVel(velCommand, angleGoal);
-        std::cout << "limit velCommand - x: " << velCommand.x << "y: " << velCommand.y <<std::endl;
+        std::cout << "limit velCommand - x: " << velCommand.x << "y: " << velCommand.y << std::endl;
 
 
         // Fill the command message
@@ -413,177 +416,18 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         command.x_vel = velCommand.x;
         command.y_vel = velCommand.y;
         command.w = 0;
-        command.dribbler = true;
+//        if (succeeded == true){
+//            command.dribbler = false;
+//        }
+//        else {
+            command.dribbler = true;
+//        }
 
         return command;
 
 
-
-
     } //end ballplacement
-
-    // Get the latest world state
-    roboteam_msgs::World world = LastWorld::get();
-
-    // Find the robot with the specified ID
-    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
-    roboteam_msgs::WorldRobot me;
-    if (findBot) {
-        me = *findBot;
-    } else {
-        ROS_WARN_STREAM("BallPlacementTest: robot with this ID not found, ID: " << ROBOT_ID);
-        failure = true;
-        succeeded = false;
-        return boost::none;
-    }
-
-    // drawer.drawPoint("targetPosOld_" + std::to_string(ROBOT_ID), targetPos);
-
-    // Check the input position
-    if (targetPos == prevTargetPos) {
-        targetPos = prevTargetPos;
-    } else {
-        targetPos = checkTargetPos(targetPos);
-        prevTargetPos = targetPos;
-    }
-
-
-    if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
-        // ROS_INFO_STREAM("robot" << ROBOT_ID << " in stayAwayFromBall" );
-        roboteam_msgs::World world = LastWorld::get();
-        Vector2 ballPos(world.ball.pos);
-        if ((ballPos - targetPos).length() < 0.7) {
-            Vector2 diffVecNorm = (targetPos - ballPos).normalize();
-            targetPos = ballPos + diffVecNorm.scale(0.7);
-        }
-    }
-
-    // Store some variables for easy access
-    Vector2 myPos(me.pos);
-    Vector2 myVel(me.vel);
-    Vector2 posError = targetPos - myPos;
-
-    // Draw the line towards the target position
-    drawer.setColor(0, 100, 100);
-    drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
-    drawer.setColor(0, 0, 0);
-
-    double angleGoal;
-    angleGoal = posError.angle() + M_PI;
-//    if (HasDouble("angleGoal")) {
-//        angleGoal = cleanAngle(GetDouble("angleGoal"));
-//    } else {
-//        angleGoal = me.angle;
-//    }
-//
-//    if (posError.length() > 0.5) {
-//        angleGoal = posError.angle();
-//    }
-
-    double myAngle = me.angle;
-    double angleError = cleanAngle(angleGoal - myAngle);
-    double myAngularVel = me.w;
-
-    // Determine how close we should get to the targetPos before we succeed
-    double successDist;
-    if (HasDouble("successDist")) {
-        successDist = GetDouble("successDist");
-    } else {
-        successDist = 0.03;
-    }
-
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.08) {
-        successCounter++;
-        if (successCounter >= 3) {
-            // sendStopCommand(ROBOT_ID);
-            succeeded = true;
-            failure = false;
-            return boost::none;
-        }
-    } else {
-        successCounter = 0;
-    }
-
-    // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
-    Vector2 sumOfForces(0.0, 0.0);
-
-    // Position controller to steer the robot towards the target position
-    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
-
-//    // Robot avoidance
-//    if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {
-//        // AvoidRobots defaults to true if not set
-//    } else {
-//        Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-//        if (posError.length() >= 0.5) {
-//            angleGoal = sumOfForces.angle();
-//            angleError = cleanAngle(angleGoal - myAngle);
-//        }
-//        sumOfForces = newSumOfForces;
-//    }
-
-
-    // drawer.setColor(255,255,255);
-    // drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-
-    // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
-
-    
-
-//    // Defense area avoidance
-//    if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
-//        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-//    }
-//
-//    // Ball avoidance
-//    if (HasBool("avoidBall") && GetBool("avoidBall")) {
-//        Vector2 ballPos = Vector2(world.ball.pos);
-//        sumOfForces = avoidBall(ballPos, myPos, sumOfForces, targetPos, myVel);
-//    }
-
-    // Draw the target velocity vector in rqt-view (in red, oooh)
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-    // drawer.setColor(0, 0, 0);
-
-    // Rotate the commands from world frame to robot frame
-    Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
-
-
-    // Velocity controller
-    // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
-    Vector2 velCommand = velTarget;
-
-    // Limit angular and linear velocity
-    velCommand = controller.limitVel(velCommand, angularVelTarget);
-    angularVelTarget = controller.limitAngularVel(angularVelTarget);
-
-    double maxVel = GetDouble("maxVelocity", 299792458.0);
-    if (velCommand.length() > maxVel) {
-    	velCommand = velCommand.stretchToLength(maxVel);
-    }
-
-    if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
-        if (velCommand.length() >= 1.5) {
-            velCommand = velCommand.scale(1.5 / velCommand.length());
-        }
-    }
-
-
-    // Fill the command message
-    roboteam_msgs::RobotCommand command;
-    command.id = ROBOT_ID;
-    command.x_vel = velCommand.x;
-    command.y_vel = velCommand.y;
-    command.w = angularVelTarget;
-    command.dribbler = GetBool("dribbler");
-
-    return command;
 }
-
 
 bt::Node::Status BallPlacementTest::Update() {
 
