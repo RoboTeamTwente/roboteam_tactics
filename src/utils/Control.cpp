@@ -90,11 +90,11 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 3.0;
-        iGainPosition = 0.0; 
-        dGainPosition = 0.5; 
+        pGainPosition = 2.0;//3.0
+        iGainPosition = 0.3;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
+        dGainPosition = 0.3; //prevteam: 0.5
         pGainRotation = 2.5; 
-        iGainRotation = 0.0;
+        iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
         maxSpeed = 4.0;
@@ -102,13 +102,13 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;
-        iGainPosition = 0.0;
+        pGainPosition = 2.0;//2.0
+        iGainPosition = 0.0;//0.0
+	dGainPosition = 0.0; //0.0
         pGainRotation = 2.0;
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 6.0;
-        dGainPosition = 0.0; 
 
         robotType = RobotType::GRSIM;
     } else {
@@ -198,7 +198,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos) {
     Vector2 posError = targetPos - myPos;
 
     // Integral term
-    if (posError.length() < 0.15) {
+    if (posError.length() < 0.15) {//0.15
         posErrorI = posErrorI.scale(0.95) + posError.scale(1);
     } else {
         posErrorI = Vector2(0.0, 0.0);
@@ -215,13 +215,13 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos) {
     return velTarget;
 }
 
-// PI position controller
+// PID position controller
 Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 myVel) {
  
     Vector2 posError = targetPos - myPos;
 
     // Integral term
-    if (posError.length() < 0.15) {
+    if (posError.length() < 0.40 && posError.length() > 0.105) {//0.15
         posErrorI = posErrorI.scale(0.95) + posError.scale(1);
     } else {
         posErrorI = Vector2(0.0, 0.0);
