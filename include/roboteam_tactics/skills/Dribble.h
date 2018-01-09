@@ -12,7 +12,7 @@ namespace rtt {
  * \class Dribble
  * \brief See YAML
  */
-/*
+/**
  * Descr: Goes to a position while keeping the ball
  * Params:
  *   - ROBOT_ID:

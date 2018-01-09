@@ -13,6 +13,12 @@
 #include "BlockGoal.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "BallPlacement.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
+#include "BallPlacementTest.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Chip.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -34,8 +40,17 @@
 #include "Freeze.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Geneva.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "GenevaKick.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "GetBall.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "GetBallTest.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "GoToPos.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
