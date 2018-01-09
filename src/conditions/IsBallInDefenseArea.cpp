@@ -19,7 +19,7 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point) {
     GeometryFieldSize field = LastWorld::get_field();
     Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, 0.0);
     if (ourDefenseArea) {
-        if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+        if (distToDefenseArea.x > -0.1 && point.x >= -field.field_length/2) return true;
         else return false;
     } else {
         if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;

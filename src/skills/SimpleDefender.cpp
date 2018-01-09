@@ -41,9 +41,9 @@ Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, dou
     
     double angle = (defendPos - goalPos).angle() + angleOffset;
 
-    if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
-        distanceFromGoal = (defendPos - goalPos).length() - 0.5;
-    }
+    //if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
+        //distanceFromGoal = (defendPos - goalPos).length() - 0.5;
+    //}
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
@@ -71,9 +71,9 @@ bt::Node::Status SimpleDefender::Update() {
     double distanceFromGoal;
     std::string fieldType = GetString("fieldType");
     if (fieldType == "office") {
-        distanceFromGoal = 0.4;
-        acceptableDeviation = 0.7;
-        dribblerDist = 1.0;
+        distanceFromGoal = 0.3;////////0.4
+        acceptableDeviation = 0.35;/////0.7
+        dribblerDist = 1.0;////////////1.0
     } else {
         distanceFromGoal = 0.7;
         acceptableDeviation = 0.8;

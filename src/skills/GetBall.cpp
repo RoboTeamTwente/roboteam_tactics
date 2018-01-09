@@ -320,9 +320,10 @@ bt::Node::Status GetBall::Update (){
         } else {
 
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
+                publishKickCommand(5.0);////////3.0/////////
             } else {
-                publishKickCommand(8.0);
+                publishKickCommand(8.0);////////8.0/////////
+		return Status::Success;/////////not here before/////////
             }
 
             if(countFinalMessages < 10){
