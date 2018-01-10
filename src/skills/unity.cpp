@@ -29,7 +29,10 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Dribble.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "Evade.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "Failer.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
