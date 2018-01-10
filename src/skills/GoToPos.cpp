@@ -39,7 +39,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.10;//BEFORE:0.15
+            avoidRobotsGain = 0.002;//because inverse quadratic distance dependence is now used. BEFORE:0.15
         }
 
 
@@ -57,21 +57,21 @@ void GoToPos::sendStopCommand(uint id) {
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos) {
 
     Vector2 forceVector;
-
     //Vector2 ahead = myPos + antenna;
     Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
-    Vector2 force = closestPoint - otherRobotPos;//NOT HERE BEFORE
-    double dist = force.length(); 
+    Vector2 force = closestPoint - otherRobotPos;
+    double dist = force.length();
+    double minDist = 0.05;
     if ((closestPoint - myPos).length() > 0.001 && dist <= 0.5){//NOT HERE BEFORE -if (closestPoint != myPos && closestPoint != ahead && dist <= 0.3) {
-	if(force.length() > 0.05) {
-            //Vector2 force = closestPoint - otherRobotPos; NOT COMMENTED BEFORE
-            force = force.scale( avoidRobotsGain / (  force.length() * force.length()  ) );//* (closestPoint - myPos).length() 
-            //force = force.scale(1.0 / (closestPoint - myPos).length());
-            forceVector = force;
-    	} else if(force.length() != 0) {
-	    forceVector = force.stretchToLength(avoidRobotsGain*4);// Vector2(avoidRobotsGain, force.angle());
+	if(dist > minDist) {
+            forceVector = force.stretchToLength(avoidRobotsGain/dist/dist);
+    	} else if(dist != 0) {
+	    forceVector = force.stretchToLength(avoidRobotsGain/minDist/minDist);// // Vector2(avoidRobotsGain, force.angle());
 	}
     }
+    // Draw forceVector in rqt
+    drawer.setColor(0, 0, 255);
+    drawer.drawLine("forceVector", otherRobotPos, forceVector);
 
     return forceVector;
 }
@@ -82,21 +82,18 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 1.0; // default
-    if (lookingDistance > (posError.length())) {
+    double lookingDistance = 1.2; // default
+    if (lookingDistance > ( posError.length() )) {
         lookingDistance = posError.length();
     }
 
     // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
-    Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
-
-    // Draw the antenna in rqt-view
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("antenna", myPos, antenna);
+    Vector2 antenna = posError.stretchToLength(lookingDistance*myVel.length()*1.0);
 
     // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
     Vector2 sumOfForces;
+    Vector2 sumOfCushions;
+    Vector2 sumOfForces2;
     for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
             Vector2 otherRobotPos(currentRobot.pos);
@@ -105,15 +102,18 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
             if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
-		//crashVel is the velocity at which the other robot would crash into this robot
+		//'crashVel' is the velocity at which the other robot would crash into this robot
 		Vector2 crashVel = (otherRobotVel - myVel).project2(otherRobotPos,myPos);
-		//A negative crashVel becomes zero
+		// A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
+		Vector2 cushionForce = crashVel.scale(0.06 / distToRobot);
+		//I will not respond to a negative crashVel or a crashVel not caused by me
 		if(crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(myPos - otherRobotPos) > 0){
-		    crashVel = Vector2(0,0);
+		    cushionForce = Vector2(0,0);
 		}
-		Vector2 cushionForce = crashVel.scale(0.05 / distToRobot);
-		//We add the avoidance forceVector to the total, as well as the cushionForce that should damp out the crashVel
+		//We add the avoidance forceVector to the total, as well as the cushionForce.
                 sumOfForces = sumOfForces + forceVector + cushionForce;
+		sumOfCushions = sumOfCushions + cushionForce; // for visualisation
+		sumOfForces2 = sumOfForces2 + forceVector; // for visualisation
             }
         }
     }
@@ -123,17 +123,29 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
         double distToRobot = (otherRobotPos - myPos).length();
         Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
         if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
-            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
-		//crashVel is the velocity at which the other robot would crash into this robot
+		Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
+		//'crashVel' is the velocity at which the other robot would crash into this robot
 		Vector2 crashVel = (otherRobotVel - myVel).project2(otherRobotPos,myPos);
-		Vector2 cushionForce = crashVel.scale(0.05 / distToRobot);
-		//We add the avoidance forceVector to the total, as well as the cushionForce that should damp out the crashVel
+		// A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
+		Vector2 cushionForce = crashVel.scale(0.06 / distToRobot);
+		
+		//I will not respond to a negative crashVel or a crashVel not caused by me
+		if(crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(myPos - otherRobotPos) > 0){
+		    cushionForce = Vector2(0,0);
+		}
+		//We add the avoidance forceVector to the total, as well as the cushionForce.
                 sumOfForces = sumOfForces + forceVector + cushionForce;
+		sumOfCushions = sumOfCushions + cushionForce; // for visualisation
+		sumOfForces2 = sumOfForces2 + forceVector; // for visualisation
         }
     }
 
+    //draw cusionForce in rqt
+    drawer.setColor(255, 0, 255);
+    drawer.drawLine("cushionForce", myPos, sumOfCushions);
+    //draw sumOfForces2
     drawer.setColor(255, 0, 0);
-    drawer.drawLine("sumOfForces", myPos, sumOfForces.scale(0.05));//NOT HERE BEFORE
+    drawer.drawLine("sumOfForces2", myPos, sumOfForces2);
     drawer.setColor(0, 0, 0);
 
     return sumOfForces;
