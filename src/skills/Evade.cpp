@@ -51,7 +51,7 @@ bool Evade::updateGoalPosition() {
 
 
 	Vector2 ownPos { bot->pos };
-	Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
+	// Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
 	Vector2 ballPos { LastWorld::get().ball.pos };
 
 	auto bots = LastWorld::get().us;
@@ -70,11 +70,7 @@ bool Evade::updateGoalPosition() {
 
 		if (id != ownId && dist < LOOKING_DISTANCE && vel.length()>0.01) {
 			Vector2 relevantVel = vel.project2(pos, ownPos);
-
-			std::cout << vel.length() << std::endl;
-			std::cout << relevantVel.length()+1 << std::endl;
-
-			if(relevantVel.dot(ownPos - pos) > 0 && relevantVel.length() > 0.03 && relevantVel.length() > relevantMaxVel.length()) { //TWEAK: threshold for seeing moving robot
+			if(relevantVel.dot(ownPos - pos) > 0 && relevantVel.length() > 0.05 && relevantVel.length() > relevantMaxVel.length()) { //TWEAK: threshold for seeing moving robot
 				maxVel = vel;
 				relevantMaxVel = relevantVel;
 				distance = dist;
@@ -83,7 +79,7 @@ bool Evade::updateGoalPosition() {
 	}
 	
 	Vector2 goal = ownPos; //goal remains ownPos if no moving object in sight
-	if (relevantMaxVel.length() > 0.03) { //TWEAK: threshold for seeing moving robot
+	if (relevantMaxVel.length() > 0.05) { //TWEAK: threshold for seeing moving robot
 		float angle = maxVel.angle() - relevantMaxVel.angle();
 		if(angle > M_PI) {
 			angle -= 2 * M_PI;
@@ -93,8 +89,8 @@ bool Evade::updateGoalPosition() {
 		Vector2 rotatedVector = maxVel.rotate((angle < 0 ? .5 : -.5) * M_PI); //TWEAK: maxVel.scale(..)
 		double scaling = distance / LOOKING_DISTANCE;
 		Vector2 goalVector = relevantMaxVel.lerp(rotatedVector, 0.5*(1.0-scaling)); //TWEAK: less effect for relevantMaxVel: ...*(1.0-scaling)
-		drawer.setColor(255, 0, 0);
-    	drawer.drawLine("goalVector", ownPos, goalVector);
+		// drawer.setColor(255, 0, 0);
+  //   	drawer.drawLine("goalVector", ownPos, goalVector);
 		goal = ownPos + goalVector.scale(0.1/goalVector.length() + 0.1/distance/distance); //TWEAK: scale(....) //TWEAK: stretchToLength instead of scale, to remove speed dependency
 	}
 
