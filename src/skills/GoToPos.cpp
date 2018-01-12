@@ -39,7 +39,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.002;//because inverse quadratic distance dependence is now used. BEFORE:0.15
+            avoidRobotsGain = 0.003;//because inverse quadratic distance dependence is now used. BEFORE:0.15
         }
 
 
@@ -57,16 +57,21 @@ void GoToPos::sendStopCommand(uint id) {
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos) {
 
     Vector2 forceVector;
-    //Vector2 ahead = myPos + antenna;
+    Vector2 ahead = myPos + antenna;
     Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
     Vector2 force = closestPoint - otherRobotPos;
     double dist = force.length();
-    double minDist = 0.025;
-    if ((closestPoint - myPos).length() > 0.001 && dist <= 0.5){//NOT HERE BEFORE -if (closestPoint != myPos && closestPoint != ahead && dist <= 0.3) {
+    double dist2 = (myPos - otherRobotPos).length();
+    double minDist = 0.06;
+    double Vel = targetPos.length();
+    if (Vel<1.0){
+        Vel=1.0;
+    }
+    if ((closestPoint - myPos).length() > 0.001 && dist <= 0.5 && (ahead - closestPoint).length()>0.001){//NOT HERE BEFORE -if (closestPoint != myPos && closestPoint != ahead && dist <= 0.3) {
 	if(dist > minDist) {
-            forceVector = force.stretchToLength(avoidRobotsGain/dist/dist);
+            forceVector = force.stretchToLength(Vel*avoidRobotsGain/dist/dist/dist2);
         } else if(dist != 0) {
-            forceVector = force.stretchToLength(avoidRobotsGain/minDist/minDist);
+            forceVector = force.stretchToLength(Vel*avoidRobotsGain/minDist/minDist/dist2);
         }
     }
     // Draw forceVector in rqt
@@ -82,7 +87,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
 
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 1.2; // default
+    double lookingDistance = 1.0; // default
     double crashLookingDistance = lookingDistance;
     if (lookingDistance > ( posError.length() )) {
         lookingDistance = posError.length();
@@ -102,7 +107,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             double distToRobot = (otherRobotPos - myPos).length();
             Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
             if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
-                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
+                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, myVel);
                 //We add the avoidance forceVector to the total
                 sumOfForces = sumOfForces + forceVector;
             } // The looking distance for crash avoidance doesn't scale down
@@ -110,7 +115,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                 //'crashVel' is the velocity at which the other robot would crash into this robot
                 Vector2 crashVel = (otherRobotVel - myVel).project2(otherRobotPos,myPos);
                 // A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
-                Vector2 cushionForce = crashVel.scale(0.1 / distToRobot);
+                Vector2 cushionForce = crashVel.scale(0.3 / distToRobot);
                 //I will not respond to a negative crashVel or a crashVel not caused by me
                 if(crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(myPos - otherRobotPos) > 0.01){
                     cushionForce = Vector2(0,0);
@@ -467,7 +472,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
-    Vector2 velCommand = velTarget;
+    Vector2 velCommand = velTarget + velTarget.stretchToLength(0.1);
 
     // Limit angular and linear velocity
     velCommand = controller.limitVel(velCommand, angularVelTarget);
