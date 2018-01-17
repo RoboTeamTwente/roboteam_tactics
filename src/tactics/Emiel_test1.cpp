@@ -85,17 +85,15 @@ namespace rtt {
 
 
         // === Setup the RoleDirective message === //
-        /* The RoleDirective message is sent to a
+        roboteam_msgs::RoleDirective rd;        // Create the message
+        rd.robot_id = robotId;                  // Set the robot_id
 
-        roboteam_msgs::RoleDirective rd;
-        rd.robot_id = robotId;
+        rd.tree = "rtt_emiel/new_tree";         // Set the role tree for the robot
+        rd.blackboard = bb.toMsg();             // Convert the blackboard to a message, and add it
 
-        rd.tree = "rtt_emiel/new_tree";
-        rd.blackboard = bb.toMsg();
 
-        // Get the default roledirective publisher
-        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-        pub.publish(rd);
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();    // Get the default roledirective publisher
+        pub.publish(rd);                                                                    // Publish the message
         ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize] Published! " << robotId);
 
     }
