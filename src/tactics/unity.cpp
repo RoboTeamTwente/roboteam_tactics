@@ -139,3 +139,6 @@
 
 #include "StopPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Emiel_test1.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
