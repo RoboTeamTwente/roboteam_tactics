@@ -46,6 +46,7 @@ bool ignoring_strategy_instructions = false;
 
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
+    ROS_INFO_NAMED("RoleNode", "[msgCallbackRef] refdate received!");
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
@@ -129,12 +130,12 @@ int main(int argc, char *argv[]) {
 
     pub = n.advertise<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS, 100);
 
+    ROS_INFO_STREAM_NAMED("RoleNode", "New instance, name=" << ros::this_node::getName());
+
     std::string name = ros::this_node::getName();
     // Chop off the leading "/robot"
     std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
     // Convert to int
-
-
     try {
         ROBOT_ID = std::stoi(robotIDStr);
     } catch (...) {
@@ -145,7 +146,7 @@ int main(int argc, char *argv[]) {
     int iterationsPerSecond = 60;
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    RTT_DEBUGLN_TEAM("Iterations per second: %i", iterationsPerSecond);
+    ROS_INFO_STREAM_NAMED("RoleNode", "Iterations per second: %i" << iterationsPerSecond);
 
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -155,15 +156,15 @@ int main(int argc, char *argv[]) {
     rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
+    ROS_DEBUG_NAMED("RoleNode", "Subscribed to vision_refbox");
 
     // For receiving trees
-    RTT_DEBUG("RoleNode %i subscribing... ", ROBOT_ID);
-    ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
+        ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
         rtt::TOPIC_ROLE_DIRECTIVE,
         1000,
         &roleDirectiveCallback
         );
-    RTT_DEBUG("done \n");
+    ROS_DEBUG_STREAM_NAMED("RoleNode", "Subscribed to " << rtt::TOPIC_ROLE_DIRECTIVE);
 
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
 
@@ -174,15 +175,9 @@ int main(int argc, char *argv[]) {
     int iters = 0;
 
     while (ros::ok()) {
-        // if (ROBOT_ID == 1) {
-            // std::cout << "Spinning. LW Seq: " << rtt::LastWorld::get().header.seq << "\n";
-        // }
 
+        // Process all received messages
         ros::spinOnce();
-
-        // if (ROBOT_ID == 1) {
-            // std::cout << "Done spinning! Seq: " << rtt::LastWorld::get().header.seq << "\n";
-        // }
 
         sleeprate.sleep();
 
@@ -193,14 +188,16 @@ int main(int argc, char *argv[]) {
         bt::Node::Status status = currentTree->Update();
 
         if (status == bt::Node::Status::Success
-                 || status == bt::Node::Status::Failure
-                 || status == bt::Node::Status::Invalid) {
-            RTT_DEBUGLN_TEAM("Robot %i has finished tree %s", ROBOT_ID, currentTreeName.c_str());
+         || status == bt::Node::Status::Failure
+         || status == bt::Node::Status::Invalid) {
 
+            ROS_INFO_STREAM_NAMED("RoleNode", "Robot " << ROBOT_ID <<  " has finished tree " << currentTreeName.c_str());
 
+            // Create a feedback message
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;
 
+            // Create a blackboard
             roboteam_msgs::Blackboard bb;
 
             // TODO: Maybe implement bt rqt feedback here as well?
@@ -218,6 +215,9 @@ int main(int argc, char *argv[]) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
                 feedbackPub.publish(feedback);
             }
+
+//            ROS_INFO_STREAM_NAMED("RoleNode", "Published RoleFeedback. token: " << currentToken.uuid << ", status: " << status);
+            ROS_INFO_STREAM_NAMED("RoleNode", "Published RoleFeedback. token: " << currentToken);
 
             currentTree = nullptr;
 
