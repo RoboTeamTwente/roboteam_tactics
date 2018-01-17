@@ -29,48 +29,41 @@ namespace rtt {
     Emiel_test1::Emiel_test1(std::string name, bt::Blackboard::Ptr blackboard)
             : Tactic(name, blackboard)  // Initialize superclass
     {
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[New] name=" << name);
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "New instance. name=" << name);
     }
 
 
 
     /* Initialize : Called once when creating this play */
     void Emiel_test1::Initialize(){
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize]");
-
-
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Initializing..");
 
 
         // === Check if there are robots available ===
         std::vector<int> robotsAvailable = getAvailableRobots();
         int nRobotsAvailable = robotsAvailable.size();
 
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize] Robots available : " << nRobotsAvailable);
+        // Print all the robots that are available
+        std::stringstream result;
+        std::copy(robotsAvailable.begin(), robotsAvailable.end(), std::ostream_iterator<int>(result, ","));
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Robots " << result.str().c_str() << " available");
 
         if(nRobotsAvailable < 1){
-            ROS_WARN_STREAM_NAMED("Emiel_test1", "[Initialize] Not enough robots available!");
+            ROS_WARN_STREAM_NAMED("Emiel_test1", "Not enough robots available!");
             return;
-        }
-
-        // Print all the robots that are available
-        for(int i = 0; i < nRobotsAvailable; i++){
-            ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize] Robot " << robotsAvailable.at(i) << " available");
         }
         // ===========================================
 
 
-
         // === Try to claim the first robot ===
         int robotId = robotsAvailable.front();
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize] Trying to claim robotId " << robotId);
         bool robotClaimed = claim_robot(robotId);
         if(!robotClaimed){
-            ROS_ERROR_STREAM_NAMED("Emiel_test1", "[Initialize] Could not claim robot, aborting...");
+            ROS_ERROR_STREAM_NAMED("Emiel_test1", "Could not claim robot " << robotId << ", aborting...");
             return;
         }
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Robot " << robotId << " claimed");
         // ====================================
-
-
 
 
         // === Setup the Blackboard ===
@@ -84,7 +77,7 @@ namespace rtt {
         // ============================
 
 
-        // === Setup the RoleDirective message === //
+        // === Setup and publish the RoleDirective message ===
         roboteam_msgs::RoleDirective rd;        // Create the message
         rd.robot_id = robotId;                  // Set the robot_id
 
@@ -94,23 +87,34 @@ namespace rtt {
 
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();    // Get the default roledirective publisher
         pub.publish(rd);                                                                    // Publish the message
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Initialize] Published! " << robotId);
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Published RoleDirective for robot " << robotId);
+        // ===================================================
 
+        timeSinceInitialized = now();
     }
 
 
 
     /* Update: Called on every frame / tick() */
+    /* The tree is terminated when the tree returns something other than Status::Running (If I recall correctly */
     bt::Node::Status Emiel_test1::Update(){
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Update] returning Status::Success");
+        ROS_INFO_STREAM_ONCE_NAMED("Emiel_test1", "Updating");  // Print only once, to prevent clogging the console
+
+        // Check if three seconds have passed, for no other reason than demonstrating
+        if (time_difference_milliseconds(timeSinceInitialized, now()).count() < 3000) {
+            return Status::Running;
+        }
+
 
         // Check if the parameter 'aParam' is set in the blackboard
         if(HasInt("aParam")){
-            ROS_INFO_STREAM_NAMED("Emiel_test1", "[Update] aParam set! : " << GetInt("aParam"));
+            ROS_INFO_STREAM_NAMED("Emiel_test1", "aParam set! : " << GetInt("aParam"));
         }else{
-            ROS_INFO_STREAM_NAMED("Emiel_test1", "[Update] aParam NOT set!");
+            ROS_INFO_STREAM_NAMED("Emiel_test1", "aParam NOT set!");
         }
 
+
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Three seconds have passed!");
         return Status::Success;
     }
 
@@ -118,7 +122,7 @@ namespace rtt {
 
     /* Terminate : Called once when removing this play */
     void Emiel_test1::Terminate(bt::Node::Status s){
-        ROS_INFO_STREAM_NAMED("Emiel_test1", "[Terminate]");
+        ROS_INFO_STREAM_NAMED("Emiel_test1", "Terminating");
     }
 
 } // rtt
