@@ -5,6 +5,10 @@
 
 namespace rtt {
 
+/**
+ * \class Kick
+ * \brief See YAML
+ */
 /*
  * Descr: Mirror an opponent's position along the center line or some other x-coordinate.
  * Params:
@@ -20,7 +24,7 @@ namespace rtt {
  *       Default: 0
  *   - alongMirror:
  *       Type: Bool
- *       Descr: |
+ *       Descr: >
  *               If true, the robot will stay near the mirror line, otherwise it will maintain
  *               the same distance the opponent does.
  *       Default: true

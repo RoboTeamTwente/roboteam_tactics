@@ -19,8 +19,8 @@ namespace rtt {
  *       Type: Int
  *       Descr: The id of the robot
  *   - genevaState:
- *	 	Type: Int
- *	 	Descr: The state in which the Geneva Drive should go to. -2 means leftmost state, 0 means 'neutral' state, 2 means rightmost state.
+ *       Type: Int
+ *       Descr: The state in which the Geneva Drive should go to. -2 means leftmost state, 0 means 'neutral' state, 2 means rightmost state.
  */
 class Geneva : public Skill {
 public:

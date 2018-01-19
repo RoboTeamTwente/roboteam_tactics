@@ -13,7 +13,6 @@ namespace rtt {
  */
 /*
  * Descr: Utility skill which always succeeds.
- * Params: null
  */
 class Succeeder : public Skill {
 public:

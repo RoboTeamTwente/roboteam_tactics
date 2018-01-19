@@ -9,7 +9,7 @@ namespace rtt {
 
 /**
  *
- * Descr: |
+ * Descr: >
  *     Sets a param. If the value param is not present in any type,
  *     the signal is deleted from the ros param server.
  *
@@ -23,7 +23,7 @@ namespace rtt {
  *
  *    - value:
  *        Type: String/Double/Int/Bool
- *        Descr: |
+ *        Descr: >
  *            The value to set. If there are multiple ones set it picks the one
  *            with the most information/the leftmost type.
  *

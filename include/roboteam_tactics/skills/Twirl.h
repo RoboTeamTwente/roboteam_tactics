@@ -11,13 +11,13 @@ namespace rtt {
 /*
  * Descr: Twirls the robot at eye blazing speed.
  * Params:
- *   ROBOT_ID:
- *     Type: Int
- *     Descr: The id of the robot to stop
- *   speed:
- *     Type: Double
- *     Descr: Number if rotations per second
- *     Default: 0.5
+ *   - ROBOT_ID:
+ *         Type: Int
+ *         Descr: The id of the robot to stop
+ *   - speed:
+ *         Type: Double
+ *         Descr: Number if rotations per second
+ *         Default: 0.5
  */
 class Twirl final : public Skill {
 

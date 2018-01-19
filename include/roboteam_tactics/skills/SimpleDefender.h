@@ -30,7 +30,7 @@ namespace rtt {
  *       Descr: 
  *       Can be:
  *          office: If used on the field in the office
- *          Otherwise it defaults to the SSL field
+ *          default: SSL specifications
  */
 
 class SimpleDefender : public Skill {

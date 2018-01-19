@@ -17,7 +17,7 @@ namespace rtt {
  *
  * Params:
  *  - ROBOT_ID:
-        Type: Int 
+ *      Type: Int 
  *      Descr: Id of the robot
  *
  */

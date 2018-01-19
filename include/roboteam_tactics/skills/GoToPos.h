@@ -26,56 +26,45 @@ namespace rtt {
  */
 /**
  * # Using the YAML multiline literal here
- * Descr: |
- *     Goes to a position
- *
+ * Descr: Goes to a position
  * Params:
- *     - ROBOT_ID:
- *         Type: Int 
- *         Descr: Id of the robot
- *     - KEEPER_ID:
- *         Type: Int
- *         Descr: Id of the keeper (for defense area avoidance)
- *     
- *     - angleGoal:
- *         Type: Double
- *         Descr: The angle of the arrival position
- *     
- *     - xGoal:
- *         Type: Double
- *         Descr: The target x coordinate
- *     
- *     - yGoal:
- *         Type: Double
- *         Descr: The target y coordinate
- *     
- *     - dribbler:
- *         Type: Bool
- *         Descr: Turns on the dribbler if true
- *
- *     - avoidRobots:
- *         Type: Bool
- *         Descr: Indicates whether or not other robots should be avoided
- *
- *     - stayOnSide:
- *         Type: String
- *         Descr: Indicates on which side of the field GoToPos should stay.
- *         Can be:
- *             ourSide: Have the robot stay at our side.
+ *   - ROBOT_ID:
+ *       Descr:     Id of the robot
+ *       Type:      Int
+ *   - KEEPER_ID:
+ *       Descr:     Id of the keeper (for defense area avoidance)
+ *       Type:      Int
+ *   - angleGoal:
+ *       Descr:     The angle of the arrival position
+ *       Type:      Double
+ *   - xGoal:
+ *       Descr:     The target x coordinate
+ *       Type:      Double
+ *   - yGoal:
+ *       Descr:     The target y coordinate
+ *       Type:      Double
+ *   - dribbler:
+ *       Descr:     Turns on the dribbler if true
+ *       Type:      Bool
+ *   - avoidRobots:
+ *       Descr:     Indicates whether or not other robots should be avoided
+ *       Type:      Bool
+ *   - stayOnSide:
+ *       Descr:     Indicates on which side of the field GoToPos should stay.
+ *       Type:      String
+ *       Can be:
+ *             ourSide:   Have the robot stay at our side.
  *             theirSide: Have the robot stay at their side.
- *             TOTALLY EMPTY: Does nothing
- *
- *      - maxSpeed:
- *          Type: Double
- *          Descr: Sets the maximum robot speed in the controller
- *
- *      - enterDefenseAreas:
- *          Type: Bool
- *          Descr: When true allows GoToPos to go into the defense areas of both teams.
- *      - maxVelocity:
- *          Type: Double
- *          Descr: The maximum velocity the robot is allowed to achieve.
- *          Default: 299792458
+ *   - maxSpeed:
+ *       Descr:     Sets the maximum robot speed in the controller
+ *       Type:      Double
+ *   - enterDefenseAreas:
+ *       Descr:     When true allows GoToPos to go into the defense areas of both teams.
+ *       Type:      Bool
+ *   - maxVelocity:
+ *       Descr:     The maximum velocity the robot is allowed to achieve.
+ *       Type:      Double
+ *       Default:   299792458
  */
 class GoToPos : public Skill {
 public:

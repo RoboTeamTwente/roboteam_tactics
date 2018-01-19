@@ -26,8 +26,7 @@ namespace rtt {
  */
 /**
  * # Using the YAML multiline literal here
- * Descr: |
- *     Goes to a position
+ * Descr: Goes to a position
  *
  * Params:
  *     - ROBOT_ID:
@@ -66,14 +65,14 @@ namespace rtt {
  *             theirSide: Have the robot stay at their side.
  *             TOTALLY EMPTY: Does nothing
  *
- *      - maxSpeed:
+ *     - maxSpeed:
  *          Type: Double
  *          Descr: Sets the maximum robot speed in the controller
  *
- *      - enterDefenseAreas:
+ *     - enterDefenseAreas:
  *          Type: Bool
  *          Descr: When true allows BallPlacementTest to go into the defense areas of both teams.
- *      - maxVelocity:
+ *     - maxVelocity:
  *          Type: Double
  *          Descr: The maximum velocity the robot is allowed to achieve.
  *          Default: 299792458

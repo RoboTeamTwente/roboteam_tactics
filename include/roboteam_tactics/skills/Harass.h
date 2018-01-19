@@ -7,19 +7,19 @@
 namespace rtt {
 
 /*
- * Descr: |
+ * Descr: >
  *   Depending on whether or not the target opponent has the ball, this skill will either try to
  *   prevent the opponent from passing or receiving it.
  * 
- * Global params: 
+ * Global params:
  *   - ROBOT_ID:
- *       Type: int
+ *       Type: Int
  *       Descr: ID of the harasser.
  *   - TGT_ID:
- *       Type: int
+ *       Type: Int
  *       Descr: ID of the target.
  *   - distance:
- *       Type: double
+ *       Type: Double
  *       Descr: Distance the harasser will keep to the target.
  *       Default: 0.4
  */ 

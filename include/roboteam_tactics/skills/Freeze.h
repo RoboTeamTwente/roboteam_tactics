@@ -11,10 +11,10 @@ namespace rtt {
 /*
  * Descr: Stops a robot from moving, possibly repeatedly
  * Params:
- *   ROBOT_ID:
+ *   - ROBOT_ID:
  *     Type: Int
  *     Descr: The id of the robot to stop
- *   repeat:
+ *   - repeat:
  *     Type: Int
  *     Descr: |
  *       The amount of times to repeat the stop command. Set to zero to send it only once.
