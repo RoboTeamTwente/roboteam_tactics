@@ -42,7 +42,7 @@ std::random_device rd;
 std::mt19937 rng(rd());
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
-
+    ROS_INFO("");
 
     auto uuid = unique_id::fromMsg(msg->token);
 
@@ -59,36 +59,42 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 }
 
 void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    ROS_INFO("Referee command received!");
     rtt::LastRef::set(*refdata);
 }
 
 class StrategyDebugInfo {
 public:
-    StrategyDebugInfo() {
-        ROS_INFO("[StrategyNode.cpp][StrategyDebugInfo] New");
-
-        ros::NodeHandle n;
-
-        strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
-    }
-
-
-    ros::Publisher strategyInfoPub;
 
     using Clock = std::chrono::steady_clock;
     using timepoint = std::chrono::steady_clock::time_point;
     using milliseconds = std::chrono::milliseconds;
 
+    ros::Publisher strategyInfoPub; // Publisher to publish on strategy_debug_info
     timepoint lastDebugMsg = timepoint::min();
-
     static milliseconds const MSG_INTERVAL;
+
+    StrategyDebugInfo() {
+        ROS_INFO("New instance");
+
+        ros::NodeHandle n;
+
+        strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
+
+        ROS_INFO("Publishing on strategy_debug_info");
+    }
+
 
     bool timeSinceLastMessagePassed() {
         using namespace std::chrono;
         return duration_cast<milliseconds>(Clock::now() - lastDebugMsg) >= MSG_INTERVAL;
     }
 
+
+
     void doUpdate(std::shared_ptr<bt::BehaviorTree> tree) {
+
+        ROS_DEBUG("Tick");
 
         auto root = tree->GetRoot();
 

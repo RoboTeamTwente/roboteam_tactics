@@ -5,6 +5,9 @@
         Or:
             $ roslaunch SafeStrategyNode.launch cmdline:="rtt_jim/NormalPlayStrategy KEEPER_ID=4"
 	-->
-	<arg name="cmdline"/>
-	<node name="Strategy" pkg="roboteam_tactics" type="run_StrategyNode.sh" output="screen" args="$(arg cmdline)"/>
+	
+	<arg name="nodeName" default="Strategy" />
+	<arg name="cmdline" default="mainStrategy" />
+
+	<node name="$(arg nodeName)" pkg="roboteam_tactics" type="run_StrategyNode.sh" output="screen" args="$(arg cmdline)"/>
 </launch>

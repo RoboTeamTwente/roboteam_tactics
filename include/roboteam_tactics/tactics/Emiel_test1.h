@@ -23,10 +23,15 @@ namespace rtt {
     class Emiel_test1 : public Tactic {
     public:
         Emiel_test1(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
+
         void Initialize();
         Status Update();
         void Terminate(Status s);
 
         ros::NodeHandle nh;
+
+    private:
+        time_point timeSinceInitialized;
+
     };
 }
