@@ -69,8 +69,11 @@ namespace rtt {
  *        Note: Not sure if this feature should remain, or whether we should always use the kick skill
  *
  *   - stayOnSide:
- *        Type: String
- *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
+ *       Descr:     Indicates on which side of the field GoToPos should stay.
+ *       Type:      String
+ *       Can be:
+ *             - ourSide:   Have the robot stay at our side.
+ *             - theirSide: Have the robot stay at their side.
  *
  *   - maxSpeed:
  *        Type: Double

@@ -19,9 +19,9 @@ namespace rtt {
  *      Type: String
  *      Descr: What it should do after an update.
  *      Can be:
- *         Success: Return success upon finishing
- *         Failure: Return failure upon finishing
- *         Running: Return running upon finishing
+ *         - Success: Return success upon finishing
+ *         - Failure: Return failure upon finishing
+ *         - Running: Return running upon finishing
  *      Default: Running
  *   - msg:
  *      Type: String

@@ -29,8 +29,8 @@ namespace rtt {
  *       Type: String
  *       Descr: 
  *       Can be:
- *          office: If used on the field in the office
- *          default: SSL specifications
+ *          - office: If used on the field in the office
+ *          - default: SSL specifications
  */
 
 class SimpleDefender : public Skill {

@@ -26,7 +26,6 @@ namespace rtt {
  *        Descr: >
  *            The value to set. If there are multiple ones set it picks the one
  *            with the most information/the leftmost type.
- *
  */
 class ParamSet : public Skill {
 public:

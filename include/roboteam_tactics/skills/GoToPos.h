@@ -53,8 +53,8 @@ namespace rtt {
  *       Descr:     Indicates on which side of the field GoToPos should stay.
  *       Type:      String
  *       Can be:
- *             ourSide:   Have the robot stay at our side.
- *             theirSide: Have the robot stay at their side.
+ *             - ourSide:   Have the robot stay at our side.
+ *             - theirSide: Have the robot stay at their side.
  *   - maxSpeed:
  *       Descr:     Sets the maximum robot speed in the controller
  *       Type:      Double
