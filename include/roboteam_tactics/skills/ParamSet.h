@@ -11,7 +11,7 @@ namespace rtt {
  *
  * Descr: >
  *     Sets a param. If the value param is not present in any type,
- *     the signal is deleted from the ros param server.
+ *     the signal is deleted from the ros param server. Only one value will be red
  *
  *     @Idea Ofcourse maybe introduce the robot param here as well.
  *     Or use ROBOT_ID?
@@ -21,11 +21,25 @@ namespace rtt {
  *        Type: String
  *        Descr: The signal to set
  *
- *    - value:
- *        Type: String/Double/Int/Bool
+ *    - stringValue:
+ *        Type: String
  *        Descr: >
- *            The value to set. If there are multiple ones set it picks the one
- *            with the most information/the leftmost type.
+ *            The string value to set.
+ *
+ *    - doubleValue:
+ *        Type: Double
+ *        Descr: >
+ *            The double value to set.
+ *
+ *    - intValue:
+ *        Type: Int
+ *        Descr: >
+ *            The int value to set.
+ *
+ *    - boolValue:
+ *        Type: Bool
+ *        Descr: >
+ *            The boolean value to set.
  */
 class ParamSet : public Skill {
 public:

@@ -19,22 +19,22 @@ bt::Node::Status ParamSet::Update() {
     std::string signal = "/signal_" + GetString("signal");
     std::string value;
     std::string argType;
-    if (HasString("value")) {
-        value = GetString("value");
+    if (HasString("stringValue")) {
+        value = GetString("stringValue");
         argType = "string";
         ros::param::set(signal, value);
-    } else if (HasDouble("value")) {
-        double val = GetDouble("value");
+    } else if (HasDouble("doubleValue")) {
+        double val = GetDouble("doubleValue");
         ros::param::set(signal, val);
         argType = "double";
         value = std::to_string(val);
-    } else if (HasInt("value")) {
-        int val = GetInt("value");
+    } else if (HasInt("intValue")) {
+        int val = GetInt("intValue");
         ros::param::set(signal, val);
         argType = "value";
         value = std::to_string(val);
-    } else if (HasBool("value")) {
-        if (GetBool("value")) {
+    } else if (HasBool("boolValue")) {
+        if (GetBool("boolValue")) {
             value = "true";
             ros::param::set(signal, true);
         } else {

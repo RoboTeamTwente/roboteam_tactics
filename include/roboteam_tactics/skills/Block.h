@@ -52,8 +52,8 @@ public:
  *   - BLOCK_ID:
  *       Type: Int
  *       Can be:
- *         - BLOCK_BALL_ID: (=987654) To stand between TGT_ID and the ball
- *         - Any positive integer: To stand between TGT_ID and the opponent 
+ *         - 987654: BLOCK_BALL_ID, to stand between TGT_ID and the ball
+ *         - 1: Any positive integer to stand between TGT_ID and the opponent 
  *       Used when: block_x and block_y are not set
  *       Descr: When the block target is not an absolute location, this number indicates what to block
  *   - block_x:
