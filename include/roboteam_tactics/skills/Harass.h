@@ -6,8 +6,12 @@
 
 namespace rtt {
 
+/**
+ * \class Harass
+ * \brief See YAML
+ */
 /*
- * Descr: >
+ * Descr: |
  *   Depending on whether or not the target opponent has the ball, this skill will either try to
  *   prevent the opponent from passing or receiving it.
  * 

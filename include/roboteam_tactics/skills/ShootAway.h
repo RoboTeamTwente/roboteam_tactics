@@ -17,6 +17,10 @@ namespace rtt {
 
  //TODO: GetBall is very accurate, but also quite slow. We need speed more than precision, here.
 
+/**
+ * \class ShootAway
+ * \brief See YAML
+ */
 /*
  * Descr: |
  *   Gets the ball away from where it is now, not caring much about where it ends up.

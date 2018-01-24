@@ -16,7 +16,7 @@ namespace rtt {
  *      Descr: The id of the robot to stop
  *   - repeat:
  *      Type: Int
- *      Descr: >
+ *      Descr: |
  *       The amount of times to repeat the stop command. Set to zero to send it only once.
  *       If this number is set to a negative value, this skill will always return Running.
  */

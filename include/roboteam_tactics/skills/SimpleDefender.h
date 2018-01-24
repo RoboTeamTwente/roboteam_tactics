@@ -11,7 +11,7 @@
 namespace rtt {
 
 /**
- * \class Simple Keeper
+ * \class SimpleDefender
  * \brief See YAML
  */
 /*

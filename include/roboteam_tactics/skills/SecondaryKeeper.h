@@ -5,7 +5,7 @@
 namespace rtt{
 
 /**
- * \class KeeperBlock
+ * \class SecondaryKeeper
  * \brief See YAML
  */
 /*
