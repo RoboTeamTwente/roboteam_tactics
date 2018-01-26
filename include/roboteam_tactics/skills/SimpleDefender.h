@@ -27,7 +27,7 @@ namespace rtt {
  *
  *   - fieldType:
  *       Type: String
- *       Descr: 
+ *       Descr: Used to specify the dimensions of the field
  *       Can be:
  *          - office: If used on the field in the office
  *          - default: SSL specifications

@@ -4,6 +4,23 @@
 
 namespace rtt {
 
+/**
+ * \class DefendPenalty
+ * \brief See YAML
+ */
+/**
+ * Descr: Defender specifically for penalties
+ * 
+ * Params:
+ *  - ROBOT_ID:
+ *     Descr:     Id of the robot
+ *     Type:      Int
+ *
+ *  - isShortRangePenalty:
+ *     Descr:     Indicates whether the penalty range is short or long
+ *     Type:      Bool
+ */
+ 
 class DefendPenalty : public Skill {
 public:
 	static constexpr double SHORT_RANGE_PENALTY_DIST = 1.0;

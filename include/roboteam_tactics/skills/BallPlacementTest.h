@@ -61,9 +61,9 @@ namespace rtt {
  *         Type: String
  *         Descr: Indicates on which side of the field BallPlacementTest should stay.
  *         Can be:
- *             ourSide: Have the robot stay at our side.
- *             theirSide: Have the robot stay at their side.
- *             TOTALLY EMPTY: Does nothing
+ *            - ourSide: Have the robot stay at our side.
+ *            - theirSide: Have the robot stay at their side.
+ *            - TOTALLY EMPTY: Does nothing
  *
  *     - maxSpeed:
  *          Type: Double

@@ -5,6 +5,27 @@
 
 namespace rtt {
 
+/**
+ * \class SelectStarAttackShooter
+ * \brief See YAML
+ */
+/**
+ * # Using the YAML multiline literal here
+ * Descr: Goes to a position
+ * Params:
+ *   - ROBOT_ID:
+ *       Descr:     Id of the robot
+ *       Type:      Int
+ *
+ *   - availableIDs:
+ *       Descr:     The IDs of the available robots split by ','
+ *       Type:      String
+ *
+ *   - idStoreParam:
+ *       Descr:     The ID of the param in which you want to store the starattackshooter
+ *       Type:      String
+ */
+ 
 class SelectStarAttackShooter : public Skill {
 public:
 	SelectStarAttackShooter(std::string name = "", bt::Blackboard::Ptr bb = nullptr);

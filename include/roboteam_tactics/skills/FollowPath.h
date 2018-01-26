@@ -7,6 +7,28 @@
 
 namespace rtt {
 
+/**
+ * \class FollowPath
+ * \brief See YAML
+ */
+/**
+ * # Using the YAML multiline literal here
+ * Descr: Goes to a position
+ * Params:
+ *   - ROBOT_ID:
+ *       Descr:     Id of the robot
+ *       Type:      Int
+ *   - wGoal:
+ *       Descr:     The angle of the arrival position
+ *       Type:      Double
+ *   - xGoal:
+ *       Descr:     The target x coordinate
+ *       Type:      Double
+ *   - yGoal:
+ *       Descr:     The target y coordinate
+ *       Type:      Double
+ */
+ 
 // Forward declare skill
 class GoToPos;
 

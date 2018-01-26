@@ -7,6 +7,19 @@
 
 namespace rtt {
 
+/**
+ * \class KeepPosition
+ * \brief See YAML
+ */
+/**
+ * # Using the YAML multiline literal here
+ * Descr: TODO
+ * Params:
+ *   - ROBOT_ID:
+ *       Descr:     Id of the robot
+ *       Type:      Int
+ */
+ 
 class KeepPosition : public Skill {
 public:
 	KeepPosition(std::string name, bt::Blackboard::Ptr bb);
