@@ -7,6 +7,28 @@
 
 namespace rtt {
 
+/**
+ * \class Evade
+ * \brief See YAML
+ */
+/**
+ * Descr: Aims the robot at a certain point.
+ * 
+ * Params:
+ * - ROBOT_ID:
+ *     Descr:     Id of the robot
+ *     Type:      Int
+ * 
+ * - KEEPER_ID:
+ *     Descr:     Id of the keeper
+ *     Type:      Int
+ *
+ * - returnToInitialPos:
+ *     Type: Bool
+ *     Descr: Whether to return to the original position
+ *     Note: Is not used at the moment
+ */
+ 
 class Evade : public Skill {
 public:
 	Evade(std::string name, bt::Blackboard::Ptr bb);

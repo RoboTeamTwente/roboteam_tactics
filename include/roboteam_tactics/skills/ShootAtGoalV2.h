@@ -17,7 +17,7 @@ namespace rtt {
  * \brief See YAML
  */
 /*
- * Descr: >
+ * Descr: |
  *     Improved ShootAtGoal which finds the ideal place to aim, then shoots the ball there.
  *     This skill will calculate the largest area of the goal which the active robot can
  *     see unobstructed, and aim for the middle of that area.

@@ -7,6 +7,31 @@
 
 namespace rtt {
 
+/**
+ * \class Approach
+ * \brief See YAML
+ */
+/*
+ * Descr: TODO
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the robot
+ *
+ *   - xGoal:
+ *       Type: Double
+ *       Descr: The x coordinate of the location the robot should approach
+ *
+ *   - yGoal:
+ *       Type: Double
+ *       Descr: The y coordinate of the location the robot should approach
+ *
+ *   - approachDistance:
+ *       Type: Double
+ *       Descr: The distance the robot should keep from the goal location in meters
+ *       Default: .3
+ */
+ 
 class Approach : public Skill {
     public:
     Approach(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

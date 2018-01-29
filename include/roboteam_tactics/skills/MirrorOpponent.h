@@ -6,7 +6,7 @@
 namespace rtt {
 
 /**
- * \class Kick
+ * \class MirrorOpponent
  * \brief See YAML
  */
 /*
@@ -24,7 +24,7 @@ namespace rtt {
  *       Default: 0
  *   - alongMirror:
  *       Type: Bool
- *       Descr: >
+ *       Descr: |
  *               If true, the robot will stay near the mirror line, otherwise it will maintain
  *               the same distance the opponent does.
  *       Default: true
