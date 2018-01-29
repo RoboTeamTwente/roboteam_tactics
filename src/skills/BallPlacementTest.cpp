@@ -365,8 +365,8 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
         angleGoal = ballPosError.angle() + M_PI;
 
         double myAngle = me.angle;
-        double angleError = cleanAngle(angleGoal - myAngle);
-        double myAngularVel = me.w;
+        // double angleError = cleanAngle(angleGoal - myAngle);
+        // double myAngularVel = me.w;
 
         // Determine how close we should get to the targetPos before we succeed
         double successDist;

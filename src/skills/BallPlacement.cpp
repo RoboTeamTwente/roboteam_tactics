@@ -218,7 +218,7 @@ namespace rtt {
         double targetAngle = computeAngle(robotPos, goalPos);
 
         double myAngle = robot.angle;
-        double angleError = cleanAngle(targetAngle - myAngle);
+        // double angleError = cleanAngle(targetAngle - myAngle);
 
         double worldrotDiff = (robotPos - ballPos).angle() - (targetAngle + M_PI);
         worldrotDiff = cleanAngle(worldrotDiff);
@@ -300,7 +300,7 @@ namespace rtt {
 
                 if (posError.length() >= 0.5) {
                     targetAngle = sumOfForces.angle();
-                    angleError = cleanAngle(targetAngle - myAngle);
+                    // angleError = cleanAngle(targetAngle - myAngle);
                 }
                 sumOfForces = newSumOfForces;
 

@@ -4,10 +4,5 @@
 		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/NormalPlay" output="screen" />
 	</group>
 	
-	<group ns="yellow">
-		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/NormalPlay" output="screen" />
-
-	</group>
-	
 	
 </launch>
