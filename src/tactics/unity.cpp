@@ -113,6 +113,9 @@
 #include "BallPlacementUsPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Anouk_BallPlacementUsPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "Jim_GetBallPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
