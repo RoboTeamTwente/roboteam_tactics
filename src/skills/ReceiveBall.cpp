@@ -444,8 +444,9 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetDouble("pGainPosition", 4.0);
-        private_bb->SetBool("avoidDefenseAreas", true);
+        if (!HasBool("pGainLarger") || GetBool("pGainLarger")){
+        	private_bb->SetDouble("pGainPosition", 4.0);
+        }
         if (HasString("stayOnSide")) {
         	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }
@@ -455,6 +456,9 @@ bt::Node::Status ReceiveBall::Update() {
         if (HasDouble("maxSpeed")) {
         	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
         }
+        if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    	} 
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
 	    if (commandPtr) {

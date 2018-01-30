@@ -126,6 +126,12 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasDouble("maxSpeed")) {
         private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     }
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    }
+    if (!HasBool("pGainLarger") || GetBool("pGainLarger")){
+            private_bb->SetDouble("pGainPosition", 4.0);
+    }
 
 
     return receiveBall.Tick();

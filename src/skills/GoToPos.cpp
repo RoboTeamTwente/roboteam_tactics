@@ -268,7 +268,9 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     double yGoal = targetPos.y;
 
     // We should not go outside the field close to the goal areas
-    if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
+    if (fabs(yGoal) < (field.goal_width/2)) { //BEFORE: if(fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas))
+        marginOutsideField = field.goal_depth - 0.1;
+    } else if (fabs(yGoal) < field.goal_width + 0.5) {
         marginOutsideField = -0.1;
     }
 
@@ -505,6 +507,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.setColor(255, 0, 0);
     drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
     drawer.setColor(0, 0, 0);
+
+    // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
+    Vector2 ballPos = Vector2(world.ball.pos);
+    Vector2 ballVel = Vector2(world.ball.vel);
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("balVel", ballPos, ballVel);
 
     // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
