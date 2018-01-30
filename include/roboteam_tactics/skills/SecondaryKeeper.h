@@ -9,8 +9,11 @@ namespace rtt{
  * \brief See YAML
  */
 /*
- * Descr: Same as KeeperBlock, but stays farther away from the goal
- * Params: Same as KeeperBlock
+ * Descr: Skill for the keeper to stay between the ball and the goal. Keeps more distance than KeeperBlock
+ * Params:
+ *   - ROBOT_ID:
+ *       Type: Int
+ *       Descr: The id of the keeper
  */
 class SecondaryKeeper : public KeeperBlock {
     public:

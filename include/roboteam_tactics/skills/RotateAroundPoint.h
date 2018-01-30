@@ -50,7 +50,8 @@ namespace rtt {
  *       Descr: The distance to keep from the rotation center
  *   - maxv:
  *       Type: Double
- *       Descr: Indicates maximum speed. Default: 1 m/s
+ *       Descr: Indicates maximum speed in m/s.
+ *       Default: 1
  *   - quiet:
  *       Type: Bool
  *       Descr: Stops the skill from sending stop commands

@@ -11,33 +11,6 @@
 namespace rtt {
 
 /**
- * \enum WanderArea
- * \brief The different types of wandering robots can do.
- */
-enum class WanderArea {
-    NEAR_BALL,        //< Wander near the ball
-    NEAR_OUR_GOAL,    //< Wander near our goal
-    NEAR_THEIR_GOAL,  //< Wander near the opponents' goal
-    QUADRANT,         //< Wander in a quadrant (numbered 0-3, left to right, top to bottom) of the field
-    BOX               //< Wander in a rectangular area specified in the blackboard
-}; 
-
-/**
- * \brief Gets the WanderArea corresponding to a string
- */ 
-WanderArea areaForName(const std::string& name);
-
-/**
- * \struct Box
- * \brief Defines a rectangle by giving its bottom-right corner, length and width.
- */
-struct Box {
-    Vector2 bottomRight;
-    double length;
-    double width;
-};
-
-/**
  * \class Wander
  * \brief See YAML
  */
@@ -65,24 +38,54 @@ struct Box {
  *         - 3: Bottom-right
  *       Used when: type == QUADRANT
  *       Descr: Specifies what quadrant to wander in
- *    - boxCenterX:
+ *   - boxCenterX:
  *        Type: Double
  *        Used when: type == BOX
  *        Descr: The x-coordinate of the center of the area to wander in
- *    - boxCenterY:
+ *   - boxCenterY:
  *        Type: Double
  *        Used when: type == BOX
  *        Descr: The y-coordinate of the center of the area to wander in
- *    - boxLength:
+ *   - boxLength:
  *        Type: Double
  *        Used when: type == BOX
  *        Descr: The length of the area to wander in
- *    - boxWidth:
+ *   - boxWidth:
  *        Type: Double
  *        Used when: type == BOX
  *        Default: boxLength
  *        Descr: The width of the area to wander in
  */
+
+
+
+/**
+ * \enum WanderArea
+ * \brief The different types of wandering robots can do.
+ */
+enum class WanderArea {
+    NEAR_BALL,        //< Wander near the ball
+    NEAR_OUR_GOAL,    //< Wander near our goal
+    NEAR_THEIR_GOAL,  //< Wander near the opponents' goal
+    QUADRANT,         //< Wander in a quadrant (numbered 0-3, left to right, top to bottom) of the field
+    BOX               //< Wander in a rectangular area specified in the blackboard
+}; 
+
+/**
+ * \brief Gets the WanderArea corresponding to a string
+ */ 
+WanderArea areaForName(const std::string& name);
+
+/**
+ * \struct Box
+ * \brief Defines a rectangle by giving its bottom-right corner, length and width.
+ */
+struct Box {
+    Vector2 bottomRight;
+    double length;
+    double width;
+};
+
 class Wander : public Skill {
 public:
     static constexpr double NEAR_BALL_DIST = .8;

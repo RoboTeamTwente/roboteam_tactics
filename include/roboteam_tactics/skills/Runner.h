@@ -13,7 +13,6 @@ namespace rtt {
  */
 /*
  * Descr: Utility skill which always returns Running
- * Params: null
  */
 class Runner : public Skill {
 public:

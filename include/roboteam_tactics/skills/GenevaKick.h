@@ -34,8 +34,8 @@ namespace rtt {
  *       Descr: When true, first push the ball forward a little bit to ensure it is in contact with the kicker
  *       Default: false
  *   - genevaState:
- *	 	 Type: Int
- *	 	 Descr: The state in which the Geneva Drive should go to. -2 means leftmost state, 0 means 'neutral' state, 2 means rightmost state.
+ *       Type: Int
+ *       Descr: The state in which the Geneva Drive should go to. -2 means leftmost state, 0 means 'neutral' state, 2 means rightmost state.
 
  */
 class GenevaKick : public Skill {

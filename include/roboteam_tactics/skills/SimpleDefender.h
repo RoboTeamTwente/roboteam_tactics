@@ -11,7 +11,7 @@
 namespace rtt {
 
 /**
- * \class Simple Keeper
+ * \class SimpleDefender
  * \brief See YAML
  */
 /*
@@ -27,10 +27,10 @@ namespace rtt {
  *
  *   - fieldType:
  *       Type: String
- *       Descr: 
+ *       Descr: Used to specify the dimensions of the field
  *       Can be:
- *          office: If used on the field in the office
- *          Otherwise it defaults to the SSL field
+ *          - office: If used on the field in the office
+ *          - default: SSL specifications
  */
 
 class SimpleDefender : public Skill {

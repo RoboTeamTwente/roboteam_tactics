@@ -42,7 +42,8 @@ std::random_device rd;
 std::mt19937 rng(rd());
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
-    
+    ROS_INFO("");
+
     auto uuid = unique_id::fromMsg(msg->token);
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
@@ -58,34 +59,43 @@ void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
 }
 
 void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
+    ROS_INFO("Referee command received!");
     rtt::LastRef::set(*refdata);
 }
 
 class StrategyDebugInfo {
 public:
-    StrategyDebugInfo() {
-        ros::NodeHandle n;
-
-        strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
-    }
-
-
-    ros::Publisher strategyInfoPub;
 
     using Clock = std::chrono::steady_clock;
     using timepoint = std::chrono::steady_clock::time_point;
     using milliseconds = std::chrono::milliseconds;
 
+    ros::Publisher strategyInfoPub; // Publisher to publish on strategy_debug_info
     timepoint lastDebugMsg = timepoint::min();
-
     static milliseconds const MSG_INTERVAL;
+
+    StrategyDebugInfo() {
+        ROS_INFO("New instance");
+
+        ros::NodeHandle n;
+
+        strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
+
+        ROS_INFO("Publishing on strategy_debug_info");
+    }
+
 
     bool timeSinceLastMessagePassed() {
         using namespace std::chrono;
         return duration_cast<milliseconds>(Clock::now() - lastDebugMsg) >= MSG_INTERVAL;
     }
 
+
+
     void doUpdate(std::shared_ptr<bt::BehaviorTree> tree) {
+
+        ROS_DEBUG("Tick");
+
         auto root = tree->GetRoot();
 
         if (auto rss = std::dynamic_pointer_cast<rtt::RefStateSwitch>(root)) {
@@ -134,7 +144,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "StrategyNode");
     ros::NodeHandle n;
 
-    ros::Rate rate(60);
+    ros::Rate rate(10);
 
     ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
         rtt::TOPIC_ROLE_FEEDBACK,
@@ -142,7 +152,7 @@ int main(int argc, char *argv[]) {
         &feedbackCallback
         );
 
-
+    ROS_INFO("[StrategyNode][main] Subscribed to 'role_feedback'");
     // Construct the global role directive publisher & bt debug publisher if needed
     rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
@@ -155,18 +165,20 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
+    ROS_INFO("[StrategyNode][main] Subscribed to 'vision_refbox'");
 
     StrategyDebugInfo stratDebugInfo;
 
     std::shared_ptr<bt::BehaviorTree> strategy;
+
     // Only continue if arguments were given
     if (arguments.size() > 0) {
         if (arguments[0] == "mainStrategy") {
             strategy = rtt::StrategyComposer::getMainStrategy();
 
-            std::cout << "mainStrategy: " << strategy << "\n";
+            ROS_INFO_STREAM("mainStrategy: " << strategy);
             if (!strategy) {
-                std::cerr << "There was an error initializing the main strategy tree (StrategyComposer). Aborting.\n";
+                ROS_ERROR("[StrategyNode][main] There was an error initializing the main strategy tree (StrategyComposer). Aborting.");
                 return 1;
             }
 
@@ -178,6 +190,14 @@ int main(int argc, char *argv[]) {
             namespace f = rtt::factories;
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
             // If the given name exists...
+
+
+
+            for (const auto& entry : repo) {
+                std::cout << "\t- " << entry.first << "\n";
+            }
+
+
             if (repo.find(arguments[0]) != repo.end()) {
                 // Get the factory
                 auto treeFactory = repo.at(arguments[0]);

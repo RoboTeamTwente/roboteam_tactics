@@ -24,7 +24,7 @@ namespace rtt {
  *       Type: Int
  *       Descr: The ID of the robot
  *
- *   - KEEPER_ID
+ *   - KEEPER_ID:
  *       Type: Int
  *       Descr: The ID of the keeper
  *
@@ -47,25 +47,28 @@ namespace rtt {
  *       Used when: aimAt == robot
  *       Descr: True if the robot we should aim at is from our team
  *
- *    - targetAngle:
+ *   - targetAngle:
  *        Type: Double
  *        Descr: The angle to look at with the ball
  *        Used when: aimAt is not set
  *
- *    - passOn:
+ *   - passOn:
  *        Type: Bool
  *        Descr: When true, the robot will kick the ball after getting it and aiming in the proper direction.
  *        Note: Not sure if this feature should remain, or whether we should always use the kick skill
  *
- *    - stayOnSide:
- *        Type: String
- *        Descr: Behaves exactly like the stayOnSide in GoToPos. See the docs for details.
+ *   - stayOnSide:
+ *       Descr:     Indicates on which side of the field GoToPos should stay.
+ *       Type:      String
+ *       Can be:
+ *             - ourSide:   Have the robot stay at our side.
+ *             - theirSide: Have the robot stay at their side.
  *
- *    - maxSpeed:
+ *   - maxSpeed:
  *        Type: Double
  *        Descr: For debugging purposes, a maxSpeed parameter can be set here and will be passed on to GoToPos
  *
- *    - enterDefenseAreas:
+ *   - enterDefenseAreas:
  *        Type: Bool
  *        Descr: When true allows GoToPos to go into the defense areas of both teams. Is passed on to GoToPos.
  */

@@ -11,7 +11,24 @@
 #include <boost/optional.hpp>
 
 namespace rtt {
-    
+
+/**
+ * \class BlockGoal
+ * \brief See YAML
+ */
+/**
+ * Descr: TODO
+ * 
+ * Params:
+ *  - ROBOT_ID:
+ *     Descr:     Id of the robot
+ *     Type:      Int
+ *
+ *  - rotationFromOptimal:
+ *     Descr:     TODO
+ *     Type:      Double
+ */
+ 
 class BlockGoal : public Skill {
     public:
     BlockGoal(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);

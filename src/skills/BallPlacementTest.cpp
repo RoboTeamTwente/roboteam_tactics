@@ -14,6 +14,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/LastRef.h"
+#include "roboteam_tactics/utils/ScopedBB.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
@@ -277,7 +278,13 @@ Vector2 BallPlacementTest::checkTargetPos(Vector2 targetPos) {
 boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() {
 
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+//    Vector2 targetPos = LastRef::get().designated_position;
+//    rtt::ScopedBB(bb, "BallPlacementTest")
+//            .setDouble("xGoal", targetPos.x)
+//            .setDouble("yGoal", targetPos.y)
+//            ;
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    std::cout << "xGoal: " << targetPos.x << ", yGoal: " << targetPos.y << std::endl;
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
     if (HasDouble("pGainPosition")) {
@@ -308,7 +315,7 @@ boost::optional<roboteam_msgs::RobotCommand> BallPlacementTest::getVelCommand() 
 //ballplacement
     if (HasBool("ballPlacement")) {
 
-        controller.setControlParam("maxSpeed", 0.5);
+        controller.setControlParam("maxSpeed", 0.1);
 
 
 

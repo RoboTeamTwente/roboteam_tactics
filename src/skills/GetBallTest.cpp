@@ -2,7 +2,6 @@
 
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBallTest.h"
-#include "roboteam_tactics/skills/BallPlacement.h" //to get coordinates for ballplacement
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
 #include "roboteam_tactics/conditions/CanClaimBall.h"
@@ -12,8 +11,10 @@
 #include "roboteam_tactics/Parts.h"
 
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
+
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -207,7 +208,12 @@ bt::Node::Status GetBallTest::Update (){
     } else if (HasString("aimAt")) {
         if (GetString("aimAt") == "ballplacement") {
             std::cout << "-> 3 face towards ballplacement" << std::endl;
+//            Vector2 const ballplacement = LastRef::get().designated_position;
+//            std::cout << "command code: " << LastRef::getState().RefState << std::endl;
+//            std::cout << "ballplacement -> x: " << LastRef::get().designated_position.x << ", y: " << LastRef::get().designated_position.y << std::endl;
             Vector2 ballplacement = Vector2(GetDouble("aimAtBallplacement_x"), GetDouble("aimAtBallplacement_y"));
+            std::cout << "ballplacement -> x: " << ballplacement.x << ", y: " << ballplacement.y << std::endl;
+
             targetAngle = (ballplacement-ballPos).angle();
         }
         else {

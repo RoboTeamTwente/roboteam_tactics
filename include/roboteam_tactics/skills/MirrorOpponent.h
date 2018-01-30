@@ -5,6 +5,10 @@
 
 namespace rtt {
 
+/**
+ * \class MirrorOpponent
+ * \brief See YAML
+ */
 /*
  * Descr: Mirror an opponent's position along the center line or some other x-coordinate.
  * Params:

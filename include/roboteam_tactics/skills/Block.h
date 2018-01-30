@@ -28,18 +28,8 @@ const std::map<BlockType, const char*> block_type_names {
     { BlockType::GOALAREA, "GOALAREA" }
 };
 
-/**
- * \class BlockPos
- * \brief Determines where to position a blocking robot.
- */
 class BlockPos {
 public:
-    /**
-     * \brief Determine the position where our robot should be.
-     * \param current The blocking robot's current position.
-     * \param opponent The location of the opponent.
-     * \param to_block The location to block the opponent from.
-     */
     virtual Position block_pos(const Position& current,
                              const Vector& opponent,
                              const Vector& to_block) const = 0;
@@ -62,8 +52,8 @@ public:
  *   - BLOCK_ID:
  *       Type: Int
  *       Can be:
- *         - BLOCK_BALL_ID: (=987654) To stand between TGT_ID and the ball
- *         - Any positive integer: To stand between TGT_ID and the opponent 
+ *         - 987654: BLOCK_BALL_ID, to stand between TGT_ID and the ball
+ *         - 1: Any positive integer to stand between TGT_ID and the opponent 
  *       Used when: block_x and block_y are not set
  *       Descr: When the block target is not an absolute location, this number indicates what to block
  *   - block_x:
@@ -77,30 +67,30 @@ public:
  *   - block_type:
  *       Type: String
  *       Can be:
- *         - RELATIVE: |
+ *         - RELATIVE: >
  *             Block at a position a certain fraction (given by block_arg) between the two points.
  *             For example, when block_arg is 0.5, the robot will stand halfway between the opponent
  *             and the point it should block. By default, the robot will face the opponent.
- *         - CIRCLE: |
+ *         - CIRCLE: >
  *             Blocks along a circle centered around the opponent, with a radius given by block_arg.
  *             By default, the robot will face the opponent.
- *         - COVER: |
+ *         - COVER: >
  *             Blocks close to the opponent, trying to keep it from receiving the ball.
  *             By default, the robot will face the location it is blocking.
- *         - GOALAREA: |
+ *         - GOALAREA: >
  *             Blocks along the line surrounding the goal. By default, the robot will face
  *             away from the goal.
- *        Used when: block_x and block_y are not set.
- *        Descr: Determines how the actual block position is calculated.
- *    - block_arg:
+ *       Used when: block_x and block_y are not set.
+ *       Descr: Determines how the actual block position is calculated.
+ *   - block_arg:
  *        Type: Double
  *        Used when: block_type is used and is either RELATIVE or CIRCLE
  *        Descr: Parameter for the block_type. See its documentation for details.
- *    - invert_direction:
+ *   - invert_direction:
  *        Type: Bool
  *        Used when: block_type is used
  *        Descr: When true, the robot will face the direction opposite to the one it normally would given the block_type.
- *    - selfBlock:
+ *   - selfBlock:
  *        Type: Bool
  *        Default: false
  *        Descr: When true, TGT_ID is considered to be one of our robots, rather than an opponent. For testing.

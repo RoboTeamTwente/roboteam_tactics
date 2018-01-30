@@ -22,7 +22,10 @@ namespace rtt {
  *       Descr: The id of the robot
  *   - numberOfRobots:
  *       Type: Int
- *       Can be: 1, 2 or 3
+ *       Can be:
+ *         - 1
+ *         - 2
+ *         - 3
  *       Descr: How many robots should be executing this skill simultaneously
  *   - position:
  *       Type: String

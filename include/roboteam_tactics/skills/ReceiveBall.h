@@ -15,6 +15,10 @@
 namespace rtt {
 
 /**
+ * \class ReceiveBall
+ * \brief See YAML
+ */
+/**
  * Descr: Receives a ball at a certain position
  *
  * Params:

@@ -21,9 +21,9 @@ namespace rtt {
  *       Type: Int
  *       Descr: The ID of the robot
  *
- *	 - KEEPER_ID
- *		 Type: Int
- *		 Descr: The ID of the keeper
+ *   - KEEPER_ID:
+ *       Type: Int
+ *       Descr: The ID of the keeper
  *
  *   - theirID:
  *       Type: Int
@@ -41,13 +41,13 @@ namespace rtt {
  *       Type: Double
  *       Descr: The y-coordinate of the point we should find a free spot close to (and drive towards if it is free)
  *
- *	 - closeToX:
- *	 	 Type: Double
- *		 Descr: The x-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
+ *   - closeToX:
+ *       Type: Double
+ *       Descr: The x-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
  *
- *	 - closeToY;
- *		 Type: Double
- *		 Descr: The y-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
+ *   - closeToY:
+ *       Type: Double
+ *       Descr: The y-coordinate of the point we should try to find a free position as close as possible to (for example the position of their goal)
  *
  *   - distanceFromPoint:
  *       Type: Double

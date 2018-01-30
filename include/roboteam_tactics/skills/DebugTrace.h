@@ -15,15 +15,15 @@ namespace rtt {
 /*
  * Descr: Prints it's name to standard out everytime it updates.
  * Params:
- *   - doReturn
+ *   - doReturn:
  *      Type: String
  *      Descr: What it should do after an update.
  *      Can be:
- *         Success: Return success upon finishing
- *         Failure: Return failure upon finishing
- *         Running: Return running upon finishing
+ *         - Success: Return success upon finishing
+ *         - Failure: Return failure upon finishing
+ *         - Running: Return running upon finishing
  *      Default: Running
- *   - msg
+ *   - msg:
  *      Type: String
  *      Descr: A message that will be appended to the print if it is present
  *      

@@ -19,6 +19,7 @@ namespace rtt {
  *   go to the point between the ball and the center of the goal. Howver, in some cases this
  *   leads to the keeper pushing the ball into the goal. Therefore be sure to cover this case
  *   in the behaviour tree!
+ *
  * Params:
  *   - ROBOT_ID:
  *       Type: Int
