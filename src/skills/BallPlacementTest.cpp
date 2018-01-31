@@ -226,7 +226,7 @@ void BallPlacementTest::sendStopCommand(uint id) {
         // Set the blackboard for GoToPos
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
-        private_bb->SetDouble("maxSpeed", 0.1);
+        private_bb->SetDouble("maxSpeed", 1);
         private_bb->SetDouble("successDist", 0.08);
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
