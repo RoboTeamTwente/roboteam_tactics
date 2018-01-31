@@ -1,0 +1,5 @@
+<launch>
+	<include file="$(find roboteam_utils)/mini_grsim.launch" />
+	<include file="$(find roboteam_input)/keyboard.launch" />
+	<node pkg="roboteam_tactics" type="TestX" args="rtt_jim/KeeperRole ROBOT_ID=0" name="$(anon TestX)" />
+</launch>

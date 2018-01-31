@@ -112,7 +112,6 @@ void GetBallTest::releaseBall() {
     return;
 }
 
-
 void GetBallTest::Initialize() {
     ballCloseFrameCount = 0;
     finalStage = false;

@@ -83,7 +83,6 @@ public:
     BallPlacementTest(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 
     void sendStopCommand(uint id);
-    void publishStopCommand();
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos);
     Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
@@ -101,7 +100,6 @@ public:
         params["yGoal"] = BBArgumentType::Double;
         params["ballPlacement"] = BBArgumentType::Bool;
         params["dribbler"] = BBArgumentType::Bool;
-        params["counter"] = BBArgumentType::Int;
         return params;
     }
     std::string node_name() { return "BallPlacementTest"; }
@@ -109,7 +107,6 @@ public:
 private:
 
     // Control parameters
-    int robotID;
     double avoidRobotsGain;
     Vector2 posErrorI;
     double angleErrorI;
