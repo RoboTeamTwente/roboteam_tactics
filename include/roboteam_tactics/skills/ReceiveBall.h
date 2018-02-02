@@ -72,13 +72,14 @@ public:
 private:
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
-    InterceptPose deduceInterceptPosFromBall();
+    InterceptPose deduceInterceptPosFromBall(Vector2 ballPos, Vector2 ballVel);
     boost::optional<InterceptPose> deduceInterceptPosFromRobot();
     double prevballdist;
     int robotID;
     boost::optional<int> hasBall;
     bool our_team;
     double acceptableDeviation = 1.0;
+	double marginDeviation;
 
     GoToPos goToPos;
     GetBall getBall;

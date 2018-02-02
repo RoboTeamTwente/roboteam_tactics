@@ -69,8 +69,8 @@ bool Evade::updateGoalPosition() {
 		float dist = pos.dist(ownPos);
 
 		if (id != ownId && dist < LOOKING_DISTANCE && vel.length()>0.01) {
-			Vector2 relevantVel = vel.project2(pos, ownPos);
-			if(relevantVel.dot(ownPos - pos) > 0 && relevantVel.length() > 0.05 && relevantVel.length() > relevantMaxVel.length()) { //TWEAK: threshold for seeing moving robot
+			Vector2 relevantVel = vel.project2(ownPos - pos);
+			if(relevantVel.length() > 0.05 && relevantVel.length() > relevantMaxVel.length() && relevantVel.dot(ownPos - pos) > 0) { //TWEAK: threshold for seeing moving robot
 				maxVel = vel;
 				relevantMaxVel = relevantVel;
 				distance = dist;

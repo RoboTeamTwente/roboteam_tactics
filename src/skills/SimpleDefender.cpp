@@ -83,6 +83,12 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
     }
+    if (HasDouble("acceptableDeviation")) {
+        acceptableDeviation = GetDouble("acceptableDeviation");
+    }
+    if (HasDouble("dribblerDist")) {
+        dribblerDist = GetDouble("dribblerDist");
+    }
 
     Vector2 defendPos;
 
@@ -132,6 +138,9 @@ bt::Node::Status SimpleDefender::Update() {
     if (!HasBool("pGainLarger") || GetBool("pGainLarger")){
             private_bb->SetDouble("pGainPosition", 4.0);
     }
+    if (HasDouble("marginDeviation")) {
+		private_bb->SetDouble("marginDeviation", GetDouble("marginDeviation"));
+	}
 
 
     return receiveBall.Tick();

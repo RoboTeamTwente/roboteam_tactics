@@ -144,7 +144,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                 drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
                 //'crashVel' is the velocity at which the robots would crash into eachother
-                Vector2 crashVel = (otherRobotVel - myVel).project2(otherRobotPos,myPos);
+                Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
                 // A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
                 Vector2 cushionForce = crashVel.scale(0.15 / distToRobot);    //////////////////TWEAK///////////////////////
                 //I will not respond to a negative crashVel or a crashVel not caused by me
@@ -172,7 +172,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                 drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
                 //'crashVel' is the velocity at which the robots would crash into eachother
-                Vector2 crashVel = (otherRobotVel - myVel).project2(otherRobotPos,myPos);
+                Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
                 // A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
                 Vector2 cushionForce = crashVel.scale(0.15 / distToRobot);    //////////////////TWEAK///////////////////////
                 //I will not respond to a negative crashVel or a crashVel not caused by me
@@ -356,6 +356,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
+    if (HasBool("pGainLarger") && GetBool("pGainLarger")) {
+        controller.setControlParam("pGainPosition", 6.0);
+    } else {
+        controller.setPresetControlParams();
+    }
+
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
     }
@@ -380,6 +386,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
     }
+
 
 
     // Get the latest world state
@@ -456,7 +463,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (posError.length() < successDist && fabs(angleError) < 0.08) {
         successCounter++;
         if (successCounter >= 3) {
-            sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
+            //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
             succeeded = true;
             failure = false;
             return boost::none;
@@ -565,6 +572,7 @@ bt::Node::Status GoToPos::Update() {
         pub.publish(*command);
         return Status::Running;
     } else {
+        sendStopCommand(ROBOT_ID);
         if (succeeded) {
             return Status::Success;
         } else if (failure) {
