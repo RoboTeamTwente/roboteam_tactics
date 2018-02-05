@@ -1,0 +1,8 @@
+<launch>
+
+	<group ns="blue">
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="rtt_jim/NormalPlay" output="screen" />
+	</group>
+	
+	
+</launch>

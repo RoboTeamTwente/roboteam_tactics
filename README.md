@@ -20,6 +20,10 @@ sudo apt install ros-kinetic-unique-identifier
 
 Should Just Work™. If not, contact a RTT member. *crosses fingers*
 
+## How do I add a Skill?
+1. Header file and cpp file in corresponding skills directory
+2. Add it to unity.cpp in skills
+
 ## How do I add a Behavior3 project?
 1. Create a B3 project in the src/trees/projects folder with the Behavior3 Editor. Make sure it contains at least one valid tree. For example: a "KickTest" tree, with only a "Kick" node with name "Kick_A" in it.
 2. Add it to the `CMakeLists.txt` there.

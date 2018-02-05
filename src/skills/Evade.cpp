@@ -51,7 +51,7 @@ bool Evade::updateGoalPosition() {
 
 
 	Vector2 ownPos { bot->pos };
-	Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
+	// Vector2 referencePos = initialPos ? initialPos->location() : ownPos;
 	Vector2 ballPos { LastWorld::get().ball.pos };
 
 	auto bots = LastWorld::get().us;
@@ -67,29 +67,31 @@ bool Evade::updateGoalPosition() {
 		Vector2 vel { bot.vel };
 		unsigned id { bot.id };
 		float dist = pos.dist(ownPos);
-		if (id != ownId && dist < LOOKING_DISTANCE) {
-			Vector2 relevantVel = vel.project2(pos, ownPos);
-			if(relevantVel.dot(ownPos - pos) > 0 && relevantVel.length() > 0.05 && relevantVel.length() > relevantMaxVel.length()) {
+
+		if (id != ownId && dist < LOOKING_DISTANCE && vel.length()>0.01) {
+			Vector2 relevantVel = vel.project2(ownPos - pos);
+			if(relevantVel.length() > 0.05 && relevantVel.length() > relevantMaxVel.length() && relevantVel.dot(ownPos - pos) > 0) { //TWEAK: threshold for seeing moving robot
 				maxVel = vel;
 				relevantMaxVel = relevantVel;
 				distance = dist;
 			}
 		}
 	}
-
+	
 	Vector2 goal = ownPos; //goal remains ownPos if no moving object in sight
-	if (maxVel.length() != 0) {
+	if (relevantMaxVel.length() > 0.05) { //TWEAK: threshold for seeing moving robot
 		float angle = maxVel.angle() - relevantMaxVel.angle();
 		if(angle > M_PI) {
 			angle -= 2 * M_PI;
 		} else if (angle < -M_PI) {
 			angle += 2 * M_PI;
 		}
-		Vector2 rotatedVector = (maxVel.scale(3)).rotate((angle < 0 ? .5 : -.5) * M_PI); //TWEAK: maxVel.scale(..)
+		Vector2 rotatedVector = maxVel.rotate((angle < 0 ? .5 : -.5) * M_PI); //TWEAK: maxVel.scale(..)
 		double scaling = distance / LOOKING_DISTANCE;
-		Vector2 goalVector = relevantMaxVel.lerp(rotatedVector, 1.0-scaling);
-
-		goal = ownPos + goalVector.scale(0.05/distance/distance); //TWEAK: scale(....)
+		Vector2 goalVector = relevantMaxVel.lerp(rotatedVector, 0.5*(1.0-scaling)); //TWEAK: less effect for relevantMaxVel: ...*(1.0-scaling)
+		// drawer.setColor(255, 0, 0);
+  //   	drawer.drawLine("goalVector", ownPos, goalVector);
+		goal = ownPos + goalVector.scale(0.1/goalVector.length() + 0.1/distance/distance); //TWEAK: scale(....) //TWEAK: stretchToLength instead of scale, to remove speed dependency
 	}
 
 	private_bb->SetDouble("Evade_GTP_xGoal", goal.x);

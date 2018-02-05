@@ -4,6 +4,7 @@
 #include "GoToPos.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Position.h"
+#include "roboteam_utils/Draw.h"
 
 namespace rtt {
 
@@ -39,6 +40,7 @@ private:
 	bool updateGoalPosition();
 	Vector2 getNearestObject(Vector2 ownPos);
 	boost::optional<Position> initialPos;
+	Draw drawer;
 };
 
 }
