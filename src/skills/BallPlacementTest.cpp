@@ -38,9 +38,8 @@ RTT_REGISTER_SKILL(BallPlacementTest);
 
 BallPlacementTest::BallPlacementTest(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , goToPosObj("", private_bb)
+        , goToPosObj("", private_bb){
 
-        {
             succeeded = false;
             failure = false;
             ros::NodeHandle n;
@@ -128,20 +127,12 @@ void BallPlacementTest::sendStopCommand(uint id) {
             return Status::Failure;
         }
 
-
+        // test if the ball is within the success distance for 5 frames. if so, return success
         if (ballPosError.length() < 0.08){
 
-
-            if(!!HasInt("counter")){
-
-                blackboard->SetInt("counter", 0);
-                ROS_WARN_STREAM("counter set to " << blackboard->GetInt("counter"));
-            }
-
-            if (blackboard->GetInt("counter") < 5){
+            if (blackboard->GetInt("counter") < 0){
                 int counterSafe = blackboard->GetInt("counter");
                 counterSafe = counterSafe + 1;
-
                 blackboard->SetInt("counter", counterSafe);
                 ROS_WARN_STREAM("counter++ " << counterSafe);
                 return Status::Running;
@@ -157,81 +148,18 @@ void BallPlacementTest::sendStopCommand(uint id) {
         }
 
 
-//        // Different !!GetBall!! parameters for grsim than for real robots
-//        // !!so needs to be fine tuned for the ball placement!!
-//        std::string robot_output_target = "";
-//        ros::param::getCached("robot_output_target", robot_output_target);
-//        double successDist;
-//        double successAngle;
-//        double getBallDist;
-//        double distAwayFromBall;
-//        if (robot_output_target == "grsim") {
-//            successDist = 0.11;
-//            successAngle = 0.2;
-//            getBallDist = 0.09 ;
-//            distAwayFromBall = 0.2;;
-//        } else if (robot_output_target == "serial") {
-//            successDist = 0.115 ;
-//            successAngle = 0.15;
-//            getBallDist = 0.05;
-//            distAwayFromBall = 0.2;
-//        }
-
-
-
-        // turn on dribbler
-        private_bb->SetBool("dribbler", true);
-        std::cout << "dribbler on" << std::endl;
-
-
-
-//        // Return Success if we've been close to the ball for a certain number of frames
-//        // !!Needs to be turned into if we've been close to the ball placement location!!
-//        double angleError = cleanAngle(robot.angle - targetAngle);
-//        if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-//            // matchBallVel = false;
-//            int ballCloseFrameCountTo = 10;
-//            if(HaFInt("ballCloseFrameCount")){
-//                ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
-//            }
-//
-//            if (ballCloseFrameCount < ballCloseFrameCountTo) {
-//                ballCloseFrameCount++;
-//                return Status::Running;
-//            } else {
-//
-//                if (choseRobotToPassTo) {
-//                    publishKickCommand(3.0);
-//                } else {
-//                    publishKickCommand(8.0);
-//                }
-//
-//                if(countFinalMessages < 10){
-//                    countFinalMessages=countFinalMessages+1;
-//                    return Status::Running;
-//                }
-//                else {
-//                    choseRobotToPassTo = false;
-//                    releaseBall();
-//                    return Status::Success;
-//                }
-//
-//                return Status::Running;
-//            }
-//        } else {
-//            ballCloseFrameCount = 0;
-//        }
-
 
         // Set the blackboard for GoToPos
-        private_bb->SetInt("ROBOT_ID", robotID);
-        private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
-        private_bb->SetDouble("maxSpeed", 0.1);
-        private_bb->SetDouble("successDist", 0.08);
-        private_bb->SetDouble("xGoal", targetPos.x);
-        private_bb->SetDouble("yGoal", targetPos.y);
-        private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", false);
+        private_bb->SetInt("ROBOT_ID", robotID);                            // sets robot id
+        private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));   // sets keeper id
+        private_bb->SetBool("dribbler", true);                              // turn on dribbler
+        private_bb->SetDouble("maxSpeed", 0.1);                             // sets maximum speed (which is low for ball placement)
+        private_bb->SetDouble("successDist", 0.08);                         // sets succes distance
+        private_bb->SetDouble("xGoal", targetPos.x);                        // x location for ball placement
+        private_bb->SetDouble("yGoal", targetPos.y);                        // y location for ball placement
+        private_bb->SetDouble("angleGoal", targetAngle);                    // final goal for the angle of the robot
+        private_bb->SetBool("avoidRobots", false);                          // the robot does not have to avoid robots during ball placement
+
         if (HasBool("enterDefenseAreas")) {
             private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
         }
@@ -239,16 +167,18 @@ void BallPlacementTest::sendStopCommand(uint id) {
         if (HasDouble("pGainPosition")) {
             private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
         }
+
         if (HasDouble("pGainRotation")) {
             private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
         }
+
 
         // Get the velocity command from GoToPos
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPosObj.getVelCommand();
         roboteam_msgs::RobotCommand command;
         if (commandPtr) {
             command = *commandPtr;
-            command.w = 0;
+            command.w = 0;          //this makes sure the robot will not turn during ball placement
 
             // Get global robot command publisher, and publish the command
             auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

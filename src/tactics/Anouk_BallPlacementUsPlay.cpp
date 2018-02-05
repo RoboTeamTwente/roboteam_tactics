@@ -63,16 +63,15 @@ void Anouk_BallPlacementUsPlay::Initialize() {
     rtt::ScopedBB(bb, "GetBallTest_A")
         .setString("aimAt", "ballplacement")
         .setBool("enterDefenseAreas", true)
-            .setBool("aimAwayFromTarget", true)
-            .setDouble("aimAtBallplacement_x", 1)
-            .setDouble("aimAtBallplacement_y", 0)
+        .setBool("aimAwayFromTarget", true)
+        .setDouble("aimAtBallplacement_x", endPos.x)
+        .setDouble("aimAtBallplacement_y", endPos.y)
         ;
 
     rtt::ScopedBB(bb, "BallPlacementTest_A")
-            .setBool("ballPlacement", true)
-        .setDouble("xGoal", 1)
-        .setDouble("yGoal", 0)
-            .setBool("enterDefenseAreas", true)
+        .setDouble("xGoal", endPos.x)
+        .setDouble("yGoal", endPos.y)
+        .setBool("enterDefenseAreas", true)
         ;
 
 
