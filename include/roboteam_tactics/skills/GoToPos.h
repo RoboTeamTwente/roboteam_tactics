@@ -71,7 +71,11 @@ public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 
     void sendStopCommand(uint id);
+<<<<<<< HEAD
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos);
+=======
+    Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna);
+>>>>>>> jelleExperimental
     Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel);
