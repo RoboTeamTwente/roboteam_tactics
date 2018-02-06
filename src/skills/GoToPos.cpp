@@ -501,7 +501,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
     if (controller.getRobotType()==RobotType::PROTO){
-        velTarget = velTarget + velTarget.stretchToLength(0.1); //adds 0.1 length to the vector
+        velTarget = velTarget + velTarget.stretchToLength(0.15); //adds 0.1 length to the vector
     }
     Vector2 velCommand = velTarget;
 
