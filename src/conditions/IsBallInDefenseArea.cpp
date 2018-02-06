@@ -15,8 +15,11 @@
 
 namespace rtt {
 
+
+// Tweaked by Jelle to use Jelle's variant of getting distance to defense area, which now returns a double.
 bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point) {
     GeometryFieldSize field = LastWorld::get_field();
+<<<<<<< HEAD
     Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, 0.0);
     if (ourDefenseArea) {
         if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
@@ -25,6 +28,11 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point) {
         if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
         else return false;
     }
+=======
+    double distToDefenseArea = getDistToDefenseArea2(ourDefenseArea, point);
+    if (distToDefenseArea < 0) return true;
+    else return false;
+>>>>>>> jelleExperimental
 }
 
 bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
@@ -38,6 +46,8 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin
         else return false;
     }
 }
+
+
 
 
 RTT_REGISTER_CONDITION(IsBallInDefenseArea);
