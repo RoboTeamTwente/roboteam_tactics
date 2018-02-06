@@ -39,11 +39,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-<<<<<<< HEAD
-            avoidRobotsGain = 0.15;
-=======
             avoidRobotsGain = 0.012;
->>>>>>> jelleExperimental
         }
 
 
@@ -58,21 +54,6 @@ void GoToPos::sendStopCommand(uint id) {
 
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them7
 // Based on this algorithm: https://gamedevelopment.tutsplus.com/tutorials/understanding-steering-behaviors-collision-avoidance--gamedev-7777
-<<<<<<< HEAD
-Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos) {
-
-    Vector2 forceVector;
-
-    Vector2 ahead = myPos + antenna;
-    Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
-
-    double dist = (closestPoint - otherRobotPos).length();
-    if (closestPoint != myPos && closestPoint != ahead && dist <= 0.3) {
-        Vector2 force = closestPoint - otherRobotPos;
-        force = force.scale(avoidRobotsGain / (force.length() * force.length()) );
-        force = force.scale(1.0 / (closestPoint - myPos).length());
-        forceVector = force;
-=======
 // Tweaked by Jelle, to prevent division by zero and having a maximum force that can be applied (by using a minimum distance)
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna) {
 
@@ -92,7 +73,6 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
         } else if(dist > 0.0005) {
             force = force.stretchToLength(avoidRobotsGain/minDist/dist2);
         }
->>>>>>> jelleExperimental
     }
     return force;
 }
@@ -102,22 +82,6 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
 Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 posError = targetPos - myPos;
-<<<<<<< HEAD
-    double lookingDistance = 1.0; // default
-    if (lookingDistance > (posError.length())) {
-        lookingDistance = posError.length();
-    }
-
-    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
-    Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
-
-    // Draw the antenna in rqt-view
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("antenna", myPos, antenna);
-
-    // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
-=======
     // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
     double minAntenna = 0.3; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
     Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.5);
@@ -136,19 +100,13 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // To find a better way of taking velocities into account when avoiding robots, Jelle replaced the use of estimated future positions ..
     // ..by the concept of a 'relative antenna', which is a rotated version of the antenna for each robot that is close, ..
     // ..based on the relative velocity between me and the other robot.
->>>>>>> jelleExperimental
     Vector2 sumOfForces;
+    Vector2 sumOfCushions;
     for (auto const currentRobot : world.us) {
         if (currentRobot.id != ROBOT_ID) {
             Vector2 otherRobotPos(currentRobot.pos);
             Vector2 otherRobotVel(currentRobot.vel);
             double distToRobot = (otherRobotPos - myPos).length();
-<<<<<<< HEAD
-            Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
-            if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
-                Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
-                sumOfForces = sumOfForces + forceVector;
-=======
 
             Vector2 relativeVel = myVel - otherRobotVel;
             Vector2 relativeAntenna = antenna;
@@ -171,26 +129,10 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfCushions = sumOfCushions + cushionForce; // We add the cushion force to the total
->>>>>>> jelleExperimental
             }
         }
     }
     for (size_t i = 0; i < world.them.size(); i++) {
-<<<<<<< HEAD
-        Vector2 otherRobotPos(world.them.at(i).pos);
-        Vector2 otherRobotVel(world.them.at(i).vel);
-        double distToRobot = (otherRobotPos - myPos).length();
-        Vector2 otherRobotFuturePos = otherRobotPos + otherRobotVel.scale(distToRobot / myVel.length());
-        if ((otherRobotFuturePos - myPos).length() <= lookingDistance) {
-            Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotFuturePos, antenna, targetPos);
-            sumOfForces = sumOfForces + forceVector;
-        }
-    }
-
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("sumOfForces", myPos, sumOfForces);
-    drawer.setColor(0, 0, 0);
-=======
             Vector2 otherRobotPos(world.them.at(i).pos);
             Vector2 otherRobotVel(world.them.at(i).vel);
             double distToRobot = (otherRobotPos - myPos).length();
@@ -227,8 +169,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
 
     drawer.setColor(0, 155, 1.55);
     drawer.drawPoint("antenna",myPos+antenna);
->>>>>>> jelleExperimental
 
+    sumOfForces = sumOfForces + sumOfCushions;
     return sumOfForces;
 }
 
@@ -287,7 +229,7 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, 
     Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
     antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
 
-    sumOfForces = sumOfForces + getForceVectorFromRobot(myPos, ballPos, antenna, targetPos);
+    sumOfForces = sumOfForces + getForceVectorFromRobot(myPos, ballPos, antenna);
 
     return sumOfForces;
 }
@@ -300,15 +242,9 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
 
-<<<<<<< HEAD
-    // We should not go outside the field close to the goal areas
-    if (fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas)) {
-        marginOutsideField = -0.1;
-=======
     // In and around the goal the robot cannot cross the backline.
     if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
         marginOutsideField = -0.09;
->>>>>>> jelleExperimental
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
@@ -393,15 +329,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
-<<<<<<< HEAD
-=======
     if (HasBool("pGainLarger") && GetBool("pGainLarger")) {
         controller.setControlParam("pGainPosition", 4.0);
     } else {
         controller.setPresetControlParams();
     }
 
->>>>>>> jelleExperimental
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
     }
@@ -426,6 +359,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
     }
+
 
 
     // Get the latest world state
@@ -502,7 +436,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (posError.length() < successDist && fabs(angleError) < 0.08) {
         successCounter++;
         if (successCounter >= 3) {
-            // sendStopCommand(ROBOT_ID);
+            //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
             succeeded = true;
             failure = false;
             return boost::none;
@@ -550,9 +484,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-    // drawer.setColor(0, 0, 0);
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
+    drawer.setColor(0, 0, 0);
+
+    // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
+    Vector2 ballPos = Vector2(world.ball.pos);
+    Vector2 ballVel = Vector2(world.ball.vel);
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("balVel", ballPos, ballVel);
 
     // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
@@ -560,6 +500,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
+    if (controller.getRobotType()==RobotType::PROTO){
+        velTarget = velTarget + velTarget.stretchToLength(0.1); //adds 0.1 length to the vector
+    }
     Vector2 velCommand = velTarget;
 
     // Limit angular and linear velocity
@@ -602,6 +545,7 @@ bt::Node::Status GoToPos::Update() {
         pub.publish(*command);
         return Status::Running;
     } else {
+        sendStopCommand(ROBOT_ID);
         if (succeeded) {
             return Status::Success;
         } else if (failure) {
