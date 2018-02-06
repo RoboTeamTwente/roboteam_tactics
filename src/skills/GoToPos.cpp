@@ -39,7 +39,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.012;       //////////////////TWEAK///////////////////////
+            avoidRobotsGain = 0.012;
         }
 
 
@@ -54,76 +54,52 @@ void GoToPos::sendStopCommand(uint id) {
 
 // Used in the avoidRobots function. Computes a virtual repelling 'force' that each other robot exerts on our robot, in order to avoid them7
 // Based on this algorithm: https://gamedevelopment.tutsplus.com/tutorials/understanding-steering-behaviors-collision-avoidance--gamedev-7777
+// Tweaked by Jelle, to prevent division by zero and having a maximum force that can be applied (by using a minimum distance)
 Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna) {
 
-    Vector2 forceVector;
-    Vector2 ahead = myPos + antenna;
+    Vector2 ahead = myPos + antenna; // tip of the antenna
     Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
-    Vector2 force = closestPoint - otherRobotPos;
-    double dist = force.length();
-    double dist2 = (myPos - otherRobotPos).length();
-    double minDist = 0.09;                  //////////////////TWEAK///////////////////////
+    Vector2 force = closestPoint - otherRobotPos; // Vector from other robot to closest point on antenna.
+    double dist = force.length(); // distance between closest point on antenna and other robot.
+    double dist2 = (myPos - otherRobotPos).length(); // distance between me and other robot, used for scaling the force.
+    double minDist = 0.09; // avoidance force does not increase further when dist becomes smaller that minDist
+    double maxDist = 0.5; // no force is exerted when dist is larger than maxDist
 
-    //////////////////TWEAK: DIST<=???///////////////////////
-    if ((closestPoint - myPos).length() > 0.001 && dist <= 0.5 && (ahead - closestPoint).length()>0.001){
+    // Check if the point lies within the antenna, and not on the edges. 
+    // Then calculate the needed avoidance force.
+    if ((closestPoint - myPos).length() > 0.001 && (ahead - closestPoint).length() > 0.001 && dist <= maxDist){
         if(dist > minDist) {
-            forceVector = force.stretchToLength(avoidRobotsGain/dist/dist2); ////////////TWEAK: MATHEMATICAL RELATION///////////////
-        } else if(dist != 0) {
-            forceVector = force.stretchToLength(avoidRobotsGain/minDist/dist2);
+            force = force.stretchToLength(avoidRobotsGain/dist/dist2);
+        } else if(dist > 0.0005) {
+            force = force.stretchToLength(avoidRobotsGain/minDist/dist2);
         }
     }
-
-    return forceVector;
-}
-Vector2 GoToPos::getForceVectorFromRobot2(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna) {
-
-    Vector2 forceVector;
-    Vector2 ahead = myPos + antenna;
-    Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
-    Vector2 force = closestPoint - otherRobotPos;
-    double dist = force.length();
-    double dist2 = (myPos - otherRobotPos).length();
-    double minDist = 0.09;                  //////////////////TWEAK///////////////////////
-
-    //////////////////TWEAK: DIST<=???///////////////////////
-    if ((closestPoint - myPos).length() > 0.001 && dist <= 0.5 && (ahead - closestPoint).length()>0.001){
-        if(dist > minDist) {
-            forceVector = force.stretchToLength(avoidRobotsGain/dist/dist2); ////////////TWEAK: MATHEMATICAL RELATION///////////////
-        } else if(dist != 0) {
-            forceVector = force.stretchToLength(avoidRobotsGain/minDist/dist2);
-        }
-    }
-
-    return forceVector;
+    return force;
 }
 
 
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid crashing into other robots
 Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     roboteam_msgs::World world = LastWorld::get();
-
     Vector2 posError = targetPos - myPos;
-    double lookingDistance = 2; // default
-
-    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
-    Vector2 antenna = posError.stretchToLength(myVel.length());
-    double minAntenna = 0.3;
-    if (antenna.length()<minAntenna || myVel.dot(antenna)<0){
+    // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
+    double minAntenna = 0.3; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.5);
+    // The antenna will not grow beyond its minimum value when moving backwards
+    if (myVel.dot(antenna)<0 ){
         antenna = posError.stretchToLength(minAntenna);
     }
+    // The antenna is never larger than the position error
     if (posError.length() < antenna.length()) {
             antenna = posError;
     }
 
-    Vector2 antenna2 = posError.stretchToLength(minAntenna + myVel.length()*0.5);////////////////TEST//////////////
-    if (myVel.dot(antenna2)<0 ){
-        antenna2 = posError.stretchToLength(minAntenna);
-    }
-    if (posError.length() < antenna2.length()) {
-            antenna2 = posError;
-    }
-
-    // For all robots in the field that are closer than the lookingDistance to our robot, determine if they exert a repelling force and add all these forces
+    // For all robots in the field that are closer than the antenna length to our robot: ..
+    // ..determine if they exert a repelling force and add all these forces.
+    // A 'cushion force' that damps out the 'crash velocity' was added by Jelle to prevent hard collisions that cant be avoided.
+    // To find a better way of taking velocities into account when avoiding robots, Jelle replaced the use of estimated future positions ..
+    // ..by the concept of a 'relative antenna', which is a rotated version of the antenna for each robot that is close, ..
+    // ..based on the relative velocity between me and the other robot.
     Vector2 sumOfForces;
     Vector2 sumOfCushions;
     for (auto const currentRobot : world.us) {
@@ -133,25 +109,26 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             double distToRobot = (otherRobotPos - myPos).length();
 
             Vector2 relativeVel = myVel - otherRobotVel;
-            Vector2 relativeAntenna = antenna2;
-            if (relativeVel.length()>0.2 && myVel.length()>0.1) {   ////////// or rotate by relativeVel.angle - myVel.angle??
-                relativeAntenna = antenna2.rotate(relativeVel.angle()-myVel.angle());//relativeVel.stretchToLength(antenna2.length());
+            Vector2 relativeAntenna = antenna;
+            if (relativeVel.length()>0.2 && myVel.length()>0.1) {
+                relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
             }
             
-            if (distToRobot <= antenna2.length() && relativeAntenna.dot(myVel) > 0) {
+            if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
                 drawer.setColor(0, 0, 255);
                 drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
-                //'crashVel' is the velocity at which the robots would crash into eachother
+
+                // Determine the crash velocity (velocity at which the robots would crash into eachother)..
+                // ..and determine the 'cushion force' to damp out this crash velocity.
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
-                // A 'cushionForce' is calculated to decrease the crashVel. Size depends on crash velocity and proximity.
-                Vector2 cushionForce = crashVel.scale(0.15 / distToRobot);    //////////////////TWEAK///////////////////////
+                Vector2 cushionForce = crashVel.scale(0.15 / distToRobot);
                 //I will not respond to a negative crashVel or a crashVel not caused by me
                 if (crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(otherRobotPos - myPos) < 0.01) {
                     cushionForce = Vector2(0,0);
                 }
-                sumOfCushions = sumOfCushions + cushionForce; //We add the cushion force to the total
+                sumOfCushions = sumOfCushions + cushionForce; // We add the cushion force to the total
             }
         }
     }
@@ -161,12 +138,12 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             double distToRobot = (otherRobotPos - myPos).length();
 
             Vector2 relativeVel = myVel - otherRobotVel;
-            Vector2 relativeAntenna = antenna2;
-            if (relativeVel.length()>0.2 && myVel.length()>0.1) {   ////////// or rotate by relativeVel.angle - myVel.angle??
-                relativeAntenna = antenna2.rotate(relativeVel.angle()-myVel.angle());//relativeVel.stretchToLength(antenna2.length());
+            Vector2 relativeAntenna = antenna;
+            if (relativeVel.length()>0.2 && myVel.length()>0.1) {
+                relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
             }
             
-            if (distToRobot <= antenna2.length() && relativeAntenna.dot(myVel) > 0) {
+            if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
                 drawer.setColor(0, 0, 255);
                 drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
@@ -190,10 +167,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     drawer.setColor(0, 0, 255);
     drawer.drawLine("sumOfForces", myPos, sumOfForces.scale(0.5));
 
-    drawer.setColor(155, 155, 0);
-    drawer.drawPoint("antenna",myPos+antenna);
     drawer.setColor(0, 155, 1.55);
-    drawer.drawPoint("antenna2",myPos+antenna2);
+    drawer.drawPoint("antenna",myPos+antenna);
 
     sumOfForces = sumOfForces + sumOfCushions;
     return sumOfForces;
@@ -267,11 +242,9 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
 
-    // We should not go outside the field close to the goal areas
-    if (fabs(yGoal) < (field.goal_width/2)) { //BEFORE: if(fabs(yGoal) < (field.goal_width/2 + safetyMarginGoalAreas))
-        marginOutsideField = field.goal_depth - 0.1;
-    } else if (fabs(yGoal) < field.goal_width + 0.5) {
-        marginOutsideField = -0.1;
+    // In and around the goal the robot cannot cross the backline.
+    if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
+        marginOutsideField = -0.09;
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
@@ -357,7 +330,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
     if (HasBool("pGainLarger") && GetBool("pGainLarger")) {
-        controller.setControlParam("pGainPosition", 6.0);
+        controller.setControlParam("pGainPosition", 4.0);
     } else {
         controller.setPresetControlParams();
     }
