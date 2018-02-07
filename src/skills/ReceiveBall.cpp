@@ -48,6 +48,11 @@ void ReceiveBall::Initialize() {
 	} else {
 		acceptableDeviation = 2.0;
 	}
+	if (HasDouble("marginDeviation")) {
+		marginDeviation = GetDouble("marginDeviation");
+	} else {
+		marginDeviation = 0.0;
+	}
 
 	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 
@@ -104,18 +109,14 @@ void ReceiveBall::publishStopCommand() {
 }
 
 // Predict intercept pos from ball velocity
-InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
+InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos,Vector2 ballVel) {
 
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	double interceptAngle;
-	roboteam_msgs::World world = LastWorld::get();
 	// ballIsComing = false;
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
-
-	Vector2 ballPos(world.ball.pos);
-	Vector2 ballVel(world.ball.vel);
 
 	roboteam_msgs::WorldRobot robot;
 	boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
@@ -147,7 +148,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall() {
 		
 		return interceptPose;
 	} else {
-		Vector2 ballTrajectory = ballVel.scale(10.0 / ballVel.length());
+		Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 
 		// drawer.setColor(255,255,255);
@@ -182,7 +183,6 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	// ballIsComing = false;
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
-	double interceptAngle;
 	roboteam_msgs::World world = LastWorld::get();
 
 	roboteam_msgs::WorldRobot otherRobot;
@@ -214,27 +214,23 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	Vector2 ballToCenter = receiveBallAtPos - ballPosNow;
 	double projectionOnBallTrajectory = ballToCenter.dot(otherRobotLooksAt);
 	Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
-
+	double deviation = (closestPoint - receiveBallAtPos).length();
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
-	if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
-		interceptPos = closestPoint;
-		if (otherRobot.angle > 0) {
-			interceptAngle = otherRobot.angle - M_PI;
-		} else {
-			interceptAngle = otherRobot.angle + M_PI;
+	if (deviation > 0.001 && deviation < acceptableDeviation + marginDeviation) {
+		// if the deviation is within the margin region, it should remain at acceptableDeviation until it exceeds the margin
+		if (deviation > acceptableDeviation) {
+			deviation = acceptableDeviation;
 		}
-
 		if (avoidBall) {
-			interceptPos = closestPoint + (receiveBallAtPos - closestPoint).normalize();
+			deviation = deviation - 1;
 		}
-
+		interceptPos = receiveBallAtPos + (closestPoint - receiveBallAtPos).stretchToLength(deviation);
 	} else {
 		interceptPos = receiveBallAtPos;
-		interceptAngle = (ballPosNow - receiveBallAtPos).angle();
 	}
 
 	interceptPose.interceptPos = interceptPos; 
-	interceptPose.interceptAngle = interceptAngle;
+	interceptPose.interceptAngle = (ballPosNow - interceptPos).angle();
 	return interceptPose;
 }
 
@@ -302,7 +298,7 @@ bt::Node::Status ReceiveBall::Update() {
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	boost::optional<InterceptPose> interceptPose;
 	if (!hasBall || *hasBall == robotID) {
-		interceptPose = deduceInterceptPosFromBall();
+		interceptPose = deduceInterceptPosFromBall(ballPos,ballVel);
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
@@ -444,8 +440,11 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetDouble("pGainPosition", 4.0);
-        private_bb->SetBool("avoidDefenseAreas", true);
+        if (!HasBool("pGainLarger") || GetBool("pGainLarger") || ballIsComing){
+        	private_bb->SetBool("pGainLarger", true);
+        } else {
+        	private_bb->SetBool("pGainLarger", false);
+        }
         if (HasString("stayOnSide")) {
         	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }
@@ -455,6 +454,9 @@ bt::Node::Status ReceiveBall::Update() {
         if (HasDouble("maxSpeed")) {
         	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
         }
+        if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    	} 
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
 	    if (commandPtr) {

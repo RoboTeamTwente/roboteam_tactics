@@ -307,7 +307,7 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
+	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
         int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
@@ -324,6 +324,7 @@ bt::Node::Status GetBall::Update (){
             } else {
                 publishKickCommand(8.0);
             }
+            return Status::Success;
 
             if(countFinalMessages < 10){
                 countFinalMessages=countFinalMessages+1;

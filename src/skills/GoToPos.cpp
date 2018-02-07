@@ -377,7 +377,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
-    // drawer.drawPoint("targetPosOld_" + std::to_string(ROBOT_ID), targetPos);
 
     // Check the input position
     if (targetPos == prevTargetPos) {
@@ -406,7 +405,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
-    // drawer.drawPoint("targetPos_" + std::to_string(ROBOT_ID), targetPos);
     drawer.setColor(0, 0, 0);
 
     double angleGoal;
@@ -463,10 +461,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         sumOfForces = newSumOfForces;
     }
 
-
-    // drawer.setColor(255,255,255);
-    // drawer.drawLine("sumOfForces" + std::to_string(ROBOT_ID), myPos, sumOfForces);
-
     // Rotation controller to make sure the robot reaches its angleGoal
     double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
 
@@ -489,10 +483,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.setColor(0, 0, 0);
 
     // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
-    Vector2 ballPos = Vector2(world.ball.pos);
-    Vector2 ballVel = Vector2(world.ball.vel);
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("balVel", ballPos, ballVel);
+    // Vector2 ballPos = Vector2(world.ball.pos);
+    // Vector2 ballVel = Vector2(world.ball.vel);
+    // drawer.setColor(255, 0, 0);
+    // drawer.drawLine("balVel", ballPos, ballVel);
 
     // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);

@@ -41,9 +41,9 @@ Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, dou
     
     double angle = (defendPos - goalPos).angle() + angleOffset;
 
-    if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
-        distanceFromGoal = (defendPos - goalPos).length() - 0.5;
-    }
+    //if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
+        //distanceFromGoal = (defendPos - goalPos).length() - 0.5;
+    //}
 
     Vector2 targetPos(distanceFromGoal, 0.0);
     targetPos = targetPos.rotate(angle);
@@ -71,8 +71,8 @@ bt::Node::Status SimpleDefender::Update() {
     double distanceFromGoal;
     std::string fieldType = GetString("fieldType");
     if (fieldType == "office") {
-        distanceFromGoal = 0.4;
-        acceptableDeviation = 0.7;
+        distanceFromGoal = 0.3;
+        acceptableDeviation = 0.35;
         dribblerDist = 1.0;
     } else {
         distanceFromGoal = 0.7;
@@ -82,6 +82,12 @@ bt::Node::Status SimpleDefender::Update() {
 
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
+    }
+    if (HasDouble("acceptableDeviation")) {
+        acceptableDeviation = GetDouble("acceptableDeviation");
+    }
+    if (HasDouble("dribblerDist")) {
+        dribblerDist = GetDouble("dribblerDist");
     }
 
     Vector2 defendPos;
@@ -126,6 +132,15 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasDouble("maxSpeed")) {
         private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
     }
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+    }
+    if (!HasBool("pGainLarger") || GetBool("pGainLarger")){
+            private_bb->SetDouble("pGainPosition", 4.0);
+    }
+    if (HasDouble("marginDeviation")) {
+		private_bb->SetDouble("marginDeviation", GetDouble("marginDeviation"));
+	}
 
 
     return receiveBall.Tick();
