@@ -29,6 +29,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
 
         {
+            ROS_DEBUG_STREAM_NAMED("GoToPos", "New GoToPos started for robot " << blackboard->GetInt("ROBOT_ID"));
+            ROS_DEBUG_STREAM_NAMED("GoToPos", "Blackboard : " << blackboard->toString());
+
             succeeded = false;
             failure = false;
             ros::NodeHandle n;
