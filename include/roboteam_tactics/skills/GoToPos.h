@@ -35,7 +35,7 @@ namespace rtt {
  *       Descr:     Id of the keeper (for defense area avoidance)
  *       Type:      Int
  *   - angleGoal:
- *       Descr:     The angle of the arrival position
+ *       Descr:     The angle of the arrival position in radians
  *       Type:      Double
  *   - xGoal:
  *       Descr:     The target x coordinate
