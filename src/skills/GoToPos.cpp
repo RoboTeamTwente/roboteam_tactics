@@ -63,7 +63,7 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
     double dist = force.length(); // distance between closest point on antenna and other robot.
     double dist2 = (myPos - otherRobotPos).length(); // distance between me and other robot, used for scaling the force.
     double minDist = 0.09; // avoidance force does not increase further when dist becomes smaller that minDist
-    double maxDist = 0.5; // no force is exerted when dist is larger than maxDist
+    double maxDist = 0.3; // no force is exerted when dist is larger than maxDist
 
     // Check if the point lies within the antenna, and not on the edges. 
     // Then calculate the needed avoidance force.
@@ -73,6 +73,8 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
         } else if(dist > 0.0005) {
             force = force.stretchToLength(avoidRobotsGain/minDist/dist2);
         }
+    } else {
+        force = Vector2(0,0);
     }
     return force;
 }
