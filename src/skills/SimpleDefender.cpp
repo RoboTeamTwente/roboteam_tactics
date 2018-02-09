@@ -135,8 +135,8 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     }
-    if (!HasBool("pGainLarger") || GetBool("pGainLarger")){
-            private_bb->SetDouble("pGainPosition", 4.0);
+    if (HasBool("pGainLarger")){
+            private_bb->SetBool("pGainLarger", GetBool("pGainLarger"));
     }
     if (HasDouble("marginDeviation")) {
 		private_bb->SetDouble("marginDeviation", GetDouble("marginDeviation"));
