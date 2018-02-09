@@ -109,8 +109,7 @@ private:
     void releaseBall();
     
 	int robotID;
-	bool our_team;
-    bool waiting = true;
+	bool dontDribble;
 
 	GoToPos goToPos;
     Draw drawer;

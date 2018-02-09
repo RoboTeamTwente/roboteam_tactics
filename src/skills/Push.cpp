@@ -10,22 +10,22 @@ namespace rtt {
 RTT_REGISTER_SKILL(Push);
 
 Push::Push(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard)
-        {
-            counter = 0;
+        : Skill(name, blackboard) {}
 
-            if (HasDouble("duration")){
-                dur = ceil(60 * GetDouble("duration"));
-            } else { dur = ceil(60 * 0.2); }
+void Push::Initialize() {
+    counter = 0;
+    if (HasDouble("duration")){
+        dur = ceil(60 * GetDouble("duration"));
+    } else { dur = ceil(60 * 0.2); }
 
-            if (HasDouble("velocity")){
-                vel = GetDouble("velocity");
-            } else { vel = 1.0; }
+    if (HasDouble("velocity")){
+        vel = GetDouble("velocity");
+    } else { vel = 1.0; }
 
-            if (HasDouble("waitDribblerOff")) {
-                wait = ceil(60 * GetDouble("waitDribblerOff"));
-            } else { wait = 0; }
-        }
+    if (HasDouble("waitDribblerOff")) {
+        wait = ceil(60 * GetDouble("waitDribblerOff"));
+    } else { wait = 0; }
+}
 
 bt::Node::Status Push::Update() {
     roboteam_msgs::RobotCommand command;

@@ -32,6 +32,8 @@ class Push : public Skill {
 public:
 	Push(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 
+	void Initialize();
+
 	Status Update();
 
     static VerificationMap required_params() {

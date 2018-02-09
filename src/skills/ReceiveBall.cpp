@@ -385,6 +385,9 @@ bt::Node::Status ReceiveBall::Update() {
 	
 	// If the ball gets close, turn on the dribbler
 	double dribblerDist = acceptableDeviation * 2.0;
+	if (HasDouble("dribblerDist")) {
+		dribblerDist = GetDouble("dribblerDist");
+	}
 	if (shootAtGoal) {
 		dribblerDist = 0.0;
 	}

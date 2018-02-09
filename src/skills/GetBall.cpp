@@ -74,7 +74,7 @@ void GetBall::publishKickCommand(double kickSpeed){
 
     command.x_vel = 0;
     command.y_vel = 0;
-    if (GetBool("passOn")) {
+    if (GetBool("passOn") || dontDribble) {
         command.dribbler = false;
     } else {
         command.dribbler = true;
@@ -116,6 +116,11 @@ void GetBall::Initialize() {
     finalStage = false;
     countFinalMessages = 0;
 
+    if (HasBool("dribblerOff") && GetBool("dribblerOff")) {
+        dontDribble = true;
+    } else {
+        dontDribble = false;
+    }
     
 }
 
@@ -300,8 +305,12 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("dribbler", false);
         matchBallVel = true;
 	} else {
-        private_bb->SetBool("dribbler", true); 
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06       
+        if (dontDribble) {
+            private_bb->SetBool("dribbler", false);
+        } else {
+            private_bb->SetBool("dribbler", true); 
+        } 
 	}
     
 
@@ -312,6 +321,9 @@ bt::Node::Status GetBall::Update (){
         int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
+        }
+        if (dontDribble) {
+            ballCloseFrameCountTo = 3;
         }
         
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
