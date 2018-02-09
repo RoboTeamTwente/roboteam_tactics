@@ -51,7 +51,9 @@ public:
     const std::unordered_map<std::string, float> getFloats();
     const std::unordered_map<std::string, double> getDoubles();
     const std::unordered_map<std::string, std::string> getStrings();
-    
+
+    std::string toString();
+
 protected:
     std::unordered_map<std::string, bool> bools;
     std::unordered_map<std::string, int> ints;
