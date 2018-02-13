@@ -43,11 +43,10 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             //DEFAULTS
             safetyMarginGoalAreas = 0.2;
             marginOutsideField = 0.3;
-            avoidRobotsGain = 0.012;
-            cushionGain = 0.15;
-            minDist = 0.09; // avoidance force does not increase further when dist becomes smaller that minDist
+            avoidRobotsGain = 0.005;
+            cushionGain = 0.06;
+            minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
             maxDist = 0.3; // no force is exerted when dist is larger than maxDist
-            addLength = 0.15;
             //PROCESS BLACKBOARD
             if (HasDouble("avoidRobotsGain")) {
                 avoidRobotsGain = GetDouble("avoidRobotsGain");
@@ -55,19 +54,12 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             if (HasDouble("cushionGain")) {
                 cushionGain = GetDouble("cushionGain");
             }
-            if (HasDouble("addLength")) {
-                addLength = GetDouble("addLength");
-            }
             if (HasDouble("minDist")) {
                 minDist = GetDouble("minDist");
             }
             if (HasDouble("maxDist")) {
                 maxDist = GetDouble("maxDist");
             }
-
-            if (controller.getRobotType()==RobotType::PROTO){
-                proto = true;
-            } else { proto = false; }
         }
 
 
@@ -526,9 +518,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
-    if (proto) {
-        velTarget = velTarget + Vector2(addLength,0).rotate(velTarget.angle()); //adds length to the velocity command
-    }
     
     Vector2 velCommand = velTarget;
 

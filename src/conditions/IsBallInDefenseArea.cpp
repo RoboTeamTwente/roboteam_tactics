@@ -16,25 +16,25 @@
 namespace rtt {
 
 
-// Tweaked by Jelle to use Jelle's variant of getting distance to defense area, which now returns a double.
-bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point) {
+// Tweaked by Jelle to use Jelle's variant of getting distance to defense area, which now returns a double instead of a vector.
+bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
     GeometryFieldSize field = LastWorld::get_field();
     double distToDefenseArea = getDistToDefenseArea2(ourDefenseArea, point);
-    if (distToDefenseArea < 0) return true;
+    if (distToDefenseArea < margin) return true;
     else return false;
 }
 
-bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
-    GeometryFieldSize field = LastWorld::get_field();
-    Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, safetyMargin);
-    if (ourDefenseArea) {
-        if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
-        else return false;
-    } else {
-        if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
-        else return false;
-    }
-}
+// bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
+//     GeometryFieldSize field = LastWorld::get_field();
+//     Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, safetyMargin);
+//     if (ourDefenseArea) {
+//         if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
+//         else return false;
+//     } else {
+//         if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
+//         else return false;
+//     }
+// }
 
 
 
@@ -55,7 +55,12 @@ bt::Node::Status IsBallInDefenseArea::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ballPos(world.ball.pos);
 
-	if (isWithinDefenseArea(ourDefenseArea, ballPos)) {
+	double margin = 0.0;
+	if (HasDouble("margin")) {
+		margin = GetDouble("margin");
+	}
+
+	if (isWithinDefenseArea(ourDefenseArea, ballPos, margin)) {
 		return Status::Success;
 	} else {
 		return Status::Failure;

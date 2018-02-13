@@ -99,8 +99,6 @@ private:
 	double maxDist;
     Vector2 posErrorI;
     double angleErrorI;
-	double addLength;
-	bool proto;
 
     // Safety margins used to filter the target position
     double safetyMarginGoalAreas;

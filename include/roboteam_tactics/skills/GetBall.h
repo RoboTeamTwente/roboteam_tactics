@@ -71,6 +71,10 @@ namespace rtt {
  *   - enterDefenseAreas:
  *        Type: Bool
  *        Descr: When true allows GoToPos to go into the defense areas of both teams. Is passed on to GoToPos.
+ *
+ *   - dribblerOff:
+ *        Type: Bool
+ *        Descr: When true the dribbler wont be used.
  */
 
 
