@@ -41,8 +41,8 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
             //DEFAULTS
-            safetyMarginGoalAreas = 0.2;
-            marginOutsideField = 0.3;
+            safetyMarginGoalAreas = 0.2; //0.2
+            marginOutsideField = -0.1; //0.3
             avoidRobotsGain = 0.005;
             cushionGain = 0.06;
             minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist

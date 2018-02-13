@@ -153,7 +153,7 @@ void BallPlacementTest::sendStopCommand(uint id) {
         private_bb->SetInt("ROBOT_ID", robotID);                            // sets robot id
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));   // sets keeper id
         private_bb->SetBool("dribbler", true);                              // turn on dribbler
-        private_bb->SetDouble("maxSpeed", 0.1);                             // sets maximum speed (which is low for ball placement)
+        private_bb->SetDouble("maxSpeed", 0.5);                             // sets maximum speed (which is low for ball placement)
         private_bb->SetDouble("successDist", 0.08);                         // sets succes distance
         private_bb->SetDouble("xGoal", targetPos.x);                        // x location for ball placement
         private_bb->SetDouble("yGoal", targetPos.y);                        // y location for ball placement

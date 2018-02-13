@@ -88,7 +88,8 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
 
-        minTarget = 0.07;
+        thresholdTarget = 0.07;
+        minTarget = 0.30;
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
@@ -102,7 +103,8 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 4.0;
         maxAngularVel = 10.0;
 
-        minTarget = 0.02;
+        thresholdTarget = 0.035;
+        minTarget = 0.45;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
@@ -114,7 +116,8 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
 
-        minTarget = 0.07;
+        thresholdTarget = 0.07;
+        minTarget = 0.30;
 
         robotType = RobotType::GRSIM;
     } else {
@@ -241,9 +244,9 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    if (velTarget.length() < 0.30) {
-        if (velTarget.length() > minTarget) {
-            velTarget = velTarget.scale(0.30 / velTarget.length());  
+    if (velTarget.length() < minTarget) {
+        if (velTarget.length() > thresholdTarget) {
+            velTarget = velTarget.scale(minTarget / velTarget.length());  
         }
     }
 

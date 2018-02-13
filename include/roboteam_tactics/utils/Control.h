@@ -70,6 +70,7 @@ private:
     double dGainRotation;
     double pGainVelocity;
 
+    double thresholdTarget;
     double minTarget;
     // Min and max speeds
     double maxAngularVel;
