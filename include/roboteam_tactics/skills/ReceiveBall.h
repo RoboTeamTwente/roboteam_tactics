@@ -88,6 +88,7 @@ private:
     bool ballHasBeenClose = false;
     bool startKicking = false;
     bool ballIsComing = false;
+    int successCounter;
 
     bool touchedBall = false;
     time_point initialBallContact;

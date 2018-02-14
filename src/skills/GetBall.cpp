@@ -254,9 +254,9 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.09 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.115 ;
+        successDist = 0.10 ;
         successAngle = 0.15; 
-        getBallDist = 0.05;
+        getBallDist = 0.0;
         distAwayFromBall = 0.2;
     }
     
@@ -297,13 +297,16 @@ bt::Node::Status GetBall::Update (){
     }
     distAwayFromBall = distAwayFromBall + addBallSpeed;
 
-
+    bool moreGain = false;
     // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
     // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
         private_bb->SetBool("dribbler", false);
         matchBallVel = true;
+        if (posDiff.length() < (distAwayFromBall + 0.1)) {
+            moreGain = true;
+        }
 	} else {
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06       
         if (dontDribble) {
@@ -336,19 +339,21 @@ bt::Node::Status GetBall::Update (){
             } else {
                 publishKickCommand(8.0);
             }
+            choseRobotToPassTo = false;
+            releaseBall();
             return Status::Success;
 
-            if(countFinalMessages < 10){
-                countFinalMessages=countFinalMessages+1;
-                return Status::Running;
-            }
-            else {
-                choseRobotToPassTo = false;
-                releaseBall();
-                return Status::Success;
-            }
+            // if(countFinalMessages < 10){
+            //     countFinalMessages=countFinalMessages+1;
+            //     return Status::Running;
+            // }
+            // else {
+            //     choseRobotToPassTo = false;
+            //     releaseBall();
+            //     return Status::Success;
+            // }
 
-            return Status::Running;
+            // return Status::Running;
         }
     } else {
         ballCloseFrameCount = 0;
@@ -371,6 +376,11 @@ bt::Node::Status GetBall::Update (){
     } 
     if (HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
+    }
+    if (moreGain) {
+        private_bb->SetBool("pGainLarger", true);
+    } else {
+        private_bb->SetBool("pGainLarger", false);
     }
 
     // Get the velocity command from GoToPos

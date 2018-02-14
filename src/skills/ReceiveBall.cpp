@@ -1,17 +1,19 @@
 #include "ros/ros.h"
 
-#include "roboteam_tactics/skills/GoToPos.h"
-#include "roboteam_tactics/skills/ReceiveBall.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/Parts.h"
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/Math.h"
 
-#include "roboteam_tactics/Parts.h"
+#include "roboteam_tactics/skills/GoToPos.h"
+#include "roboteam_tactics/skills/ReceiveBall.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
+#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
 #include "roboteam_msgs/WorldRobot.h"
@@ -53,6 +55,8 @@ void ReceiveBall::Initialize() {
 	} else {
 		marginDeviation = 0.0;
 	}
+
+	successCounter = 0;
 
 	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 
@@ -485,7 +489,19 @@ bt::Node::Status ReceiveBall::Update() {
 	    	publishStopCommand();
 	    }
 
-	    return Status::Running;		
+	    // if the ball is in our defense area for quite some time, Success is returned
+	    if (isWithinDefenseArea(true, ballPos, 0.0)) {
+	    	if (successCounter<120) {
+	    		successCounter++;
+	    	} else {
+	    		successCounter = 0;
+	    		return Status::Success;
+	    	}
+	    } else {
+	    	successCounter = 0;
+	    }
+
+	    return Status::Running;
 	}
 };
 
