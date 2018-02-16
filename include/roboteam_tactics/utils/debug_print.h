@@ -114,6 +114,7 @@ SET_DEBUG_FOR(Jim_PenaltyPlay, true);
 SET_DEBUG_FOR(Jim_IndependentAttackersPlay, true);
 SET_DEBUG_FOR(KickoffDefensePlay, true);
 SET_DEBUG_FOR(StopPlay, true);
+SET_DEBUG_FOR(Jelle_DemoPlay, true);
 
 // Other
 SET_DEBUG_FOR(OpportunityFinder, true);
