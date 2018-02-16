@@ -69,8 +69,8 @@ void Anouk_BallPlacementUsPlay::Initialize() {
         ;
 
     rtt::ScopedBB(bb, "BallPlacementTest_A")
-        .setDouble("xGoal", endPos.x)
-        .setDouble("yGoal", endPos.y)
+        .setDouble("xPlace", endPos.x)
+        .setDouble("yPlace", endPos.y)
         .setBool("enterDefenseAreas", true)
         ;
 

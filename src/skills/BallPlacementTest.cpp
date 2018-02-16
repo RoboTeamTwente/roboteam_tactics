@@ -105,7 +105,7 @@ void BallPlacementTest::sendStopCommand(uint id) {
         Vector2 robotVel(robot.vel);
 
         // get position for ball placement
-        Vector2 ballPlacePosition = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+        Vector2 ballPlacePosition = Vector2(GetDouble("xPlace"), GetDouble("yPlace"));
         std::cout << "xGoal: " << ballPlacePosition.x << ", yGoal: " << ballPlacePosition.y << std::endl;
 
         // set target position (targetPos) for the robot
