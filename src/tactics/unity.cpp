@@ -145,3 +145,6 @@
 
 #include "Emiel_test1.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Jelle_DemoPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
