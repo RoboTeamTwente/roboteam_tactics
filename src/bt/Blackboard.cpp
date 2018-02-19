@@ -148,35 +148,47 @@ namespace bt {
     std::string Blackboard::toString() {
         std::stringstream ss;
 
-        ss << std::endl << "  BOOLS";
-        for(auto i : bools){
-            ss << " | " << i.first << " = " << i.second;
-        }
         ss << std::endl;
 
-        ss << "  INTS";
-        for(auto i : ints){
-            ss << " | " << i.first << " = " << i.second;
+        if(bools.size() > 0) {
+            ss << "  BOOLS";
+            for (auto i : bools) {
+                ss << " | " << i.first << " = " << i.second;
+            }
+            ss << std::endl;
         }
-        ss << std::endl;
 
-        ss << "  FLOATS";
-        for(auto i : floats){
-            ss << " | " << i.first << " = " << i.second;
+        if(ints.size() > 0) {
+            ss << "  INTS";
+            for (auto i : ints) {
+                ss << " | " << i.first << " = " << i.second;
+            }
+            ss << std::endl;
         }
-        ss << std::endl;
 
-        ss << "  DOUBLES";
-        for(auto i : doubles){
-            ss << " | " << i.first << " = " << i.second;
+        if(floats.size() > 0) {
+            ss << "  FLOATS";
+            for (auto i : floats) {
+                ss << " | " << i.first << " = " << i.second;
+            }
+            ss << std::endl;
         }
-        ss << std::endl;
 
-        ss << "  STRINGS";
-        for(auto i : strings){
-            ss << " | " << i.first << " = " << i.second;
+        if(doubles.size() > 0) {
+            ss << "  DOUBLES";
+            for (auto i : doubles) {
+                ss << " | " << i.first << " = " << i.second;
+            }
+            ss << std::endl;
         }
-        ss << std::endl;
+
+        if(strings.size() > 0) {
+            ss << "  STRINGS";
+            for (auto i : strings) {
+                ss << " | " << i.first << " = " << i.second;
+            }
+            ss << std::endl;
+        }
 
         return ss.str();
 
