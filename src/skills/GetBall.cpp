@@ -324,8 +324,7 @@ bt::Node::Status GetBall::Update (){
         int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
-        }
-        if (dontDribble) {
+        } else if (dontDribble) {
             ballCloseFrameCountTo = 3;
         }
         

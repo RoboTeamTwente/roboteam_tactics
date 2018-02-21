@@ -267,12 +267,12 @@ bt::Node::Status GetBallTest::Update (){
     if (robot_output_target == "grsim") {
         successDist = 0.11;
         successAngle = 0.2;
-        getBallDist = 0.09 ;
+        getBallDist = 0.0 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.115 ;
+        successDist = 0.12 ;
         successAngle = 0.15; 
-        getBallDist = 0.05;
+        getBallDist = 0.0;
         distAwayFromBall = 0.2;
     }
     

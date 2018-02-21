@@ -42,7 +42,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             //DEFAULTS
             safetyMarginGoalAreas = 0.2; //0.2
-            marginOutsideField = -0.1; //0.3
+            marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
             avoidRobotsGain = 0.005;
             cushionGain = 0.06;
             minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
@@ -413,7 +413,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         prevTargetPos = targetPos;
     }
 
-
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         // ROS_INFO_STREAM("robot" << ROBOT_ID << " in stayAwayFromBall" );
         roboteam_msgs::World world = LastWorld::get();
@@ -428,6 +427,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
+
+    // For the 1v1 demo: if the robot (which is controlled by a human) gets inside our defense area, ..
+    // ..generate a targetpos just outside the defense area based on the robot position
+    if (HasBool("goalOutsideDefenseArea") && GetBool("goalOutsideDefenseArea")) {
+        targetPos = checkTargetPos(myPos);
+    }
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
@@ -481,8 +486,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         // AvoidRobots defaults to true if not set
     } else {
         Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-        if (posError.length() >= 0.5) {
-            angleGoal = sumOfForces.angle();
+        if (newSumOfForces.length() >= 1.5) {
+            angleGoal = newSumOfForces.angle();
             angleError = cleanAngle(angleGoal - myAngle);
         }
         sumOfForces = newSumOfForces;
@@ -545,7 +550,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.id = ROBOT_ID;
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
-    command.w = angularVelTarget;
+    if ( !(HasBool("dontRotate") && GetBool("dontRotate")) ) {
+        command.w = angularVelTarget;
+    }
     command.dribbler = GetBool("dribbler");
 
     return command;

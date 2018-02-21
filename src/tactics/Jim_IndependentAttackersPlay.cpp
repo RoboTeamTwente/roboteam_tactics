@@ -46,14 +46,13 @@ void Jim_IndependentAttackersPlay::Initialize() {
 
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballPos(world.ball.pos);
-    
-    int numAttackers = std::min((int) robots.size(), 3);    
+
+    // Max 3 attackers
+    int numAttackers = std::min((int) robots.size(), 3);
     RTT_DEBUGLN("Initializing Jim_IndependentAttackersPlay numAttackers: %i", numAttackers);    
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-
-    // double xPos = std::min(ballPos.x + 4.5, );
 
     std::vector<Vector2> attackersDefaultPositions;
     attackersDefaultPositions.push_back(Vector2(3.0, 1.5));

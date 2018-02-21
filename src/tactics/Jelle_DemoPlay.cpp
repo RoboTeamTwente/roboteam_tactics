@@ -93,7 +93,11 @@ void Jelle_DemoPlay::Initialize() {
 
     // roboteam_msgs::RoleDirective rd2;
     rd2.robot_id = Attacker_id;
-    rd2.tree = "rtt_jelle/DemoAttacker";
+    if(HasBool("onlyKeeper") && GetBool("onlyKeeper")){
+        rd2.tree = "rtt_jelle/SleepRole";
+    } else {
+        rd2.tree = "rtt_jelle/DemoAttacker";
+    }
     rd2.blackboard = bb2.toMsg();
 
     token = unique_id::fromRandom();

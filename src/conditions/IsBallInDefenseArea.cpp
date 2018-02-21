@@ -60,7 +60,26 @@ bt::Node::Status IsBallInDefenseArea::Update() {
 		margin = GetDouble("margin");
 	}
 
-	if (isWithinDefenseArea(ourDefenseArea, ballPos, margin)) {
+	Vector2 point = ballPos;
+
+	// THE CONDITION NEEDS DIFFERENT NAME, BECAUSE WE CAN PUT IN ROBOT POS AS WELL NOW
+
+	// If robot pos should be checked instead of ball pos, get my position and use that as the point.
+	if (HasBool("robot") && GetBool("robot")){
+		int robotID = GetInt("ROBOT_ID");
+		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    	roboteam_msgs::WorldRobot me;
+    	if (findBot) {
+	        me = *findBot;
+	    } else {
+        	ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << robotID);
+        	return Status::Invalid;
+    	}
+		point = me.pos;
+	}
+
+	// Do the check
+	if (isWithinDefenseArea(ourDefenseArea, point, margin)) {
 		return Status::Success;
 	} else {
 		return Status::Failure;
