@@ -357,7 +357,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
     if (HasBool("pGainLarger") && GetBool("pGainLarger")) {
-        controller.setControlParam("pGainPosition", 4.0);
+        controller.setControlParam("pGainPosition", 3.0);
     } else {
         controller.setPresetControlParams();
     }

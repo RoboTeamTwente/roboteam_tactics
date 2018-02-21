@@ -251,10 +251,10 @@ bt::Node::Status GetBall::Update (){
     if (robot_output_target == "grsim") {
         successDist = 0.11;
         successAngle = 0.2;
-        getBallDist = 0.09 ;
+        getBallDist = 0.0 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.10 ;
+        successDist = 0.12 ;
         successAngle = 0.15; 
         getBallDist = 0.0;
         distAwayFromBall = 0.2;
@@ -335,7 +335,7 @@ bt::Node::Status GetBall::Update (){
         } else {
 
             if (choseRobotToPassTo) {
-                publishKickCommand(3.0);
+                publishKickCommand(3.0); //Too slow for GrSim
             } else {
                 publishKickCommand(8.0);
             }
