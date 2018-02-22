@@ -19,6 +19,23 @@ bt::Node::Status IsBallInZone::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 	Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
+	Vector2 point = ballPos;
+
+	// THE CONDITION NEEDS DIFFERENT NAME, BECAUSE WE CAN PUT IN ROBOT POS AS WELL NOW
+
+	// If robot pos should be checked instead of ball pos, get my position and use that as the point.
+	if (HasBool("robot") && GetBool("robot")){
+		int robotID = GetInt("ROBOT_ID");
+		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
+    	roboteam_msgs::WorldRobot me;
+    	if (findBot) {
+	        me = *findBot;
+	    } else {
+        	ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << robotID);
+        	return Status::Invalid;
+    	}
+		point = me.pos;
+	}
 
 	//Initialize Zone
 	double zone_x1=0.0;
@@ -57,6 +74,7 @@ bt::Node::Status IsBallInZone::Update() {
 			zone_y1=-field.field_width/2 + 0.2;
 			zone_y2=field.field_width/2 - 0.2;
 		}
+
 	}
 	
 	// Set zone according to points given in blackboard
@@ -66,7 +84,7 @@ bt::Node::Status IsBallInZone::Update() {
 	if (HasDouble("y2")) {zone_y2 = GetDouble("y2");}
 		
 	// The condition
-	if(ballPos.x > zone_x1 && ballPos.x < zone_x2 && ballPos.y > zone_y1 && ballPos.y < zone_y2){
+	if(point.x > zone_x1 && point.x < zone_x2 && point.y > zone_y1 && point.y < zone_y2){
 		return Status::Success;
 	}
 	return Status::Failure;
