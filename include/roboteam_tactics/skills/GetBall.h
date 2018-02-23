@@ -114,6 +114,7 @@ private:
     
 	int robotID;
 	bool dontDribble;
+	double deviation;
 
 	GoToPos goToPos;
     Draw drawer;

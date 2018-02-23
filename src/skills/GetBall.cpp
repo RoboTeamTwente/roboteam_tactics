@@ -121,6 +121,13 @@ void GetBall::Initialize() {
     } else {
         dontDribble = false;
     }
+
+    if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
+        deviation = 0.35*(get_rand_int(2)*2-1);
+        ROS_INFO_STREAM("GetBall: " << deviation);
+    } else {
+        deviation = 0.0;
+    }
     
 }
 
@@ -207,7 +214,7 @@ bt::Node::Status GetBall::Update (){
     } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
     } else if (HasString("aimAt")) {
-		targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+		targetAngle = GetTargetAngle(ballPos - Vector2(0,deviation), GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
 	} else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
     } else if (shootAtGoal) {
