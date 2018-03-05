@@ -123,7 +123,7 @@ void GetBall::Initialize() {
     }
 
     if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
-        deviation = 0.35*(get_rand_int(2)*2-1);
+        deviation = 0.30*(get_rand_int(2)*2-1);
         ROS_INFO_STREAM("GetBall: " << deviation);
     } else {
         deviation = 0.0;
@@ -383,7 +383,7 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
     }
-    if (moreGain) {
+    if (moreGain && !GetBool("pGainNotLarger")) {
         private_bb->SetBool("pGainLarger", true);
     } else {
         private_bb->SetBool("pGainLarger", false);
