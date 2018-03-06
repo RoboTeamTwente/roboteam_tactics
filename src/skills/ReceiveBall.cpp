@@ -429,18 +429,24 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
-    if (distanceToBall <= 0.4 && ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
-    	// ROS_INFO("ReceiveBall success");
-    	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
-    	if (shootAtGoal) {
-    		// ROS_INFO("Start kicking");
-    		startKicking = true;
-    		return kick.Update();
+    if (ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
+
+    	if(distanceToBall <= 0.4) {
+    		// ROS_INFO("ReceiveBall success");
+    		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
+    		if (shootAtGoal) {
+	    		// ROS_INFO("Start kicking");
+    			startKicking = true;
+    			return kick.Update();
+    		}
+			RTT_DEBUGLN("ReceiveBall skill completed.");
+			publishStopCommand();
+			// return Status::Running;
+			return Status::Success;
+    	} else {
+    		return Status::Failure;
     	}
-		RTT_DEBUGLN("ReceiveBall skill completed.");
-		publishStopCommand();
-		// return Status::Running;
-		return Status::Success;
+    	
 	} else {
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));

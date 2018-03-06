@@ -20,6 +20,9 @@
 #include "FormationPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "CounterPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "FreeKickDefenceTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 

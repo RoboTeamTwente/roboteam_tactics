@@ -340,8 +340,8 @@ bt::Node::Status GetBall::Update (){
             return Status::Running;
         } else {
 
-            if (choseRobotToPassTo) {
-                publishKickCommand(3.0); //Too slow for GrSim
+            if (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam")) ) {
+                publishKickCommand(4.0);
             } else {
                 publishKickCommand(8.0);
             }

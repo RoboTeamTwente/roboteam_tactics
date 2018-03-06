@@ -18,10 +18,31 @@ namespace rtt {
 
 // Tweaked by Jelle to use Jelle's variant of getting distance to defense area, which now returns a double instead of a vector.
 bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
+    // double distToDefenseArea = getDistToDefenseArea2(ourDefenseArea, point);
+    // if (distToDefenseArea < margin) return true;
+    // else return false;
+
+	// Because of the rectangular defense area now the calculation is easier. Distance to defense area is not used for this anymore
     GeometryFieldSize field = LastWorld::get_field();
-    double distToDefenseArea = getDistToDefenseArea2(ourDefenseArea, point);
-    if (distToDefenseArea < margin) return true;
-    else return false;
+    double xBound;
+    double yTopBound;
+    double yBottomBound;
+    if (ourDefenseArea) {
+    	xBound = field.left_penalty_line.begin.x;
+    	yTopBound = field.top_left_penalty_stretch.begin.y;
+    	yBottomBound = field.bottom_left_penalty_stretch.begin.y;
+        if (point.x < xBound + margin && point.y < yTopBound + margin && point.y > yBottomBound - margin) {
+        	return true;
+        } else return false;
+    } else {
+    	xBound = field.right_penalty_line.begin.x;
+    	yTopBound = field.top_right_penalty_stretch.begin.y;
+    	yBottomBound = field.bottom_right_penalty_stretch.begin.y;
+    	if (point.x > xBound - margin && point.y < yTopBound + margin && point.y > yBottomBound - margin) {
+        	return true;
+        } else return false;
+    }
+    
 }
 
 // bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {

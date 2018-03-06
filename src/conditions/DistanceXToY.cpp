@@ -144,8 +144,10 @@ Vector2 distPointToLine(FieldLineSegment line, Vector2 point, double safetyMargi
 
 Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
     FieldLineSegment line;
-    FieldCircularArc top_arc;
-    FieldCircularArc bottom_arc;
+    FieldLineSegment top_line;
+    FieldLineSegment bottom_line;
+    // FieldCircularArc top_arc;
+    // FieldCircularArc bottom_arc;
     
     double safetyMarginLine = safetyMargin;
 
@@ -153,26 +155,38 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
 
     if (ourDefenseArea) {
         line = field.left_penalty_line;
-        top_arc = field.top_left_penalty_arc;
-        bottom_arc = field.bottom_left_penalty_arc;
+        top_line = field.top_left_penalty_stretch;
+        bottom_line = field.bottom_left_penalty_stretch;
+        // top_arc = field.top_left_penalty_arc;
+        // bottom_arc = field.bottom_left_penalty_arc;
     } else {
         line = field.right_penalty_line;
-        top_arc = field.top_right_penalty_arc;
-        bottom_arc = field.bottom_right_penalty_arc;
+        top_line = field.top_right_penalty_stretch;
+        bottom_line = field.bottom_right_penalty_stretch;
+        // top_arc = field.top_right_penalty_arc;
+        // bottom_arc = field.bottom_right_penalty_arc;
         safetyMarginLine = safetyMarginLine * -1; // on the right side of the field we need to subtract the safety margin instead of add it.
     }
 
     Vector2 distToLine = distPointToLine(line, point, safetyMarginLine);
-    Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
-    Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
+    Vector2 distToTopLine = distPointToLine(top_line, point, safetyMarginLine);
+    Vector2 distToBottomLine = distPointToLine(bottom_line, point, safetyMarginLine);
+    // Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
+    // Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
 
     Vector2 shortestDistance = distToLine;
-    if (distToTopArc.length() < shortestDistance.length()) {
-        shortestDistance = distToTopArc;
+    if (distToTopLine.length() < shortestDistance.length()) {
+        shortestDistance = distToTopLine;
     }
-    if (distToBottomArc.length() < shortestDistance.length()) {
-        shortestDistance = distToBottomArc;
+    if (distToBottomLine.length() < shortestDistance.length()) {
+        shortestDistance = distToBottomLine;
     }
+    // if (distToTopArc.length() < shortestDistance.length()) {
+    //     shortestDistance = distToTopArc;
+    // }
+    // if (distToBottomArc.length() < shortestDistance.length()) {
+    //     shortestDistance = distToBottomArc;
+    // }
 
     return shortestDistance;
 }
@@ -180,43 +194,66 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
 // Written by Jelle: get distance as a double that is negative when inside defense area
 double getDistToDefenseArea2(bool ourDefenseArea, Vector2 point) { 
     FieldLineSegment line;
-    FieldCircularArc top_arc;
-    FieldCircularArc bottom_arc;
+    FieldLineSegment top_line;
+    FieldLineSegment bottom_line;
+    // FieldCircularArc top_arc;
+    // FieldCircularArc bottom_arc;
 
     GeometryFieldSize field = LastWorld::get_field();
 
     if (ourDefenseArea) {
         line = field.left_penalty_line;
-        top_arc = field.top_left_penalty_arc;
-        bottom_arc = field.bottom_left_penalty_arc;
+        top_line = field.top_left_penalty_stretch;
+        bottom_line = field.bottom_left_penalty_stretch;
+        // top_arc = field.top_left_penalty_arc;
+        // bottom_arc = field.bottom_left_penalty_arc;
     } else {
         line = field.right_penalty_line;
-        top_arc = field.top_right_penalty_arc;
-        bottom_arc = field.bottom_right_penalty_arc;
+        top_line = field.top_right_penalty_stretch;
+        bottom_line = field.bottom_right_penalty_stretch;
+        // top_arc = field.top_right_penalty_arc;
+        // bottom_arc = field.bottom_right_penalty_arc;
     }
 
     Vector2 distToLine = distPointToLine(line, point, 0.0);
-    Vector2 distToTopArc = distPointToArc(top_arc, point, 0.0);
-    Vector2 distToBottomArc = distPointToArc(bottom_arc, point, 0.0);
+    Vector2 distToTopLine = distPointToLine(top_line, point, 0.0);
+    Vector2 distToBottomLine = distPointToLine(bottom_line, point, 0.0);
+
+    // drawer.setColor(0, 100, 100);
+    // drawer.drawLine("distToBottomLine", point, distToBottomLine);
+    // drawer.setColor(100, 100, 0);
+    // drawer.drawLine("distToTopLine", point, distToTopLine);
+    // Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
+    // Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
 
     double shortestDistance = distToLine.length() * -signum(distToLine.x);
-    if (ourDefenseArea) {
-        // For the arcs the sign of the distance is determined from the angle of the distance vector.
-        if (distToTopArc.length() < fabs(shortestDistance)) {
-            shortestDistance = distToTopArc.length() * signum(cleanAngle(distToTopArc.angle() - 0.75*M_PI));
-        }
-        if (distToBottomArc.length() < fabs(shortestDistance)) {
-            shortestDistance = distToBottomArc.length() * signum(cleanAngle(distToBottomArc.angle() - 0.25*M_PI));
-        }
-    } else { // On their defense area (right side)
+    if (!ourDefenseArea) {
         shortestDistance = -shortestDistance;
-        if (distToTopArc.length() < fabs(shortestDistance)) {
-            shortestDistance = distToTopArc.length() * signum(cleanAngle(distToTopArc.angle() + 0.75*M_PI));
-        }
-        if (distToBottomArc.length() < fabs(shortestDistance)) {
-            shortestDistance = distToBottomArc.length() * signum(cleanAngle(distToBottomArc.angle() + 0.25*M_PI));
-        }
     }
+    if (distToTopLine.length() < fabs(shortestDistance)) {
+        shortestDistance = distToTopLine.length() * -signum(distToTopLine.y);
+    }
+    if (distToBottomLine.length() < fabs(shortestDistance)) {
+        shortestDistance = distToBottomLine.length() * signum(distToBottomLine.y);
+    }
+    // if (ourDefenseArea) {
+    //     // For the arcs the sign of the distance is determined from the angle of the distance vector.
+    //     if (distToTopArc.length() < fabs(shortestDistance)) {
+    //         shortestDistance = distToTopArc.length() * signum(cleanAngle(distToTopArc.angle() - 0.75*M_PI));
+    //     }
+    //     if (distToBottomArc.length() < fabs(shortestDistance)) {
+    //         shortestDistance = distToBottomArc.length() * signum(cleanAngle(distToBottomArc.angle() - 0.25*M_PI));
+    //     }
+    // } else { // On their defense area (right side)
+    //     shortestDistance = -shortestDistance;
+    //     if (distToTopArc.length() < fabs(shortestDistance)) {
+    //         shortestDistance = distToTopArc.length() * signum(cleanAngle(distToTopArc.angle() + 0.75*M_PI));
+    //     }
+    //     if (distToBottomArc.length() < fabs(shortestDistance)) {
+    //         shortestDistance = distToBottomArc.length() * signum(cleanAngle(distToBottomArc.angle() + 0.25*M_PI));
+    //     }
+    // }
+
     
     return shortestDistance;
 }
