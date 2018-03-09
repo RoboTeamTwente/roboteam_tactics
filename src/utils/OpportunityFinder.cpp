@@ -77,7 +77,7 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
-
+	// SHOULDNT OWN POS BE EXCLUDED?
 	
 	
 	double shortestDistance = (Vector2(world.us.at(0).pos) - testPosition).length();
@@ -310,32 +310,15 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
-Vector2 OpportunityFinder::computeBestOpportunity() {
+Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth) {
 
 	// time_point start = now();
 	
 	roboteam_msgs::World world = LastWorld::get();
 	targetPos = getTargetPos(target, targetID, true);
 
-	int x_steps = 60;
-	int y_steps = 40;
-
-	// Remove all the old drawn points
-	// for (int x_step = 1; x_step < x_steps; x_step++) {
-	// 	for (int y_step = 1; y_step < y_steps; y_step++) {
-	// 		// generate a name:
-	// 		std::string x_string = std::to_string(x_step);
-	// 		std::string y_string = std::to_string(y_step);
-	// 		std::string name = "point";
-	// 		name.append("x");
-	// 		name.append(x_string);
-	// 		name.append("y");
-	// 		name.append(y_string);
-	// 		drawer.removePoint(name);
-	// 		// ros::spinOnce();
-	// 	}
-	// }
-	// drawer.removePoint("bestPosition");
+	int x_steps = 20;
+	int y_steps = 20;
 
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
@@ -346,63 +329,45 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 	std::string our_side;
     ros::param::get("our_side", our_side);
 
-    if (ROBOT_ID == 1) {
-    	// ROS_INFO_STREAM("begin for loop");
-    }
 
 	for (int x_step = 1; x_step < x_steps; x_step++) {
-		double x = -(field.field_length - 0.2)/2 + x_step*(field.field_length - 0.2)/x_steps;
+		// double x = -(field.field_length - 0.2)/2 + x_step*(field.field_length - 0.2)/x_steps;
+		double x = -(boxLength)/2 + x_step*(boxLength)/x_steps + centerPoint.x;
 		for (int y_step = 1; y_step < y_steps; y_step++) {
-			double y = -(field.field_width - 0.2)/2 + y_step*(field.field_width - 0.2)/y_steps;
-
+			// double y = -(field.field_width - 0.2)/2 + y_step*(field.field_width - 0.2)/y_steps;
+			double y = -(boxWidth)/2 + y_step*(boxWidth)/y_steps + centerPoint.y;
 			// calculate the score of this point:
 			Vector2 point(x, y);
-			double dist = calcDistToRobot(point, world);
-			Vector2 ballPos(world.ball.pos);
-			double distToBall = (point - ballPos).length();
+			// double dist = calcDistToRobot(point, world);
+			// Vector2 ballPos(world.ball.pos);
+			// double distToBall = (point - ballPos).length();
 
-			if (dist < distToRobotThreshold && !isWithinDefenseArea(false, point, 0.5) && distToBall >= 1.0) {
-			// if (dist < distToRobotThreshold && distToBall >= 1.0) {
-				
+			// generate a name:
+				std::string x_string = std::to_string(x_step);
+				std::string y_string = std::to_string(y_step);
+				std::string name = "point";
+				name.append("x");
+				name.append(x_string);
+				name.append("y");
+				name.append(y_string);
 
-				if (ROBOT_ID == 1) {
-			    	// ROS_INFO_STREAM("doing calc for point " << x << " " << y);;
-			    }
-
-			// if (dist < distToRobotThreshold && !isWithinDefenseArea("their defense area", point)) {
-				
-				// boost::optional<double> score = computePassPointScore(point);
+			if (!isWithinDefenseArea(false, point, 0.1)) {
 				double score = computeScore(point);
-				// if (score) {
-					opportunities.push_back(point);
-					scores.push_back(score);
-
-					// generate a name:
-					std::string x_string = std::to_string(x_step);
-					std::string y_string = std::to_string(y_step);
-					std::string name = "point";
-					name.append("x");
-					name.append(x_string);
-					name.append("y");
-					name.append(y_string);
-					names.push_back(name);
-				// }
+				opportunities.push_back(point);
+				scores.push_back(score);
+				names.push_back(name);
+			} else {
+				drawer.setColor(0,0,0);
+				drawer.drawPoint(name, Vector2(0.0,0.0));
 			}
+			
 		}
 	}
-
-
-	if (ROBOT_ID == 1) {
-    	// ROS_INFO_STREAM("end for loop");
-    }
 
 	if (opportunities.size() == 0) {
 		ROS_WARN("No position found that meets the requirements :(");
 		return Vector2(0.0, 0.0);
 	}
-
-	
-
 
 	if (DRAW_PASS_POINT_GRID) {
 
@@ -414,8 +379,6 @@ Vector2 OpportunityFinder::computeBestOpportunity() {
 			drawer.drawPoint(names.at(i), opportunities.at(i));
 		}
 	}
-
-
 
 	Vector2 bestPosition = opportunities.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));

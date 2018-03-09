@@ -32,7 +32,7 @@ public:
 	void setCloseToPos(Vector2 closeToPos);
 	// boost::optional<double> computePassPointScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition);
-	Vector2 computeBestOpportunity();
+	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
 private:
 
 	// Weights for determining the score of a point on the field

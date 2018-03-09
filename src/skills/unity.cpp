@@ -85,6 +85,9 @@
 #include "ParamSet.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Positioning.cpp"
+#undef RTT_CURRENT_DEBUG_TAG 
+
 #include "Push.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
