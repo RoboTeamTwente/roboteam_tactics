@@ -53,6 +53,7 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 	this->ROBOT_ID = ROBOT_ID;
 	this->target = target;
 	this->targetID = targetID;
+	targetPos = getTargetPos(target, targetID, true);
 
 	isCloseToPosSet = false;
 }
@@ -77,14 +78,14 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
-	// SHOULDNT OWN POS BE EXCLUDED?
 	
-	
-	double shortestDistance = (Vector2(world.us.at(0).pos) - testPosition).length();
-	for (size_t i = 1; i < world.us.size(); i++) {
-		double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-		if (testDistance < shortestDistance) {
-			shortestDistance = testDistance;
+	double shortestDistance = 1000;
+	for (size_t i = 0; i < world.us.size(); i++) {
+		if (world.us.at(i).id!=ROBOT_ID){
+			double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+			if (testDistance < shortestDistance) {
+				shortestDistance = testDistance;
+			}
 		}
 	}
 	return shortestDistance;
@@ -211,6 +212,74 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 	return viewOfGoal;
 }
 
+std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
+	// Vector2 theirGoal = LastWorld::get_their_goal_center();
+	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+	
+	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
+	Vector2 goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
+	Vector2 vecToGoalSide1 = goalSide1 - testPosition;
+	Vector2 vecToGoalSide2 = goalSide2 - testPosition;
+
+	Cone goalCone(testPosition, vecToGoalSide1, vecToGoalSide2);
+	std::vector<double> openAngles1;
+	std::vector<double> openAngles2;
+
+	// The goal angles are normalized (such that angle1 becomes 0 and angle 2 positive)..
+	double goalAngle2 = fabs(cleanAngle(vecToGoalSide2.angle() - vecToGoalSide1.angle()));
+	// ..and placed in the two 'open angle vectors', representing the initial open angle
+	openAngles1.push_back(0);
+	openAngles2.push_back(goalAngle2);
+
+	// The open angle vectors are adjusted for each robot blocking sight of the goal.
+	for (size_t i = 0; i < world.them.size(); i++) {
+		Vector2 botPos(world.them.at(i).pos);
+		if(goalCone.IsWithinCone(botPos, 0.113)) { // 0.113 = robotRadius+ballRadius
+			Vector2 vecToBot = botPos - testPosition;
+			// botAngle: angle to center of blocking robot, normalized
+			double botAngle = fabs(cleanAngle( vecToBot.angle() - vecToGoalSide1.angle() ));
+			double blockedAngle = atan(0.113/vecToBot.length());
+			double blocked1 = botAngle-blockedAngle; // startpoint of blocked angle
+			double blocked2 = botAngle+blockedAngle; // endpoint of blocked angle
+			size_t j = 0;
+			while (j < openAngles1.size()) {
+				double open1 = openAngles1.at(j); // startpoint of this open angle
+				double open2 = openAngles2.at(j); // endpoint of this open angle
+
+				if (blocked2 <= open1 || blocked1 >= open2) {
+					// no blocking of current open angle -> next j
+					j++;
+				} else {
+					if (blocked2 < open2) {
+						if (blocked1 > open1) {
+							// blocking is entirely within this open angle
+							openAngles1.insert(openAngles1.begin()+j+1, blocked2);
+							openAngles2.insert(openAngles2.begin()+j, blocked1);
+							break; // exit the while loop
+							ROS_INFO_STREAM("exitwhileloop");
+						} else {
+							// only the startpoint of this open angle is blocked
+							openAngles1[j] = blocked2;
+				 			j++;
+						}
+					} else {
+						if (blocked1 > open1) {
+							// only the endpoint of this open angle is blocked
+							openAngles2[j] = blocked1;
+				 			j++;
+						} else {
+							// this complete open angle is blocked -> delete and remain at same j
+							openAngles1.erase(openAngles1.begin() + j);
+							openAngles2.erase(openAngles2.begin() + j);
+						}
+					}
+				}
+			} // scan over and update the open angles
+		} // if robot in goalCone
+	} // for each opp. robot
+	return {openAngles1,openAngles2};
+}
+
 // Calculates the distance between the testPosition and the current robot
 double OpportunityFinder::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world) {
 	
@@ -278,27 +347,53 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 
 
 	Vector2 ballPos(world.ball.pos);
-	double distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
-	double distToOpp = sqrt(calcDistToClosestOpp(testPosition, world));
-	double distToTeammate = sqrt(calcDistToClosestTeammate(testPosition, world));
-	double distToBall = (testPosition - ballPos).length();
-	double viewOfGoal = calcViewOfGoal(testPosition, world) / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+
+	double distToGoal = 0.0;
+	if (distToGoalWeight>0.0) {
+		distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
+	}
+	double distToOpp = 0.0;
+	if (distToOppWeight>0.0) {
+		distToOpp = calcDistToClosestOpp(testPosition, world);
+	}
+	double distToTeammate = 0.0;
+	if (distToTeammateWeight>0.0) {
+		distToTeammate = calcDistToClosestTeammate(testPosition, world);
+	}
+	double distToBall = 0.0;
+	if (distToBallWeight>0.0) {
+		distToBall = (testPosition - ballPos).length();
+	}
+	double viewOfGoal = 0.0;
+	if (viewOfGoalWeight>0.0){
+		std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
+		ROS_INFO_STREAM("openangleshavebeendetermined");
+		for (size_t i = 0; i < openAngles.second.size(); i++) {
+   			viewOfGoal += openAngles.second.at(i) - openAngles.first.at(i);
+   			// ROS_INFO_STREAM("first: " << openAngles.first.at(i) << ", second: " << openAngles.second.at(i));
+		}
+		// ROS_INFO_STREAM("viewOfGoal: " << viewOfGoal);
+		// viewOfGoal = calcViewOfGoal(testPosition, world);// / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+	}
 	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-	double distToRobot = calcDistToRobot(testPosition, world);
-	double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
 
-
-
-	angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
-	angleDiffRobotTarget = fabs(angleDiffRobotTarget);
-
+	double distToRobot = 0.0;
+	if (distToRobotWeight>0.0) {
+		distToRobot = calcDistToRobot(testPosition, world);
+	}
+	double angleDiffRobotTarget = 0.0;
+	if (angleDiffRobotTargetWeight>0.0) {
+		angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+		// angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
+		// angleDiffRobotTarget = fabs(angleDiffRobotTarget);
+	}
 	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
 		// angleDiffRobotTarget = M_PI;
 	// }
 	
 	score += - distToGoal*distToGoalWeight 
-				   + distToOpp*distToOppWeight 
-				   + distToTeammate*distToTeammateWeight
+				   + distToOpp*distToOpp*distToOppWeight 
+				   + distToTeammate*distToTeammate*distToTeammateWeight
 				   + distToBall*distToBallWeight
 				   + viewOfGoal*viewOfGoalWeight
 				   + distOppToBallTraj*distOppToBallTrajWeight
@@ -312,15 +407,12 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth) {
 
-	// time_point start = now();
+	time_point start = now();
 	
 	roboteam_msgs::World world = LastWorld::get();
-	targetPos = getTargetPos(target, targetID, true);
 
 	int x_steps = 20;
 	int y_steps = 20;
-
-	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
 	std::vector<Vector2> opportunities;
 	std::vector<double> scores;
@@ -331,16 +423,11 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 
 
 	for (int x_step = 1; x_step < x_steps; x_step++) {
-		// double x = -(field.field_length - 0.2)/2 + x_step*(field.field_length - 0.2)/x_steps;
 		double x = -(boxLength)/2 + x_step*(boxLength)/x_steps + centerPoint.x;
 		for (int y_step = 1; y_step < y_steps; y_step++) {
-			// double y = -(field.field_width - 0.2)/2 + y_step*(field.field_width - 0.2)/y_steps;
 			double y = -(boxWidth)/2 + y_step*(boxWidth)/y_steps + centerPoint.y;
 			// calculate the score of this point:
 			Vector2 point(x, y);
-			// double dist = calcDistToRobot(point, world);
-			// Vector2 ballPos(world.ball.pos);
-			// double distToBall = (point - ballPos).length();
 
 			// generate a name:
 				std::string x_string = std::to_string(x_step);
@@ -384,8 +471,8 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// drawer.removePoint(winningPointName);
 
-	// int timePassed = time_difference_milliseconds(start, now()).count();
-	// ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	int timePassed = time_difference_milliseconds(start, now()).count();
+	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// std::string name = "bestPosition";
 	// name.append(std::to_string(ROBOT_ID));

@@ -26,6 +26,7 @@ public:
 	double calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
 	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
+	std::pair<std::vector<double>, std::vector<double>> getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world);
 	double calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world);
 
@@ -54,7 +55,7 @@ private:
 	double viewOfGoalThreshold;
 
 	// The ID of the robot for which are trying to find a good point to stand on the field
-	int ROBOT_ID;
+	uint ROBOT_ID;
 	std::string target;
 	int targetID;
 	Vector2 targetPos;

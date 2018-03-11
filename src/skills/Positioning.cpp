@@ -19,7 +19,7 @@ void Positioning::Initialize() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
 
     opportunityFinder.Initialize("jelle.txt", ROBOT_ID, "theirgoal", 0);
-    bestPosition = opportunityFinder.computeBestOpportunity(Vector2(2.25,0.0),4.5,3.0);
+    bestPosition = opportunityFinder.computeBestOpportunity(Vector2(2.25,0.0),4.5,6.0);
     counter = 1;
 }
 
@@ -28,13 +28,13 @@ bt::Node::Status Positioning::Update() {
     auto elapsedTime = time_difference_milliseconds(start, now());
     // ROS_INFO_STREAM("elapsedTime: " << elapsedTime.count());
 
-    if (elapsedTime.count() >= 1000) {
-        if (counter>10) {
+    if (elapsedTime.count() >= 500) {
+        if (counter>5) {
             Initialize();
         }
         counter++;
 
-        opportunityFinder.Initialize("jelle.txt", ROBOT_ID, "theirgoal", 0);
+        //opportunityFinder.Initialize("jelle.txt", ROBOT_ID, "ourgoal", 0);
         // double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos));
         Vector2 myPos = getTargetPos("robot", ROBOT_ID, true);
         double boxSize = (bestPosition - myPos).length() + 1.0;
