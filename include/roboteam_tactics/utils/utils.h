@@ -278,6 +278,8 @@ bool robotIsWithinBounds(const TeamRobot& bot, const roboteam_msgs::World& world
 
 boost::optional<roboteam_msgs::WorldRobot> getBotFromDangerList(unsigned dangerIndex);
 
+bool IsWithinField(Vector2 point);
+
 /**
  * \class GlobalPublisher
  * \brief Shared ros::Publisher instance of all messages of a certain type

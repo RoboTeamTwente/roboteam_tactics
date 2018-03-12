@@ -1,4 +1,5 @@
 #include "roboteam_tactics/utils/OpportunityFinder.h"
+#include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
@@ -162,58 +163,63 @@ std::vector<Cone> OpportunityFinder::combineOverlappingRobots(std::vector<Cone> 
 // Calculale the angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
 double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
-	Vector2 theirGoal = LastWorld::get_their_goal_center();
-	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+	double viewOfGoal = 0.0;
+	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
+	for (size_t i = 0; i < openAngles.second.size(); i++) {
+   		viewOfGoal += openAngles.second.at(i) - openAngles.first.at(i);
+	}
+	// Vector2 theirGoal = LastWorld::get_their_goal_center();
+	// roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	
-	Vector2 vecToGoalSide1 = theirGoal + Vector2(0, -field.goal_width/2) - testPosition;
-	Vector2 vecToGoalSide2 = theirGoal + Vector2(0, field.goal_width/2) - testPosition;
+	// Vector2 vecToGoalSide1 = theirGoal + Vector2(0, -field.goal_width/2) - testPosition;
+	// Vector2 vecToGoalSide2 = theirGoal + Vector2(0, field.goal_width/2) - testPosition;
 
-	Cone goalCone(testPosition, vecToGoalSide2, vecToGoalSide1);
+	// Cone goalCone(testPosition, vecToGoalSide2, vecToGoalSide1);
 
-	std::vector<Cone> robotCones;
-	for (size_t i = 0; i < world.them.size(); i++) {
-		if(goalCone.IsWithinCone(Vector2(world.them.at(i).pos), 0.09)) {
-			Cone robotCone(testPosition, Vector2(world.them.at(i).pos), 0.09); 
-			robotCones.push_back(robotCone);
-		}
-	}
+	// std::vector<Cone> robotCones;
+	// for (size_t i = 0; i < world.them.size(); i++) {
+	// 	if(goalCone.IsWithinCone(Vector2(world.them.at(i).pos), 0.09)) {
+	// 		Cone robotCone(testPosition, Vector2(world.them.at(i).pos), 0.09); 
+	// 		robotCones.push_back(robotCone);
+	// 	}
+	// }
 
-	std::vector<Cone> combinedRobotCones = combineOverlappingRobots(robotCones);
-	combinedRobotCones = combineOverlappingRobots(combinedRobotCones);
+	// std::vector<Cone> combinedRobotCones = combineOverlappingRobots(robotCones);
+	// combinedRobotCones = combineOverlappingRobots(combinedRobotCones);
 
-	double viewOfGoal = cleanAngle(goalCone.side1.angle() - goalCone.side2.angle());
+	// double viewOfGoal = cleanAngle(goalCone.side1.angle() - goalCone.side2.angle());
 
-	for (size_t i = 0; i < combinedRobotCones.size(); i++) {
+	// for (size_t i = 0; i < combinedRobotCones.size(); i++) {
 
-		Cone robotCone = combinedRobotCones.at(i);
-		double robotSide1Angle = cleanAngle(robotCone.side1.angle());
-		double robotSide2Angle = cleanAngle(robotCone.side2.angle());
-		double goalConeSide1Angle = cleanAngle(goalCone.side1.angle());
-		double goalConeSide2Angle = cleanAngle(goalCone.side2.angle());
+	// 	Cone robotCone = combinedRobotCones.at(i);
+	// 	double robotSide1Angle = cleanAngle(robotCone.side1.angle());
+	// 	double robotSide2Angle = cleanAngle(robotCone.side2.angle());
+	// 	double goalConeSide1Angle = cleanAngle(goalCone.side1.angle());
+	// 	double goalConeSide2Angle = cleanAngle(goalCone.side2.angle());
 
-		if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide1Angle) && isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // robotCone completely within goalCone
-			double blockedAngle = fabs(cleanAngle(robotSide1Angle - robotSide2Angle));
-			viewOfGoal -= blockedAngle;
-		} else if (isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide1Angle) && isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide2Angle)) { // goalCone completely within robotCone
-			viewOfGoal = 0;
-			break;
-		} else if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // only on the left side 
-			double blockedAngle = cleanAngle(goalCone.side1.angle() - robotCone.side2.angle());
-			viewOfGoal -= blockedAngle;
-		} else if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide1Angle)) { // only on the right side
-			double blockedAngle = cleanAngle(robotCone.side1.angle() - goalCone.side2.angle());
-			viewOfGoal -= blockedAngle;
-		} else {
-			ROS_INFO_STREAM("hmm, this is probably not right..." << testPosition.x << " " << testPosition.y);
-            viewOfGoal = 0;
-		}
-	}
-
+	// 	if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide1Angle) && isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // robotCone completely within goalCone
+	// 		double blockedAngle = fabs(cleanAngle(robotSide1Angle - robotSide2Angle));
+	// 		viewOfGoal -= blockedAngle;
+	// 	} else if (isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide1Angle) && isBetweenAngles(robotSide2Angle, robotSide1Angle, goalConeSide2Angle)) { // goalCone completely within robotCone
+	// 		viewOfGoal = 0;
+	// 		break;
+	// 	} else if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide2Angle)) { // only on the left side 
+	// 		double blockedAngle = cleanAngle(goalCone.side1.angle() - robotCone.side2.angle());
+	// 		viewOfGoal -= blockedAngle;
+	// 	} else if (isBetweenAngles(goalConeSide2Angle, goalConeSide1Angle, robotSide1Angle)) { // only on the right side
+	// 		double blockedAngle = cleanAngle(robotCone.side1.angle() - goalCone.side2.angle());
+	// 		viewOfGoal -= blockedAngle;
+	// 	} else {
+	// 		ROS_INFO_STREAM("hmm, this is probably not right..." << testPosition.x << " " << testPosition.y);
+ //            viewOfGoal = 0;
+	// 	}
+	// }
+	
 	return viewOfGoal;
 }
 
 std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
-	// Vector2 theirGoal = LastWorld::get_their_goal_center();
+	// targetPos is one of the goals. IMPROVEMENT: Maybe add functionality that uses other views than only goal views (like view of dangerous positions)
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	
 	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
@@ -234,7 +240,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 	// The open angle vectors are adjusted for each robot blocking sight of the goal.
 	for (size_t i = 0; i < world.them.size(); i++) {
 		Vector2 botPos(world.them.at(i).pos);
-		if(goalCone.IsWithinCone(botPos, 0.113)) { // 0.113 = robotRadius+ballRadius
+		if(goalCone.IsWithinCone(botPos, 0.113)) { // if robot blocks the goal, where 0.113 = robotRadius+ballRadius
 			Vector2 vecToBot = botPos - testPosition;
 			// botAngle: angle to center of blocking robot, normalized
 			double botAngle = fabs(cleanAngle( vecToBot.angle() - vecToGoalSide1.angle() ));
@@ -277,7 +283,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 			} // scan over and update the open angles
 		} // if robot in goalCone
 	} // for each opp. robot
-	return {openAngles1,openAngles2};
+	return {openAngles1,openAngles2}; // IMPROVEMENT: de-normalize angles again, for practical use.
 }
 
 // Calculates the distance between the testPosition and the current robot
@@ -316,89 +322,87 @@ void OpportunityFinder::setCloseToPos(Vector2 closeToPos) {
 // boost::optional<double> OpportunityFinder::computePassPointScore(Vector2 testPosition) {
 double OpportunityFinder::computeScore(Vector2 testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
+	Vector2 ballPos(world.ball.pos);
 
 	// if (world.us.size() == 0) {
 	// 	return boost::none;
 	// }
-
-	// double distToRobot = calcDistToRobot(testPosition, world);
-	// if (distToRobot > distToRobotThreshold) {
-	// 	return boost::none;
-	// }
-
 	
 	double score = 0.0;
 
-	double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-	if (distOppToBallTraj < distOppToBallTrajThreshold) {
-		score -= distOppToBallTrajWeight;
+	if (distOppToBallTrajWeight>0.0) {
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToBallTraj = (distOppToBallTraj - distOppToBallTrajThreshold)/0.5; // IMPROVE: max value should be in weight list as well
+		// Add score to total score
+		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
 	}
 
-
-	double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
-	if (distOppToBallToTargetTraj < distOppToBallToTargetTrajThreshold) {
-		score -= distOppToBallToTargetTrajWeight;
+	if (distOppToBallToTargetTrajWeight>0.0) {
+		double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToBallToTargetTraj = (distOppToBallToTargetTraj - distOppToBallToTargetTrajThreshold)/0.5; // IMPROVE: max value should be in weight list as well
+		// Add score to total score
+		score += smoothStep(distOppToBallToTargetTraj)*distOppToBallToTargetTrajWeight;
 	}
-
-	// double viewOfGoal = sqrt(calcViewOfGoal(testPosition, world));
-	// if (viewOfGoal < viewOfGoalThreshold) {
-	// 	return boost::none;
-	// }
-
-
-	Vector2 ballPos(world.ball.pos);
-
-	double distToGoal = 0.0;
-	if (distToGoalWeight>0.0) {
-		distToGoal = (testPosition - LastWorld::get_their_goal_center()).length();
-	}
-	double distToOpp = 0.0;
-	if (distToOppWeight>0.0) {
-		distToOpp = calcDistToClosestOpp(testPosition, world);
-	}
-	double distToTeammate = 0.0;
-	if (distToTeammateWeight>0.0) {
-		distToTeammate = calcDistToClosestTeammate(testPosition, world);
-	}
-	double distToBall = 0.0;
-	if (distToBallWeight>0.0) {
-		distToBall = (testPosition - ballPos).length();
-	}
-	double viewOfGoal = 0.0;
-	if (viewOfGoalWeight>0.0){
-		std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
-		ROS_INFO_STREAM("openangleshavebeendetermined");
-		for (size_t i = 0; i < openAngles.second.size(); i++) {
-   			viewOfGoal += openAngles.second.at(i) - openAngles.first.at(i);
-   			// ROS_INFO_STREAM("first: " << openAngles.first.at(i) << ", second: " << openAngles.second.at(i));
-		}
-		// ROS_INFO_STREAM("viewOfGoal: " << viewOfGoal);
-		// viewOfGoal = calcViewOfGoal(testPosition, world);// / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
-	}
-	// double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-
-	double distToRobot = 0.0;
-	if (distToRobotWeight>0.0) {
-		distToRobot = calcDistToRobot(testPosition, world);
-	}
-	double angleDiffRobotTarget = 0.0;
-	if (angleDiffRobotTargetWeight>0.0) {
-		angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
-		// angleDiffRobotTarget -= (60.0 / 180.0 * M_PI);
-		// angleDiffRobotTarget = fabs(angleDiffRobotTarget);
-	}
-	// if (angleDiffRobotTarget <= (30.0 / 180.0 * M_PI)) {
-		// angleDiffRobotTarget = M_PI;
-	// }
 	
-	score += - distToGoal*distToGoalWeight 
-				   + distToOpp*distToOpp*distToOppWeight 
-				   + distToTeammate*distToTeammate*distToTeammateWeight
-				   + distToBall*distToBallWeight
-				   + viewOfGoal*viewOfGoalWeight
-				   + distOppToBallTraj*distOppToBallTrajWeight
-				   - distToRobot*distToRobotWeight
-				   - angleDiffRobotTarget*angleDiffRobotTargetWeight;
+	if (distToGoalWeight>0.0) { // IMPROVEMENT: Distance from goal line, instead of goal center point?
+		double distToGoal = (testPosition - targetPos).length();
+		// Normalize such that 0 corresponds to best and 1 to worst possible score
+		distToGoal = (distToGoal-1.2)/5.0; // IMPROVE: max & min value should be in weight list as well
+		// Add score to total score
+		score -= smoothStep(distToGoal)*distToGoalWeight;
+	}
+
+	if (distToOppWeight>0.0) {
+		double distToOpp = calcDistToClosestOpp(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distToOpp = (distToOpp-0.18)/1.0; // IMPROVE: min & max value should be in weight list as well
+		// Add score to total score
+		score += smoothStep(distToOpp)*distToOppWeight;
+	}
+
+	if (distToTeammateWeight>0.0) {
+		double distToTeammate = calcDistToClosestTeammate(testPosition, world);
+		// ROS_INFO_STREAM("distToTeammate: " << distToTeammate);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distToTeammate = (distToTeammate-0.18)/1.0; // IMPROVE: min & max value should be in weight list as well
+		// Add score to total score
+		score += smoothStep(distToTeammate)*distToTeammateWeight;
+	}
+	if (distToBallWeight>0.0) {
+		double distToBall = (testPosition - ballPos).length();
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distToBall = (distToBall-0.113)/1.0; // IMPROVE: min & max value should be in weight list as well
+		// Add score to total score
+		score += smoothStep(distToBall)*distToBallWeight;
+	}
+	if (viewOfGoalWeight>0.0){
+		double viewOfGoal = calcViewOfGoal(testPosition, world);
+		// ROS_INFO_STREAM("viewOfGoal: " << viewOfGoal);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		viewOfGoal = viewOfGoal/0.6; // IMPROVE: max value should be in weight list as well
+   		// ROS_INFO_STREAM("first: " << openAngles.first.at(i) << ", second: " << openAngles.second.at(i));
+		// viewOfGoal = calcViewOfGoal(testPosition, world);// / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
+		// Add score to total score
+		score += smoothStep(viewOfGoal)*viewOfGoalWeight;
+	}
+
+	if (distToRobotWeight>0.0) {
+		double distToRobot = calcDistToRobot(testPosition, world);
+		// Normalize such that 0 corresponds to best and 1 to worst possible score
+		distToRobot = (distToRobot)/3.0; // IMPROVE: min & max value should be in weight list as well
+		// Add score to total score
+		score -= smoothStep(distToRobot)*distToRobotWeight;
+	}
+	
+	if (angleDiffRobotTargetWeight>0.0) {
+		double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+		// Normalize such that 0 corresponds to best and 1 to worst possible score
+		angleDiffRobotTarget = (angleDiffRobotTarget - 60.0/180.0*M_PI) / M_PI; //IMPROVE: This value should be in weightslist as well
+		// Add score to total score
+		score -= smoothStep(angleDiffRobotTarget)*angleDiffRobotTargetWeight;
+	}
 
 	return score;
 }
@@ -438,7 +442,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 				name.append("y");
 				name.append(y_string);
 
-			if (!isWithinDefenseArea(false, point, 0.1)) {
+			if (!isWithinDefenseArea(false, point, 0.1) && IsWithinField(point)) {
 				double score = computeScore(point);
 				opportunities.push_back(point);
 				scores.push_back(score);
@@ -450,6 +454,8 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 			
 		}
 	}
+	int timePassed = time_difference_milliseconds(start, now()).count();
+	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinderBeforeDrawing took: " << timePassed << " ms");
 
 	if (opportunities.size() == 0) {
 		ROS_WARN("No position found that meets the requirements :(");
@@ -468,11 +474,13 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	}
 
 	Vector2 bestPosition = opportunities.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
-	// drawer.removePoint(winningPointName);
+	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 
-	int timePassed = time_difference_milliseconds(start, now()).count();
+	timePassed = time_difference_milliseconds(start, now()).count();
 	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+
+	// Info about best position
+	ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));
 
 	// std::string name = "bestPosition";
 	// name.append(std::to_string(ROBOT_ID));
