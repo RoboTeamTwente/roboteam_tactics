@@ -74,6 +74,7 @@ bt::Node::Status IsBallInZone::Update() {
 			zone_y1=-field.field_width/2 + 0.2;
 			zone_y2=field.field_width/2 - 0.2;
 		}
+		// zone 5: zone 4 with larger margin
 		else if (zone==5) {
 			zone_x1=-field.field_length/2 + 0.35;
 			zone_x2=field.field_length/2 - 0.35;

@@ -38,11 +38,12 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     
     prevComputedPoint = now();
     computedTargetPos = false;
-    startTime = now();
+    
     prevballdist=0;
 }
 
 void ReceiveBall::Initialize() {
+	startTime = now();
 
 	robotID = blackboard->GetInt("ROBOT_ID");	
 	if (HasDouble("acceptableDeviation")) {
@@ -55,8 +56,6 @@ void ReceiveBall::Initialize() {
 	} else {
 		marginDeviation = 0.0;
 	}
-
-	successCounter = 0;
 
 	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
 
@@ -495,16 +494,14 @@ bt::Node::Status ReceiveBall::Update() {
 	    	publishStopCommand();
 	    }
 
-	    // if the ball is in our defense area for quite some time, Success is returned
-	    if (isWithinDefenseArea(true, ballPos, 0.0)) {
-	    	if (successCounter<120) {
-	    		successCounter++;
-	    	} else {
-	    		successCounter = 0;
-	    		return Status::Success;
+	    // if the ball has low velocity for some time, return Failure
+	    if (ballVel.length()<0.1) {
+	    	if (time_difference_milliseconds(startTime, now()).count()>1000) {
+	    		startTime = now();
+	    		return Status::Failure;
 	    	}
 	    } else {
-	    	successCounter = 0;
+	    	startTime = now();
 	    }
 
 	    return Status::Running;

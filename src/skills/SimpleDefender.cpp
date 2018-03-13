@@ -33,11 +33,11 @@ SimpleDefender::SimpleDefender(std::string name, bt::Blackboard::Ptr blackboard)
 Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
     
     Vector2 goalPos;
-    // if (ourSide) {
+    if (ourSide) {
         goalPos = LastWorld::get_our_goal_center();
-    // } else {
-        // goalPos = LastWorld::get_their_goal_center();
-    // }
+    } else {
+        goalPos = LastWorld::get_their_goal_center();
+    }
     
     double angle = (defendPos - goalPos).angle() + angleOffset;
 
@@ -59,11 +59,9 @@ bt::Node::Status SimpleDefender::Update() {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     robotID = blackboard->GetInt("ROBOT_ID");
 
-    bool ourSide;
+    bool ourSide = true;
     if (HasBool("ourSide")) {
         ourSide = GetBool("ourSide");
-    } else {
-        ourSide = true;
     }
 
     double acceptableDeviation;
