@@ -35,18 +35,32 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 		myfile.close();
 
 		distToGoalWeight = weightsVector.at(0);
-		distToOppWeight = weightsVector.at(1);
-		distToTeammateWeight = weightsVector.at(2);
-		distToBallWeight = weightsVector.at(3);
-		viewOfGoalWeight = weightsVector.at(4);
-		distOppToBallTrajWeight = weightsVector.at(5);
-		distOppToBallToTargetTrajWeight = weightsVector.at(6);
-		distToRobotWeight = weightsVector.at(7);
-		angleDiffRobotTargetWeight = weightsVector.at(8);
-		distToRobotThreshold = weightsVector.at(9);
-		distOppToBallTrajThreshold = weightsVector.at(10);
-		distOppToBallToTargetTrajThreshold = weightsVector.at(11);
-		viewOfGoalThreshold = weightsVector.at(12);
+		distToGoalMin = weightsVector.at(1);
+		distToGoalMax = weightsVector.at(2);
+		viewOfGoalWeight = weightsVector.at(3);
+		viewOfGoalMin = weightsVector.at(4);
+		viewOfGoalMax = weightsVector.at(5);
+		distToOppWeight = weightsVector.at(6);
+		distToOppMin = weightsVector.at(7);
+		distToOppMax = weightsVector.at(8);
+		distToTeammateWeight = weightsVector.at(9);
+		distToTeammateMin = weightsVector.at(10);
+		distToTeammateMax = weightsVector.at(11);
+		distToBallWeight = weightsVector.at(12);
+		distToBallMin = weightsVector.at(13);
+		distToBallMax = weightsVector.at(14);
+		distToSelfWeight = weightsVector.at(15);
+		distToSelfMin = weightsVector.at(16);
+		distToSelfMax = weightsVector.at(17);
+		ballReflectionAngleWeight = weightsVector.at(18);
+		ballReflectionAngleMin = weightsVector.at(19);
+		ballReflectionAngleMax = weightsVector.at(20);
+		distOppToBallTrajWeight = weightsVector.at(21);
+		distOppToBallTrajMin = weightsVector.at(22);
+		distOppToBallTrajMax = weightsVector.at(23);
+		distOppToTargetTrajWeight = weightsVector.at(24);
+		distOppToTargetTrajMin = weightsVector.at(25);
+		distOppToTargetTrajMax = weightsVector.at(26);
 	} else {
 		RTT_DEBUG("Unable to open file \n");
 	}
@@ -114,7 +128,7 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 }
 
 // Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
-double OpportunityFinder::calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballToTargetTraj = targetPos - testPosition;
 
 	if (world.them.size() == 0) {
@@ -287,7 +301,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 }
 
 // Calculates the distance between the testPosition and the current robot
-double OpportunityFinder::calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world) {
 	
 	if (isCloseToPosSet) {
 		return (testPosition - closeToPos).length();
@@ -307,10 +321,10 @@ double OpportunityFinder::calcDistToRobot(Vector2 testPosition, roboteam_msgs::W
 
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
 // If this angle is low, it means that a robot standing on the testPosition can more easily shoot the ball at the goal directly after receiving the ball
-double OpportunityFinder::calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballPos(world.ball.pos);
-	double angleDiffRobotTarget = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
-	return angleDiffRobotTarget;
+	double ballReflectionAngle = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
+	return ballReflectionAngle;
 }
 
 void OpportunityFinder::setCloseToPos(Vector2 closeToPos) {
@@ -330,34 +344,28 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	
 	double score = 0.0;
 
-	if (distOppToBallTrajWeight>0.0) {
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distOppToBallTraj = (distOppToBallTraj - distOppToBallTrajThreshold)/0.5; // IMPROVE: max value should be in weight list as well
-		// Add score to total score
-		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
-	}
+	// POSSIBLE IMPROVEMENT: certain metrics have such priority that a zero score in these metrics will return a 0 (or negative? or invalid?) score immediately
 
-	if (distOppToBallToTargetTrajWeight>0.0) {
-		double distOppToBallToTargetTraj = calcDistOppToBallToTargetTraj(testPosition, world);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distOppToBallToTargetTraj = (distOppToBallToTargetTraj - distOppToBallToTargetTrajThreshold)/0.5; // IMPROVE: max value should be in weight list as well
-		// Add score to total score
-		score += smoothStep(distOppToBallToTargetTraj)*distOppToBallToTargetTrajWeight;
-	}
-	
 	if (distToGoalWeight>0.0) { // IMPROVEMENT: Distance from goal line, instead of goal center point?
 		double distToGoal = (testPosition - targetPos).length();
 		// Normalize such that 0 corresponds to best and 1 to worst possible score
-		distToGoal = (distToGoal-1.2)/5.0; // IMPROVE: max & min value should be in weight list as well
+		distToGoal = (distToGoal-distToGoalMin)/(distToGoalMax-distToGoalMin);
 		// Add score to total score
 		score -= smoothStep(distToGoal)*distToGoalWeight;
+	}
+
+	if (viewOfGoalWeight>0.0){
+		double viewOfGoal = calcViewOfGoal(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		viewOfGoal = (viewOfGoal-viewOfGoalMin)/(viewOfGoalMax-viewOfGoalMin);
+		// Add score to total score
+		score += smoothStep(viewOfGoal)*viewOfGoalWeight;
 	}
 
 	if (distToOppWeight>0.0) {
 		double distToOpp = calcDistToClosestOpp(testPosition, world);
 		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distToOpp = (distToOpp-0.18)/1.0; // IMPROVE: min & max value should be in weight list as well
+		distToOpp = (distToOpp-distToOppMin)/(distToOppMax-distToOppMin);
 		// Add score to total score
 		score += smoothStep(distToOpp)*distToOppWeight;
 	}
@@ -366,42 +374,49 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 		double distToTeammate = calcDistToClosestTeammate(testPosition, world);
 		// ROS_INFO_STREAM("distToTeammate: " << distToTeammate);
 		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distToTeammate = (distToTeammate-0.18)/1.0; // IMPROVE: min & max value should be in weight list as well
+		distToTeammate = (distToTeammate-distToTeammateMin)/(distToTeammateMax-distToTeammateMin);
 		// Add score to total score
 		score += smoothStep(distToTeammate)*distToTeammateWeight;
 	}
+
 	if (distToBallWeight>0.0) {
 		double distToBall = (testPosition - ballPos).length();
 		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distToBall = (distToBall-0.113)/1.0; // IMPROVE: min & max value should be in weight list as well
+		distToBall = (distToBall-distToBallMin)/(distToBallMax-distToBallMin);
 		// Add score to total score
 		score += smoothStep(distToBall)*distToBallWeight;
 	}
-	if (viewOfGoalWeight>0.0){
-		double viewOfGoal = calcViewOfGoal(testPosition, world);
-		// ROS_INFO_STREAM("viewOfGoal: " << viewOfGoal);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		viewOfGoal = viewOfGoal/0.6; // IMPROVE: max value should be in weight list as well
-   		// ROS_INFO_STREAM("first: " << openAngles.first.at(i) << ", second: " << openAngles.second.at(i));
-		// viewOfGoal = calcViewOfGoal(testPosition, world);// / 0.336 * distToGoal; // equals 1 when the angle is 0.336 radians, which is the view one meter in front of the goal
-		// Add score to total score
-		score += smoothStep(viewOfGoal)*viewOfGoalWeight;
-	}
 
-	if (distToRobotWeight>0.0) {
-		double distToRobot = calcDistToRobot(testPosition, world);
+	if (distToSelfWeight>0.0) {
+		double distToSelf = calcDistToSelf(testPosition, world);
 		// Normalize such that 0 corresponds to best and 1 to worst possible score
-		distToRobot = (distToRobot)/3.0; // IMPROVE: min & max value should be in weight list as well
+		distToSelf = (distToSelf-distToSelfMin)/(distToSelfMax-distToSelfMin);
 		// Add score to total score
-		score -= smoothStep(distToRobot)*distToRobotWeight;
+		score -= smoothStep(distToSelf)*distToSelfWeight;
 	}
 	
-	if (angleDiffRobotTargetWeight>0.0) {
-		double angleDiffRobotTarget = calcAngleDiffRobotTarget(testPosition, world);
+	if (ballReflectionAngleWeight>0.0) {
+		double ballReflectionAngle = calcBallReflectionAngle(testPosition, world);
 		// Normalize such that 0 corresponds to best and 1 to worst possible score
-		angleDiffRobotTarget = (angleDiffRobotTarget - 60.0/180.0*M_PI) / M_PI; //IMPROVE: This value should be in weightslist as well
+		ballReflectionAngle = (ballReflectionAngle-ballReflectionAngleMin)/(ballReflectionAngleMax-ballReflectionAngleMin);
 		// Add score to total score
-		score -= smoothStep(angleDiffRobotTarget)*angleDiffRobotTargetWeight;
+		score -= smoothStep(ballReflectionAngle)*ballReflectionAngleWeight;
+	}
+
+	if (distOppToBallTrajWeight>0.0) {
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToBallTraj = (distOppToBallTraj-distOppToBallTrajMin)/(distOppToBallTrajMax-distOppToBallTrajMin);
+		// Add score to total score
+		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
+	}
+
+	if (distOppToTargetTrajWeight>0.0) {
+		double distOppToTargetTraj = calcDistOppToTargetTraj(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToTargetTraj = (distOppToTargetTraj-distOppToTargetTrajMin)/(distOppToTargetTrajMax-distOppToTargetTrajMin);
+		// Add score to total score
+		score += smoothStep(distOppToTargetTraj)*distOppToTargetTrajWeight;
 	}
 
 	return score;

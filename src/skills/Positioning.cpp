@@ -28,8 +28,8 @@ bt::Node::Status Positioning::Update() {
     auto elapsedTime = time_difference_milliseconds(start, now());
     // ROS_INFO_STREAM("elapsedTime: " << elapsedTime.count());
 
-    if (elapsedTime.count() >= 500) {
-        if (counter>20) {
+    if (elapsedTime.count() >= 100) {
+        if (counter>10) {
             Initialize();
         }
         counter++;

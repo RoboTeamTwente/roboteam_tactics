@@ -23,36 +23,47 @@ public:
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistOppToBallToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
 	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
 	std::pair<std::vector<double>, std::vector<double>> getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistToRobot(Vector2 testPosition, roboteam_msgs::World world);
-	double calcAngleDiffRobotTarget(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world);
+	double calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world);
 
 	void setCloseToPos(Vector2 closeToPos);
 	// boost::optional<double> computePassPointScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition);
 	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
 private:
-
-	// Weights for determining the score of a point on the field
+	
+	// Weights for determining the score of a point on the field, including min and max values that correspond to the min and max scores
 	double distToGoalWeight;
-	double distToOppWeight;
-	double distToTeammateWeight;
-	double distToBallWeight;
+	double distToGoalMin;
+	double distToGoalMax;
 	double viewOfGoalWeight;
+	double viewOfGoalMin;
+	double viewOfGoalMax;
+	double distToOppWeight;
+	double distToOppMin;
+	double distToOppMax;
+	double distToTeammateWeight;
+	double distToTeammateMin;
+	double distToTeammateMax;
+	double distToBallWeight;
+	double distToBallMin;
+	double distToBallMax;
+	double distToSelfWeight;
+	double distToSelfMin;
+	double distToSelfMax;
+	double ballReflectionAngleWeight;
+	double ballReflectionAngleMin;
+	double ballReflectionAngleMax;
 	double distOppToBallTrajWeight;
-	double distOppToBallToTargetTrajWeight;
-
-	double distToRobotWeight;
-	double angleDiffRobotTargetWeight;
-
-	// Thresholds for determining whether a point on the field should be considered or not
-	double distToRobotThreshold;
-	double distOppToBallTrajThreshold;
-	double distOppToBallToTargetTrajThreshold;
-	double viewOfGoalThreshold;
+	double distOppToBallTrajMin;
+	double distOppToBallTrajMax;
+	double distOppToTargetTrajWeight;
+	double distOppToTargetTrajMin;
+	double distOppToTargetTrajMax;
 
 	// The ID of the robot for which are trying to find a good point to stand on the field
 	uint ROBOT_ID;
