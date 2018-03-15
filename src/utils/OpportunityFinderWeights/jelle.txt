@@ -15,7 +15,7 @@ distToBallMin 0.113
 distToBallMax 1.0
 distToSelfWeight 0.05
 distToSelfMin 0.0
-distToSelfMax 3.0
+distToSelfMax 1.0
 ballReflectionAngleWeight 1.0
 ballReflectionAngleMin 1.0
 ballReflectionAngleMax 3.14
