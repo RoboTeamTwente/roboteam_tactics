@@ -29,15 +29,29 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
     double yBottomBound;
     if (ourDefenseArea) {
     	xBound = field.left_penalty_line.begin.x;
-    	yTopBound = field.top_left_penalty_stretch.begin.y;
-    	yBottomBound = field.bottom_left_penalty_stretch.begin.y;
+    	if (field.left_penalty_line.begin.y < field.left_penalty_line.end.y) {
+    		yBottomBound = field.left_penalty_line.begin.y;
+    		yTopBound = field.left_penalty_line.end.y;
+    	} else {
+    		yBottomBound = field.left_penalty_line.end.y;
+    		yTopBound = field.left_penalty_line.begin.y;
+    	}
+    	// yTopBound = field.top_left_penalty_stretch.begin.y;
+    	// yBottomBound = field.bottom_left_penalty_stretch.begin.y;
         if (point.x < xBound + margin && point.y < yTopBound + margin && point.y > yBottomBound - margin) {
         	return true;
         } else return false;
-    } else {
+    } else { // their defense area
     	xBound = field.right_penalty_line.begin.x;
-    	yTopBound = field.top_right_penalty_stretch.begin.y;
-    	yBottomBound = field.bottom_right_penalty_stretch.begin.y;
+    	if (field.left_penalty_line.begin.y < field.left_penalty_line.end.y) {
+    		yBottomBound = field.left_penalty_line.begin.y;
+    		yTopBound = field.left_penalty_line.end.y;
+    	} else {
+    		yBottomBound = field.left_penalty_line.end.y;
+    		yTopBound = field.left_penalty_line.begin.y;
+    	}
+    	// yTopBound = field.top_right_penalty_stretch.begin.y;
+    	// yBottomBound = field.bottom_right_penalty_stretch.begin.y;
     	if (point.x > xBound - margin && point.y < yTopBound + margin && point.y > yBottomBound - margin) {
         	return true;
         } else return false;

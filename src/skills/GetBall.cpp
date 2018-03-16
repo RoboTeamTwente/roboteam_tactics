@@ -38,7 +38,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
     if (robot_output_target == "grsim") {
         distanceFromBallWhenDribbling = 0.105;
     } else if (robot_output_target == "serial") {
-        distanceFromBallWhenDribbling = 0.08;
+        distanceFromBallWhenDribbling = 0.10; //0.08
     } else {
         distanceFromBallWhenDribbling = 0.105;
     }
@@ -261,8 +261,8 @@ bt::Node::Status GetBall::Update (){
         getBallDist = 0.0 ;
         distAwayFromBall = 0.2;;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12 ;
-        successAngle = 0.15; 
+        successDist = 0.13; //0.12
+        successAngle = 0.25; //0.15
         getBallDist = 0.0;
         distAwayFromBall = 0.2;
     }
@@ -332,7 +332,7 @@ bt::Node::Status GetBall::Update (){
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         } else if (dontDribble) {
-            ballCloseFrameCountTo = 3;
+            ballCloseFrameCountTo = 2;
         }
         
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
