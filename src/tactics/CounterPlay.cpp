@@ -93,7 +93,7 @@ void CounterPlay::Initialize() {
 	    	bb.SetBool("GetBall_A_ourTeam", true);
         } else {
         	bb.SetString("GetBall_A_aimAt", "theirgoal");
-        	bb.SetBool("shootAtGoal",true);
+        	bb.SetBool("shootAtGoal", true);
         }
         bb.SetBool("GetBall_A_passOn", true);
 

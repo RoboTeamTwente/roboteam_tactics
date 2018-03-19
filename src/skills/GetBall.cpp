@@ -311,16 +311,15 @@ bt::Node::Status GetBall::Update (){
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
         private_bb->SetBool("dribbler", false);
         matchBallVel = true;
-        if (posDiff.length() < (distAwayFromBall + 0.1)) {
-            moreGain = true;
-        }
+
 	} else {
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06       
-        if (dontDribble) {
-            private_bb->SetBool("dribbler", false);
-        } else {
-            private_bb->SetBool("dribbler", true); 
-        } 
+
+        private_bb->SetBool("dribbler", !dontDribble);
+
+        // If robot is closer to the ball than (distAwayFromBall+0.1), then increase pGain
+        moreGain = true;//posDiff.length() < (distAwayFromBall + 0.1);
+
 	}
     
 
@@ -328,7 +327,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
-        int ballCloseFrameCountTo = 10;
+        int ballCloseFrameCountTo = 5;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         } else if (dontDribble) {
@@ -383,11 +382,11 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
     }
-    if (moreGain && !GetBool("pGainNotLarger")) {
-        private_bb->SetBool("pGainLarger", true);
-    } else {
+//    if (moreGain && !GetBool("pGainNotLarger")) {
+//        private_bb->SetBool("pGainLarger", true);
+//    } else {
         private_bb->SetBool("pGainLarger", false);
-    }
+//    }
 
     // Get the velocity command from GoToPos
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
