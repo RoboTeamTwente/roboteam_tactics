@@ -3,8 +3,9 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
+	<arg name="our_color" default="yellow" />
 	<param name="our_side" type="str" value="right" />
-	<param name="our_color" type="str" value="yellow" />
+	<param name="our_color" type="str" value="$(arg our_color)" />
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />
