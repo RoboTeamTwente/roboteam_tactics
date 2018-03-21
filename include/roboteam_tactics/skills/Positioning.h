@@ -39,6 +39,7 @@ private:
 	time_point start;
 	Vector2 bestPosition;
 	int counter;
+	bool dontGoToPos;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;

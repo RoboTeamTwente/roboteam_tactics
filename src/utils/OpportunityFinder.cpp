@@ -96,8 +96,20 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 	
 	double shortestDistance = 1000;
 	for (size_t i = 0; i < world.us.size(); i++) {
+
 		if (world.us.at(i).id!=ROBOT_ID){
-			double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+			// check whether current bot claimed a position
+			double botClaimedX;
+			ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosX", botClaimedX);
+			double testDistance = 0;
+			if(botClaimedX == 0 && !std::signbit(botClaimedX)) { // check for a -0.0, meaning bot did not claim position
+				testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+			} else { // if bot did claim a position, this is considered instead of its actual position
+				double botClaimedY;
+				ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
+				testDistance = (Vector2(botClaimedX,botClaimedY) - testPosition).length();
+			}
+			// testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
 			if (testDistance < shortestDistance) {
 				shortestDistance = testDistance;
 			}
@@ -308,9 +320,19 @@ double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::Wo
 	} else {
 		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
 		if (bot) {
-			roboteam_msgs::WorldRobot robot = *bot;
-			Vector2 robotPos(robot.pos);
-			return (testPosition - robotPos).length();
+			// check whether I claimed a position
+			double botClaimedX;
+			ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/claimedPosX", botClaimedX);
+			if(botClaimedX == 0 && !std::signbit(botClaimedX)) { // check for a -0.0, meaning bot did not claim position
+				roboteam_msgs::WorldRobot robot = *bot;
+				Vector2 robotPos(robot.pos);
+				return (testPosition - robotPos).length();
+			} else { // if bot did claim a position, this is considered instead of its actual position
+				double botClaimedY;
+				ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/claimedPosY", botClaimedY);
+				return (Vector2(botClaimedX,botClaimedY) - testPosition).length();
+			}
+			
 		} else {
 			ROS_WARN("OpportunityFinder::distToRobot robot not found :(");
 			return 0.0;
@@ -426,7 +448,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth) {
 
-	time_point start = now();
+	// time_point start = now();
 	
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -469,8 +491,8 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 			
 		}
 	}
-	int timePassed = time_difference_milliseconds(start, now()).count();
-	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinderBeforeDrawing took: " << timePassed << " ms");
+	// int timePassed = time_difference_milliseconds(start, now()).count();
+	// ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinderBeforeDrawing took: " << timePassed << " ms");
 
 	if (opportunities.size() == 0) {
 		ROS_WARN("No position found that meets the requirements :(");
@@ -491,11 +513,11 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	Vector2 bestPosition = opportunities.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 
-	timePassed = time_difference_milliseconds(start, now()).count();
-	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	// timePassed = time_difference_milliseconds(start, now()).count();
+	// ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// Info about best position
-	ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));
+	// ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));
 
 	// std::string name = "bestPosition";
 	// name.append(std::to_string(ROBOT_ID));
