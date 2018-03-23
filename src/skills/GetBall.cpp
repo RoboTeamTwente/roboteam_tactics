@@ -74,11 +74,11 @@ void GetBall::publishKickCommand(double kickSpeed){
 
     command.x_vel = 0;
     command.y_vel = 0;
-    if (GetBool("passOn") || dontDribble) {
+   // if (GetBool("passOn") || dontDribble) {
         command.dribbler = false;
-    } else {
-        command.dribbler = true;
-    }
+    //} else {
+    //    command.dribbler = true;
+    //}
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);  
@@ -112,19 +112,18 @@ void GetBall::releaseBall() {
 
 
 void GetBall::Initialize() {
+
+    ROS_INFO_STREAM_NAMED("skills.GetBall", "Initialize");
+
     ballCloseFrameCount = 0;
     finalStage = false;
     countFinalMessages = 0;
 
-    if (HasBool("dribblerOff") && GetBool("dribblerOff")) {
-        dontDribble = true;
-    } else {
-        dontDribble = false;
-    }
+    dontDribble = HasBool("dribblerOff") && GetBool("dribblerOff");
 
     if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
         deviation = 0.30*(get_rand_int(2)*2-1);
-        ROS_INFO_STREAM("GetBall: " << deviation);
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "deviation : " << deviation);
     } else {
         deviation = 0.0;
     }
@@ -150,7 +149,7 @@ bt::Node::Status GetBall::Update (){
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN_STREAM("GetBall: robot with this ID not found, ID: " << robotID);
+        ROS_WARN_STREAM_NAMED("skills.GetBall", "Robot with this ID not found, ID: " << robotID);
         return Status::Failure;
     }  
 
@@ -174,19 +173,22 @@ bt::Node::Status GetBall::Update (){
 
     // If we should pass on to the best available attacker, we should find which one has the highest score
     if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-        // ROS_INFO_STREAM("robot: " << robotID << " checking passToBestAttacker options");
         double maxScore = -std::numeric_limits<double>::max();
 
+        // For each robot in the field
         for (size_t i = 0; i < (world.us.size()); i++) {
 
+            // Check rosparam to see if the robot is ready to receive the ball
             std::string paramName = "robot" + std::to_string(world.us.at(i).id) + "/readyToReceiveBall";
             bool readyToReceiveBall = false;
-            ros::param::getCached(paramName, readyToReceiveBall);
+            ros::param::getCached(paramName, readyToReceiveBall); // Emiel : Why is the cached value used?
 
+            // If robot is ready to receive ball and is not this robot
             if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
-                // ROS_INFO_STREAM("getball " << robotID << " robot " << world.us.at(i).id << " readyToReceiveBall");
+                // Calculate score of attacker
                 opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
                 double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos));
+                // Store highest score and ID
                 if (score > maxScore) {
                     maxScore = score;
                     maxScoreID = world.us.at(i).id;
@@ -199,27 +201,37 @@ bt::Node::Status GetBall::Update (){
                 choseRobotToPassTo = true;
                 passToRobot = *maxScoreID;
             } else {
-                ROS_WARN("GetBall found no robot to pass to");
+                ROS_WARN_NAMED("skills.GetBall", "Found no robot to pass to");
             }
         } else {
         	SetString("aimAt", "theirgoal");
         }
-        
     }
     
 
-	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
+	/* If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball */
+    // If no robot was found to pass the ball to
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
-    } else if (choseRobotToPassTo) {
+    } else
+    // If a robot was found to pass to
+    if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
-    } else if (HasString("aimAt")) {
+    } else
+    // If a specific location to aim at was given
+    if (HasString("aimAt")) {
 		targetAngle = GetTargetAngle(ballPos - Vector2(0,deviation), GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
-	} else if (HasDouble("targetAngle")) {
+	} else
+    // If a specific angle was given to aim at
+    if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
-    } else if (shootAtGoal) {
+    } else
+    // If robot has to shoot at the goal
+    if (shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
-    } else {
+    }
+    // Nothing given, shoot straight
+    else {
         targetAngle = posDiff.angle();
     }
 
@@ -227,26 +239,27 @@ bt::Node::Status GetBall::Update (){
         targetAngle = targetAngle + M_PI;
     }
 
-
-
-
+    // e.g. cleanAngle(-4.3 Pi) = 0.7 Pi, cleanAngle(2.5 Pi) = 0.5 Pi
 	targetAngle = cleanAngle(targetAngle);
 
+    ROS_INFO_STREAM_NAMED("skills.GetBall", "targetAngle: " << targetAngle);
 
 	// Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
 	// This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
 	// target position. It's hard to explain without drawing, for questions ask Jim :)
-    double angleDiff = (targetAngle - (ballPos - robotPos).angle());
+    double angleDiff = (targetAngle - (ballPos - robotPos).angle()); // Emiel : Does (ballPas - robotPos) assume that we are looking at the ball?
 	angleDiff = cleanAngle(angleDiff);
     double intermediateAngle;
-	if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
+
+    if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() + 0.3*M_PI;
 	} else if (angleDiff < -0.1*M_PI) { // 0.1*M_PI for real-life robots!!
 		intermediateAngle = (ballPos - robotPos).angle() - 0.3*M_PI;
 	} else {
         intermediateAngle = targetAngle;
     }
-	
+
+    ROS_INFO_STREAM_NAMED("skills.GetBall", "intermediateAngle: " << intermediateAngle);
     
 	// Different GetBall parameters for grsim than for real robots
     std::string robot_output_target = "";
@@ -256,7 +269,7 @@ bt::Node::Status GetBall::Update (){
     double getBallDist;
     double distAwayFromBall;
     if (robot_output_target == "grsim") {
-        successDist = 0.11;
+        successDist = 0.13;
         successAngle = 0.2;
         getBallDist = 0.0 ;
         distAwayFromBall = 0.2;;
