@@ -20,6 +20,8 @@ OpportunityFinder::OpportunityFinder() {}
 
 void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
+	ROS_INFO_STREAM_NAMED("utils.OpportunityFinder", "Initialize");
+
 	std::string filePath = PASS_POINT_WEIGHTS_DIRECTORY.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -62,7 +64,7 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 		distOppToTargetTrajMin = weightsVector.at(25);
 		distOppToTargetTrajMax = weightsVector.at(26);
 	} else {
-		RTT_DEBUG("Unable to open file \n");
+		ROS_WARN_STREAM_NAMED("utils.OpportunityFinder", "Unable to open file " << fileName);
 	}
 
 	this->ROBOT_ID = ROBOT_ID;
