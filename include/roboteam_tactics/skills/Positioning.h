@@ -27,6 +27,7 @@ public:
 	void Initialize() override;
 
 	Status Update() override;
+	void Terminate(Status s) override;
 
 	static VerificationMap required_params() {
 		VerificationMap params;
@@ -39,7 +40,6 @@ private:
 	time_point start;
 	Vector2 bestPosition;
 	int counter;
-	bool dontGoToPos;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;

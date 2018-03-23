@@ -107,7 +107,7 @@ void Jelle_DemoPlay::Initialize() {
 }
 
 bt::Node::Status Jelle_DemoPlay::Update() {
-    if ((!getTeamBot(Keeper_id,true) || !getTeamBot(Attacker_id,true))){ //!failed && 
+    if ( (!getTeamBot(Keeper_id,true) || !getTeamBot(Attacker_id,true)) && !failed){ 
     //     auto pub2 = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     //     for(int i = 1; i<200; i++){
     //     pub2.publish(stop_command(Keeper_id));
@@ -115,14 +115,14 @@ bt::Node::Status Jelle_DemoPlay::Update() {
     // }
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
         // rd1.tree = "rtt_dennis/HaltRole";
-        rd1.tree = "rtt_dennis/HaltRole";
-        token = unique_id::fromRandom();
-        rd1.token = unique_id::toMsg(token);
+        rd1.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+        // token = unique_id::fromRandom();
+        // rd1.token = unique_id::toMsg(token);
         pub.publish(rd1);
-        // rd2.tree = "rtt_dennis/HaltRole";
-        rd1.tree = "rtt_dennis/HaltRole";
-        token = unique_id::fromRandom();
-        rd2.token = unique_id::toMsg(token);
+        // rd1.tree = "rtt_dennis/HaltRole";
+        rd2.tree = roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE;
+        // token = unique_id::fromRandom();
+        // rd2.token = unique_id::toMsg(token);
         pub.publish(rd2);
         release_robot(Keeper_id);
         release_robot(Attacker_id);
