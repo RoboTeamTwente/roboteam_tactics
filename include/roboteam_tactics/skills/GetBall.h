@@ -7,6 +7,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 
+#include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Draw.h"
 
 
@@ -106,26 +107,24 @@ public:
     std::string node_name() override { return "GetBall"; }
 
 private:
-	boost::optional<int> whichRobotHasBall();
-	void publishStopCommand();
+    boost::optional<int> whichRobotHasBall();
+    void publishStopCommand();
     void publishKickCommand(double kickVel);
     bool canClaimBall();
     void releaseBall();
     
-	int robotID;
-	bool dontDribble;
-	double deviation;
-
-	GoToPos goToPos;
+    int robotID;
+    GoToPos goToPos;
     Draw drawer;
     OpportunityFinder opportunityFinder;
     bool choseRobotToPassTo;
+    Vector2 bestClaimedPos;
+    bool bestBotClaimedPos;
     int ballCloseFrameCount = 0;
     int passToRobot;
-
-    double distanceFromBallWhenDribbling;
-    bool finalStage=false;
-    int countFinalMessages=0;
+    bool dontDribble;
+    double deviation;
+    std::string robot_output_target = "";
 };
 
 } // rtt

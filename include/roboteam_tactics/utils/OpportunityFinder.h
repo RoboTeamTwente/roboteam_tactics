@@ -66,6 +66,8 @@ private:
 	double distOppToTargetTrajMin;
 	double distOppToTargetTrajMax;
 
+	double totalWeight = 0.0001;
+
 	// The ID of the robot for which are trying to find a good point to stand on the field
 	uint ROBOT_ID;
 	std::string target;

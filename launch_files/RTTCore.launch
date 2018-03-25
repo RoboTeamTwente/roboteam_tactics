@@ -53,6 +53,7 @@
 	<param name="robot9/claimedPosY" type="double" value="-0.0" />
 
 	<param name="robotClaimedBall" type="int" value="-1" />
+	<param name="passToRobot" type="int" value="-1" />
  
 	<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
 	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />

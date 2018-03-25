@@ -61,6 +61,10 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 		distOppToTargetTrajWeight = weightsVector.at(24);
 		distOppToTargetTrajMin = weightsVector.at(25);
 		distOppToTargetTrajMax = weightsVector.at(26);
+		// calculate totalWeight for normalization in computeScore
+		totalWeight = viewOfGoalWeight + distToOppWeight + distToTeammateWeight
+					+ distToBallWeight + distToSelfWeight + ballReflectionAngleWeight
+					+ distOppToBallTrajWeight + distOppToTargetTrajWeight + 0.0001;
 	} else {
 		RTT_DEBUG("Unable to open file \n");
 	}
@@ -326,9 +330,26 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 	
 	Vector2 ballPos(world.ball.pos);
 	
-	double score = 0.0;
+	double score = 0.0;	// score will not go below 0
 
-	// POSSIBLE IMPROVEMENT: certain metrics have such priority that a zero score in these metrics will return a 0 score immediately
+	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
+		if (distOppToBallTraj<distOppToBallTrajMin) {
+			return 0.0;
+		}
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToBallTraj = (distOppToBallTraj-distOppToBallTrajMin)/(distOppToBallTrajMax-distOppToBallTrajMin);
+		// Add score to total score
+		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
+	}
+
+	if (distOppToTargetTrajWeight>0.0) {
+		double distOppToTargetTraj = calcDistOppToTargetTraj(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distOppToTargetTraj = (distOppToTargetTraj-distOppToTargetTrajMin)/(distOppToTargetTrajMax-distOppToTargetTrajMin);
+		// Add score to total score
+		score += smoothStep(distOppToTargetTraj)*distOppToTargetTrajWeight;
+	}
 
 	if (distToGoalWeight>0.0) { // IMPROVEMENT: Distance from goal line, instead of goal center point?
 		double distToGoal = (testPosition - targetPos).length();
@@ -387,22 +408,9 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		// Add score to total score
 		score += smoothStep(1-ballReflectionAngle)*ballReflectionAngleWeight;
 	}
-
-	if (distOppToBallTrajWeight>0.0) {
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distOppToBallTraj = (distOppToBallTraj-distOppToBallTrajMin)/(distOppToBallTrajMax-distOppToBallTrajMin);
-		// Add score to total score
-		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
-	}
-
-	if (distOppToTargetTrajWeight>0.0) {
-		double distOppToTargetTraj = calcDistOppToTargetTraj(testPosition, world);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distOppToTargetTraj = (distOppToTargetTraj-distOppToTargetTrajMin)/(distOppToTargetTrajMax-distOppToTargetTrajMin);
-		// Add score to total score
-		score += smoothStep(distOppToTargetTraj)*distOppToTargetTrajWeight;
-	}
+		
+	// normalize score between 0 and 100
+	score = score / totalWeight * 100;
 
 	return score;
 }

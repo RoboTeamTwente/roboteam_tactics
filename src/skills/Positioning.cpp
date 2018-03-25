@@ -1,11 +1,11 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/skills/Positioning.h"
-#include "roboteam_tactics/utils/utils.h"
 #include <chrono>
 
 #include "roboteam_msgs/World.h"
 
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG Positioning
 
@@ -19,6 +19,7 @@ Positioning::Positioning(std::string name, bt::Blackboard::Ptr blackboard)
 
 void Positioning::Initialize() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+    passIncoming = false;
 
     opportunityFinder.Initialize("jelle.txt", ROBOT_ID, "theirgoal", 0);
     // starting point is opponents half of the field
@@ -31,21 +32,46 @@ void Positioning::Initialize() {
     private_bb->SetDouble("yGoal", bestPosition.y);
 
     counter = 1;
+    counter2 = 0;
     start = now();
 }
 
-void Positioning::Terminate(bt::Node::Status s){
+void Positioning::Terminate(bt::Node::Status s) {
         // unclaim position
         ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosX", -0.0);
         ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosY", -0.0);
         ROS_INFO_STREAM_NAMED("jelle_test1", "Terminating");
     }
 
+double Positioning::getBallGoalHalfwayAngle(Vector2 testPos) {
+    roboteam_msgs::World world = LastWorld::get();
+    Vector2 ballPos(world.ball.pos);
+    double angleToGoal = (LastWorld::get_their_goal_center() - testPos).angle();    // Angle from testPos to their goal
+    double angleToBall = (ballPos - testPos).angle();                               // Angle from testPos to the ball
+    double halfwayAngle = cleanAngle(angleToBall - angleToGoal)/2 + angleToGoal;
+    return halfwayAngle;
+}
+
 bt::Node::Status Positioning::Update() {
     
+
+    if (!passIncoming) {
+        int passToRobot;
+        ros::param::getCached("passToRobot", passToRobot);
+        passIncoming = passToRobot == (int) ROBOT_ID;
+    } else if (counter2 > 20) {// if a pass is incoming, I should stop repositioning myself and go to the last bestPosition I chose
+        private_bb->SetDouble("xGoal", bestPosition.x);
+        private_bb->SetDouble("yGoal", bestPosition.y);
+        private_bb->SetDouble("angleGoal", getBallGoalHalfwayAngle(bestPosition));
+        counter2 = 0;
+    } else {
+        counter2++;
+    }
+    
+
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 100) {
+    if (!passIncoming && elapsedTime.count() >= 100) {
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
@@ -66,13 +92,6 @@ bt::Node::Status Positioning::Update() {
         // Determine new best position, in the neighbourhood of the previously determined best position
         bestPosition = opportunityFinder.computeBestOpportunity(bestPosition,boxSize,boxSize);
 
-        // // See what position robot 2 claimed (for debugging)
-        // double botClaimedX = 0;
-        // double botClaimedY = 0;
-        // ros::param::getCached("robot2/claimedPosX", botClaimedX);
-        // ros::param::getCached("robot2/claimedPosY", botClaimedY);
-        // ROS_INFO_STREAM("robot: " << 2 << " claimed position: x: " << botClaimedX << ", y: "<< botClaimedY);
-
         if(!dontGoToPos) {
             // I will wait at a set distance from the best position it computed, otherwise the opponent can react, making the position less good.
             // This waiting position is then in a direction such that the best position will not be blocked from the ball or goal by the opponent as a reaction.
@@ -80,14 +99,7 @@ bt::Node::Status Positioning::Update() {
             if (HasDouble("waitAtDistance")) {
                 waitAtDist = GetDouble("waitAtDistance");
             }
-            roboteam_msgs::World world = LastWorld::get();
-            Vector2 ballPos(world.ball.pos);
-            // Vector2 vecToBall = ballPos - bestPosition; // Vector from bestPosition to ball
-            // Vector2 vecToGoal = getTargetPos("theirgoal",0,true) - bestPosition; // Vector from bestPosition to their goalcenter
-            // Vector2 posOffset = Vector2(fabs(vecToGoal.y)-fabs(vecToBall.y),vecToBall.x*signum(vecToBall.y)-vecToGoal.x*signum(vecToGoal.y)).stretchToLength(waitAtDist);
-            double angleToGoal = (getTargetPos("theirgoal",0,true) - bestPosition).angle(); // Angle from bestPosition to their goal
-            double angleToBall = (ballPos - bestPosition).angle();  // Angle from bestPosition to the ball
-            Vector2 posOffset = Vector2(-waitAtDist,0).rotate( cleanAngle(angleToBall - angleToGoal)/2 + angleToGoal );
+            Vector2 posOffset = Vector2(-waitAtDist,0).rotate( getBallGoalHalfwayAngle(bestPosition) );
 
             // pass new position setpoint to GoToPos blackboard
             private_bb->SetDouble("xGoal", bestPosition.x + posOffset.x);

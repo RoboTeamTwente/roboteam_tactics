@@ -39,10 +39,14 @@ private:
 	uint ROBOT_ID;
 	time_point start;
 	Vector2 bestPosition;
+	bool passIncoming;
 	int counter;
+	int counter2;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;
+
+	double getBallGoalHalfwayAngle(Vector2 testPos);
 };
 
 
