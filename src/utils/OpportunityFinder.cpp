@@ -100,7 +100,7 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
 	
-	double shortestDistance = 1000;
+	double shortestDistance = 20;//(Vector2(world.us.at(0).pos) - testPosition).length();
 	for (size_t i = 0; i < world.us.size(); i++) {
 
 		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
@@ -130,7 +130,7 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 	return shortestDistance;
 }
 
-// Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
+
 double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballTraj = testPosition - ballPos;
@@ -138,18 +138,46 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 	if (world.them.size() == 0) {
 		return 0.0;
 	}
+	// IMPROVEMENT: Maybe the ball trajectory should be considered a cone, when assessing how close opponents may be.
+	// Vector2 oppPos = Vector2(world.them.at(0).pos);
+	double shortestDistance = 20;//fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
+	for (size_t i = 0; i < world.them.size(); i++) {
+		Vector2 oppPos(world.them.at(i).pos);
+		// WIP: opponents outside a 90 degree field of view are not considered
+		if ( fabs(cleanAngle( (oppPos - ballPos).angle() - ballTraj.angle() )) < 0.25*M_PI) {
+		// WIP: if closest point on ball traj is (nearly) at ballPos, the opponent must be behind the ball (more than 90 degrees from the ball trajectory)
+		// if ( ! (closestPoint - ballPos).length() < 0.001 ) {
+			double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
+			if (testDistance < shortestDistance) {
+				shortestDistance = testDistance;
+			}
 
-	Vector2 oppPos = Vector2(world.them.at(0).pos);
-	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
-	for (size_t i = 1; i < world.them.size(); i++) {
-		Vector2 oppPos = Vector2(world.them.at(i).pos);
-		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
-		if (testDistance < shortestDistance) {
-			shortestDistance = testDistance;
+		// }
 		}
 	}
 	return shortestDistance;
 }
+
+// Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
+// double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
+// 	Vector2 ballPos(world.ball.pos);
+// 	Vector2 ballTraj = testPosition - ballPos;
+
+// 	if (world.them.size() == 0) {
+// 		return 0.0;
+// 	}
+
+// 	Vector2 oppPos = Vector2(world.them.at(0).pos);
+// 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
+// 	for (size_t i = 1; i < world.them.size(); i++) {
+// 		Vector2 oppPos = Vector2(world.them.at(i).pos);
+// 		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
+// 		if (testDistance < shortestDistance) {
+// 			shortestDistance = testDistance;
+// 		}
+// 	}
+// 	return shortestDistance;
+// }
 
 // Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
 double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {

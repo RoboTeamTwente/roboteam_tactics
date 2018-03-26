@@ -43,11 +43,7 @@ void GetBall::Initialize() {
     ros::param::set("passToRobot", -1);
     ros::param::getCached("robot_output_target", robot_output_target);
 
-    if (HasBool("dribblerOff") && GetBool("dribblerOff")) {
-        dontDribble = true;
-    } else {
-        dontDribble = false;
-    }
+    dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
 
     // // RANDOM ANGLE SHOOTER (set deviation to 0 to not use this)
     // if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
@@ -58,8 +54,11 @@ void GetBall::Initialize() {
     // }
     
     robotID = blackboard->GetInt("ROBOT_ID");
-    // IMPROVE: Should be a different weight list that does not take dist to teammate (and dist to self?) into account
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+
+    if (GetBool("passToBestAttacker")) {
+	// IMPROVE: Should be a different weight list that does not take dist to teammate (and dist to self?) into account
+	    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+	}
 }
 
 void GetBall::publishStopCommand() {
@@ -90,11 +89,11 @@ void GetBall::publishKickCommand(double kickSpeed){
 
     command.x_vel = 0;
     command.y_vel = 0;
-   // if (GetBool("passOn") || dontDribble) {
+   if (GetBool("passOn") || dontDribble) {
         command.dribbler = false;
-    //} else {
-    //    command.dribbler = true;
-    //}
+    } else {
+       command.dribbler = true;
+    }
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);  
@@ -156,13 +155,20 @@ bt::Node::Status GetBall::Update (){
         successAngle = 0.2;
         getBallDist = 0.0 ;
         distAwayFromBall = 0.2;
-        minDist = 0.1;
+        minDist = 0.06;
     } else if (robot_output_target == "serial") {
-        successDist = 0.13; //0.12
+        successDist = 0.12; //0.12
         successAngle = 0.15; //0.15
         getBallDist = 0.0;
-        distAwayFromBall = 0.2;
-        minDist = 0.1;
+        distAwayFromBall = 0.28;
+        minDist = 0.06;
+
+        // extra strafe gain for goToPos
+        if (HasDouble("strafeGain")) {
+	        private_bb->SetDouble("strafeGain", GetDouble("strafeGain"));
+	    } else {
+	    	private_bb->SetDouble("strafeGain", 1.3);
+	    }
     }
     // if (GetBool("beAggressive", false)) {
     //  successDist = 0.11 ;
@@ -175,7 +181,7 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = GetDouble("distAwayFromBall");
     }
     if (HasDouble("minDist")) {
-        minDist = GetDouble("distAwayFromBall");
+        minDist = GetDouble("minDist");
     }
     if (HasDouble("successAngle")) {
         successAngle = GetDouble("successAngle");
@@ -334,16 +340,12 @@ bt::Node::Status GetBall::Update (){
         ballDist = distAwayFromBall;
     }
     Vector2 targetPos;
-    if (fabs(angleDiff)>successAngle/2) {
+    if (fabs(angleDiff)>successAngle) {
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) );
-        private_bb->SetBool("dribbler", false);
+        private_bb->SetBool("dribbler", posDiff.length()<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
         targetPos = ballPos + Vector2(-getBallDist, 0.0).rotate(targetAngle);
-        if (dontDribble) {
-            private_bb->SetBool("dribbler", false);
-        } else {
-            private_bb->SetBool("dribbler", true); 
-        }
+        private_bb->SetBool("dribbler", !dontDribble);
     }
     
  //    // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
@@ -399,13 +401,13 @@ bt::Node::Status GetBall::Update (){
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
-    
     if (HasDouble("pGainPosition")) {
         private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
     } 
     if (HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
     }
+    
 
     // Get the velocity command from GoToPos
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();

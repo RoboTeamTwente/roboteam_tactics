@@ -526,7 +526,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Rotate the commands from world frame to robot frame
     Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
 
-
+    // BEUN Solution for now: strafing needs more gain
+    if (HasDouble("strafeGain")) {
+        velTarget.y = velTarget.y * GetDouble("strafeGain");
+    }
+    
     // Velocity controller
     // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
     

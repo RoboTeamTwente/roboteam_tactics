@@ -3,7 +3,7 @@ distToGoalMin 1.2
 distToGoalMax 6.2
 viewOfGoalWeight 2.0
 viewOfGoalMin 0.0
-viewOfGoalMax 0.6
+viewOfGoalMax 0.7
 distToOppWeight 1.0
 distToOppMin 0.18
 distToOppMax 1.0
