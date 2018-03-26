@@ -33,6 +33,7 @@ public:
 	void setCloseToPos(Vector2 closeToPos);
 	// boost::optional<double> computePassPointScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition);
+	double computeScore(Vector2 testPosition, roboteam_msgs::World world);
 	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
 private:
 	
@@ -64,6 +65,8 @@ private:
 	double distOppToTargetTrajWeight;
 	double distOppToTargetTrajMin;
 	double distOppToTargetTrajMax;
+
+	double totalWeight = 0.0001;
 
 	// The ID of the robot for which are trying to find a good point to stand on the field
 	uint ROBOT_ID;

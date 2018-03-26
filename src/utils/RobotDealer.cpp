@@ -91,7 +91,8 @@ bool RobotDealer::claim_robot(int id) {
 
 bool RobotDealer::release_robot(int id) {
 	LOCK_THIS_FUNCTION
-    RTT_DEBUGLN("Releasing robot %i", id);
+    // RTT_DEBUGLN("Releasing robot %i", id);
+    ROS_DEBUG("RobotDealer Releasing robot %i", id);
 
     removeRobotFromOwnerList(id);
 

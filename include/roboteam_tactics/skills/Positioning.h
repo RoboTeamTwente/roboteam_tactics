@@ -27,6 +27,7 @@ public:
 	void Initialize() override;
 
 	Status Update() override;
+	void Terminate(Status s) override;
 
 	static VerificationMap required_params() {
 		VerificationMap params;
@@ -38,11 +39,14 @@ private:
 	uint ROBOT_ID;
 	time_point start;
 	Vector2 bestPosition;
+	bool passIncoming;
 	int counter;
-	bool dontGoToPos;
+	int counter2;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;
+
+	double getBallGoalHalfwayAngle(Vector2 testPos);
 };
 
 
