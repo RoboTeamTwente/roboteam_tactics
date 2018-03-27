@@ -18,29 +18,32 @@ Positioning::Positioning(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb) {}
 
 void Positioning::Initialize() {
-    ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    passIncoming = false;
+    robotID = blackboard->GetInt("ROBOT_ID");
+    ROS_INFO_STREAM_NAMED("skills.Positioning", "Initialize for robot: " << robotID);
+    // passIncoming = false;
 
-    opportunityFinder.Initialize("jelle.txt", ROBOT_ID, "theirgoal", 0);
+    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
     // starting point is opponents half of the field
     bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
 
     // pass first info to GoToPos blackboard already
-    private_bb->SetInt("ROBOT_ID", ROBOT_ID);
+    private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", bestPosition.x);
     private_bb->SetDouble("yGoal", bestPosition.y);
 
     counter = 1;
-    counter2 = 0;
+    // counter2 = 0;
     start = now();
 }
 
 void Positioning::Terminate(bt::Node::Status s) {
+        if (!GetBool("dontUnclaim")) {
         // unclaim position
-        ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosX", -0.0);
-        ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosY", -0.0);
-        ROS_INFO_STREAM_NAMED("jelle_test1", "Terminating");
+            ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
+            ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
+            ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << "Unclaiming pos at termination");
+        }
     }
 
 double Positioning::getBallGoalHalfwayAngle(Vector2 testPos) {
@@ -55,27 +58,27 @@ double Positioning::getBallGoalHalfwayAngle(Vector2 testPos) {
 bt::Node::Status Positioning::Update() {
     
 
-    if (!passIncoming) {
-        int passToRobot;
-        ros::param::getCached("passToRobot", passToRobot);
-        passIncoming = passToRobot == (int) ROBOT_ID;
-    } else if (counter2 > 20) {// if a pass is incoming, I should stop repositioning myself and go to the last bestPosition I chose
-        private_bb->SetDouble("xGoal", bestPosition.x);
-        private_bb->SetDouble("yGoal", bestPosition.y);
-        private_bb->SetDouble("angleGoal", getBallGoalHalfwayAngle(bestPosition));
-        counter2 = 0;
-    } else {
-        counter2++;
-    }
+    // if (!passIncoming) {
+    //     int passToRobot;
+    //     ros::param::getCached("passToRobot", passToRobot);
+    //     passIncoming = passToRobot == (int) robotID;
+    // } else if (counter2 > 20) {// if a pass is incoming, I should stop repositioning myself and go to the last bestPosition I chose
+    //     private_bb->SetDouble("xGoal", bestPosition.x);
+    //     private_bb->SetDouble("yGoal", bestPosition.y);
+    //     private_bb->SetDouble("angleGoal", getBallGoalHalfwayAngle(bestPosition));
+    //     counter2 = 0;
+    // } else {
+    //     counter2++;
+    // }
     
 
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (!passIncoming && elapsedTime.count() >= 100) {
+    if (elapsedTime.count() >= 100) { // !passIncoming && 
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
-        Vector2 myPos = getTargetPos("robot", ROBOT_ID, true);
+        Vector2 myPos = getTargetPos("robot", robotID, true);
         double boxSize = (bestPosition - myPos).length() + 1.0; 
 
         bool dontGoToPos = false;
@@ -106,12 +109,12 @@ bt::Node::Status Positioning::Update() {
             private_bb->SetDouble("yGoal", bestPosition.y + posOffset.y);
 
             // claim chosen position to go to
-            ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosX", bestPosition.x);
-            ros::param::set("robot" + std::to_string(ROBOT_ID) + "/claimedPosY", bestPosition.y);
+            ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", bestPosition.x);
+            ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", bestPosition.y);
         }
 
         start = now();
-        // ROS_INFO_STREAM("robot: " << ROBOT_ID << " best position: x: " << bestPosition.x << ", y: "<< bestPosition.y);  
+        // ROS_INFO_STREAM("robot: " << robotID << " best position: x: " << bestPosition.x << ", y: "<< bestPosition.y);  
     }
     // private_bb->SetDouble("angleGoal", targetAngle);
     goToPos.Update();
