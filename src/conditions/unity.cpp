@@ -8,7 +8,10 @@
 #undef RTT_CURRENT_DEBUG_TAG  
 
 #include "CanInterceptBall.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "CanInterceptBallDuel.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "CanKeeperMove.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
