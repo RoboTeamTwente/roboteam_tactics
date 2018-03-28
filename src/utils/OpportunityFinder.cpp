@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID true
+#define DRAW_PASS_POINT_GRID false
 
 namespace rtt {
 
@@ -66,7 +66,7 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 		// calculate totalWeight for normalization in computeScore
 		totalWeight = viewOfGoalWeight + distToOppWeight + distToTeammateWeight
 					+ distToBallWeight + distToSelfWeight + ballReflectionAngleWeight
-					+ distOppToBallTrajWeight + distOppToTargetTrajWeight + 0.0001;
+					+ distOppToBallTrajWeight + distOppToTargetTrajWeight + distToGoalWeight + 0.0001;
 	} else {
 		ROS_WARN_STREAM_NAMED("utils.OpportunityFinder", "Unable to open file " << fileName);
 	}
@@ -109,22 +109,6 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 			if (testDistance < shortestDistance) {
 				shortestDistance = testDistance;
 			}
-
-			// check whether current bot claimed a position
-			// double botClaimedX;
-			// ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosX", botClaimedX);
-			// double testDistance = 1000;
-			// if(botClaimedX == 0.0 && std::signbit(botClaimedX)) { // check for a -0.0, meaning bot did not claim position
-			// 	testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-			// } else { // if bot did claim a position, this is considered instead of its actual position
-			// 	double botClaimedY;
-			// 	ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
-			// 	testDistance = (Vector2(botClaimedX,botClaimedY) - testPosition).length();
-			// }
-			// // testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-			// if (testDistance < shortestDistance) {
-			// 	shortestDistance = testDistance;
-			// }
 		}
 	}
 	return shortestDistance;
@@ -145,39 +129,14 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 		Vector2 oppPos(world.them.at(i).pos);
 		// WIP: opponents outside a 90 degree field of view are not considered
 		if ( fabs(cleanAngle( (oppPos - ballPos).angle() - ballTraj.angle() )) < 0.25*M_PI) {
-		// WIP: if closest point on ball traj is (nearly) at ballPos, the opponent must be behind the ball (more than 90 degrees from the ball trajectory)
-		// if ( ! (closestPoint - ballPos).length() < 0.001 ) {
 			double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 			if (testDistance < shortestDistance) {
 				shortestDistance = testDistance;
 			}
-
-		// }
 		}
 	}
 	return shortestDistance;
 }
-
-// Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
-// double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
-// 	Vector2 ballPos(world.ball.pos);
-// 	Vector2 ballTraj = testPosition - ballPos;
-
-// 	if (world.them.size() == 0) {
-// 		return 0.0;
-// 	}
-
-// 	Vector2 oppPos = Vector2(world.them.at(0).pos);
-// 	double shortestDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
-// 	for (size_t i = 1; i < world.them.size(); i++) {
-// 		Vector2 oppPos = Vector2(world.them.at(i).pos);
-// 		double testDistance = fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
-// 		if (testDistance < shortestDistance) {
-// 			shortestDistance = testDistance;
-// 		}
-// 	}
-// 	return shortestDistance;
-// }
 
 // Calculates the shortest distance between the closest opponent and the expected trajectory of the ball
 double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
@@ -315,18 +274,6 @@ double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::Wo
 		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
 		if (bot) {
 			return (testPosition - Vector2((*bot).pos)).length();
-			// // check whether I claimed a position
-			// double botClaimedX;
-			// ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/claimedPosX", botClaimedX);
-			// if(botClaimedX == 0 && std::signbit(botClaimedX)) { // check for a -0.0, meaning bot did not claim position
-			// 	roboteam_msgs::WorldRobot robot = *bot;
-			// 	Vector2 robotPos(robot.pos);
-			// 	return (testPosition - robotPos).length();
-			// } else { // if bot did claim a position, this is considered instead of its actual position
-			// 	double botClaimedY;
-			// 	ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/claimedPosY", botClaimedY);
-			// 	return (Vector2(botClaimedX,botClaimedY) - testPosition).length();
-			// }
 			
 		} else {
 			ROS_WARN("OpportunityFinder::distToRobot robot not found :(");
@@ -483,7 +430,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 				name.append("y");
 				name.append(std::to_string(y_step));
 			// calculate the score of this point:
-			if (!isWithinDefenseArea(false, point, 0.1) && IsWithinField(point)) {
+			if (!isWithinDefenseArea(false, point, 0.2) && IsWithinField(point)) {
 				double score = computeScore(point, world);
 				opportunities.push_back(point);
 				scores.push_back(score);
@@ -518,11 +465,11 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 
 	int timePassed = time_difference_milliseconds(start, now()).count();
-	ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	//ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// Info about best position
 	// ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));
-	ROS_INFO_STREAM("distClosestTeammate" << calcDistToClosestTeammate(bestPosition, world));
+	// ROS_INFO_STREAM("distClosestTeammate" << calcDistToClosestTeammate(bestPosition, world));
 	std::string name = "bestPosition";
 	name.append(std::to_string(ROBOT_ID));
 	drawer.setColor(255, 255, 255);

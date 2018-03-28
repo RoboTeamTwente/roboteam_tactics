@@ -36,12 +36,19 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
 }
 
 void GetBall::Initialize() {
-	ROS_INFO_STREAM_NAMED("skills.GetBall", "Initialize");
+    robotID = blackboard->GetInt("ROBOT_ID");
+	ROS_INFO_STREAM_NAMED("skills.GetBall", "Initialize for robot: " << robotID);
+
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
     bestBotClaimedPos = false;
-    ros::param::set("passToRobot", -1);
+    // ros::param::set("passToRobot", -1);
+    // ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", passToRobot param reset to -1 because doing GetBall now");
     ros::param::getCached("robot_output_target", robot_output_target);
+    // unclaim position
+    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
+    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
+    ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
 
@@ -52,12 +59,10 @@ void GetBall::Initialize() {
     // } else {
         deviation = 0.0;
     // }
-    
-    robotID = blackboard->GetInt("ROBOT_ID");
 
     if (GetBool("passToBestAttacker")) {
 	// IMPROVE: Should be a different weight list that does not take dist to teammate (and dist to self?) into account
-	    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+	    opportunityFinder.Initialize("jellePass.txt", robotID, "theirgoal", 0);
 	}
 }
 
@@ -151,10 +156,10 @@ bt::Node::Status GetBall::Update (){
     double distAwayFromBall;
     double minDist;
     if (robot_output_target == "grsim") {
-        successDist = 0.11;
-        successAngle = 0.2;
+        successDist = 0.12;
+        successAngle = 0.15;
         getBallDist = 0.0 ;
-        distAwayFromBall = 0.2;
+        distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
         successDist = 0.12; //0.12
@@ -204,7 +209,7 @@ bt::Node::Status GetBall::Update (){
 
     // Check whether I should shoot at goal
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
-    bool canSeeGoal = viewOfGoal >= 0.1; 
+    bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
@@ -224,7 +229,7 @@ bt::Node::Status GetBall::Update (){
                 if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
                     double botClaimedY;
                     ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
-                    double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos),world);
+                    double score = opportunityFinder.computeScore(Vector2(botClaimedX,botClaimedY),world);
                     if (score > maxScore) {
                         maxScore = score;
                         maxScoreID = world.us.at(i).id;
@@ -258,8 +263,9 @@ bt::Node::Status GetBall::Update (){
         if (maxScoreID)  {//-std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
             choseRobotToPassTo = true;
             passToRobot = *maxScoreID;
-            ROS_INFO_STREAM("passing to robot: " << passToRobot << " with score: " << maxScore);
+            // ROS_INFO_STREAM("passing to robot: " << passToRobot << " with score: " << maxScore);
             ros::param::set("passToRobot", passToRobot); // communicate that chosen robot will receive the ball
+            ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", passToRobot param set to: " << passToRobot <<" because GetBall chose this attacker with score: " << maxScore);
         // } else if (GetBool("dontShootAtGoal", false)) {
         //     ROS_WARN("GetBall found no robot to pass to, but is not allowed to shoot at goal");
 
@@ -275,6 +281,7 @@ bt::Node::Status GetBall::Update (){
 
 	/* If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball */
 	double targetAngle;
+    double targetDist = 2.0; // WIP (jelle): for passing harder if target is further away
     // If no robot was found to pass the ball to
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
@@ -283,6 +290,7 @@ bt::Node::Status GetBall::Update (){
     else if (choseRobotToPassTo) { 
         if (bestBotClaimedPos) {
             targetAngle = (bestClaimedPos - ballPos).angle();
+            targetDist = (bestClaimedPos - ballPos).length();
         } else {
             targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
         }
@@ -379,9 +387,18 @@ bt::Node::Status GetBall::Update (){
         } else {
 
             if (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam")) ) {
-                publishKickCommand(4.0);
+                double passingSpeed = targetDist*2;
+                if (HasDouble("passingMult")) {
+                    passingSpeed = targetDist*GetDouble("passingMult");
+                }
+                if (passingSpeed>6.5) {
+                    passingSpeed = 6.5;
+                } else if (passingSpeed<2.0) {
+                    passingSpeed = 2.0;
+                }
+                publishKickCommand(passingSpeed);
             } else {
-                publishKickCommand(8.0);
+                publishKickCommand(6.5);
             }
             releaseBall();
             return Status::Success;

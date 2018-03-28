@@ -19,6 +19,14 @@ namespace rtt {
  *   - ROBOT_ID:
  *       Type: Int
  *       Descr: The id of the robot
+ *
+ *   - waitAtDistance:
+ *       Type: Double
+ *       Descr: The robot will wait at a set distance from the position it claimed, to prevent anticipation by the opponent
+ *
+ *   - dontUnclaim:
+ *       Type: Bool
+ *       Descr: If true, when terminate gets called for this skill, it wont unclaim its claimed position.
  */
 class Positioning : public Skill {
 public:
@@ -36,12 +44,12 @@ public:
 	}
 	std::string node_name() { return "Positioning"; }
 private:
-	uint ROBOT_ID;
+	uint robotID;
 	time_point start;
 	Vector2 bestPosition;
-	bool passIncoming;
 	int counter;
-	int counter2;
+	//bool passIncoming;
+	//int counter2;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;

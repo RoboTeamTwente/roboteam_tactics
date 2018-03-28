@@ -37,15 +37,18 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
     
     prevComputedPoint = now();
-    computedTargetPos = false;
+    //computedTargetPos = false;
     
-    prevballdist=0;
+    // prevballdist=0;
 }
 
 void ReceiveBall::Initialize() {
 	startTime = now();
+	robotID = blackboard->GetInt("ROBOT_ID");
+	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Initialize for robot: " << robotID);
+	ballIsComing = false;
+	startKicking = false;
 
-	robotID = blackboard->GetInt("ROBOT_ID");	
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
 	} else {
@@ -66,6 +69,13 @@ void ReceiveBall::Initialize() {
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	} else if (GetBool("computePoint")) {
 		receiveBallAtPos = computePoint();
+	} else if (GetBool("claimedPos")) {
+		double botClaimedX;
+		double botClaimedY;
+		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
+		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
+		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
+		ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
 
 		roboteam_msgs::WorldRobot robot;
@@ -74,7 +84,7 @@ void ReceiveBall::Initialize() {
 	        robot = *findBot;
 	        receiveBallAtPos = Vector2(robot.pos);
 	    } else {
-	        ROS_WARN("ReceiveBall could not find robot");
+	        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot");
 	    }
 	}
 }
@@ -126,33 +136,35 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos,Vector2 ba
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN("ReceiveBall could not find robot");
+        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot");
     }
 	Vector2 robotPos(robot.pos);
 	Vector2 posdiff = robotPos - ballPos;
 	double balldist = posdiff.length();
-	double ballDir=1.0;
-	if (balldist > prevballdist){
-		ballDir=-1.0;
-	}
+	// double ballDir=1.0;
+	// if (balldist >= prevballdist){
+	// 	ballDir=-1.0;
+	// }
 
-	prevballdist=balldist;
+	// prevballdist=balldist;
 
 	//double ballDir = ballVel.dot();
 
 	// ROS_INFO("ballDir: %f",ballDir);
 
-	if (ballVel.length() < 0.1 || ballDir <= 0) {
+	if (ballVel.length() < 0.2 || ballVel.dot(posdiff)<0) {
 
 		// drawer.removeLine("ballTrajectory");
 		// drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
+		ballIsComing = false;
 		
 		return interceptPose;
 	} else {
 		Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
+		ballIsComing = true;
 
 		// drawer.setColor(255,255,255);
 		// drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
@@ -160,7 +172,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos,Vector2 ba
 		// drawer.setColor(0,0,0);
 		// ROS_INFO_STREAM("robot " << robotID << " acceptableDeviation: " << acceptableDeviation); 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
-			ballIsComing = true;
+			
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
 
@@ -193,7 +205,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
     if (findBot) {
         otherRobot = *findBot;
     } else {
-        ROS_WARN("ReceiveBall could not find other robot");
+        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find other robot");
         return interceptPose;
     }
 
@@ -242,6 +254,7 @@ bt::Node::Status ReceiveBall::Update() {
 	// ROS_INFO_STREAM("robot " << robotID << " in ReceiveBall update");
 	
 	if (startKicking) {
+		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "KICK!");
 		return kick.Update();
 	}
 
@@ -286,7 +299,7 @@ bt::Node::Status ReceiveBall::Update() {
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN("ReceiveBall could not find robot");
+        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot");
         return Status::Failure;
     }
 	Vector2 robotPos(robot.pos);
@@ -307,7 +320,7 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 	
 	if (!interceptPose) {
-		ROS_WARN("Receive ball was unable to calculate an InterceptPose");
+		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "Receive ball was unable to calculate an InterceptPose");
 		return Status::Failure;
 	}
 
@@ -317,15 +330,19 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
-	double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
-	bool canSeeGoal = viewOfGoal >= 0.2;
-	bool shootAtGoal = GetBool("shootAtGoal") && canSeeGoal;
+	// and on whether the 'reflection angle' (angleDiff) is small enough
+	bool shootAtGoal = false;
+	double angleDiff = 0;
+	if (GetBool("shootAtGoal")) {
+		double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
+		angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
+		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2);
+	}
 
 
 	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
 	if (shootAtGoal) {
 		drawer.setColor(255, 0, 0);
-		double angleDiff = cleanAngle( ((ballPos - robotPos).angle() - (LastWorld::get_their_goal_center() - robotPos).angle()) );
 		targetAngle = (LastWorld::get_their_goal_center() - robotPos).angle() + (angleDiff / 4.0);
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
@@ -374,6 +391,7 @@ bt::Node::Status ReceiveBall::Update() {
 	if (shootAtGoal) {
 		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
 			startKicking = true;
+			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "Start Kicking, Initialize KICK and RETURN KICK, because ball could be touching me any time now");
 			kick.Initialize();
 			return kick.Update();
 		}
@@ -429,20 +447,21 @@ bt::Node::Status ReceiveBall::Update() {
 
 	// ROS_INFO("ball is coming: %i, ball was coming: %i",ballIsComing,ballWasComing);
     if (ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
-
     	if(distanceToBall <= 0.4) {
     		// ROS_INFO("ReceiveBall success");
     		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
     		if (shootAtGoal) {
-	    		// ROS_INFO("Start kicking");
+    			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "Start Kicking and RETURN KICK");
     			startKicking = true;
     			return kick.Update();
     		}
 			RTT_DEBUGLN("ReceiveBall skill completed.");
 			publishStopCommand();
 			// return Status::Running;
+			ROS_WARN_STREAM_NAMED("jelle_test1", "robot " << robotID << ", ReceiveBall succeeded because ball stopped coming and distanceToBall < 0.4");
 			return Status::Success;
     	} else {
+    		ROS_WARN_STREAM_NAMED("jelle_test1", "robot " << robotID << ", ReceiveBall failed because ball stopped coming but distanceToBall > 0.4");
     		return Status::Failure;
     	}
     	
@@ -495,14 +514,15 @@ bt::Node::Status ReceiveBall::Update() {
 	    }
 
 	    // if the ball has low velocity for some time, return Failure
-	    if (ballVel.length()<0.1) {
-	    	if (time_difference_milliseconds(startTime, now()).count()>1000) {
-	    		startTime = now();
-	    		return Status::Failure;
-	    	}
-	    } else {
-	    	startTime = now();
-	    }
+	    // if (ballVel.length()>0.2 && ballVel.length()<1.0) {
+	    // 	if (time_difference_milliseconds(startTime, now()).count()>100) {
+	    // 		startTime = now();
+	    // 		ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", ReceiveBall failed because ball moved too slow");
+	    // 		return Status::Failure;
+	    // 	}
+	    // } else {
+	    // 	startTime = now();
+	    // }
 
 	    return Status::Running;
 	}

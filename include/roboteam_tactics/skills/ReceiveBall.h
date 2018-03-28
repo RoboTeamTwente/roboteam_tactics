@@ -29,6 +29,10 @@ namespace rtt {
  *  - receiveBallAtCurrentPos: 
  *      Type: Bool
  *      Descr: Indicates that ball should be received at the current robot position
+ *
+ *  - claimedPos: 
+ *      Type: Bool
+ *      Descr: Indicates that ball should be received at the position that the robot claimed
  *    
  *  - receiveBallAtX:
  *      Type: Double
@@ -85,11 +89,11 @@ private:
     GetBall getBall;
     Draw drawer;
     Kick kick;
-    bool ballHasBeenClose = false;
+    //bool ballHasBeenClose = false;
     bool startKicking = false;
     bool ballIsComing = false;
 
-    bool touchedBall = false;
+    //bool touchedBall = false;
     time_point initialBallContact;
     time_point startTime;
 
@@ -99,7 +103,7 @@ private:
 
     bt::Blackboard::Ptr getBallbb = std::make_shared<bt::Blackboard>();
 
-    bool computedTargetPos;
+    //bool computedTargetPos;
     
 };
 
