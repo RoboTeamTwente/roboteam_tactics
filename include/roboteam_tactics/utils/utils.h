@@ -325,6 +325,19 @@ template<
 >
 ros::Publisher* GlobalPublisher<M>::pubPtr = nullptr;
 
+
+
+
+
+int getClosestOppToPoint(Vector2 testPosition, roboteam_msgs::World world);
+
+
+
+
+
+
+
+
 /**
  * \brief Get all robots active in the world. This is the union of world.us and world.them
  */

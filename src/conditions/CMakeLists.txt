@@ -22,7 +22,6 @@ set(CONDITION_SOURCES
     # ${CMAKE_CURRENT_SOURCE_DIR}/ParamCheck.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/unity.cpp
-    
     )
 set(CONDITION_SOURCES
     ${CONDITION_SOURCES}

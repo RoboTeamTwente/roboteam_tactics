@@ -426,6 +426,39 @@ boost::optional<int> get_robot_closest_to_their_goal(std::vector<int> robots, co
     return furthest_robot == -1 ? boost::none : boost::optional<int>(furthest_robot);
 }
 
+
+
+
+
+
+
+
+
+
+int getClosestOppToPoint(Vector2 testPosition, roboteam_msgs::World world) {
+
+        if (world.them.size() == 0) {
+            return 0.0;
+        }
+
+        double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
+        int closestOppToPoint = 0;
+        for (size_t i = 1; i < world.them.size(); i++) {
+            double testDistance = (Vector2(world.them.at(i).pos) - testPosition).length();
+            if (testDistance < shortestDistance) {
+                shortestDistance = testDistance;
+                closestOppToPoint = i;
+            }
+        }
+        return closestOppToPoint;
+    }
+
+
+
+
+
+
+
 std::vector<roboteam_msgs::WorldRobot> getAllBots(const roboteam_msgs::World& world) {
     std::vector<roboteam_msgs::WorldRobot> bots;
     bots.insert(bots.end(), world.us.begin(), world.us.end());

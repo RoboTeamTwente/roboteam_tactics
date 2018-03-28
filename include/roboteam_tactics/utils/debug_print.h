@@ -104,6 +104,7 @@ SET_DEBUG_FOR(Bob_ChipoffAtGoalPlay, true);
 SET_DEBUG_FOR(Jim_StandReadyPlay, true);
 SET_DEBUG_FOR(Jim_MultipleStrikersPlay, true);
 SET_DEBUG_FOR(Jim_MultipleDefendersPlay, true);
+SET_DEBUG_FOR(Jim_MultipleDefendersPlayOld, true);
 SET_DEBUG_FOR(BallPlacementThemPlay, true);
 SET_DEBUG_FOR(BallPlacementUsPlay, true);
 SET_DEBUG_FOR(Jim_GetBallPlay, true);
