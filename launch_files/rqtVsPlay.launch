@@ -1,53 +1,110 @@
 <launch>
 	
 
-		<arg name="legacy_packets" default="false" />
-		<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+	<arg name="legacy_packets" default="false" />
+	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
-		<param name="our_side" type="str" value="left" />
-		<param name="our_color" type="str" value="yellow" />
+	<param name="our_side" type="str" value="left" />
+	<param name="our_color" type="str" value="yellow" />
 
-		<param name="robot0/robotType" type="str" value="grsim" />
-		<param name="robot1/robotType" type="str" value="grsim" />
-		<param name="robot2/robotType" type="str" value="grsim" />
-		<param name="robot3/robotType" type="str" value="grsim" />
-		<param name="robot4/robotType" type="str" value="grsim" />
-		<param name="robot5/robotType" type="str" value="grsim" />
-		<param name="robot6/robotType" type="str" value="grsim" />
-		<param name="robot7/robotType" type="str" value="grsim" />
+	<param name="role_iterations_per_second" type="int" value="30" />
+	<param name="num_role_nodes" type="int" value="10" />
+	<param name="normalize_field" type="bool" value="true" />
 
-		<param name="robot0/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot1/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot2/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot3/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot4/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot5/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot6/readyToReceiveBall" type="bool" value="false" />
-		<param name="robot7/readyToReceiveBall" type="bool" value="false" />
+	<arg name="robot_output_target" default="grsim" />
+	<arg name="robot_type" default="grsim" />
+	<param name="robot_output_target" type="string" value="grsim" />
 
-		<group ns="grsim">
-			<param name="batching" type="bool" value="true"/>
-		</group>
+	<param name="robot0/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot1/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot2/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot3/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot4/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot5/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot6/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot7/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot8/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot9/robotType" type="string" value="$(arg robot_type)" />
 
-		<param name="robotClaimedBall" type="int" value="-1" />
-	 
-		<node pkg="roboteam_world" type="filtered_world" name="world" />
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
-        	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+	<param name="robot0/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot1/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot2/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot3/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot4/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot5/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot6/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot7/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot8/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot9/readyToReceiveBall" type="bool" value="false" />
 
-		<param name="role_iterations_per_second" type="int" value="30" />
-		<param name="num_role_nodes" type="int" value="8" />
-		<param name="normalize_field" type="bool" value="true" />
-		<param name="robot_output_target" type="str" value="grsim" />
+	<param name="robot0/claimedPosX" type="double" value="-0.0" />
+	<param name="robot0/claimedPosY" type="double" value="-0.0" />
+	<param name="robot1/claimedPosX" type="double" value="-0.0" />
+	<param name="robot1/claimedPosY" type="double" value="-0.0" />
+	<param name="robot2/claimedPosX" type="double" value="-0.0" />
+	<param name="robot2/claimedPosY" type="double" value="-0.0" />
+	<param name="robot3/claimedPosX" type="double" value="-0.0" />
+	<param name="robot3/claimedPosY" type="double" value="-0.0" />
+	<param name="robot4/claimedPosX" type="double" value="-0.0" />
+	<param name="robot4/claimedPosY" type="double" value="-0.0" />
+	<param name="robot5/claimedPosX" type="double" value="-0.0" />
+	<param name="robot5/claimedPosY" type="double" value="-0.0" />
+	<param name="robot6/claimedPosX" type="double" value="-0.0" />
+	<param name="robot6/claimedPosY" type="double" value="-0.0" />
+	<param name="robot7/claimedPosX" type="double" value="-0.0" />
+	<param name="robot7/claimedPosY" type="double" value="-0.0" />
+	<param name="robot8/claimedPosX" type="double" value="-0.0" />
+	<param name="robot8/claimedPosY" type="double" value="-0.0" />
+	<param name="robot9/claimedPosX" type="double" value="-0.0" />
+	<param name="robot9/claimedPosY" type="double" value="-0.0" />
 
-		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot6" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot7" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<param name="robotClaimedBall" type="int" value="-1" />
+	<param name="passToRobot" type="int" value="-1" />
+ 
+	<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
+	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
+	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
+
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot0"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot1"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot2"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot3"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot4"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot5"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot6"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot7"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot8"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot9"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
 
 	
 	
@@ -56,14 +113,21 @@
 		<param name="our_side" type="str" value="right" />
 		<param name="our_color" type="str" value="blue" />
 
-		<param name="robot0/robotType" type="str" value="grsim" />
-		<param name="robot1/robotType" type="str" value="grsim" />
-		<param name="robot2/robotType" type="str" value="grsim" />
-		<param name="robot3/robotType" type="str" value="grsim" />
-		<param name="robot4/robotType" type="str" value="grsim" />
-		<param name="robot5/robotType" type="str" value="grsim" />
-		<param name="robot6/robotType" type="str" value="grsim" />
-		<param name="robot7/robotType" type="str" value="grsim" />
+		<param name="role_iterations_per_second" type="int" value="30" />
+		<param name="robot_output_target" type="string" value="$(arg robot_output_target)" />
+		<param name="num_role_nodes" type="int" value="10" />
+		<param name="normalize_field" type="bool" value="true" />
+
+		<param name="robot0/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot1/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot2/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot3/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot4/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot5/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot6/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot7/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot8/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot9/robotType" type="string" value="$(arg robot_type)" />
 
 		<param name="robot0/readyToReceiveBall" type="bool" value="false" />
 		<param name="robot1/readyToReceiveBall" type="bool" value="false" />
@@ -73,30 +137,81 @@
 		<param name="robot5/readyToReceiveBall" type="bool" value="false" />
 		<param name="robot6/readyToReceiveBall" type="bool" value="false" />
 		<param name="robot7/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot8/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot9/readyToReceiveBall" type="bool" value="false" />
+
+		<param name="robot0/claimedPosX" type="double" value="-0.0" />
+		<param name="robot0/claimedPosY" type="double" value="-0.0" />
+		<param name="robot1/claimedPosX" type="double" value="-0.0" />
+		<param name="robot1/claimedPosY" type="double" value="-0.0" />
+		<param name="robot2/claimedPosX" type="double" value="-0.0" />
+		<param name="robot2/claimedPosY" type="double" value="-0.0" />
+		<param name="robot3/claimedPosX" type="double" value="-0.0" />
+		<param name="robot3/claimedPosY" type="double" value="-0.0" />
+		<param name="robot4/claimedPosX" type="double" value="-0.0" />
+		<param name="robot4/claimedPosY" type="double" value="-0.0" />
+		<param name="robot5/claimedPosX" type="double" value="-0.0" />
+		<param name="robot5/claimedPosY" type="double" value="-0.0" />
+		<param name="robot6/claimedPosX" type="double" value="-0.0" />
+		<param name="robot6/claimedPosY" type="double" value="-0.0" />
+		<param name="robot7/claimedPosX" type="double" value="-0.0" />
+		<param name="robot7/claimedPosY" type="double" value="-0.0" />
+		<param name="robot8/claimedPosX" type="double" value="-0.0" />
+		<param name="robot8/claimedPosY" type="double" value="-0.0" />
+		<param name="robot9/claimedPosX" type="double" value="-0.0" />
+		<param name="robot9/claimedPosY" type="double" value="-0.0" />
 
 		<param name="robotClaimedBall" type="int" value="-1" />
-
-		<group ns="grsim">
-			<param name="batching" type="bool" value="true"/>
-		</group>
+		<param name="passToRobot" type="int" value="-1" />
 	 
-		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
-		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+		<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
+		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
 
-		<param name="role_iterations_per_second" type="int" value="30" />
-		<param name="robot_output_target" type="str" value="grsim" />
-		<param name="num_role_nodes" type="int" value="8" />
-		<param name="normalize_field" type="bool" value="true" />
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot0"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot1"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot2"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot3"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot4"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot5"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot6"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot7"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot8"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot9"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
 
-		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot6" pkg="roboteam_tactics" type="RoleNode" output="screen" />
-		<node name="robot7" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+
+
+
 	</group>
 	
 </launch>

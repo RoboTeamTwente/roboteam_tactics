@@ -84,6 +84,7 @@ public:
     GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update() override;
     void Initialize() override;
+    void Terminate(Status s);
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -110,7 +111,7 @@ private:
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
     void publishKickCommand(double kickVel);
-    bool canClaimBall();
+    bool claimBall();
     void releaseBall();
     
     int robotID;
@@ -123,6 +124,8 @@ private:
     int ballCloseFrameCount = 0;
     int passToRobot;
     bool dontDribble;
+    bool ballClaimedByMe;
+    bool hasTerminated;
     double deviation;
     std::string robot_output_target = "";
 };

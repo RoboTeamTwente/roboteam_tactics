@@ -33,6 +33,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb) {
     passToRobot = 0;
+    ballClaimedByMe = false;
 }
 
 void GetBall::Initialize() {
@@ -42,13 +43,18 @@ void GetBall::Initialize() {
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
     bestBotClaimedPos = false;
+    ballClaimedByMe = false;
+    hasTerminated = false;
     // ros::param::set("passToRobot", -1);
     // ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", passToRobot param reset to -1 because doing GetBall now");
     ros::param::getCached("robot_output_target", robot_output_target);
+
+    if (GetBool("unclaimPos")) {
     // unclaim position
-    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
-    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
-    ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
+        ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
+        ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
+        ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
+    }
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
 
@@ -64,6 +70,15 @@ void GetBall::Initialize() {
 	// IMPROVE: Should be a different weight list that does not take dist to teammate (and dist to self?) into account
 	    opportunityFinder.Initialize("jellePass.txt", robotID, "theirgoal", 0);
 	}
+}
+
+void GetBall::Terminate(bt::Node::Status s) {
+    if (!hasTerminated) {
+    // Because I got this annoying terminate message constantly, even if the skill had not initialized again
+        hasTerminated = true; 
+        releaseBall();
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID << ", releasing the ball");
+    }
 }
 
 void GetBall::publishStopCommand() {
@@ -104,33 +119,46 @@ void GetBall::publishKickCommand(double kickSpeed){
     pub.publish(command);  
 }
 
-bool GetBall::canClaimBall() {
-    int robotClaimedBall;
+bool GetBall::claimBall() {
+    if (ballClaimedByMe) {
+        return true;
+    }
 
+    int robotClaimedBall;
     if (ros::param::has("robotClaimedBall")) {
         ros::param::getCached("robotClaimedBall", robotClaimedBall);
 
         if (robotClaimedBall == robotID) {
+            ballClaimedByMe = true; // prevents too many ros param checks
             return true;
         } else if (robotClaimedBall == -1) {
             ros::param::set("robotClaimedBall", robotID);
             return true; // if no-one claimed the ball -> I claim the ball
         } else {
-            ros::param::set("robotClaimedBall", -1); // SHOULD THIS BE DONE LIKE THIS? RATHER USE TERMINATE FUNCTION FOR UNCLAIMING
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << "cant claim the ball because " << robotClaimedBall << " already did");
             return false;
         }
-    } else {
+    } else { // if param had not been initialized, set it anyways
         ros::param::set("robotClaimedBall", robotID);
         return true;
     }
 }
 
 void GetBall::releaseBall() {
-    ros::param::set("robotClaimedBall", -1);
+    if (claimBall()) {
+    // only release ball if I actually claimed it
+        ros::param::set("robotClaimedBall", -1);
+    }
     return;
 }
 
 bt::Node::Status GetBall::Update (){
+    if (!claimBall()) {
+    // In this way, only 1 of our robots may perform GetBall at a time. Is that what we want? probably yes
+        ROS_WARN_STREAM_NAMED("skills.GetBall", "return RUNNING for robot "<< robotID << ", because ball was already claimed");
+        // return Status::Failure;
+        return Status::Running; // failure currently leads to too many reinitializations, so wont use that for now...
+    }
 
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -219,7 +247,7 @@ bt::Node::Status GetBall::Update (){
         double maxScore = 0;//-std::numeric_limits<double>::max();
         boost::optional<int> maxScoreID = boost::none;
 
-        // For each robot in the field
+        // For each of our robots in the field
         for (size_t i = 0; i < (world.us.size()); i++) {
             if (world.us.at(i).id != (unsigned int) robotID) {
 
@@ -236,9 +264,8 @@ bt::Node::Status GetBall::Update (){
                         bestClaimedPos = Vector2(botClaimedX,botClaimedY);
                         bestBotClaimedPos = true;
                     }
-                    // world.us.at(i).pos.x = float(botClaimedX);
-                    // world.us.at(i).pos.y = float(botClaimedY);
-                } else { // if current robot did not claim a position, check its own position.
+                } else {
+                // if current robot did not claim a position, check its own position.
                     double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos),world);
                     if (score > maxScore) {
                         maxScore = score;
@@ -246,19 +273,8 @@ bt::Node::Status GetBall::Update (){
                         bestBotClaimedPos = false;
                     }
                 }
-
-                // std::string paramName = "robot" + std::to_string(world.us.at(i).id) + "/readyToReceiveBall";
-                // bool readyToReceiveBall = false;
-                // ros::param::getCached(paramName, readyToReceiveBall);
-
-                // if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
-
-                // if (readyToReceiveBall){
-                    // ROS_INFO_STREAM("getball " << robotID << " robot " << world.us.at(i).id << " readyToReceiveBall");
-                    // opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
-                // }
             }
-        } // for every robot
+        } // end of for-loop
         
         if (maxScoreID)  {//-std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
             choseRobotToPassTo = true;
@@ -281,7 +297,7 @@ bt::Node::Status GetBall::Update (){
 
 	/* If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball */
 	double targetAngle;
-    double targetDist = 2.0; // WIP (jelle): for passing harder if target is further away
+    double targetDist = 3.0; // WIP (jelle): for passing harder if target is further away
     // If no robot was found to pass the ball to
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
@@ -387,7 +403,18 @@ bt::Node::Status GetBall::Update (){
         } else {
 
             if (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam")) ) {
-                double passingSpeed = targetDist*2;
+            // Passing to robot
+                if (GetBool("lastCheck")) {
+                // If necessary, perform a last check to see if robot is ready to receive ball
+                    bool readyToReceiveBall = false;
+                    ros::param::get("robot" + std::to_string(passToRobot) + "/readyToReceiveBall", readyToReceiveBall);
+                    if (!readyToReceiveBall) {
+                    // if not ready: dont shoot yet
+                        return Status::Running;
+                    }
+                }
+                // If ready
+                double passingSpeed = targetDist*1.3;
                 if (HasDouble("passingMult")) {
                     passingSpeed = targetDist*GetDouble("passingMult");
                 }
@@ -398,6 +425,7 @@ bt::Node::Status GetBall::Update (){
                 }
                 publishKickCommand(passingSpeed);
             } else {
+            // Shooting on goal
                 publishKickCommand(6.5);
             }
             releaseBall();

@@ -62,6 +62,7 @@ public:
     void Initialize();
     Vector2 computePoint();
     Status Update();
+    void Terminate(Status s);
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -76,7 +77,7 @@ public:
 private:
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
-    InterceptPose deduceInterceptPosFromBall(Vector2 ballPos, Vector2 ballVel);
+    InterceptPose deduceInterceptPosFromBall(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     boost::optional<InterceptPose> deduceInterceptPosFromRobot();
     double prevballdist;
     int robotID;
@@ -92,6 +93,7 @@ private:
     //bool ballHasBeenClose = false;
     bool startKicking = false;
     bool ballIsComing = false;
+    bool readyHasBeenSet = false;
 
     //bool touchedBall = false;
     time_point initialBallContact;

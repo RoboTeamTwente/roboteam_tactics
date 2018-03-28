@@ -42,7 +42,9 @@ void Positioning::Terminate(bt::Node::Status s) {
         // unclaim position
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
-            ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << "Unclaiming pos at termination");
+            ROS_INFO_STREAM_NAMED("skills.Positioning", "Terminating, unclaim position for robot: " << robotID);
+        } else {
+            ROS_INFO_STREAM_NAMED("skills.Positioning", "Terminating, keeping claimed pos for robot: " << robotID);
         }
     }
 
@@ -74,7 +76,7 @@ bt::Node::Status Positioning::Update() {
 
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 100) { // !passIncoming && 
+    if (elapsedTime.count() >= 300) { // !passIncoming && 
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
