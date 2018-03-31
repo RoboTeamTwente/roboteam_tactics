@@ -40,7 +40,7 @@ public:
 	double computeScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition, roboteam_msgs::World world);
 	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
-	BestTeammate chooseBestTeammate(bool notBackwards=false, bool distFromTargetLimit=false, double limit=8.0, bool realWorld=false);
+	BestTeammate chooseBestTeammate(bool realScore=false, bool realPos=false, bool notBackwards=false, bool distFromTargetLimit=false, double limit=8.0);
 private:
 	
 	// Weights for determining the score of a point on the field, including min and max values that correspond to the min and max scores

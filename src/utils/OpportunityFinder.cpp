@@ -481,20 +481,23 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 }
 
 
-BestTeammate OpportunityFinder::chooseBestTeammate(bool notBackwards, bool distFromTargetLimit, double limit, bool realWorld) {
+BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos, bool notBackwards, bool distFromTargetLimit, double limit) {
 
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::World fakeWorld = world;
 	
-	// Get claimed positions, place them instead of those robot positions in our 'fake' world object
-	for (size_t i = 0; i < fakeWorld.us.size(); i++) {
-		double botClaimedX;
-		ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
-		if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
-			double botClaimedY;
-			ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosY", botClaimedY);
-			fakeWorld.us.at(i).pos.x = float(botClaimedX);
-			fakeWorld.us.at(i).pos.y = float(botClaimedY);
+
+	if (!realScore || !realPos) {
+		// Get claimed positions, place them instead of those robot positions in our 'fake' world object
+		for (size_t i = 0; i < fakeWorld.us.size(); i++) {
+			double botClaimedX;
+			ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
+			if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
+				double botClaimedY;
+				ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosY", botClaimedY);
+				fakeWorld.us.at(i).pos.x = float(botClaimedX);
+				fakeWorld.us.at(i).pos.y = float(botClaimedY);
+			}
 		}
 	}
 
@@ -509,8 +512,13 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool notBackwards, bool distF
     // For each of our robots
     for (size_t i = 0; i < (fakeWorld.us.size()); i++) {
         if (fakeWorld.us.at(i).id != ROBOT_ID) { // dont choose myself
-
-        	Vector2 botPos(fakeWorld.us.at(i).pos);
+        	Vector2 botPos;
+        	if (realPos) {
+        		botPos = Vector2(world.us.at(i).pos);
+        	} else {
+        		botPos = Vector2(fakeWorld.us.at(i).pos);
+        	}
+        	
         	if (notBackwards && botPos.x < ballPos.x) {
         	// if notBackwards true, robots too far from target will be skipped
         		continue;
@@ -520,7 +528,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool notBackwards, bool distF
         		continue;
         	}
             double score;
-            if (realWorld) {
+            if (realScore) {
             	score = computeScore(botPos, world);
             } else {
             	score = computeScore(botPos,fakeWorld);

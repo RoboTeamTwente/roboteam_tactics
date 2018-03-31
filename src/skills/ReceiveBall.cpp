@@ -33,14 +33,14 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb)
         , getBall("", blackboard)
-        , kick("", blackboard)
-        , isRobotClosestToBall("", blackboard) {
+        // , kick("", blackboard)
+        // , isRobotClosestToBall("", blackboard) 
+        {
     hasBall = whichRobotHasBall();
     
     prevComputedPoint = now();
     //computedTargetPos = false;
     
-    // prevballdist=0;
 }
 
 void ReceiveBall::Initialize() {
@@ -50,6 +50,8 @@ void ReceiveBall::Initialize() {
 	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Initialize for robot: " << robotID);
 	ballIsComing = false;
 	startKicking = false;
+	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
+	readyHasBeenSet = false;
 
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
@@ -62,8 +64,7 @@ void ReceiveBall::Initialize() {
 		marginDeviation = 0.0;
 	}
 
-	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
-	readyHasBeenSet = false;
+	
 
 	// Read the blackboard info about where to receive the ball 
 	if ((HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
@@ -78,7 +79,7 @@ void ReceiveBall::Initialize() {
 		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
 		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
 		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
-		ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
+		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
 
 		roboteam_msgs::WorldRobot robot;
@@ -100,8 +101,7 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 
 		if (GetBool("setSignal")) {
 		// Check if the robot actually expects to receive a pass
-		// If setSignal is not used, the rosparam passToRobot will not be set to my ID (it shouldnt, at least)
-		// The same holds for rosparam robotClaimedBall
+		// If setSignal is not used, the rosparam robotClaimedBall will not be set to my ID (it shouldnt, at least)
 			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false); // reset readyToReceiveBall
 			int passToParam;
 		    ros::param::getCached("passToRobot", passToParam);
@@ -116,7 +116,7 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
 		    if (robotClaimedBall == robotID) {
 		    	ros::param::set("robotClaimedBall", -1);
-        		ROS_WARN_DEBUG_NAMED("skills.ReceiveBall", robotID << "released ball");
+        		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " released ball");
 		    }
 		}
 	}
@@ -170,37 +170,15 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
-	// roboteam_msgs::WorldRobot robot;
-	// boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
- //    if (findBot) {
- //        robot = *findBot;
- //    } else {
- //        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot");
- //    }
-	// Vector2 myPos(robot.pos);
-
 	Vector2 posdiff = myPos - ballPos;
-	// double balldist = posdiff.length();
-	// double ballDir=1.0;
-	// if (balldist >= prevballdist){
-	// 	ballDir=-1.0;
-	// }
-
-	// prevballdist=balldist;
-
-	//double ballDir = ballVel.dot();
-
-	// ROS_INFO("ballDir: %f",ballDir);
 
 	if (ballVel.length() < 0.1 || ballVel.dot(posdiff)<0) {
-
+	// if ball goes too slow, or is not in my direction
+	// POSSIBLE IMPROVEMENT: SPECIFY BETTER WHAT 'MY DIRECTION' IS (IS THERE A CERTAIN MARGIN LIKE ACCEPTABLE DEVIATION?)
 		// drawer.removeLine("ballTrajectory");
 		// drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
-		ballIsComing = false;
-		
-		return interceptPose;
 	} else {
 		Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
 		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
@@ -212,24 +190,20 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		// drawer.setColor(0,0,0);
 		// ROS_INFO_STREAM("robot " << robotID << " acceptableDeviation: " << acceptableDeviation); 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
-			
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
-
 			if (avoidBall) {
 				interceptPos = closestPoint + (receiveBallAtPos - closestPoint).normalize();
 			}
-
 		} else {
 			interceptPos = receiveBallAtPos;
 			interceptAngle = (ballPos - receiveBallAtPos).angle();
 		}
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
-
-		
-		return interceptPose;
 	}
+
+	return interceptPose;
 }
 
 // Predict intercept pos by looking at the robot that has the ball
@@ -342,22 +316,39 @@ bt::Node::Status ReceiveBall::Update() {
 	bool ballWasComing = ballIsComing;
 	ballIsComing = false;
 
+
+	if(!ballWasComing && !GetBool("defenderMode") && GetBool("setSignal") && (!hasBall || (hasBall && !our_team))) {
+		int robotClaimedBall;
+	    ros::param::getCached("robotClaimedBall", robotClaimedBall);
+	    if (robotClaimedBall == robotID) {
+	    	ballIsComing = true;
+    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
+	    }
+	}
+
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	boost::optional<InterceptPose> interceptPose;
-	if (!hasBall || *hasBall == robotID) { // if any other robot has the ball (also opponent i guess?)
+	if (!hasBall || *hasBall == robotID) { // if no other robot has the ball (also opponent i guess?)
 		interceptPose = deduceInterceptPosFromBall(ballPos, ballVel, myPos);
 	} else {
 		interceptPose = deduceInterceptPosFromRobot();
 	}
-	
+
 	if (!interceptPose) {
 		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "Receive ball was unable to calculate an InterceptPose");
 		return Status::Failure;
 	}
-
 	Vector2 interceptPos = interceptPose->interceptPos;
 	double interceptAngle = interceptPose->interceptAngle;
 
+	// isRobotClosestToBall.Update() == Status::Success
+    	// 	int elapsedTime = time_difference_milliseconds(startTime, now()).count();
+    	// 	if (elapsedTime > 200 && ) {
+    	// 		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a slow moving ball");
+    	// 		return Status::Failure; 
+    	// 	}
+    	// } else {
+    	// 	startTime = now();
 
 
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
@@ -384,19 +375,19 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
-	// Set the readyToReceiveBall param once we're close
+	// Once we're close, turn off robot avoidance, and set the readyToReceiveBall param if necessary
 	Vector2 posError = targetPos - myPos; //receiveBallAtPos - myPos;
 	double readyDist = 0.5;
 	if (HasDouble("readyDist")) {
 		readyDist = GetDouble("readyDist");
 	}
 	if (posError.length() < readyDist) {
+		private_bb->SetBool("avoidRobots", false);
 		// avoid setting ready continuously in rosparam because it can become quite heavy on ROS
 		if (GetBool("setSignal") && !readyHasBeenSet) {
 			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
 			readyHasBeenSet = true;
 		}
-		private_bb->SetBool("avoidRobots", false);
 	} else {
 		private_bb->SetBool("avoidRobots", true);
 		if (readyHasBeenSet && posError.length() > 0.1 + readyDist) {
@@ -404,18 +395,6 @@ bt::Node::Status ReceiveBall::Update() {
 			readyHasBeenSet = false;
 		}
 	}
-
-
-	// double minRunTime = 2000;
-	// if (ballWasComing && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
-	// 	ROS_INFO_STREAM("ROBOT " << robotID << " missed the ball");
-	// 	return Status::Failure;
-	// }
-
-	// if (ballVel.length() > 1.0 && !ballIsComing && GetBool("shouldFail") && posError.length() < acceptableDeviation) {
-	// 	ROS_INFO_STREAM("ball is probably not for us " << robotID);
-	// 	return Status::Failure;
-	// }
 
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
@@ -427,16 +406,11 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 		timeStep = 1.0 / role_iterations_per_second;
 	}
-
 	double distanceToBall = (ballPos-myPos).length();
 	if (shootAtGoal) {
 		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
 			startKicking = true;
 			ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
-			// ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking, Initialize KICK and *RETURN KICK, because ball could be touching me any time now");
-			// kick.Initialize();
-			// kick.Update();
-			// return kick.Update();
 		}
 	}
 	
@@ -457,18 +431,18 @@ bt::Node::Status ReceiveBall::Update() {
 
 
 	// Check the IHaveBall condition to see whether the GetBall skill succeeded
-	// auto bb3 = std::make_shared<bt::Blackboard>();
-	// bb3->SetInt("me", robotID);
-	// bb3->SetBool("our_team", true);
-	// IHaveBall iHaveBall2("", bb3);
+		// auto bb3 = std::make_shared<bt::Blackboard>();
+		// bb3->SetInt("me", robotID);
+		// bb3->SetBool("our_team", true);
+		// IHaveBall iHaveBall2("", bb3);
+		// double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
+	    // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
+	    // if (iHaveBall2.Update() == Status::Success) {
 
-	// double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
 
-    // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
-    // if (iHaveBall2.Update() == Status::Success) {
 	double angleError = cleanAngle(targetAngle - robot.angle);
 	bool matchBallVel = (distanceToBall <= 0.6 && fabs(angleError) <= 0.2)
-						&& !shootAtGoal && !robotID == blackboard->GetInt("KEEPER_ID");
+						&& !shootAtGoal && robotID != blackboard->GetInt("KEEPER_ID");
 
     if (ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
     // If the ball just stopped coming, success or failure will be returned based on the current distance to the ball
@@ -477,7 +451,7 @@ bt::Node::Status ReceiveBall::Update() {
 			publishStopCommand();
 			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " succeeded because ball stopped coming and distanceToBall < 0.4");
 			return Status::Success;
-    	} else if (!GetBool("defenderMode") && isRobotClosestToBall.Update() == Status::Success) { 
+    	} else if (!GetBool("defenderMode")) { // && isRobotClosestToBall.Update() == Status::Success
     	// If I'm not defending, i.e. actually expecting a pass but the ball stopped too far away from me, return failure
     		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because ball stopped coming but distanceToBall > 0.4");
     		return Status::Failure;
@@ -487,21 +461,6 @@ bt::Node::Status ReceiveBall::Update() {
     	}
     	
 	} else {
-
-		// if the ball has low velocity for some time, and we dont have it in possession, return Failure
-	    // this is because we shouldn't be receiving the ball if we dont have it in possession
-	    // Of course defenders should not return failure at this point
-	    if (!GetBool("defenderMode")) {
-	    	if(ballVel.length() < 0.3) { // if ( (!hasBall || *hasBall == robotID) )
-	    		int elapsedTime = time_difference_milliseconds(startTime, now()).count();
-	    		if (elapsedTime > 300 && isRobotClosestToBall.Update() == Status::Success) {
-	    			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a slow moving ball");
-	    			return Status::Failure; 
-	    		}
-	    	} else {
-	    		startTime = now();
-	    	}
-	    }
 
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));

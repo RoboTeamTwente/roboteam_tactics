@@ -4,8 +4,8 @@
 
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
-#include "roboteam_tactics/skills/Kick.h"
-#include "roboteam_tactics/conditions/IsRobotClosestToBall.h"
+//#include "roboteam_tactics/skills/Kick.h"
+//#include "roboteam_tactics/conditions/IsRobotClosestToBall.h"
 
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
@@ -81,26 +81,23 @@ private:
     void publishStopCommand();
     InterceptPose deduceInterceptPosFromBall(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     boost::optional<InterceptPose> deduceInterceptPosFromRobot();
-    double prevballdist;
-    int robotID;
     boost::optional<int> hasBall;
+
+    int robotID;
     bool our_team;
-    double acceptableDeviation = 1.0;
+    double acceptableDeviation;
     double marginDeviation;
 
     GoToPos goToPos;
     GetBall getBall;
     Draw drawer;
-    Kick kick;
-    IsRobotClosestToBall isRobotClosestToBall;
-    //bool ballHasBeenClose = false;
-    bool startKicking = false;
-    bool ballIsComing = false;
-    bool readyHasBeenSet = false;
+    //Kick kick;
+    //IsRobotClosestToBall isRobotClosestToBall;
+    bool startKicking;
+    bool ballIsComing;
+    bool readyHasBeenSet;
     bool hasTerminated;
 
-    //bool touchedBall = false;
-    time_point initialBallContact;
     time_point startTime;
 
     OpportunityFinder opportunityFinder;
