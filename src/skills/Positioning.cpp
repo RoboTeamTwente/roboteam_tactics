@@ -21,8 +21,23 @@ void Positioning::Initialize() {
     robotID = blackboard->GetInt("ROBOT_ID");
     ROS_INFO_STREAM_NAMED("skills.Positioning", "Initialize for robot: " << robotID);
     // passIncoming = false;
+    int type = 0;
+    if (HasInt("type")) {
+        type = GetInt("type");
+    }
+    if (type == 0) {
+    // Attacker
+        opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    } else if (type == 1) {
+    // Assister/passer
+    // WIP: To which robot should be passed? check at every scan which robot?
+        // Check which robot:
+        
 
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
+    }
+
+    
     // starting point is opponents half of the field
     bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
 

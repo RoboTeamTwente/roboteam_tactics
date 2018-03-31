@@ -26,7 +26,17 @@ bt::Node::Status IsRobotClosestToBall::Update() {
 	int robotID = GetInt("ROBOT_ID");
 	Vector2 ballPos(world.ball.pos);
 	std::vector<roboteam_msgs::WorldRobot> robots = world.us;
-	boost::optional<int> robotClosestToBallPtr = get_robot_closest_to_point(robots, ballPos);
+
+	boost::optional<int> robotClosestToBallPtr;
+	if (HasDouble("secondsAhead")) {
+		double t_ahead = GetDouble("secondsAhead");
+		Vector2 ballVel(world.ball.vel);
+		ballPos = ballPos + ballVel.scale(t_ahead);
+		robotClosestToBallPtr = predict_robot_closest_to_point(robots, ballPos, t_ahead);
+	} else {
+		robotClosestToBallPtr = get_robot_closest_to_point(robots, ballPos);
+	}
+
 	if (robotClosestToBallPtr) {
 		int robotClosestToBall = *robotClosestToBallPtr;
 		if (robotID == robotClosestToBall) {

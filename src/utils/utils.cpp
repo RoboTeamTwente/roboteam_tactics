@@ -380,6 +380,25 @@ boost::optional<int> get_robot_closest_to_point(std::vector<roboteam_msgs::World
     return closest_robot == -1 ? boost::none : boost::optional<int>(closest_robot);
 }
 
+boost::optional<int> predict_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point, double t_ahead) {
+    int closest_robot = -1;
+    double closest_robot_ds = std::numeric_limits<double>::max();
+
+    for (roboteam_msgs::WorldRobot worldRobot : robots) {
+        Vector2 pos(worldRobot.pos);
+        Vector2 vel(worldRobot.vel);
+        pos = pos + vel.scale(t_ahead);
+
+        if ((pos - point).length() < closest_robot_ds) {
+           closest_robot = worldRobot.id;
+           closest_robot_ds = (pos - point).length();
+        }
+    }
+
+    return closest_robot == -1 ? boost::none : boost::optional<int>(closest_robot);
+}
+
+
 boost::optional<int> get_robot_closest_to_ball(std::vector<int> robots) {
     roboteam_msgs::World lw = LastWorld::get();
     return get_robot_closest_to_ball(robots, lw);

@@ -5,6 +5,8 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/skills/Kick.h"
+#include "roboteam_tactics/conditions/IsRobotClosestToBall.h"
+
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
@@ -90,10 +92,12 @@ private:
     GetBall getBall;
     Draw drawer;
     Kick kick;
+    IsRobotClosestToBall isRobotClosestToBall;
     //bool ballHasBeenClose = false;
     bool startKicking = false;
     bool ballIsComing = false;
     bool readyHasBeenSet = false;
+    bool hasTerminated;
 
     //bool touchedBall = false;
     time_point initialBallContact;

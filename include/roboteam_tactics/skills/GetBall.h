@@ -113,16 +113,16 @@ private:
     void publishKickCommand(double kickVel);
     bool claimBall();
     void releaseBall();
+    void passBall(int id);
     
     int robotID;
     GoToPos goToPos;
     Draw drawer;
     OpportunityFinder opportunityFinder;
     bool choseRobotToPassTo;
-    Vector2 bestClaimedPos;
-    bool bestBotClaimedPos;
     int ballCloseFrameCount = 0;
-    int passToRobot;
+    int bestID;
+    Vector2 bestPos;
     bool dontDribble;
     bool ballClaimedByMe;
     bool hasTerminated;

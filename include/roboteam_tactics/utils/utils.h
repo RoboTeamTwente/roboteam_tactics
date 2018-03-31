@@ -232,6 +232,15 @@ boost::optional<int> get_robot_closest_to_point(std::vector<int> robots, const r
 boost::optional<int> get_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point);
 
 /**
+ * \brief Gets the id of whichever robot is in the future closest to a given point
+ * \param robots The robots to consider
+ * \param point The point to search near
+ * \param t_ahead The amount of seconds to look into the future
+ * \return The id of the robot closest to the point
+ */
+boost::optional<int> predict_robot_closest_to_point(std::vector<roboteam_msgs::WorldRobot> robots, const Vector2& point, double t_ahead);
+
+/**
  * \brief Gets the id of whichever robot is closest to the opponents' goal
  * \param robots The robots to consider
  */
