@@ -100,17 +100,22 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
 	
+	Vector2 ballPos(world.ball.pos);
+
 	double shortestDistance = 40;//(Vector2(world.us.at(0).pos) - testPosition).length();
 	for (size_t i = 0; i < world.us.size(); i++) {
 
 		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
 
-			double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+			// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+			// WIP: TEST DISTANCE IS AN ANGLE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS
+			double testDistance = fabs(cleanAngle( (Vector2(world.us.at(i).pos) - ballPos).angle() - (testPosition - ballPos).angle() ));
 			if (testDistance < shortestDistance) {
 				shortestDistance = testDistance;
 			}
 		}
 	}
+
 	return shortestDistance;
 }
 

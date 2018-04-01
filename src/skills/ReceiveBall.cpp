@@ -172,9 +172,14 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	Vector2 posdiff = myPos - ballPos;
 
-	if (ballVel.length() < 0.1 || ballVel.dot(posdiff)<0) {
-	// if ball goes too slow, or is not in my direction
-	// POSSIBLE IMPROVEMENT: SPECIFY BETTER WHAT 'MY DIRECTION' IS (IS THERE A CERTAIN MARGIN LIKE ACCEPTABLE DEVIATION?)
+	double velLimit = posdiff.length()/3; // ARBITRARY GUESS
+	if (GetBool("defenderMode")) {
+		velLimit = 0.1;
+	} else if (velLimit<0.1) {
+		velLimit = 0.1;
+	}
+	if (ballVel.dot(posdiff.stretchToLength(1)) < velLimit) { 
+	// if the velocity in my direction is too low, ballIsComing will not be set to true
 		// drawer.removeLine("ballTrajectory");
 		// drawer.removePoint("closestPointReceiveBall");
 		interceptPose.interceptPos = receiveBallAtPos;
