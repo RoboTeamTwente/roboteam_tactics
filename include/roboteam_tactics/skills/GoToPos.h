@@ -91,14 +91,14 @@ public:
     std::string node_name() { return "GoToPos"; }
     
 private:
+    // output target: grsim or serial
+    std::string robot_output_target;
 
-    // Control parameters
+    // Obstacle avoidance parameters
     double avoidRobotsGain;
-	double cushionGain;
-	double minDist;
-	double maxDist;
-    Vector2 posErrorI;
-    double angleErrorI;
+    double cushionGain;
+    double minDist;
+    double maxDist;
 
     // Safety margins used to filter the target position
     double safetyMarginGoalAreas;
@@ -110,9 +110,6 @@ private:
 
     // Info about previous states
     Vector2 prevTargetPos;
-    Vector2 prevSumOfForces;
-    Vector2 prevVelCommand;
-    double prevAngularVelTarget;
     
     // Success 
     int successCounter;
@@ -120,7 +117,6 @@ private:
     bool failure;
 
     Draw drawer;
-    RobotType robotType;
     Control controller;
 
     // @DEBUG info

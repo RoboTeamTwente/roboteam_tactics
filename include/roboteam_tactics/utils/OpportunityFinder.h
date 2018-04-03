@@ -25,6 +25,11 @@ class OpportunityFinder {
 public:
 	OpportunityFinder();
 	void Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID);
+
+	void setWeight(std::string metric, double value);
+	void setMin(std::string metric, double value);
+	void setMax(std::string metric, double value);
+
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
@@ -36,13 +41,12 @@ public:
 	double calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world);
 
 	void setCloseToPos(Vector2 closeToPos);
-	// boost::optional<double> computePassPointScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition);
 	double computeScore(Vector2 testPosition, roboteam_msgs::World world);
 	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
 	BestTeammate chooseBestTeammate(bool realScore=false, bool realPos=false, bool notBackwards=false, bool distFromTargetLimit=false, double limit=8.0);
 private:
-	
+
 	// Weights for determining the score of a point on the field, including min and max values that correspond to the min and max scores
 	double distToGoalWeight;
 	double distToGoalMin;

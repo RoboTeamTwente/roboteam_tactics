@@ -108,26 +108,31 @@ public:
     std::string node_name() override { return "GetBall"; }
 
 private:
+    void initializeOpportunityFinder();
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
     void publishKickCommand(double kickVel);
     bool claimBall();
     void releaseBall();
     void passBall(int id);
+    double computePassSpeed(double dist, double v2);
     
     int robotID;
+    std::string robot_output_target = "";
     GoToPos goToPos;
     Draw drawer;
     OpportunityFinder opportunityFinder;
+
     bool choseRobotToPassTo;
-    int ballCloseFrameCount = 0;
-    int bestID;
-    Vector2 bestPos;
     bool dontDribble;
     bool ballClaimedByMe;
     bool hasTerminated;
     double deviation;
-    std::string robot_output_target = "";
+    bool chip;
+    double passThreshold;
+    int ballCloseFrameCount = 0;
+    int bestID;
+    Vector2 bestPos;
 };
 
 } // rtt

@@ -493,7 +493,6 @@ bt::Node::Status ReceiveBall::Update() {
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
 	    if (commandPtr) {
 	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-
 	        roboteam_msgs::RobotCommand command = *commandPtr;
 
 	        // TEMPORARY REPLACEMENT OF BALL SENSOR FOR IN GRSIM
@@ -504,16 +503,16 @@ bt::Node::Status ReceiveBall::Update() {
 	        	command.kicker = false;
 	        }
 	        
-	     //    if (matchBallVel) {
-		    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.5);
-		    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-		    //     if (newVelCommand.length() > 4.0) {
-		    //       newVelCommand.scale(4.0 / newVelCommand.length());
-		    //     }
-		    //     command.x_vel = newVelCommand.x;
-		    //     command.y_vel = newVelCommand.y;    
-		    // }
-
+	    	//    if (matchBallVel) {
+			    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.5);
+			    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+			    //     if (newVelCommand.length() > 4.0) {
+			    //       newVelCommand.scale(4.0 / newVelCommand.length());
+			    //     }
+			    //     command.x_vel = newVelCommand.x;
+			    //     command.y_vel = newVelCommand.y;    
+			    // }
+	        
 	        pub.publish(command);
 	    } else {
 	    	publishStopCommand();

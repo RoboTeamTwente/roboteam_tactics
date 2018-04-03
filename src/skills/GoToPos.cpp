@@ -34,19 +34,32 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
             succeeded = false;
             failure = false;
+            controller.Initialize(blackboard->GetInt("ROBOT_ID"));
+
+            // Debug info
             ros::NodeHandle n;
             myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
             myVelTopic = n.advertise<roboteam_msgs::WorldRobot>("myVelTopic", 1000);
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
-            controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
             //DEFAULTS
-            safetyMarginGoalAreas = 0.2; //0.2
-            marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
-            avoidRobotsGain = 0.005;
-            cushionGain = 0.06;
-            minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
-            maxDist = 0.3; // no force is exerted when dist is larger than maxDist
+            ros::param::getCached("robot_output_target", robot_output_target);
+            if (robot_output_target == "grsim") {
+                safetyMarginGoalAreas = 0.2;
+                marginOutsideField = 0.3;
+                avoidRobotsGain = 0.005;
+                cushionGain = 0.06;
+                minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
+                maxDist = 0.3; // no force is exerted when dist is larger than maxDist
+            } else if (robot_output_target == "serial") {
+                safetyMarginGoalAreas = 0.2;
+                marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                avoidRobotsGain = 0.005;
+                cushionGain = 0.06;
+                minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
+                maxDist = 0.3; // no force is exerted when dist is larger than maxDist
+            }
+            
             //PROCESS BLACKBOARD
             if (HasDouble("avoidRobotsGain")) {
                 avoidRobotsGain = GetDouble("avoidRobotsGain");
@@ -80,16 +93,18 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
     Vector2 ahead = myPos + antenna; // tip of the antenna
     Vector2 closestPoint = antenna.closestPointOnVector(myPos, otherRobotPos);
     Vector2 force = closestPoint - otherRobotPos; // Vector from other robot to closest point on antenna.
-    double dist = force.length(); // distance between closest point on antenna and other robot.
-    double dist2 = (myPos - otherRobotPos).length(); // distance between me and other robot, used for scaling the force.
+    double distToAntenna = force.length(); // distance between closest point on antenna and other robot.
+    double distToMe = (myPos - otherRobotPos).length(); // distance between me and other robot, used for scaling the force.
 
-    // Check if the point lies within the antenna, and not on the edges. 
+    // Check if the point lies within the antenna, so not on the edges. 
     // Then calculate the needed avoidance force.
-    if ((closestPoint - myPos).length() > 0.001 && (ahead - closestPoint).length() > 0.001 && dist <= maxDist){
-        if(dist > minDist) {
-            force = force.stretchToLength(avoidRobotsGain/dist/dist2);
-        } else if(dist > 0.0005) {
-            force = force.stretchToLength(avoidRobotsGain/minDist/dist2);
+    if ((closestPoint - myPos).length() > 0.001 && (ahead - closestPoint).length() > 0.001 && distToAntenna <= maxDist){
+        if(distToAntenna > minDist) {
+            force = force.stretchToLength(avoidRobotsGain/distToAntenna/distToMe);
+        } else if(distToAntenna > 0.0005) { // avoid division by 0
+            force = force.stretchToLength(avoidRobotsGain/minDist/distToMe);
+        } else { // distToAntenna almost zero -> force direction becomes 
+            force = (antenna.rotate(M_PI/2)).stretchToLength(avoidRobotsGain/minDist/distToMe);
         }
     } else {
         force = Vector2(0,0);
@@ -355,9 +370,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
-
-    std::string robot_output_target = "";
-    ros::param::getCached("robot_output_target", robot_output_target);
 
     if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
         controller.setControlParam("pGainPosition", 3.5);

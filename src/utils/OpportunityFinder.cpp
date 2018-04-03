@@ -79,6 +79,50 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 	isCloseToPosSet = false;
 }
 
+void OpportunityFinder::setWeight(std::string metric, double value) {
+	// a few metrics are listed here for easy changing without loading a completely different txt file.
+	if (metric == "distToOpp") {
+		distToOppWeight = value;
+	} else if (metric == "distToTeammate") {
+		distToTeammateWeight = value;
+	} else if (metric == "distToSelf") {
+		distToSelfWeight = value;
+	} else if (metric == "distOppToBallTraj") {
+		distOppToBallTrajWeight = value;
+	} else {
+		ROS_WARN_STREAM_NAMED("utils.OpportunityFinder", "setting " << metric << "Weight is not specified in setWeight function");
+	}
+}
+void OpportunityFinder::setMin(std::string metric, double value) {
+	// a few metrics are listed here for easy changing without loading a completely different txt file.
+	if (metric == "distToOpp") {
+		distToOppMin = value;
+	} else if (metric == "distToTeammate") {
+		distToTeammateMin = value;
+	} else if (metric == "distToSelf") {
+		distToSelfMax = value;
+	} else if (metric == "distOppToBallTraj") {
+		distOppToBallTrajWeight = value;
+	} else {
+		ROS_WARN_STREAM_NAMED("utils.OpportunityFinder", "setting " << metric << "Min is not specified in setMin function");
+	}
+}
+void OpportunityFinder::setMax(std::string metric, double value) {
+	// a few metrics are listed here for easy changing without loading a completely different txt file.
+	if (metric == "distToOpp") {
+		distToOppWeight = value;
+	} else if (metric == "distToTeammate") {
+		distToTeammateWeight = value;
+	} else if (metric == "distToSelf") {
+		distToSelfWeight = value;
+	} else if (metric == "distOppToBallTraj") {
+		distOppToBallTrajWeight = value;
+	} else {
+		ROS_WARN_STREAM_NAMED("utils.OpportunityFinder", "setting " << metric << "Max is not specified in setMax function");
+	}
+}
+
+
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
 
@@ -142,6 +186,7 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 	}
 	return shortestDistance;
 }
+
 
 // Calculates the distance of the closest opponent to the expected trajectory from testPosition to target
 double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
@@ -310,7 +355,6 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 	return computeScore(testPosition, world);
 }
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
-// boost::optional<double> OpportunityFinder::computePassPointScore(Vector2 testPosition) {
 double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::World world) {
 	
 	Vector2 ballPos(world.ball.pos);
@@ -319,13 +363,24 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
 		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
-		if (distOppToBallTraj<distOppToBallTrajMin) {
+		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}
 		// Normalize such that 0 corresponds to worst and 1 to best possible score
 		distOppToBallTraj = (distOppToBallTraj-distOppToBallTrajMin)/(distOppToBallTrajMax-distOppToBallTrajMin);
 		// Add score to total score
 		score += smoothStep(distOppToBallTraj)*distOppToBallTrajWeight;
+	}
+
+	if (distToOppWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
+		double distToOpp = calcDistToClosestOpp(testPosition, world);
+		if (distToOpp < distToOppMin) {
+			return 0.0;
+		}
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		distToOpp = (distToOpp-distToOppMin)/(distToOppMax-distToOppMin);
+		// Add score to total score
+		score += smoothStep(distToOpp)*distToOppWeight;
 	}
 
 	if (distOppToTargetTrajWeight>0.0) {
@@ -350,14 +405,6 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		viewOfGoal = (viewOfGoal-viewOfGoalMin)/(viewOfGoalMax-viewOfGoalMin);
 		// Add score to total score
 		score += smoothStep(viewOfGoal)*viewOfGoalWeight;
-	}
-
-	if (distToOppWeight>0.0) {
-		double distToOpp = calcDistToClosestOpp(testPosition, world);
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
-		distToOpp = (distToOpp-distToOppMin)/(distToOppMax-distToOppMin);
-		// Add score to total score
-		score += smoothStep(distToOpp)*distToOppWeight;
 	}
 
 	if (distToTeammateWeight>0.0) {
@@ -490,7 +537,6 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 
 	roboteam_msgs::World world = LastWorld::get();
 	roboteam_msgs::World fakeWorld = world;
-	
 
 	if (!realScore || !realPos) {
 		// Get claimed positions, place them instead of those robot positions in our 'fake' world object
@@ -506,17 +552,16 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 		}
 	}
 
-
 	// initialize max score and corresponding ID and position
    	double maxScore = 0;
    	int bestID = -1;
    	Vector2 bestPos(0,0);
-    
-    Vector2 ballPos(fakeWorld.ball.pos);
+
+    Vector2 ballPos(world.ball.pos);
 
     // For each of our robots
-    for (size_t i = 0; i < (fakeWorld.us.size()); i++) {
-        if (fakeWorld.us.at(i).id != ROBOT_ID) { // dont choose myself
+    for (size_t i = 0; i < (world.us.size()); i++) {
+        if (world.us.at(i).id != ROBOT_ID) { // dont choose myself
         	Vector2 botPos;
         	if (realPos) {
         		botPos = Vector2(world.us.at(i).pos);
@@ -540,7 +585,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
             } 
             if (score > maxScore) {
                 maxScore = score;
-                bestID = fakeWorld.us.at(i).id;
+                bestID = world.us.at(i).id;
                 bestPos = botPos;
             }
         }
