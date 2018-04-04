@@ -150,10 +150,10 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 	for (size_t i = 0; i < world.us.size(); i++) {
 
 		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
-
+			Vector2 botPos(world.us.at(i).pos);
 			// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-			// WIP: TEST DISTANCE IS AN ANGLE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS
-			double testDistance = fabs(cleanAngle( (Vector2(world.us.at(i).pos) - ballPos).angle() - (testPosition - ballPos).angle() ));
+			// WIP: TEST DISTANCE IS COMBINATION OF ANGLE AND DISTANCE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
+			double testDistance = 1.0*fabs(cleanAngle( (botPos - ballPos).angle() - (testPosition - ballPos).angle() )) + 1.0*(botPos - testPosition).length();
 			if (testDistance < shortestDistance) {
 				shortestDistance = testDistance;
 			}
@@ -164,13 +164,14 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 }
 
 // Calculates the distance of the closest opponent to the expected trajectory of the ball
-double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world, double chipMargin) {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballTraj = testPosition - ballPos;
 
 	if (world.them.size() == 0) {
 		return 40.0;
 	}
+
 	// IMPROVEMENT: Maybe the ball trajectory should be considered a cone, when assessing how close opponents may be.
 	// Vector2 oppPos = Vector2(world.them.at(0).pos);
 	double shortestDistance = 40;//fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
@@ -178,9 +179,14 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 		Vector2 oppPos(world.them.at(i).pos);
 		// WIP: opponents outside a 90 degree field of view (as seen from the ball) are not considered
 		if ( fabs(cleanAngle( (oppPos - ballPos).angle() - ballTraj.angle() )) < 0.25*M_PI) {
-			double testDistance = (ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length();
-			if (testDistance < shortestDistance) {
-				shortestDistance = testDistance;
+			Vector2 closestPoint = ballTraj.closestPointOnVector(ballPos, oppPos);
+			double distToBall = (closestPoint - ballPos).length();
+			if (distToBall > chipMargin || distToBall < 0.25) {
+				double testDistance = (closestPoint - oppPos).length();
+
+				if (testDistance < shortestDistance) {
+					shortestDistance = testDistance;
+				}
 			}
 		}
 	}
@@ -362,7 +368,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world);
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 2.0);
 		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}
@@ -453,7 +459,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	
 	roboteam_msgs::World world = LastWorld::get();
 	// time_point start = now();
-	
+
 	int x_steps = 20;
 	int y_steps = 20;
 

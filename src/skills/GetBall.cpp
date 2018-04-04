@@ -107,12 +107,19 @@ void GetBall::publishKickCommand(double kickSpeed){
     if (HasDouble("kickerVel")) {
         kickSpeed = GetDouble("kickerVel");
     }
+    choseRobotToPassTo = false;
     
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-    command.kicker = true;
-    command.kicker_forced = true;
-    command.kicker_vel = kickSpeed;
+    if (chip) {
+        command.chipper = true;
+        command.chipper_vel = kickSpeed;
+    } else {
+        command.kicker = true;
+        command.kicker_forced = true;
+        command.kicker_vel = kickSpeed;
+    }
+    
     // command.chipper = GetBool("chipOn");
     // command.chipper_forced = GetBool("chipOn");
     // command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
@@ -175,7 +182,10 @@ void GetBall::passBall(int id) {
 }
 
 double GetBall::computePassSpeed(double dist, double v2) {
-    double a = 1.0; // friction constant. assumes velocity decreases linearly over time
+    double a = 0.25; // friction constant. assumes velocity decreases linearly over time
+    if (HasDouble("friction")) {
+        a = GetDouble("friction");
+    }
     double v1 = sqrt(v2*v2 + a*2*dist); // computes necessary pass speed v1, such that ball has speed v2 when it arrives.
     return v1;
 }
@@ -269,7 +279,7 @@ bt::Node::Status GetBall::Update (){
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
-    if (!choseRobotToPassTo && GetBool("passToBestAttacker") && posDiff.length() < 0.6 && !shootAtGoal) {
+    if (!choseRobotToPassTo && GetBool("passToBestAttacker") && posDiff.length() < 1.5 && !shootAtGoal) {
         BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
         bestID = bestTeammate.id;
         bestPos = bestTeammate.pos;
@@ -357,6 +367,8 @@ bt::Node::Status GetBall::Update (){
             ballCloseFrameCountTo = 2;
         }
         
+        bool softPass = false;
+        bool passClaim = false;
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
         // When I have not been close for long enough yet
             if (choseRobotToPassTo && ballCloseFrameCount == 0) {
@@ -376,15 +388,18 @@ bt::Node::Status GetBall::Update (){
                 // If again I didnt find a suitable player, or the passline to the chosen robot is blocked now...
                 // ... -> go through some alternatives. If theres no alternative, chip at goal.
                 if (bestID == -1 || opportunityFinder.calcDistOppToBallTraj(bestPos, world) < passThreshold) { 
-                    // pass line is crossed by opponent -> chip possible?
-                    double chipDist = 1.0;
+                // pass line is crossed by opponent -> chip possible?
+                    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << bestID);
+                    double chipDist = 2.0;
+                    double minChipDist = 1.0;
                     Vector2 passLine = bestPos - ballPos;
-                    Vector2 chipBallPos = ballPos + passLine.stretchToLength(chipDist); // ball pos after chip landed
-                    roboteam_msgs::World chipWorld = world; // alternative world where the ball lay on the position after the chip landed
-                    chipWorld.ball.pos.x = float(chipBallPos.x);
-                    chipWorld.ball.pos.y = float(chipBallPos.y);
-                    if (bestID == -1 || passLine.length() < chipDist || opportunityFinder.calcDistOppToBallTraj(bestPos, chipWorld) < passThreshold) {
+                    // Vector2 chipBallPos = ballPos + passLine.stretchToLength(chipDist); // ball pos after chip landed
+                    // roboteam_msgs::World chipWorld = world; // alternative world where the ball lay on the position after the chip landed
+                    // chipWorld.ball.pos.x = float(chipBallPos.x);
+                    // chipWorld.ball.pos.y = float(chipBallPos.y);
+                    if (bestID == -1 || passLine.length() < minChipDist || opportunityFinder.calcDistOppToBallTraj(bestPos, world, chipDist) < passThreshold) {
                     // chip not possible -> softpass to someone else?
+                        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned chip, checking for soft pass to another bot");
                         // First specify what leads to a soft pass being possible
                         opportunityFinder.setMin("distToOpp", 1.0); // if opponent will be closer than this value, soft pass wont be viable
                         opportunityFinder.setMax("distToOpp", 2.0); // make sure max value is still higher than newly chosen min value
@@ -393,9 +408,11 @@ bt::Node::Status GetBall::Update (){
                         initializeOpportunityFinder(); // reset parameters of our opportunity finder for future usage.
                         if (bestTeammate.id == -1) {
                         // found no (claimed) pos to which a soft pass would be smart -> consider direct pass
+                            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a soft pass candidate, checking for direct pass to a bot");
                             BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(true, true, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
                             if (bestTeammate.id == -1) {
                             // found no good direct pass option -> direct chip to anyone? WIP. for now: chip towards goal
+                                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a direct pass canditate, so chipping towards goal");
                                 chip = true;
                                 bestID = -1; // this leads to shootAtGoal in next iteration
                                 checkIfReady = false;
@@ -404,16 +421,20 @@ bt::Node::Status GetBall::Update (){
                                 bestID = bestTeammate.id;
                                 bestPos = bestTeammate.pos;
                                 checkIfReady = false;
+                                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a direct pass option and chose robot " << bestID);
                             }
                         } else {
                         // soft pass is possible
                             bestID = bestTeammate.id;
                             bestPos = bestTeammate.pos;
                             checkIfReady = false;
+                            softPass = true;
+                            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a soft pass option and chose robot " << bestID);
                         }
                     } else {
                     // chip is possible -> keep this bestpos and chip!
                         chip = true;
+                        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " will chip towards robot " << bestID);
                     }
                 }
 
@@ -422,19 +443,18 @@ bt::Node::Status GetBall::Update (){
                     bool readyToReceiveBall = false;
                     ros::param::get("robot" + std::to_string(bestID) + "/readyToReceiveBall", readyToReceiveBall);
                     if (!readyToReceiveBall) {
-                    // if not ready: dont shoot yet
-                        return Status::Running; 
+                    // if not ready: pass softer 
+                        softPass = true;
                     } else {
                     // assigns ball claimage to new player that is passed to
                     // NOTE: this can be dangerous, so now only happens if the receiving robot actually communicates back.
                     // If the robot communicates, I can assume it will reset its own ball claimage if he failed to receive it.
-                        passBall(bestID); 
+                        passClaim = true;
                     }
                 }
 
                 ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball (possibly once more)
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot param set to: " << bestID);
-                // readyTimerStart = now();
+                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
             }
             ballCloseFrameCount++;
             return Status::Running;
@@ -457,7 +477,17 @@ bt::Node::Status GetBall::Update (){
                     // }
                 double passSpeed = 4.0;
                 if (choseRobotToPassTo) {
-                    passSpeed = computePassSpeed((bestPos - ballPos).length(), 2.0);
+                    if (softPass) { 
+                        // WIP: SHOULD CONSIDER ROBOT'S POSITION AND VELOCITY TO ESTIMATE HOW MUCH TIME IT WILL TAKE FOR HIM
+                        passSpeed = computePassSpeed((bestPos - ballPos).length(), 0.5);
+                    } else {
+                        passSpeed = computePassSpeed((bestPos - ballPos).length(), 2.0);
+                    }
+                }
+                if (passClaim) {
+                    passBall(bestID);
+                } else {
+                    passBall(bestID); //releaseBall(); WIP: SHOULD JUST BE RELEASEBALL
                 }
                 publishKickCommand(passSpeed);
                 return Status::Success;

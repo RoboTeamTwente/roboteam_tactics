@@ -32,7 +32,7 @@ public:
 
 	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world, double chipMargin=0.0);
 	double calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
 	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);

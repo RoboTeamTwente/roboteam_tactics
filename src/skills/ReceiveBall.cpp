@@ -178,10 +178,23 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	} else if (velLimit<0.1) {
 		velLimit = 0.1;
 	}
-	if (ballVel.dot(posdiff.stretchToLength(1)) < velLimit) { 
-	// if the velocity in my direction is too low, ballIsComing will not be set to true
+	if (ballVel.dot(posdiff.stretchToLength(1)) < velLimit) { // if the velocity in my direction is too low
+	
+		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
+			// if a pass is noted to myself, I assume the ball is coming.
+			int robotClaimedBall;
+		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
+		    if (robotClaimedBall == robotID) {
+		    	ballIsComing = true;
+	    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
+		    }
+		} else {
+			ballIsComing = false;
+		}
+
 		// drawer.removeLine("ballTrajectory");
 		// drawer.removePoint("closestPointReceiveBall");
+
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
@@ -319,24 +332,18 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 targetPos;
 	double targetAngle;
 	bool ballWasComing = ballIsComing;
-	ballIsComing = false;
-
-
-	if(!ballWasComing && !GetBool("defenderMode") && GetBool("setSignal") && (!hasBall || (hasBall && !our_team))) {
-		int robotClaimedBall;
-	    ros::param::getCached("robotClaimedBall", robotClaimedBall);
-	    if (robotClaimedBall == robotID) {
-	    	ballIsComing = true;
-    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
-	    }
-	}
 
 	// Calculate where we can receive the ball close to the given receiveBallAt... point.
 	boost::optional<InterceptPose> interceptPose;
-	if (!hasBall || *hasBall == robotID) { // if no other robot has the ball (also opponent i guess?)
-		interceptPose = deduceInterceptPosFromBall(ballPos, ballVel, myPos);
-	} else {
-		interceptPose = deduceInterceptPosFromRobot();
+	if (GetBool("defenderMode") && (!hasBall || *hasBall == robotID)) { 			// if im defending and no other robot has the ball
+		interceptPose = deduceInterceptPosFromBall(ballPos, ballVel, myPos);			// use ball for determining interceptpos
+		// ballIsComing is also determined in this function
+	} else if (!GetBool("defenderMode") && (!hasBall || (hasBall && !our_team))) { 	// if im not defending and no teammate has the ball
+		interceptPose = deduceInterceptPosFromBall(ballPos, ballVel, myPos);			// use ball for determining interceptpos
+		// ballIsComing is also determined in this function
+	} else {																		// else
+		interceptPose = deduceInterceptPosFromRobot();									// use robot in possession for determining interceptpos
+		ballIsComing = false;
 	}
 
 	if (!interceptPose) {
@@ -472,7 +479,7 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        if (!HasBool("pGainLarger") || GetBool("pGainLarger") || ballIsComing){
+        if (!HasBool("pGainLarger") || GetBool("pGainLarger")) { // || ballIsComing
         	private_bb->SetBool("pGainLarger", true);
         } else {
         	private_bb->SetBool("pGainLarger", false);
