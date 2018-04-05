@@ -76,6 +76,18 @@ namespace rtt {
  *   - dribblerOff:
  *        Type: Bool
  *        Descr: When true the dribbler wont be used.
+ *
+ *   - passToBestAttacker:
+ *        Type: Bool
+ *        Descr: Aims at best attacker
+ *
+ *   - doNotPlayBackDefense:
+ *        Type: Bool
+ *        Descr: Used when passToBestAttacker is true. If doNotPlayBackDefense is true the robot can not play to a robot behind him
+ *
+ *   - doNotPlayBackAttack:
+ *        Type: Bool
+ *        Descr: Used when passToBestAttacker is true. If doNotPlayBackAttack is true the robot can not play to a robot which is to far from their goal
  */
 
 
@@ -125,6 +137,9 @@ private:
     bool dontDribble;
     double deviation;
     std::string robot_output_target = "";
+
+    bool doNotPlayBackDefense = false;
+    bool doNotPlayBackAttack = false;
 };
 
 } // rtt

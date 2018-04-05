@@ -32,8 +32,8 @@
 		<param name="robotClaimedBall" type="int" value="-1" />
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world" />
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
-        	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
+        <node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
 		<param name="role_iterations_per_second" type="int" value="30" />
 		<param name="num_role_nodes" type="int" value="8" />
@@ -81,7 +81,7 @@
 		</group>
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
-		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
 		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
 		<param name="role_iterations_per_second" type="int" value="30" />

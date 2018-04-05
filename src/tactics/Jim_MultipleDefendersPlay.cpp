@@ -110,6 +110,13 @@ namespace rtt {
 
 // void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps) {
     bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
+
+        drawer.setColor(255, 255, 0);
+        Vector2 pos1(0, 0);
+        Vector2 pos2(1, 1);
+        drawer.drawLine("Jim_testLine_werwer", pos1, pos2);
+        drawer.setColor(0, 0, 0);
+
         // time_point startInit = now();
 
         roboteam_msgs::World world = LastWorld::get();
@@ -125,6 +132,7 @@ namespace rtt {
         std::vector<int> robots = getAvailableRobots();
         int numRobots = robots.size() + activeRobots.size();
         int totalNumRobots = world.us.size();
+
 
         if (numRobots >= (totalNumRobots - 1)) {
             numRobots = totalNumRobots - 2;
@@ -152,7 +160,7 @@ namespace rtt {
             ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Switched to " << (weAreAttacking ? "attacking" : "defending"));
         }
 
-        // Filter removed because it was not working: when it changed to atacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
+        // Filter removed because it was not working: when it changed to attacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
 
         if (weAreAttacking) {
             minDangerScore = 8.0;
@@ -170,18 +178,21 @@ namespace rtt {
                 roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
                 double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
                 if (angleDiffBall <= 0.15) {
+                    ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "setting minBallDefenders=2, for robot=" << opp.id);
                     minBallDefenders = 2;
                 } else {
                     bool addDangerousOpp = true;
                     for (size_t j = 0; j < dangerousOpps.size(); j++) {
                         double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
                         if (angleDiffRobot <= 0.15) {
+                            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Not adding robotDefender for robot=" << opp.id);
                             addDangerousOpp = false;
                             break;
                         }
                     }
 
                     if (addDangerousOpp) {
+                        ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Adding robotDefender for robot=" << opp.id);
                         dangerousOpps.push_back(opp);
                     }
                 }
@@ -295,6 +306,7 @@ namespace rtt {
 
         for (size_t i = 0; i < ballDefenders.size(); i++) {
             int ballDefenderID = ballDefenders.at(i);
+            std::cout << "Robot [" << ballDefenderID << "] is a Ball Defender!!" << std::endl;
 
             // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
             delete_from_vector(robots, ballDefenderID);
@@ -357,6 +369,7 @@ namespace rtt {
             if(robots.size()>0){
 
                 int defenderID = *getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
+                std::cout << "Robot " << defenderID << " is a Robot Defender!!" << std::endl;
 
                 // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
                 delete_from_vector(robots, defenderID);

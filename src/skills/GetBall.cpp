@@ -230,6 +230,22 @@ bt::Node::Status GetBall::Update (){
                     double botClaimedY;
                     ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
                     double score = opportunityFinder.computeScore(Vector2(botClaimedX,botClaimedY),world);
+
+
+                    // when "doNotPlayBackDefense" is true, this checks if this robot is behind me. If so, his score is set to 0
+                    if(HasBool("doNotPlayBackDefense") && GetBool("doNotPlayBackDefense")) {
+                        if (botClaimedX < robotPos.x) {
+                            score = 0;
+                        }
+                    }
+                    // when "doNotPlayBackAttack" is true, this checks if this robot is behind me. If so, his score is set to 0
+                    if(HasBool("doNotPlayBackAttack") && GetBool("doNotPlayBackAttack")) {
+                        if (calcDistGoalToRobot(i, world) > 8.0) {
+                            score = 0;
+                        }
+                    }
+
+
                     if (score > maxScore) {
                         maxScore = score;
                         maxScoreID = world.us.at(i).id;
@@ -238,8 +254,29 @@ bt::Node::Status GetBall::Update (){
                     }
                     // world.us.at(i).pos.x = float(botClaimedX);
                     // world.us.at(i).pos.y = float(botClaimedY);
+
+
+
                 } else { // if current robot did not claim a position, check its own position.
                     double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos),world);
+
+
+                    // when "doNotPlayBackDefense" is true, it checks if this robot is behind me. If so, his score is set to 0
+                    if(HasBool("doNotPlayBackDefense") && GetBool("doNotPlayBackDefense")) {
+                        if (Vector2(world.us.at(i).pos).x < robotPos.x) {
+                            score = 0;
+                        }
+                    }
+                    // when "doNotPlayBackAttack" is true, it checks if this robot is further away from their goal then 8m. If so, his score is set to 0
+                    if(HasBool("doNotPlayBackAttack") && GetBool("doNotPlayBackAttack")) {
+                        std::cout << "GETBALL - DistGoalToRobot " << i << " = " << calcDistGoalToRobot(i, world) << std::endl;
+                        if (calcDistGoalToRobot(i, world) > 8.0) {
+                            std::cout << "GETBALL - Set score of robot " << i << " to zero " << std::endl;
+                            score = 0;
+                        }
+                    }
+
+
                     if (score > maxScore) {
                         maxScore = score;
                         maxScoreID = world.us.at(i).id;

@@ -375,6 +375,8 @@ constexpr bool isNaN(double	t) {
 
 bool weAreLeft();
 
+double calcDistGoalToRobot(int robot, roboteam_msgs::World world);
+
 std::vector<int> getAvailableRobots(roboteam_msgs::World const & world = LastWorld::get());
 
 } // rtt
