@@ -47,7 +47,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             if (robot_output_target == "grsim") {
                 safetyMarginGoalAreas = 0.2;
                 marginOutsideField = 0.3;
-                avoidRobotsGain = 0.005;
+                avoidRobotsGain = 0.010;
                 cushionGain = 0.06;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
                 maxDist = 0.3; // no force is exerted when dist is larger than maxDist
@@ -281,20 +281,21 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     double xGoal = targetPos.x;
     double yGoal = targetPos.y;
 
+    double newMargin = marginOutsideField;
     // In and around the goal the robot cannot cross the backline.
     if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
-        marginOutsideField = -0.1;
+        newMargin = -0.1;
     }
     if (fabs(yGoal) < (field.goal_width/2)) {
-        marginOutsideField = -0.05;
+        newMargin = -0.05;
     }
 
     // If the target position is outside of the field + margins, then change the target position to the closest point within this margin
     // if (GetBool("ignoreFieldBounds", false)) {
-        if (xGoal > (field.field_length/2+marginOutsideField) || xGoal < (-field.field_length/2-marginOutsideField)) {
-            xGoal = signum(xGoal)*(field.field_length/2+marginOutsideField);
+        if (xGoal > (field.field_length/2+newMargin) || xGoal < (-field.field_length/2-newMargin)) {
+            xGoal = signum(xGoal)*(field.field_length/2+newMargin);
         }
-        if (yGoal > (field.field_width/2+marginOutsideField) || yGoal < (-field.field_width/2-marginOutsideField)) {
+        if (yGoal > (field.field_width/2+marginOutsideField) || yGoal < -(field.field_width/2+marginOutsideField)) {
             yGoal = signum(yGoal)*(field.field_width/2+marginOutsideField);
         }
     // }

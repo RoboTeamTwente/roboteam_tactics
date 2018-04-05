@@ -115,7 +115,9 @@ private:
     bool claimBall();
     void releaseBall();
     void passBall(int id);
-    double computePassSpeed(double dist, double v2);
+    double computePassSpeed(double dist, double input, bool imposeTime);
+    double computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel);
+    double computeArrivalTime(Vector2 location, int id);
     
     int robotID;
     std::string robot_output_target = "";
