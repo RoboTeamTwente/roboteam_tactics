@@ -96,6 +96,7 @@ public:
     GetBall(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 	Status Update() override;
     void Initialize() override;
+    void Terminate(Status s);
     
     static VerificationMap required_params() {
         VerificationMap params;
@@ -119,27 +120,33 @@ public:
     std::string node_name() override { return "GetBall"; }
 
 private:
+    void initializeOpportunityFinder();
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
     void publishKickCommand(double kickVel);
-    bool canClaimBall();
+    bool claimBall();
     void releaseBall();
+    void passBall(int id);
+    double computePassSpeed(double dist, double v2);
     
     int robotID;
+    std::string robot_output_target = "";
     GoToPos goToPos;
     Draw drawer;
     OpportunityFinder opportunityFinder;
-    bool choseRobotToPassTo;
-    Vector2 bestClaimedPos;
-    bool bestBotClaimedPos;
-    int ballCloseFrameCount = 0;
-    int passToRobot;
-    bool dontDribble;
-    double deviation;
-    std::string robot_output_target = "";
 
-    bool doNotPlayBackDefense = false;
-    bool doNotPlayBackAttack = false;
+    bool choseRobotToPassTo;
+    bool dontDribble;
+    bool ballClaimedByMe;
+    bool hasTerminated;
+    double deviation;
+
+    bool chip;
+    double passThreshold;
+    int ballCloseFrameCount = 0;
+    int bestID;
+    Vector2 bestPos;
+
 };
 
 } // rtt

@@ -15,7 +15,8 @@ bt::Node::Status PassToMe::Update() {
     int robotID = GetInt("ROBOT_ID");
     int passToRobot;
     ros::param::getCached("passToRobot", passToRobot);
-    if (passToRobot == robotID) {
+
+    if (passToRobot == robotID || (GetBool("anyone") && passToRobot!=-1)) {
         // ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", PassToMe detected");
         if (GetBool("resetParam")) {
             ros::param::set("passToRobot", -1);

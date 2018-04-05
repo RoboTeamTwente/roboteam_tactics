@@ -21,8 +21,23 @@ void Positioning::Initialize() {
     robotID = blackboard->GetInt("ROBOT_ID");
     ROS_INFO_STREAM_NAMED("skills.Positioning", "Initialize for robot: " << robotID);
     // passIncoming = false;
+    int type = 0;
+    if (HasInt("type")) {
+        type = GetInt("type");
+    }
+    if (type == 0) {
+    // Attacker
+        opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    } else if (type == 1) {
+    // Assister/passer
+    // WIP: To which robot should be passed? check at every scan which robot?
+        // Check which robot:
+        
 
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
+    }
+
+    
     // starting point is opponents half of the field
     bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
 
@@ -42,7 +57,9 @@ void Positioning::Terminate(bt::Node::Status s) {
         // unclaim position
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
-            ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << "Unclaiming pos at termination");
+            ROS_INFO_STREAM_NAMED("skills.Positioning", "Terminating, unclaim position for robot: " << robotID);
+        } else {
+            ROS_INFO_STREAM_NAMED("skills.Positioning", "Terminating, keeping claimed pos for robot: " << robotID);
         }
     }
 
@@ -74,7 +91,7 @@ bt::Node::Status Positioning::Update() {
 
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 100) { // !passIncoming && 
+    if (elapsedTime.count() >= 300) { // !passIncoming && 
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position

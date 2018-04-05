@@ -32,7 +32,7 @@ RTT_REGISTER_SKILL(GetBall);
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb) {
-    passToRobot = 0;
+    ballClaimedByMe = false;
 }
 
 void GetBall::Initialize() {
@@ -41,29 +41,54 @@ void GetBall::Initialize() {
 
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
-    bestBotClaimedPos = false;
-    // ros::param::set("passToRobot", -1);
-    // ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", passToRobot param reset to -1 because doing GetBall now");
-    ros::param::getCached("robot_output_target", robot_output_target);
-    // unclaim position
-    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
-    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
-    ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
+    ballClaimedByMe = false;
+    hasTerminated = false;
+    chip = false;
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
+    passThreshold = 0.1;    // minimal dist of opp to pass line for pass to be possible
+
+    ros::param::getCached("robot_output_target", robot_output_target);
+
+    if (GetBool("unclaimPos")) {
+    // unclaim position
+        ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
+        ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
+        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
+    }
+
+    
 
     // // RANDOM ANGLE SHOOTER (set deviation to 0 to not use this)
-    // if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
-    //     deviation = 0.30*(get_rand_int(2)*2-1);
-    //     ROS_INFO_STREAM("GetBall: " << deviation);
-    // } else {
-        deviation = 0.0;
-    // }
+        // if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
+        //     deviation = 0.30*(get_rand_int(2)*2-1);
+        //     ROS_INFO_STREAM("GetBall: " << deviation);
+        // } else {
+            deviation = 0.0;
+        // }
 
     if (GetBool("passToBestAttacker")) {
-	// IMPROVE: Should be a different weight list that does not take dist to teammate (and dist to self?) into account
-	    opportunityFinder.Initialize("jellePass.txt", robotID, "theirgoal", 0);
-	}
+        initializeOpportunityFinder();
+    }
+}
+
+void GetBall::initializeOpportunityFinder() {
+    // load the relevant weights list on which our teammates' positions will be judged, and specify the 'target' (see opportunityFinder)
+    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+
+    // the following custom changes apply for when choosing a teammate to pass to.
+    opportunityFinder.setWeight("distToTeammate", 0.0);  // not relevant for passing, only for positioning
+    opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
+    opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // be less strict on whether pass will fail
+}
+
+void GetBall::Terminate(bt::Node::Status s) {
+    if (!hasTerminated) {
+    // Because I got this annoying terminate message constantly, even if the skill had not initialized again
+        hasTerminated = true;
+        releaseBall();
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID << ", releasing the ball if I claimed it");
+    }
 }
 
 void GetBall::publishStopCommand() {
@@ -82,55 +107,96 @@ void GetBall::publishKickCommand(double kickSpeed){
     if (HasDouble("kickerVel")) {
         kickSpeed = GetDouble("kickerVel");
     }
+    choseRobotToPassTo = false;
     
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-    command.kicker = GetBool("passOn");
-    command.kicker_forced = GetBool("passOn");
-    command.chipper = GetBool("chipOn");
-    command.chipper_forced = GetBool("chipOn");
-    command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
-    command.kicker_vel = GetBool("passOn") ? kickSpeed : 0;
-
+    if (chip) {
+        command.chipper = true;
+        command.chipper_vel = kickSpeed;
+    } else {
+        command.kicker = true;
+        command.kicker_forced = true;
+        command.kicker_vel = kickSpeed;
+    }
+    
+    // command.chipper = GetBool("chipOn");
+    // command.chipper_forced = GetBool("chipOn");
+    // command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.x_vel = 0;
     command.y_vel = 0;
-   if (GetBool("passOn") || dontDribble) {
-        command.dribbler = false;
-    } else {
-       command.dribbler = true;
-    }
+    command.dribbler = false;
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);  
 }
 
-bool GetBall::canClaimBall() {
-    int robotClaimedBall;
+bool GetBall::claimBall() {
+    if (ballClaimedByMe) { // prevents too many ros param checks
+        return true;
+    }
 
+    int robotClaimedBall;
     if (ros::param::has("robotClaimedBall")) {
         ros::param::getCached("robotClaimedBall", robotClaimedBall);
 
         if (robotClaimedBall == robotID) {
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " already claimed ball");
+            ballClaimedByMe = true; 
             return true;
         } else if (robotClaimedBall == -1) {
-            ros::param::set("robotClaimedBall", robotID);
+            //ros::param::set("robotClaimedBall", robotID);
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
+            ballClaimedByMe = true;
             return true; // if no-one claimed the ball -> I claim the ball
         } else {
-            ros::param::set("robotClaimedBall", -1); // SHOULD THIS BE DONE LIKE THIS? RATHER USE TERMINATE FUNCTION FOR UNCLAIMING
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " cant claim the ball because " << robotClaimedBall << " already did");
             return false;
         }
-    } else {
-        ros::param::set("robotClaimedBall", robotID);
+    } else { // if param had not been initialized, set it anyways
+        //ros::param::set("robotClaimedBall", robotID);
+        ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
+        ballClaimedByMe = true;
         return true;
     }
 }
 
 void GetBall::releaseBall() {
-    ros::param::set("robotClaimedBall", -1);
+    if (GetBool("useBallClaiming") && claimBall()) {
+    // only release ball if I actually claimed it
+        ros::param::set("robotClaimedBall", -1);
+        ROS_DEBUG_STREAM_NAMED("skills.GetBall", robotID << " released ball");
+        ballClaimedByMe = false;
+    }
     return;
 }
 
+void GetBall::passBall(int id) {
+    if (GetBool("useBallClaiming") && claimBall()) {
+    // only pass the claim on the ball if I actually claimed it
+        ros::param::set("robotClaimedBall", id);
+        ROS_DEBUG_STREAM_NAMED("skills.GetBall", robotID << " passed claim on the ball to robot " << id);
+        ballClaimedByMe = false;
+    }
+    return;
+}
+
+double GetBall::computePassSpeed(double dist, double v2) {
+    double a = 0.25; // friction constant. assumes velocity decreases linearly over time
+    if (HasDouble("friction")) {
+        a = GetDouble("friction");
+    }
+    double v1 = sqrt(v2*v2 + a*2*dist); // computes necessary pass speed v1, such that ball has speed v2 when it arrives.
+    return v1;
+}
+
 bt::Node::Status GetBall::Update (){
+    if (GetBool("useBallClaiming") && !claimBall()) {
+    // In this way, only 1 of our robots may perform GetBall at a time. Is that what we want? probably yes
+        // ROS_WARN_STREAM_NAMED("skills.GetBall", "return RUNNING for robot "<< robotID << ", because ball was already claimed");
+        // return Status::Failure;
+        return Status::Running; // failure currently leads to too many reinitializations, so wont use that for now...
+    }
 
 	roboteam_msgs::World world = LastWorld::get();
 
@@ -147,27 +213,34 @@ bt::Node::Status GetBall::Update (){
     } else {
         ROS_WARN_STREAM_NAMED("skills.GetBall", "Robot with this ID not found, ID: " << robotID);
         return Status::Failure;
-    }  
+    }
+
+    // Store some info about the world state
+    roboteam_msgs::WorldBall ball = world.ball;
+    Vector2 ballPos(ball.pos);
+    Vector2 ballVel(ball.vel);
+    Vector2 robotPos(robot.pos);
+    Vector2 robotVel(robot.vel);
+    Vector2 posDiff = ballPos - robotPos;
 
     // Different GetBall parameters for grsim than for real robots
     double successDist;
     double successAngle;
-    double getBallDist;
+    // double getBallDist; deprecated
     double distAwayFromBall;
     double minDist;
     if (robot_output_target == "grsim") {
         successDist = 0.12;
         successAngle = 0.15;
-        getBallDist = 0.0 ;
+        // getBallDist = 0.0;
         distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
         successDist = 0.12; //0.12
         successAngle = 0.15; //0.15
-        getBallDist = 0.0;
+        // getBallDist = 0.0;
         distAwayFromBall = 0.28;
         minDist = 0.06;
-
         // extra strafe gain for goToPos
         if (HasDouble("strafeGain")) {
 	        private_bb->SetDouble("strafeGain", GetDouble("strafeGain"));
@@ -176,12 +249,12 @@ bt::Node::Status GetBall::Update (){
 	    }
     }
     // if (GetBool("beAggressive", false)) {
-    //  successDist = 0.11 ;
-    //     successAngle = 0.15; 
-    //     getBallDist = 0.0;
-    //     distAwayFromBall = 0.2;
-    //     // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    // }
+        //  successDist = 0.11 ;
+        //     successAngle = 0.15; 
+        //     getBallDist = 0.0;
+        //     distAwayFromBall = 0.2;
+        //     // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+        // }
     if (HasDouble("distAwayFromBall")) {
         distAwayFromBall = GetDouble("distAwayFromBall");
     }
@@ -191,145 +264,48 @@ bt::Node::Status GetBall::Update (){
     if (HasDouble("successAngle")) {
         successAngle = GetDouble("successAngle");
     }
-    if (HasDouble("getBallDist")) {
-        getBallDist=GetDouble("getBallDist");
-    }
+    // if (HasDouble("getBallDist")) {
+    //     getBallDist=GetDouble("getBallDist");
+    // }
     if (HasDouble("successDist")) {
         successDist=GetDouble("successDist");
     }
 
-	// Store some info about the world state
-	roboteam_msgs::WorldBall ball = world.ball;
-	Vector2 ballPos(ball.pos);
-	Vector2 ballVel(ball.vel);
-	Vector2 robotPos(robot.pos);
-	Vector2 robotVel(robot.vel);
-    Vector2 posDiff = ballPos - robotPos; 
-
 
     // Check whether I should shoot at goal
-    double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
+    double viewOfGoal = opportunityFinder.calcViewOfGoal(ballPos, world);
     bool canSeeGoal = viewOfGoal >= 0.2; 
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
-    // If we should pass on to the best available attacker, we should find which one has the highest score.
-    if (posDiff.length() < 0.6 && GetBool("passToBestAttacker") && !choseRobotToPassTo && !shootAtGoal) {
-        // ROS_INFO_STREAM("robot: " << robotID << " checking passToBestAttacker options");
-        double maxScore = 0;//-std::numeric_limits<double>::max();
-        boost::optional<int> maxScoreID = boost::none;
 
-        // For each robot in the field
-        for (size_t i = 0; i < (world.us.size()); i++) {
-            if (world.us.at(i).id != (unsigned int) robotID) {
+    // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
+    if (!choseRobotToPassTo && GetBool("passToBestAttacker") && posDiff.length() < 1.5 && !shootAtGoal) {
+        BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+        bestID = bestTeammate.id;
+        bestPos = bestTeammate.pos;
+        choseRobotToPassTo = true;
+        ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
+        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
 
-                // first check if current robot claimed a position. If so, score this claimed position
-                double botClaimedX;
-                ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosX", botClaimedX);
-                if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
-                    double botClaimedY;
-                    ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
-                    double score = opportunityFinder.computeScore(Vector2(botClaimedX,botClaimedY),world);
-
-
-                    // when "doNotPlayBackDefense" is true, this checks if this robot is behind me. If so, his score is set to 0
-                    if(HasBool("doNotPlayBackDefense") && GetBool("doNotPlayBackDefense")) {
-                        if (botClaimedX < robotPos.x) {
-                            score = 0;
-                        }
-                    }
-                    // when "doNotPlayBackAttack" is true, this checks if this robot is behind me. If so, his score is set to 0
-                    if(HasBool("doNotPlayBackAttack") && GetBool("doNotPlayBackAttack")) {
-                        if (calcDistGoalToRobot(i, world) > 8.0) {
-                            score = 0;
-                        }
-                    }
-
-
-                    if (score > maxScore) {
-                        maxScore = score;
-                        maxScoreID = world.us.at(i).id;
-                        bestClaimedPos = Vector2(botClaimedX,botClaimedY);
-                        bestBotClaimedPos = true;
-                    }
-                    // world.us.at(i).pos.x = float(botClaimedX);
-                    // world.us.at(i).pos.y = float(botClaimedY);
-
-
-
-                } else { // if current robot did not claim a position, check its own position.
-                    double score = opportunityFinder.computeScore(Vector2(world.us.at(i).pos),world);
-
-
-                    // when "doNotPlayBackDefense" is true, it checks if this robot is behind me. If so, his score is set to 0
-                    if(HasBool("doNotPlayBackDefense") && GetBool("doNotPlayBackDefense")) {
-                        if (Vector2(world.us.at(i).pos).x < robotPos.x) {
-                            score = 0;
-                        }
-                    }
-                    // when "doNotPlayBackAttack" is true, it checks if this robot is further away from their goal then 8m. If so, his score is set to 0
-                    if(HasBool("doNotPlayBackAttack") && GetBool("doNotPlayBackAttack")) {
-                        std::cout << "GETBALL - DistGoalToRobot " << i << " = " << calcDistGoalToRobot(i, world) << std::endl;
-                        if (calcDistGoalToRobot(i, world) > 8.0) {
-                            std::cout << "GETBALL - Set score of robot " << i << " to zero " << std::endl;
-                            score = 0;
-                        }
-                    }
-
-
-                    if (score > maxScore) {
-                        maxScore = score;
-                        maxScoreID = world.us.at(i).id;
-                        bestBotClaimedPos = false;
-                    }
-                }
-
-                // std::string paramName = "robot" + std::to_string(world.us.at(i).id) + "/readyToReceiveBall";
-                // bool readyToReceiveBall = false;
-                // ros::param::getCached(paramName, readyToReceiveBall);
-
-                // if (world.us.at(i).id != (unsigned int) robotID && readyToReceiveBall) {
-
-                // if (readyToReceiveBall){
-                    // ROS_INFO_STREAM("getball " << robotID << " robot " << world.us.at(i).id << " readyToReceiveBall");
-                    // opportunityFinder.Initialize("spits.txt", world.us.at(i).id, "theirgoal", 0);
-                // }
-            }
-        } // for every robot
-        
-        if (maxScoreID)  {//-std::numeric_limits<double>::max() || GetBool("dontShootAtGoal", false)) {
-            choseRobotToPassTo = true;
-            passToRobot = *maxScoreID;
-            // ROS_INFO_STREAM("passing to robot: " << passToRobot << " with score: " << maxScore);
-            ros::param::set("passToRobot", passToRobot); // communicate that chosen robot will receive the ball
-            ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << robotID << ", passToRobot param set to: " << passToRobot <<" because GetBall chose this attacker with score: " << maxScore);
-        // } else if (GetBool("dontShootAtGoal", false)) {
-        //     ROS_WARN("GetBall found no robot to pass to, but is not allowed to shoot at goal");
-
-        } else {
-            ROS_WARN_NAMED("skills.GetBall", "Found no robot to pass to");
-            return Status::Failure;
-            // shootAtGoal = true;
-        	// SetString("aimAt", "theirgoal");
-        }
     }
     
 
-
 	/* If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball */
 	double targetAngle;
-    double targetDist = 2.0; // WIP (jelle): for passing harder if target is further away
-    // If no robot was found to pass the ball to
-    if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
+    // If we chose to shoot at goal
+    if (shootAtGoal) { //GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
-    } 
+    }
     // If a robot was found to pass to
     else if (choseRobotToPassTo) { 
-        if (bestBotClaimedPos) {
-            targetAngle = (bestClaimedPos - ballPos).angle();
-            targetDist = (bestClaimedPos - ballPos).length();
+        if (bestID == -1) {
+        // could not find teammate to pass to, so WHAT SHOULD WE DO HERE?? FOR NOW ILL SET IT TO SHOOTATGOAL
+            targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+            shootAtGoal = true;    
         } else {
-            targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
+        // aim at best teammate to pass to.
+            targetAngle = (bestPos - ballPos).angle();
         }
     } 
     // If a specific location to aim at was given
@@ -356,31 +332,20 @@ bt::Node::Status GetBall::Update (){
 	targetAngle = cleanAngle(targetAngle);
     double angleDiff = cleanAngle(targetAngle - posDiff.angle());
 
-    // // Limit the difference between the targetAngle and the direction we're driving towards to 90 degrees so we don't hit the ball
-    // // This is no problem, because the direction we're driving towards slowly converges to the targetAngle as we drive towards the 
-    // // target position. It's hard to explain without drawing, for questions ask Jim :)
-    // double intermediateAngle;
-    // if (angleDiff > 0.1*M_PI) { // 0.1*M_PI for real-life robots!!
-    //     intermediateAngle = posDiff.angle() + 0.3*M_PI;
-    // } else if (angleDiff < -0.1*M_PI) { // 0.1*M_PI for real-life robots!!
-    //     intermediateAngle = posDiff.angle() - 0.3*M_PI;
-    // } else {
-    //     intermediateAngle = targetAngle;
-    // }
-	// ROS_INFO_STREAM_NAMED("skills.GetBall", "intermediateAngle: " << intermediateAngle);
-
+    
     // bool matchBallVel = false;
-    // if (fabs(angleDiff) > 0.5*M_PI) {
-    //     matchBallVel = true;
-    // }
-    // double addBallSpeed = ballVel.length() * 0.2;
-    // if (addBallSpeed > 1.7) {
-    //     addBallSpeed = 1.7;
-    // }
-    // distAwayFromBall = distAwayFromBall + addBallSpeed;
+        // if (fabs(angleDiff) > 0.5*M_PI) {
+        //     matchBallVel = true;
+        // }
+        // double addBallSpeed = ballVel.length() * 0.2;
+        // if (addBallSpeed > 1.7) {
+        //     addBallSpeed = 1.7;
+        // }
+        // distAwayFromBall = distAwayFromBall + addBallSpeed;
 
     // Jelle's getBall motion variation:
-    double ballDist = minDist + (distAwayFromBall-minDist) / (0.5*M_PI) * fabs(angleDiff);
+    // POSSIBLE IMPROVEMENT: DO SOMETHING ABOUT THE 'WIGGLE'
+    double ballDist = minDist + (distAwayFromBall - minDist) / (0.5*M_PI) * fabs(angleDiff);
     if (ballDist > distAwayFromBall) {
         ballDist = distAwayFromBall;
     }
@@ -389,23 +354,9 @@ bt::Node::Status GetBall::Update (){
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) );
         private_bb->SetBool("dribbler", posDiff.length()<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
-        targetPos = ballPos + Vector2(-getBallDist, 0.0).rotate(targetAngle);
+        targetPos = ballPos + Vector2(-ballDist, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
     }
-    
- //    // Only once we get close enough to the ball, our target position is one directly touching the ball. Otherwise our target position is 
- //    // at a distance of "distAwayFromBall" of the ball, because that allows for easy rotation around the ball and smooth driving towards the ball.
-	// if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
-	// 	targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
- //        private_bb->SetBool("dribbler", false);
- //        matchBallVel = true;
- //        if (posDiff.length() < (distAwayFromBall + 0.1)) {
- //            moreGain = true;
- //        }
-	// } else {
-	// 	targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06       
- //        private_bb->SetBool("dribbler", !dontDribble);
-	// }
     
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
@@ -418,27 +369,136 @@ bt::Node::Status GetBall::Update (){
             ballCloseFrameCountTo = 2;
         }
         
+        bool softPass = false;
+        bool passClaim = false;
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
+        // When I have not been close for long enough yet
+            if (choseRobotToPassTo && ballCloseFrameCount == 0) {
+            // If I chose best teammate before, check best robot once more (at the first success count)
+
+                bool checkIfReady = GetBool("checkIfReady"); // if true, I will check if my teammate is ready to receive the ball, before passing.
+
+                // If I couldn't find a suitable player before, try again one last time
+                if (bestID == -1) {
+                    BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+                    if (bestTeammate.id != -1) {
+                        bestID = bestTeammate.id;
+                        bestPos = bestTeammate.pos;
+                    }
+                } 
+
+                // If again I didnt find a suitable player, or the passline to the chosen robot is blocked now...
+                // ... -> go through some alternatives. If theres no alternative, chip at goal.
+                if (bestID == -1 || opportunityFinder.calcDistOppToBallTraj(bestPos, world) < passThreshold) { 
+                // pass line is crossed by opponent -> chip possible?
+                    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << bestID);
+                    double chipDist = 2.0;
+                    double minChipDist = 1.0;
+                    Vector2 passLine = bestPos - ballPos;
+                    // Vector2 chipBallPos = ballPos + passLine.stretchToLength(chipDist); // ball pos after chip landed
+                    // roboteam_msgs::World chipWorld = world; // alternative world where the ball lay on the position after the chip landed
+                    // chipWorld.ball.pos.x = float(chipBallPos.x);
+                    // chipWorld.ball.pos.y = float(chipBallPos.y);
+                    if (bestID == -1 || passLine.length() < minChipDist || opportunityFinder.calcDistOppToBallTraj(bestPos, world, chipDist) < passThreshold) {
+                    // chip not possible -> softpass to someone else?
+                        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned chip, checking for soft pass to another bot");
+                        // First specify what leads to a soft pass being possible
+                        opportunityFinder.setMin("distToOpp", 1.0); // if opponent will be closer than this value, soft pass wont be viable
+                        opportunityFinder.setMax("distToOpp", 2.0); // make sure max value is still higher than newly chosen min value
+                        // Find best teammate for a soft pass
+                        BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+                        initializeOpportunityFinder(); // reset parameters of our opportunity finder for future usage.
+                        if (bestTeammate.id == -1) {
+                        // found no (claimed) pos to which a soft pass would be smart -> consider direct pass
+                            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a soft pass candidate, checking for direct pass to a bot");
+                            BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(true, true, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+                            if (bestTeammate.id == -1) {
+                            // found no good direct pass option -> direct chip to anyone? WIP. for now: chip towards goal
+                                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a direct pass canditate, so chipping towards goal");
+                                chip = true;
+                                bestID = -1; // this leads to shootAtGoal in next iteration
+                                checkIfReady = false;
+                            } else {
+                            // direct pass is possible
+                                bestID = bestTeammate.id;
+                                bestPos = bestTeammate.pos;
+                                checkIfReady = false;
+                                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a direct pass option and chose robot " << bestID);
+                            }
+                        } else {
+                        // soft pass is possible
+                            bestID = bestTeammate.id;
+                            bestPos = bestTeammate.pos;
+                            checkIfReady = false;
+                            softPass = true;
+                            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a soft pass option and chose robot " << bestID);
+                        }
+                    } else {
+                    // chip is possible -> keep this bestpos and chip!
+                        chip = true;
+                        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " will chip towards robot " << bestID);
+                    }
+                }
+
+                if (checkIfReady && bestID != -1) {
+                // If necessary, perform a last check to see if robot is ready to receive ball
+                    bool readyToReceiveBall = false;
+                    ros::param::get("robot" + std::to_string(bestID) + "/readyToReceiveBall", readyToReceiveBall);
+                    if (!readyToReceiveBall) {
+                    // if not ready: pass softer 
+                        softPass = true;
+                    } else {
+                    // assigns ball claimage to new player that is passed to
+                    // NOTE: this can be dangerous, so now only happens if the receiving robot actually communicates back.
+                    // If the robot communicates, I can assume it will reset its own ball claimage if he failed to receive it.
+                        passClaim = true;
+                    }
+                }
+
+                ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball (possibly once more)
+                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
+            }
             ballCloseFrameCount++;
             return Status::Running;
         } else {
-
-            if (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam")) ) {
-                double passingSpeed = targetDist*2;
-                if (HasDouble("passingMult")) {
-                    passingSpeed = targetDist*GetDouble("passingMult");
+        // I have been close for long enough!
+            if (!GetBool("passOn")) {
+            // if not shooting, im successful now
+                return Status::Success;
+            } 
+            else if (!shootAtGoal && (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam"))) ) {
+            // Passing to robot
+                    // double passSpeed = targetDist*2.0;
+                    // if (HasDouble("passingMult")) {
+                    //     passSpeed = targetDist*GetDouble("passingMult");
+                    // }
+                    // if (passSpeed>6.5) {
+                    //     passSpeed = 6.5;
+                    // } else if (passSpeed<2.0) {
+                    //     passSpeed = 2.0;
+                    // }
+                double passSpeed = 4.0;
+                if (choseRobotToPassTo) {
+                    if (softPass) { 
+                        // WIP: SHOULD CONSIDER ROBOT'S POSITION AND VELOCITY TO ESTIMATE HOW MUCH TIME IT WILL TAKE FOR HIM
+                        passSpeed = computePassSpeed((bestPos - ballPos).length(), 0.5);
+                    } else {
+                        passSpeed = computePassSpeed((bestPos - ballPos).length(), 2.0);
+                    }
                 }
-                if (passingSpeed>6.5) {
-                    passingSpeed = 6.5;
-                } else if (passingSpeed<2.0) {
-                    passingSpeed = 2.0;
+                if (passClaim) {
+                    passBall(bestID);
+                } else {
+                    passBall(bestID); //releaseBall(); WIP: SHOULD JUST BE RELEASEBALL
                 }
-                publishKickCommand(passingSpeed);
+                publishKickCommand(passSpeed);
+                return Status::Success;
             } else {
+            // Shooting hard
+                releaseBall();
                 publishKickCommand(6.5);
+                return Status::Success;
             }
-            releaseBall();
-            return Status::Success;
         }
     } else {
         ballCloseFrameCount = 0;
@@ -470,15 +530,15 @@ bt::Node::Status GetBall::Update (){
     	command = *commandPtr;
 
         // Optional feature after testing: match the ball velocity for easy ball interception
-        // if (matchBallVel) {
-        //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        //     if (newVelCommand.length() > 4.0) {
-        //       newVelCommand.scale(4.0 / newVelCommand.length());
-        //     }
-        //     command.x_vel = newVelCommand.x;
-        //     command.y_vel = newVelCommand.y;    
-        // }
+            // if (matchBallVel) {
+            //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
+            //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
+            //     if (newVelCommand.length() > 4.0) {
+            //       newVelCommand.scale(4.0 / newVelCommand.length());
+            //     }
+            //     command.x_vel = newVelCommand.x;
+            //     command.y_vel = newVelCommand.y;    
+            // }
         
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

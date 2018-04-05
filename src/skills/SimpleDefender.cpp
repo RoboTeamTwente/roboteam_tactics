@@ -115,7 +115,7 @@ bt::Node::Status SimpleDefender::Update() {
     private_bb->SetDouble("receiveBallAtY", targetPos.y);
     private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
     private_bb->SetDouble("dribblerDist", dribblerDist);
-    private_bb->SetBool("shouldFail", false);
+    private_bb->SetBool("defenderMode", true);
     private_bb->SetBool("dontDriveToBall", GetBool("dontDriveToBall"));
     private_bb->SetBool("setSignal", false);
     if (HasBool("avoidBallsFromOurRobots") && GetBool("avoidBallsFromOurRobots")) {
