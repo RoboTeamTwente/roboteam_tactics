@@ -45,14 +45,14 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             //DEFAULTS
             ros::param::getCached("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
-                safetyMarginGoalAreas = 0.2;
+                safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
                 avoidRobotsGain = 0.010;
                 cushionGain = 0.06;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
                 maxDist = 0.3; // no force is exerted when dist is larger than maxDist
             } else if (robot_output_target == "serial") {
-                safetyMarginGoalAreas = 0.2;
+                safetyMarginGoalAreas = 0.1;
                 marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 0.005;
                 cushionGain = 0.06;

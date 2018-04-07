@@ -115,6 +115,7 @@ private:
     bool claimBall();
     void releaseBall();
     void passBall(int id);
+    Vector2 computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     double computePassSpeed(double dist, double input, bool imposeTime);
     double computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel);
     double computeArrivalTime(Vector2 location, int id);

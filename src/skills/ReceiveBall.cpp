@@ -110,9 +110,17 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 		if (GetBool("setSignal")) {
 		// Check if the robot actually expects to receive a pass
 		// If setSignal is not used, the rosparam robotClaimedBall will not be set to my ID (it shouldnt, at least)
+
+			int robotClaimedBall;
+		    ros::param::get("robotClaimedBall", robotClaimedBall);
+		    if (robotClaimedBall == robotID) {
+		    	ros::param::set("robotClaimedBall", -1);
+        		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " released ball");
+		    }
+
 			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false); // reset readyToReceiveBall
 			int passToParam;
-		    ros::param::getCached("passToRobot", passToParam);
+		    ros::param::get("passToRobot", passToParam);
 		    if (passToParam == robotID) {
 		        ros::param::set("passToRobot", -1);
 		        ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Terminate for " << robotID << ", resetting passToRobot and readyToReceiveBall");
@@ -120,12 +128,6 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 		    	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Terminate for " << robotID << ", resetting readyToReceiveBall");
 		    }
 
-		    int robotClaimedBall;
-		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
-		    if (robotClaimedBall == robotID) {
-		    	ros::param::set("robotClaimedBall", -1);
-        		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " released ball");
-		    }
 		}
 	}
 
@@ -178,16 +180,15 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	bool avoidBall = GetBool("avoidBallsFromOurRobots") && our_team;
 
+	// Is ball coming towards me? (for determining failure/success)
 	Vector2 posdiff = myPos - ballPos;
-
-	double velLimit = 0.5;// posdiff.length()/3; // ARBITRARY GUESS
+	double velThreshold = posdiff.length()/4; // ARBITRARY GUESS
 	if (GetBool("defenderMode")) {
-		velLimit = 0.1;
-	} else if (velLimit<0.1) {
-		velLimit = 0.1;
+		velThreshold = 0.1;
+	} else if (velThreshold < 0.1) {
+		velThreshold = 0.1;
 	}
-	if (ballVel.dot(posdiff.stretchToLength(1)) < velLimit) { // if the velocity in my direction is too low
-	
+	if (ballVel.dot(posdiff.stretchToLength(1)) < velThreshold) { // if the velocity in my direction is too low
 		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
 			// if a pass is noted to myself, I assume the ball is coming.
 			int robotClaimedBall;
@@ -199,7 +200,10 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		} else {
 			ballIsComing = false;
 		}
+	}//--------------------------
 
+	// Actual determining of the interceptPose
+	if (ballVel.length() < 0.1) {
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
