@@ -89,7 +89,8 @@ void GetBall::Terminate(bt::Node::Status s) {
         ballCloseFrameCount = 0;
         choseRobotToPassTo = false;
         chip = false;
-        ballClaimedByMe = false;
+
+        releaseBall();
         ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID << ", releasing the ball if I claimed it");
     }
 }
@@ -176,6 +177,8 @@ void GetBall::releaseBall() {
         ros::param::set("robotClaimedBall", -1);
         ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball");
         ballClaimedByMe = false;
+        // also reset passToRobot rosparam
+        ros::param::set("passToRobot", -1);
     }
     return;
 }
@@ -188,6 +191,43 @@ void GetBall::passBall(int id) {
         ballClaimedByMe = false;
     }
     return;
+}
+
+Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos) { //WIP: needs testing for correctness
+    // this function calculates the closest position where I could intercept the ball ..
+    // .. assuming I would get there at a certain constant velocity and the ball would not slow down
+    // These assumptions are of course not completely accurate, but might work for this purpose
+
+    // used parameters
+    double vBot = 2.0; // assumed constant robot velocity
+
+    // used variables
+    double vBall = ballVel.length();    // absolute ball velocity
+    if (vBall < 0.1) {  // avoid division by 0 and switching behavior due to noise
+        return ballPos; // ball velocity is low so I'll just go for the current ball position
+    }
+    double vux = ballVel.x / vBall;     // x component of ball velocity unit vector
+    double vuy = ballVel.y / vBall;     // y component of ball velocity unit vector
+    Vector2 rb = ballPos - myPos;       // vector from robot to ball
+    double rbx = rb.x;                      // x component
+    double rby = rb.y;                      // y component
+
+    // formulas
+    double term1 = vBot*vBot*(rbx*rbx + rby*rby) - vBall*vBall*pow(rbx*vuy + rby*vux, 2);
+    double term2 = (vBall*vBall - vBot*vBot);
+    if (term1 < 0 || fabs(term2) < 0.001) { 
+    // prevent sqrt of negative number and division by 0 -> in this case the closest point from me to the ball trajectory becomes by best option
+    // although this probably means I won't be in time (IMPROVEMENT: maybe should just take some margin ahead of ball as best option here)
+        Vector2 closestPoint = ballPos - rb.project2(ballVel);
+        return closestPoint;
+    }
+    double L = -vBall*( sqrt(term1) + vBall*(rbx*vux + rby*vuy)) / term2;
+    if (L < 0) { // L should not be negative (no idea if that's possible at this point?)
+        return ballPos;
+    }
+    Vector2 interceptPos = ballPos + ballVel.scale(L / vBall);
+    return interceptPos;
+
 }
 
 double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
@@ -206,12 +246,14 @@ double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
         if (arrivalTime < 0.001) { // prevent division by 0
             return 100;
         } else {
-            return (dist/arrivalTime + a*arrivalTime/2);
+            double v1 = dist/arrivalTime + a*arrivalTime/2;
+            return v1;
         }
     } else {
         // compute necessary pass speed, such that ball has speed v2 when it arrives.
         double v2 = input;
-        return (sqrt(v2*v2 + a*2*dist));
+        double v1 = sqrt(v2*v2 + a*2*dist);
+        return v1;
     }
 }
 
@@ -231,6 +273,9 @@ double GetBall::computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 bot
     double dist = botToLoc.length();
     if (dist > 0.001) { // prevent division by 0
         double v1 = botVel.dot(botToLoc.scale(1/dist)); // current velocity in location direction
+        if (v1 < 0) {
+            v1 = 0;     // calculation does not make sense if v1 is negative
+        }
         double v2 = sqrt(v1*v1 + 2*acc*dist); // velocity it would accelerate to
         if (v1 > vMax-0.001) { // robot already at max velocity
             return (dist / vMax);
@@ -293,7 +338,11 @@ bt::Node::Status GetBall::Update (){
     Vector2 ballVel(ball.vel);
     Vector2 robotPos(robot.pos);
     Vector2 robotVel(robot.vel);
+    ballPos = computeBallInterception(ballPos, ballVel, robotPos); // pretend that the ball is at the location where we could intercept it
     Vector2 posDiff = ballPos - robotPos;
+
+    drawer.setColor(72, 0, 255);
+    drawer.drawPoint("ballIntercept",ballPos);
 
     // Different GetBall parameters for grsim than for real robots
     double successDist;
@@ -548,10 +597,10 @@ bt::Node::Status GetBall::Update (){
                     // If the robot communicates, I can assume it will reset its own ball claimage if he failed to receive it.
                         passBall(bestID);
                     } else {
-                        releaseBall();
+                        //releaseBall();
                     }
                 } else {
-                    releaseBall();
+                    //releaseBall();
                 }
                 ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " passed towards robot " << bestID);
                 
@@ -560,7 +609,7 @@ bt::Node::Status GetBall::Update (){
             } else {
             // Shooting hard
                 ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " shooting");
-                releaseBall();
+                //releaseBall();
                 ros::param::set("passToRobot", -1); // communicate that chosen robot will receive the ball (possibly once more)
                 ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: -1");
                 publishKickCommand(6.5);
