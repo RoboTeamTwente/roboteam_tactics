@@ -50,8 +50,16 @@ void ReceiveBall::Initialize() {
 	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Initialize for robot: " << robotID);
 	ballIsComing = false;
 	startKicking = false;
-	ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
-	readyHasBeenSet = false;
+	
+	// readyHasBeenSet = false;
+	//	If we set readyToReceiveBall true, my teammate that passes the ball can give me the claim over the ball
+	//	(such that other robots wont interfere). If setSignal is enabled, I can be trusted in resetting claim if this skill terminates.
+	if (GetBool("setSignal")) {
+		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
+	} else {
+		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
+	}
+
 
 	if (HasDouble("acceptableDeviation")) {
 		acceptableDeviation = GetDouble("acceptableDeviation");
@@ -172,7 +180,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	Vector2 posdiff = myPos - ballPos;
 
-	double velLimit = posdiff.length()/3; // ARBITRARY GUESS
+	double velLimit = 0.5;// posdiff.length()/3; // ARBITRARY GUESS
 	if (GetBool("defenderMode")) {
 		velLimit = 0.1;
 	} else if (velLimit<0.1) {
@@ -192,21 +200,13 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 			ballIsComing = false;
 		}
 
-		// drawer.removeLine("ballTrajectory");
-		// drawer.removePoint("closestPointReceiveBall");
-
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
-		Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
-		Vector2 closestPoint = ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
+		// Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
+		Vector2 closestPoint = ballPos + (receiveBallAtPos - ballPos).project2(ballVel); //ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 		ballIsComing = true;
 
-		// drawer.setColor(255,255,255);
-		// drawer.drawLine("ballTrajectory", ballPos, ballTrajectory);
-		// drawer.drawPoint("closestPointReceiveBall", closestPoint);
-		// drawer.setColor(0,0,0);
-		// ROS_INFO_STREAM("robot " << robotID << " acceptableDeviation: " << acceptableDeviation); 
 		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
@@ -387,27 +387,26 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
-	// Once we're close, turn off robot avoidance, and set the readyToReceiveBall param if necessary
-	Vector2 posError = targetPos - myPos; //receiveBallAtPos - myPos;
-	double readyDist = 0.5;
-	if (HasDouble("readyDist")) {
-		readyDist = GetDouble("readyDist");
-	}
-	if (posError.length() < readyDist) {
-		private_bb->SetBool("avoidRobots", false);
-		// avoid setting ready continuously in rosparam because it can become quite heavy on ROS
-		if (GetBool("setSignal") && !readyHasBeenSet) {
-			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
-			readyHasBeenSet = true;
-		}
-	} else {
-		private_bb->SetBool("avoidRobots", true);
-		if (readyHasBeenSet && posError.length() > 0.1 + readyDist) {
-			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
-			readyHasBeenSet = false;
-		}
-	}
-
+	// // Once we're close, turn off robot avoidance, and set the readyToReceiveBall param if necessary
+	// Vector2 posError = targetPos - myPos; //receiveBallAtPos - myPos;
+	// double readyDist = 0.5;
+	// if (HasDouble("readyDist")) {
+	// 	readyDist = GetDouble("readyDist");
+	// }
+	// if (posError.length() < readyDist) {
+	// 	private_bb->SetBool("avoidRobots", false);
+	// 	// avoid setting ready continuously in rosparam because it can become quite heavy on ROS
+	// 	if (GetBool("setSignal") && !readyHasBeenSet) {
+	// 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
+	// 		readyHasBeenSet = true;
+	// 	}
+	// } else {
+	// 	private_bb->SetBool("avoidRobots", true);
+	// 	if (readyHasBeenSet && posError.length() > 0.1 + readyDist) {
+	// 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
+	// 		readyHasBeenSet = false;
+	// 	}
+	// }
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
 	double role_iterations_per_second = 0.0;
@@ -479,7 +478,7 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        if (!HasBool("pGainLarger") || GetBool("pGainLarger")) { // || ballIsComing
+        if (!HasBool("pGainLarger") || GetBool("pGainLarger") || ballIsComing) {
         	private_bb->SetBool("pGainLarger", true);
         } else {
         	private_bb->SetBool("pGainLarger", false);

@@ -42,11 +42,14 @@ std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
+std::string LOG_NAME = "RoleNode";
+
+
 bool ignoring_strategy_instructions = false;
 
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
-    ROS_INFO_NAMED("RoleNode", "[msgCallbackRef] refdate received!");
+    ROS_INFO_NAMED(LOG_NAME, "[msgCallbackRef] refdata received!");
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
@@ -68,14 +71,14 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    RTT_DEBUGLN_TEAM("Robot %i directive: %s", ROBOT_ID, msg->tree.c_str());
+    ROS_INFO_STREAM_NAMED(LOG_NAME, "Directive received : " << msg->tree.c_str());
 
     ros::NodeHandle n;
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
 
-        ROS_WARN("Received stop command for robot %i", ROBOT_ID);
+        ROS_WARN_NAMED(LOG_NAME, "Received stop command");
 
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
@@ -100,21 +103,20 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bb->fromMsg(msg->blackboard);
 
     if (!bb->HasInt("ROBOT_ID")) {
-        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " got a RoleDirective without a ROBOT_ID!" << END_COLOR << "\n";
+        ROS_ERROR_NAMED(LOG_NAME, "RoleDirective received without ROBOT_ID");
     }
-
 
     if (!bb->HasInt("KEEPER_ID")) {
-        std::cout << "[RoleNode] " << RED_BOLD_COLOR << "Error: Robot #" << ROBOT_ID << " received a RoleDirective without a KEEPER_ID!" << END_COLOR << "\n";
+        ROS_ERROR_NAMED(LOG_NAME, "RoleDirective received without KEEPER_ID");
     }
 
-    {
-        ros::NodeHandle n;
+    {   // Emiel: Not sure why this scope is here
+//        ros::NodeHandle n;    // Emiel: not sure why this is here
         currentTreeName = msg->tree;
         currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
 
         if (!currentTree)  {
-            ROS_ERROR("Tree name is neither tree nor skill: \"%s\"",  msg->tree.c_str());
+            ROS_ERROR_STREAM_NAMED(LOG_NAME, "Tree name is neither tree nor skill: " << msg->tree.c_str());
             return;
         }
     }
@@ -128,25 +130,33 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
-    pub = n.advertise<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS, 100);
+    ROS_DEBUG_STREAM_NAMED(LOG_NAME, "New RoleNode instance, name=" << ros::this_node::getName());
 
-    ROS_INFO_STREAM_NAMED("RoleNode", "New instance, name=" << ros::this_node::getName());
 
-    std::string name = ros::this_node::getName();
-    // Chop off the leading "/robot"
-    std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);
-    // Convert to int
+
+    // ====== ROBOT_ID ====== //
+    std::string name = ros::this_node::getName();                               // Get name of Node
+    std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);     // Chop off the leading "/robot"
     try {
-        ROBOT_ID = std::stoi(robotIDStr);
+        ROBOT_ID = std::stoi(robotIDStr);                                       // Convert to int
+        LOG_NAME = LOG_NAME + "." + robotIDStr;                                 // Set logging name from RoleNode to RoleNode.ROBOT_ID
     } catch (...) {
-        ROS_ERROR("Could not parse Robot ID from node name \"%s\". Aborting.", name.c_str());
+        ROS_ERROR_STREAM_NAMED(LOG_NAME, "Could not parse Robot ID from node name " << name.c_str() << "! Aborting");
         return 1;
     }
+    // ====================== //
 
+    // Set Hz of RoleNode
     int iterationsPerSecond = 60;
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    ROS_INFO_STREAM_NAMED("RoleNode", "Iterations per second: %i" << iterationsPerSecond);
+    ROS_INFO_STREAM_NAMED(LOG_NAME, "New RoleNode #" << ROBOT_ID << " at " << iterationsPerSecond << "Hz");
+
+
+
+    // ====== Setup subscribers and advertisers ====== //
+    // Advertise RobotCommands
+    pub = n.advertise<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS, 100);
 
     // Create global robot command publisher
     rtt::GlobalPublisher<roboteam_msgs::RobotCommand> globalRobotCommandPublisher(rtt::TOPIC_COMMANDS);
@@ -155,20 +165,20 @@ int main(int argc, char *argv[]) {
     // Create world, geom, and ref callbacks
     rtt::WorldAndGeomCallbackCreator cb;
     rtt::LastWorld::wait_for_first_messages();
+    // Subscribe to vision
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
-    ROS_DEBUG_NAMED("RoleNode", "Subscribed to vision_refbox");
 
-    // For receiving trees
-        ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
+    // Subscribe to RoleDirective, for receiving trees
+    ros::Subscriber roleDirectiveSub = n.subscribe<roboteam_msgs::RoleDirective>(
         rtt::TOPIC_ROLE_DIRECTIVE,
         1000,
         &roleDirectiveCallback
-        );
-    ROS_DEBUG_STREAM_NAMED("RoleNode", "Subscribed to " << rtt::TOPIC_ROLE_DIRECTIVE);
-
+    );
+    // Advertise to RoleFeedback
     feedbackPub = n.advertise<roboteam_msgs::RoleFeedback>(rtt::TOPIC_ROLE_FEEDBACK, 10);
+    // =============================================== //
 
-    // auto worldStateDummySub = n.subscribe<roboteam_msgs::World>("/world_state", 1, &wsDummy, ros::TransportHints().tcpNoDelay());
+
 
     using namespace std::chrono;
     steady_clock::time_point start = steady_clock::now();
@@ -181,19 +191,21 @@ int main(int argc, char *argv[]) {
 
         sleeprate.sleep();
 
+        // If the RoleNode currently has no tree, continue
         if (!currentTree){
             continue;
         }
 
+        // Update the tree, get its status
         bt::Node::Status status = currentTree->Update();
 
+        // If the tree is not running anymore
         if (status == bt::Node::Status::Success
          || status == bt::Node::Status::Failure
          || status == bt::Node::Status::Invalid) {
 
-            ROS_INFO_STREAM_NAMED("RoleNode", "Robot " << ROBOT_ID <<  " has finished tree " << currentTreeName.c_str());
 
-            // Create a feedback message
+             // Create a feedback message
             roboteam_msgs::RoleFeedback feedback;
             feedback.token = currentToken;
 
@@ -202,23 +214,29 @@ int main(int argc, char *argv[]) {
 
             // TODO: Maybe implement bt rqt feedback here as well?
 
+            std::string statusString = "";
             if (status == bt::Node::Status::Success) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_SUCCESS;
                 feedbackPub.publish(feedback);
-                RTT_DEBUGLN_TEAM("Robot has success");
-            } else if (status == bt::Node::Status::Invalid) {
+                statusString = "Success";
+            } else
+            if (status == bt::Node::Status::Invalid) {
                 feedback.status = roboteam_msgs::RoleFeedback::STATUS_INVALID;
                 feedbackPub.publish(feedback);
-                RTT_DEBUGLN_TEAM("Robot has invalid");
-            } else if (status == bt::Node::Status::Failure) {
-                RTT_DEBUGLN_TEAM("Role node failed! ID: %d", ROBOT_ID);
-                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE ;
+                statusString = "Invalid";
+            } else
+            if (status == bt::Node::Status::Failure) {
+                feedback.status = roboteam_msgs::RoleFeedback::STATUS_FAILURE;
                 feedbackPub.publish(feedback);
+                statusString = "Failure";
             }
 
-//            ROS_INFO_STREAM_NAMED("RoleNode", "Published RoleFeedback. token: " << currentToken.uuid << ", status: " << status);
-            ROS_INFO_STREAM_NAMED("RoleNode", "Published RoleFeedback. token: " << currentToken);
+            ROS_INFO_STREAM_NAMED(LOG_NAME, "Tree finished. "
+                    << "status=" << statusString
+                    << ", tree=" << currentTreeName.c_str()
+                    << ", token=" << currentToken);
 
+            // Reset tree
             currentTree = nullptr;
 
             // Stop the robot in its tracks
@@ -227,10 +245,10 @@ int main(int argc, char *argv[]) {
 
         iters++;
 
-        if ((steady_clock::now() - start) > milliseconds(2000)) {
+        if ((steady_clock::now() - start) > milliseconds(5000)) {
             start = steady_clock::now();
-            
-            std::cout << "RoleHZ for robot #" << ROBOT_ID << ": " << (iters / 2.0) << "\n";
+
+            ROS_INFO_STREAM_NAMED(LOG_NAME, "Actual Hz = " << (iters / 5.0));
 
             iters = 0;
         }

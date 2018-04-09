@@ -46,9 +46,9 @@ void mySigintHandler(int sig) {
         sigCounter++;
     }
 
-    std::cout << "Sig: " << sig << "\n";
+    ROS_INFO_STREAM_NAMED("TestX", "Sig: " << sig);
     if (sigCounter >= 3) {
-    	std::cout << "Received at least 3 SIGINTs, so stopping ungracefully\n";
+        ROS_WARN_STREAM_NAMED("TestX", "Received at least 3 SIGINTs, so stopping ungracefully");
     	std::exit(0);
     }
 }
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
             rtt::factories::print_all<bt::BehaviorTree>("trees");
             return 0;
         } else {
-            std::cout << "second argument from show not recognized (\"" << arguments.at(1) << "\")\n";
+            ROS_WARN_STREAM_NAMED("TestX", "Second argument from show not recognized (\"" << arguments.at(1) << "\")");
             arguments = { "help "};
         }
     }
@@ -195,18 +195,22 @@ How to use:
     auto bb = std::make_shared<bt::Blackboard>();
 
     std::string testClass = arguments.at(0);
-    std::cout << "Test class: " << testClass << "\n";
 
+    ROS_INFO_STREAM_NAMED("TestX", "Test class : " << testClass);
+
+    /* For each argument, figure out its type, parse it, and add it to the blackboard */
     for (size_t i = 1; i < arguments.size(); i++) {
         std::vector<std::string> typeSplit;
 
+        // Get argument
         auto arg = arguments.at(i);
 
+        // If := is in the string, it's a ROS argument, so we skip it
         if (arg.find(":=") != std::string::npos) {
-            // If := is in the string, it's a ROS argument, so we skip it
             continue;
         }
 
+        // Split argument
         auto nameSplit = split(arg, '=');
         auto name = nameSplit.at(0);
         auto rest = nameSplit.at(1);
@@ -218,6 +222,7 @@ How to use:
             rest += nameSplit.at(i);
         }
 
+        // ====== Figure out the type of the argument ====== //
         std::string argType;
         if (name.find(":") != std::string::npos) {
             // Name contains type - lets take it out
@@ -237,18 +242,11 @@ How to use:
             } else {
                 argType = "string";
             }
+            ROS_WARN_STREAM_NAMED("TestX", "implicitly derived type '" << argType << "' for argument '" << rest << "'");
         }
+        // ================================================= //
 
-
-        // Uncomment to see the arguments
-        // std::cout << "\n[Arg]\n";
-        // std::cout << "Type: " << argType << "\n";
-        // std::cout << "Name: " << name << "\n";
-        // std::cout << "Value: " << rest << "\n";
-        // TODO: Factor the logic here into a few common functions
-        // (one for going string -> T and one for going T -> string)
-        // and use them here, paramset, paramget, and in some of Dennis's bb code
-
+        // Update blackboard with the new value
         if (argType == "string") {
             bb->SetString(name, rest);
         } else if (argType == "int") {
@@ -258,11 +256,9 @@ How to use:
         } else if (argType == "bool") {
             bb->SetBool(name, rest == "true");
         } else {
-            std::cout << "Unknown arg type: " << argType << "\n";
+            ROS_WARN_STREAM_NAMED("TestX", "Unknown argument type '" << argType << "' for argument '" << rest << "'");
         }
     }
-
-    //rtt::print_blackboard(bb);
 
     // Create subscribers for world & geom messages
     rtt::WorldAndGeomCallbackCreator cb;
@@ -276,9 +272,9 @@ How to use:
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData> ("vision_refbox", 1000, msgCallbackRef);
 
     // Wait for the first geom & world message
-    std::cout << "Waiting for first world & geom message...\n";
+    ROS_INFO_STREAM_NAMED("TestX", "Waiting for first world & geom message...");
     rtt::LastWorld::wait_for_first_messages();
-    std::cout << "Received first messages, proceeding\n";
+    ROS_INFO_STREAM_NAMED("TestX", "Received first messages, proceeding");
 
     std::shared_ptr<bt::Node> node = rtt::generate_rtt_node<>(testClass, "", bb);
 
@@ -287,102 +283,79 @@ How to use:
         return 1;
     }
 
+    // If we test a Strategy, wait for a RoleNode to come online
     if (rtt::factories::isTactic(testClass)) {
-        std::cout << "Testing a tactic! Please ensure that at least 1 role nodes is available...\n";
-        std::cout << "(For example by using mini_rolenodes.launch from roboteam_utils)\n";
+        ROS_INFO_STREAM_NAMED("TestX", "Testing a tactic! Please ensure that at least 1 RoleNode is available...");
 
         auto& directivePub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-        ros::Rate fps60(60);
+        ros::Rate fps10(10);
         while ((int) directivePub.getNumSubscribers() < 1) {
             ros::spinOnce();
-            fps60.sleep();
+            fps10.sleep();
 
-            std::cout << "mustShutdown = " << mustShutdown << "\n";
+            ROS_DEBUG_STREAM_NAMED("TestX", "mustShutdown = " << mustShutdown);
 
             if (mustShutdown) {
-                std::cout << "Interrupt received, exiting...";
+                ROS_INFO_STREAM_NAMED("TestX", "Interrupt received, exiting...");
                 return 0;
             }
         }
 
-        std::cout << "Spotted 6 role directives, carrying on!\n";
+        ROS_INFO_STREAM_NAMED("TestX", "Spotted 1 RoleDirective listener, carrying on!");
 
         // TODO: Maybe at the end ensure that the role nodes stop the execution?
         // And this can then be prevented with a command line switch
     }
 
+    // Emiel : Not sure why this is here.. Maybe to give newly created RoleNodes the time to initialize?
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
+    // === Get the Hz
     double updateRate = 30;
     ros::param::get("role_iterations_per_second", updateRate);
     if (updateRate == 0) {
-        ROS_ERROR_STREAM("role_iterations_per_second == 0. Aborting!");
+        ROS_ERROR_STREAM_NAMED("TestX", "role_iterations_per_second == 0. Aborting!");
         return 1;
     }
     ros::Rate fps(updateRate);
-    std::cout << "[TestX] Updating at " << updateRate << "Hz\n";
+    ROS_INFO_STREAM_NAMED("TestX", "Updating at " << updateRate << "Hz");
+    // ===
 
     rtt::RobotDealer::setKeeper(0);
 
+
+    // === If we're testing a tree (Strategy / Role)
     if (rtt::factories::isTree(testClass)) {
         int bot_id = -1;
         if (bb->HasInt("ROBOT_ID")) {
             bot_id = bb->GetInt("ROBOT_ID");
         }
-        // Notify the tree debugger that we're running a tree.
+        // Notify the tree debugger that we're running a tree. Emiel : why assume TYPE_ROLE? What about TYPE_STRATEGY?
         RTT_SEND_RQT_BT_TRACE(bot_id, testClass, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
-
-        bt::BehaviorTree* bt = dynamic_cast<bt::BehaviorTree*>(&(*node));
-
-        bt->Initialize();
-
-        rtt::BTRunner runner(*bt, false);
-		runner.run_until([&](bt::Node::Status previousStatus) {
-            ros::spinOnce();
-            fps.sleep();
-            return !mustShutdown && previousStatus != bt::Node::Status::Success && previousStatus != bt::Node::Status::Failure;
-        });
-
-        // TODO: This is a hack, and if the thing above this is just a while loop
-        // we can terminate or tick just fine.
-        bt->Terminate(bt::Node::Status::Failure);
-    } else {
-        node->Initialize();
-
-        std::vector<int> claimedRobots;
-
-        if (rtt::factories::isTactic(testClass)) {
-            auto tacticNode = std::static_pointer_cast<rtt::Tactic>(node);
-            claimedRobots = tacticNode->get_claimed_robots();
-        }
-
-        bt::Node::Status status = bt::Node::Status::Invalid;
-        while (!mustShutdown) {
-            ros::spinOnce();
-
-            status = node->Update();
-
-            if (status == bt::Node::Status::Success || status == bt::Node::Status::Failure) {
-                break;
-            }
-
-            fps.sleep();
-        }
-
-        node->Terminate(status);
-
-        if (status == bt::Node::Status::Success) {
-            std::cout << "Final Status: Success";
-        }
-        if (status == bt::Node::Status::Failure) {
-            std::cout << "Final Status: Failure";
-        }
-
-        // for (auto id : claimedRobots) {
-            // stopRolenode(id);
-            // stopRobot(id);
-        // }
     }
+    // ===
+
+
+    /* ======== Run the node ======== */
+    node->Initialize();
+
+    bt::Node::Status status = bt::Node::Status::Invalid;
+    while(!mustShutdown){
+        ros::spinOnce();
+        fps.sleep();
+
+        status = node->Update();
+        if(status != bt::Node::Status::Running)
+            break;
+    }
+    std::string statusString = "Unknown";
+    if(status == bt::Node::Status::Running) statusString = "Running";
+    if(status == bt::Node::Status::Success) statusString = "Success";
+    if(status == bt::Node::Status::Failure) statusString = "Failure";
+    if(status == bt::Node::Status::Invalid) statusString = "Invalid";
+
+    node->Terminate(status);
+    /* ============================== */
 
     // Give ros some time to send the stop messages
     ros::Rate rate(60);
@@ -394,7 +367,7 @@ How to use:
     // Gracefully close all the publishers.
     n.shutdown();
 
-    std::cout << "Test of " << testClass << " completed!\n";
+    ROS_INFO_STREAM_NAMED("TestX", "Completed '" << testClass << "' with status '" << statusString << "'");
 
 	return 0;
 }
