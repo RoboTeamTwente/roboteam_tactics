@@ -95,7 +95,7 @@ private:
     //IsRobotClosestToBall isRobotClosestToBall;
     bool startKicking;
     bool ballIsComing;
-    bool readyHasBeenSet;
+    //bool readyHasBeenSet;
     bool hasTerminated;
 
     time_point startTime;

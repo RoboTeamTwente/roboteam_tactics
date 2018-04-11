@@ -48,7 +48,7 @@ void GetBall::Initialize() {
     // startTime = now();
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
-    passThreshold = 0.1;    // minimal dist of opp to pass line for pass to be possible
+    passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
 
     ros::param::getCached("robot_output_target", robot_output_target);
 
@@ -81,7 +81,7 @@ void GetBall::initializeOpportunityFinder() {
     // the following custom changes apply for when choosing a teammate to pass to.
     opportunityFinder.setWeight("distToTeammate", 0.0);  // not relevant for passing, only for positioning
     opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
-    opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // be less strict on whether pass will fail
+    opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // how strict to be on whether pass will fail
 }
 
 void GetBall::Terminate(bt::Node::Status s) {
@@ -117,7 +117,13 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
     command.id = robotID;
     if (chip) {
         command.chipper = true;
-        command.chipper_vel = kickSpeed;
+        command.chipper_forced = true;
+        if (robot_output_target == "grsim" && kickSpeed*1.3 > 5.0) {
+            command.chipper_vel = 5.0;
+        } else {
+            command.chipper_vel = kickSpeed*1.3;
+        }
+        
     } else {
         command.kicker = true;
         command.kicker_forced = true;
@@ -208,13 +214,119 @@ void GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
     return;
 }
 
-double GetBall::computePassSpeed(double dist, double v2) {
-    double a = 0.25; // friction constant. assumes velocity decreases linearly over time
+Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos) { //WIP: needs testing for correctness
+    // this function calculates the closest position where I could intercept the ball ..
+    // .. assuming I would get there at a certain constant velocity and the ball would not slow down
+    // These assumptions are of course not completely accurate, but might work for this purpose
+
+    // used parameters
+    double vBot = 2.0; // assumed constant robot velocity
+
+    // used variables
+    double vBall = ballVel.length();    // absolute ball velocity
+    if (vBall < 0.1) {  // avoid division by 0 and switching behavior due to noise
+        return ballPos; // ball velocity is low so I'll just go for the current ball position
+    }
+    double vux = ballVel.x / vBall;     // x component of ball velocity unit vector
+    double vuy = ballVel.y / vBall;     // y component of ball velocity unit vector
+    Vector2 rb = ballPos - myPos;       // vector from robot to ball
+    double rbx = rb.x;                      // x component
+    double rby = rb.y;                      // y component
+
+    // formulas
+    double term1 = vBot*vBot*(rbx*rbx + rby*rby) - vBall*vBall*pow(rbx*vuy + rby*vux, 2);
+    double term2 = (vBall*vBall - vBot*vBot);
+    if (term1 < 0 || fabs(term2) < 0.001) { 
+    // prevent sqrt of negative number and division by 0 -> in this case the closest point from me to the ball trajectory becomes by best option
+    // although this probably means I won't be in time (IMPROVEMENT: maybe should just take some margin ahead of ball as best option here)
+        Vector2 closestPoint = ballPos - rb.project2(ballVel);
+        return closestPoint;
+    }
+    double L = -vBall*( sqrt(term1) + vBall*(rbx*vux + rby*vuy)) / term2;
+    if (L < 0) { // L should not be negative (no idea if that's possible at this point?)
+        return ballPos;
+    }
+    Vector2 interceptPos = ballPos + ballVel.scale(L / vBall);
+    return interceptPos;
+
+}
+
+double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
+    double a = 1.5; // friction constant. assumes velocity decreases linearly over time
     if (HasDouble("friction")) {
         a = GetDouble("friction");
     }
-    double v1 = sqrt(v2*v2 + a*2*dist); // computes necessary pass speed v1, such that ball has speed v2 when it arrives.
-    return v1;
+
+    if (imposeTime) {
+        // compute necessary pass speed, such that the ball arrives after 'arrivalTime'
+        double arrivalTime = input;
+        double maxTime = sqrt(dist*2/a); // imposing a higher arrival time is not possible
+        if (arrivalTime > maxTime) {
+            arrivalTime = maxTime;
+        }
+        if (arrivalTime < 0.001) { // prevent division by 0
+            return 100;
+        } else {
+            double v1 = dist/arrivalTime + a*arrivalTime/2;
+            return v1;
+        }
+    } else {
+        // compute necessary pass speed, such that ball has speed v2 when it arrives.
+        double v2 = input;
+        double v1 = sqrt(v2*v2 + a*2*dist);
+        return v1;
+    }
+}
+
+double GetBall::computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel) {
+    //  this function assumes the robot will accelerate towards its top speed with a constant
+    //  acceleration in the direction of the location, without decelerating when it gets there.
+
+    // used parameters
+    double acc = 1.5; // m/s², assumes constant acceleration
+    if (HasDouble("acc")) {
+        acc = GetDouble("acc");
+    }
+    double vMax = 2.0; // max speed in m/s
+
+    // A certain distance combined with current robot velocity relates to a certain time it takes to arrive
+    Vector2 botToLoc = location - botPos;
+    double dist = botToLoc.length();
+    if (dist > 0.001) { // prevent division by 0
+        double v1 = botVel.dot(botToLoc.scale(1/dist)); // current velocity in location direction
+        if (v1 < 0) {
+            v1 = 0;     // calculation does not make sense if v1 is negative
+        }
+        double v2 = sqrt(v1*v1 + 2*acc*dist); // velocity it would accelerate to
+        if (v1 > vMax-0.001) { // robot already at max velocity
+            return (dist / vMax);
+        } else if (v2 > vMax) { // robot will reach its max velocity before covering the distance
+            double t1 = (vMax - v1)/acc;        // time while accelerating
+            double dist1 = t1*(v1 + vMax)/2;    // distance covered while accelerating
+            double t2 = (dist - dist1) / vMax ; // time while at max speed
+            return (t1 + t2);
+        } else { // robot will not reach max velocity
+            return (2*dist / (v1+v2));
+        }
+    } else {
+        return 0.0; // practically already there
+    }
+}
+
+double GetBall::computeArrivalTime(Vector2 location, int id) {
+    // Find the robot with the specified ID
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(id);
+    roboteam_msgs::WorldRobot robot;
+    if (findBot) {
+        robot = *findBot;
+    } else {
+        ROS_WARN_STREAM_NAMED("skills.GetBall", "Teammate with this ID not found, ID: " << id);
+        return 0.0;
+    }
+    Vector2 botPos(robot.pos);
+    Vector2 botVel(robot.vel);
+
+    return computeArrivalTime(location, botPos, botVel);
 }
 
 
@@ -320,7 +432,11 @@ bt::Node::Status GetBall::Update (){
     Vector2 ballVel(ball.vel);
     Vector2 robotPos(robot.pos);
     Vector2 robotVel(robot.vel);
+    ballPos = computeBallInterception(ballPos, ballVel, robotPos); // pretend that the ball is at the location where we could intercept it
     Vector2 posDiff = ballPos - robotPos;
+
+    drawer.setColor(72, 0, 255);
+    drawer.drawPoint("ballIntercept",ballPos);
 
     // Different GetBall parameters for grsim than for real robots
     double successDist;
@@ -330,13 +446,13 @@ bt::Node::Status GetBall::Update (){
     double minDist;
     if (robot_output_target == "grsim") {
         successDist = 0.12;
-        successAngle = 0.15;
+        successAngle = 0.10;
         // getBallDist = 0.0;
         distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
         successDist = 0.12; //0.12
-        successAngle = 0.15; //0.15
+        successAngle = 0.10; //0.15
         // getBallDist = 0.0;
         distAwayFromBall = 0.28;
         minDist = 0.06;
@@ -413,10 +529,6 @@ bt::Node::Status GetBall::Update (){
     else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
     }
-    // If robot has to shoot at the goal
-    else if (shootAtGoal) {
-        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
-    }
     // Nothing given, shoot straight
     else {
         targetAngle = posDiff.angle();
@@ -430,7 +542,7 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = cleanAngle(targetAngle - posDiff.angle());
 
     // Jelle's getBall motion variation:
-    // POSSIBLE IMPROVEMENT: DO SOMETHING ABOUT THE 'WIGGLE'
+    // POSSIBLE IMPROVEMENT: TAKE FUTURE BALL, OR BALL VELOCITY INTO ACCOUNT
     double ballDist = minDist + (distAwayFromBall - minDist) / (0.5*M_PI) * fabs(angleDiff);
     if (ballDist > distAwayFromBall) {
         ballDist = distAwayFromBall;
@@ -444,11 +556,12 @@ bt::Node::Status GetBall::Update (){
         private_bb->SetBool("dribbler", !dontDribble);
     }
     
+
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
-        int ballCloseFrameCountTo = 5;
+        int ballCloseFrameCountTo = 2;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         } else if (dontDribble) {
@@ -481,6 +594,7 @@ bt::Node::Status GetBall::Update (){
 
             if (!GetBool("passOn")) {
             // if not shooting, im successful now
+                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " has ball so succeeded");
                 return Status::Success;
             } 
             else if (!shootAtGoal && (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam"))) ) {
