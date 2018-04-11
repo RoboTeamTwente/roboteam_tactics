@@ -95,8 +95,7 @@ void ReceiveBall::Initialize() {
 
 void ReceiveBall::Terminate(bt::Node::Status s) {
 
-	if (!hasTerminated) {
-	// If ReceiveBall hasnt terminated already... (OF COURSE THIS SHOULD BE HANDLED BETTER BY THE BEHAVIORTREES(?))
+	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
 
 		if (GetBool("setSignal")) {
@@ -281,6 +280,10 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 }
 
 bt::Node::Status ReceiveBall::Update() {
+	if (hasTerminated) { // Temporary hack, because terminate is not always called at the right moments (similar hack in terminate function)
+        Initialize();
+    }
+
 
     // Get the last world information and some blackboard info
 	roboteam_msgs::World world = LastWorld::get();
@@ -494,7 +497,7 @@ bt::Node::Status ReceiveBall::Update() {
         	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
         }
         if (HasBool("enterDefenseAreas")) {
-        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+        	private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     	} 
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();

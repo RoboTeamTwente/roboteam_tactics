@@ -8,7 +8,7 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
-#include "roboteam_tactics/conditions/DistanceXToY.h"
+// #include "roboteam_tactics/conditions/DistanceXToY.h"
 
 #include <vector>
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -16,7 +16,6 @@
 namespace rtt {
 
 
-// Tweaked by Jelle to use Jelle's variant of getting distance to defense area, which now returns a double instead of a vector.
 bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
     // double distToDefenseArea = getDistToDefenseArea2(ourDefenseArea, point);
     // if (distToDefenseArea < margin) return true;
@@ -58,19 +57,6 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
     }
     
 }
-
-// bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
-//     GeometryFieldSize field = LastWorld::get_field();
-//     Vector2 distToDefenseArea = getDistToDefenseArea(ourDefenseArea, point, safetyMargin);
-//     if (ourDefenseArea) {
-//         if (distToDefenseArea.x > 0.0 && point.x >= -field.field_length/2) return true;
-//         else return false;
-//     } else {
-//         if (distToDefenseArea.x < 0.0 && point.x <= field.field_length/2) return true;
-//         else return false;
-//     }
-// }
-
 
 
 
