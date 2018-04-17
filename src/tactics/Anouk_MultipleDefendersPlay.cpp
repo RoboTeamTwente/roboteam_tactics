@@ -245,7 +245,7 @@ namespace rtt {
         if (justChecking) {
             if (weAreAttacking != weWereAttacking) {
                 weWereAttacking = weAreAttacking;
-//                 return true;
+                return true;
             }
             weWereAttacking = weAreAttacking;
             return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || newNumExtraDefenders != numExtraDefenders;
@@ -253,8 +253,10 @@ namespace rtt {
         }
 
 
-
-        ROS_INFO_STREAM_NAMED("plays.Anouk", "=====================");
+        if(weAreAttacking)
+            ROS_INFO_STREAM_NAMED("plays.Anouk", "===================== ATTACKING");
+        else
+            ROS_INFO_STREAM_NAMED("plays.Anouk", "===================== DEFENDING");
 
 
         weWereAttacking = weAreAttacking;
@@ -351,7 +353,7 @@ namespace rtt {
             // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
             delete_from_vector(robots, ballDefenderID);
             claim_robot(ballDefenderID);
-            ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed ball defender. ID : " << ballDefenderID);
+            ROS_INFO_STREAM_NAMED("plays.Anouk", "  Claimed ball defender. ID : " << ballDefenderID);
 
             roboteam_msgs::RoleDirective rd;
             rd.robot_id = ballDefenderID;
@@ -424,7 +426,7 @@ namespace rtt {
                 // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
                 delete_from_vector(robots, defenderID);
                 claim_robot(defenderID);
-                ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed robot defender. ID : " << defenderID);
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "  Claimed robot defender. ID : " << defenderID);
 
                 roboteam_msgs::RoleDirective rd;
                 rd.robot_id = defenderID;
@@ -470,22 +472,12 @@ namespace rtt {
         // ==================================
         // Initialize the extra Defenders!
         // ==================================
+
         ROS_INFO_STREAM_NAMED("plays.Anouk", "Initializing extra Robot Defenders");
         for (int i = 0; i < numExtraDefenders; i++) {
 
 
-            /*  als er robots over zijn voor verdediging, moeten deze extra defenders op een goede plek gaan staan
-             *  zodat als ze toch nodig zijn dat ze dan in de buurt zijn.
-             *  misschien wil je ook dat deze robots vrij staan?? voor nu vaste locatie.
-             *
-             *
-             *
-             *
-             *
-             *
-             *
-             */
-
+            // setting the standard positions of the extra defenders, todo: make this "smart" positions
             std::vector<Vector2> standardDefendPositions;
 
             standardDefendPositions.push_back(Vector2(-3.0, 2.5));
@@ -493,16 +485,13 @@ namespace rtt {
 
 
             if(robots.size()>0){
-                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at " << i << ", size : " << standardDefendPositions.size());
                 int extraDefenderID = *get_robot_closest_to_point(robots, world, standardDefendPositions.at(i));
 
-                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at succeeded");
-//                int extraDefenderID = *getClosestDefender(robots, world, standardDefendPositions.at(i), 0.0);
 
-                // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
+
                 delete_from_vector(robots, extraDefenderID);
                 claim_robot(extraDefenderID);
-                ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed extra defender. ID : " << extraDefenderID);
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "  Claimed extra defender. ID : " << extraDefenderID);
 
                 roboteam_msgs::RoleDirective rd;
                 rd.robot_id = extraDefenderID;
@@ -522,9 +511,8 @@ namespace rtt {
                 //----------improvement defenders----------
 
                 bb.SetDouble("DistanceXToY_A_distance", 2.0);
-                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at(i).x/y");
-                bb.SetDouble("ReceiveBall_A_receiveBallAtX", standardDefendPositions.at(i).x);
-                bb.SetDouble("ReceiveBall_A_receiveBallAtY", standardDefendPositions.at(i).y);
+//                bb.SetDouble("ReceiveBall_A_receiveBallAtX", standardDefendPositions.at(i).x);
+//                bb.SetDouble("ReceiveBall_A_receiveBallAtY", standardDefendPositions.at(i).y);
 
 
                 // Create message

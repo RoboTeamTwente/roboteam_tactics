@@ -28,6 +28,9 @@ void Positioning::Initialize() {
     if (type == 0) {
     // Attacker
         opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    // starting point is opponents half of the field
+        bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
+
     } else if (type == 1) {
     // Assister/passer
     // WIP: To which robot should be passed? check at every scan which robot?
@@ -35,11 +38,16 @@ void Positioning::Initialize() {
         
 
         // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
+    } else if (type == 2){
+        // Attacker
+        opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        // starting point is opponents half of the field
+        bestPosition = opportunityFinder.computeBestOpportunity(Vector2(-3.0,0.0),6.0,9.0);
+
     }
 
     
-    // starting point is opponents half of the field
-    bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
+
 
     // pass first info to GoToPos blackboard already
     private_bb->SetInt("ROBOT_ID", robotID);
