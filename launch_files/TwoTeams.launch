@@ -26,7 +26,7 @@
 		<param name="robot7/readyToReceiveBall" type="bool" value="false" />
 
 		<group ns="grsim">
-			<param name="batching" type="bool" value="true"/>
+			<param name="batching" type="bool" value="false"/>
 		</group>
 
 		<param name="robotClaimedBall" type="int" value="-1" />
@@ -35,8 +35,8 @@
 		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
         <node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
-		<param name="role_iterations_per_second" type="int" value="50" />
-		<param name="num_role_nodes" type="int" value="6" />
+		<param name="role_iterations_per_second" type="int" value="40" />
+		<param name="num_role_nodes" type="int" value="8" />
 		<param name="normalize_field" type="bool" value="true" />
 		<param name="robot_output_target" type="str" value="grsim" />
 
@@ -79,16 +79,16 @@
 		<param name="robotClaimedBall" type="int" value="-1" />
 
 		<group ns="grsim">
-			<param name="batching" type="bool" value="true"/>
+			<param name="batching" type="bool" value="false"/>
 		</group>
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
 		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
 		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
 
-		<param name="role_iterations_per_second" type="int" value="50" />
+		<param name="role_iterations_per_second" type="int" value="40" />
 		<param name="robot_output_target" type="str" value="grsim" />
-		<param name="num_role_nodes" type="int" value="6" />
+		<param name="num_role_nodes" type="int" value="8" />
 		<param name="normalize_field" type="bool" value="true" />
 
 		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />

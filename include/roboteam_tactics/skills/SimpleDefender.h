@@ -4,9 +4,11 @@
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/Draw.h"
 
 #include "roboteam_tactics/skills/ReceiveBall.h"
 #include "roboteam_tactics/skills/GetBall.h"
+
 
 namespace rtt {
 
@@ -53,7 +55,7 @@ private:
     GoToPos goToPos;
     // double distanceFromGoal;
     // bool ourSide;
-    
+    Draw drawer;
 };
 
 } // rtt

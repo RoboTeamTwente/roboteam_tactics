@@ -151,8 +151,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             
             if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
-                drawer.setColor(0, 0, 255);
-                drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
+//                drawer.setColor(0, 0, 255);
+//                drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
 
                 // Determine the crash velocity (velocity at which the robots would crash into eachother)..
@@ -164,8 +164,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfCushions = sumOfCushions + cushionForce; // We add the cushion force to the total
-                drawer.setColor(255, 0, 255);
-                drawer.drawLine("cushionForce" + std::to_string(currentRobot.id),otherRobotPos,cushionForce.scale(0.5));
+//                drawer.setColor(255, 0, 255);
+//                drawer.drawLine("cushionForce" + std::to_string(currentRobot.id),otherRobotPos,cushionForce.scale(0.5));
             }
         }
     }
@@ -182,8 +182,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             
             if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
-                drawer.setColor(0, 0, 255);
-                drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
+//                drawer.setColor(0, 0, 255);
+//                drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
                 //'crashVel' is the velocity at which the robots would crash into eachother
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
@@ -194,8 +194,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfCushions = sumOfCushions + cushionForce; //We add the cushion force to the total
-                drawer.setColor(255, 0, 255);
-                drawer.drawLine("cushionForce" + std::to_string(i),otherRobotPos,cushionForce.scale(0.5));
+//                drawer.setColor(255, 0, 255);
+//                drawer.drawLine("cushionForce" + std::to_string(i),otherRobotPos,cushionForce.scale(0.5));
             }
     }
 
@@ -206,8 +206,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // drawer.setColor(0, 0, 255);
     // drawer.drawLine("sumOfForces", myPos, sumOfForces.scale(0.5));
 
-    drawer.setColor(0, 155, 155);
-    drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
+//    drawer.setColor(0, 155, 155);
+//    drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
 
     sumOfForces = sumOfForces + sumOfCushions;
     return sumOfForces;
@@ -526,9 +526,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
-    drawer.setColor(0, 0, 0);
+
+//    drawer.setColor(255, 0, 0);
+//    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
+//    drawer.setColor(0, 0, 0);
 
     // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
     // Vector2 ballPos = Vector2(world.ball.pos);

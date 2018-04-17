@@ -191,7 +191,43 @@ namespace bt {
         }
 
         return ss.str();
-
     }
+
+    std::string Blackboard::toTestX() {
+        std::stringstream ss;
+
+        if(bools.size() > 0) {
+            for (auto i : bools) {
+                ss << " bool:" << i.first << "=" << i.second;
+            }
+        }
+
+        if(ints.size() > 0) {
+            for (auto i : ints) {
+                ss << " int:" << i.first << "=" << i.second;
+            }
+        }
+
+        if(floats.size() > 0) {
+            for (auto i : floats) {
+                ss << " double:" << i.first << "=" << i.second;
+            }
+        }
+
+        if(doubles.size() > 0) {
+            for (auto i : doubles) {
+                ss << " double:" << i.first << "=" << i.second;
+            }
+        }
+
+        if(strings.size() > 0) {
+            for (auto i : strings) {
+                ss << " string:" << i.first << "=" << i.second;
+            }
+        }
+
+        return ss.str();
+    }
+
 
 }
