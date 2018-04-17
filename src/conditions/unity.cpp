@@ -35,7 +35,10 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "IHaveBall.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "KeeperHasBall.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "IsBallInDefenseArea.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 

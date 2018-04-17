@@ -77,6 +77,7 @@ SET_DEBUG_FOR(IsRefStage, true);
 SET_DEBUG_FOR(ParamCheck, false);
 
 // Tactics
+SET_DEBUG_FOR(Anouk_MultipleDefendersPlay, true);
 SET_DEBUG_FOR(AttackerTactic, true);
 SET_DEBUG_FOR(BasicDefenseTactic, true);
 SET_DEBUG_FOR(BasicKeeperTactic, true);

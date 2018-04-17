@@ -82,6 +82,13 @@ bt::Node::Status IsBallInZone::Update() {
 			zone_y2=field.field_width/2 - 0.35;
 		}
 
+		else if (zone==6) {
+			zone_x1=-4.8;
+			zone_x2=-4.0;
+			zone_y1=-1.5;
+			zone_y2=1.5;
+		}
+
 	}
 	
 	// Set zone according to points given in blackboard

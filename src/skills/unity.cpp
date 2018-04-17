@@ -122,7 +122,10 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "SimpleDefender.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+
+#include "SimpleGoalDefender.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "Sleep.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 

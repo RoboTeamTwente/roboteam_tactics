@@ -89,7 +89,7 @@ void ReceiveBall::Initialize() {
 		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
-
+		std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!robot ["<< robotID << "] did not received receiveBallAtPos locations" << std::endl;
 		roboteam_msgs::WorldRobot robot;
 		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
 	    if (findBot) {
@@ -498,7 +498,10 @@ bt::Node::Status ReceiveBall::Update() {
         }
         if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
-    	} 
+    	}
+		if (HasBool("avoidRobots")) {
+			private_bb->SetBool("avoidRobots", GetBool("avoidRobots"));
+		}
 
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
 	    if (commandPtr) {

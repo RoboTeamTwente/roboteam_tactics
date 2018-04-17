@@ -11,7 +11,7 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/WorldBall.h"
 
-#include "roboteam_tactics/tactics/Jim_MultipleDefendersPlay.h"
+#include "roboteam_tactics/tactics/Anouk_MultipleDefendersPlay.h"
 #include "roboteam_tactics/conditions/WeHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
@@ -23,17 +23,17 @@
 #include "roboteam_utils/LastWorld.h"
 
 
-#define RTT_CURRENT_DEBUG_TAG Jim_MultipleDefendersPlay
+#define RTT_CURRENT_DEBUG_TAG Anouk_MultipleDefendersPlay
 
 namespace rtt {
 
-    RTT_REGISTER_TACTIC(Jim_MultipleDefendersPlay);
+    RTT_REGISTER_TACTIC(Anouk_MultipleDefendersPlay);
 
-    Jim_MultipleDefendersPlay::Jim_MultipleDefendersPlay(std::string name, bt::Blackboard::Ptr blackboard)
+    Anouk_MultipleDefendersPlay::Anouk_MultipleDefendersPlay(std::string name, bt::Blackboard::Ptr blackboard)
             : Tactic(name, blackboard)
     {}
 
-    boost::optional<int> Jim_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots,
+    boost::optional<int> Anouk_MultipleDefendersPlay::getClosestDefender(std::vector<int> robots,
                                                                        roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset) {
         double distanceFromGoal = 1.35;
         Vector2 defensePoint = SimpleDefender::computeDefensePoint(dangerPos, true, distanceFromGoal, angleOffset);
@@ -46,14 +46,13 @@ namespace rtt {
             return boost::none;
         }
 
-        // return defenderID;
     }
 
     namespace {
 
 // Calculates the length of the vector from each robot position to each point
 // and sums it
-        double calcTotalCost(std::map<int, Vector2> const & currentPositions, std::vector<int> const & robots, std::vector<Vector2> const & points) {
+        double calcTotalCostAnouk(std::map<int, Vector2> const & currentPositions, std::vector<int> const & robots, std::vector<Vector2> const & points) {
             double total = 0;
             for (size_t i = 0; i < points.size(); ++i) {
                 total += currentPositions.at(robots[i]).dist(points[i]);
@@ -63,7 +62,7 @@ namespace rtt {
 
     }
 
-    std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots,
+    std::vector<int> Anouk_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots,
                                                                         std::vector<Vector2> points, roboteam_msgs::World& world) {
         // If the number of points is larger than the number of robots, choose the first points to drive to
         if (points.size() > robots.size()) {
@@ -91,10 +90,10 @@ namespace rtt {
         std::sort(robots.begin(), robots.end());
 
         std::vector<int> minAssignment = robots;
-        double minCost = calcTotalCost(currentPositions, robots, points);
+        double minCost = calcTotalCostAnouk(currentPositions, robots, points);
 
         while (std::next_permutation(robots.begin(), robots.end())) {
-            double candidateCost = calcTotalCost(currentPositions, robots, points);
+            double candidateCost = calcTotalCostAnouk(currentPositions, robots, points);
             if (candidateCost < minCost) {
                 minAssignment = robots;
                 minCost = candidateCost;
@@ -108,12 +107,11 @@ namespace rtt {
         return minAssignment;
     }
 
-// void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps) {
-    bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
+    bool Anouk_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
 
+//        ROS_INFO_STREAM_NAMED("plays.Anouk", "================");
 
-        // time_point startInit = now();
-
+        // Save some values
         roboteam_msgs::World world = LastWorld::get();
         Vector2 ballPos(world.ball.pos);
         Vector2 ballVel(world.ball.vel);
@@ -124,23 +122,29 @@ namespace rtt {
             return !getWorldBot(id, true, world);
         }), activeRobots.end());
 
+        // Save how many robots available/active and how many robots in total
         std::vector<int> robots = getAvailableRobots();
         int numRobots = robots.size() + activeRobots.size();
         int totalNumRobots = world.us.size();
 
-
+        // We can use max 5 of all robots
         if (numRobots >= (totalNumRobots - 1)) {
             numRobots = totalNumRobots - 2;
         }
 
+        // If less then one robot is available throw an error
         if (numRobots < 1) {
-            ROS_INFO_STREAM_THROTTLE_NAMED(1, "Jim_MultipleDefendersPlay", "Not enough robots, cannot initialize... \n");
+            ROS_INFO_STREAM_THROTTLE_NAMED(1, "Anouk_MultipleDefendersPlay", "Not enough robots, cannot initialize... \n");
             // TODO: Want to pass failure here as well!
             return false;
         }
 
-        int minBallDefenders = 1;
+        // Set min and max number of ball defenders
+        int minBallDefenders = 2;
         int maxBallDefenders = 2;
+        int maxExtraDefenders = 2;
+
+
         double minDangerScore;
         std::vector<double> distancesBallDefendersFromGoal;
 
@@ -150,6 +154,8 @@ namespace rtt {
         WeHaveBall weHaveBall("", bb);
 
         bool weAreAttacking = ballOnTheirSide; // && (weHaveBall.Update() == Status::Success);
+
+
 
         /* Draw box around field */
         if(weAreAttacking) drawer.setColor(0, 0, 255);
@@ -166,45 +172,50 @@ namespace rtt {
         drawer.drawLine("bottomright_to_topright",   bottomright, Vector2(0, 9));
 
         drawer.setColor(0, 0, 0);
+        /*    End of draw box    */
+
 
 
         if(weAreAttacking != weWereAttacking){
-            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Switched to " << (weAreAttacking ? "attacking" : "defending"));
+            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "Switched to " << (weAreAttacking ? "attacking" : "defending"));
         }
 
-        // Filter removed because it was not working: when it changed to attacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
-
+        // Set the distance BallDefenders from goal values and minDangerscore for weareattacking and not attacking
         if (weAreAttacking) {
+            maxExtraDefenders = 0;
             minDangerScore = 8.0; // 8.0
             distancesBallDefendersFromGoal.push_back(1.35);
             distancesBallDefendersFromGoal.push_back(1.35); // 3.00
         } else {
-            minDangerScore = 3.2;
+            maxExtraDefenders = 2;
+            minDangerScore = 1.0; //3.2
             distancesBallDefendersFromGoal.push_back(1.35);
             distancesBallDefendersFromGoal.push_back(1.35);
         }
 
+
+        // Add dangerous opponents to a dangerlist
         std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
         for (size_t i = 0; i < world.dangerList.size(); i++) {
             if (world.dangerScores.at(i) >= minDangerScore) {
                 roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
                 double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
                 if (angleDiffBall <= 0.15) {
-                    ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "setting minBallDefenders=2, for robot=" << opp.id);
+                    ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "setting minBallDefenders=2, for robot=" << opp.id);
                     minBallDefenders = 2;
                 } else {
                     bool addDangerousOpp = true;
                     for (size_t j = 0; j < dangerousOpps.size(); j++) {
                         double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
                         if (angleDiffRobot <= 0.15) {
-                            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Not adding robotDefender for robot=" << opp.id);
+                            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "Not adding robotDefender for robot=" << opp.id);
                             addDangerousOpp = false;
                             break;
                         }
                     }
 
                     if (addDangerousOpp) {
-                        ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Adding robotDefender for robot=" << opp.id);
+                        ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "Adding robotDefender for robot=" << opp.id);
                         dangerousOpps.push_back(opp);
                     }
                 }
@@ -212,29 +223,47 @@ namespace rtt {
 
         }
         int numDangerousOpps = dangerousOpps.size();
-        std::cout << "numDangerousOpps = " << numDangerousOpps << "!!!!!" << std::endl;
+//        std::cout << "numDangerousOpps = " << numDangerousOpps << "!!!!!" << std::endl;
+
 
         int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
         int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
-        newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
-        newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
+        int newNumExtraDefenders = std::max(numExtraDefenders, numRobots - newNumRobotDefenders - newNumBallDefenders); // maximize the amount of ball defenders to the amount of available robots
+        newNumExtraDefenders = std::min(newNumExtraDefenders, maxExtraDefenders);
 
 
+        ROS_INFO_STREAM_THROTTLE_NAMED(1, "Anouk_MultipleDefendersPlay", "numExtraDef: " << numExtraDefenders << ", newNumExtraDef: " << newNumExtraDefenders);
+//        std::cout << "numExtraDef = " << numExtraDefenders << "!!!!! newNumExtraDef = " << newNumExtraDefenders << "!!!!!" << std::endl;
+
+
+
+
+//        newNumBallDefenders = std::max(newNumBallDefenders, numRobots - newNumRobotDefenders); // maximize the amount of ball defenders to the amount of available robots
+//        newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // max 2 ball defenders
+
+        // when it needs to check(update) it looks if the number of balldefenders or robotdefenders changed, when it did we should reinitialize
         if (justChecking) {
             if (weAreAttacking != weWereAttacking) {
                 weWereAttacking = weAreAttacking;
-                // return true;
+//                 return true;
             }
             weWereAttacking = weAreAttacking;
-            return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders;
+            return newNumBallDefenders != numBallDefenders || newNumRobotDefenders != numRobotDefenders || newNumExtraDefenders != numExtraDefenders;
+//            return newNumExtraDefenders != numExtraDefenders;
         }
+
+
+
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "=====================");
+
 
         weWereAttacking = weAreAttacking;
 
         numBallDefenders = newNumBallDefenders;
         numRobotDefenders = newNumRobotDefenders;
+        numExtraDefenders = newNumExtraDefenders;
 
-        ROS_INFO_STREAM_THROTTLE_NAMED(1, "Jim_MultipleDefendersPlay", "numBallDef: " << numBallDefenders << ", numRobotDef: " << numRobotDefenders);
+        ROS_INFO_STREAM_THROTTLE_NAMED(1, "Anouk_MultipleDefendersPlay", "numBallDef: " << numBallDefenders << ", numRobotDef: " << numRobotDefenders);
 
         activeRobots.clear();
 
@@ -268,8 +297,8 @@ namespace rtt {
             rd.token = unique_id::toMsg(token);
 
             // Send to rolenode
-            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
-            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "bb: " << bb.toString());
+            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
+            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "bb: " << bb.toString());
             pub.publish(rd);
         }
 
@@ -279,22 +308,21 @@ namespace rtt {
         // ====================================
         std::vector<double> angleOffsets;
         std::vector<Vector2> idlePositions;
-//        idlePositions.push_back(Vector2(-3.0, 1.1));
-//        idlePositions.push_back(Vector2(-3.0, -1.1));
 
-        idlePositions.push_back(Vector2(-2.0, 2.0));
-        idlePositions.push_back(Vector2(2.0, -2.0));
+        // positions for the ball defenders when ball is in defense area
+        idlePositions.push_back(Vector2(-4.8, 1.15));
+        idlePositions.push_back(Vector2(-4.8, -1.15));
 
         if (weAreAttacking) {
             if (numBallDefenders == 1) {
                 angleOffsets.push_back(0.0);
             } else if (numBallDefenders == 2) {
                 if (ballPos.y >= 0) {
-                    angleOffsets.push_back(0.15); // 0.15
-                    angleOffsets.push_back(-0.15); // -0.05
+                    angleOffsets.push_back(0.15);
+                    angleOffsets.push_back(-0.15);
                 } else {
-                    angleOffsets.push_back(-0.15); // -0.15
-                    angleOffsets.push_back(0.15); // 0.05
+                    angleOffsets.push_back(-0.15);
+                    angleOffsets.push_back(0.15);
                 }
             }
         } else {
@@ -323,13 +351,16 @@ namespace rtt {
             // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
             delete_from_vector(robots, ballDefenderID);
             claim_robot(ballDefenderID);
+            ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed ball defender. ID : " << ballDefenderID);
 
             roboteam_msgs::RoleDirective rd;
             rd.robot_id = ballDefenderID;
             activeRobots.push_back(ballDefenderID);
+
             bt::Blackboard bb;
 
-            std::cout << "angleOffset of robot [" << ballDefenderID << "] = " << angleOffsets.at(i) << std::endl;
+//            std::cout << "Trying to access " << i << std::endl;
+//            std::cout << "angleOffset of robot [" << ballDefenderID << "] = " << angleOffsets.at(i) << std::endl;
 
             // Set the robot ID
             bb.SetInt("ROBOT_ID", ballDefenderID);
@@ -350,11 +381,11 @@ namespace rtt {
 
             bb.SetDouble("DistanceXToY_A_distance", 2.0);
             //ROS_INFO_STREAM("robot: " << ballDefenderID << " distance: " << distancesBallDefendersFromGoal.at(i));
-            bb.SetDouble("SimpleDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
-            bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
-            bb.SetBool("SimpleDefender_A_avoidRobots", false);
-            bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
-            bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
+            bb.SetDouble("SimpleGoalDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
+            bb.SetDouble("SimpleGoalDefender_A_angleOffset", angleOffsets.at(i));
+            bb.SetBool("SimpleGoalDefender_A_avoidRobots", false);
+            bb.SetBool("SimpleGoalDefender_A_dontDriveToBall", true);
+            bb.SetBool("SimpleGoalDefender_A_avoidBallsFromOurRobots", true);
 //            bb.SetBool("SimpleDefender_A_ballDefender", true);
 
 
@@ -368,9 +399,10 @@ namespace rtt {
             rd.token = unique_id::toMsg(token);
 
             // Send to rolenode
-            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
-            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "bb: " << bb.toString());
+            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
+            ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "bb: " << bb.toString());
             pub.publish(rd);
+//            std::cout << "All access stuff succesful" << std::endl;
         }
 
         numBallDefenders = newNumBallDefenders;
@@ -379,6 +411,7 @@ namespace rtt {
         // ==================================
         // Initialize the Robot Defenders!
         // ==================================
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "Initializing Robot Defenders");
         for (int i = 0; i < numRobotDefenders; i++) {
 
             roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
@@ -391,6 +424,7 @@ namespace rtt {
                 // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
                 delete_from_vector(robots, defenderID);
                 claim_robot(defenderID);
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed robot defender. ID : " << defenderID);
 
                 roboteam_msgs::RoleDirective rd;
                 rd.robot_id = defenderID;
@@ -424,8 +458,8 @@ namespace rtt {
                 rd.token = unique_id::toMsg(token);
 
                 // Send to rolenode
-                ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
-                ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "bb: " << bb.toString());
+                ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
+                ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "bb: " << bb.toString());
                 pub.publish(rd);
             }
             else {
@@ -433,17 +467,110 @@ namespace rtt {
             }
         }
 
+        // ==================================
+        // Initialize the extra Defenders!
+        // ==================================
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "Initializing extra Robot Defenders");
+        for (int i = 0; i < numExtraDefenders; i++) {
+
+
+            /*  als er robots over zijn voor verdediging, moeten deze extra defenders op een goede plek gaan staan
+             *  zodat als ze toch nodig zijn dat ze dan in de buurt zijn.
+             *  misschien wil je ook dat deze robots vrij staan?? voor nu vaste locatie.
+             *
+             *
+             *
+             *
+             *
+             *
+             *
+             */
+
+            std::vector<Vector2> standardDefendPositions;
+
+            standardDefendPositions.push_back(Vector2(-3.0, 2.5));
+            standardDefendPositions.push_back(Vector2(-3.0, -2.5));
+
+
+            if(robots.size()>0){
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at " << i << ", size : " << standardDefendPositions.size());
+                int extraDefenderID = *get_robot_closest_to_point(robots, world, standardDefendPositions.at(i));
+
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at succeeded");
+//                int extraDefenderID = *getClosestDefender(robots, world, standardDefendPositions.at(i), 0.0);
+
+                // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
+                delete_from_vector(robots, extraDefenderID);
+                claim_robot(extraDefenderID);
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "Claimed extra defender. ID : " << extraDefenderID);
+
+                roboteam_msgs::RoleDirective rd;
+                rd.robot_id = extraDefenderID;
+                activeRobots.push_back(extraDefenderID);
+                bt::Blackboard bb;
+
+                // Set the robot ID
+                bb.SetInt("ROBOT_ID", extraDefenderID);
+                bb.SetInt("KEEPER_ID", keeperID);
+
+
+                //----------improvement defenders----------
+                bb.SetBool("GetBall_B_aimAwayFromTarget", true);
+                bb.SetString("GetBall_B_aimAt", "ourgoal");
+                bb.SetBool("GetBall_D_aimAwayFromTarget", true);
+                bb.SetString("GetBall_D_aimAt", "ourgoal");
+                //----------improvement defenders----------
+
+                bb.SetDouble("DistanceXToY_A_distance", 2.0);
+                ROS_INFO_STREAM_NAMED("plays.Anouk", "standardDefendPositions.at(i).x/y");
+                bb.SetDouble("ReceiveBall_A_receiveBallAtX", standardDefendPositions.at(i).x);
+                bb.SetDouble("ReceiveBall_A_receiveBallAtY", standardDefendPositions.at(i).y);
+
+
+                // Create message
+                rd.tree = "rtt_jim/DefenderRoleExtraDefender";
+                rd.blackboard = bb.toMsg();
+
+                // Add random token and save it for later
+                boost::uuids::uuid token = unique_id::fromRandom();
+                tokens.push_back(token);
+                rd.token = unique_id::toMsg(token);
+
+                // Send to rolenode
+                ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", rd.robot_id << " -> " << rd.tree);
+                ROS_INFO_STREAM_NAMED("Anouk_MultipleDefendersPlay", "bb: " << bb.toString());
+                pub.publish(rd);
+            }
+            else {
+                ROS_ERROR("there was a mistake in determining the number of defenders to use");
+            }
+        }
+
+
+
+
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "Active robots claimed: " << activeRobots.size());
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "Total robots claimed : " << get_claimed_robots().size());
+
+
+
+        ROS_INFO_STREAM_NAMED("plays.Anouk", "Initializing of Robot Defenders finished");
+
+
+
+
         // double timeLapsed = time_difference_milliseconds(startInit, now()).count();
 
         return false;
     }
 
 
-    void Jim_MultipleDefendersPlay::Initialize() {
+    void Anouk_MultipleDefendersPlay::Initialize() {
         activeRobots.clear();
 
         numBallDefenders = 0;
         numRobotDefenders = 0;
+        numExtraDefenders = 0;
         distBallToGoalThreshold = 4.0;
         weAreAttackingCounter = 0;
         weWereAttacking = false;
@@ -452,7 +579,7 @@ namespace rtt {
     }
 
 
-    bt::Node::Status Jim_MultipleDefendersPlay::Update() {
+    bt::Node::Status Anouk_MultipleDefendersPlay::Update() {
 
         if (reInitializeWhenNeeded(true)) {
             RTT_DEBUGLN_TEAM("Should reInitialize!");

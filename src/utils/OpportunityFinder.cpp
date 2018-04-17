@@ -579,7 +579,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
         	// if notBackwards true, robots too far from target will be skipped
         		continue;
         	}
-        	if (distFromTargetLimit && (targetPos - botPos).length() < limit) {
+        	if (distFromTargetLimit && (targetPos - botPos).length() > limit) {
         	// if distFromTargetLimit true, robots too far from target will be skipped
         		continue;
         	}

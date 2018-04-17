@@ -5,6 +5,9 @@
 #include "AttackerTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Anouk_MultipleDefendersPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "BasicAttackTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
