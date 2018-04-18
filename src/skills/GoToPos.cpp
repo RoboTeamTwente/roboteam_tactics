@@ -52,12 +52,12 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
                 avoidRobotsGain = 0.010;
-                cushionGain = 0.06;
+                cushionGain = 0.12;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
                 maxDist = 0.3; // no force is exerted when dist is larger than maxDist
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 0.005;
                 cushionGain = 0.06;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
@@ -158,7 +158,6 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                 drawer.setColor(0, 0, 255);
                 drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
-
                 // Determine the crash velocity (velocity at which the robots would crash into eachother)..
                 // ..and determine the 'cushion force' to damp out this crash velocity.
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
