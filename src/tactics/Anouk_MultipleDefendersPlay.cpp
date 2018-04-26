@@ -126,7 +126,7 @@ namespace rtt {
 
         // We can use max 5 of all robots
         if (numRobots >= (totalNumRobots - 1)) {
-            numRobots = totalNumRobots - 2;
+            numRobots = totalNumRobots - 4;
         }
 
         // If less then one robot is available throw an error
@@ -174,12 +174,12 @@ namespace rtt {
         // Set the distance BallDefenders from goal values and minDangerscore for weareattacking and not attacking
         if (weAreAttacking) {
 //            maxExtraDefenders = 0;
-            minDangerScore = 1.0; // 8.0
+            minDangerScore = 8.0; // 8.0
             distancesBallDefendersFromGoal.push_back(1.35);
             distancesBallDefendersFromGoal.push_back(1.35); // 3.00
         } else {
 //            maxExtraDefenders = 2;
-            minDangerScore = 1.0; //3.2
+            minDangerScore = 1.2; //3.2
             distancesBallDefendersFromGoal.push_back(1.35);
             distancesBallDefendersFromGoal.push_back(1.35);
         }
@@ -230,7 +230,7 @@ namespace rtt {
 //        ROS_DEBUG_STREAM_NAMED("plays.AnoukMDP", numDangerousOpps << " dangerous opponents found");
 
         int newNumRobotDefenders = std::min(numDangerousOpps, numRobots); // limit robot defenders to dangerous opps or to available robots
-        int newNumBallDefenders = std::max(minBallDefenders, numRobots - newNumRobotDefenders); // start with a number of ball defenders
+        int newNumBallDefenders = std::max(numBallDefenders, numRobots - newNumRobotDefenders); // start with a number of ball defenders
         newNumBallDefenders = std::min(newNumBallDefenders, maxBallDefenders); // maximize the amount of ball defenders to the amount of available robots
 //        int newNumExtraDefenders = std::max(numExtraDefenders, numRobots - newNumRobotDefenders - newNumBallDefenders); // maximize the amount of ball defenders to the amount of available robots
 //        newNumExtraDefenders = std::min(newNumExtraDefenders, maxExtraDefenders);
@@ -405,16 +405,16 @@ namespace rtt {
 
 
             bb.SetDouble("DistanceXToY_A_distance", 2.0);
-            bb.SetDouble("SimpleGoalDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
-            bb.SetDouble("SimpleGoalDefender_A_angleOffset", angleOffsets.at(i));
-            bb.SetBool("SimpleGoalDefender_A_avoidRobots", false);
-            bb.SetBool("SimpleGoalDefender_A_dontDriveToBall", true);
-            bb.SetBool("SimpleGoalDefender_A_avoidBallsFromOurRobots", true);
+            bb.SetDouble("SimpleDefender_A_distanceFromGoal", distancesBallDefendersFromGoal.at(i));
+            bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
+            bb.SetBool("SimpleDefender_A_avoidRobots", false);
+            bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
+            bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 //            bb.SetBool("SimpleDefender_A_ballDefender", true);
 
 
             // Create message
-            rd.tree = "rtt_jim/DefenderRoleBallDefenders";
+            rd.tree = "rtt_jim/DefenderRoleGetBall";
             rd.blackboard = bb.toMsg();
 
             // Create TestX command

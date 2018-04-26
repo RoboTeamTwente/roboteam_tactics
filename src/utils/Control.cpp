@@ -93,7 +93,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0;//3.0
+        pGainPosition = 1.8;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
         dGainPosition = 0.0; //prevteam: 0.5
         pGainRotation = 2.5; 

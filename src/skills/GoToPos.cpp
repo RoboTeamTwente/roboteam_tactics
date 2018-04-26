@@ -462,9 +462,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         angleGoal = me.angle;
     }
 
-    if (posError.length() > 0.5) {
-        angleGoal = posError.angle();
-    } 
+    // if (posError.length() > 0.5) {
+    //     angleGoal = posError.angle();
+    // } 
 
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);
@@ -475,7 +475,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.03;
+        successDist = 0.05;//WAS 0.03
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
