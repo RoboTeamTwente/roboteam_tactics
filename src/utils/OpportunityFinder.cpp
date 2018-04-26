@@ -2,7 +2,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_utils/Math.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "ros/package.h"
 
@@ -143,7 +143,7 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	Vector2 ballPos(world.ball.pos);
 
 	double shortestDistance = 40;//(Vector2(world.us.at(0).pos) - testPosition).length();
@@ -252,14 +252,14 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 	for (size_t i = 0; i < openAngles.second.size(); i++) {
    		viewOfGoal += openAngles.second.at(i) - openAngles.first.at(i);
 	}
-	
+
 	return viewOfGoal;
 }
 
 std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
 	// targetPos is one of the goals. IMPROVEMENT: Maybe add functionality that uses other views than only goal views (like view of dangerous positions)
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-	
+
 	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
 	Vector2 goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
 	Vector2 vecToGoalSide1 = goalSide1 - testPosition;
@@ -326,19 +326,19 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 
 // Calculates the distance between the testPosition and the current robot
 double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	if (isCloseToPosSet) {
 		return (testPosition - closeToPos).length();
 	} else {
 		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
 		if (bot) {
 			return (testPosition - Vector2((*bot).pos)).length();
-			
+
 		} else {
 			ROS_WARN("OpportunityFinder::distToRobot robot not found :(");
 			return 0.0;
 		}
-	}	
+	}
 }
 
 
@@ -362,9 +362,9 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 }
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
 double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	Vector2 ballPos(world.ball.pos);
-	
+
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
@@ -437,7 +437,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		// Add score to total score
 		score += smoothStep(1-distToSelf)*distToSelfWeight;
 	}
-	
+
 	if (ballReflectionAngleWeight>0.0) {
 		// double ballReflectionAngle = calcBallReflectionAngle(testPosition, world);
 		double ballReflectionAngle = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
@@ -446,7 +446,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		// Add score to total score
 		score += smoothStep(1-ballReflectionAngle)*ballReflectionAngleWeight;
 	}
-		
+
 	// normalize score between 0 and 100
 	score = score / totalWeight * 100;
 
@@ -456,7 +456,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth) {
-	
+
 	roboteam_msgs::World world = LastWorld::get();
 	// time_point start = now();
 
@@ -500,7 +500,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 				drawer.setColor(0,0,0);
 				drawer.drawPoint(name, Vector2(0.0,0.0));
 			}
-			
+
 		}
 	}
 	// int timePassed = time_difference_milliseconds(start, now()).count();
@@ -574,7 +574,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
         	} else {
         		botPos = Vector2(fakeWorld.us.at(i).pos);
         	}
-        	
+
         	if (notBackwards && botPos.x < ballPos.x) {
         	// if notBackwards true, robots too far from target will be skipped
         		continue;
@@ -588,7 +588,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
             	score = computeScore(botPos, world);
             } else {
             	score = computeScore(botPos,fakeWorld);
-            } 
+            }
             if (score > maxScore) {
                 maxScore = score;
                 bestID = world.us.at(i).id;
@@ -596,7 +596,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
             }
         }
     } // end of for-loop
-    
+
     BestTeammate bestTeammate;
     bestTeammate.id = bestID;
     bestTeammate.pos = bestPos;
