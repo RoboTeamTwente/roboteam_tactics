@@ -16,10 +16,6 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
-
-
-#define RTT_CURRENT_DEBUG_TAG Jim_KickOffDefense
-
 namespace rtt {
 
 RTT_REGISTER_TACTIC(Jim_KickOffDefense);
@@ -34,9 +30,9 @@ Jim_KickOffDefense::Jim_KickOffDefense(std::string name, bt::Blackboard::Ptr bla
 void Jim_KickOffDefense::Initialize() {
     tokens.clear();
 
-    RTT_DEBUGLN_TEAM("Initializing Jim_KickOffDefense");    
+    ROS_INFO_NAMED("plays.JimKOD", "Initializing Jim_KickOffDefense");
     if (getAvailableRobots().size() < 1) {
-        RTT_DEBUG("Not enough robots, cannot initialize... \n");
+        ROS_WARN_NAMED("plays.JimKOD", "Not enough robots, cannot initialize..");
         // TODO: Want to pass failure here as well!
         return;
     }
@@ -140,14 +136,13 @@ void Jim_KickOffDefense::Initialize() {
 
     std::vector<int> defenderIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, defenderPositions, world);
 
-    RTT_DEBUGLN("num KickOffDefenders: %i", numRobotDefenders);
+    ROS_DEBUG_NAMED("plays.JimKOD", "num KickOffDefenders: %i", numRobotDefenders);
 
     for (int i = 0; i < numRobotDefenders; i++) {
 
         roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
         int defenderID = defenderIDs.at(i);
-        RTT_DEBUGLN("KickOffDenfer with id: %i",defenderID);
-        // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
+
         delete_from_vector(robots, defenderID);
         claim_robot(defenderID);
 
@@ -253,7 +248,6 @@ void Jim_KickOffDefense::Initialize() {
 
         int ballDefenderID = ballDefenders.at(i);
 
-        // RTT_DEBUGLN("Initializing BallDefender %i", ballDefenderID);
         delete_from_vector(robots, ballDefenderID);
         claim_robot(ballDefenderID);
 
@@ -288,13 +282,6 @@ void Jim_KickOffDefense::Initialize() {
         pub.publish(rd);
     }
 
-
-
-
-
-
-
-   
 
     initTime = now();
     
@@ -347,7 +334,7 @@ void Jim_KickOffDefense::Initialize() {
 bt::Node::Status Jim_KickOffDefense::Update() {
 
     if (time_difference_milliseconds(initTime, now()).count() >= 1000) {
-        RTT_DEBUGLN("ReInitializing Jim_KickOffDefense");
+        ROS_INFO_NAMED("plays.JimKOD", "Timeout : ReInitializing Jim_KickOffDefense");
         return Status::Failure;
     }
 
@@ -355,7 +342,7 @@ bt::Node::Status Jim_KickOffDefense::Update() {
     Vector2 ballVel(world.ball.vel);
 
     if (ballVel.length() > 0.5 && (HasBool("allowSuccess") && GetBool("allowSuccess"))) {
-        ROS_INFO_STREAM("KickOff success because of moving ball!");
+        ROS_INFO_NAMED("plays.JimKOD", "KickOff success because of moving ball!");
         return Status::Success;
     }
 
