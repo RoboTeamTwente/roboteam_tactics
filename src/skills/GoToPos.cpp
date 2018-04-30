@@ -17,7 +17,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 
 #define RTT_CURRENT_DEBUG_TAG GoToPos
 
@@ -59,7 +59,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
                 maxDist = 0.3; // no force is exerted when dist is larger than maxDist
             }
-            
+
             //PROCESS BLACKBOARD
             if (HasDouble("avoidRobotsGain")) {
                 avoidRobotsGain = GetDouble("avoidRobotsGain");
@@ -96,14 +96,14 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
     double distToAntenna = force.length(); // distance between closest point on antenna and other robot.
     double distToMe = (myPos - otherRobotPos).length(); // distance between me and other robot, used for scaling the force.
 
-    // Check if the point lies within the antenna, so not on the edges. 
+    // Check if the point lies within the antenna, so not on the edges.
     // Then calculate the needed avoidance force.
     if ((closestPoint - myPos).length() > 0.001 && (ahead - closestPoint).length() > 0.001 && distToAntenna <= maxDist){
         if(distToAntenna > minDist) {
             force = force.stretchToLength(avoidRobotsGain/distToAntenna/distToMe);
         } else if(distToAntenna > 0.0005) { // avoid division by 0
             force = force.stretchToLength(avoidRobotsGain/minDist/distToMe);
-        } else { // distToAntenna almost zero -> force direction becomes 
+        } else { // distToAntenna almost zero -> force direction becomes
             force = (antenna.rotate(M_PI/2)).stretchToLength(avoidRobotsGain/minDist/distToMe);
         }
     } else {
@@ -464,7 +464,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // if (posError.length() > 0.5) {
     //     angleGoal = posError.angle();
-    // } 
+    // }
 
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);

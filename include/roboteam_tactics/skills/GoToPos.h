@@ -13,7 +13,7 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_msgs/WorldRobot.h"
 
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 
 
 namespace rtt {
@@ -72,7 +72,7 @@ public:
 
     void sendStopCommand(uint id);
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna);
-    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
+    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel);
     Vector2 checkTargetPos(Vector2 targetPos);
@@ -80,7 +80,7 @@ public:
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
 
     Status Update();
-    
+
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;
@@ -89,7 +89,7 @@ public:
         return params;
     }
     std::string node_name() { return "GoToPos"; }
-    
+
 private:
     // output target: grsim or serial
     std::string robot_output_target;
@@ -110,8 +110,8 @@ private:
 
     // Info about previous states
     Vector2 prevTargetPos;
-    
-    // Success 
+
+    // Success
     int successCounter;
     bool succeeded;
     bool failure;

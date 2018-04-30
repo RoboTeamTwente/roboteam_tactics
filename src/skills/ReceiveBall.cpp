@@ -12,7 +12,7 @@
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/skills/ReceiveBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldBall.h"
@@ -89,7 +89,7 @@ void ReceiveBall::Initialize() {
 		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
-		std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!robot ["<< robotID << "] did not received receiveBallAtPos locations" << std::endl;
+
 		roboteam_msgs::WorldRobot robot;
 		boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
 	    if (findBot) {
