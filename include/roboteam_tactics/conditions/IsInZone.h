@@ -6,7 +6,7 @@
 namespace rtt {
 
 /**
- * \class IsBallInZone
+ * \class IsInZone
  * \brief See YAML
  */
 /*

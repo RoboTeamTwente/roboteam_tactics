@@ -402,9 +402,9 @@
       "properties": {}
     },
     {
-      "name": "IsBallInZone",
+      "name": "IsInZone",
       "category": "condition",
-      "title": "IsBallInZone",
+      "title": "IsInZone",
       "description": null,
       "properties": {}
     },

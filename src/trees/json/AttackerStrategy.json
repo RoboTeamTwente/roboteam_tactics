@@ -375,9 +375,9 @@
     {
       "version": "0.3.0",
       "scope": "node",
-      "name": "IsBallInZone",
+      "name": "IsInZone",
       "category": "condition",
-      "title": "IsBallInZone",
+      "title": "IsInZone",
       "description": null,
       "properties": {}
     },
