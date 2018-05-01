@@ -15,6 +15,7 @@
 #include "roboteam_msgs/StrategyIgnoreRobot.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/constants.h"
 #include "roboteam_msgs/StrategyDebugInfo.h"
 
@@ -42,24 +43,19 @@ std::random_device rd;
 std::mt19937 rng(rd());
 
 void feedbackCallback(const roboteam_msgs::RoleFeedbackConstPtr &msg) {
-    ROS_INFO_NAMED("StrategyNode", "");
 
     auto uuid = unique_id::fromMsg(msg->token);
 
     if (msg->status == roboteam_msgs::RoleFeedback::STATUS_FAILURE) {
         rtt::feedbacks[uuid] = bt::Node::Status::Failure;
-        // std::cout << "Received a feedback on token " << uuid << ": failure.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_INVALID) {
         rtt::feedbacks[uuid] = bt::Node::Status::Invalid;
-        // std::cout << "Received a feedback on token " << uuid << ": invalid.\n";
     } else if (msg->status == roboteam_msgs::RoleFeedback::STATUS_SUCCESS) {
         rtt::feedbacks[uuid] = bt::Node::Status::Success;
-        // std::cout << "Received a feedback on token " << uuid << ": success.\n";
     }
 }
 
 void refereeCallback(const roboteam_msgs::RefereeDataConstPtr& refdata) {
-    ROS_INFO_NAMED("StrategyNode", "Referee command received!");
     rtt::LastRef::set(*refdata);
 }
 
@@ -93,8 +89,6 @@ public:
 
 
     void doUpdate(std::shared_ptr<bt::BehaviorTree> tree) {
-
-        ROS_DEBUG_NAMED("StrategyNode", "Tick");
 
         auto root = tree->GetRoot();
 
@@ -139,13 +133,15 @@ StrategyDebugInfo::milliseconds const StrategyDebugInfo::MSG_INTERVAL(200);
 }
 
 int main(int argc, char *argv[]) {
-    // rtt::crash::registerCrashHandlers();
 
+    // Initialize ros node
     ros::init(argc, argv, "StrategyNode");
+    // Initialize ros node handle
     ros::NodeHandle n;
 
     ros::Rate rate(10);
 
+    // Subscribe to RoleFeedback
     ros::Subscriber feedbackSub = n.subscribe<roboteam_msgs::RoleFeedback>(
         rtt::TOPIC_ROLE_FEEDBACK,
         10,
@@ -165,6 +161,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
+    // Subscribe to referee
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
     ROS_INFO_NAMED("StrategyNode", "Subscribed to 'vision_refbox'");
 
@@ -186,7 +183,10 @@ int main(int argc, char *argv[]) {
             if (!rtt::LastRef::waitForFirstRefCommand()) {
                 return 0;
             }
-        } else {
+        }
+
+        /*
+        else {
             // Get all available trees
             namespace f = rtt::factories;
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
@@ -220,6 +220,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
+        */
     } else {
         ROS_ERROR_NAMED("StrategyNode", "No strategy tree passed as argument. Aborting.");
         return 1;
