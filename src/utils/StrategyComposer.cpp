@@ -71,7 +71,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::DEFEND_PENALTY        , "rtt_dennis/DefendPenaltyStrategy"s  } ,
-        { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s              } ,
+        { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,
 
         { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
@@ -84,6 +84,8 @@ std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
 void StrategyComposer::init() {
     // Return if not initialized
     if (initialized) return;
+
+    ROS_INFO_NAMED("StrategyComposer", "Initializing StrategyComposer..");
 
     // Construct the global bb and the refstate switch
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>(bt::Blackboard());
@@ -99,9 +101,9 @@ void StrategyComposer::init() {
     if (defNameIt != MAPPING.end() && defNameIt->second) {
         defName = *defNameIt->second;
     } else {
-        std::cerr << "Could not find a normal play strategy! "
-                  << "Please verify that the static MAPPING variable contains a normal play.\n"
-                  ;
+        ROS_ERROR_STREAM_NAMED("StrategyComposer",
+            "Could not find a normal play strategy! " <<
+            "Please verify that the static MAPPING variable contains a normal play");
         return;
     }
 
@@ -112,10 +114,11 @@ void StrategyComposer::init() {
     if (defIt != repo.end()) {
         def = defIt->second("", bb);
     } else {
-        std::cerr << "Could not find a tree for default strategy tree \""
-                  << defName
-                  << "\". Possibly \"refresh_b3_projects.sh\" needs to be run "
-                  << "or a non-existent tree was selected.\n";
+        ROS_ERROR_STREAM_NAMED("StrategyComposer",
+            "Could not find a tree for default strategy tree \"" <<
+            defName <<
+            "\". Possibly \"refresh_b3_projects.sh\" needs to be run " <<
+            "or a non-existent tree was selected.\n");
         return;
     }
 
@@ -156,6 +159,8 @@ void StrategyComposer::init() {
     mainStrategy = std::make_shared<bt::BehaviorTree>();
     mainStrategy->SetRoot(rss);
     initialized = true;
+    ROS_INFO_NAMED("StrategyComposer", "StrategyComposer initialized");
+
 }
 
 StrategyComposer::Forwarder::Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target) : bt::Leaf(bb), target(target) {}
