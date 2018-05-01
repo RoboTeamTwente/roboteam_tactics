@@ -25,11 +25,11 @@ namespace rtt {
 
 	/**
 	 * (re)starts the right strategy tree if needed (change in number of robots, change in referee command)
-	 * @return
+	 * @returns Status::Running
 	 */
     bt::Node::Status RefStateSwitch::Update() {
 
-        // If there is no referee command yet, return RUNNING
+        // If there is no referee command yet, do nothing
         if (!LastRef::hasReceivedFirstCommand()) {
             ROS_WARN_STREAM_NAMED("RefStateSwitch", "Have not yet received a ref command, so not executing any strategy tree.");
             return Status::Running;
@@ -55,13 +55,13 @@ namespace rtt {
             }
         }
 
-        startedNewStrategy = false;
 
+
+        startedNewStrategy = false;
         auto cmd = LastRef::getState();
 
         // === If the referee command changed, then terminate current tree and check for TwoState === //
         if (currentCmd != cmd) {
-            ROS_DEBUG_STREAM_NAMED("RefStateSwitch", "RefState switch detected");
 
             // If there is a new command, terminate the current strategy
             if (currentCmd) {
@@ -80,7 +80,13 @@ namespace rtt {
 
             needToInitialize = true;
             startedNewStrategy = true;
+
+			if(previousCmd && currentCmd) {
+				ROS_INFO_STREAM_NAMED("RefStateSwitch", "RefState switch detected : " << rtt::refStateToString(*previousCmd) << " -> " << rtt::refStateToString(*currentCmd) << " : " << getCurrentStrategyTreeName());
+			}
         }
+
+
 
         // If the current strategy tree needs to be re-initialized
         if (needToInitialize) {
@@ -105,6 +111,7 @@ namespace rtt {
         // Run the strategy tree
         bt::Node::Status currentStatus = getCurrentChild()->Update();
 
+		// If the current tree is finished, set needToInitialize and finishedOnce
         if (currentStatus == Status::Failure || currentStatus == Status::Success) {
             ROS_DEBUG_STREAM_NAMED("RefStateSwitch", "Current tree finished : " << getCurrentStrategyTreeName());
             getCurrentChild()->Terminate(currentStatus); // Emiel : Doesn't the tree already terminate on its own? (TODO : Check Node.tick() implementation to confirm)
@@ -119,6 +126,10 @@ namespace rtt {
         return startedNewStrategy;
     }
 
+	/**
+	 * Returns the current referee state based on previousCmd, currentCmd, and finishedOnce
+	 * @returns any of the possible referee states including our custom ones, defined in roboteam_utils/.../LastRef.h
+	 */
     b::optional<RefState> RefStateSwitch::getCurrentRefState() const {
         std::string previousCmdName = "none yet";
         std::string currentCmdName = "none yet";
@@ -131,27 +142,34 @@ namespace rtt {
             previousCmdName = refStateToString(*previousCmd);
         }
 
-        // If there was a specific switch from one state to another (isTwoState)
+        // If there was a specific switch from one state to another (isTwoState) as defined in roboteam_utils/.../RefLookup.cpp
         if (currentCmd && isTwoState(previousCmd, *currentCmd)) {
-            // If we are still in the second part of the TwoState
+            // If we are still in the TwoState
             if (!finishedOnce) {
+				// getFirstState returns the state that the specific switch leads to, e.g. DO_KICKOFF
                 if (auto targetStateOpt = getFirstState(previousCmd, *currentCmd)) {
                     return *targetStateOpt;
+
+				// If getFirstState returns nothing, there is something wrong..
                 } else {
-                    ROS_ERROR("PreviousCmd and currentCmd are twoState states, but getFirstState "
-                                      "returned nothing! PreviousCmd: %s, currentCmd: %s",
-                              previousCmdName.c_str(),
-                              currentCmdName.c_str()
+					ROS_ERROR_STREAM_NAMED("RefStateSwitch", "PreviousCmd and currentCmd are twoState states, "
+							<< "but getFirstState returned nothing! Something is wrong in the mapping in RefLookup.cpp!"
+							<< "PreviousCmd : " << previousCmdName.c_str()
+							<< "currentCmd : " << currentCmdName.c_str()
                     );
 
                     return b::none;
                 }
+
+			// If we finished the TwoState, return NORMAL_START as the default state
             } else {
-                // Second state of a twostate pair is always normal play
                 return RefState::NORMAL_START;
             }
+
+		// If there is no current command, return none
         } else if (!currentCmd) {
             return b::none;
+		// Return the current RefState
         } else {
             return *currentCmd;
         }
@@ -188,7 +206,7 @@ namespace rtt {
             if (stateIt != refStateStrategies.end()) {
                 return stateIt->second;
             } else {
-                ROS_ERROR("No strategy tree found! Previouscmd: %s, currentCmd: %s",
+                ROS_ERROR_NAMED("RefStateSwitch", "No strategy tree found! Previouscmd: %s, currentCmd: %s",
                           previousCmdName.c_str(),
                           currentCmdName.c_str()
                 );
@@ -201,28 +219,11 @@ namespace rtt {
     }
 
     void RefStateSwitch::Terminate(Status) {
-        ROS_ERROR_STREAM("TERMINATING THE REF STATE SWITCH IS NOT SUPPORTED!");
-        // std::cout << "Terminating RSS!\n";
-
-        // if (last != -1) {
-        // if (getCurrentChild()->getStatus() == bt::Node::Status::Running) {
-        // getCurrentChild()->Terminate(getCurrentChild()->getStatus());
-        // }
-
-        // switchedToNormal = true;
-
-        // last = -1;
-        // }
-
-        // // Consider the node failed if it did not properly finish
-        // if (s == Status::Running) {
-        // setStatus(Status::Failure);
-        // }
+        ROS_FATAL_NAMED("RefStateSwitch", "TERMINATING THE REF STATE SWITCH IS NOT SUPPORTED!");
     }
 
     std::string RefStateSwitch::node_name() {
         return "RefStateSwitch";
-
     }
 
 } // rtt
