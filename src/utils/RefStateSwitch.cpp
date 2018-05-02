@@ -17,7 +17,6 @@ namespace rtt {
     RefStateSwitch::RefStateSwitch() : finishedOnce(false), needToInitialize(false), startedNewStrategy(false), lastKnownBotCount(-1) {}
 
     void RefStateSwitch::AddStrategy(RefState refState, Node::Ptr child) {
-        ROS_DEBUG_STREAM_NAMED("RefStateSwitch", "AddStrategy : " << refStateToString(refState) << " -> " << child->node_name());
         refStateStrategies[refState] = child;
     }
 
@@ -82,7 +81,9 @@ namespace rtt {
             startedNewStrategy = true;
 
 			if(previousCmd && currentCmd) {
-				ROS_INFO_STREAM_NAMED("RefStateSwitch", "RefState switch detected : " << rtt::refStateToString(*previousCmd) << " -> " << rtt::refStateToString(*currentCmd) << " : " << getCurrentStrategyTreeName());
+				ROS_INFO_STREAM_NAMED("RefStateSwitch", "RefState switch detected : "
+					<< rtt::refStateToString(*previousCmd) << " -> " << rtt::refStateToString(*currentCmd) << " | "
+					<< refStateToString(*getCurrentRefState()) << " : " << getCurrentStrategyTreeName());
 			}
         }
 

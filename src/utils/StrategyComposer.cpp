@@ -73,6 +73,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DEFEND_PENALTY        , "rtt_dennis/DefendPenaltyStrategy"s  } ,
         { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,
 
+        // SHOULD BE REMOVED
         { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
 
@@ -140,8 +141,11 @@ void StrategyComposer::init() {
             if (stratIt != repo.end()) {
                 // If so, set it
                 auto node = stratIt->second("", bb);
-                rss->AddStrategy(refState, node);
-            } else {
+				std::string refStateStr = refStateToString(refState);
+				refStateStr.resize(20, ' ');
+				ROS_INFO_STREAM_NAMED("StrategyComposer", "AddStrategy : " << refStateStr << " -> " << stratName);
+				rss->AddStrategy(refState, node);
+			} else {
                 // Else it's not there, abort!
                 std::cerr << "Could not find a tree for \""
                           << stratName
