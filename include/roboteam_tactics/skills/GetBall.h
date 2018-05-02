@@ -78,6 +78,11 @@ namespace rtt {
  *        Descr: When true the dribbler wont be used.
  */
 
+struct PassOption {
+    Vector2 pos;
+    int id;
+    bool chip;
+};
 
 class GetBall : public Skill {
 public:
@@ -111,27 +116,29 @@ private:
     void initializeOpportunityFinder();
     boost::optional<int> whichRobotHasBall();
     void publishStopCommand();
-    void publishKickCommand(double kickVel);
+    void publishKickCommand(double kickVel, bool chip);
     bool claimBall();
     void releaseBall();
-    void passBall(int id);
+    void passBall(int id, Vector2 pos, Vector2 ballPos, bool chip);
     Vector2 computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     double computePassSpeed(double dist, double input, bool imposeTime);
     double computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel);
     double computeArrivalTime(Vector2 location, int id);
+    PassOption choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, roboteam_msgs::World world, double passThreshold);
     
     int robotID;
     std::string robot_output_target = "";
     GoToPos goToPos;
     Draw drawer;
     OpportunityFinder opportunityFinder;
+    time_point startTime;
 
     bool choseRobotToPassTo;
     bool dontDribble;
     bool ballClaimedByMe;
     bool hasTerminated;
     double deviation;
-    bool chip;
+    //bool chip;
     double passThreshold;
     int ballCloseFrameCount = 0;
     int bestID;

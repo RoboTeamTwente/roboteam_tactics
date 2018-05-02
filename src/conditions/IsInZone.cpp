@@ -7,21 +7,19 @@
 #include "roboteam_utils/LastWorld.h"
 
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/conditions/IsBallInZone.h"
+#include "roboteam_tactics/conditions/IsInZone.h"
 
 namespace rtt {
 
-IsBallInZone::IsBallInZone(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
+IsInZone::IsInZone(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {
 
 }
 
-bt::Node::Status IsBallInZone::Update() {
+bt::Node::Status IsInZone::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	auto field = LastWorld::get_field();
 	Vector2 ballPos(world.ball.pos.x, world.ball.pos.y);
 	Vector2 point = ballPos;
-
-	// THE CONDITION NEEDS DIFFERENT NAME, BECAUSE WE CAN PUT IN ROBOT POS AS WELL NOW
 
 	// If robot pos should be checked instead of ball pos, get my position and use that as the point.
 	if (HasBool("robot") && GetBool("robot")){
@@ -31,7 +29,7 @@ bt::Node::Status IsBallInZone::Update() {
     	if (findBot) {
 	        me = *findBot;
 	    } else {
-        	ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << robotID);
+        	ROS_WARN_STREAM("IsInZone: robot with this ID not found, ID: " << robotID);
         	return Status::Invalid;
     	}
 		point = me.pos;
@@ -59,7 +57,7 @@ bt::Node::Status IsBallInZone::Update() {
 			zone_x2=-1.5;
 			zone_y1=0.0;
 			zone_y2=-3.0;
-		} 
+		}
 		// zone 3: all field except area close to opponents goal
 		else if (zone==3) {
 			zone_x1=-4.5;
@@ -83,13 +81,13 @@ bt::Node::Status IsBallInZone::Update() {
 		}
 
 	}
-	
+
 	// Set zone according to points given in blackboard
 	if (HasDouble("x1")) {zone_x1 = GetDouble("x1");}
 	if (HasDouble("x2")) {zone_x2 = GetDouble("x2");}
 	if (HasDouble("y1")) {zone_y1 = GetDouble("y1");}
 	if (HasDouble("y2")) {zone_y2 = GetDouble("y2");}
-		
+
 	// The condition
 	if(point.x > zone_x1 && point.x < zone_x2 && point.y > zone_y1 && point.y < zone_y2){
 		return Status::Success;
