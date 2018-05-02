@@ -51,8 +51,8 @@ public:
 private:
     
 	int robotID;
-    ReceiveBall receiveBall;
-    GoToPos goToPos;
+	ReceiveBall receiveBall;
+
     // double distanceFromGoal;
     // bool ourSide;
     Draw drawer;

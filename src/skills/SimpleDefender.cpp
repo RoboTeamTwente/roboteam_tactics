@@ -27,8 +27,7 @@ RTT_REGISTER_SKILL(SimpleDefender);
 
 SimpleDefender::SimpleDefender(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , receiveBall("", private_bb)
-        , goToPos("", private_bb) { }
+        , receiveBall("", private_bb) { }
 
 Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
     
@@ -120,6 +119,11 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasBool("avoidBallsFromOurRobots") && GetBool("avoidBallsFromOurRobots")) {
         private_bb->SetBool("avoidBallsFromOurRobots", true);
     }
+
+    if (HasBool("avoidBall") && GetBool("avoidBall")) {
+        private_bb->SetBool("avoidBall", true);
+    }
+
     if (HasString("stayOnSide")) {
         private_bb->SetString("stayOnSide", GetString("stayOnSide"));
     }
