@@ -286,7 +286,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
         newMargin = -0.1;
     }
-    if (fabs(yGoal) < (field.goal_width/2)) {
+    if (fabs(yGoal) < (field.goal_width / 2)) {
         newMargin = -0.05;
     }
 
