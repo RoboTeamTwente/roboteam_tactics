@@ -17,6 +17,8 @@ add_library(utils OBJECT
     GoalPartition.cpp
     Intercept.cpp
     intercept/intercept2.cpp
+
+    RobotPatternGenerator.cpp
     )
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
