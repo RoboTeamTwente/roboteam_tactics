@@ -17,9 +17,6 @@
 #include "BasicKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
-//#include "DemoTactic.cpp"
-//#undef RTT_CURRENT_DEBUG_TAG
-
 #include "FormationPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
@@ -157,3 +154,6 @@
 
 #include "Jelle_DemoPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Emiel_PrepareKickoffUs.cpp"
+#undef ROS_LOG_NAME
