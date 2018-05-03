@@ -157,3 +157,6 @@
 
 #include "Emiel_PrepareKickoffUs.cpp"
 #undef ROS_LOG_NAME
+
+#include "Emiel_PreparePenaltyUs.cpp"
+#undef ROS_LOG_NAME
