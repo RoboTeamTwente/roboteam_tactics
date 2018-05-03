@@ -27,7 +27,7 @@ namespace rtt {
 	void Emiel_PrepareKickoffUs::Initialize(){
 		ROS_INFO_NAMED(ROS_LOG_NAME, "Initializing");
 
-		// Check if this tree is used for the correct RefState, DO_KICKOFF
+		// Check if this tree is used for the correct RefState, PREPARE_KICKOFF_US
 		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
 		if(refState != RefState::PREPARE_KICKOFF_US){
 			ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_KICKOFF_US");
@@ -77,26 +77,27 @@ namespace rtt {
 		{
 			// Claim a robot to be the kicker
 			int kickerID = robots.at(0);
+
+			// Remove ID from vectors
 			delete_from_vector(robots, kickerID);
 			claim_robot(kickerID);
 
-			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Claiming robot " << kickerID << " as kicker");
-
-			roboteam_msgs::RoleDirective rd;
-			rd.robot_id = kickerID;
+			/* Create Blackboard */
 			bt::Blackboard bb;
-
+			// Set the robot ID
 			bb.SetInt("ROBOT_ID", kickerID);
 			bb.SetInt("KEEPER_ID", keeperID);
-
 			// Set positioning variables
-			bb.SetDouble("GoToPos_A_angleGoal", M_PI/2);
-			bb.SetDouble("GoToPos_A_xGoal", 0);
-			bb.SetDouble("GoToPos_A_yGoal", -0.5);
-			bb.SetBool("GoToPos_A_avoidRobots", true);
-			bb.SetDouble("GoToPos_A_maxSpeed", 1.3);
+			ScopedBB(bb, "GoToPos_A")
+				.setDouble("angleGoal"  , M_PI/2)
+				.setDouble("xGoal"      , 0)
+				.setDouble("yGoal"      , -0.5)
+				.setBool  ("avoidRobots", true)
+				.setDouble("maxSpeed"   , 1.3);
 
-			// Create message
+			/* Create message */
+			roboteam_msgs::RoleDirective rd;
+			rd.robot_id = kickerID;
 			rd.tree = "rtt_jim/GoToPosRole";
 			rd.blackboard = bb.toMsg();
 
@@ -110,51 +111,47 @@ namespace rtt {
 		}
 
 
+
 		// ====================================
 		// Initialize the Ball Defenders!
 		// ====================================
-		int numBallDefenders = robots.size();
 
+		static std::vector<Vector2> x_y_coords;
+		int numBallDefenders;
+		std::vector<int> ballDefenders;
+
+		// Calculate the number of robots to use
+		numBallDefenders = robots.size();
 		// Calculate positions for ballDefenders
-		std::tuple<std::vector<float>, std::vector<float>> anglesAndDistances;
-		anglesAndDistances = RobotPatternGenerator::Line(numBallDefenders, 5, LastWorld::get_our_goal_center(), 0, 4);
-		std::vector<float> angleOffsets = std::get<0>(anglesAndDistances);
-		std::vector<float> distanceOffsets = std::get<1>(anglesAndDistances);
+		x_y_coords = RobotPatternGenerator::Circle(numBallDefenders, M_PI, 4.3, Vector2(0, 0), M_PI, 0, -0.2);
+		// Calculate which robot should take which position
+		ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, x_y_coords, world);
 
-		std::vector<Vector2> ballDefendersPositions;
-		for (int i = 0; i < numBallDefenders; i++) {
-			ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, distanceOffsets.at(i), angleOffsets.at(i)));
-		}
-
-		std::vector<int> ballDefenders = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, ballDefendersPositions, world);
-
+		// For each robot
 		for (size_t i = 0; i < ballDefenders.size(); i++) {
-
+			// Get its ID
 			int ballDefenderID = ballDefenders.at(i);
-
+			// Remove ID from vectors
 			delete_from_vector(robots, ballDefenderID);
 			claim_robot(ballDefenderID);
 
-			roboteam_msgs::RoleDirective rd;
-			rd.robot_id = ballDefenderID;
+			/* Create Blackboard */
 			bt::Blackboard bb;
-
 			// Set the robot ID
 			bb.SetInt("ROBOT_ID", ballDefenderID);
 			bb.SetInt("KEEPER_ID", keeperID);
+			// Set positioning variables
+			ScopedBB(bb, "GoToPos_A")
+				.setDouble("angleGoal"  , 0)
+				.setDouble("xGoal"      , x_y_coords.at(i).x)
+				.setDouble("yGoal"      , x_y_coords.at(i).y)
+				.setBool  ("avoidRobots", true)
+				.setDouble("maxSpeed"   , 1.3);
 
-			bb.SetDouble("DistanceXToY_A_distance", 2.0);
-			bb.SetDouble("SimpleDefender_A_distanceFromGoal", distanceOffsets.at(i));
-			bb.SetDouble("SimpleDefender_A_angleOffset", angleOffsets.at(i));
-			bb.SetBool("SimpleDefender_A_avoidRobots", true);
-			bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
-			bb.SetBool("SimpleDefender_A_stayAwayFromBall", true);
-			bb.SetBool("SimpleDefender_A_avoidBall", true);
-
-			bb.SetDouble("SimpleDefender_A_maxSpeed", 1.3);
-
-			// Create message
-			rd.tree = "rtt_jim/DefenderRoleStop";
+			/* Create message */
+			roboteam_msgs::RoleDirective rd;
+			rd.robot_id = ballDefenderID;
+			rd.tree = "rtt_jim/GoToPosRole";
 			rd.blackboard = bb.toMsg();
 
 			// Add random token and save it for later
@@ -165,6 +162,8 @@ namespace rtt {
 			// Send to rolenode
 			pub.publish(rd);
 		}
+
+
 	}
 
 	bt::Node::Status Emiel_PrepareKickoffUs::Update(){
