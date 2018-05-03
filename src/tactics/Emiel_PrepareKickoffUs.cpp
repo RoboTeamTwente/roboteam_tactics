@@ -29,8 +29,8 @@ namespace rtt {
 
 		// Check if this tree is used for the correct RefState, DO_KICKOFF
 		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
-		if(refState != RefState::DO_KICKOFF){
-			ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for DO_KICKOFF");
+		if(refState != RefState::PREPARE_KICKOFF_US){
+			ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_KICKOFF_US");
 		}
 
 		// Get the default roledirective publisher
@@ -169,10 +169,6 @@ namespace rtt {
 
 	bt::Node::Status Emiel_PrepareKickoffUs::Update(){
 		return Status::Running;
-	}
-
-	void Emiel_PrepareKickoffUs::Terminate(Status status){
-
 	}
 
 }

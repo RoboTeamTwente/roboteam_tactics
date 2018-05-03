@@ -10,7 +10,6 @@ namespace rtt {
 
 		void Initialize();
 		Status Update();
-		void Terminate(Status status);
 
 		ros::NodeHandle nh;
 
