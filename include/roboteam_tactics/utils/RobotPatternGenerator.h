@@ -3,12 +3,15 @@
 //
 #pragma once
 
+#include "roboteam_utils/Vector2.h"
+#include <vector>
+
 namespace rtt{
 
 	class RobotPatternGenerator {
 	public:
-		static std::tuple<std::vector<float>, std::vector<float>> Line(int numRobots, float lineWidth, Vector2 centre, float angleToCentre, float distanceFromCentre);
-		static std::tuple<std::vector<float>, std::vector<float>> Circle(int numRobots, float circleAngle, float circleRadius, Vector2 centre, float angleToCentre, float distanceFromCentre);
+		static std::vector<Vector2> Line(int numRobots, float lineWidth, Vector2 centre, float angleToCentre, float distanceFromCentre);
+		static std::vector<Vector2> Circle(int numRobots, float circleAngle, float circleRadius, Vector2 centre, float phase, float angleToCentre, float distanceFromCentre);
 
 	};
 

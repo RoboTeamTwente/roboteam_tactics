@@ -2,12 +2,13 @@
 // Created by emiel on 2-5-18.
 //
 
-#include <tuple>
 #include <vector>
 #include <cmath>
+#include <ros/ros.h>
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/RobotPatternGenerator.h"
+
 
 namespace rtt {
 
@@ -22,10 +23,10 @@ namespace rtt {
 	 * @return A tuple with two float vectors, giving positions in radians relative to the centre.
 	 * 		   The first contains angles towards the centre, the second contains distances from the centre.
 	 */
-	std::tuple<std::vector<float>, std::vector<float>> RobotPatternGenerator::Line(int numRobots, float lineWidth, Vector2 centre, float angleToCentre, float distanceFromCentre){
 
-		std::vector<float> angles;
-		std::vector<float> distances;
+	std::vector<Vector2> RobotPatternGenerator::Line(int numRobots, float lineWidth, Vector2 centre, float angleToCentre, float distanceFromCentre){
+
+		std::vector<Vector2> x_y_coords;
 
 		// Calculate the step between each robot. In this case, distance in meters
 		float step = lineWidth / (numRobots - 1);
@@ -35,70 +36,58 @@ namespace rtt {
 		// For each robot
 		for (int i = 0; i < numRobots; i++) {
 			// Calculate the y-position
+			float x = distanceFromCentre;
 			float y = offset + i * step;
-			// Calculate the long edge of the triangle
-			float x = sqrt(pow(distanceFromCentre, 2) + pow(y, 2));
-			// Calculate the corner
-			float w = atan(y / distanceFromCentre);
-			// Add the angleToCentre
-			w += angleToCentre;
-
-			angles.push_back(w);
-			distances.push_back(x);
-
+			// Rotate according to angleToCentre
+			float _x = x * cos(angleToCentre)  + y * sin(angleToCentre);
+			float _y = -x * sin(angleToCentre) + y * cos(angleToCentre);
+			// Create Vector2
+			Vector2 coords(_x, _y);
+			// Add centre
+			coords = coords + centre;
+			// Store coordinates
+			x_y_coords.push_back(coords);
 		}
 
-		return std::make_tuple(angles, distances);
+		return x_y_coords;
 	}
 
-	std::tuple<std::vector<float>, std::vector<float>> RobotPatternGenerator::Circle(int numRobots, float circleAngle, float circleRadius, Vector2 centre, float angleToCentre, float distanceFromCentre) {
+	std::vector<Vector2> RobotPatternGenerator::Circle(int numRobots, float circleAngle, float circleRadius, Vector2 centre, float phase, float angleToCentre, float distanceFromCentre){
 
-		std::vector<float> angles;
-		std::vector<float> distances;
-
-		distanceFromCentre -= circleRadius;
+		std::vector<Vector2> x_y_coords;
 
 		// Calculate the step between each robot. In this case, distance in meters
 		float step = circleAngle / (numRobots - 1);
-		// Calculate the position of the 1st robot
+		// Calculate the offset of the 1st robot
 		float offset = -circleAngle / 2;
 
 		// For each robot
 		for (int i = 0; i < numRobots; i++) {
 
-			float A = offset + i * step;
-			A += angleToCentre;
+			/* Calculate coordinates in circle */
+			// Calculate angle
+			float angle = offset + i * step;
+			// Add phase
+			angle += phase;
+			// Convert to cartesian coordinates
+			float x = circleRadius * cos(angle);
+			float y = circleRadius * sin(angle);
 
-			float b = circleRadius + distanceFromCentre;
-			float c = circleRadius;
+			// Add distanceFromCentre
+			x += distanceFromCentre;
+			// Rotate according to angleToCentre
+			float _x = x * cos(angleToCentre)  + y * sin(angleToCentre);
+			float _y = -x * sin(angleToCentre) + y * cos(angleToCentre);
 
-			float b2 = pow(b, 2);
-			float c2 = pow(c, 2);
-
-			float a2 = b2 + c2 - 2 * b * c * cos(A);
-			float a = sqrt(a2);
-
-			float C = acos( (a2 + b2 - c2) / ( 2 * a * b ));
-
-			if((A-angleToCentre) < 0)
-				C = -C;
-
-//			ROS_WARN_STREAM_NAMED("plays.JimKOD", i << ": "
-//			<< " A=" << A
-//			<< " a=" << a << " a2=" << a2
-//			<< " b=" << b << " b2=" << b2
-//          << " c=" << c << " c2=" << c2
-//			<< " C=" << C);
-
-			angles.push_back(C);
-			distances.push_back(a);
-
+			// Create Vector2
+			Vector2 coords(_x, _y);
+			// Add centre
+			coords = coords + centre;
+			// Store coordinates
+			x_y_coords.push_back(coords);
 		}
 
-
-
-		return std::make_tuple(angles, distances);
+		return x_y_coords;
 	}
-
 
 }
