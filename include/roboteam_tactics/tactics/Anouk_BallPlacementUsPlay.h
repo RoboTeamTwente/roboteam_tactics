@@ -16,7 +16,7 @@ class Anouk_BallPlacementUsPlay : public Tactic {
 public:
     Anouk_BallPlacementUsPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
-    void Initialize() override;
+	void Initialize() override;
     Status Update() override;
     
     std::string node_name() override { return "Anouk_BallPlacementUsPlay"; }
@@ -25,6 +25,8 @@ private:
     boost::uuids::uuid token;
     bool failed;
     bool succeeded;
+
+	Vector2 lastBallPlacementPosition;
 
 } ;
 

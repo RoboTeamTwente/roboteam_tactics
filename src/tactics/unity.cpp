@@ -120,7 +120,7 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Anouk_BallPlacementUsPlay.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "Jim_GetBallPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
