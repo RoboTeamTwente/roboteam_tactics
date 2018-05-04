@@ -1,10 +1,12 @@
 #pragma once
 
+#include "roboteam_tactics/tactics/Emiel_Prepare.h"
 #include "roboteam_tactics/Parts.h"
+#include <boost/uuid/uuid.hpp>
 
 namespace rtt {
 
-	class Emiel_PrepareKickoffThem : public Tactic {
+	class Emiel_PrepareKickoffThem : public Emiel_Prepare {
 	public:
 		Emiel_PrepareKickoffThem(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
