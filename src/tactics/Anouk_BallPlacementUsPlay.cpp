@@ -1,4 +1,6 @@
 #include <sstream>
+#include <ctime>
+#include <chrono>
 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_utils/Vector2.h"
@@ -22,13 +24,17 @@ RTT_REGISTER_TACTIC(Anouk_BallPlacementUsPlay);
 Anouk_BallPlacementUsPlay::Anouk_BallPlacementUsPlay(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard){}
 
 void Anouk_BallPlacementUsPlay::Initialize() {
+
+	// Set the current state of the play
+	currentState = PlayStates::PLACING_BALL;
+
     failed = false;
     succeeded = false;
     
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
+	// Get all available robots
     auto robots = getAvailableRobots();
-
 	// Check if there is a robot available
     if (robots.size() == 0) {
         ROS_WARN_NAMED(ROS_LOG_NAME, "No robots left to claim! Aborting..");
@@ -60,6 +66,8 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 	delete_from_vector(robots, *ROBOT_ID);
 
 	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot " << *ROBOT_ID << " placing robot at " << endPos);
+	// Store ID of placer
+	placerID = *ROBOT_ID;
 
     {
 		bt::Blackboard bb;
@@ -84,6 +92,7 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 		rd.tree = "rtt_anouk/BallPlacementTree";
 		rd.blackboard = bb.toMsg();
 
+		// Store token of placer
 		token = unique_id::fromRandom();
 		rd.token = unique_id::toMsg(token);
 
@@ -132,7 +141,8 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 					.setDouble("xGoal"    , newPos.x)
 					.setDouble("yGoal"    , newPos.y)
 					.setBool("avoidRobots", true)
-					.setBool("avoidBall"  , false)
+					.setBool("avoidBall"  , true)
+					.setBool("stayAwayFromBall", true)
 					.setDouble("maxSpeed" , 1.3);
 
 				/* Create message */
@@ -152,7 +162,83 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 
 }
 
+void Anouk_BallPlacementUsPlay::movePlacerAwayFromBall(){
 
+	// Get current position of the robot
+	Vector2 const pos = LastWorld::get().us.at(placerID).pos;
+	Vector2 const ballPos = LastWorld::get().ball.pos;
+
+	Vector2 ballToUs = pos - ballPos;
+	ballToUs.normalize();
+
+	Vector2 newPos = pos + ballToUs;
+
+	// Get publisher
+	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
+
+	// === Send role to robot
+	/* Create Blackboard */
+	bt::Blackboard bb;
+	// Set the robot ID
+	bb.SetInt("ROBOT_ID", placerID);
+	bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
+	// Set positioning variables
+	ScopedBB(bb, "GoToPos_A")
+		.setDouble("angleGoal", 0)
+		.setDouble("xGoal"    , newPos.x)
+		.setDouble("yGoal"    , newPos.y)
+		.setBool("avoidRobots", true)
+		.setBool("avoidBall"  , true)
+		.setBool("stayAwayFromBall", true)
+		.setDouble("maxSpeed" , 1.3);
+
+	/* Create message */
+	roboteam_msgs::RoleDirective rd;
+	rd.robot_id = placerID;
+	// Use this tree instead of rtt_emiel/GoToPos_Nonstop_Role, because this tree returns a token
+	rd.tree = "rtt_jim/GoToPosRole";
+	rd.blackboard = bb.toMsg();
+
+	// Store token of placer
+	token = unique_id::fromRandom();
+	rd.token = unique_id::toMsg(token);
+
+	// Send to rolenode
+	pub.publish(rd);
+}
+
+bool Anouk_BallPlacementUsPlay::ballPlacementSuccessful(){
+	/* Rulebook 9.2 */
+
+	bool success = true;
+
+	roboteam_msgs::WorldBall ball = LastWorld::get().ball;
+
+	// No robot within 500mm from the ball
+	for(auto robot : LastWorld::get().us){
+		Vector2 distanceToBall = Vector2(robot.pos) - Vector2(ball.pos);
+		if(distanceToBall.length() < 0.5){
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot " << robot.id << " too close to ball! " << distanceToBall.length() << "m");
+			success = false;
+		}
+	}
+
+	// Ball is stationary
+	if(0.1 < Vector2(ball.vel).length()){
+		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball is still moving! " << Vector2(ball.vel).length() << "m/s");
+		success = false;
+	}
+
+	// Within 100mm from the requested position
+	Vector2 distance = Vector2(ball.pos) - LastRef::get().designated_position;
+	if(0.1 < distance.length()){
+		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball is too far from target position! " << distance.length() << "m");
+		success = false;
+	}
+
+	return success;
+
+}
 
 bt::Node::Status Anouk_BallPlacementUsPlay::Update() {
     // BallPlacementUsPlay is done when a normal start is signalled.
@@ -174,15 +260,58 @@ bt::Node::Status Anouk_BallPlacementUsPlay::Update() {
         return Status::Success;
     }
 
-    if (feedbacks.find(token) != feedbacks.end()) {
+
+	if(currentState == PlayStates::STOP_BALL_SPINNING){
+		long int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		// Wait for two seconds, to make sure the ball has stopped spinning
+		if(2000 < (now - timeBallPlaced)){
+			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Ball has stopped spinning");
+			// Change state to moving the placer
+			currentState = PlayStates::MOVING_PLACER;
+			// Move the placer away from the ball
+			movePlacerAwayFromBall();
+			// Return running
+			return Status::Running;
+		}
+	}
+
+
+	if (feedbacks.find(token) != feedbacks.end()) {
         Status status = feedbacks.at(token);
         if (status == Status::Success) {
-            // Yay!
-            return Status::Success;
-        } else if (status == Status::Running) {
+
+			// If we are done placing the ball
+			if(currentState == PlayStates::PLACING_BALL){
+				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed successfully");
+				// Reset token
+				token = boost::uuids::nil_uuid();
+				// Store the time the ball was placed
+				timeBallPlaced = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				// Change state to wait for the ball to stop spinning
+				currentState = PlayStates::STOP_BALL_SPINNING;
+				// Return running
+				return Status::Running;
+			}
+
+			if(currentState == PlayStates::MOVING_PLACER){
+				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Placer has moved");
+				// Reset token
+				token = boost::uuids::nil_uuid();
+				// Check if the BallPlacement was a success
+				if(ballPlacementSuccessful()){
+					ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed successfully!");
+					return Status::Success;
+				}else{
+					ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed unsuccessfully!");
+					return Status::Failure;
+				}
+			}
+
+
+		} else if (status == Status::Running) {
             // Carry on
         } else {
-            // Oh shit
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed unsuccessfully!");
             return Status::Failure;
         }
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "unique_id/unique_id.h"
 
 #include "roboteam_tactics/Parts.h"
@@ -27,6 +29,20 @@ private:
     bool succeeded;
 
 	Vector2 lastBallPlacementPosition;
+	int placerID;
+	long int timeBallPlaced;
+
+	void movePlacerAwayFromBall();
+	bool ballPlacementSuccessful();
+
+	enum PlayStates {
+		PLACING_BALL,
+		STOP_BALL_SPINNING,
+		MOVING_PLACER
+	};
+	PlayStates currentState;
+
+
 
 } ;
 

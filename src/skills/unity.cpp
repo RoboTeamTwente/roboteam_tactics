@@ -17,7 +17,7 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "BallPlacementTest.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "Chip.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
