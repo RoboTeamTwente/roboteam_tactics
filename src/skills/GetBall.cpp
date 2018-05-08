@@ -89,10 +89,9 @@ void GetBall::Terminate(bt::Node::Status s) {
         hasTerminated = true;
         ballCloseFrameCount = 0;
         choseRobotToPassTo = false;
-        // chip = false;
 
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID);
         releaseBall();
-        ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID << ", releasing the ball if I claimed it");
     }
 }
 
@@ -152,7 +151,7 @@ bool GetBall::claimBall() {
         ros::param::getCached("robotClaimedBall", robotClaimedBall);
 
         if (robotClaimedBall == robotID) {
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " already claimed ball");
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << ", I already claimed ball");
             ballClaimedByMe = true; 
             return true;
         } else if (robotClaimedBall == -1) {
@@ -165,7 +164,7 @@ bool GetBall::claimBall() {
             return false;
         }
     } else { // if param had not been initialized, set it anyways
-        //ros::param::set("robotClaimedBall", robotID);
+        ros::param::set("robotClaimedBall", robotID);
         ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
         ballClaimedByMe = true;
         return true;
@@ -176,7 +175,7 @@ void GetBall::releaseBall() {
     if (GetBool("useBallClaiming") && claimBall()) {
     // only release ball if I actually claimed it
         ros::param::set("robotClaimedBall", -1);
-        ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball");
+        ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball and reset passToRobot");
         // also reset passToRobot rosparam
         ros::param::set("passToRobot", -1);
     }
@@ -207,10 +206,13 @@ void GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
             // If the robot communicates, I can assume it will reset its own ball claimage if he failed to receive it.
             ros::param::set("robotClaimedBall", id);
             ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " passed claim on the ball to robot " << id);
+        } else {
+            ros::param::set("robotClaimedBall", -1);
+            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball, because teammate was not ready to receive" << id);
         }
     }
     ballClaimedByMe = false;
-    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " passed towards robot " << bestID);
+    ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << " publishing kick command for passing towards robot " << bestID);
     publishKickCommand(passSpeed, chip);
     return;
 }
@@ -400,13 +402,14 @@ bt::Node::Status GetBall::Update (){
         Initialize();
     }
 
-
-    if (GetBool("useBallClaiming") && time_difference_milliseconds(startTime, now()).count() > 300) {
-        if (!claimBall()){
-        // In this way, only 1 of our robots may perform GetBall at a time. Is that what we want? probably yes
-        // ROS_WARN_STREAM_NAMED("skills.GetBall", "return RUNNING for robot "<< robotID << ", because ball was already claimed");
+    if (GetBool("useBallClaiming")) {
+        if (time_difference_milliseconds(startTime, now()).count() > 300){
             startTime = now();
-            return Status::Running; // failure currently leads to too many reinitializations, so wont use that for now...
+            claimBall();
+        }
+        if (!ballClaimedByMe) {
+            // In this way, only 1 of our robots may perform GetBall at a time. Is that what we want? probably yes
+            return Status::Running;
         }
     }
 
@@ -442,19 +445,27 @@ bt::Node::Status GetBall::Update (){
     // Different GetBall parameters for grsim than for real robots
     double successDist;
     double successAngle;
-    // double getBallDist; deprecated
     double distAwayFromBall;
     double minDist;
+    double successRobotAngle;
     if (robot_output_target == "grsim") {
         successDist = 0.12;
         successAngle = 0.10;
-        // getBallDist = 0.0;
+        if (GetBool("passToBestAttacker")) {
+            successRobotAngle = 0.025;
+        } else {
+            successRobotAngle = 0.10;
+        }
         distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
         successDist = 0.12; //0.12
         successAngle = 0.10; //0.15
-        // getBallDist = 0.0;
+        if (GetBool("passToBestAttacker")) {
+            successRobotAngle = 0.025;
+        } else {
+            successRobotAngle = 0.10;
+        }
         distAwayFromBall = 0.28;
         minDist = 0.06;
         // extra strafe gain for goToPos
@@ -501,7 +512,7 @@ bt::Node::Status GetBall::Update (){
         bestPos = bestTeammate.pos;
         choseRobotToPassTo = true;
         ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << posDiff.length());
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << posDiff.length());
     }
     
 
@@ -560,7 +571,7 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle && fabs(angleDiff) < successAngle) {
+	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle/2 && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
         int ballCloseFrameCountTo = 2;
         if(HasInt("ballCloseFrameCount")){
@@ -587,7 +598,7 @@ bt::Node::Status GetBall::Update (){
                 }
                 bestPos = passOption.pos;
                 ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball (possibly once more)
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
+                ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
                 if (bestID == -1) {
                     shootAtGoal = true;
                 }

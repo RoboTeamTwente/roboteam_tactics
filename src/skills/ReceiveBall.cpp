@@ -416,20 +416,24 @@ bt::Node::Status ReceiveBall::Update() {
 	// }
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
-	double role_iterations_per_second = 0.0;
-	ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
-	double timeStep;
-	if (role_iterations_per_second == 0.0) {
-		timeStep = 1.0 / 30.0;
-	} else {
-		timeStep = 1.0 / role_iterations_per_second;
-	}
+
+	// double role_iterations_per_second = 0.0;
+	// ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
+	// double timeStep;
+	// if (role_iterations_per_second == 0.0) {
+	// 	timeStep = 1.0 / 30.0;
+	// } else {
+	// 	timeStep = 1.0 / role_iterations_per_second;
+	// }
 	double distanceToBall = (ballPos-myPos).length();
-	if (shootAtGoal) {
-		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
-			startKicking = true;
-			ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
-		}
+	// if (shootAtGoal) {
+	// 	if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
+	// 		startKicking = true;
+	// 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
+	// 	}
+	// }
+	if (shootAtGoal && distanceToBall < 2.0) {
+		startKicking = true;
 	}
 
 	// If the ball gets close, turn on the dribbler

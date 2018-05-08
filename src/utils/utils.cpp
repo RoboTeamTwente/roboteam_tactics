@@ -544,7 +544,7 @@ std::vector<int> getAvailableRobots(roboteam_msgs::World const & world) {
     return availableRobots;
 }
 
-bool IsWithinField(Vector2 point) {
+bool isWithinField(Vector2 point) {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     double fieldLimitX = field.field_length / 2.0;
     double fieldLimitY = field.field_width / 2.0;
