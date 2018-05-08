@@ -13,7 +13,7 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_msgs/WorldRobot.h"
 
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 #include "roboteam_tactics/skills/RotateAroundPoint.h"
 
 

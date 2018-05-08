@@ -14,7 +14,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 
 
 #define RTT_CURRENT_DEBUG_TAG DistanceXToY

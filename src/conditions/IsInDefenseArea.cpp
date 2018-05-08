@@ -2,13 +2,14 @@
 #include "roboteam_msgs/WorldRobot.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 
-#include "roboteam_tactics/conditions/TeamHasBall.h"
-#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
+
+#include "roboteam_tactics/conditions/TeamHasBall.h"
+#include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/utils/utils.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
-// #include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
+//#include "roboteam_tactics/conditions/DistanceXToY.h"
 
 #include <vector>
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -55,17 +56,17 @@ bool isWithinDefenseArea(bool ourDefenseArea, Vector2 point, double margin) {
         	return true;
         } else return false;
     }
-    
+
 }
 
 
 
-RTT_REGISTER_CONDITION(IsBallInDefenseArea);
+RTT_REGISTER_CONDITION(IsInDefenseArea);
 
-IsBallInDefenseArea::IsBallInDefenseArea(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {}
+IsInDefenseArea::IsInDefenseArea(std::string name, bt::Blackboard::Ptr blackboard) : Condition(name, blackboard) {}
 
-bt::Node::Status IsBallInDefenseArea::Update() {
-	
+bt::Node::Status IsInDefenseArea::Update() {
+
 	bool ourDefenseArea;
 	if (HasBool("ourDefenseArea")) {
 		ourDefenseArea = GetBool("ourDefenseArea");
@@ -83,8 +84,6 @@ bt::Node::Status IsBallInDefenseArea::Update() {
 
 	Vector2 point = ballPos;
 
-	// THE CONDITION NEEDS DIFFERENT NAME, BECAUSE WE CAN PUT IN ROBOT POS AS WELL NOW
-
 	// If robot pos should be checked instead of ball pos, get my position and use that as the point.
 	if (HasBool("robot") && GetBool("robot")){
 		int robotID = GetInt("ROBOT_ID");
@@ -93,7 +92,7 @@ bt::Node::Status IsBallInDefenseArea::Update() {
     	if (findBot) {
 	        me = *findBot;
 	    } else {
-        	ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << robotID);
+        	ROS_WARN_STREAM("IsInDefenseArea: robot with this ID not found, ID: " << robotID);
         	return Status::Invalid;
     	}
 		point = me.pos;
