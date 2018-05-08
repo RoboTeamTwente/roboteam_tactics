@@ -452,7 +452,7 @@ bt::Node::Status GetBall::Update (){
         successDist = 0.12;
         successAngle = 0.10;
         if (GetBool("passToBestAttacker")) {
-            successRobotAngle = 0.025;
+            successRobotAngle = 0.05;
         } else {
             successRobotAngle = 0.10;
         }
@@ -571,7 +571,7 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle/2 && fabs(angleDiff) < successAngle) {
+	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
         int ballCloseFrameCountTo = 2;
         if(HasInt("ballCloseFrameCount")){
