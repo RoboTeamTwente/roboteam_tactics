@@ -223,7 +223,7 @@ Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vecto
     // These assumptions are of course not completely accurate, but might work for this purpose
 
     // used parameters
-    double vBot = 2.0; // assumed constant robot velocity
+    double vBot = 1.0; // assumed constant robot velocity
 
     // used variables
     double vBall = ballVel.length();    // absolute ball velocity
@@ -439,8 +439,8 @@ bt::Node::Status GetBall::Update (){
     ballPos = computeBallInterception(ballPos, ballVel, robotPos); // pretend that the ball is at the location where we could intercept it
     Vector2 posDiff = ballPos - robotPos;
 
-    drawer.setColor(72, 0, 255);
-    drawer.drawPoint("ballIntercept",ballPos);
+    // drawer.setColor(72, 0, 255);
+    // drawer.drawPoint("ballIntercept",ballPos);
 
     // Different GetBall parameters for grsim than for real robots
     double successDist;
