@@ -61,7 +61,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::GOAL_US               , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::GOAL_THEM             , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_anouk/BallPlacement_Strat"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_anouk/BallPlacementThemStrat"s           } ,
 
         //////////////////////////
         // Our custom refstates //
