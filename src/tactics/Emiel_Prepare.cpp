@@ -1,23 +1,16 @@
-#include "roboteam_tactics/tactics/Emiel_Prepare.h"
-
-#include <vector>
-
-#include "roboteam_utils/Vector2.h"
-
-#include "roboteam_tactics/Parts.h"
-
 #include <tuple>
 #include <vector>
+#include <ros/ros.h>
+
+#include "roboteam_tactics/tactics/Emiel_Prepare.h"
+#include "roboteam_tactics/utils/RobotPatternGenerator.h"
+#include "roboteam_tactics/Parts.h"
 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/World.h"
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
-
-#include "roboteam_tactics/utils/RobotPatternGenerator.h"
-
-#include <ros/ros.h>
 
 namespace rtt {
 
