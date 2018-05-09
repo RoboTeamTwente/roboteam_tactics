@@ -75,7 +75,7 @@ public:
     Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel);
-    Vector2 checkTargetPos(Vector2 targetPos);
+    Vector2 checkTargetPos(Vector2 targetPos, Vector2 myPos);
 
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
 

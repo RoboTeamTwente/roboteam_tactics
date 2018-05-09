@@ -281,7 +281,7 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, 
 
 
 // Makes sure that the given target position is not inside a goal area, or (too far) outside the field. "Too far" is specified by the class variable marginOutsideField
-Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
+Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
     double xGoal = targetPos.x;
@@ -369,6 +369,76 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
         }
     }
 
+
+
+
+
+    /////////////////////////
+    // Check to prevent getting stuck behind the rectangular defense area WIP: PLACE THIS IN CHECKTARGETPOS?
+    // Vector2 posError = newTargetPos - myPos;
+    // if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas")) && posError.length() > 0.3) {
+    //     Section posErrorSec(myPos.x, myPos.y, newTargetPos.x, newTargetPos.y);
+    //     //roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    //     roboteam_msgs::FieldLineSegment line;
+    //     int sig;
+    //     if (myPos.x < 0) {
+    //         line = field.left_penalty_line;
+    //         sig = -1;
+    //     } else {
+    //         line = field.right_penalty_line;
+    //         sig = 1;
+    //     }
+    //     double px1 = line.begin.x;
+    //     double px2 = sig * (field.field_length/2 + 1); // extra margin should make sure this also works if the bot is beyond the goal line
+    //     double py1 = line.begin.y;
+    //     double py2 = line.end.y;
+    //     if (py1 > py2) { // make sure py1 is always smaller than py2
+    //         py1 = py2;
+    //         py2 = line.begin.y;
+    //     }
+    //     // Define defense area sections
+    //     Section bottomSec(px1, py1, px2, py1);
+    //     Section topSec(px1, py2, px2, py2);
+    //     Section verticalSec(px1, py1, px1, py2);
+    //     // Find intersections 
+    //     Vector2 intersect1 = posErrorSec.intersection(bottomSec);
+    //     Vector2 intersect2 = posErrorSec.intersection(topSec);
+    //     Vector2 intersect3 = posErrorSec.intersection(verticalSec);
+    //     // Add safety margins to defense area points, which can now function as intermediate target points
+    //     px1 -= sig * safetyMarginGoalAreas;
+    //     py1 -= safetyMarginGoalAreas;
+    //     py2 += safetyMarginGoalAreas;
+
+    //     // If my posError section intersects the defense area (excluding margins) -> use intermediate target point
+    //     if ((posErrorSec.pointOnLine(intersect1) && bottomSec.pointOnLine(intersect1))
+    //         || (posErrorSec.pointOnLine(intersect2) && topSec.pointOnLine(intersect2))
+    //         || (posErrorSec.pointOnLine(intersect3) && verticalSec.pointOnLine(intersect3))) {
+    //         Vector2 interTarget = newTargetPos;
+    //         double extra = 0.3;
+    //         if (fabs(myPos.x) > fabs(px1)) {
+    //             if(myPos.y < 0) {
+    //                 interTarget = Vector2(px1 - sig * extra, py1);
+    //             } else {
+    //                 interTarget = Vector2(px1 - sig * extra, py2);
+    //             }
+    //         } else {
+    //             if(myPos.y < newTargetPos.y) {
+    //                 interTarget = Vector2(px1, py2 + extra);
+    //             } else {
+    //                 interTarget = Vector2(px1, py1 - extra);
+    //             }
+    //         }
+    //         newTargetPos = interTarget;
+    //         //posError = newTargetPos - myPos;
+    //     }
+    // }
+    //////////////////////////////////
+
+
+
+
+
+
     return newTargetPos;
 }
 
@@ -427,18 +497,20 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
+    // Store some variables for easy access
+    Vector2 myPos(me.pos);
+    Vector2 myVel(me.vel);
 
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
     } else {
-        targetPos = checkTargetPos(targetPos);
+        targetPos = checkTargetPos(targetPos, myPos);
         prevTargetPos = targetPos;
     }
 
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         // ROS_INFO_STREAM("robot" << ROBOT_ID << " in stayAwayFromBall" );
-        roboteam_msgs::World world = LastWorld::get();
         Vector2 ballPos(world.ball.pos);
         if ((ballPos - targetPos).length() < 0.7) {
             Vector2 diffVecNorm = (targetPos - ballPos).normalize();
@@ -446,16 +518,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-    // Store some variables for easy access
-    Vector2 myPos(me.pos);
-    Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
-
-    // For the 1v1 demo: if the robot (which is controlled by a human) gets inside our defense area, ..
-    // ..generate a targetpos just outside the defense area based on the robot position
-    if (HasBool("goalOutsideDefenseArea") && GetBool("goalOutsideDefenseArea")) {
-        targetPos = checkTargetPos(myPos);
-    }
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
@@ -500,62 +563,62 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     /////////////////////////
     // Check to prevent getting stuck behind the rectangular defense area WIP: PLACE THIS IN CHECKTARGETPOS?
-    if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas")) && posError.length() > 0.3) {
-        Section posErrorSec(myPos.x, myPos.y, targetPos.x, targetPos.y);
-        roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-        roboteam_msgs::FieldLineSegment line;
-        int sig;
-        if (myPos.x < 0) {
-            line = field.left_penalty_line;
-            sig = -1;
-        } else {
-            line = field.right_penalty_line;
-            sig = 1;
-        }
-        double px1 = line.begin.x;
-        double px2 = sig * (field.field_length/2 + 1);
-        double py1 = line.begin.y;
-        double py2 = line.end.y;
-        if (py1 > py2) {
-            py1 = py2;
-            py2 = line.begin.y;
-        }
-        // Define defense area sections
-        Section bottomSec(px1, py1, px2, py1);
-        Section topSec(px1, py2, px2, py2);
-        Section verticalSec(px1, py1, px1, py2);
-        // Find intersections 
-        Vector2 intersect1 = posErrorSec.intersection(bottomSec);
-        Vector2 intersect2 = posErrorSec.intersection(topSec);
-        Vector2 intersect3 = posErrorSec.intersection(verticalSec);
-        // Add safety margins to defense area points
-        px1 -= sig * safetyMarginGoalAreas;
-        py1 -= safetyMarginGoalAreas;
-        py2 += safetyMarginGoalAreas;
+    // if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas")) && posError.length() > 0.3) {
+    //     Section posErrorSec(myPos.x, myPos.y, targetPos.x, targetPos.y);
+    //     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+    //     roboteam_msgs::FieldLineSegment line;
+    //     int sig;
+    //     if (myPos.x < 0) {
+    //         line = field.left_penalty_line;
+    //         sig = -1;
+    //     } else {
+    //         line = field.right_penalty_line;
+    //         sig = 1;
+    //     }
+    //     double px1 = line.begin.x;
+    //     double px2 = sig * (field.field_length/2 + 1); // extra margin should make sure this also works if the bot is beyond the goal line
+    //     double py1 = line.begin.y;
+    //     double py2 = line.end.y;
+    //     if (py1 > py2) { // make sure py1 is always smaller than py2
+    //         py1 = py2;
+    //         py2 = line.begin.y;
+    //     }
+    //     // Define defense area sections
+    //     Section bottomSec(px1, py1, px2, py1);
+    //     Section topSec(px1, py2, px2, py2);
+    //     Section verticalSec(px1, py1, px1, py2);
+    //     // Find intersections 
+    //     Vector2 intersect1 = posErrorSec.intersection(bottomSec);
+    //     Vector2 intersect2 = posErrorSec.intersection(topSec);
+    //     Vector2 intersect3 = posErrorSec.intersection(verticalSec);
+    //     // Add safety margins to defense area points, which can now function as intermediate target points
+    //     px1 -= sig * safetyMarginGoalAreas;
+    //     py1 -= safetyMarginGoalAreas;
+    //     py2 += safetyMarginGoalAreas;
 
-        // If my posError section intersects the defense area (excluding margins) -> use intermediate target point
-        if ((posErrorSec.pointOnLine(intersect1) && bottomSec.pointOnLine(intersect1))
-            || (posErrorSec.pointOnLine(intersect2) && topSec.pointOnLine(intersect2))
-            || (posErrorSec.pointOnLine(intersect3) && verticalSec.pointOnLine(intersect3))) {
-            Vector2 interTarget = targetPos;
-            double extra = 0.3;
-            if (fabs(myPos.x) > fabs(px1)) {
-                if(myPos.y < 0) {
-                    interTarget = Vector2(px1 - sig * extra, py1);
-                } else {
-                    interTarget = Vector2(px1 - sig * extra, py2);
-                }
-            } else {
-                if(myPos.y < targetPos.y) {
-                    interTarget = Vector2(px1, py2 + extra);
-                } else {
-                    interTarget = Vector2(px1, py1 - extra);
-                }
-            }
-            targetPos = interTarget;
-            posError = targetPos - myPos;
-        }
-    }
+    //     // If my posError section intersects the defense area (excluding margins) -> use intermediate target point
+    //     if ((posErrorSec.pointOnLine(intersect1) && bottomSec.pointOnLine(intersect1))
+    //         || (posErrorSec.pointOnLine(intersect2) && topSec.pointOnLine(intersect2))
+    //         || (posErrorSec.pointOnLine(intersect3) && verticalSec.pointOnLine(intersect3))) {
+    //         Vector2 interTarget = targetPos;
+    //         double extra = 0.3;
+    //         if (fabs(myPos.x) > fabs(px1)) {
+    //             if(myPos.y < 0) {
+    //                 interTarget = Vector2(px1 - sig * extra, py1);
+    //             } else {
+    //                 interTarget = Vector2(px1 - sig * extra, py2);
+    //             }
+    //         } else {
+    //             if(myPos.y < targetPos.y) {
+    //                 interTarget = Vector2(px1, py2 + extra);
+    //             } else {
+    //                 interTarget = Vector2(px1, py1 - extra);
+    //             }
+    //         }
+    //         targetPos = interTarget;
+    //         posError = targetPos - myPos;
+    //     }
+    // }
     //////////////////////////////////
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)

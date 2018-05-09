@@ -229,7 +229,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
  
     Vector2 posError = targetPos - myPos;
 
-    // Integral term
+    // Integral term (SEEMS HACKY, ALSO IT SHOULD TAKE TIME STEP INTO ACCOUNT)
     if (posError.length() < 0.20 && posError.length() > 0.04) {
         posErrorI = posErrorI.scale(0.95) + posError.scale(1);
     } else {
@@ -244,18 +244,18 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    // If velocity target is too low, it's set to a minimum value
-    if (velTarget.length() < minTarget) {
-        if (velTarget.length() > thresholdTarget) {
-            velTarget = velTarget.scale(minTarget / velTarget.length());  
-        }
-    }
+    // If velocity target is too low, it's set to a minimum value. NOT NECESSARY ANYMORE WHEN USING FRICTION COMPENSATION ON ROBOT
+    // if (velTarget.length() < minTarget) {
+    //     if (velTarget.length() > thresholdTarget) {
+    //         velTarget = velTarget.scale(minTarget / velTarget.length());  
+    //     }
+    // }   
 
     return velTarget;
 }
 
 
-// Proportional velocity controller
+// Proportional velocity controller NOT USED ANYMORE
 Vector2 Control::velocityController(Vector2 myVelRobotFrame, Vector2 velTarget) {
 
     Vector2 velError = prevVelCommand - myVelRobotFrame;
@@ -356,12 +356,12 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
     }
 
+    // This seems quite hacky
     if (fabs(angularVelTarget) < 2.2) {
         if (fabs(angularVelTarget) > 0.5) {
             angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
         }
     }
-
 
     return angularVelTarget;
 }
