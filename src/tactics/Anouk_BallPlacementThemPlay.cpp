@@ -15,7 +15,7 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 
-#define ROS_LOG_NAME "plays.Anouk_BPus"
+#define ROS_LOG_NAME "plays.Anouk_BPthem"
 
 namespace rtt {
 
@@ -25,19 +25,10 @@ Anouk_BallPlacementThemPlay::Anouk_BallPlacementThemPlay(std::string name, bt::B
 
 void Anouk_BallPlacementThemPlay::Initialize() {
 
-    failed = false;
-    succeeded = false;
-    
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 	// Get all available robots
     auto robots = getAvailableRobots();
-	// Check if there is a robot available
-    if (robots.size() == 0) {
-        ROS_WARN_NAMED(ROS_LOG_NAME, "No robots left to claim! Aborting..");
-        failed = true;
-        return;
-    }
 
 	// Get the positions where the ball is, and where it should go
     Vector2 const endPos = LastRef::get().designated_position;
@@ -48,13 +39,10 @@ void Anouk_BallPlacementThemPlay::Initialize() {
 
 	// If the ball is already close enough to the end-point, don't do anything
     if ((endPos - ballPos).length() <= MAX_DISTANCE_FROM_END_POINT) {
-        succeeded = true;
         return;
     }
 
-
-
-    // ==== Move our robots out of the way if needed ==== //
+	// ==== Move our robots out of the way if needed ==== //
 	// Get the last world
 	roboteam_msgs::World world = LastWorld::get();
     // For each robot
@@ -113,40 +101,6 @@ void Anouk_BallPlacementThemPlay::Initialize() {
 
     }
 
-
-}
-
-bool Anouk_BallPlacementThemPlay::ballPlacementSuccessful(){
-	/* Rulebook 9.2 */
-
-	bool success = true;
-
-	roboteam_msgs::WorldBall ball = LastWorld::get().ball;
-
-	// No robot within 500mm from the ball
-	for(auto robot : LastWorld::get().us){
-		Vector2 distanceToBall = Vector2(robot.pos) - Vector2(ball.pos);
-		if(distanceToBall.length() < 0.5){
-			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot " << robot.id << " too close to ball! " << distanceToBall.length() << "m");
-			success = false;
-		}
-	}
-
-	// Ball is stationary
-	if(0.1 < Vector2(ball.vel).length()){
-		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball is still moving! " << Vector2(ball.vel).length() << "m/s");
-		success = false;
-	}
-
-	// Within 100mm from the requested position
-	Vector2 distance = Vector2(ball.pos) - LastRef::get().designated_position;
-	if(0.1 < distance.length()){
-		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball is too far from target position! " << distance.length() << "m");
-		success = false;
-	}
-
-	return success;
-
 }
 
 bt::Node::Status Anouk_BallPlacementThemPlay::Update() {
@@ -161,45 +115,7 @@ bt::Node::Status Anouk_BallPlacementThemPlay::Update() {
 		return Status::Failure;
 	}
 
-    if (failed) {
-        return Status::Failure;
-    }
-
-    if (succeeded) {
-        return Status::Success;
-    }
-
-
-
-	if (feedbacks.find(token) != feedbacks.end()) {
-        Status status = feedbacks.at(token);
-        if (status == Status::Success) {
-
-
-			if(currentState == PlayStates::MOVING_PLACER){
-				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Placer has moved");
-				// Reset token
-				token = boost::uuids::nil_uuid();
-				// Check if the BallPlacement was a success
-				if(ballPlacementSuccessful()){
-					ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed successfully!");
-					return Status::Success;
-				}else{
-					ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed unsuccessfully!");
-					return Status::Failure;
-				}
-			}
-
-
-		} else if (status == Status::Running) {
-            // Carry on
-        } else {
-			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball has been placed unsuccessfully!");
-            return Status::Failure;
-        }
-    }
-
-    return bt::Node::Status::Running;
+    return Status::Running;
 }
 
 
