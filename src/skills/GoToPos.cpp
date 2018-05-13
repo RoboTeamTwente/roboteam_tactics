@@ -525,6 +525,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
     drawer.setColor(0, 0, 0);
 
+    // Determine angle goal and error
     double angleGoal;
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
@@ -535,7 +536,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (posError.length() > 0.5) {
         angleGoal = posError.angle();
     }
-
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);
     double myAngularVel = me.w;
@@ -545,7 +545,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.03;
+        successDist = 0.01;
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
@@ -571,23 +571,18 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {
         // AvoidRobots defaults to true if not set
     } else {
-        Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-        if (newSumOfForces.length() >= 1.5) {
-            angleGoal = newSumOfForces.angle();
-            angleError = cleanAngle(angleGoal - myAngle);
-        }
-        sumOfForces = newSumOfForces;
+        Vector2 sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        // TODO: IS THE FOLLOWING NECESSARY? MIGHT BE BETTER WITHOUT
+        // if (newSumOfForces.length() >= 1.5) {
+        //     angleGoal = newSumOfForces.angle();
+        //     angleError = cleanAngle(angleGoal - myAngle);
+        // }
     }
-
-    // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
-
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {
         Vector2 ballPos = Vector2(world.ball.pos);
         sumOfForces = avoidBall(ballPos, myPos, sumOfForces, targetPos, myVel);
     }
-
     // Defense area avoidance
     if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
@@ -598,40 +593,33 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
     drawer.setColor(0, 0, 0);
 
-    // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
-    // Vector2 ballPos = Vector2(world.ball.pos);
-    // Vector2 ballVel = Vector2(world.ball.vel);
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("balVel", ballPos, ballVel);
-
-    // Rotate the commands from world frame to robot frame
-    Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
-
-    // BEUN Solution for now: strafing needs more gain
-    if (HasDouble("strafeGain")) {
-        velTarget.y = velTarget.y * GetDouble("strafeGain");
+    // Different velocity commands for grsim and real robot
+    Vector2 velCommand;
+    double angularCommand;
+    if (robot_output_target == "grsim") {
+        velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
+        angularCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
+        velCommand = controller.limitVel(velCommand, angularCommand);    // Limit linear velocity
+        angularCommand = controller.limitAngularVel(angularCommand);  // Limit angular velocity
+    } else {
+        // The rotation of linear velocity to robot frame happens on the robot itself now
+        // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
+        velCommand = sumOfForces;
+        angularCommand = angleGoal;
     }
 
-    // Velocity controller
-    // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
-
-    Vector2 velCommand = velTarget;
-
-    // Limit angular and linear velocity
-    velCommand = controller.limitVel(velCommand, angularVelTarget);
-    angularVelTarget = controller.limitAngularVel(angularVelTarget);
-
+    // Apply any max velocity that is set
     double maxVel = GetDouble("maxVelocity", 299792458.0);
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
 
-    if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
-        if (velCommand.length() >= 1.5) {
-            velCommand = velCommand.scale(1.5 / velCommand.length());
-        }
-    }
-
+    // WHY WAS THIS HERE?
+    // if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
+    //     if (velCommand.length() >= 1.5) {
+    //         velCommand = velCommand.scale(1.5 / velCommand.length());
+    //     }
+    // }
 
     // Fill the command message
     roboteam_msgs::RobotCommand command;
@@ -639,7 +627,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
     if ( !(HasBool("dontRotate") && GetBool("dontRotate")) ) {
-        command.w = angularVelTarget;
+        command.w = angularCommand;
     }
     command.dribbler = GetBool("dribbler");
 

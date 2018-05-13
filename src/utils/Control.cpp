@@ -87,7 +87,6 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
-
         thresholdTarget = 0.07;
         minTarget = 0.30;
 
@@ -102,20 +101,18 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainVelocity = 0.0;
         maxSpeed = 4.0;
         maxAngularVel = 10.0;
-
         thresholdTarget = 0.04;
         minTarget = 0.40;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;//2.0
-        iGainPosition = 0.0;//0.0
-        dGainPosition = 0.0; //0.0
+        pGainPosition = 3.0; //2.0
+        iGainPosition = 0.0;
+        dGainPosition = 0.2;
         pGainRotation = 2.0;
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
-
         thresholdTarget = 0.07;
         minTarget = 0.10;
 
@@ -244,12 +241,12 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    // If velocity target is too low, it's set to a minimum value. NOT NECESSARY ANYMORE WHEN USING FRICTION COMPENSATION ON ROBOT
-    // if (velTarget.length() < minTarget) {
-    //     if (velTarget.length() > thresholdTarget) {
-    //         velTarget = velTarget.scale(minTarget / velTarget.length());  
-    //     }
-    // }   
+    // If velocity target is too low, it's set to a minimum value. PROBABLY NOT NECESSARY ANYMORE WHEN USING FRICTION COMPENSATION ON ROBOT
+    if (velTarget.length() < minTarget) {
+        if (velTarget.length() > thresholdTarget) {
+            velTarget = velTarget.scale(minTarget / velTarget.length());  
+        }
+    }   
 
     return velTarget;
 }
@@ -317,11 +314,9 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
     bool forceAngle = false;
 
-
     if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
     }
-
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
@@ -351,17 +346,12 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    // Limit the angular velocity target
-    if (fabs(angularVelTarget) > maxAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
-    }
-
-    // This seems quite hacky
-    if (fabs(angularVelTarget) < 2.2) {
-        if (fabs(angularVelTarget) > 0.5) {
-            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-        }
-    }
+    // This seems quite hacky REMOVED FOR NOW
+    // if (fabs(angularVelTarget) < 2.2) {
+    //     if (fabs(angularVelTarget) > 0.5) {
+    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+    //     }
+    // }
 
     return angularVelTarget;
 }
@@ -379,26 +369,17 @@ Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
     //     }
 
     // } else {
-
-        // Limit the robot velocity to the maximum speed
-        if (sumOfForces.length() > maxSpeed) {
-            if (sumOfForces.length() > 0.0) {
-                sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
-            }
-        }
-
+    double L = sumOfForces.length();
+    // Limit the robot velocity to the maximum speed
+    if (L > maxSpeed && L > 0.0) {
+        sumOfForces = sumOfForces.scale(maxSpeed / L);
+    }
     // }
 
-
-    
-
-    if (fabs(sumOfForces.y) > 1.0) {
-        sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
-    }
-
-
-
-
+        // WHY WAS THIS HERE?
+    // if (fabs(sumOfForces.y) > 1.0) {
+    //     sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
+    // }
 
     return sumOfForces;
 }
