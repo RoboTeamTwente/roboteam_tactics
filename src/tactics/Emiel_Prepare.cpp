@@ -24,7 +24,7 @@ namespace rtt {
 	Emiel_Prepare::Emiel_Prepare(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard){}
 
 	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(std::vector<Vector2> positions){
-		prepare(positions, {});
+		return prepare(positions, std::vector<int>());
 	}
 
 	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(std::vector<Vector2> positions, std::vector<int> robotsToDefend) {
@@ -99,7 +99,6 @@ namespace rtt {
 		// ====================================
 		// Initialize robot defenders
 		// ====================================
-
 		if(0 < robotsToDefend.size()) {
 			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
 
