@@ -604,7 +604,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
             angleGoal = cleanAngle(velCommand.angle() + M_PI);
         }
-        double angleCommand = (angleGoal/M_PI + 1)/2*2047; // make sure it fits in the package
+        double angleCommand = angleGoal/180*2047; // make sure it fits in the package
         command.w = angleCommand;
     }
 
