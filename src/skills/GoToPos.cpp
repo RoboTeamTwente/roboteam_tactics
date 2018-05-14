@@ -369,10 +369,6 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
         }
     }
 
-
-
-
-
     /////////////////////////
     // Check to prevent getting stuck behind the rectangular defense area
     Vector2 posError = newTargetPos - myPos;
@@ -429,16 +425,9 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
                 }
             }
             newTargetPos = interTarget;
-            //posError = newTargetPos - myPos;
         }
     }
     //////////////////////////////////
-
-
-
-
-
-
     return newTargetPos;
 }
 
@@ -594,18 +583,29 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     drawer.setColor(0, 0, 0);
 
     // Different velocity commands for grsim and real robot
+    roboteam_msgs::RobotCommand command;
     Vector2 velCommand;
-    double angularCommand;
     if (robot_output_target == "grsim") {
+
         velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        angularCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        velCommand = controller.limitVel(velCommand, angularCommand);    // Limit linear velocity
-        angularCommand = controller.limitAngularVel(angularCommand);  // Limit angular velocity
+        double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
+        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
+        
+        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
+            command.w = 0;
+        } else {
+            command.w = angularVelCommand;
+        }
     } else {
         // The rotation of linear velocity to robot frame happens on the robot itself now
         // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
         velCommand = sumOfForces;
-        angularCommand = angleGoal;
+        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
+            angleGoal = cleanAngle(velCommand.angle() + M_PI);
+        }
+        double angleCommand = (angleGoal/M_PI + 1)/2*2047; // make sure it fits in the package
+        command.w = angleCommand;
     }
 
     // Apply any max velocity that is set
@@ -621,15 +621,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     //     }
     // }
 
-    // Fill the command message
-    roboteam_msgs::RobotCommand command;
+    // fill the rest of command message
     command.id = ROBOT_ID;
+    command.dribbler = GetBool("dribbler");
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
-    if ( !(HasBool("dontRotate") && GetBool("dontRotate")) ) {
-        command.w = angularCommand;
-    }
-    command.dribbler = GetBool("dribbler");
 
     return command;
 }

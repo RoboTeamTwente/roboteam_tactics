@@ -87,6 +87,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
+        
         thresholdTarget = 0.07;
         minTarget = 0.30;
 
@@ -101,19 +102,21 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainVelocity = 0.0;
         maxSpeed = 4.0;
         maxAngularVel = 10.0;
+
         thresholdTarget = 0.04;
         minTarget = 0.40;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 3.0; //2.0
+        pGainPosition = 2.0; //2.0
         iGainPosition = 0.0;
-        dGainPosition = 0.2;
+        dGainPosition = 0.0;
         pGainRotation = 2.0;
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
-        thresholdTarget = 0.07;
+
+        thresholdTarget = 0.03;
         minTarget = 0.10;
 
         robotType = RobotType::GRSIM;
