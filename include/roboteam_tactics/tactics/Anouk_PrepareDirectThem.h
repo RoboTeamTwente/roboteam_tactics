@@ -19,7 +19,7 @@ namespace rtt {
     private:
         std::vector<boost::uuids::uuid> tokens;
 
-        std::vector<int> GetRobotsToDefend();
+        std::vector<int> GetRobotsToDefend(double minDangerScore);
         std::vector<int> robotsToDefend;
 
     };

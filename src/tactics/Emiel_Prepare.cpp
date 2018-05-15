@@ -137,6 +137,12 @@ namespace rtt {
 		return tokens;
 	}
 
+	/**
+	 * Initializes a ball defender
+	 * @param robotID The ID of our robot
+	 * @param position The position the robot should defend
+	 * @return uuid-token of the role directive
+	 */
 	boost::uuids::uuid Emiel_Prepare::init_ballDefender(int robotID, Vector2 position){
 
 		// Get the default roledirective publisher
@@ -163,6 +169,7 @@ namespace rtt {
 			.setDouble("yGoal"    , position.y)
 			.setBool("avoidRobots", true)
 			.setBool("avoidBall"  , true)
+			.setBool("avoidDefenseAreas"  , true)
 			.setDouble("maxSpeed" , 1.3)
 		;
 
@@ -182,6 +189,12 @@ namespace rtt {
 		return token;
 	}
 
+	/**
+	 * Initializes a robot defender
+	 * @param robotID The ID of our robot
+	 * @param opponentID The ID of the robot it should defend
+	 * @return uuid-token of the role directive
+	 */
 	boost::uuids::uuid Emiel_Prepare::init_robotDefender(int robotID, int opponentID){
 
 		// Get the default roledirective publisher
@@ -196,11 +209,11 @@ namespace rtt {
 		bb.SetInt("KEEPER_ID", keeperID);
 
 		// Set blackboard variables
-
 		ScopedBB(bb, "SimpleDefender_A")
 			.setInt("defendRobot", opponentID)
 			.setDouble("distanceFromGoalRatio", 0.9)
 			.setString("stayOnSide", "ourSide")
+			.setBool("avoidDefenseAreas"  , true)
 			.setBool("stayAwayFromBall", true)
 			.setBool("dontDriveToBall", true)
 			.setDouble("A_maxSpeed", 1.3)

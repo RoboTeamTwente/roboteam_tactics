@@ -23,7 +23,7 @@ namespace rtt {
 
 
 
-    std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(){
+    std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(double minDangerScore){
         // Get the last world
         roboteam_msgs::World world = LastWorld::get();
 
@@ -57,8 +57,9 @@ namespace rtt {
                 continue;
             // Get danger score of the robot
             float dangerScore = world.dangerScores.at(i);
+
             // If the danger score of the robot is too low, ignore it
-            if(dangerScore < 3.0)
+            if(dangerScore < minDangerScore)
                 continue;
 
             // The robot should be defended
@@ -77,7 +78,7 @@ namespace rtt {
         }
 
         // Get the robots that should be defended
-        std::vector<int> robotsToDefend = GetRobotsToDefend();
+        std::vector<int> robotsToDefend = GetRobotsToDefend(3.0);
 
         // Print the robots that should be defended
         std::stringstream vectorStr;
@@ -100,6 +101,10 @@ namespace rtt {
         int numRobotDefenders = std::min(robotsLeft, (int)robotsToDefend.size());
         robotsLeft -= numRobotDefenders;
 
+        // Number of ball interceptors
+        int numBallInterceptors = robotsLeft;
+
+
         // Get the last world
         roboteam_msgs::World world = LastWorld::get();
         // Get the position of the ball
@@ -112,10 +117,10 @@ namespace rtt {
         // Calculate the positions of the ball defenders
         std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20, goalPos, angleGoalToBall, 1.8);
 
-        // Place the ball defenders, also claims the robots
+        // Place the ball defenders and robot defender, also claims the robots
         Emiel_Prepare::prepare(defenderCoords, robotsToDefend);
 
-        // Initialize the robot defenders
+        // Initialize the robots that are left
 
 
     }
