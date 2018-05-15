@@ -14,7 +14,7 @@
 #include "roboteam_utils/Draw.h"
 #include "roboteam_msgs/WorldRobot.h"
 
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 
 
 namespace rtt {
@@ -31,21 +31,21 @@ namespace rtt {
  *
  * Params:
  *     - ROBOT_ID:
- *         Type: Int 
+ *         Type: Int
  *         Descr: Id of the robot
  *     - KEEPER_ID:
  *         Type: Int
  *         Descr: Id of the keeper (for defense area avoidance)
  *
- *     
+ *
  *     - xGoal:
  *         Type: Double
  *         Descr: The target x coordinate
- *     
+ *
  *     - yGoal:
  *         Type: Double
  *         Descr: The target y coordinate
- *     
+ *
  *     - dribbler:
  *         Type: Bool
  *         Descr: Turns on the dribbler if true
@@ -85,7 +85,7 @@ public:
     void sendStopCommand(uint id);
     void publishStopCommand();
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 targetPos);
-    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);    
+    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel);
     Vector2 checkTargetPos(Vector2 targetPos);
@@ -93,7 +93,7 @@ public:
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
 
     Status Update();
-    
+
     static VerificationMap required_params() {
         VerificationMap params;
         params["ROBOT_ID"] = BBArgumentType::Int;
@@ -105,7 +105,7 @@ public:
         return params;
     }
     std::string node_name() { return "BallPlacementTest"; }
-    
+
 private:
 
     // Control parameters
@@ -127,8 +127,8 @@ private:
     Vector2 prevSumOfForces;
     Vector2 prevVelCommand;
     double prevAngularVelTarget;
-    
-    // Success 
+
+    // Success
     int successCounter;
     bool succeeded;
     bool failure;

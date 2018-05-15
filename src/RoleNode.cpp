@@ -139,7 +139,9 @@ int main(int argc, char *argv[]) {
     std::string robotIDStr = name.substr(name.find_last_of("/\\") + 1 + 5);     // Chop off the leading "/robot"
     try {
         ROBOT_ID = std::stoi(robotIDStr);                                       // Convert to int
-        LOG_NAME = LOG_NAME + "." + robotIDStr;                                 // Set logging name from RoleNode to RoleNode.ROBOT_ID
+        std::string our_team = "no_color";
+        ros::param::get("our_color", our_team);
+        LOG_NAME = LOG_NAME + "." + our_team + "." + robotIDStr;                // Set logging name from RoleNode to RoleNode.our_color.ROBOT_ID
     } catch (...) {
         ROS_ERROR_STREAM_NAMED(LOG_NAME, "Could not parse Robot ID from node name " << name.c_str() << "! Aborting");
         return 1;

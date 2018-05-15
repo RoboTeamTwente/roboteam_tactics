@@ -2,7 +2,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/skills/ShootAtGoalV2.h"
 #include "roboteam_utils/Math.h"
-#include "roboteam_tactics/conditions/IsBallInDefenseArea.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "ros/package.h"
 
@@ -143,20 +143,23 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 // Calculates the distance between the closest opponent and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	Vector2 ballPos(world.ball.pos);
 
-	double shortestDistance = 40;//(Vector2(world.us.at(0).pos) - testPosition).length();
+	double shortestDistance = 1000;//(Vector2(world.us.at(0).pos) - testPosition).length();
 	for (size_t i = 0; i < world.us.size(); i++) {
 
 		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
 			Vector2 botPos(world.us.at(i).pos);
-			// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-			// WIP: TEST DISTANCE IS COMBINATION OF ANGLE AND DISTANCE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
-			double testDistance = 1.0*fabs(cleanAngle( (botPos - ballPos).angle() - (testPosition - ballPos).angle() )) + 1.0*(botPos - testPosition).length();
-			if (testDistance < shortestDistance) {
-				shortestDistance = testDistance;
-			}
+			Vector2 ballToBot = botPos - ballPos;
+			//if (ballToBot.length() > 0.5) { // WIP: prevent taking into account the robot getting the ball. Maybe handle this in the fake world object at the start?
+				// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
+				// WIP: TEST DISTANCE IS ANGLE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
+				double testDistance = 1.0*fabs(cleanAngle( ballToBot.angle() - (testPosition - ballPos).angle() )); // + 1.0*(botPos - testPosition).length()
+				if (testDistance < shortestDistance) {
+					shortestDistance = testDistance;
+				}
+			//}
 		}
 	}
 
@@ -169,19 +172,19 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 	Vector2 ballTraj = testPosition - ballPos;
 
 	if (world.them.size() == 0) {
-		return 40.0;
+		return 1000.0;
 	}
 
 	// IMPROVEMENT: Maybe the ball trajectory should be considered a cone, when assessing how close opponents may be.
 	// Vector2 oppPos = Vector2(world.them.at(0).pos);
-	double shortestDistance = 40;//fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
+	double shortestDistance = 1000;//fabs((ballTraj.closestPointOnVector(ballPos, oppPos) - oppPos).length());
 	for (size_t i = 0; i < world.them.size(); i++) {
 		Vector2 oppPos(world.them.at(i).pos);
 		// WIP: opponents outside a 90 degree field of view (as seen from the ball) are not considered
 		if ( fabs(cleanAngle( (oppPos - ballPos).angle() - ballTraj.angle() )) < 0.25*M_PI) {
 			Vector2 closestPoint = ballTraj.closestPointOnVector(ballPos, oppPos);
 			double distToBall = (closestPoint - ballPos).length();
-			if (distToBall > chipMargin || distToBall < 0.25) {
+			if (distToBall > chipMargin) {
 				double testDistance = (closestPoint - oppPos).length();
 
 				if (testDistance < shortestDistance) {
@@ -199,11 +202,11 @@ double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam
 	Vector2 posToTargetTraj = targetPos - testPosition;
 
 	if (world.them.size() == 0) {
-		return 40.0;
+		return 1000.0;
 	}
 
 	// IMPROVEMENT: Maybe the trajectory should be considered a cone, when assessing how close opponents may be.
-	double shortestDistance = 40;
+	double shortestDistance = 1000;
 	for (size_t i = 0; i < world.them.size(); i++) {
 		Vector2 oppPos(world.them.at(i).pos);
 		// WIP: opponents outside a 90 degree field of view (as seen from the testPosition) are not considered
@@ -252,14 +255,14 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 	for (size_t i = 0; i < openAngles.second.size(); i++) {
    		viewOfGoal += openAngles.second.at(i) - openAngles.first.at(i);
 	}
-	
+
 	return viewOfGoal;
 }
 
 std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
 	// targetPos is one of the goals. IMPROVEMENT: Maybe add functionality that uses other views than only goal views (like view of dangerous positions)
 	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
-	
+
 	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
 	Vector2 goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
 	Vector2 vecToGoalSide1 = goalSide1 - testPosition;
@@ -326,19 +329,19 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 
 // Calculates the distance between the testPosition and the current robot
 double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	if (isCloseToPosSet) {
 		return (testPosition - closeToPos).length();
 	} else {
 		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(ROBOT_ID, true, world);
 		if (bot) {
 			return (testPosition - Vector2((*bot).pos)).length();
-			
+
 		} else {
-			ROS_WARN("OpportunityFinder::distToRobot robot not found :(");
+			//ROS_WARN("OpportunityFinder::calcDistToSelf robot not found :(");
 			return 0.0;
 		}
-	}	
+	}
 }
 
 
@@ -362,9 +365,9 @@ double OpportunityFinder::computeScore(Vector2 testPosition) {
 }
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
 double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::World world) {
-	
+
 	Vector2 ballPos(world.ball.pos);
-	
+
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
@@ -437,7 +440,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		// Add score to total score
 		score += smoothStep(1-distToSelf)*distToSelfWeight;
 	}
-	
+
 	if (ballReflectionAngleWeight>0.0) {
 		// double ballReflectionAngle = calcBallReflectionAngle(testPosition, world);
 		double ballReflectionAngle = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
@@ -446,7 +449,7 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 		// Add score to total score
 		score += smoothStep(1-ballReflectionAngle)*ballReflectionAngleWeight;
 	}
-		
+
 	// normalize score between 0 and 100
 	score = score / totalWeight * 100;
 
@@ -456,14 +459,18 @@ double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::Worl
 // Checks many positions in the field and determines which has the highest score (higher score = better position to pass the ball to),
 // also draws a 'heat map' in rqt_view
 Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth) {
-	
+
 	roboteam_msgs::World world = LastWorld::get();
+	Vector2 ballPos(world.ball.pos);
 	// time_point start = now();
 
 	int x_steps = 20;
 	int y_steps = 20;
 
-	// Get claimed positions, place them instead of those robot positions in our world object
+	// Generate a fake world object which for our robots contains claimed positions where applicable...
+    // ...and does not include our robot closest to ball
+	size_t closestToBallIndex = 0;
+	double closestToBallDist = 1000;
 	for (size_t i = 0; i < world.us.size(); i++) {
 		// check whether current bot claimed a position
 		double botClaimedX;
@@ -474,8 +481,17 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 			world.us.at(i).pos.x = float(botClaimedX);
 			world.us.at(i).pos.y = float(botClaimedY);
 		}
+		// see whether current bot is closest to the ball
+		double distToBall = (ballPos - Vector2(world.us.at(i).pos)).length();
+		if (distToBall < closestToBallDist) {
+			closestToBallDist = distToBall;
+			closestToBallIndex = i;
+		}
 	}
+	world.us.erase(world.us.begin()+closestToBallIndex); // remove robot closest to ball from our fake world object
 
+
+	// loop through each point in the grid
 	std::vector<Vector2> opportunities;
 	std::vector<double> scores;
 	std::vector<std::string> names;
@@ -491,7 +507,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 				name.append("y");
 				name.append(std::to_string(y_step));
 			// calculate the score of this point:
-			if (!isWithinDefenseArea(false, point, 0.2) && IsWithinField(point)) {
+			if (!isWithinDefenseArea(false, point, 0.2) && isWithinField(point)) {
 				double score = computeScore(point, world);
 				opportunities.push_back(point);
 				scores.push_back(score);
@@ -500,7 +516,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 				drawer.setColor(0,0,0);
 				drawer.drawPoint(name, Vector2(0.0,0.0));
 			}
-			
+
 		}
 	}
 	// int timePassed = time_difference_milliseconds(start, now()).count();
@@ -541,8 +557,19 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 
 BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos, bool notBackwards, bool distFromTargetLimit, double limit) {
 
+	// initialize max score and corresponding ID and position
 	roboteam_msgs::World world = LastWorld::get();
+   	double maxScore = 0;
+   	int bestID = -1;
+   	Vector2 bestPos(0,0);
+    Vector2 ballPos(world.ball.pos);
+
+    // Generate a fake world object which for our robots contains claimed positions where applicable...
+    // ...and does not include our robot closest to ball
 	roboteam_msgs::World fakeWorld = world;
+
+	size_t closestToBallIndex = 0;
+	double closestToBallDist = 1000;
 
 	if (!realScore || !realPos) {
 		// Get claimed positions, place them instead of those robot positions in our 'fake' world object
@@ -555,17 +582,20 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 				fakeWorld.us.at(i).pos.x = float(botClaimedX);
 				fakeWorld.us.at(i).pos.y = float(botClaimedY);
 			}
+			// see whether current bot is closest to the ball
+			double distToBall = (ballPos - Vector2(fakeWorld.us.at(i).pos)).length();
+			if (distToBall < closestToBallDist) {
+				closestToBallDist = distToBall;
+				closestToBallIndex = i;
+			}
 		}
+		fakeWorld.us.erase(fakeWorld.us.begin()+closestToBallIndex); // delete robot closest to ball from the fake world
+		world.us.erase(world.us.begin()+closestToBallIndex); 		// same goes for the real world to make sure both are the same size
 	}
 
-	// initialize max score and corresponding ID and position
-   	double maxScore = 0;
-   	int bestID = -1;
-   	Vector2 bestPos(0,0);
+	
 
-    Vector2 ballPos(world.ball.pos);
-
-    // For each of our robots
+    // For each of our robots, check score of their (claimed or real) position
     for (size_t i = 0; i < (world.us.size()); i++) {
         if (world.us.at(i).id != ROBOT_ID) { // dont choose myself
         	Vector2 botPos;
@@ -574,7 +604,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
         	} else {
         		botPos = Vector2(fakeWorld.us.at(i).pos);
         	}
-        	
+
         	if (notBackwards && botPos.x < ballPos.x) {
         	// if notBackwards true, robots too far from target will be skipped
         		continue;
@@ -584,11 +614,16 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
         		continue;
         	}
             double score;
+            roboteam_msgs::World checkWorld; // world object on which the score is computed
             if (realScore) {
-            	score = computeScore(botPos, world);
+            	checkWorld = world;
             } else {
-            	score = computeScore(botPos,fakeWorld);
-            } 
+            	checkWorld = fakeWorld;
+            }
+            // make sure the current bot is not used in the score computations...
+            // ... e.g. for the distance to closest teammate metric, I should not take this bot itself into account. 
+            checkWorld.us.erase(checkWorld.us.begin()+i);
+            score = computeScore(botPos, checkWorld);
             if (score > maxScore) {
                 maxScore = score;
                 bestID = world.us.at(i).id;
@@ -596,7 +631,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
             }
         }
     } // end of for-loop
-    
+
     BestTeammate bestTeammate;
     bestTeammate.id = bestID;
     bestTeammate.pos = bestPos;
