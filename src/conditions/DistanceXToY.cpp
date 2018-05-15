@@ -14,6 +14,8 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
+
 
 #define RTT_CURRENT_DEBUG_TAG DistanceXToY
 
@@ -149,7 +151,7 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
     // FieldCircularArc top_arc;
     // FieldCircularArc bottom_arc;
     
-    double safetyMarginLine = safetyMargin;
+    double safetyMarginLine = safetyMargin;//safetyMargin;
 
     GeometryFieldSize field = LastWorld::get_field();
 
@@ -168,11 +170,24 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
         safetyMarginLine = safetyMarginLine * -1; // on the right side of the field we need to subtract the safety margin instead of add it.
     }
 
-    Vector2 distToLine = distPointToLine(line, point, safetyMarginLine);
-    Vector2 distToTopLine = distPointToLine(top_line, point, safetyMarginLine);
-    Vector2 distToBottomLine = distPointToLine(bottom_line, point, safetyMarginLine);
+
+    Vector2 distToLine = distPointToLine(line, point, 0.0);
+    Vector2 distToTopLine = distPointToLine(top_line, point, 0.0);
+    Vector2 distToBottomLine = distPointToLine(bottom_line, point, 0.0);
     // Vector2 distToTopArc = distPointToArc(top_arc, point, safetyMargin);
     // Vector2 distToBottomArc = distPointToArc(bottom_arc, point, safetyMargin);
+
+    if(isWithinDefenseArea(ourDefenseArea, point, 0.001)) {
+        // if within actual defense area -> just add margin
+        distToLine.x += safetyMarginLine;
+        distToTopLine.y += safetyMargin;
+        distToBottomLine.y -= safetyMargin;
+    } else {
+        // if not -> stretch outward (i.e. add margin in opposite direction)
+        distToLine = distToLine + Vector2(-safetyMargin, 0.0).rotate(distToLine.angle());
+        distToTopLine = distToTopLine + Vector2(-safetyMargin, 0.0).rotate(distToTopLine.angle());
+        distToBottomLine = distToBottomLine + Vector2(-safetyMargin, 0.0).rotate(distToBottomLine.angle());
+    }
 
     Vector2 shortestDistance = distToLine;
     if (distToTopLine.length() < shortestDistance.length()) {

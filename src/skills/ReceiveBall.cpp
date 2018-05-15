@@ -34,13 +34,13 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb)
         , getBall("", blackboard)
         // , kick("", blackboard)
-        // , isRobotClosestToBall("", blackboard) 
+        // , isRobotClosestToBall("", blackboard)
         {
     hasBall = whichRobotHasBall();
-    
+
     prevComputedPoint = now();
     //computedTargetPos = false;
-    
+
 }
 
 void ReceiveBall::Initialize() {
@@ -50,7 +50,7 @@ void ReceiveBall::Initialize() {
 	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Initialize for robot: " << robotID);
 	ballIsComing = false;
 	startKicking = false;
-	
+
 	// readyHasBeenSet = false;
 	//	If we set readyToReceiveBall true, my teammate that passes the ball can give me the claim over the ball
 	//	(such that other robots wont interfere). If setSignal is enabled, I can be trusted in resetting claim if this skill terminates.
@@ -72,9 +72,9 @@ void ReceiveBall::Initialize() {
 		marginDeviation = 0.0;
 	}
 
-	
 
-	// Read the blackboard info about where to receive the ball 
+
+	// Read the blackboard info about where to receive the ball
 	if ((HasDouble("receiveBallAtX") && HasDouble("receiveBallAtY"))) {
 		double receiveBallAtX = GetDouble("receiveBallAtX");
 		double receiveBallAtY = GetDouble("receiveBallAtY");
@@ -103,8 +103,7 @@ void ReceiveBall::Initialize() {
 
 void ReceiveBall::Terminate(bt::Node::Status s) {
 
-	if (!hasTerminated) {
-	// If ReceiveBall hasnt terminated already... (OF COURSE THIS SHOULD BE HANDLED BETTER BY THE BEHAVIORTREES(?))
+	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
 
 		if (GetBool("setSignal")) {
@@ -230,7 +229,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 // Predict intercept pos by looking at the robot that has the ball
 boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
-	
+
 	InterceptPose interceptPose;
 	Vector2 interceptPos;
 	roboteam_msgs::World world = LastWorld::get();
@@ -279,12 +278,16 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 		interceptPos = receiveBallAtPos;
 	}
 
-	interceptPose.interceptPos = interceptPos; 
+	interceptPose.interceptPos = interceptPos;
 	interceptPose.interceptAngle = (ballPosNow - interceptPos).angle();
 	return interceptPose;
 }
 
 bt::Node::Status ReceiveBall::Update() {
+	if (hasTerminated) { // Temporary hack, because terminate is not always called at the right moments (similar hack in terminate function)
+        Initialize();
+    }
+
 
     // Get the last world information and some blackboard info
 	roboteam_msgs::World world = LastWorld::get();
@@ -293,7 +296,7 @@ bt::Node::Status ReceiveBall::Update() {
 		double receiveBallAtY = GetDouble("receiveBallAtY");
 		receiveBallAtPos = Vector2(receiveBallAtX, receiveBallAtY);
 	}
-	
+
 	// Wait for the first world message
 	while (world.us.size() == 0) {
 		ROS_INFO_STREAM("ReceiveBall, empty world...");
@@ -332,7 +335,7 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 myPos(robot.pos);
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
-	
+
 	Vector2 targetPos;
 	double targetAngle;
 	bool ballWasComing = ballIsComing;
@@ -361,7 +364,7 @@ bt::Node::Status ReceiveBall::Update() {
     	// 	int elapsedTime = time_difference_milliseconds(startTime, now()).count();
     	// 	if (elapsedTime > 200 && ) {
     	// 		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a slow moving ball");
-    	// 		return Status::Failure; 
+    	// 		return Status::Failure;
     	// 	}
     	// } else {
     	// 	startTime = now();
@@ -413,22 +416,26 @@ bt::Node::Status ReceiveBall::Update() {
 	// }
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
-	double role_iterations_per_second = 0.0;
-	ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
-	double timeStep;
-	if (role_iterations_per_second == 0.0) {
-		timeStep = 1.0 / 30.0;
-	} else {
-		timeStep = 1.0 / role_iterations_per_second;
-	}
+
+	// double role_iterations_per_second = 0.0;
+	// ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
+	// double timeStep;
+	// if (role_iterations_per_second == 0.0) {
+	// 	timeStep = 1.0 / 30.0;
+	// } else {
+	// 	timeStep = 1.0 / role_iterations_per_second;
+	// }
 	double distanceToBall = (ballPos-myPos).length();
-	if (shootAtGoal) {
-		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
-			startKicking = true;
-			ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
-		}
+	// if (shootAtGoal) {
+	// 	if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
+	// 		startKicking = true;
+	// 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
+	// 	}
+	// }
+	if (shootAtGoal && distanceToBall < 2.0) {
+		startKicking = true;
 	}
-	
+
 	// If the ball gets close, turn on the dribbler
 	double dribblerDist = acceptableDeviation * 2.0;
 	if (HasDouble("dribblerDist")) {
@@ -474,7 +481,7 @@ bt::Node::Status ReceiveBall::Update() {
     	// If I'm just defending, but the ball stopped too far away from me, return running
     		return Status::Running;
     	}
-    	
+
 	} else {
 
         private_bb->SetInt("ROBOT_ID", robotID);
@@ -518,7 +525,7 @@ bt::Node::Status ReceiveBall::Update() {
 	        } else {
 	        	command.kicker = false;
 	        }
-	        
+
 	    	//    if (matchBallVel) {
 			    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.5);
 			    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
@@ -526,9 +533,9 @@ bt::Node::Status ReceiveBall::Update() {
 			    //       newVelCommand.scale(4.0 / newVelCommand.length());
 			    //     }
 			    //     command.x_vel = newVelCommand.x;
-			    //     command.y_vel = newVelCommand.y;    
+			    //     command.y_vel = newVelCommand.y;
 			    // }
-	        
+
 	        pub.publish(command);
 	    } else {
 	    	publishStopCommand();
