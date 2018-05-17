@@ -39,6 +39,7 @@ class SimpleDefender : public Skill {
 public:
 	SimpleDefender(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     static Vector2 computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset);
+    static Vector2 computeDefensePointRatio(Vector2 defendPos, double ratio);
 	Status Update();
 
     static VerificationMap required_params() {

@@ -34,7 +34,7 @@ namespace rtt {
 		// Holds positions
 		std::vector<Vector2> positions;
 		// Add kicker
-		positions.push_back(Vector2(4.8, 0));
+		positions.push_back(Vector2(4.6, 0));
 
 		// All but one robot
 		int numRobots = robots.size() - 1;

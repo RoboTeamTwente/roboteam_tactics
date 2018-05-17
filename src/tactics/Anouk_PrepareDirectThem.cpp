@@ -1,0 +1,126 @@
+#include "roboteam_tactics/tactics/Anouk_PrepareDirectThem.h"
+
+#include <tuple>
+#include <vector>
+
+#include "roboteam_msgs/RoleDirective.h"
+#include "roboteam_msgs/World.h"
+
+#include "roboteam_utils/Vector2.h"
+#include "roboteam_utils/LastWorld.h"
+
+#include "roboteam_tactics/utils/RobotPatternGenerator.h"
+
+#include <ros/ros.h>
+
+#define ROS_LOG_NAME "plays.Anouk_PrepareDirectThem"
+
+namespace rtt {
+
+    RTT_REGISTER_TACTIC(Anouk_PrepareDirectThem);
+
+    Anouk_PrepareDirectThem::Anouk_PrepareDirectThem(std::string name, bt::Blackboard::Ptr blackboard) : Emiel_Prepare(name, blackboard) {}
+
+
+
+    std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(){
+        // Get the last world
+        roboteam_msgs::World world = LastWorld::get();
+
+        // Get the position of the ball
+        Vector2 ballPos(world.ball.pos);
+
+        // === Get their robot that is the closest to the ball === //
+        int oppKicker = -1; // Holds the kicker ID
+        double oppClosestDistance = 9999; // Holds the closest distance
+        for(size_t i = 0; i < world.them.size(); i++){
+            // Get the distance between the ball and the current opponent
+            double distanceToBall = (Vector2(world.them.at(i).pos) - ballPos).length();
+            // If this distance is closer than previous distances, store it
+            if(distanceToBall < oppClosestDistance ){
+                oppClosestDistance = distanceToBall;
+                oppKicker = i;
+            }
+        }
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot closest to ball : " << oppKicker);
+        // ======================================================= //
+
+        // === Find the most dangerous opponents, excluding the kicker ===
+        // Vector to hold the new robots to defend
+        std::vector<int> newRobotsToDefend;
+        // For each opponent in the world
+        for (size_t i = 0; i < world.dangerList.size(); i++) {
+            // Get the opponent
+            roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
+            // If the robot is the kicker, ignore
+            if(opp.id == oppKicker)
+                continue;
+            // Get danger score of the robot
+            float dangerScore = world.dangerScores.at(i);
+            // If the danger score of the robot is too low, ignore it
+            if(dangerScore < 3.0)
+                continue;
+
+            // The robot should be defended
+            newRobotsToDefend.push_back(opp.id);
+        }
+
+        return newRobotsToDefend;
+    }
+
+    void Anouk_PrepareDirectThem::Initialize() {
+
+        // Check if this tree is used for the correct RefState, PREPARE_PENALTY_THEM
+        boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
+        if (refState != RefState::DIRECT_FREE_THEM) {
+            ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for DIRECT_FREE_THEM");
+        }
+
+        // Get the robots that should be defended
+        std::vector<int> robotsToDefend = GetRobotsToDefend();
+
+        // Print the robots that should be defended
+        std::stringstream vectorStr;
+        std::copy(robotsToDefend.begin(), robotsToDefend.end(), std::ostream_iterator<int>(vectorStr, " "));
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend : " << vectorStr.str().c_str());
+
+
+
+
+
+        // Get all the available robots
+        std::vector<int> robots = getAvailableRobots();
+        int robotsLeft = (int)robots.size();
+
+        // Number of ball defenders
+        int numBallDefenders = std::min(robotsLeft, 2);
+        robotsLeft -= numBallDefenders;
+
+        // Number of robot defenders
+        int numRobotDefenders = std::min(robotsLeft, (int)robotsToDefend.size());
+        robotsLeft -= numRobotDefenders;
+
+        // Get the last world
+        roboteam_msgs::World world = LastWorld::get();
+        // Get the position of the ball
+        Vector2 ballPos(world.ball.pos);
+        // Get the position of our goal
+        Vector2 goalPos(LastWorld::get_our_goal_center());
+
+        double angleGoalToBall = -(ballPos - goalPos).angle();
+
+        // Calculate the positions of the ball defenders
+        std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20, goalPos, angleGoalToBall, 1.8);
+
+        // Place the ball defenders, also claims the robots
+        Emiel_Prepare::prepare(defenderCoords, robotsToDefend);
+
+        // Initialize the robot defenders
+
+
+    }
+
+    bt::Node::Status Anouk_PrepareDirectThem::Update() {
+        return Status::Running;
+    }
+}

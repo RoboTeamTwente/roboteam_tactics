@@ -125,6 +125,9 @@
 #include "Anouk_BallPlacementThemPlay.cpp"
 #undef ROS_LOG_NAME
 
+#include "Anouk_PrepareDirectThem.cpp"
+#undef ROS_LOG_NAME
+
 #include "Jim_GetBallPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 

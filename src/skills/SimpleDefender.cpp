@@ -19,6 +19,7 @@
 #include "roboteam_tactics/utils/utils.h"
 
 #define RTT_CURRENT_DEBUG_TAG SimpleDefender
+#define ROS_LOG_NAME "skills.SimpleDefender"
 
 namespace rtt {
 
@@ -30,14 +31,14 @@ SimpleDefender::SimpleDefender(std::string name, bt::Blackboard::Ptr blackboard)
         , receiveBall("", private_bb) { }
 
 Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset) {
-    
+
     Vector2 goalPos;
     if (ourSide) {
         goalPos = LastWorld::get_our_goal_center();
     } else {
         goalPos = LastWorld::get_their_goal_center();
     }
-    
+
     double angle = (defendPos - goalPos).angle() + angleOffset;
 
     //if (((defendPos - goalPos).length() - 0.5) < distanceFromGoal) {
@@ -51,8 +52,21 @@ Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, dou
     return targetPos;
 }
 
+Vector2 SimpleDefender::computeDefensePointRatio(Vector2 defendPos, double ratio){
+    // Get the position of our goal
+    Vector2 goalPos(LastWorld::get_our_goal_center());
+    // Get vector between defendPos and goalPos
+    Vector2 targetPos = defendPos - goalPos;
+    // Scale vector to ratio
+    targetPos = targetPos.scale(ratio);
+    // Move vector to goalPos
+    targetPos = targetPos + goalPos;
+
+    return targetPos;
+}
+
 bt::Node::Status SimpleDefender::Update() {
-    
+
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
@@ -63,22 +77,16 @@ bt::Node::Status SimpleDefender::Update() {
         ourSide = GetBool("ourSide");
     }
 
-    double acceptableDeviation;
-    double dribblerDist;
-    double distanceFromGoal;
-    std::string fieldType = GetString("fieldType");
-    if (fieldType == "office") {
-        distanceFromGoal = 0.3;
-        acceptableDeviation = 0.35;
-        dribblerDist = 1.0;
-    } else {
-        distanceFromGoal = 0.7;
-        acceptableDeviation = 0.8;
-        dribblerDist = 2.0;
-    }
+    double distanceFromGoal = 0.7;
+    double distanceFromGoalRatio = 0.5;
+    double acceptableDeviation = 0.8;
+    double dribblerDist = 2.0;
 
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
+    }
+    if (HasDouble("distanceFromGoalRatio")) {
+        distanceFromGoalRatio = GetDouble("distanceFromGoalRatio");
     }
     if (HasDouble("acceptableDeviation")) {
         acceptableDeviation = GetDouble("acceptableDeviation");
@@ -86,6 +94,10 @@ bt::Node::Status SimpleDefender::Update() {
     if (HasDouble("dribblerDist")) {
         dribblerDist = GetDouble("dribblerDist");
     }
+
+
+    // DistanceFromGoal
+    // DistanceFromGoalAmorousAdventure
 
     Vector2 defendPos;
 
@@ -96,16 +108,23 @@ bt::Node::Status SimpleDefender::Update() {
         if (findBot) {
             robot = *findBot;
         } else {
-            ROS_WARN_STREAM("SimpleKeeper: robot with this ID not found, ID: " << robotID);
+            ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot with this ID not found, ID: " << robotID);
             return Status::Failure;
-        }  
+        }
         defendPos = Vector2(robot.pos);
     } else {
         defendPos = Vector2(world.ball.pos);
     }
-    
+
     double angleOffset = GetDouble("angleOffset");
-    Vector2 targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
+    Vector2 targetPos;
+    if(HasDouble("distanceFromGoalRatio")) {
+        targetPos = computeDefensePointRatio(defendPos, distanceFromGoalRatio);
+    }else{
+        targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
+    }
+
+//    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "targetPos: " << targetPos);
 
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));

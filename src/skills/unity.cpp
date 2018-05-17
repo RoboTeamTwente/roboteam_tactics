@@ -123,6 +123,7 @@
 
 #include "SimpleDefender.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "SimpleGoalDefender.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
