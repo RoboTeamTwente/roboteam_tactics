@@ -399,7 +399,6 @@ bt::Node::Status GetBall::Update (){
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
-
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
     if (!choseRobotToPassTo && GetBool("passToBestAttacker") && posDiff.length() < 1.5 && !shootAtGoal) {
         BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
@@ -407,8 +406,7 @@ bt::Node::Status GetBall::Update (){
         bestPos = bestTeammate.pos;
         choseRobotToPassTo = true;
         ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-
-        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID);
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << posDiff.length());
     }
     
 

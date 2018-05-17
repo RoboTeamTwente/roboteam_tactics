@@ -87,7 +87,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
-
+        
         thresholdTarget = 0.07;
         minTarget = 0.30;
 
@@ -108,15 +108,15 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
-        pGainPosition = 2.0;//2.0
-        iGainPosition = 0.0;//0.0
-        dGainPosition = 0.0; //0.0
+        pGainPosition = 2.0; //2.0
+        iGainPosition = 0.0;
+        dGainPosition = 0.0;
         pGainRotation = 2.0;
         iGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
 
-        thresholdTarget = 0.07;
+        thresholdTarget = 0.03;
         minTarget = 0.10;
 
         robotType = RobotType::GRSIM;
@@ -229,7 +229,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
  
     Vector2 posError = targetPos - myPos;
 
-    // Integral term
+    // Integral term (SEEMS HACKY, ALSO IT SHOULD TAKE TIME STEP INTO ACCOUNT)
     if (posError.length() < 0.20 && posError.length() > 0.04) {
         posErrorI = posErrorI.scale(0.95) + posError.scale(1);
     } else {
@@ -244,18 +244,18 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    // If velocity target is too low, it's set to a minimum value
+    // If velocity target is too low, it's set to a minimum value. PROBABLY NOT NECESSARY ANYMORE WHEN USING FRICTION COMPENSATION ON ROBOT
     if (velTarget.length() < minTarget) {
         if (velTarget.length() > thresholdTarget) {
             velTarget = velTarget.scale(minTarget / velTarget.length());  
         }
-    }
+    }   
 
     return velTarget;
 }
 
 
-// Proportional velocity controller
+// Proportional velocity controller NOT USED ANYMORE
 Vector2 Control::velocityController(Vector2 myVelRobotFrame, Vector2 velTarget) {
 
     Vector2 velError = prevVelCommand - myVelRobotFrame;
@@ -317,11 +317,9 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
     bool forceAngle = false;
 
-
     if (posError.length() > 1.0 && !forceAngle) {
         angleGoal = posError.angle();
     }
-
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
@@ -351,17 +349,12 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    // Limit the angular velocity target
-    if (fabs(angularVelTarget) > maxAngularVel) {
-        angularVelTarget = angularVelTarget / fabs(angularVelTarget) * maxAngularVel;
-    }
-
-    if (fabs(angularVelTarget) < 2.2) {
-        if (fabs(angularVelTarget) > 0.5) {
-            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-        }
-    }
-
+    // This seems quite hacky REMOVED FOR NOW
+    // if (fabs(angularVelTarget) < 2.2) {
+    //     if (fabs(angularVelTarget) > 0.5) {
+    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+    //     }
+    // }
 
     return angularVelTarget;
 }
@@ -379,26 +372,17 @@ Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
     //     }
 
     // } else {
-
-        // Limit the robot velocity to the maximum speed
-        if (sumOfForces.length() > maxSpeed) {
-            if (sumOfForces.length() > 0.0) {
-                sumOfForces = sumOfForces.scale(maxSpeed / sumOfForces.length());
-            }
-        }
-
+    double L = sumOfForces.length();
+    // Limit the robot velocity to the maximum speed
+    if (L > maxSpeed && L > 0.0) {
+        sumOfForces = sumOfForces.scale(maxSpeed / L);
+    }
     // }
 
-
-    
-
-    if (fabs(sumOfForces.y) > 1.0) {
-        sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
-    }
-
-
-
-
+        // WHY WAS THIS HERE?
+    // if (fabs(sumOfForces.y) > 1.0) {
+    //     sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
+    // }
 
     return sumOfForces;
 }

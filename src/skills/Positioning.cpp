@@ -15,7 +15,10 @@ RTT_REGISTER_SKILL(Positioning);
 
 Positioning::Positioning(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
-        , goToPos("", private_bb) {}
+        , goToPos("", private_bb) {
+
+            start = now();
+        }
 
 void Positioning::Initialize() {
     robotID = blackboard->GetInt("ROBOT_ID");
@@ -57,7 +60,6 @@ void Positioning::Initialize() {
 
     counter = 1;
     // counter2 = 0;
-    start = now();
 }
 
 void Positioning::Terminate(bt::Node::Status s) {
@@ -99,7 +101,7 @@ bt::Node::Status Positioning::Update() {
 
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 300) { // !passIncoming && 
+    if (elapsedTime.count() >= 500) { // WIP: extra check for zero or very low score on current claimed pos?
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position

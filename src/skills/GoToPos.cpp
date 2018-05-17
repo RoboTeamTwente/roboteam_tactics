@@ -5,19 +5,23 @@
 #include <ros/ros.h>
 
 #include "roboteam_msgs/GeometryFieldSize.h"
+#include "roboteam_msgs/FieldLineSegment.h"
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/WorldRobot.h"
+
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/skills/GoToPos.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
+#include "roboteam_tactics/conditions/DistanceXToY.h"
+#include "roboteam_tactics/conditions/IsInDefenseArea.h"
+
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_utils/LastRef.h"
 #include "roboteam_utils/Math.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/world_analysis.h"
-#include "roboteam_tactics/conditions/DistanceXToY.h"
-#include "roboteam_tactics/conditions/IsInDefenseArea.h"
+#include "roboteam_utils/Section.h"
 
 #define RTT_CURRENT_DEBUG_TAG GoToPos
 
@@ -48,12 +52,12 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
                 avoidRobotsGain = 0.010;
-                cushionGain = 0.06;
+                cushionGain = 0.12;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
                 maxDist = 0.3; // no force is exerted when dist is larger than maxDist
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = -0.1; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 0.005;
                 cushionGain = 0.06;
                 minDist = 0.01; // avoidance force does not increase further when dist becomes smaller that minDist
@@ -148,13 +152,12 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             if (relativeVel.length()>0.2 && myVel.length()>0.1) {
                 relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
             }
-            
+
             if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
-//                drawer.setColor(0, 0, 255);
-//                drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
+                drawer.setColor(0, 0, 255);
+                drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
-
                 // Determine the crash velocity (velocity at which the robots would crash into eachother)..
                 // ..and determine the 'cushion force' to damp out this crash velocity.
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
@@ -164,8 +167,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfCushions = sumOfCushions + cushionForce; // We add the cushion force to the total
-//                drawer.setColor(255, 0, 255);
-//                drawer.drawLine("cushionForce" + std::to_string(currentRobot.id),otherRobotPos,cushionForce.scale(0.5));
+                drawer.setColor(255, 0, 255);
+                drawer.drawLine("cushionForce" + std::to_string(currentRobot.id),otherRobotPos,cushionForce.scale(0.5));
             }
         }
     }
@@ -179,11 +182,11 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
             if (relativeVel.length()>0.2 && myVel.length()>0.1) {
                 relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
             }
-            
+
             if (distToRobot <= antenna.length() && relativeAntenna.dot(myVel) > 0) {
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna);
-//                drawer.setColor(0, 0, 255);
-//                drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
+                drawer.setColor(0, 0, 255);
+                drawer.drawLine("avoidForce" + std::to_string(i),otherRobotPos,forceVector.scale(0.5));
                 sumOfForces = sumOfForces + forceVector; //We add the avoidance forceVector to the total
                 //'crashVel' is the velocity at which the robots would crash into eachother
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
@@ -194,8 +197,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfCushions = sumOfCushions + cushionForce; //We add the cushion force to the total
-//                drawer.setColor(255, 0, 255);
-//                drawer.drawLine("cushionForce" + std::to_string(i),otherRobotPos,cushionForce.scale(0.5));
+                drawer.setColor(255, 0, 255);
+                drawer.drawLine("cushionForce" + std::to_string(i),otherRobotPos,cushionForce.scale(0.5));
             }
     }
 
@@ -206,8 +209,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
     // drawer.setColor(0, 0, 255);
     // drawer.drawLine("sumOfForces", myPos, sumOfForces.scale(0.5));
 
-//    drawer.setColor(0, 155, 155);
-//    drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
+    drawer.setColor(0, 155, 155);
+    drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
 
     sumOfForces = sumOfForces + sumOfCushions;
     return sumOfForces;
@@ -217,32 +220,35 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos) {
 // Computes a velocity vector that can be added to the normal velocity command vector, in order to avoid the goal areas by moving only parralel to the goal area when close
 Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces) {
     Vector2 posError = targetPos - myPos;
+    Vector2 newSumOfForces = sumOfForces;
+    double max = 0.3;
 
-    if (ROBOT_ID != KEEPER_ID) {
-        Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, safetyMarginGoalAreas);
-        if (isWithinDefenseArea(true, myPos, safetyMarginGoalAreas)) {
-            // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
-        } else if ((distToOurDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToOurDefenseArea) > 0) {
-            if (sumOfForces.dot(distToOurDefenseArea.rotate(0.5*M_PI)) > 0) {
-                sumOfForces = distToOurDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
-            } else {
-                sumOfForces = distToOurDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToOurDefenseArea.length());
+    if (posError.length() > max) {
+
+        if (ROBOT_ID != KEEPER_ID) {
+            // Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, safetyMarginGoalAreas);
+            Vector2 distToOurDefenseArea = getDistToDefenseArea(true, myPos, 0.0);
+            double dist = distToOurDefenseArea.length();
+            if (isWithinDefenseArea(true, myPos, 0.001)) {
+                // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
+            }  else if (dist < max + safetyMarginGoalAreas && dist > 0.001 && sumOfForces.dot(distToOurDefenseArea) > 0) {
+                Vector2 dirForce = sumOfForces.project2(distToOurDefenseArea);
+                newSumOfForces = sumOfForces - dirForce.scale(1 - (dist - safetyMarginGoalAreas)/max);
             }
+
+        }
+
+        Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, myPos, 0.0);
+        double dist = distToTheirDefenseArea.length();
+        if (isWithinDefenseArea(false, myPos, 0.001)) {
+            // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
+        } else if (dist < max + safetyMarginGoalAreas && dist > 0.001 && sumOfForces.dot(distToTheirDefenseArea) > 0) {
+            Vector2 dirForce = sumOfForces.project2(distToTheirDefenseArea);
+            newSumOfForces = sumOfForces - dirForce.scale(1 - (dist - safetyMarginGoalAreas)/max);
         }
     }
 
-    Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, myPos, safetyMarginGoalAreas);
-    if (isWithinDefenseArea(false, myPos, safetyMarginGoalAreas)) {
-        // If we are already in the defense area, it's best just to drive straight out of it and not to add any weird forces
-    } else if ((distToTheirDefenseArea.length() < 0.5) && posError.length() > 0.5 && myVel.dot(distToTheirDefenseArea) > 0) {
-        if (sumOfForces.dot(distToTheirDefenseArea.rotate(0.5*M_PI)) > 0) {
-            sumOfForces = distToTheirDefenseArea.rotate(0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
-        } else {
-            sumOfForces = distToTheirDefenseArea.rotate(-0.5*M_PI).scale(sumOfForces.length() / distToTheirDefenseArea.length());
-        }
-    }
-
-    return sumOfForces;
+    return newSumOfForces;
 }
 
 
@@ -275,7 +281,7 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, 
 
 
 // Makes sure that the given target position is not inside a goal area, or (too far) outside the field. "Too far" is specified by the class variable marginOutsideField
-Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
+Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
     double xGoal = targetPos.x;
@@ -286,7 +292,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
     if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
         newMargin = -0.1;
     }
-    if (fabs(yGoal) < (field.goal_width/2)) {
+    if (fabs(yGoal) < (field.goal_width / 2)) {
         newMargin = -0.05;
     }
 
@@ -308,12 +314,16 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(true, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea(true, newTargetPos, safetyMarginGoalAreas);
+            drawer.setColor(50, 50, 50);
+            drawer.drawLine("defAreaLine", newTargetPos, distToOurDefenseArea);
             newTargetPos = newTargetPos + distToOurDefenseArea;
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
         if (isWithinDefenseArea(false, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, newTargetPos, safetyMarginGoalAreas);
+            drawer.setColor(50, 50, 100);
+            drawer.drawLine("defTheirAreaLine", newTargetPos, distToTheirDefenseArea);
             newTargetPos = newTargetPos + distToTheirDefenseArea;
         }
     }
@@ -359,9 +369,65 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos) {
         }
     }
 
+    /////////////////////////
+    // Check to prevent getting stuck behind the rectangular defense area
+    Vector2 posError = newTargetPos - myPos;
+    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas")) && posError.length() > 0.3) {
+        Section posErrorSec(myPos.x, myPos.y, newTargetPos.x, newTargetPos.y);
+        //roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+        roboteam_msgs::FieldLineSegment line;
+        int sig;
+        if (myPos.x < 0) {
+            line = field.left_penalty_line;
+            sig = -1;
+        } else {
+            line = field.right_penalty_line;
+            sig = 1;
+        }
+        double px1 = line.begin.x;
+        double px2 = sig * (field.field_length/2 + 1); // extra margin should make sure this also works if the bot is beyond the goal line
+        double py1 = line.begin.y;
+        double py2 = line.end.y;
+        if (py1 > py2) { // make sure py1 is always smaller than py2
+            py1 = py2;
+            py2 = line.begin.y;
+        }
+        // Define defense area sections
+        Section bottomSec(px1, py1, px2, py1);
+        Section topSec(px1, py2, px2, py2);
+        Section verticalSec(px1, py1, px1, py2);
+        // Find intersections 
+        Vector2 intersect1 = posErrorSec.intersection(bottomSec);
+        Vector2 intersect2 = posErrorSec.intersection(topSec);
+        Vector2 intersect3 = posErrorSec.intersection(verticalSec);
+        // Add safety margins to defense area points, which can now function as intermediate target points
+        px1 -= sig * safetyMarginGoalAreas;
+        py1 -= safetyMarginGoalAreas;
+        py2 += safetyMarginGoalAreas;
 
-    
-
+        // If my posError section intersects the defense area (excluding margins) -> use intermediate target point
+        if ((posErrorSec.pointOnLine(intersect1) && bottomSec.pointOnLine(intersect1))
+            || (posErrorSec.pointOnLine(intersect2) && topSec.pointOnLine(intersect2))
+            || (posErrorSec.pointOnLine(intersect3) && verticalSec.pointOnLine(intersect3))) {
+            Vector2 interTarget = newTargetPos;
+            double extra = 0.3;
+            if (fabs(myPos.x) > fabs(px1)) {
+                if(myPos.y < 0) {
+                    interTarget = Vector2(px1 - sig * extra, py1);
+                } else {
+                    interTarget = Vector2(px1 - sig * extra, py2);
+                }
+            } else {
+                if(myPos.y < newTargetPos.y) {
+                    interTarget = Vector2(px1, py2 + extra);
+                } else {
+                    interTarget = Vector2(px1, py1 - extra);
+                }
+            }
+            newTargetPos = interTarget;
+        }
+    }
+    //////////////////////////////////
     return newTargetPos;
 }
 
@@ -420,18 +486,20 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         return boost::none;
     }
 
+    // Store some variables for easy access
+    Vector2 myPos(me.pos);
+    Vector2 myVel(me.vel);
 
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
     } else {
-        targetPos = checkTargetPos(targetPos);
+        targetPos = checkTargetPos(targetPos, myPos);
         prevTargetPos = targetPos;
     }
 
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         // ROS_INFO_STREAM("robot" << ROBOT_ID << " in stayAwayFromBall" );
-        roboteam_msgs::World world = LastWorld::get();
         Vector2 ballPos(world.ball.pos);
         if ((ballPos - targetPos).length() < 0.7) {
             Vector2 diffVecNorm = (targetPos - ballPos).normalize();
@@ -439,22 +507,14 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-    // Store some variables for easy access
-    Vector2 myPos(me.pos);
-    Vector2 myVel(me.vel);
     Vector2 posError = targetPos - myPos;
-
-    // For the 1v1 demo: if the robot (which is controlled by a human) gets inside our defense area, ..
-    // ..generate a targetpos just outside the defense area based on the robot position
-    if (HasBool("goalOutsideDefenseArea") && GetBool("goalOutsideDefenseArea")) {
-        targetPos = checkTargetPos(myPos);
-    }
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
     drawer.setColor(0, 0, 0);
 
+    // Determine angle goal and error
     double angleGoal;
     if (HasDouble("angleGoal")) {
         angleGoal = cleanAngle(GetDouble("angleGoal"));
@@ -462,10 +522,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         angleGoal = me.angle;
     }
 
-    // if (posError.length() > 0.5) {
-    //     angleGoal = posError.angle();
-    // }
-
+    if (posError.length() > 0.5) {
+        angleGoal = posError.angle();
+    }
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);
     double myAngularVel = me.w;
@@ -475,7 +534,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("successDist")) {
         successDist = GetDouble("successDist");
     } else {
-        successDist = 0.05;//WAS 0.03
+        successDist = 0.01;
     }
 
     // If we are close enough to our target position and target orientation, then stop the robot and return success
@@ -501,80 +560,72 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {
         // AvoidRobots defaults to true if not set
     } else {
-        Vector2 newSumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
-        if (newSumOfForces.length() >= 1.5) {
-            angleGoal = newSumOfForces.angle();
-            angleError = cleanAngle(angleGoal - myAngle);
-        }
-        sumOfForces = newSumOfForces;
+        Vector2 sumOfForces = sumOfForces + avoidRobots(myPos, myVel, targetPos);
+        // TODO: IS THE FOLLOWING NECESSARY? MIGHT BE BETTER WITHOUT
+        // if (newSumOfForces.length() >= 1.5) {
+        //     angleGoal = newSumOfForces.angle();
+        //     angleError = cleanAngle(angleGoal - myAngle);
+        // }
     }
-
-    // Rotation controller to make sure the robot reaches its angleGoal
-    double angularVelTarget = controller.rotationController(myAngle, angleGoal, posError, myAngularVel);
-
-    
-
-    // Defense area avoidance
-    if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
-        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
-    }
-
     // Ball avoidance
     if (HasBool("avoidBall") && GetBool("avoidBall")) {
         Vector2 ballPos = Vector2(world.ball.pos);
         sumOfForces = avoidBall(ballPos, myPos, sumOfForces, targetPos, myVel);
     }
+    // Defense area avoidance
+    if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
+        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+    }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
+    drawer.setColor(0, 0, 0);
 
-//    drawer.setColor(255, 0, 0);
-//    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
-//    drawer.setColor(0, 0, 0);
+    // Different velocity commands for grsim and real robot
+    roboteam_msgs::RobotCommand command;
+    Vector2 velCommand;
+    if (robot_output_target == "grsim") {
 
-    // TEMPORARILY DRAW BALL VEL (FOR DEBUGGING)
-    // Vector2 ballPos = Vector2(world.ball.pos);
-    // Vector2 ballVel = Vector2(world.ball.vel);
-    // drawer.setColor(255, 0, 0);
-    // drawer.drawLine("balVel", ballPos, ballVel);
-
-    // Rotate the commands from world frame to robot frame
-    Vector2 velTarget = worldToRobotFrame(sumOfForces, myAngle);
-
-    // BEUN Solution for now: strafing needs more gain
-    if (HasDouble("strafeGain")) {
-        velTarget.y = velTarget.y * GetDouble("strafeGain");
+        velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
+        double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
+        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
+        
+        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
+            command.w = 0;
+        } else {
+            command.w = angularVelCommand;
+        }
+    } else {
+        // The rotation of linear velocity to robot frame happens on the robot itself now
+        // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
+        velCommand = sumOfForces;
+        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
+            angleGoal = cleanAngle(velCommand.angle() + M_PI);
+        }
+        double angleCommand = angleGoal/180*2047; // make sure it fits in the package
+        command.w = angleCommand;
     }
-    
-    // Velocity controller
-    // Vector2 velCommand = controller.velocityController(myVelRobotFrame, velTarget);
-    
-    Vector2 velCommand = velTarget;
 
-    // Limit angular and linear velocity
-    velCommand = controller.limitVel(velCommand, angularVelTarget);
-    angularVelTarget = controller.limitAngularVel(angularVelTarget);
-
+    // Apply any max velocity that is set
     double maxVel = GetDouble("maxVelocity", 299792458.0);
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
 
-    if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
-        if (velCommand.length() >= 1.5) {
-            velCommand = velCommand.scale(1.5 / velCommand.length());
-        }
-    }
+    // WHY WAS THIS HERE?
+    // if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
+    //     if (velCommand.length() >= 1.5) {
+    //         velCommand = velCommand.scale(1.5 / velCommand.length());
+    //     }
+    // }
 
-
-    // Fill the command message
-    roboteam_msgs::RobotCommand command;
+    // fill the rest of command message
     command.id = ROBOT_ID;
+    command.dribbler = GetBool("dribbler");
     command.x_vel = velCommand.x;
     command.y_vel = velCommand.y;
-    if ( !(HasBool("dontRotate") && GetBool("dontRotate")) ) {
-        command.w = angularVelTarget;
-    }
-    command.dribbler = GetBool("dribbler");
 
     return command;
 }
