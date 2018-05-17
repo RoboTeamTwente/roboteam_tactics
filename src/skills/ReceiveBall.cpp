@@ -103,8 +103,7 @@ void ReceiveBall::Initialize() {
 
 void ReceiveBall::Terminate(bt::Node::Status s) {
 
-	if (!hasTerminated) {
-	// If ReceiveBall hasnt terminated already... (OF COURSE THIS SHOULD BE HANDLED BETTER BY THE BEHAVIORTREES(?))
+	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
 
 		if (GetBool("setSignal")) {
@@ -285,6 +284,10 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 }
 
 bt::Node::Status ReceiveBall::Update() {
+	if (hasTerminated) { // Temporary hack, because terminate is not always called at the right moments (similar hack in terminate function)
+        Initialize();
+    }
+
 
     // Get the last world information and some blackboard info
 	roboteam_msgs::World world = LastWorld::get();
@@ -413,20 +416,24 @@ bt::Node::Status ReceiveBall::Update() {
 	// }
 
 	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
-	double role_iterations_per_second = 0.0;
-	ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
-	double timeStep;
-	if (role_iterations_per_second == 0.0) {
-		timeStep = 1.0 / 30.0;
-	} else {
-		timeStep = 1.0 / role_iterations_per_second;
-	}
+
+	// double role_iterations_per_second = 0.0;
+	// ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
+	// double timeStep;
+	// if (role_iterations_per_second == 0.0) {
+	// 	timeStep = 1.0 / 30.0;
+	// } else {
+	// 	timeStep = 1.0 / role_iterations_per_second;
+	// }
 	double distanceToBall = (ballPos-myPos).length();
-	if (shootAtGoal) {
-		if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
-			startKicking = true;
-			ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
-		}
+	// if (shootAtGoal) {
+	// 	if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
+	// 		startKicking = true;
+	// 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
+	// 	}
+	// }
+	if (shootAtGoal && distanceToBall < 2.0) {
+		startKicking = true;
 	}
 
 	// If the ball gets close, turn on the dribbler
