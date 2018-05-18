@@ -93,18 +93,18 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 2.0;//3.0
+        pGainPosition = 3.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.0; //prevteam: 0.5
-        pGainRotation = 2.5; 
+        dGainPosition = 0.5; //prevteam: 0.5
+        pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 4.0;
-        maxAngularVel = 10.0;
+        maxSpeed = 5.0;
+        maxAngularVel = 20.0;
 
-        thresholdTarget = 0.04;
-        minTarget = 0.40;
+        thresholdTarget = 0.02;
+        minTarget = 0.30;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
@@ -237,7 +237,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
     }
 
     // Control equation
-    Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition - myVel*dGainPosition;
+    Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition - myVel*dGainPosition; // should use derivative of error instead of myVel
 
     // Limit velocity target to the maxSpeed
     if (velTarget.length() > maxSpeed) {

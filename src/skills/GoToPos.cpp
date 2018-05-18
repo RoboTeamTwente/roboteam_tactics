@@ -490,6 +490,43 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
 
+    // Determine angle goal and error
+    double angleGoal;
+    if (HasDouble("angleGoal")) {
+        angleGoal = cleanAngle(GetDouble("angleGoal"));
+    } else {
+        angleGoal = me.angle;
+    }
+    // TODO: TURNED OFF FOR TESTING:
+    // if (posError.length() > 0.5) {
+    //     angleGoal = posError.angle();
+    // }
+    double myAngle = me.angle;
+    double angleError = cleanAngle(angleGoal - myAngle);
+    double myAngularVel = me.w;
+
+    // Determine how close we should get to the targetPos before we succeed
+    double successDist;
+    if (HasDouble("successDist")) {
+        successDist = GetDouble("successDist");
+    } else {
+        successDist = 0.05;
+    }
+
+    Vector2 posError = targetPos - myPos;;
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < successDist && fabs(angleError) < 0.08) {
+        successCounter++;
+        if (successCounter >= 3) {
+            //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
+            succeeded = true;
+            failure = false;
+            return boost::none;
+        }
+    } else {
+        successCounter = 0;
+    }
+
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
@@ -507,48 +544,38 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-    Vector2 posError = targetPos - myPos;
+
+    // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
+    static time_point prevTime = now();
+    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    prevTime = now();
+    double max_diff = 8.0*timeDiff*0.001;
+    static Vector2 prevTarget = myPos + Vector2(0.01,0);
+    Vector2 targetDiff = targetPos - prevTarget;
+    if (targetDiff.length() > max_diff) {
+        targetPos = (prevTarget + targetDiff.scale(max_diff));
+    }
+    prevTarget = targetPos;
+
+    // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
+    // static time_point prevTime = now();
+    // int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    // prevTime = now();
+    // double max_diff = 10.0*timeDiff*0.001;
+    // static Vector2 prevCommand;
+    // Vector2 commandDiff = sumOfForces - prevCommand;
+    // if (commandDiff.length() > max_diff) {
+    //     sumOfForces = (prevCommand + commandDiff.scale(max_diff));
+    // }
+    // prevCommand = sumOfForces;
+    //////////
+
+    posError = targetPos - myPos;
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
     drawer.setColor(0, 0, 0);
-
-    // Determine angle goal and error
-    double angleGoal;
-    if (HasDouble("angleGoal")) {
-        angleGoal = cleanAngle(GetDouble("angleGoal"));
-    } else {
-        angleGoal = me.angle;
-    }
-
-    if (posError.length() > 0.5) {
-        angleGoal = posError.angle();
-    }
-    double myAngle = me.angle;
-    double angleError = cleanAngle(angleGoal - myAngle);
-    double myAngularVel = me.w;
-
-    // Determine how close we should get to the targetPos before we succeed
-    double successDist;
-    if (HasDouble("successDist")) {
-        successDist = GetDouble("successDist");
-    } else {
-        successDist = 0.01;
-    }
-
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.08) {
-        successCounter++;
-        if (successCounter >= 3) {
-            //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
-            succeeded = true;
-            failure = false;
-            return boost::none;
-        }
-    } else {
-        successCounter = 0;
-    }
 
     // A vector to combine all the influences of different controllers (normal position controller, obstacle avoidance, defense area avoidance...)
     Vector2 sumOfForces(0.0, 0.0);
@@ -579,7 +606,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
     drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces);
     drawer.setColor(0, 0, 0);
 
     // Different velocity commands for grsim and real robot
@@ -598,14 +625,21 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             command.w = angularVelCommand;
         }
     } else {
-        // The rotation of linear velocity to robot frame happens on the robot itself now
-        // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
-        velCommand = sumOfForces;
+        velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
+        double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
+        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        
+        // angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
+        // // The rotation of linear velocity to robot frame happens on the robot itself now
+        // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
+        // velCommand = sumOfForces;
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
             angleGoal = cleanAngle(velCommand.angle() + M_PI);
         }
         double angleCommand = angleGoal/180*2047; // make sure it fits in the package
-        command.w = angleCommand;
+        command.w = angleCommand;//angularVelCommand;//angleCommand;
+        // command.kicker_vel = myAngle/M_PI*4 + 4; // TEMPORARY HACK by sending my angle through the kicker_vel channel
+        // command.kicker = true;
     }
 
     // Apply any max velocity that is set
