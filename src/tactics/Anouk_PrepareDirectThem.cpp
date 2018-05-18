@@ -24,15 +24,20 @@ namespace rtt {
 
 
     std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(double minDangerScore){
+
         // Get the last world
         roboteam_msgs::World world = LastWorld::get();
 
         // Get the position of the ball
         Vector2 ballPos(world.ball.pos);
 
+
+
         // === Get their robot that is the closest to the ball === //
+
         int oppKicker = -1; // Holds the kicker ID
         double oppClosestDistance = 9999; // Holds the closest distance
+
         for(size_t i = 0; i < world.them.size(); i++){
             // Get the distance between the ball and the current opponent
             double distanceToBall = (Vector2(world.them.at(i).pos) - ballPos).length();
@@ -42,8 +47,13 @@ namespace rtt {
                 oppKicker = i;
             }
         }
+
         ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot closest to ball : " << oppKicker);
+
         // ======================================================= //
+
+
+
 
         // === Find the most dangerous opponents, excluding the kicker ===
         // Vector to hold the new robots to defend
@@ -69,6 +79,7 @@ namespace rtt {
         return newRobotsToDefend;
     }
 
+
     void Anouk_PrepareDirectThem::Initialize() {
 
         // Check if this tree is used for the correct RefState, PREPARE_PENALTY_THEM
@@ -78,7 +89,7 @@ namespace rtt {
         }
 
         // Get the robots that should be defended
-        std::vector<int> robotsToDefend = GetRobotsToDefend(3.0);
+        robotsToDefend = GetRobotsToDefend(3.0);
 
         // Print the robots that should be defended
         std::stringstream vectorStr;
@@ -86,12 +97,14 @@ namespace rtt {
         ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend : " << vectorStr.str().c_str());
 
 
-
+        // Get the robots that should be intercepted
+        robotsToIntercept = GetRobotsToDefend(0.0);
 
 
         // Get all the available robots
         std::vector<int> robots = getAvailableRobots();
         int robotsLeft = (int)robots.size();
+
 
         // Number of ball defenders
         int numBallDefenders = std::min(robotsLeft, 2);
@@ -114,11 +127,14 @@ namespace rtt {
 
         double angleGoalToBall = -(ballPos - goalPos).angle();
 
+
+
+
         // Calculate the positions of the ball defenders
         std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20, goalPos, angleGoalToBall, 1.8);
 
         // Place the ball defenders and robot defender, also claims the robots
-        Emiel_Prepare::prepare(defenderCoords, robotsToDefend);
+        Emiel_Prepare::prepare(defenderCoords, robotsToDefend, robotsToIntercept);
 
         // Initialize the robots that are left
 
@@ -126,6 +142,29 @@ namespace rtt {
     }
 
     bt::Node::Status Anouk_PrepareDirectThem::Update() {
-        return Status::Running;
+        // Get the new robots that should be intercepted
+        std::vector<int> robotsToInterceptNew = GetRobotsToDefend(0.0);
+        // Get the new robots that should be defended
+        std::vector<int> robotsToDefendNew = GetRobotsToDefend(3.0);
+
+        if (robotsToDefend.size() == robotsToDefendNew.size() && robotsToIntercept.size() == robotsToInterceptNew.size()){
+            for (size_t i = 0; i < robotsToDefendNew.size(); i++) {
+                if (robotsToDefend[i] != robotsToDefendNew[i]){
+                    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Not Equal: Status Success ");
+                    return Status::Success;
+                }
+            }
+            for (size_t i = 0; i < robotsToInterceptNew.size(); i++) {
+                if (robotsToIntercept[i] != robotsToInterceptNew[i]) {
+                    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Not Equal: Status Success ");
+                    return Status::Success;
+                }
+            }
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Equal: Status Running ");
+            return Status::Running;
+        } else {
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Not Equal size: [" << robotsToDefend.size() << " - " << robotsToDefendNew.size() << " - " << robotsToIntercept.size() << " - " << robotsToInterceptNew.size() << "]");
+            return Status::Success;
+        }
     }
 }

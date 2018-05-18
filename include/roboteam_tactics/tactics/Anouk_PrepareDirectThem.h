@@ -21,6 +21,7 @@ namespace rtt {
 
         std::vector<int> GetRobotsToDefend(double minDangerScore);
         std::vector<int> robotsToDefend;
+        std::vector<int> robotsToIntercept;
 
     };
 

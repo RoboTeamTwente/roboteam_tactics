@@ -37,8 +37,7 @@ namespace rtt {
 		int numAttackers = std::max((int)robots.size()-numDefenders, 0);
 
 		// Calculate positions for defenders and attackers
-		/* Creates a line of 5? robots, 1.2 meter wide, 2 meters in front of our goal */
-//		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numDefenders, 2, Vector2(-4.8, 0), 0, 0);
+		/* Creates a circle of 5? robots, 1.2 meter wide, 2 meters in front of our goal */
 		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Circle(numDefenders, M_PI/2, -3, LastWorld::get_our_goal_center(), 3*M_PI, 0, 0);
 
 		/* Creates a line of 2? robots, covering M_PI/2 rad, in a circle with radius 3, around their goal center, with a M_PI rad phase shift */

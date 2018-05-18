@@ -11,12 +11,14 @@ namespace rtt {
 
 		std::vector <boost::uuids::uuid> prepare(std::vector<Vector2> positions);
 		std::vector <boost::uuids::uuid> prepare(std::vector<Vector2> positions, std::vector<int> robotsToDefend);
+		std::vector <boost::uuids::uuid> prepare(std::vector<Vector2> positions, std::vector<int> robotsToDefend, std::vector<int> robotsToIntercept);
 
 		ros::NodeHandle nh;
 	private:
 
 		boost::uuids::uuid init_ballDefender(int robotID, Vector2 position);
 		boost::uuids::uuid init_robotDefender(int robotID, int opponentID);
+		boost::uuids::uuid init_interceptDefender(int robotID, int opponentInterceptID);
 		bool init_robotDefender();
 
 	};
