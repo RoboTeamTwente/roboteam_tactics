@@ -71,8 +71,8 @@ public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
 
     void sendStopCommand(uint id);
-    Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna);
-    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos);
+    Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 sumOfForces);
+    Vector2 avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Vector2 sumOfForces);
     Vector2 avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel);
     Vector2 checkTargetPos(Vector2 targetPos, Vector2 myPos);
@@ -97,8 +97,7 @@ private:
     // Obstacle avoidance parameters
     double avoidRobotsGain;
     double cushionGain;
-    double minDist;
-    double maxDist;
+    double maxDistToAntenna;
 
     // Safety margins used to filter the target position
     double safetyMarginGoalAreas;

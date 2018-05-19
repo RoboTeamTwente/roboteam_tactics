@@ -244,7 +244,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         velTarget = velTarget.scale(maxSpeed / velTarget.length());
     }
 
-    // If velocity target is too low, it's set to a minimum value. PROBABLY NOT NECESSARY ANYMORE WHEN USING FRICTION COMPENSATION ON ROBOT
+    // If velocity target is too low, it's set to a minimum value
     if (velTarget.length() < minTarget) {
         if (velTarget.length() > thresholdTarget) {
             velTarget = velTarget.scale(minTarget / velTarget.length());  
