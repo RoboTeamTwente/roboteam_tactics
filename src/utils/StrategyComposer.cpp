@@ -56,7 +56,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::INDIRECT_FREE_US      , "rtt_jim/IndirectStrat"s         } ,
 
         // FreeKickDefenceStrategy
-        { RefState::INDIRECT_FREE_THEM    , "rtt_jim/KickOffDefenseStrat"s       } ,
+        { RefState::INDIRECT_FREE_THEM    , "rtt_anouk/PrepareDirectThem"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
         { RefState::TIMEOUT_THEM          , "rtt_jim/TimeOutStrat"s           } ,
         { RefState::GOAL_US               , "rtt_jim/DefensivePrepareStrat"s           } ,
@@ -71,7 +71,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
-        { RefState::DEFEND_PENALTY        , "rtt_dennis/DefendPenaltyStrategy"s  } ,
+        { RefState::DEFEND_PENALTY        , "rtt_emiel/PreparePenaltyThemStrategy"s  } ,
         { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,
 
         // SHOULD BE REMOVED

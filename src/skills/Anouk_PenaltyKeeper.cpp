@@ -1,13 +1,11 @@
 #include "roboteam_msgs/RoleDirective.h"
 
 #include "roboteam_tactics/skills/Anouk_PenaltyKeeper.h"
-#include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_msgs/World.h"
 
 #include "roboteam_utils/LastWorld.h"
-#include <sstream>
 #include "roboteam_utils/Math.h"
 
 #define ROS_LOG_NAME "skills.Anouk_PenaltyKeeper"
@@ -16,19 +14,29 @@ namespace rtt {
 
 RTT_REGISTER_SKILL(Anouk_PenaltyKeeper);
 
-    Anouk_PenaltyKeeper::Anouk_PenaltyKeeper(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard)
-        {}
+Anouk_PenaltyKeeper::Anouk_PenaltyKeeper(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPos("", private_bb){}
+
+void Anouk_PenaltyKeeper::publishStopCommand(int robotID) {
+    roboteam_msgs::RobotCommand command;
+    command.id = robotID;
+    command.x_vel = 0.0;
+    command.y_vel = 0.0;
+    command.w = 0.0;
+    command.dribbler = false;
+
+    rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher().publish(command);
+}
 
 Vector2 Anouk_PenaltyKeeper::calculateKeeperPosition(){
     // Get the last world
     roboteam_msgs::World world = LastWorld::get();
     // Get the position of the ball
     Vector2 ballPos(world.ball.pos);
+    // Get the position of the ball
+    Vector2 goalPos(LastWorld::get_our_goal_center());
 
 
     // === Get their robot that is the closest to the ball === //
-
     int oppKicker = -1; // Holds the kicker ID
     double oppClosestDistance = 9999; // Holds the closest distance
 
@@ -41,60 +49,50 @@ Vector2 Anouk_PenaltyKeeper::calculateKeeperPosition(){
             oppKicker = i;
         }
     }
-
     Vector2 oppKickerPos = Vector2(world.them.at(oppKicker).pos);
-
-    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot closest to ball : " << oppKicker);
-
     // ======================================================= //
 
+    // Angle between ball and kicker
     double angleBallOppKicker = (oppKickerPos - ballPos).angle();
 
-    keeperPosition = Vector2(-1.2, 0).rotate(angleBallOppKicker);
-    keeperPosition = KeeperPosition + Vector2(-4.8, 0);
+    double y = tan(angleBallOppKicker) * -(ballPos.x-goalPos.x);
+    double x = goalPos.x + 0.05;
 
-    return keeperPosition;
+    // === Don't let the keeper drive out of the goal === //
+    // Half the width of the goal minus the diameter of the robot
+    double maxOffset = 0.6 - 0.18;
+    if(maxOffset < y ) y =  maxOffset;
+    if(y < -maxOffset) y = -maxOffset ;
 
+    return Vector2(x, y);
 }
 
 void Anouk_PenaltyKeeper::Initialize() {
-    tokens.clear();
 
-    RTT_DEBUG("Initializing\n");
-    std::stringstream ss;
-    print_blackboard(blackboard, ss);
-    RTT_DEBUGLN("%s\n", ss.str().c_str());
+    private_bb->SetInt("ROBOT_ID", blackboard->GetInt("ROBOT_ID"));
+    private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
 
-    Vector2 keeperPos = calculateKeeperPosition();
-
-    // Claim the keeper
-    const int ROBOT_ID = RobotDealer::get_keeper();
-    claim_robots({ROBOT_ID});
-
-    // Fill blackboard with relevant info
-    bt::Blackboard bb;
-
-    bb.SetInt("ROBOT_ID", ROBOT_ID);
-    private_bb->SetDouble("receiveBallAtX", targetPos.x);
-    private_bb->SetDouble("receiveBallAtY", targetPos.y);
-    private_bb->SetBool("dontDriveToBall", GetBool("dontDriveToBall"));
-
-
-
-
-    // Create message
-    roboteam_msgs::RoleDirective wd;
-    wd.robot_id = ROBOT_ID;
-    wd.tree = "PenaltyKeeperRole";
-    wd.blackboard = bb.toMsg();
-
-    // Send to rolenode
-    // Get the default roledirective publisher
-    auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
-    pub.publish(wd);
 }
 
 bt::Node::Status Anouk_PenaltyKeeper::Update() {
+
+    // Calculate the position of the keeper
+    Vector2 keeperPos = Anouk_PenaltyKeeper::calculateKeeperPosition();
+    // Pass the position to GoToPos
+    private_bb->SetDouble("xGoal", keeperPos.x + 0.08);
+    private_bb->SetDouble("yGoal", keeperPos.y);
+    private_bb->SetDouble("angleGoal", 0);
+
+    // Get the RobotCommand for the keeper and publish it
+    boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+    if (commandPtr) {
+        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        roboteam_msgs::RobotCommand command = *commandPtr;
+        pub.publish(command);
+    }else{
+        Anouk_PenaltyKeeper::publishStopCommand(blackboard->GetInt("ROBOT_ID"));
+    }
+
     // Keeper tactic is never done
     return bt::Node::Status::Running;
 }
