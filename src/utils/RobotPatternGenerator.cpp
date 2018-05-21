@@ -25,10 +25,17 @@ namespace rtt {
 
 		std::vector<Vector2> x_y_coords;
 
-		// Calculate the step between each robot. In this case, distance in meters
-		float step = lineWidth / (numRobots - 1);
+		if(numRobots == 0)
+			return x_y_coords;
+
 		// Calculate the offset of the 1st robot
 		float offset = -lineWidth / 2;
+
+		// Calculate the step between each robot. In this case, distance in meters
+		float step = 0;
+		if(numRobots > 1)
+			step = lineWidth / (numRobots - 1);
+
 
 		// For each robot
 		for (int i = 0; i < numRobots; i++) {

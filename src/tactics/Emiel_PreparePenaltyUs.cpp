@@ -53,7 +53,7 @@ namespace rtt {
 		positions.insert(std::end(positions), std::begin(defenderCoords), std::end(defenderCoords));
 		positions.insert(std::end(positions), std::begin(attackerCoords), std::end(attackerCoords));
 
-		Emiel_Prepare::prepare(positions);
+		Emiel_Prepare::prepare(*refState, positions);
 
 	}
 

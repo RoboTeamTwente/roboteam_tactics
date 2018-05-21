@@ -38,7 +38,7 @@ namespace rtt {
 		// Add the kicker position
 		positions.push_back(Vector2(-0.5, 0));
 
-		Emiel_Prepare::prepare(positions);
+		Emiel_Prepare::prepare(*refState, positions);
 
 	}
 

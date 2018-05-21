@@ -33,13 +33,45 @@ namespace rtt {
  *       Can be:
  *          - office: If used on the field in the office
  *          - default: SSL specifications
+ *
+ *
+ *   - targetFromType / targetToType
+ *      Type: String
+ *      Descr: Used to specify the type of the FromTarget or the ToTarget
+ *      Can be:
+ *          - position: if the target is a fixed position
+ *          - object: if the target is a moving object (ball, robot)
+ *
+ *
+ *   - targetFromTypeX / targetToTypeX
+ *      Type: Double
+ *      Descr: x coordinate of the FromTarget or the ToTarget, used when targetType is position
+ *
+ *   - targetFromTypeY / targetToTypeY
+ *      Type: Double
+ *      Descr: y coordinate of the FromTarget or the ToTarget, used when targetType is position
+ *
+ *
+ *   - targetFromObj / targetToObj
+ *      Type: String
+ *      Descr: Used to specify the kind of object, used when targetType is object
+ *      Can be:
+ *          - ball: if the position of the target is the position of the ball
+ *          - us: if the position of the target is the position of on of our robots
+ *          - them: if the position of the target is the position of on of their robots
+ *
+ *   - targetFromRobotId / targetToRobotId
+ *      Type: Int
+ *      Descr: used to specify the id of the robot, used when the targetType is robot
  */
 
 class SimpleDefender : public Skill {
 public:
 	SimpleDefender(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     static Vector2 computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset);
-    static Vector2 computeDefensePointRatio(Vector2 defendPos, double ratio);
+    static Vector2 computeDefensePointRatio(Vector2 targetFrom, Vector2 targetTo, double ratio);
+    Vector2 getTargetFromPosition();
+    Vector2 getTargetToPosition();
 	Status Update();
 
     static VerificationMap required_params() {

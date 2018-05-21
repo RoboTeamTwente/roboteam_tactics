@@ -4,6 +4,9 @@
 #include "AimAtSafe.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Anouk_PenaltyKeeper.cpp"
+#undef ROS_LOG_NAME
+
 #include "Approach.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
