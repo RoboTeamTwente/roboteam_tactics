@@ -53,31 +53,65 @@ namespace rtt {
 			ROS_WARN_STREAM_NAMED("Emiel_Prepare", "Not enough robots to defend opponents! : #opponents: " << robotsToDefend.size() + ", robots : " << (robots.size() - positions.size()));
 		}
 
-		// ============================
-		// Initialize the normal Keeper
-		// ============================
-		{
-			claim_robot(keeperID);
 
-			// Create blackboard
-			bt::Blackboard bb;
-			bb.SetInt("ROBOT_ID", keeperID);
-			bb.SetInt("KEEPER_ID", keeperID);
+		// Check if this tree is used for  RefState PREPARE_PENALTY_THEM
+		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
+		if(refState == RefState::PREPARE_PENALTY_THEM){
+			// ============================
+			// Initialize the penalty Keeper
+			// ============================
+			{
+				claim_robot(keeperID);
+
+				// Create blackboard
+				bt::Blackboard bb;
+				bb.SetInt("ROBOT_ID", keeperID);
+				bb.SetInt("KEEPER_ID", keeperID);
 
 
-			// Create message
-			roboteam_msgs::RoleDirective rd;
-			rd.robot_id = keeperID;
-			rd.tree = "rtt_jim/DefenderRoleStop";
-			rd.blackboard = bb.toMsg();
+				// Create message
+				roboteam_msgs::RoleDirective rd;
+				rd.robot_id = keeperID;
+				rd.tree = "rtt_jim/DefenderRoleStop";
+				rd.blackboard = bb.toMsg();
 
-			// Add random token and save it for later
-			boost::uuids::uuid token = unique_id::fromRandom();
-			tokens.push_back(token);
-			rd.token = unique_id::toMsg(token);
+				// Add random token and save it for later
+				boost::uuids::uuid token = unique_id::fromRandom();
+				tokens.push_back(token);
+				rd.token = unique_id::toMsg(token);
 
-			// Send to rolenode
-			pub.publish(rd);
+				// Send to rolenode
+				pub.publish(rd);
+			}
+		}else {
+
+
+			// ============================
+			// Initialize the normal Keeper
+			// ============================
+			{
+				claim_robot(keeperID);
+
+				// Create blackboard
+				bt::Blackboard bb;
+				bb.SetInt("ROBOT_ID", keeperID);
+				bb.SetInt("KEEPER_ID", keeperID);
+
+
+				// Create message
+				roboteam_msgs::RoleDirective rd;
+				rd.robot_id = keeperID;
+				rd.tree = "rtt_jim/DefenderRoleStop";
+				rd.blackboard = bb.toMsg();
+
+				// Add random token and save it for later
+				boost::uuids::uuid token = unique_id::fromRandom();
+				tokens.push_back(token);
+				rd.token = unique_id::toMsg(token);
+
+				// Send to rolenode
+				pub.publish(rd);
+			}
 		}
 
 		// =====================================
