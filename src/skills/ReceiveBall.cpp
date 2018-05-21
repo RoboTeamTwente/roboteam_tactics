@@ -187,7 +187,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	} else if (velThreshold < 0.1) {
 		velThreshold = 0.1;
 	}
-	if (ballVel.dot(posdiff.stretchToLength(1)) < velThreshold) { // if the velocity in my direction is too low
+	if (ballVel.dot(posdiff.normalize()) < velThreshold) { // if the velocity in my direction is too low
 		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
 			// if a pass is noted to myself, I assume the ball is coming.
 			int robotClaimedBall;
@@ -202,7 +202,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	}//--------------------------
 
 	// Actual determining of the interceptPose
-	if (ballVel.length() < 0.1) {
+	if (ballVel.length() < 0.1 || ballVel.dot(posdiff.normalize()) < velThreshold) { // ball not coming towards me. TODO: ISNT THIS CHECK A BIT DOUBLE?
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
@@ -393,7 +393,7 @@ bt::Node::Status ReceiveBall::Update() {
 		targetAngle = interceptAngle;
 	}
 
-
+	// TODO: READYTORECEIVEBALL IS NOW USED AS AN ACKNOWLEDGEMENT SIGNAL RATHER THAN A READY SIGNAL. STUFF BELOW IS OLD:
 	// // Once we're close, turn off robot avoidance, and set the readyToReceiveBall param if necessary
 	// Vector2 posError = targetPos - myPos; //receiveBallAtPos - myPos;
 	// double readyDist = 0.5;

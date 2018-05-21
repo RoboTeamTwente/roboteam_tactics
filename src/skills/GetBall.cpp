@@ -216,13 +216,15 @@ void GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
     return;
 }
 
-Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos) { //WIP: needs testing for correctness
+//WIP: DIDNT GET THIS TO WORK WELL, PROBABLY AN ERROR IN THE MATH OR IN THE CONCEPT
+Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos) { 
     // this function calculates the closest position where I could intercept the ball ..
     // .. assuming I would get there at a certain constant velocity and the ball would not slow down
     // These assumptions are of course not completely accurate, but might work for this purpose
 
     // used parameters
-    double vBot = 1.0; // assumed constant robot velocity
+    double vBot = 1.5; // assumed constant robot velocity
+    double L_max = 3.0; // maximum margin ahead of ball
 
     // used variables
     double vBall = ballVel.length();    // absolute ball velocity
@@ -239,14 +241,14 @@ Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vecto
     double term1 = vBot*vBot*(rbx*rbx + rby*rby) - vBall*vBall*pow(rbx*vuy + rby*vux, 2);
     double term2 = (vBall*vBall - vBot*vBot);
     if (term1 < 0 || fabs(term2) < 0.001) { 
-    // prevent sqrt of negative number and division by 0 -> in this case the closest point from me to the ball trajectory becomes by best option
-    // although this probably means I won't be in time (IMPROVEMENT: maybe should just take some margin ahead of ball as best option here)
-        Vector2 closestPoint = ballPos - rb.project2(ballVel);
-        return closestPoint;
+    // prevent sqrt of negative number and division by 0 -> just take max margin ahead of ball as best option here
+        return ballPos + ballVel.scale(L_max / vBall);
     }
     double L = -vBall*( sqrt(term1) + vBall*(rbx*vux + rby*vuy)) / term2;
     if (L < 0) { // L should not be negative (no idea if that's possible at this point?)
         return ballPos;
+    } else if (L > L_max) {
+        L = L_max;
     }
     Vector2 interceptPos = ballPos + ballVel.scale(L / vBall);
     return interceptPos;
@@ -435,7 +437,6 @@ bt::Node::Status GetBall::Update (){
     Vector2 ballVel(ball.vel);
     Vector2 robotPos(robot.pos);
     Vector2 robotVel(robot.vel);
-    ballPos = computeBallInterception(ballPos, ballVel, robotPos); // pretend that the ball is at the location where we could intercept it
     Vector2 posDiff = ballPos - robotPos;
 
     // drawer.setColor(72, 0, 255);
@@ -458,7 +459,7 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
-        successDist = 0.12; //0.12
+        successDist = 0.10; //0.12
         successAngle = 0.10; //0.15
         if (GetBool("passToBestAttacker")) {
             successRobotAngle = 0.025;
@@ -566,6 +567,21 @@ bt::Node::Status GetBall::Update (){
         targetPos = ballPos + Vector2(-ballDist, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
     }
+    // Hack for better ball interception when ball has velocity
+    double vBall = ballVel.length();
+    if (vBall > 0.1) {
+        if (posDiff.length() > 0.1) {
+            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.0;
+            double max_ahead = 5.0;
+            if (vBall*L < max_ahead) {
+                targetPos = targetPos + ballVel.scale(L);
+            } else {
+                targetPos = targetPos + ballVel.stretchToLength(max_ahead);
+            }
+            
+        } 
+    }
+    //ballPos = computeBallInterception(ballPos, ballVel, robotPos); // pretend that the ball is at the location where we could intercept it
     
 
     // Return Success if we've been close to the ball for a certain number of frames
