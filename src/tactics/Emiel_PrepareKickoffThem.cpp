@@ -29,11 +29,9 @@ namespace rtt {
 			ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_KICKOFF_THEM");
 		}
 
-
 		// Get all the available robots
 		std::vector<int> robots = getAvailableRobots();
 		int robotsLeft = (int)robots.size();
-
 
 		// Number of ball defenders for the goal
 		int numBallDefendersGoal = std::min(robotsLeft, 2);
@@ -63,12 +61,7 @@ namespace rtt {
 		Vector2 goalPos(LastWorld::get_our_goal_center());
 
 
-
-
 		double angleGoalToBall = -(ballPos - goalPos).angle();
-
-
-
 
 		// Calculate the positions of the ball defenders for the goal
 		std::vector<Vector2> ballDefenderGoalCoords = RobotPatternGenerator::Line(numBallDefendersGoal, 0.5, goalPos, angleGoalToBall, 1.8);
@@ -79,19 +72,13 @@ namespace rtt {
 		// Calculate the positions of the side robots
 		std::vector<Vector2> sideDefenderCoords = RobotPatternGenerator::Line(numSideDefenders, 8.0, Vector2(0, 0), 0, -1.0);
 
-
-
-
-
 		// Put all positions into one array
 		std::vector<Vector2> positions;
 		positions.insert(std::end(positions), std::begin(ballDefenderGoalCoords), std::end(ballDefenderGoalCoords));
 		positions.insert(std::end(positions), std::begin(ballDefenderCoords), std::end(ballDefenderCoords));
 		positions.insert(std::end(positions), std::begin(sideDefenderCoords), std::end(sideDefenderCoords));
 
-
-
-		Emiel_Prepare::prepare(positions);
+		Emiel_Prepare::prepare(*refState, positions);
 
 	}
 

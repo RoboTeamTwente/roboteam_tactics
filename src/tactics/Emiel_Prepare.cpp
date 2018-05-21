@@ -23,15 +23,15 @@ namespace rtt {
 
 	Emiel_Prepare::Emiel_Prepare(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard){}
 
-	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(std::vector<Vector2> positions){
-		return prepare(positions, std::vector<int>(), std::vector<int>());
+	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(RefState refState, std::vector<Vector2> positions){
+		return prepare(refState, positions, std::vector<int>(), std::vector<int>());
 	}
 
-    std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(std::vector<Vector2> positions, std::vector<int> robotsToDefend){
-        return prepare(positions, robotsToDefend, std::vector<int>());
+    std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(RefState refState, std::vector<Vector2> positions, std::vector<int> robotsToDefend){
+        return prepare(refState, positions, robotsToDefend, std::vector<int>());
     }
 
-	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(std::vector<Vector2> positions, std::vector<int> robotsToDefend, std::vector<int> robotsToIntercept) {
+	std::vector<boost::uuids::uuid> Emiel_Prepare::prepare(RefState refState, std::vector<Vector2> positions, std::vector<int> robotsToDefend, std::vector<int> robotsToIntercept) {
 
 		std::vector<boost::uuids::uuid> tokens;
 
@@ -53,65 +53,35 @@ namespace rtt {
 			ROS_WARN_STREAM_NAMED("Emiel_Prepare", "Not enough robots to defend opponents! : #opponents: " << robotsToDefend.size() + ", robots : " << (robots.size() - positions.size()));
 		}
 
+		// ============================
+		// Initialize the normal Keeper
+		// ============================
+		{
+			claim_robot(keeperID);
 
-		// Check if this tree is used for  RefState PREPARE_PENALTY_THEM
-		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
-		if(refState == RefState::PREPARE_PENALTY_THEM){
-			// ============================
-			// Initialize the penalty Keeper
-			// ============================
-			{
-				claim_robot(keeperID);
+			// Create blackboard
+			bt::Blackboard bb;
+			bb.SetInt("ROBOT_ID", keeperID);
+			bb.SetInt("KEEPER_ID", keeperID);
 
-				// Create blackboard
-				bt::Blackboard bb;
-				bb.SetInt("ROBOT_ID", keeperID);
-				bb.SetInt("KEEPER_ID", keeperID);
+			// Create message
+			roboteam_msgs::RoleDirective rd;
+			rd.robot_id = keeperID;
 
-
-				// Create message
-				roboteam_msgs::RoleDirective rd;
-				rd.robot_id = keeperID;
+			if(refState == RefState::PREPARE_PENALTY_THEM || refState == RefState::DEFEND_PENALTY)
+				rd.tree = "rtt_anouk/PenaltyKeeperRole";
+			else
 				rd.tree = "rtt_jim/DefenderRoleStop";
-				rd.blackboard = bb.toMsg();
 
-				// Add random token and save it for later
-				boost::uuids::uuid token = unique_id::fromRandom();
-				tokens.push_back(token);
-				rd.token = unique_id::toMsg(token);
+			rd.blackboard = bb.toMsg();
 
-				// Send to rolenode
-				pub.publish(rd);
-			}
-		}else {
+			// Add random token and save it for later
+			boost::uuids::uuid token = unique_id::fromRandom();
+			tokens.push_back(token);
+			rd.token = unique_id::toMsg(token);
 
-
-			// ============================
-			// Initialize the normal Keeper
-			// ============================
-			{
-				claim_robot(keeperID);
-
-				// Create blackboard
-				bt::Blackboard bb;
-				bb.SetInt("ROBOT_ID", keeperID);
-				bb.SetInt("KEEPER_ID", keeperID);
-
-
-				// Create message
-				roboteam_msgs::RoleDirective rd;
-				rd.robot_id = keeperID;
-				rd.tree = "rtt_jim/DefenderRoleStop";
-				rd.blackboard = bb.toMsg();
-
-				// Add random token and save it for later
-				boost::uuids::uuid token = unique_id::fromRandom();
-				tokens.push_back(token);
-				rd.token = unique_id::toMsg(token);
-
-				// Send to rolenode
-				pub.publish(rd);
-			}
+			// Send to rolenode
+			pub.publish(rd);
 		}
 
 		// =====================================
@@ -120,7 +90,7 @@ namespace rtt {
 		// Calculate which robot should take which position
 		std::vector<int> robotsToPositions = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, positions, world);
 		// For each robot
-		ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to positions to defend...");
+//		ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to positions to defend...");
 		for (size_t i = 0; i < robotsToPositions.size(); i++) {
 			// Get its ID
 			int robotID = robotsToPositions.at(i);
@@ -130,7 +100,7 @@ namespace rtt {
 			// Initialize the ball defender
 			boost::uuids::uuid token = init_ballDefender(robotID, positions.at(i));
 			tokens.push_back(token);
-			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Claimed robot " << robotID << " for position " << positions.at(i));
+//			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Claimed robot " << robotID << " for position " << positions.at(i));
 		}
 
 
@@ -340,16 +310,16 @@ namespace rtt {
 
 		// Set blackboard variables
 		ScopedBB(bb, "SimpleDefender_A")
-				.setBool("stayAwayFromBall", true)
-				.setBool("dontDriveToBall", true)
-				.setDouble("A_maxSpeed", 1.3)
-				.setString("targetToType", "object")
-				.setString("targetToObj", "ball")
-				.setString("targetFromType", "object")
-				.setString("targetFromObj", "them")
-				.setInt("targetFromRobotId", opponentInterceptID)
-				.setDouble("distanceFromGoalRatio", 0.5)
-				;
+			.setBool("stayAwayFromBall", true)
+			.setBool("dontDriveToBall", true)
+			.setDouble("A_maxSpeed", 1.3)
+			.setString("targetToType", "object")
+			.setString("targetToObj", "ball")
+			.setString("targetFromType", "object")
+			.setString("targetFromObj", "them")
+			.setInt("targetFromRobotId", opponentInterceptID)
+			.setDouble("distanceFromGoalRatio", 0.5)
+			;
 
 		/* Create message */
 		roboteam_msgs::RoleDirective rd;

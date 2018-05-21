@@ -2,6 +2,7 @@
 
 #include "roboteam_tactics/Parts.h"
 #include <boost/uuid/uuid.hpp>
+#include "roboteam_utils/LastRef.h"
 
 namespace rtt {
 
@@ -16,6 +17,7 @@ namespace rtt {
 
 	private:
 		std::vector<boost::uuids::uuid> tokens;
+		boost::optional<rtt::RefState> refState;
 	};
 
 }

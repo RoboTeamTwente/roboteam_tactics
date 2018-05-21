@@ -23,10 +23,13 @@ namespace rtt {
 
 	void Emiel_PreparePenaltyThem::Initialize(){
 
+
+
 		// Check if this tree is used for the correct RefState, PREPARE_PENALTY_THEM
-		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
-		if(refState != RefState::PREPARE_PENALTY_THEM){
-			ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_PENALTY_THEM");
+		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot!
+		refState = LastRef::getCurrentRefCommand();
+		if(refState != RefState::PREPARE_PENALTY_THEM && refState != RefState::NORMAL_PLAY){
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_PENALTY_THEM or DEFEND_PENALTY. Current : " << rtt::refStateToString(*refState));
 		}
 
 		// Get all the available robots
@@ -37,10 +40,7 @@ namespace rtt {
 		int numAttackers = std::max((int)robots.size()-numDefenders, 0);
 
 		// Calculate positions for defenders and attackers
-		/* Creates a circle of 5? robots, 1.2 meter wide, 2 meters in front of our goal */
-		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Circle(numDefenders, M_PI/2, -3, LastWorld::get_our_goal_center(), 3*M_PI, 0, 0);
-
-		/* Creates a line of 2? robots, covering M_PI/2 rad, in a circle with radius 3, around their goal center, with a M_PI rad phase shift */
+		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numDefenders, 5, Vector2(-3, 0), 0, 0);
 		std::vector<Vector2> attackerCoords = RobotPatternGenerator::Line(numAttackers, 6, Vector2(3, 0), 0, 0);
 
 		// Put all positions into one array
@@ -48,12 +48,34 @@ namespace rtt {
 		positions.insert(std::end(positions), std::begin(defenderCoords), std::end(defenderCoords));
 		positions.insert(std::end(positions), std::begin(attackerCoords), std::end(attackerCoords));
 
-		Emiel_Prepare::prepare(positions);
+		if(refState == RefState::PREPARE_PENALTY_THEM)
+			Emiel_Prepare::prepare(*refState, positions);
+		if(refState == RefState::NORMAL_START)
+			Emiel_Prepare::prepare(RefState::DEFEND_PENALTY, positions);
 
 	}
 
 	bt::Node::Status Emiel_PreparePenaltyThem::Update(){
-		return Status::Running;
+
+		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot!
+		if(refState == RefState::PREPARE_PENALTY_THEM) {
+			ROS_DEBUG_NAMED(ROS_LOG_NAME, "Returning Status::Running");
+			return Status::Running;
+		}
+		// RefState::DEFEND_PENALTY, see TODO
+		if(refState == RefState::NORMAL_START) {
+			// Wait for the ball to move. Rulebook 14.3 : "The ball is in play when it is kicked and moves forward"
+			if(LastWorld::get().ball.vel.x < -0.5){
+				ROS_DEBUG_NAMED(ROS_LOG_NAME, "Ball is moving! Returning Status::Success");
+				return Status::Success;
+			}else{
+				ROS_DEBUG_THROTTLE_NAMED(1, ROS_LOG_NAME, "Ball is stationary. Returning Status::Running");
+				return Status::Running;
+			}
+		}
+
+		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Should not be here! " << rtt::refStateToString(*refState));
+		return Status::Failure;
 	}
 
 }
