@@ -567,9 +567,9 @@ bt::Node::Status GetBall::Update (){
         targetPos = ballPos + Vector2(-ballDist, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
     }
-    // Hack for better ball interception when ball has velocity
+    // Hack for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
-    if (vBall > 0.1) {
+    if (vBall > 0.5) {
         if (posDiff.length() > 0.1) {
             double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.0;
             double max_ahead = 5.0;

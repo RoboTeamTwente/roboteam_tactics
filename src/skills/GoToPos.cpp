@@ -558,6 +558,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         targetPos = (prevTarget + targetDiff.scale(max_diff));
     }
     prevTarget = targetPos;
+    posError = targetPos - myPos;
 
     // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
     // static time_point prevTime = now();
@@ -571,8 +572,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // }
     // prevCommand = sumOfForces;
     //////////
-
-    posError = targetPos - myPos;
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
@@ -604,7 +603,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
     // Defense area avoidance
     if (ROBOT_ID != KEEPER_ID && !(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
-        sumOfForces = sumOfForces + avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
+        sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     }
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
