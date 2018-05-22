@@ -28,7 +28,7 @@ namespace rtt {
 		// Check if this tree is used for the correct RefState, PREPARE_PENALTY_THEM
 		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot!
 		refState = LastRef::getCurrentRefCommand();
-		if(refState != RefState::PREPARE_PENALTY_THEM && refState != RefState::NORMAL_PLAY){
+		if(refState != RefState::PREPARE_PENALTY_THEM && refState != RefState::NORMAL_START){
 			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_PENALTY_THEM or DEFEND_PENALTY. Current : " << rtt::refStateToString(*refState));
 		}
 

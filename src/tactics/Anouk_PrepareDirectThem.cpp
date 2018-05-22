@@ -168,7 +168,7 @@ namespace rtt {
 
 	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// WATCH OUT! Update can return SUCCESS or FALSE, ONLY when the ball has moved!
-	// Returning SUCCESS or FALSE triggers RefState::NORMAL_PLAY, starting the match
+	// Returning SUCCESS or FALSE triggers RefState::NORMAL_START, starting the match
 	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     bt::Node::Status Anouk_PrepareDirectThem::Update() {
 
