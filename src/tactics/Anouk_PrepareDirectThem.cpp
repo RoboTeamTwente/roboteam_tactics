@@ -44,8 +44,6 @@ namespace rtt {
                 oppKicker = i;
             }
         }
-        ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Robot closest to ball : " << oppKicker);
-
 
         // === Find the most dangerous opponents, excluding the kicker ===
         // Vector to hold the new robots to defend

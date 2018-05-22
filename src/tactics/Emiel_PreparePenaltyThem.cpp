@@ -59,7 +59,6 @@ namespace rtt {
 
 		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot!
 		if(refState == RefState::PREPARE_PENALTY_THEM) {
-			ROS_DEBUG_NAMED(ROS_LOG_NAME, "Returning Status::Running");
 			return Status::Running;
 		}
 		// RefState::DEFEND_PENALTY, see TODO
