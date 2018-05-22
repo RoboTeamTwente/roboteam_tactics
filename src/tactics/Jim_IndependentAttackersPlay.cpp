@@ -92,7 +92,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
-        rd.tree = "rtt_jelle/GeneralAttacker"; //"rtt_jim/IndependentAttackerRole";
+        rd.tree = "rtt_jim/IndependentAttackerRole"; //"rtt_jelle/GeneralAttacker";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
