@@ -51,15 +51,15 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             if (robot_output_target == "grsim") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
-                avoidRobotsGain = 0.3;
-                cushionGain = 0.7;
-                maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
+                avoidRobotsGain = 0.5;
+                cushionGain = 0.5;
+                maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
-                avoidRobotsGain = 0.3;
-                cushionGain = 0.7;
-                maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
+                avoidRobotsGain = 1.0;
+                cushionGain = 0.5;
+                maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             }
 
             //PROCESS BLACKBOARD
@@ -106,12 +106,15 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
 
         // If I'm very close to a robot, the component of sumOfForces in that direction will be (partially) subtracted
         double max = 1.0;
-        double bot_margin = 0.18;
-        if (L < max+bot_margin && sumOfForces.dot(meToPoint) > 0) {
+        double bot_margin = 0.14;
+        if (L < max+bot_margin && sumOfForces.dot(meToPoint) > 0 && antenna.length() > 0.3) {
             Vector2 dirForce = sumOfForces.project2(meToPoint);
             double scaleDown = (1-(L-bot_margin)/max);
-            if (distToAntenna > 0.14) {
-                scaleDown = scaleDown*(1-(distToAntenna-0.1)/(bot_margin-0.1));
+            if (distToAntenna > 0.10) {
+                scaleDown = scaleDown*(1-(distToAntenna-0.10)/(maxDistToAntenna-0.10));
+            }
+            if (scaleDown > 0.7) { // prevent lockdown of robot by not allowing complete subtraction
+                scaleDown = 0.7;
             }
             force = force - dirForce.scale(scaleDown);
         }
@@ -128,8 +131,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
     roboteam_msgs::World world = LastWorld::get();
     Vector2 posError = targetPos - myPos;
     // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
-    double minAntenna = 1.0; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
-    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*1.0);
+    double minAntenna = 1.2; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.2);
     // The antenna will not grow beyond its minimum value when moving backwards
     if (myVel.dot(antenna)<0 ){
         antenna = posError.stretchToLength(minAntenna);
@@ -628,9 +631,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     } else {
         velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
-        
+        // double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
+        // velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        velCommand = controller.limitVel(velCommand);
         // angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot

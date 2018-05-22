@@ -360,29 +360,34 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 }
 
 
-Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
+Vector2 Control::limitVel(Vector2 sumOfForces) {
 
-    // if (angularVelTarget >= 7.0) {
-
-    //     // Limit the robot velocity to the maximum speed
-    //     if (sumOfForces.length() > 1.5) {
-    //         if (sumOfForces.length() > 0.0) {
-    //             sumOfForces = sumOfForces.scale(1.5 / sumOfForces.length());
-    //         }
-    //     }
-
-    // } else {
     double L = sumOfForces.length();
     // Limit the robot velocity to the maximum speed
     if (L > maxSpeed && L > 0.0) {
         sumOfForces = sumOfForces.scale(maxSpeed / L);
     }
-    // }
+    return sumOfForces;
+}
 
-        // WHY WAS THIS HERE?
-    // if (fabs(sumOfForces.y) > 1.0) {
-    //     sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
-    // }
+Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
+
+    double L = sumOfForces.length();
+    if (angularVelTarget >= 7.0) {
+        // Limit the robot velocity to lower speed
+        if (L > 1.0) {
+            sumOfForces = sumOfForces.scale(1.0 / L);
+        }
+    } else {
+    // Limit the robot velocity to the maximum speed
+        if (L > maxSpeed && L > 0.0) {
+            sumOfForces = sumOfForces.scale(maxSpeed / L);
+        }
+    }
+        // WHY IS THIS HERE?
+    if (fabs(sumOfForces.y) > 1.0) {
+        sumOfForces = sumOfForces.scale(1.0 / fabs(sumOfForces.y));
+    }
 
     return sumOfForces;
 }

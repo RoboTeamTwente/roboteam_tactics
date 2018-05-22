@@ -37,6 +37,7 @@ public:
     Vector2 velocityController();
     double angularVelController();
 
+    Vector2 limitVel(Vector2 sumOfForces);
     Vector2 limitVel(Vector2 sumOfForces, double angularVelTarget);
     double limitAngularVel(double angularVelTarget);
     void Initialize(int ROBOT_ID);
