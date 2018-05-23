@@ -57,7 +57,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
-                avoidRobotsGain = 1.0;
+                avoidRobotsGain = 0.5;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             }
@@ -631,17 +631,13 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     } else {
         velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        // double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        // velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
         velCommand = controller.limitVel(velCommand);
-        // angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
-        // velCommand = sumOfForces;
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
             angleGoal = cleanAngle(velCommand.angle() + M_PI);
         }
-        double angleCommand = angleGoal/180*2047; // make sure it fits in the package
+        double angleCommand = angleGoal*8; // make sure it fits in the angularvel package
         command.w = angleCommand;//angularVelCommand;//angleCommand;
         // command.kicker_vel = myAngle/M_PI*4 + 4; // TEMPORARY HACK by sending my angle through the kicker_vel channel
         // command.kicker = true;
