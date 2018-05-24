@@ -57,7 +57,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
-                avoidRobotsGain = 0.5;
+                avoidRobotsGain = 2.0;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             }
@@ -502,10 +502,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         angleGoal = me.angle;
     }
-    // TODO: TURNED OFF FOR TESTING:
-    // if (posError.length() > 0.5) {
-    //     angleGoal = posError.angle();
-    // }
+    
     double myAngle = me.angle;
     double angleError = cleanAngle(angleGoal - myAngle);
     double myAngularVel = me.w;
@@ -548,13 +545,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             targetPos = ballPos + diffVecNorm.scale(0.7);
         }
     }
-
-
     // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
     static time_point prevTime = now();
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
     prevTime = now();
-    double max_diff = 8.0*timeDiff*0.001;
+    double max_diff = 4.0*timeDiff*0.001;
     static Vector2 prevTarget = myPos + Vector2(0.01,0);
     Vector2 targetDiff = targetPos - prevTarget;
     if (targetDiff.length() > max_diff) {
@@ -562,6 +557,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
     prevTarget = targetPos;
     posError = targetPos - myPos;
+
+    // TODO: TURNED OFF FOR TESTING:
+    if (posError.length() > 0.5) {
+        angleGoal = posError.angle();
+        angleError = cleanAngle(angleGoal - myAngle);
+    }
 
     // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
     // static time_point prevTime = now();
