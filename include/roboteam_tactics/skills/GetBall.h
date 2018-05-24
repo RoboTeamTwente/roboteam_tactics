@@ -143,6 +143,7 @@ private:
     int ballCloseFrameCount = 0;
     int bestID;
     Vector2 bestPos;
+    double prevAngleCommand = 0;
 };
 
 } // rtt

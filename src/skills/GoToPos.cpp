@@ -559,7 +559,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     posError = targetPos - myPos;
 
     // TODO: TURNED OFF FOR TESTING:
-    if (posError.length() > 0.5) {
+    if (posError.length() > 0.3) {
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
     }
@@ -638,7 +638,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
             angleGoal = cleanAngle(velCommand.angle() + M_PI);
         }
-        double angleCommand = angleGoal*8; // make sure it fits in the angularvel package
+        double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
         command.w = angleCommand;//angularVelCommand;//angleCommand;
         // command.kicker_vel = myAngle/M_PI*4 + 4; // TEMPORARY HACK by sending my angle through the kicker_vel channel
         // command.kicker = true;
@@ -679,7 +679,9 @@ bt::Node::Status GoToPos::Update() {
         pub.publish(*command);
         return Status::Running;
     } else {
-        sendStopCommand(ROBOT_ID);
+        if (robot_output_target == "grsim") {
+            sendStopCommand(ROBOT_ID);
+        }
         if (succeeded) {
             return Status::Success;
         } else if (failure) {

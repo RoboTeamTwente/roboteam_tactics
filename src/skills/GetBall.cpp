@@ -112,6 +112,13 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
     }
     choseRobotToPassTo = false;
     
+
+    // boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+    // roboteam_msgs::RobotCommand command;
+    // if (commandPtr) {
+    //     command = *commandPtr;
+    // }
+
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
     if (chip) {
@@ -134,6 +141,7 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
     // command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.x_vel = 0;
     command.y_vel = 0;
+    command.w = prevAngleCommand;
     command.dribbler = false;
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -438,6 +446,7 @@ bt::Node::Status GetBall::Update (){
     Vector2 robotPos(robot.pos);
     Vector2 robotVel(robot.vel);
     Vector2 posDiff = ballPos - robotPos;
+    double L_posDiff = posDiff.length();
 
     // drawer.setColor(72, 0, 255);
     // drawer.drawPoint("ballIntercept",ballPos);
@@ -468,12 +477,6 @@ bt::Node::Status GetBall::Update (){
         }
         distAwayFromBall = 0.28;
         minDist = 0.06;
-        // extra strafe gain for goToPos
-        if (HasDouble("strafeGain")) {
-	        private_bb->SetDouble("strafeGain", GetDouble("strafeGain"));
-	    } else {
-	    	private_bb->SetDouble("strafeGain", 1.3);
-	    }
     }
     // if (GetBool("beAggressive", false)) {
         //  successDist = 0.11 ;
@@ -506,13 +509,13 @@ bt::Node::Status GetBall::Update (){
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
-    if (!choseRobotToPassTo && GetBool("passToBestAttacker") && posDiff.length() < 1.5 && !shootAtGoal) {
+    if (!choseRobotToPassTo && GetBool("passToBestAttacker") && L_posDiff < 1.5 && !shootAtGoal) {
         BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
         bestID = bestTeammate.id;
         bestPos = bestTeammate.pos;
         choseRobotToPassTo = true;
         ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-        ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << posDiff.length());
+        ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff);
     }
     
 
@@ -554,23 +557,24 @@ bt::Node::Status GetBall::Update (){
     double angleDiff = cleanAngle(targetAngle - posDiff.angle());
 
     // Jelle's getBall motion variation:
-    // POSSIBLE IMPROVEMENT: TAKE FUTURE BALL, OR BALL VELOCITY INTO ACCOUNT
+    // TODO: TAKE FUTURE BALL, OR BALL VELOCITY INTO ACCOUNT - working on it, see below
     double ballDist = minDist + (distAwayFromBall - minDist) / (0.5*M_PI) * fabs(angleDiff);
     if (ballDist > distAwayFromBall) {
         ballDist = distAwayFromBall;
     }
     Vector2 targetPos;
     if (fabs(angleDiff)>successAngle) {
-        targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) );
-        private_bb->SetBool("dribbler", posDiff.length()<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*1-0.3)); //TODO: downscaling when i get closer - working on it
+        targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
+        private_bb->SetBool("dribbler", L_posDiff<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
-        targetPos = ballPos + Vector2(-ballDist, 0.0).rotate(targetAngle);
+        targetPos = ballPos;// + Vector2(-ballDist, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
     }
     // Hack for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
     if (vBall > 0.5) {
-        if (posDiff.length() > 0.1) {
+        if (L_posDiff > 0.1) {
             double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.0;
             double max_ahead = 5.0;
             if (vBall*L < max_ahead) {
@@ -586,7 +590,7 @@ bt::Node::Status GetBall::Update (){
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
-	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
+	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
         int ballCloseFrameCountTo = 2;
         if(HasInt("ballCloseFrameCount")){
@@ -667,6 +671,7 @@ bt::Node::Status GetBall::Update (){
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {
     	command = *commandPtr;
+        prevAngleCommand = command.w;
 
         // Optional feature after testing: match the ball velocity for easy ball interception
             // if (matchBallVel) {
@@ -685,7 +690,7 @@ bt::Node::Status GetBall::Update (){
 
         return Status::Running;
     } else {
-        publishStopCommand();
+        // publishStopCommand();
         return Status::Running;
     }
     
