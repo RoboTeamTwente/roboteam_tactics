@@ -93,9 +93,9 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 3.0;//3.0
+        pGainPosition = 4.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.5; //prevteam: 0.5
+        dGainPosition = 0.3; //prevteam: 0.5
         pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
@@ -103,8 +103,8 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxSpeed = 5.0;
         maxAngularVel = 20.0;
 
-        thresholdTarget = 0.02;
-        minTarget = 0.30;
+        thresholdTarget = 0.02*2;
+        minTarget = 0.30*2;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
