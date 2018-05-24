@@ -39,7 +39,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ////////////////////////////////////////////////////
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
+//        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
+        { RefState::STOP                  , "rtt_anouk/StopStrat"s           } ,
         { RefState::PREPARE_KICKOFF_US    , "rtt_emiel/PrepareKickoffUsStrategy"s    } ,
         { RefState::PREPARE_KICKOFF_THEM  , "rtt_emiel/PrepareKickoffThemStrategy"s    } ,
         { RefState::PREPARE_PENALTY_US    , "rtt_emiel/PreparePenaltyUsStrategy"s           } ,

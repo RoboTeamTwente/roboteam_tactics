@@ -126,7 +126,7 @@ namespace rtt {
 
         // We can use max 5 of all robots
         if (numRobots >= (totalNumRobots - 1)) {
-            numRobots = totalNumRobots - 4;
+            numRobots = totalNumRobots - 3;
         }
 
         // If less then one robot is available throw an error
@@ -179,7 +179,7 @@ namespace rtt {
             distancesBallDefendersFromGoal.push_back(1.35); // 3.00
         } else {
 //            maxExtraDefenders = 2;
-            minDangerScore = 1.2; //3.2
+            minDangerScore = 3.2; //3.2
             distancesBallDefendersFromGoal.push_back(1.35);
             distancesBallDefendersFromGoal.push_back(1.35);
         }

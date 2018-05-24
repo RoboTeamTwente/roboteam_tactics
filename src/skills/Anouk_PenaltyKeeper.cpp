@@ -79,7 +79,7 @@ bt::Node::Status Anouk_PenaltyKeeper::Update() {
     // Calculate the position of the keeper
     Vector2 keeperPos = Anouk_PenaltyKeeper::calculateKeeperPosition();
     // Pass the position to GoToPos
-    private_bb->SetDouble("xGoal", keeperPos.x + 0.08);
+    private_bb->SetDouble("xGoal", keeperPos.x);
     private_bb->SetDouble("yGoal", keeperPos.y);
     private_bb->SetDouble("angleGoal", 0);
 
