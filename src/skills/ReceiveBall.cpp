@@ -37,7 +37,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         // , isRobotClosestToBall("", blackboard)
         {
     hasBall = whichRobotHasBall();
-
+    ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
     //computedTargetPos = false;
 
@@ -433,7 +433,10 @@ bt::Node::Status ReceiveBall::Update() {
 	// 	}
 	// }
 	if (shootAtGoal && distanceToBall < 2.0) {
-		startKicking = true;
+		if (robot_output_target == "grsim" || distanceToBall < ballVel.length()*0.1 ) { //TODO: make this work for real robot as well
+			startKicking = true;
+		}
+		
 	}
 
 	// If the ball gets close, turn on the dribbler

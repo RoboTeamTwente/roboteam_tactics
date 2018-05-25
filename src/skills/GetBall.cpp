@@ -50,7 +50,7 @@ void GetBall::Initialize() {
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
     passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
 
-    ros::param::getCached("robot_output_target", robot_output_target);
+    ros::param::get("robot_output_target", robot_output_target);
 
     if (GetBool("unclaimPos")) {
     // unclaim position
@@ -141,7 +141,6 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
     // command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.x_vel = 0;
     command.y_vel = 0;
-    command.w = prevAngleCommand;
     command.dribbler = false;
 
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -264,7 +263,7 @@ Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vecto
 }
 
 double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
-    double a = 1.5; // friction constant. assumes velocity decreases linearly over time
+    double a = 0.5; // friction constant. assumes velocity decreases linearly over time
     if (HasDouble("friction")) {
         a = GetDouble("friction");
     }
@@ -460,23 +459,15 @@ bt::Node::Status GetBall::Update (){
     if (robot_output_target == "grsim") {
         successDist = 0.12;
         successAngle = 0.10;
-        if (GetBool("passToBestAttacker")) {
-            successRobotAngle = 0.05;
-        } else {
-            successRobotAngle = 0.10;
-        }
+        successRobotAngle = 0.10;
         distAwayFromBall = 0.28;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
-        successDist = 0.10; //0.12
+        successDist = 0.115; //0.12
         successAngle = 0.10; //0.15
-        if (GetBool("passToBestAttacker")) {
-            successRobotAngle = 0.025;
-        } else {
-            successRobotAngle = 0.10;
-        }
+        successRobotAngle = 0.10;
         distAwayFromBall = 0.28;
-        minDist = 0.06;
+        minDist = 0.07;
     }
     // if (GetBool("beAggressive", false)) {
         //  successDist = 0.11 ;
@@ -493,6 +484,9 @@ bt::Node::Status GetBall::Update (){
     }
     if (HasDouble("successAngle")) {
         successAngle = GetDouble("successAngle");
+    }
+    if (HasDouble("successRobotAngle")) {
+        successRobotAngle = GetDouble("successRobotAngle");
     }
     // if (HasDouble("getBallDist")) {
     //     getBallDist=GetDouble("getBallDist");
@@ -563,8 +557,8 @@ bt::Node::Status GetBall::Update (){
         ballDist = distAwayFromBall;
     }
     Vector2 targetPos;
-    if (fabs(angleDiff)>successAngle) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*1-0.3)); //TODO: downscaling when i get closer - working on it
+    if (fabs(angleDiff) > successAngle) {
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*2-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", L_posDiff<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
@@ -654,12 +648,16 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", true);
+    private_bb->SetBool("avoidRobots", (L_posDiff > 0.2));
+    private_bb->SetDouble("successDist", 0.01); // make sure gotopos does not return success before getball returns success
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
     if (HasDouble("pGainPosition")) {
         private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
+    }
+    if (HasDouble("dGainPosition")) {
+        private_bb->SetDouble("dGainPosition", GetDouble("dGainPosition"));
     } 
     if (HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
@@ -671,7 +669,6 @@ bt::Node::Status GetBall::Update (){
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {
     	command = *commandPtr;
-        prevAngleCommand = command.w;
 
         // Optional feature after testing: match the ball velocity for easy ball interception
             // if (matchBallVel) {
@@ -690,7 +687,7 @@ bt::Node::Status GetBall::Update (){
 
         return Status::Running;
     } else {
-        // publishStopCommand();
+        publishStopCommand();
         return Status::Running;
     }
     

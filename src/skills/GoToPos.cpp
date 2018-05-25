@@ -47,7 +47,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
 
             //DEFAULTS
-            ros::param::getCached("robot_output_target", robot_output_target);
+            ros::param::get("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
@@ -56,7 +56,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = 0.1;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 2.0;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
@@ -216,7 +216,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
 
     drawer.setColor(0, 155, 155);
     drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
-    drawer.drawLine("avoidance" + std::to_string(ROBOT_ID),myPos,sumOfForces);
+    // drawer.drawLine("avoidance" + std::to_string(ROBOT_ID),myPos,sumOfForces);
 
     return sumOfForces;
 }
@@ -632,11 +632,13 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     } else {
         velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        velCommand = controller.limitVel(velCommand);
+        velCommand = controller.limitVel2(velCommand, angleError);
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
-        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
-            angleGoal = cleanAngle(velCommand.angle() + M_PI);
+        if ( (HasBool("dontRotate") && GetBool("dontRotate"))) {
+            //
+        } else {
+            command.use_angle = true;
         }
         double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
         command.w = angleCommand;//angularVelCommand;//angleCommand;
@@ -679,9 +681,7 @@ bt::Node::Status GoToPos::Update() {
         pub.publish(*command);
         return Status::Running;
     } else {
-        if (robot_output_target == "grsim") {
-            sendStopCommand(ROBOT_ID);
-        }
+        sendStopCommand(ROBOT_ID);
         if (succeeded) {
             return Status::Success;
         } else if (failure) {

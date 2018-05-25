@@ -82,6 +82,9 @@ private:
     InterceptPose deduceInterceptPosFromBall(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     boost::optional<InterceptPose> deduceInterceptPosFromRobot();
     boost::optional<int> hasBall;
+    
+    // output target: grsim or serial
+    std::string robot_output_target;
 
     int robotID;
     bool our_team;
