@@ -16,26 +16,23 @@
 #include "roboteam_utils/Vector2.h"
 #include "unique_id/unique_id.h" 
 
+#define ROS_LOG_NAME "plays.Jim_PenaltyPlay"
 #define RTT_CURRENT_DEBUG_TAG Jim_PenaltyPlay
 
 namespace rtt {
 
 RTT_REGISTER_TACTIC(Jim_PenaltyPlay);
 
-Jim_PenaltyPlay::Jim_PenaltyPlay(std::string name, bt::Blackboard::Ptr blackboard)
-        : Tactic(name, blackboard) 
-        {}
+Jim_PenaltyPlay::Jim_PenaltyPlay(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard){}
 
 void Jim_PenaltyPlay::Initialize() {
     tokens.clear();
     success = true;
 
-    // RTT_DEBUG("Initializing Jim_PenaltyPlay \n");
-
     roboteam_msgs::World world = LastWorld::get();
 
     if (getAvailableRobots().size() < 1) {
-        RTT_DEBUG("No robots available, cannot initialize... \n");
+        ROS_WARN_NAMED(ROS_LOG_NAME, "No robots available, cannot initialize...");
         success = false;
         return;
     }
@@ -52,8 +49,7 @@ void Jim_PenaltyPlay::Initialize() {
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
-    RTT_DEBUGLN("Initializing Jim_PenaltyPlay"); 
-    // RTT_DEBUGLN("GetBall robot: %i ", ballGetterID);
+	ROS_DEBUG_NAMED(ROS_LOG_NAME, "Initializing Jim_PenaltyPlay...");
 
 
     // =============================
@@ -67,7 +63,7 @@ void Jim_PenaltyPlay::Initialize() {
         activeRobot = *penaltyTakerID;
 
         bb.SetInt("ROBOT_ID", *penaltyTakerID);
-        bb.SetInt("KEEPER_ID", 5);
+        bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
         bb.SetBool("GetBall_A_passToBestAttacker", true); 
         bb.SetBool("ShootAtGoalV2_A_waitForDO_PENALTY", true);
@@ -98,13 +94,10 @@ bt::Node::Status Jim_PenaltyPlay::Update() {
         if (feedbacks.find(token) != feedbacks.end()) {
             Status status = feedbacks.at(token);
             if (status == Status::Success) {
-                std::cout << "Jim_PenaltyPlay succes!\n";
-                RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Success!");
-
+                ROS_DEBUG_NAMED(ROS_LOG_NAME, "Success!");
             }
             if (status == Status::Failure) {
-                std::cout << "Jim_PenaltyPlay failure!\n";
-                RTT_DEBUGLN_TEAM("Jim_PenaltyPlay Failed!");
+				ROS_DEBUG_NAMED(ROS_LOG_NAME, "Failure!");
             }
             return status;
         }

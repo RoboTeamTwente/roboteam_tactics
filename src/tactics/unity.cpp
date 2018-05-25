@@ -145,6 +145,7 @@
 
 #include "Jim_PenaltyPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "Jim_IndependentAttackersPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
