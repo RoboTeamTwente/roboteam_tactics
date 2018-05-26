@@ -127,7 +127,7 @@ void OpportunityFinder::setMax(std::string metric, double value) {
 double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
 
 	if (world.them.size() == 0) {
-		return 0.0;
+		return 1000.0;
 	}
 
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();

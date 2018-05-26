@@ -95,12 +95,12 @@ void Control::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 5.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.5; //prevteam: 0.5
+        dGainPosition = 0.6; //prevteam: 0.5
         pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 5.0;
+        maxSpeed = 4.0;
         maxAngularVel = 20.0;
 
         thresholdTarget = 0.08;
@@ -236,7 +236,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         posErrorI = Vector2(0.0, 0.0);
     }
 
-    if (myVel.length() < 0.2) {
+    if (myVel.length() < 0.05) { // myVel becomes unreliable at too low value
         myVel = Vector2(0.0,0.0);
     }
     // Control equation
@@ -363,12 +363,11 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
 
 Vector2 Control::limitVel2(Vector2 sumOfForces, double angleError) {
-
-    double max = fmin(maxSpeed, maxSpeed/fabs(angleError*2));
+    double limit = fmin(maxSpeed, maxSpeed/fabs(angleError*2));
     double L = sumOfForces.length();
     // Limit the robot velocity to the maximum speed
-    if (L > max && L > 0.0) {
-        sumOfForces = sumOfForces.scale(maxSpeed / L);
+    if (L > limit && L > 0.0) {
+        sumOfForces = sumOfForces.scale(limit / L);
     }
     return sumOfForces;
 }

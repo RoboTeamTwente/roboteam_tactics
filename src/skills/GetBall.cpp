@@ -263,7 +263,7 @@ Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vecto
 }
 
 double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
-    double a = 0.4; // friction constant. assumes velocity decreases linearly over time
+    double a = 0.3; // friction constant. assumes velocity decreases linearly over time
     if (blackboard->HasDouble("friction")) {
         a = blackboard->GetDouble("friction");
     } else if (robot_output_target == "grsim") {
