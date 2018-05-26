@@ -93,14 +93,14 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 3.0;//3.0
+        pGainPosition = 5.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.3; //prevteam: 0.5
+        dGainPosition = 0.5; //prevteam: 0.5
         pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 8.0;
+        maxSpeed = 5.0;
         maxAngularVel = 20.0;
 
         thresholdTarget = 0.08;
@@ -352,12 +352,11 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    // This seems quite hacky REMOVED FOR NOW
-    // if (fabs(angularVelTarget) < 2.2) {
-    //     if (fabs(angularVelTarget) > 0.5) {
-    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-    //     }
-    // }
+    if (fabs(angularVelTarget) < 2.2) {
+        if (fabs(angularVelTarget) > 0.5) {
+            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+        }
+    }
 
     return angularVelTarget;
 }
@@ -379,8 +378,8 @@ Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
     double L = sumOfForces.length();
     if (angularVelTarget >= 7.0) {
         // Limit the robot velocity to lower speed
-        if (L > 1.0) {
-            sumOfForces = sumOfForces.scale(1.0 / L);
+        if (L > 0.5) {
+            sumOfForces = sumOfForces.scale(0.5 / L);
         }
     } else {
     // Limit the robot velocity to the maximum speed

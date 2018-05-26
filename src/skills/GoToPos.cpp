@@ -76,9 +76,13 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 
 
 void GoToPos::sendStopCommand(uint id) {
-    roboteam_msgs::RobotCommand command = controller.getStopCommand(id);
+    roboteam_msgs::RobotCommand command;
+    command.id = ROBOT_ID;
+    command.x_vel = 0.0;
+    command.y_vel = 0.0;
+    command.w = 0.0;
+    command.dribbler = false;
 
-    // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
 }
@@ -444,7 +448,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
     if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
-        controller.setControlParam("pGainPosition", 3.5);
+        controller.setControlParam("pGainPosition", 6.0);
     } else {
         controller.setPresetControlParams();
     }
@@ -559,7 +563,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     posError = targetPos - myPos;
 
     // TODO: TURNED OFF FOR TESTING:
-    if (posError.length() > 0.3) {
+    if (posError.length() > 0.25) {
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
     }
@@ -641,9 +645,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             command.use_angle = true;
         }
         double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
-        command.w = angleCommand;//angularVelCommand;//angleCommand;
-        // command.kicker_vel = myAngle/M_PI*4 + 4; // TEMPORARY HACK by sending my angle through the kicker_vel channel
-        // command.kicker = true;
+        command.w = angleCommand;
     }
 
     // Apply any max velocity that is set
@@ -651,13 +653,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
-
-    // WHY WAS THIS HERE?
-    // if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
-    //     if (velCommand.length() >= 1.5) {
-    //         velCommand = velCommand.scale(1.5 / velCommand.length());
-    //     }
-    // }
 
     // fill the rest of command message
     command.id = ROBOT_ID;

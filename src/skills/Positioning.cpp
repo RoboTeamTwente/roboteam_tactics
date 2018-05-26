@@ -93,7 +93,7 @@ bt::Node::Status Positioning::Update() {
 
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 500) { // WIP: extra check for zero or very low score on current claimed pos?
+    if (elapsedTime.count() >= 1000) { // WIP: extra check for zero or very low score on current claimed pos?
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
@@ -121,11 +121,13 @@ bt::Node::Status Positioning::Update() {
             if (HasDouble("waitAtDistance")) {
                 waitAtDist = GetDouble("waitAtDistance");
             }
-            Vector2 posOffset = Vector2(-waitAtDist,0).rotate( getBallGoalHalfwayAngle(bestPosition) );
+            double targetAngle = getBallGoalHalfwayAngle(bestPosition);
+            Vector2 posOffset = Vector2(-waitAtDist,0).rotate(targetAngle);
 
             // pass new position setpoint to GoToPos blackboard
             private_bb->SetDouble("xGoal", bestPosition.x + posOffset.x);
             private_bb->SetDouble("yGoal", bestPosition.y + posOffset.y);
+            private_bb->SetDouble("angleGoal", targetAngle);
 
             // claim chosen position to go to
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", bestPosition.x);
@@ -135,7 +137,7 @@ bt::Node::Status Positioning::Update() {
         start = now();
         // ROS_INFO_STREAM("robot: " << robotID << " best position: x: " << bestPosition.x << ", y: "<< bestPosition.y);  
     }
-    // private_bb->SetDouble("angleGoal", targetAngle);
+    
     goToPos.Update();
     return Status::Running;
 }
