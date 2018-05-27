@@ -447,14 +447,10 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
 
-    if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
-        controller.setControlParam("pGainPosition", 6.0);
-    } else {
-        controller.setPresetControlParams();
-    }
-
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
+    } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
+        controller.setControlParam("pGainPosition", 6.0);
     }
     if (HasDouble("iGainPosition")) {
         controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));

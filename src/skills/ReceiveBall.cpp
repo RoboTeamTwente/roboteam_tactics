@@ -39,6 +39,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
     ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
+    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
     //computedTargetPos = false;
 
 }
@@ -84,8 +85,8 @@ void ReceiveBall::Initialize() {
 	} else if (GetBool("claimedPos")) {
 		double botClaimedX;
 		double botClaimedY;
-		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
-		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
+		ros::param::get("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
+		ros::param::get("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
 		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
@@ -374,6 +375,8 @@ bt::Node::Status ReceiveBall::Update() {
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
 		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
 		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2);
+
+		ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
 
 	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
@@ -452,6 +455,7 @@ bt::Node::Status ReceiveBall::Update() {
         
         roboteam_msgs::RobotCommand command;
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+        command.id = robotID;
 	    if (commandPtr) {
 	        command = *commandPtr;
 	    } else {

@@ -35,21 +35,24 @@ Control::Control() : updateRateParam("role_iterations_per_second")
             pGainVelocity = 0.0;
             maxSpeed = 0.0;
             maxAngularVel = 0.0;
+
+            // Set robotType for global use
+            robotType = getRobotType();
         }
 
 RobotType Control::getRobotType() {
     std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
     if (ros::param::has(robotTypeKey)) {
-        std::string robotType;
-        ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
+        std::string robotTypeString;
+        ros::param::get(robotTypeKey, robotTypeString);
 
-        if (robotType == "arduino") {
+        if (robotTypeString == "arduino") {
             return RobotType::ARDUINO;
-        } else if (robotType == "proto") {
+        } else if (robotTypeString == "proto") {
             return RobotType::PROTO;
-        } else if (robotType == "grsim") {
+        } else if (robotTypeString == "grsim") {
             return RobotType::GRSIM;
-        } else if (robotType == "") {
+        } else if (robotTypeString == "") {
             if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
                 ROS_INFO_STREAM("Empty value for found for param \"" 
                         << robotTypeKey
@@ -62,7 +65,7 @@ RobotType Control::getRobotType() {
                 ROS_ERROR_STREAM("Unknown value found for param \"" 
                         << robotTypeKey 
                         << "\": \"" 
-                        << robotType
+                        << robotTypeString
                         << "\". Defaulting to RobotType::PROTO."
                         );
                 lastRobotTypeError = now();
@@ -93,7 +96,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
-        pGainPosition = 5.0;//3.0
+        pGainPosition = 4.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
         dGainPosition = 0.6; //prevteam: 0.5
         pGainRotation = 10;
@@ -135,7 +138,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 }
 
 void Control::setPresetControlParams() {
-    setPresetControlParams(getRobotType());
+    setPresetControlParams(robotType);
 }
 
 void Control::setPresetControlParams(

@@ -12,6 +12,7 @@ CanClaimBall::CanClaimBall(std::string name, bt::Blackboard::Ptr blackboard) : C
 
 }
 
+// NOT USED AND DEPRECATED
 bt::Node::Status CanClaimBall::Update() {
 
     roboteam_msgs::World world = LastWorld::get();

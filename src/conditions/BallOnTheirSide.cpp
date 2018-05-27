@@ -15,6 +15,8 @@ RTT_REGISTER_CONDITION(BallOnTheirSide);
 BallOnTheirSide::BallOnTheirSide(std::string name, bt::Blackboard::Ptr blackboard)
         : Condition(name, blackboard) {}
 
+
+// DEPRECATED: NOT NECESSARY TO GET OUR SIDE WHEN FIELD IS NORMALIZED
 bt::Node::Status BallOnTheirSide::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ballPos(world.ball.pos);

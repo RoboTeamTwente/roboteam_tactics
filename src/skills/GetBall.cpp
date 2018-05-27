@@ -4,7 +4,6 @@
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
-#include "roboteam_tactics/conditions/CanClaimBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -34,6 +33,7 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
         , goToPos("", private_bb) {
     ballClaimedByMe = false;
     startTime = now();
+    ros::param::get("robot_output_target", robot_output_target);
 }
 
 void GetBall::Initialize() {
@@ -49,8 +49,6 @@ void GetBall::Initialize() {
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
     passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
-
-    ros::param::get("robot_output_target", robot_output_target);
 
     if (GetBool("unclaimPos")) {
     // unclaim position
@@ -154,14 +152,14 @@ bool GetBall::claimBall() {
 
     int robotClaimedBall;
     if (ros::param::has("robotClaimedBall")) {
-        ros::param::getCached("robotClaimedBall", robotClaimedBall);
+        ros::param::get("robotClaimedBall", robotClaimedBall);
 
         if (robotClaimedBall == robotID) {
             ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << ", I already claimed ball");
             ballClaimedByMe = true; 
             return true;
         } else if (robotClaimedBall == -1) {
-            //ros::param::set("robotClaimedBall", robotID);
+            //ros::param::set("robotClaimedBall", robotID); TODO: Remember why I turned this off again? Probably to prevent claiming the ball from the bot I want to pass to
             ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
             ballClaimedByMe = true;
             return true; // if no-one claimed the ball -> I claim the ball
@@ -464,9 +462,9 @@ bt::Node::Status GetBall::Update (){
     } else if (robot_output_target == "serial") {
         successDist = 0.115; //0.12
         successAngle = 0.10; //0.15
-        successRobotAngle = 0.10;
+        successRobotAngle = 0.05;
         distAwayFromBall = 0.28;
-        minDist = 0.07;
+        minDist = 0.08;
     }
     if (blackboard->HasDouble("distAwayFromBall")) {
         distAwayFromBall = blackboard->GetDouble("distAwayFromBall");
@@ -493,7 +491,7 @@ bt::Node::Status GetBall::Update (){
 
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
     if (!choseRobotToPassTo && GetBool("passToBestAttacker")) {
-        double chooseDist = 1.0;
+        double chooseDist = 0.4;
         if (blackboard->HasDouble("chooseDist")) {
             chooseDist = blackboard->GetDouble("chooseDist");
         }
@@ -573,6 +571,7 @@ bt::Node::Status GetBall::Update (){
             
         } 
     }
+     ROS_INFO_STREAM_NAMED("skills.GetBall", "balldist: " << ballDist << ", targetAngle: " << targetAngle);
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
@@ -659,6 +658,7 @@ bt::Node::Status GetBall::Update (){
     // Get the velocity command from GoToPos
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
+    command.id = robotID;
     if (commandPtr) {
         command = *commandPtr;
     } else {
