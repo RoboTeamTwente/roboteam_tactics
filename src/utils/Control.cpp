@@ -35,9 +35,6 @@ Control::Control() : updateRateParam("role_iterations_per_second")
             pGainVelocity = 0.0;
             maxSpeed = 0.0;
             maxAngularVel = 0.0;
-
-            // Set robotType for global use
-            robotType = getRobotType();
         }
 
 RobotType Control::getRobotType() {
@@ -45,6 +42,7 @@ RobotType Control::getRobotType() {
     if (ros::param::has(robotTypeKey)) {
         std::string robotTypeString;
         ros::param::get(robotTypeKey, robotTypeString);
+        ROS_INFO_STREAM_NAMED("control", "test " << robotTypeKey << ", type: " << robotTypeString);
 
         if (robotTypeString == "arduino") {
             return RobotType::ARDUINO;
@@ -410,6 +408,7 @@ double Control::limitAngularVel(double angularVelTarget) {
 
 void Control::Initialize(int ROBOT_ID) {
     this->ROBOT_ID = ROBOT_ID;
+    robotType = getRobotType(); // Set robotType for global use
     lastRobotTypeError = now();
     lastPresetError = now();
 	setPresetControlParams();

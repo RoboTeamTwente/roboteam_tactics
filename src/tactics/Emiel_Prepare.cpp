@@ -210,8 +210,8 @@ namespace rtt {
 			.setDouble("yGoal"    , position.y)
 			.setBool("avoidRobots", true)
 			.setBool("avoidBall"  , true)
-			.setBool("avoidDefenseAreas"  , true)
-			.setDouble("maxSpeed" , 1.3)
+			.setBool("enterDefenseAreas"  , true) //TODO: CHANGED TO TRUE FOR PRESENTATION
+			// .setDouble("maxSpeed" , 1.3) //TODO: REMOVED FOR PRESENTATION
 		;
 
 		/* Create message */

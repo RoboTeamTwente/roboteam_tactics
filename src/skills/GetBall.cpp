@@ -524,7 +524,12 @@ bt::Node::Status GetBall::Update (){
     } 
     // If a specific location to aim at was given
     else if (HasString("aimAt")) {
-		targetAngle = GetTargetAngle(ballPos - Vector2(0,deviation), GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+        if (GetString("aimAt") == "ballplacement") {
+            Vector2 ballplacement = Vector2(GetDouble("aimAtBallplacement_x"), GetDouble("aimAtBallplacement_y"));
+            targetAngle = (ballplacement-ballPos).angle();
+        } else {
+	        targetAngle = GetTargetAngle(ballPos - Vector2(0,deviation), GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+        }
 	}
     // If a specific angle was given to aim at
     else if (blackboard->HasDouble("targetAngle")) {

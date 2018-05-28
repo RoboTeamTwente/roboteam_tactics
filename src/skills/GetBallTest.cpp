@@ -206,12 +206,12 @@ bt::Node::Status GetBallTest::Update (){
         std::cout << "-> 2" << std::endl;
     } else if (HasString("aimAt")) {
         if (GetString("aimAt") == "ballplacement") {
-            std::cout << "-> 3 face towards ballplacement" << std::endl;
+            //std::cout << "-> 3 face towards ballplacement" << std::endl;
 //            Vector2 const ballplacement = LastRef::get().designated_position;
 //            std::cout << "command code: " << LastRef::getState().RefState << std::endl;
 //            std::cout << "ballplacement -> x: " << LastRef::get().designated_position.x << ", y: " << LastRef::get().designated_position.y << std::endl;
             Vector2 ballplacement = Vector2(GetDouble("aimAtBallplacement_x"), GetDouble("aimAtBallplacement_y"));
-            std::cout << "ballplacement -> x: " << ballplacement.x << ", y: " << ballplacement.y << std::endl;
+            //std::cout << "ballplacement -> x: " << ballplacement.x << ", y: " << ballplacement.y << std::endl;
 
             targetAngle = (ballplacement-ballPos).angle();
         }

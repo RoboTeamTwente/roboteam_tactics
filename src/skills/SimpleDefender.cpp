@@ -130,21 +130,12 @@ Vector2 SimpleDefender::getTargetToPosition(){
 }
 
 
-
-
-
     bt::Node::Status SimpleDefender::Update() {
 
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
     robotID = blackboard->GetInt("ROBOT_ID");
-
-    Vector2 targetFromPosition = getTargetFromPosition();
-    Vector2 targetToPosition = getTargetToPosition();
-
-
-
 
     bool ourSide = true;
     if (HasBool("ourSide")) {
@@ -193,6 +184,8 @@ Vector2 SimpleDefender::getTargetToPosition(){
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos;
     if(HasDouble("distanceFromGoalRatio")) {
+        Vector2 targetFromPosition = getTargetFromPosition();
+        Vector2 targetToPosition = getTargetToPosition();
         targetPos = computeDefensePointRatio(targetFromPosition, targetToPosition, distanceFromGoalRatio);
     }else{
         targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
