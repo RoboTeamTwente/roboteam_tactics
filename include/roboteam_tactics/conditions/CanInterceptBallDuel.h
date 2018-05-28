@@ -10,7 +10,7 @@ namespace rtt {
  * \brief See YAML
  */
 /*
- * Descr: Checks whether the ball can be intercepted during a duel
+ * Descr: Checks whether the ball can be intercepted during a duel. Returns Failure if opponent is in front of the ball, else it returns Success
  * Params: null
  */
 class CanInterceptBallDuel : public Condition {

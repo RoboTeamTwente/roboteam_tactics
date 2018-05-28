@@ -432,7 +432,6 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        private_bb->SetBool("avoidRobots", (targetPos - myPos).length() > 0.3); // shut off robot avoidance when close to target
         private_bb->SetDouble("successDist", 0.01);
         if (GetBool("pGainLarger") || ballIsComing) {
         	private_bb->SetBool("pGainLarger", true);
@@ -442,15 +441,19 @@ bt::Node::Status ReceiveBall::Update() {
         if (HasString("stayOnSide")) {
         	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }
-        if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        if (blackboard->HasBool("stayAwayFromBall") && blackboard->GetBool("stayAwayFromBall")) {
         	private_bb->SetBool("stayAwayFromBall", true);
         }
         if (HasDouble("maxSpeed")) {
         	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
         }
-        if (HasBool("enterDefenseAreas")) {
-        	private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+        if (blackboard->HasBool("enterDefenseAreas")) {
+        	private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));
     	}
+    	private_bb->SetBool("avoidRobots", (targetPos - myPos).length() > 0.3); // shut off robot avoidance when close to target
+		if (blackboard->HasBool("avoidRobots")) {
+			private_bb->SetBool("avoidRobots", blackboard->GetBool("avoidRobots"));
+		}
 
         
         roboteam_msgs::RobotCommand command;

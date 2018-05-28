@@ -39,29 +39,30 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ////////////////////////////////////////////////////
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
-        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
-        { RefState::PREPARE_KICKOFF_US    , "rtt_jim/PrepareKickOff"s    } ,
-        { RefState::PREPARE_KICKOFF_THEM  , "rtt_jim/PrepareKickOff"s    } ,
-        { RefState::PREPARE_PENALTY_US    , "rtt_jim/TakePenalty"s           } ,
-        { RefState::PREPARE_PENALTY_THEM  , "rtt_dennis/DefendPenaltyStrategy"s      } ,
+//        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
+        { RefState::STOP                  , "rtt_anouk/StopStrat"s           } ,
+        { RefState::PREPARE_KICKOFF_US    , "rtt_emiel/PrepareKickoffUsStrategy"s    } ,
+        { RefState::PREPARE_KICKOFF_THEM  , "rtt_emiel/PrepareKickoffThemStrategy"s    } ,
+        { RefState::PREPARE_PENALTY_US    , "rtt_emiel/PreparePenaltyUsStrategy"s           } ,
+        { RefState::PREPARE_PENALTY_THEM  , "rtt_emiel/PreparePenaltyThemStrategy"s      } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
         { RefState::DIRECT_FREE_US        , "rtt_jim/NormalPlay"s           } ,
 
         // FreeKickDefenceStrategy
-        { RefState::DIRECT_FREE_THEM      , "rtt_jim/KickOffDefenseStrat"s         } ,
+        { RefState::DIRECT_FREE_THEM      , "rtt_anouk/PrepareDirectThem"s         } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
         { RefState::INDIRECT_FREE_US      , "rtt_jim/IndirectStrat"s         } ,
 
         // FreeKickDefenceStrategy
-        { RefState::INDIRECT_FREE_THEM    , "rtt_jim/KickOffDefenseStrat"s       } ,
+        { RefState::INDIRECT_FREE_THEM    , "rtt_anouk/PrepareDirectThem"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
         { RefState::TIMEOUT_THEM          , "rtt_jim/TimeOutStrat"s           } ,
         { RefState::GOAL_US               , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::GOAL_THEM             , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_anouk/BallPlacement_Strat"s   } ,
-        { RefState::BALL_PLACEMENT_THEM   , "rtt_dennis/StopStrategyKickoff"s           } ,
+        { RefState::BALL_PLACEMENT_THEM   , "rtt_anouk/BallPlacementThemStrat"s           } ,
 
         //////////////////////////
         // Our custom refstates //
@@ -70,9 +71,10 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
-        { RefState::DEFEND_PENALTY        , "rtt_dennis/DefendPenaltyStrategy"s  } ,
-        { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s              } ,
+        { RefState::DEFEND_PENALTY        , "rtt_emiel/PreparePenaltyThemStrategy"s  } ,
+        { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,
 
+        // SHOULD BE REMOVED
         { RefState::NORMAL_PLAY           , "rtt_jim/NormalPlay"s                } ,
 } ;
 
@@ -84,6 +86,8 @@ std::shared_ptr<bt::BehaviorTree> StrategyComposer::getMainStrategy() {
 void StrategyComposer::init() {
     // Return if not initialized
     if (initialized) return;
+
+    ROS_INFO_NAMED("StrategyComposer", "Initializing StrategyComposer..");
 
     // Construct the global bb and the refstate switch
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>(bt::Blackboard());
@@ -99,9 +103,9 @@ void StrategyComposer::init() {
     if (defNameIt != MAPPING.end() && defNameIt->second) {
         defName = *defNameIt->second;
     } else {
-        std::cerr << "Could not find a normal play strategy! "
-                  << "Please verify that the static MAPPING variable contains a normal play.\n"
-                  ;
+        ROS_ERROR_STREAM_NAMED("StrategyComposer",
+            "Could not find a normal play strategy! " <<
+            "Please verify that the static MAPPING variable contains a normal play");
         return;
     }
 
@@ -112,10 +116,11 @@ void StrategyComposer::init() {
     if (defIt != repo.end()) {
         def = defIt->second("", bb);
     } else {
-        std::cerr << "Could not find a tree for default strategy tree \""
-                  << defName
-                  << "\". Possibly \"refresh_b3_projects.sh\" needs to be run "
-                  << "or a non-existent tree was selected.\n";
+        ROS_ERROR_STREAM_NAMED("StrategyComposer",
+            "Could not find a tree for default strategy tree \"" <<
+            defName <<
+            "\". Possibly \"refresh_b3_projects.sh\" needs to be run " <<
+            "or a non-existent tree was selected.\n");
         return;
     }
 
@@ -137,8 +142,11 @@ void StrategyComposer::init() {
             if (stratIt != repo.end()) {
                 // If so, set it
                 auto node = stratIt->second("", bb);
-                rss->AddStrategy(refState, node);
-            } else {
+				std::string refStateStr = refStateToString(refState);
+				refStateStr.resize(20, ' ');
+				ROS_INFO_STREAM_NAMED("StrategyComposer", "AddStrategy : " << refStateStr << " -> " << stratName);
+				rss->AddStrategy(refState, node);
+			} else {
                 // Else it's not there, abort!
                 std::cerr << "Could not find a tree for \""
                           << stratName
@@ -156,6 +164,8 @@ void StrategyComposer::init() {
     mainStrategy = std::make_shared<bt::BehaviorTree>();
     mainStrategy->SetRoot(rss);
     initialized = true;
+    ROS_INFO_NAMED("StrategyComposer", "StrategyComposer initialized");
+
 }
 
 StrategyComposer::Forwarder::Forwarder(bt::Blackboard::Ptr bb, bt::Node::Ptr target) : bt::Leaf(bb), target(target) {}

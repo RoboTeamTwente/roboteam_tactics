@@ -53,6 +53,7 @@ public:
     const std::unordered_map<std::string, std::string> getStrings();
 
     std::string toString();
+    std::string toTestX();
 
 protected:
     std::unordered_map<std::string, bool> bools;

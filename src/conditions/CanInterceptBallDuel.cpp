@@ -21,8 +21,6 @@ CanInterceptBallDuel::CanInterceptBallDuel(std::string name, bt::Blackboard::Ptr
 
 
 
-
-
 bt::Node::Status CanInterceptBallDuel::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 

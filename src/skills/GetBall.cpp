@@ -354,11 +354,11 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
             passID = bestTeammate.id;
             passPos = bestTeammate.pos;
         }
-    } 
+    }
 
     // If again I didnt find a suitable player, or the passline to the chosen robot is blocked now...
     // ... -> go through some alternatives. If theres no alternative, chip at goal.
-    if (passID == -1 || opportunityFinder.calcDistOppToBallTraj(passPos, world) < passThreshold) { 
+    if (passID == -1 || opportunityFinder.calcDistOppToBallTraj(passPos, world) < passThreshold) {
     // pass line is crossed by opponent -> chip possible?
         ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << passID);
         double maxChipDist = 2.0;
@@ -583,7 +583,7 @@ bt::Node::Status GetBall::Update (){
         } else if (dontDribble) {
             ballCloseFrameCountTo = 2;
         }
-        
+
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
         // When I have not been close for long enough yet
             ballCloseFrameCount++;

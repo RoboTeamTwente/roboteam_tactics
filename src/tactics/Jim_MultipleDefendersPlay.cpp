@@ -110,6 +110,8 @@ namespace rtt {
 
 // void Jim_MultipleDefendersPlay::reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps) {
     bool Jim_MultipleDefendersPlay::reInitializeWhenNeeded(bool justChecking) {
+
+
         // time_point startInit = now();
 
         roboteam_msgs::World world = LastWorld::get();
@@ -126,6 +128,7 @@ namespace rtt {
         int numRobots = robots.size() + activeRobots.size();
         int totalNumRobots = world.us.size();
 
+
         if (numRobots >= (totalNumRobots - 1)) {
             numRobots = totalNumRobots - 2;
         }
@@ -141,23 +144,40 @@ namespace rtt {
         double minDangerScore;
         std::vector<double> distancesBallDefendersFromGoal;
 
-        bool ballOnTheirSide = ballPos.x > 0.0 || ballVel.x > 0.5;
+        bool ballOnTheirSide = ballPos.x > 0.0; //|| ballVel.x > 0.5;
 
         auto bb = std::make_shared<bt::Blackboard>();
         WeHaveBall weHaveBall("", bb);
 
-        bool weAreAttacking = ballOnTheirSide || (weHaveBall.Update() == Status::Success);
+        bool weAreAttacking = ballOnTheirSide; // && (weHaveBall.Update() == Status::Success);
+
+        /* Draw box around field */
+        if(weAreAttacking) drawer.setColor(0, 0, 255);
+        else               drawer.setColor(255, 0, 0);
+
+        // top left to top right
+        Vector2 topleft(-6, 4.5);
+        Vector2 bottomright(6, -4.5);
+
+        drawer.drawLine("topleft_to_topright",       topleft, Vector2(12,0));
+        drawer.drawLine("topleft_to_bottomleft",     topleft, Vector2(0, -9));
+
+        drawer.drawLine("bottomright_to_bottomleft", bottomright, Vector2(-12,0));
+        drawer.drawLine("bottomright_to_topright",   bottomright, Vector2(0, 9));
+
+        drawer.setColor(0, 0, 0);
+
 
         if(weAreAttacking != weWereAttacking){
             ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Switched to " << (weAreAttacking ? "attacking" : "defending"));
         }
 
-        // Filter removed because it was not working: when it changed to atacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
+        // Filter removed because it was not working: when it changed to attacking / defending, the number of ball or robot defenders changed, tricking the full reinitialize. This resets the filter and loop continuous
 
         if (weAreAttacking) {
-            minDangerScore = 8.0;
+            minDangerScore = 8.0; // 8.0
             distancesBallDefendersFromGoal.push_back(1.35);
-            distancesBallDefendersFromGoal.push_back(3.00);
+            distancesBallDefendersFromGoal.push_back(1.35); // 3.00
         } else {
             minDangerScore = 3.2;
             distancesBallDefendersFromGoal.push_back(1.35);
@@ -170,18 +190,21 @@ namespace rtt {
                 roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
                 double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
                 if (angleDiffBall <= 0.15) {
+                    ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "setting minBallDefenders=2, for robot=" << opp.id);
                     minBallDefenders = 2;
                 } else {
                     bool addDangerousOpp = true;
                     for (size_t j = 0; j < dangerousOpps.size(); j++) {
                         double angleDiffRobot = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (Vector2(dangerousOpps.at(j).pos) - ourGoalPos).angle()));
                         if (angleDiffRobot <= 0.15) {
+                            ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Not adding robotDefender for robot=" << opp.id);
                             addDangerousOpp = false;
                             break;
                         }
                     }
 
                     if (addDangerousOpp) {
+                        ROS_INFO_STREAM_NAMED("Jim_MultipleDefendersPlay", "Adding robotDefender for robot=" << opp.id);
                         dangerousOpps.push_back(opp);
                     }
                 }
@@ -189,6 +212,7 @@ namespace rtt {
 
         }
         int numDangerousOpps = dangerousOpps.size();
+        std::cout << "numDangerousOpps = " << numDangerousOpps << "!!!!!" << std::endl;
 
         int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
         int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
@@ -266,11 +290,11 @@ namespace rtt {
                 angleOffsets.push_back(0.0);
             } else if (numBallDefenders == 2) {
                 if (ballPos.y >= 0) {
-                    angleOffsets.push_back(0.15);
-                    angleOffsets.push_back(-0.05);
+                    angleOffsets.push_back(0.15); // 0.15
+                    angleOffsets.push_back(-0.15); // -0.05
                 } else {
-                    angleOffsets.push_back(-0.15);
-                    angleOffsets.push_back(0.05);
+                    angleOffsets.push_back(-0.15); // -0.15
+                    angleOffsets.push_back(0.15); // 0.05
                 }
             }
         } else {
@@ -305,6 +329,8 @@ namespace rtt {
             activeRobots.push_back(ballDefenderID);
             bt::Blackboard bb;
 
+            std::cout << "angleOffset of robot [" << ballDefenderID << "] = " << angleOffsets.at(i) << std::endl;
+
             // Set the robot ID
             bb.SetInt("ROBOT_ID", ballDefenderID);
             bb.SetInt("KEEPER_ID", keeperID);
@@ -329,9 +355,11 @@ namespace rtt {
             bb.SetBool("SimpleDefender_A_avoidRobots", false);
             bb.SetBool("SimpleDefender_A_dontDriveToBall", true);
             bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
+//            bb.SetBool("SimpleDefender_A_ballDefender", true);
+
 
             // Create message
-            rd.tree = "rtt_jim/DefenderRoleGetBall";
+            rd.tree = "rtt_jim/DefenderRoleBallDefenders";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later
@@ -354,8 +382,10 @@ namespace rtt {
         for (int i = 0; i < numRobotDefenders; i++) {
 
             roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
-            if(robots.size()>0){
+            Vector2 mostDangerousRobotPos = Vector2(mostDangerousRobot.pos);
+            double defenseDistanceFromGoal = ((mostDangerousRobotPos.x + 6) * 0.9);
 
+            if(robots.size()>0){
                 int defenderID = *getClosestDefender(robots, world, Vector2(mostDangerousRobot.pos), 0.0);
 
                 // RTT_DEBUGLN("Initializing Robot Defender %i", defenderID);
@@ -371,8 +401,17 @@ namespace rtt {
                 bb.SetInt("ROBOT_ID", defenderID);
                 bb.SetInt("KEEPER_ID", keeperID);
 
+
+                //----------improvement defenders----------
+                bb.SetBool("GetBall_B_aimAwayFromTarget", true);
+                bb.SetString("GetBall_B_aimAt", "ourgoal");
+                bb.SetBool("GetBall_D_aimAwayFromTarget", true);
+                bb.SetString("GetBall_D_aimAt", "ourgoal");
+                //----------improvement defenders----------
+
+
                 bb.SetInt("SimpleDefender_A_defendRobot", mostDangerousRobot.id);
-                bb.SetDouble("SimpleDefender_A_distanceFromGoal", 1.35);
+                bb.SetDouble("SimpleDefender_A_distanceFromGoal", defenseDistanceFromGoal); //1.35
                 bb.SetBool("SimpleDefender_A_avoidBallsFromOurRobots", true);
 
                 // Create message

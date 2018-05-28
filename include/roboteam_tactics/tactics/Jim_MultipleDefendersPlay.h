@@ -6,6 +6,8 @@
 
 #include "roboteam_msgs/RoleDirective.h"
 
+#include "roboteam_utils/Draw.h"
+
 namespace rtt {
 
 class Jim_MultipleDefendersPlay : public Tactic {
@@ -45,6 +47,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
     bool weWereAttacking;
     int weAreAttackingCounter;
     int prevNumRobots;
+
+    Draw drawer;
 };
 
 }

@@ -16,16 +16,6 @@ class RefStateSwitch : public bt::Composite {
 public:    
     RefStateSwitch();
     
-    /**
-     * \brief Checks whether this RefStateSwitch has all the children it should have.
-     */
-    bool isValid() const;
-    
-    /**
-     * \brief Asserts that this RefStateSwitch should be in a valid state, and prints an error message if it is not.
-     */
-    void assertValid() const;
-    
     // void AddChild(Node::Ptr child) final override;
     
     bt::Node::Status Update() override;
@@ -42,10 +32,7 @@ public:
 
     void AddStrategy(RefState refState, Node::Ptr child);
 
-    void printRefStateInfo() const;
-
 private:
-    bool validated;
     boost::optional<RefState> previousCmd;
     boost::optional<RefState> currentCmd;
     bool finishedOnce;

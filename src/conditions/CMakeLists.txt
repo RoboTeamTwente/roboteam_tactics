@@ -18,7 +18,7 @@ set(CONDITION_SOURCES
     
     # ${CMAKE_CURRENT_SOURCE_DIR}/IsRefStage.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/IsRefCommand.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/IsBallInZone.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/IsInZone.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/ParamCheck.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/unity.cpp

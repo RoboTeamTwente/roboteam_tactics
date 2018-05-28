@@ -48,7 +48,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
     Vector2 ballPos(world.ball.pos);
 
     // Max 3 attackers
-    int numAttackers = std::min((int) robots.size(), 3);
+    int numAttackers = std::min((int) robots.size(), 5);
     RTT_DEBUGLN("Initializing Jim_IndependentAttackersPlay numAttackers: %i", numAttackers);    
 
     // Get the default roledirective publisher
@@ -58,6 +58,9 @@ void Jim_IndependentAttackersPlay::Initialize() {
     attackersDefaultPositions.push_back(Vector2(3.0, 1.5));
     attackersDefaultPositions.push_back(Vector2(3.0, -1.5));
     attackersDefaultPositions.push_back(Vector2(1.0, 0.0));
+    attackersDefaultPositions.push_back(Vector2(4.5, 2.0));
+    attackersDefaultPositions.push_back(Vector2(4.5, -2.0));
+
 
     std::vector<int> strikerIDs = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, attackersDefaultPositions, world);    
 
@@ -89,7 +92,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
         // bb.SetBool("ReceiveBall_A_shootAtGoal", false);
 
         // Create message
-        rd.tree = "rtt_jim/IndependentAttackerRole";
+        rd.tree = "rtt_jim/IndependentAttackerRole"; //"rtt_jelle/GeneralAttacker";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later

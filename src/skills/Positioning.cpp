@@ -44,9 +44,14 @@ void Positioning::Initialize() {
         
 
         // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
+    } else if (type == 2){
+        // // Attacker
+        // opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        // // starting point is opponents half of the field
+        // bestPosition = opportunityFinder.computeBestOpportunity(Vector2(-3.0,0.0),6.0,9.0);
+
     }
 
-    
     // starting point
     bestPosition = opportunityFinder.computeBestOpportunity(initialPos,initialBoxSize,initialBoxSize);
 

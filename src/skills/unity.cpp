@@ -4,6 +4,9 @@
 #include "AimAtSafe.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
+#include "Anouk_PenaltyKeeper.cpp"
+#undef ROS_LOG_NAME
+
 #include "Approach.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
 
@@ -17,7 +20,7 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "BallPlacementTest.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "Chip.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 
@@ -122,7 +125,11 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "SimpleDefender.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
+
+#include "SimpleGoalDefender.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
 
 #include "Sleep.cpp"
 #undef RTT_CURRENT_DEBUG_TAG 

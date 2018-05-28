@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "unique_id/unique_id.h"
 
 #include "roboteam_tactics/Parts.h"
@@ -16,7 +18,7 @@ class Anouk_BallPlacementUsPlay : public Tactic {
 public:
     Anouk_BallPlacementUsPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
 
-    void Initialize() override;
+	void Initialize() override;
     Status Update() override;
     
     std::string node_name() override { return "Anouk_BallPlacementUsPlay"; }
@@ -25,6 +27,22 @@ private:
     boost::uuids::uuid token;
     bool failed;
     bool succeeded;
+
+	Vector2 lastBallPlacementPosition;
+	int placerID;
+	long int timeBallPlaced;
+
+	void movePlacerAwayFromBall();
+	bool ballPlacementSuccessful();
+
+	enum PlayStates {
+		PLACING_BALL,
+		STOP_BALL_SPINNING,
+		MOVING_PLACER
+	};
+	PlayStates currentState;
+
+
 
 } ;
 

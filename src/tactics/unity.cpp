@@ -5,6 +5,9 @@
 #include "AttackerTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Anouk_MultipleDefendersPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "BasicAttackTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
@@ -13,9 +16,6 @@
 
 #include "BasicKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
-
-//#include "DemoTactic.cpp"
-//#undef RTT_CURRENT_DEBUG_TAG
 
 #include "FormationPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
@@ -120,7 +120,16 @@
 #undef RTT_CURRENT_DEBUG_TAG
 
 #include "Anouk_BallPlacementUsPlay.cpp"
-#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
+
+#include "Anouk_BallPlacementThemPlay.cpp"
+#undef ROS_LOG_NAME
+
+#include "Anouk_PrepareDirectThem.cpp"
+#undef ROS_LOG_NAME
+
+#include "Anouk_StopPlay.cpp"
+#undef ROS_LOG_NAME
 
 #include "Jim_GetBallPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
@@ -154,3 +163,19 @@
 
 #include "Jelle_DemoPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+
+#include "Emiel_PrepareKickoffUs.cpp"
+#undef ROS_LOG_NAME
+
+#include "Emiel_PreparePenaltyUs.cpp"
+#undef ROS_LOG_NAME
+
+#include "Emiel_PrepareKickoffThem.cpp"
+#undef ROS_LOG_NAME
+
+#include "Emiel_PreparePenaltyThem.cpp"
+#undef ROS_LOG_NAME
+
+#include "Emiel_Prepare.cpp"
+#undef ROS_LOG_NAME
+
