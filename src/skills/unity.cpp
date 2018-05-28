@@ -54,6 +54,7 @@
 
 #include "GetBall.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "GetBallTest.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
@@ -119,7 +120,7 @@
 #undef RTT_CURRENT_DEBUG_TAG 
 
 #include "ShootAtGoalV2.cpp"
-#undef RTT_CURRENT_DEBUG_TAG 
+#undef ROS_LOG_NAME
 
 #include "ShootAway.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

@@ -235,8 +235,8 @@ int main(int argc, char *argv[]) {
 
             ROS_INFO_STREAM_NAMED(LOG_NAME, "Tree finished. "
                     << "status=" << statusString
-                    << ", tree=" << currentTreeName.c_str()
-                    << ", token=" << currentToken);
+                    << ", tree=" << currentTreeName.c_str());
+//                    << ", token=" << currentToken);
 
             // Reset tree
             currentTree = nullptr;
