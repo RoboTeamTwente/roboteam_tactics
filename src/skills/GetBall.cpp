@@ -99,6 +99,7 @@ void GetBall::publishStopCommand() {
 	command.y_vel = 0.0;
 	command.w = 0.0;
 	command.dribbler = false;
+    command.geneva_state = 3;
 
 	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
@@ -109,23 +110,16 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         kickSpeed = blackboard->GetDouble("kickerVel");
     }
     choseRobotToPassTo = false;
-    
-
-    // boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
-    // roboteam_msgs::RobotCommand command;
-    // if (commandPtr) {
-    //     command = *commandPtr;
-    // }
 
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-    if (chip) {
+    if (chip || GetBool("chipOn")) {
         command.chipper = true;
         command.chipper_forced = true;
-        if (robot_output_target == "grsim" && kickSpeed*1.3 > 5.0) {
-            command.chipper_vel = 5.0;
+        if (robot_output_target == "grsim") {
+            command.chipper_vel = fmin(5.0, kickSpeed*1.3);
         } else {
-            command.chipper_vel = kickSpeed*1.3;
+            command.chipper_vel = fmin(8.0, kickSpeed*1.5); //TODO: TUNE
         }
         
     } else {
@@ -133,10 +127,6 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         command.kicker_forced = true;
         command.kicker_vel = kickSpeed;
     }
-    
-    // command.chipper = GetBool("chipOn");
-    // command.chipper_forced = GetBool("chipOn");
-    // command.chipper_vel = GetBool("chipOn") ? kickSpeed : 0;
     command.x_vel = 0;
     command.y_vel = 0;
     command.dribbler = false;
@@ -555,7 +545,7 @@ bt::Node::Status GetBall::Update (){
     }
     Vector2 targetPos;
     if (fabs(angleDiff) > successAngle) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*2-successAngle)); //TODO: downscaling when i get closer - working on it
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", L_posDiff<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
@@ -576,7 +566,6 @@ bt::Node::Status GetBall::Update (){
             
         } 
     }
-     ROS_INFO_STREAM_NAMED("skills.GetBall", "balldist: " << ballDist << ", targetAngle: " << targetAngle);
 
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
@@ -616,6 +605,7 @@ bt::Node::Status GetBall::Update (){
             if (!GetBool("passOn")) {
             // if not shooting, im successful now
                 ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " has ball so succeeded");
+                publishStopCommand();
                 return Status::Success;
             } 
             else if (!shootAtGoal && (choseRobotToPassTo || (GetString("aimAt")=="robot" && GetBool("ourTeam"))) ) {
@@ -664,6 +654,7 @@ bt::Node::Status GetBall::Update (){
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
+    
     if (commandPtr) {
         command = *commandPtr;
     } else {
@@ -671,6 +662,13 @@ bt::Node::Status GetBall::Update (){
         command.y_vel = 0;
         command.w = 0;
     }
+
+    if (HasInt("geneva") && L_posDiff < 0.5) { // only set geneva state when close enough
+        command.geneva_state = GetInt("geneva");
+    } else {
+        command.geneva_state = 3; // center state
+    }
+
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
 

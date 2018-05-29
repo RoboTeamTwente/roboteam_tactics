@@ -161,7 +161,8 @@ void ReceiveBall::publishStopCommand() {
 	command.x_vel = 0.0;
 	command.y_vel = 0.0;
 	command.w = 0.0;
-	command.dribbler = false; 
+	command.dribbler = false;
+	command.geneva_state = 3;
 
 	if (startKicking) {
 		command.kicker = true;
@@ -374,14 +375,24 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
 		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
-		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2);
-
-		ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
+		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2 + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
+		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
 
 	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
+	int geneva_state = 3; //default geneva drive to center position
 	if (shootAtGoal) {
-		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0);
+		// decide convenient geneva state
+		static double geneva_threshold = 0.3*M_PI;
+		if (fabs(angleDiff) > geneva_threshold) {
+			geneva_state = (angleDiff<0) ? 1 : 5; // negative anglediff -> geneva to 20 degrees left, otherwise to 20 degrees right
+			geneva_threshold = 0.25*M_PI; // prevents rapid shifting of the geneva drive
+		} else {
+			geneva_state = 3;
+			geneva_threshold = 0.3*M_PI;
+		}
+		// determine shooting angle and take a step back from the ball interception pos
+		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0) + (geneva_state-3)*10/180*M_PI;
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
@@ -392,7 +403,6 @@ bt::Node::Status ReceiveBall::Update() {
 		startKicking = false;
 	}
 
-		
 
 	// If the ball hasnt been coming for a while and I'm closest to the ball, return failure.
 	if (!ballIsComing) {
@@ -416,7 +426,7 @@ bt::Node::Status ReceiveBall::Update() {
 			publishStopCommand();
 			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " succeeded because ball stopped coming and distanceToBall < 0.4");
 			return Status::Success;
-    	} else if (!GetBool("defenderMode")) { // && isRobotClosestToBall.Update() == Status::Success
+    	} else if (!GetBool("defenderMode")) {
     	// If I'm not defending, i.e. actually expecting a pass but the ball stopped too far away from me, return failure
     		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because ball stopped coming but distanceToBall > 0.4");
     		return Status::Failure;
@@ -466,7 +476,11 @@ bt::Node::Status ReceiveBall::Update() {
 	    	command.y_vel = 0;
 	    	command.w = 0;
 	    }
-        // TEMPORARY REPLACEMENT OF BALL SENSOR FOR IN GRSIM
+
+	    // Set geneva state asap (never know how fast that ball be coming)
+	    command.geneva_state = geneva_state;
+
+        // For a real robot this starts the kicking on ball sensor. For grsim, the robot will continuously kick, giving similar results
         if (startKicking) {
         	command.kicker = true;
         	command.kicker_vel = 6.5;

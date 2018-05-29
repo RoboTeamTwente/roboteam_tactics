@@ -1,0 +1,7 @@
+<launch>
+
+	<group ns="blue">
+	    <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jim/SimpleDefStrat" output="screen" />
+	</group>
+
+</launch>
