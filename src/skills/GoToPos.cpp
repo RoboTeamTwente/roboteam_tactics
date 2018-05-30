@@ -56,7 +56,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = 0.1;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = -0.1;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 2.0;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
@@ -74,6 +74,24 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             }
         }
 
+void GoToPos::Initialize() {
+    //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
+    if (GetBool("driveBackward")) {
+        ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+        // Get the latest world state
+        roboteam_msgs::World world = LastWorld::get();
+        // Find the robot with the specified ID
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
+        roboteam_msgs::WorldRobot me;
+        if (findBot) {
+            me = *findBot;
+        } else {
+            return;
+        }
+
+        backwardPos = Vector2(me.pos) + Vector2(-0.3,0).rotate(me.angle);
+    }
+}
 
 void GoToPos::sendStopCommand(uint id) {
     roboteam_msgs::RobotCommand command;
@@ -262,26 +280,20 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
 
 
 Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel) {
-    // Vector2 diff = ballPos - myPos;
-    // double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
 
-    // if (theta < (0.5 * M_PI)) {
-    //     if (fabs(theta) < .00001) theta = 0.01;
-    //     // double force = theta / (0.5 * M_PI);
-    //     Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
-    //     Vector2 ballForce = projectedBall - ballPos;
-    //     sumOfForces = sumOfForces + ballForce * 5;
-    // }
-
-    // roboteam_msgs::World world = LastWorld::get();
-    // Vector2 ballVel(world.ball.)
-
-    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
-    double lookingDistance = 1.0;
     Vector2 posError = targetPos - myPos;
 
-    Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
+    // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
+    double minAntenna = 1.2; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.2);
+    // The antenna will not grow beyond its minimum value when moving backwards
+    if (myVel.dot(antenna)<0 ){
+        antenna = posError.stretchToLength(minAntenna);
+    }
+    // The antenna is never larger than the position error
+    if (posError.length() < antenna.length()) {
+            antenna = posError;
+    }
 
     sumOfForces = sumOfForces + getForceVectorFromRobot(myPos, ballPos, antenna, sumOfForces);
 
@@ -444,8 +456,9 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
+    Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    
 
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
@@ -494,6 +507,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Store some variables for easy access
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
+
+    //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
+    if (GetBool("driveBackward")) {
+        targetPos = backwardPos;
+    }
 
     // Determine angle goal and error
     double angleGoal;

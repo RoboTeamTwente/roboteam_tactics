@@ -198,7 +198,11 @@ namespace rtt {
 		bb.SetInt("KEEPER_ID", keeperID);
 
 		// Get the position of the ball
-		Vector2 ballPos = LastWorld::get().ball.pos;
+		roboteam_msgs::World world = LastWorld::get();
+		Vector2 ballPos;
+		if (!std::isnan(world.ball.pos.x)) {
+			ballPos = world.ball.pos;
+		}
 
 		// Calculate angle to ball
 		float angleRobotToBall = (ballPos - position).angle();
@@ -211,7 +215,7 @@ namespace rtt {
 			.setBool("avoidRobots", true)
 			.setBool("avoidBall"  , true)
 			.setBool("enterDefenseAreas"  , true) //TODO: CHANGED TO TRUE FOR PRESENTATION
-			// .setDouble("maxSpeed" , 1.3) //TODO: REMOVED FOR PRESENTATION
+			.setDouble("maxSpeed" , 3.0) //TODO: HIGHER FOR PRESENTATION
 		;
 
 		/* Create message */

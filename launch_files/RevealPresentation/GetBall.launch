@@ -2,6 +2,7 @@
         <arg name="id" default="0" />
 	<arg name="chip" default="false" />
 	<arg name="geneva" default="3" />
+	<arg name="pass" default="false" />
 	
-	<node name="strategyYellow" pkg="roboteam_tactics" type="TestX" args="GetBall int:ROBOT_ID=$(arg id) bool:passOn=true bool:chipOn=$(arg chip) string:aimAt=theirgoal int:geneva=$(arg geneva)" output="screen" />
+	<node name="GetBallYellow" pkg="roboteam_tactics" type="TestX" args="GetBall int:ROBOT_ID=$(arg id) bool:passOn=true bool:chipOn=$(arg chip) string:aimAt=theirgoal int:geneva=$(arg geneva) bool:passToBestAttacker=$(arg pass)" output="screen" />
 </launch>

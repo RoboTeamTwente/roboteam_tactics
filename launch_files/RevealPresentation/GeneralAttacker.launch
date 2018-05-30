@@ -1,0 +1,6 @@
+<launch>
+        <arg name="dist" default="0.0" />
+        <arg name="id" default="0" />
+	    <node name="generalAttackerYellow" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/GeneralAttacker int:ROBOT_ID=$(arg id) double:waitAtDistance=$(arg dist)" output="screen" />
+
+</launch>

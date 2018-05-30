@@ -69,6 +69,7 @@ namespace rtt {
 class GoToPos : public Skill {
 public:
     GoToPos(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
+    void Initialize();
 
     void sendStopCommand(uint id);
     Vector2 getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, Vector2 antenna, Vector2 sumOfForces);
@@ -122,6 +123,9 @@ private:
     ros::Publisher myPosTopic;
     ros::Publisher myVelTopic;
     ros::Publisher myTargetPosTopic;
+    
+    // a position a bit behind me that is determined in the initialize function
+    Vector2 backwardPos;
 } ;
 
 } // rtt
