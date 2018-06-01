@@ -90,7 +90,7 @@ void GetBall::initializeOpportunityFinder() {
 
 void GetBall::Terminate(bt::Node::Status s) {
 
-	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Terminating for robot " << robotID << "...");
+//	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Terminating for robot " << robotID << "...");
 
     if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments (similar hack in terminate function)
         hasTerminated = true;
