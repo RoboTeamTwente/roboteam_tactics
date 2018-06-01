@@ -70,6 +70,7 @@ public:
 	SimpleDefender(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     static Vector2 computeDefensePoint(Vector2 defendPos, bool ourSide, double distanceFromGoal, double angleOffset);
     static Vector2 computeDefensePointRatio(Vector2 targetFrom, Vector2 targetTo, double ratio);
+    static Vector2 computeDefensePointAbsolute(Vector2 targetFrom, Vector2 targetTo, double distance);
     Vector2 getTargetFromPosition();
     Vector2 getTargetToPosition();
 	Status Update();

@@ -65,6 +65,18 @@ Vector2 SimpleDefender::computeDefensePointRatio(Vector2 targetFrom, Vector2 tar
     return targetPos;
 }
 
+Vector2 SimpleDefender::computeDefensePointAbsolute(Vector2 targetFrom, Vector2 targetTo, double distance){
+    // Get the position of our goal
+    Vector2 goalPos(LastWorld::get_our_goal_center());
+    // Get vector between defendPos and goalPos
+    Vector2 targetPos = targetTo - targetFrom;
+    // Stretch vector to correct length
+    targetPos.stretchToLength(distance);
+    // Move vector to goalPos
+    distanceVector = distanceVector + targetFrom;
+
+    return distanceVector;
+}
 
 Vector2 SimpleDefender::getTargetFromPosition(){
     ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition");
@@ -97,7 +109,7 @@ Vector2 SimpleDefender::getTargetFromPosition(){
         }
     }
 
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "should not be here");
+    ROS_WARN_STREAM_NAMED("SimpleDefender", "should not be here!");
 }
 
 Vector2 SimpleDefender::getTargetToPosition(){
@@ -127,10 +139,11 @@ Vector2 SimpleDefender::getTargetToPosition(){
             }
         }
     }
+    ROS_WARN_STREAM_NAMED("SimpleDefender", "should not be here!");
 }
 
 
-    bt::Node::Status SimpleDefender::Update() {
+bt::Node::Status SimpleDefender::Update() {
 
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
@@ -167,6 +180,7 @@ Vector2 SimpleDefender::getTargetToPosition(){
     Vector2 defendPos;
 
     if (HasInt("defendRobot")) {
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "parameter 'defendRobot' can be replaced with 'targetTo'");
         unsigned int defendRobot = GetInt("defendRobot");
         boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(defendRobot, false, world);
         roboteam_msgs::WorldRobot robot;
@@ -183,16 +197,22 @@ Vector2 SimpleDefender::getTargetToPosition(){
 
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos;
+
     if(HasDouble("distanceFromGoalRatio")) {
         Vector2 targetFromPosition = getTargetFromPosition();
         Vector2 targetToPosition = getTargetToPosition();
         targetPos = computeDefensePointRatio(targetFromPosition, targetToPosition, distanceFromGoalRatio);
+    }else
+    if(HasDouble("distanceFromGoalAbsolute")){
+        Vector2 targetFromPosition = getTargetFromPosition();
+        Vector2 targetToPosition = getTargetToPosition();
+        targetPos = computeDefensePointAbsolute(targetFromPosition, targetToPosition, distanceFromGoalRatio);
     }else{
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Using old computeDefensePoint");
         targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
     }
 
-//    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "targetPos: " << targetPos);
-
+    // put targetPos into GoToPos
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
     private_bb->SetDouble("receiveBallAtX", targetPos.x);

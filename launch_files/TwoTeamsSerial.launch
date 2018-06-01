@@ -1,0 +1,45 @@
+<launch>
+
+	<param name="robot_output_target" type="string" value="grsim" />
+	<param name="role_iterations_per_second" type="int" value="50" />
+
+	<group ns="yellow">
+		<param name="our_side"  type="str" value="right" />
+		<param name="our_color" type="str" value="yellow" />
+		<param name="num_role_nodes" type="int" value="4" />
+		<param name="normalize_field" type="bool" value="true" />
+		<param name="role_iterations_per_second" type="int" value="50" />
+
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
+		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
+
+		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	</group>
+
+	<group ns="blue">
+		<param name="our_side"  type="str" value="left" />
+		<param name="our_color" type="str" value="blue" />
+		<param name="num_role_nodes" type="int" value="4" />
+		<param name="normalize_field" type="bool" value="true" />
+		<param name="role_iterations_per_second" type="int" value="50" />
+
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" />
+		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" output="screen" />
+
+		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot6" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot7" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+
+	</group>
+
+	<!-- ROBOTHUB -->
+	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" />
+
+
+</launch>
