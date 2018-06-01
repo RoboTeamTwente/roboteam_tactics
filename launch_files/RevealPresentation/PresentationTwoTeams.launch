@@ -1,0 +1,123 @@
+<launch>
+	<param name="output_device" type="string" value="/dev/serial/by-id/usb-STMicroelectronics_Basestation_078-if00" />
+
+	<arg name="legacy_packets" default="false" />
+	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+
+    <param name="keeper_id" type="int" value="0" />
+	<param name="our_side" type="str" value="left" />
+	<param name="our_color" type="str" value="yellow" />
+
+	<param name="role_iterations_per_second" type="int" value="50" />
+	<param name="num_role_nodes" type="int" value="4" />
+	<param name="normalize_field" type="bool" value="true" />
+
+	<arg name="robot_output_target" default="serial" />
+	<arg name="robot_type" default="proto" />
+	<param name="robot_output_target" type="string" value="$(arg robot_output_target)" />
+
+	<param name="robot4/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot5/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot6/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot7/robotType" type="string" value="$(arg robot_type)" />
+
+	<param name="robot4/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot5/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot6/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot7/readyToReceiveBall" type="bool" value="false" />
+
+	<param name="robot4/claimedPosX" type="double" value="-0.0" />
+	<param name="robot4/claimedPosY" type="double" value="-0.0" />
+	<param name="robot5/claimedPosX" type="double" value="-0.0" />
+	<param name="robot5/claimedPosY" type="double" value="-0.0" />
+	<param name="robot6/claimedPosX" type="double" value="-0.0" />
+	<param name="robot6/claimedPosY" type="double" value="-0.0" />
+	<param name="robot7/claimedPosX" type="double" value="-0.0" />
+	<param name="robot7/claimedPosY" type="double" value="-0.0" />
+
+	<param name="robotClaimedBall" type="int" value="-1" />
+	<param name="passToRobot" type="int" value="-1" />
+ 
+	<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
+	<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
+	<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
+
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot4"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot5"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot6"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot7"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	
+	
+	
+	<group ns="blue">
+
+	    <param name="output_device" type="string" value="/dev/serial/by-id/usb-STMicroelectronics_Basestation_080-if00" />
+        <param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+        
+		<param name="keeper_id" type="int" value="0" />
+		<param name="our_side" type="str" value="right" />
+		<param name="our_color" type="str" value="blue" />
+
+		<param name="role_iterations_per_second" type="int" value="50" />
+		<param name="num_role_nodes" type="int" value="4" />
+		<param name="normalize_field" type="bool" value="true" />
+		<param name="robot_output_target" type="string" value="$(arg robot_output_target)" />
+
+		<param name="robot0/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot1/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot2/robotType" type="string" value="$(arg robot_type)" />
+		<param name="robot3/robotType" type="string" value="$(arg robot_type)" />
+
+		<param name="robot0/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot1/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot2/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot3/readyToReceiveBall" type="bool" value="false" />
+
+		<param name="robot0/claimedPosX" type="double" value="-0.0" />
+		<param name="robot0/claimedPosY" type="double" value="-0.0" />
+		<param name="robot1/claimedPosX" type="double" value="-0.0" />
+		<param name="robot1/claimedPosY" type="double" value="-0.0" />
+		<param name="robot2/claimedPosX" type="double" value="-0.0" />
+		<param name="robot2/claimedPosY" type="double" value="-0.0" />
+		<param name="robot3/claimedPosX" type="double" value="-0.0" />
+		<param name="robot3/claimedPosY" type="double" value="-0.0" />
+
+		<param name="robotClaimedBall" type="int" value="-1" />
+		<param name="passToRobot" type="int" value="-1" />
+	 
+		<node pkg="roboteam_world" type="run_world.sh" name="world" output="screen" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen" />
+		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen" />
+
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot0"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot1"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot2"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+		<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+			<arg name="name" value="robot3"/>
+			<arg name="outputToScreen" value="true"/>
+		</include>
+
+	</group>
+	
+</launch>

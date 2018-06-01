@@ -127,7 +127,7 @@ void OpportunityFinder::setMax(std::string metric, double value) {
 double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
 
 	if (world.them.size() == 0) {
-		return 0.0;
+		return 1000.0;
 	}
 
 	double shortestDistance = (Vector2(world.them.at(0).pos) - testPosition).length();
@@ -247,7 +247,7 @@ std::vector<Cone> OpportunityFinder::combineOverlappingRobots(std::vector<Cone> 
 	return robotCones;
 }
 
-// Calculale the angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
+// Calculate the total angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
 double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
 	double viewOfGoal = 0.0;
@@ -257,6 +257,23 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 	}
 
 	return viewOfGoal;
+}
+
+// Calculate the best angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
+// the view, are taken into account
+std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
+	double bestViewOfGoal = 0.0;
+	int bestIndex = 0;
+	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
+	for (size_t i = 0; i < openAngles.second.size(); i++) {
+   		double viewOfGoal = openAngles.second.at(i) - openAngles.first.at(i);
+   		if (viewOfGoal > bestViewOfGoal) {
+   			bestViewOfGoal = viewOfGoal;
+   			bestIndex = i;
+   		}
+	}
+
+	return {openAngles.first.at(bestIndex), openAngles.second.at(bestIndex)};
 }
 
 std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
@@ -474,10 +491,10 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	for (size_t i = 0; i < world.us.size(); i++) {
 		// check whether current bot claimed a position
 		double botClaimedX;
-		ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosX", botClaimedX);
+		ros::param::get("robot" + std::to_string(world.us.at(i).id) + "/claimedPosX", botClaimedX);
 		if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
 			double botClaimedY;
-			ros::param::getCached("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
+			ros::param::get("robot" + std::to_string(world.us.at(i).id) + "/claimedPosY", botClaimedY);
 			world.us.at(i).pos.x = float(botClaimedX);
 			world.us.at(i).pos.y = float(botClaimedY);
 		}
@@ -575,10 +592,10 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 		// Get claimed positions, place them instead of those robot positions in our 'fake' world object
 		for (size_t i = 0; i < fakeWorld.us.size(); i++) {
 			double botClaimedX;
-			ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
+			ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
 			if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
 				double botClaimedY;
-				ros::param::getCached("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosY", botClaimedY);
+				ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosY", botClaimedY);
 				fakeWorld.us.at(i).pos.x = float(botClaimedX);
 				fakeWorld.us.at(i).pos.y = float(botClaimedY);
 			}

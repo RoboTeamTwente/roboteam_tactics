@@ -1,0 +1,12 @@
+<launch>
+        <param name="keeper_id" type="int" value="10" />
+	    <arg name="no" default="0" />
+	    <node name="strategyYellow" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/Presentation_SetPositionsStrat int:Presentation_SetPositions_A_formation=$(arg no)" output="screen" />
+	    
+	    <group ns="blue">
+	        <param name="keeper_id" type="int" value="10" />
+	        <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/Presentation_SetPositionsStrat int:Presentation_SetPositions_A_formation=$(arg no)" output="screen" />
+	    
+	    </group>
+
+</launch>

@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "roboteam_msgs/World.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 
 #include "roboteam_utils/LastWorld.h"
 #include "roboteam_tactics/utils/utils.h"
@@ -23,6 +24,8 @@ Positioning::Positioning(std::string name, bt::Blackboard::Ptr blackboard)
 void Positioning::Initialize() {
     robotID = blackboard->GetInt("ROBOT_ID");
     ROS_INFO_STREAM_NAMED("skills.Positioning", "Initialize for robot: " << robotID);
+    roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+
     // passIncoming = false;
     int type = 0;
     if (HasInt("type")) {
@@ -31,9 +34,9 @@ void Positioning::Initialize() {
     if (type == 0) {
     // Attacker
         opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
-    // starting point is opponents half of the field
-        bestPosition = opportunityFinder.computeBestOpportunity(Vector2(3.0,0.0),6.0,9.0);
-
+         // starting point is opponents half of the field
+        initialBoxSize = field.field_width;
+        initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
     } else if (type == 1) {
     // Assister/passer
     // WIP: To which robot should be passed? check at every scan which robot?
@@ -42,15 +45,15 @@ void Positioning::Initialize() {
 
         // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
     } else if (type == 2){
-        // Attacker
-        opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
-        // starting point is opponents half of the field
-        bestPosition = opportunityFinder.computeBestOpportunity(Vector2(-3.0,0.0),6.0,9.0);
+        // // Attacker
+        // opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        // // starting point is opponents half of the field
+        // bestPosition = opportunityFinder.computeBestOpportunity(Vector2(-3.0,0.0),6.0,9.0);
 
     }
 
-    
-
+    // starting point
+    bestPosition = opportunityFinder.computeBestOpportunity(initialPos,initialBoxSize,initialBoxSize);
 
     // pass first info to GoToPos blackboard already
     private_bb->SetInt("ROBOT_ID", robotID);
@@ -84,24 +87,9 @@ double Positioning::getBallGoalHalfwayAngle(Vector2 testPos) {
 
 bt::Node::Status Positioning::Update() {
     
-
-    // if (!passIncoming) {
-    //     int passToRobot;
-    //     ros::param::getCached("passToRobot", passToRobot);
-    //     passIncoming = passToRobot == (int) robotID;
-    // } else if (counter2 > 20) {// if a pass is incoming, I should stop repositioning myself and go to the last bestPosition I chose
-    //     private_bb->SetDouble("xGoal", bestPosition.x);
-    //     private_bb->SetDouble("yGoal", bestPosition.y);
-    //     private_bb->SetDouble("angleGoal", getBallGoalHalfwayAngle(bestPosition));
-    //     counter2 = 0;
-    // } else {
-    //     counter2++;
-    // }
-    
-
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 500) { // WIP: extra check for zero or very low score on current claimed pos?
+    if (elapsedTime.count() >= 1000) { // WIP: extra check for zero or very low score on current claimed pos?
 
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
@@ -109,10 +97,10 @@ bt::Node::Status Positioning::Update() {
         double boxSize = (bestPosition - myPos).length() + 1.0; 
 
         bool dontGoToPos = false;
-        if (counter>10) {
-            // every 10 scans, the scan area is large again.
-            boxSize = 9.0;
-            bestPosition = Vector2(3.0,0.0);
+        if (counter>5) {
+            // every 5 scans, the scan area is large again.
+            boxSize = initialBoxSize;
+            bestPosition = initialPos;
             counter = 1;
             // dont immediately go to this new setpoint, because the large area scan is less precise.
             dontGoToPos = true;
@@ -129,11 +117,13 @@ bt::Node::Status Positioning::Update() {
             if (HasDouble("waitAtDistance")) {
                 waitAtDist = GetDouble("waitAtDistance");
             }
-            Vector2 posOffset = Vector2(-waitAtDist,0).rotate( getBallGoalHalfwayAngle(bestPosition) );
+            double targetAngle = getBallGoalHalfwayAngle(bestPosition);
+            Vector2 posOffset = Vector2(-waitAtDist,0).rotate(targetAngle);
 
             // pass new position setpoint to GoToPos blackboard
             private_bb->SetDouble("xGoal", bestPosition.x + posOffset.x);
             private_bb->SetDouble("yGoal", bestPosition.y + posOffset.y);
+            private_bb->SetDouble("angleGoal", targetAngle);
 
             // claim chosen position to go to
             ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", bestPosition.x);
@@ -143,7 +133,7 @@ bt::Node::Status Positioning::Update() {
         start = now();
         // ROS_INFO_STREAM("robot: " << robotID << " best position: x: " << bestPosition.x << ", y: "<< bestPosition.y);  
     }
-    // private_bb->SetDouble("angleGoal", targetAngle);
+    
     goToPos.Update();
     return Status::Running;
 }

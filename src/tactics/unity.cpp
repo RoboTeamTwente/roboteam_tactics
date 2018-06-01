@@ -47,6 +47,9 @@
 #include "PenaltyThemPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 
+#include "Presentation_SetPositions.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+
 #include "SecondaryKeeperTactic.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
 

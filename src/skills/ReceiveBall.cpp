@@ -37,8 +37,9 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         // , isRobotClosestToBall("", blackboard)
         {
     hasBall = whichRobotHasBall();
-
+    ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
+    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
     //computedTargetPos = false;
 
 }
@@ -84,8 +85,8 @@ void ReceiveBall::Initialize() {
 	} else if (GetBool("claimedPos")) {
 		double botClaimedX;
 		double botClaimedY;
-		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
-		ros::param::getCached("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
+		ros::param::get("robot" + std::to_string(robotID) + "/claimedPosX", botClaimedX);
+		ros::param::get("robot" + std::to_string(robotID) + "/claimedPosY", botClaimedY);
 		receiveBallAtPos = Vector2(botClaimedX, botClaimedY);
 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << ", receiving ball at claimed pos: x: " << botClaimedX << ", y: " << botClaimedY);
 	} else {
@@ -105,7 +106,8 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 
 	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
-
+		publishStopCommand();
+		
 		if (GetBool("setSignal")) {
 		// Check if the robot actually expects to receive a pass
 		// If setSignal is not used, the rosparam robotClaimedBall will not be set to my ID (it shouldnt, at least)
@@ -161,6 +163,7 @@ void ReceiveBall::publishStopCommand() {
 	command.y_vel = 0.0;
 	command.w = 0.0;
 	command.dribbler = false;
+	command.geneva_state = 3;
 
 	if (startKicking) {
 		command.kicker = true;
@@ -181,7 +184,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	// Is ball coming towards me? (for determining failure/success)
 	Vector2 posdiff = myPos - ballPos;
-	double velThreshold = posdiff.length()/4; // ARBITRARY GUESS
+	double velThreshold = posdiff.length()/10; // ARBITRARY GUESS
 	if (GetBool("defenderMode")) {
 		velThreshold = 0.1;
 	} else if (velThreshold < 0.1) {
@@ -189,10 +192,9 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	}
 	if (ballVel.dot(posdiff.normalize()) < velThreshold) { // if the velocity in my direction is too low
 		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
-			// if a pass is noted to myself, I assume the ball is coming.
 			int robotClaimedBall;
 		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
-		    if (robotClaimedBall == robotID) {
+		    if (robotClaimedBall == robotID) { // if a pass is noted to myself, I assume the ball is coming.
 		    	ballIsComing = true;
 	    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
 		    }
@@ -202,7 +204,7 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	}//--------------------------
 
 	// Actual determining of the interceptPose
-	if (ballVel.length() < 0.1 || ballVel.dot(posdiff.normalize()) < velThreshold) { // ball not coming towards me. TODO: ISNT THIS CHECK A BIT DOUBLE?
+	if (ballVel.length() < 0.1 || ballVel.dot(posdiff.normalize()) < velThreshold) { // ball not coming towards me.
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
@@ -265,7 +267,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	Vector2 closestPoint = ballPosNow + otherRobotLooksAt*projectionOnBallTrajectory;
 	double deviation = (closestPoint - receiveBallAtPos).length();
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
-	if (deviation > 0.001 && deviation < acceptableDeviation + marginDeviation) {
+	if (GetBool("defenderMode") && deviation > 0.001 && deviation < acceptableDeviation + marginDeviation) {
 		// if the deviation is within the margin region, it should remain at acceptableDeviation until it exceeds the margin
 		if (deviation > acceptableDeviation) {
 			deviation = acceptableDeviation;
@@ -335,6 +337,7 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 myPos(robot.pos);
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballVel(world.ball.vel);
+	double distanceToBall = (ballPos - myPos).length();
 
 	Vector2 targetPos;
 	double targetAngle;
@@ -360,120 +363,71 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 interceptPos = interceptPose->interceptPos;
 	double interceptAngle = interceptPose->interceptAngle;
 
-	// isRobotClosestToBall.Update() == Status::Success
-    	// 	int elapsedTime = time_difference_milliseconds(startTime, now()).count();
-    	// 	if (elapsedTime > 200 && ) {
-    	// 		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a slow moving ball");
-    	// 		return Status::Failure;
-    	// 	}
-    	// } else {
-    	// 	startTime = now();
-
-
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
 	// and on whether the 'reflection angle' (angleDiff) is small enough
 	bool shootAtGoal = false;
 	double angleDiff = 0;
 	if (GetBool("shootAtGoal")) {
+		// we need the last ball position before it was passed to us, because we dont want to change...
+		// ...our decision of whether shooting is possible while the ball is already coming
+		static Vector2 lastNotComingBall = ballPos; 
+		if (!ballIsComing) {
+			lastNotComingBall = ballPos;
+		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
-		angleDiff = cleanAngle( ((ballPos - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
-		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2);
+		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
+		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2 + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
+		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
 
-
 	// Set the targetAngle, if we should shoot at goal, we should face mostly towards the goal
+	int geneva_state = 3; //default geneva drive to center position
 	if (shootAtGoal) {
-		drawer.setColor(255, 0, 0);
-		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0);
+		// decide convenient geneva state
+		static double geneva_threshold = 0.3*M_PI;
+		if (fabs(angleDiff) > geneva_threshold) {
+			geneva_state = (angleDiff<0) ? 1 : 5; // negative anglediff -> geneva to 20 degrees left, otherwise to 20 degrees right
+			geneva_threshold = 0.25*M_PI; // prevents rapid shifting of the geneva drive
+		} else {
+			geneva_state = 3;
+			geneva_threshold = 0.3*M_PI;
+		}
+		// determine shooting angle and take a step back from the ball interception pos
+		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0) + (geneva_state-3)*10/180*M_PI;
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
+		startKicking = true;
 	} else {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;
+		startKicking = false;
 	}
 
-	// TODO: READYTORECEIVEBALL IS NOW USED AS AN ACKNOWLEDGEMENT SIGNAL RATHER THAN A READY SIGNAL. STUFF BELOW IS OLD:
-	// // Once we're close, turn off robot avoidance, and set the readyToReceiveBall param if necessary
-	// Vector2 posError = targetPos - myPos; //receiveBallAtPos - myPos;
-	// double readyDist = 0.5;
-	// if (HasDouble("readyDist")) {
-	// 	readyDist = GetDouble("readyDist");
-	// }
-	// if (posError.length() < readyDist) {
-	// 	private_bb->SetBool("avoidRobots", false);
-	// 	// avoid setting ready continuously in rosparam because it can become quite heavy on ROS
-	// 	if (GetBool("setSignal") && !readyHasBeenSet) {
-	// 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", true);
-	// 		readyHasBeenSet = true;
-	// 	}
-	// } else {
-	// 	private_bb->SetBool("avoidRobots", true);
-	// 	if (readyHasBeenSet && posError.length() > 0.1 + readyDist) {
-	// 		ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false);
-	// 		readyHasBeenSet = false;
-	// 	}
-	// }
 
-	// If we should shoot at the goal, we have to determine when the ball is going to reach us, so we can immediately shoot on
-
-	// double role_iterations_per_second = 0.0;
-	// ros::param::getCached("role_iterations_per_second", role_iterations_per_second);
-	// double timeStep;
-	// if (role_iterations_per_second == 0.0) {
-	// 	timeStep = 1.0 / 30.0;
-	// } else {
-	// 	timeStep = 1.0 / role_iterations_per_second;
-	// }
-	double distanceToBall = (ballPos-myPos).length();
-	// if (shootAtGoal) {
-	// 	if ((ballPos-receiveBallAtPos).length() < (ballVel.scale(timeStep).length() * 5.0)) {
-	// 		startKicking = true;
-	// 		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", "Start Kicking");
-	// 	}
-	// }
-	if (shootAtGoal && distanceToBall < 2.0) {
-		startKicking = true;
-	}
-
-	// If the ball gets close, turn on the dribbler
-	double dribblerDist = acceptableDeviation * 2.0;
-	if (HasDouble("dribblerDist")) {
-		dribblerDist = GetDouble("dribblerDist");
-	}
-	if (shootAtGoal) {
-		dribblerDist = 0.0;
-	}
-
-	if (distanceToBall < dribblerDist) {
-		private_bb->SetBool("dribbler", true);
+	// If the ball hasnt been coming for a while and I'm closest to the ball, return failure.
+	if (!ballIsComing) {
+		int elapsedTime = time_difference_milliseconds(startTime, now()).count();
+		if (elapsedTime > 1000) {
+			startTime = now();
+			boost::optional<int> robotClosestToBallPtr = get_robot_closest_to_point(world.us, ballPos);
+			if (robotClosestToBallPtr && *robotClosestToBallPtr == robotID) {
+				ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a ball that hasnt been coming for a while");
+				return Status::Failure;
+			}
+		} 
 	} else {
-		private_bb->SetBool("dribbler", false);
+    	startTime = now();
 	}
-
-
-	// Check the IHaveBall condition to see whether the GetBall skill succeeded
-		// auto bb3 = std::make_shared<bt::Blackboard>();
-		// bb3->SetInt("me", robotID);
-		// bb3->SetBool("our_team", true);
-		// IHaveBall iHaveBall2("", bb3);
-		// double ballSpeed = Vector2(world.ball.vel.x, world.ball.vel.y).length();
-	    // if (iHaveBall2.Update() == Status::Success && ballSpeed < 0.1) {
-	    // if (iHaveBall2.Update() == Status::Success) {
-
-
-	double angleError = cleanAngle(targetAngle - robot.angle);
-	bool matchBallVel = (distanceToBall <= 0.6 && fabs(angleError) <= 0.2)
-						&& !shootAtGoal && robotID != blackboard->GetInt("KEEPER_ID");
 
     if (ballWasComing && !ballIsComing && !GetBool("stayAwayFromBall", false)) {
     // If the ball just stopped coming, success or failure will be returned based on the current distance to the ball
     	if(distanceToBall <= 0.4) {
 			RTT_DEBUGLN("ReceiveBall skill completed.");
-			publishStopCommand();
+			//publishStopCommand();
 			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " succeeded because ball stopped coming and distanceToBall < 0.4");
 			return Status::Success;
-    	} else if (!GetBool("defenderMode")) { // && isRobotClosestToBall.Update() == Status::Success
+    	} else if (!GetBool("defenderMode")) {
     	// If I'm not defending, i.e. actually expecting a pass but the ball stopped too far away from me, return failure
     		ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because ball stopped coming but distanceToBall > 0.4");
     		return Status::Failure;
@@ -489,7 +443,8 @@ bt::Node::Status ReceiveBall::Update() {
         private_bb->SetDouble("xGoal", targetPos.x);
         private_bb->SetDouble("yGoal", targetPos.y);
         private_bb->SetDouble("angleGoal", targetAngle);
-        if (!HasBool("pGainLarger") || GetBool("pGainLarger") || ballIsComing) {
+        private_bb->SetDouble("successDist", 0.01);
+        if (GetBool("pGainLarger") || ballIsComing) {
         	private_bb->SetBool("pGainLarger", true);
         } else {
         	private_bb->SetBool("pGainLarger", false);
@@ -497,47 +452,55 @@ bt::Node::Status ReceiveBall::Update() {
         if (HasString("stayOnSide")) {
         	private_bb->SetString("stayOnSide", GetString("stayOnSide"));
         }
-        if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
+        if (blackboard->HasBool("stayAwayFromBall") && blackboard->GetBool("stayAwayFromBall")) {
         	private_bb->SetBool("stayAwayFromBall", true);
         }
         if (HasDouble("maxSpeed")) {
         	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
         }
-        if (HasBool("enterDefenseAreas")) {
-        	private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
+        if (blackboard->HasBool("enterDefenseAreas")) {
+        	private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));
     	}
-		if (HasBool("avoidRobots")) {
-			private_bb->SetBool("avoidRobots", GetBool("avoidRobots"));
+    	private_bb->SetBool("avoidRobots", (targetPos - myPos).length() > 0.3); // shut off robot avoidance when close to target
+		if (blackboard->HasBool("avoidRobots")) {
+			private_bb->SetBool("avoidRobots", blackboard->GetBool("avoidRobots"));
 		}
 
+        
+        roboteam_msgs::RobotCommand command;
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
+        command.id = robotID;
 	    if (commandPtr) {
-	        auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	        roboteam_msgs::RobotCommand command = *commandPtr;
-
-	        // TEMPORARY REPLACEMENT OF BALL SENSOR FOR IN GRSIM
-	        if (startKicking) {
-	        	command.kicker = true;
-	        	command.kicker_vel = 6.5;
-	        } else {
-	        	command.kicker = false;
-	        }
-
-	    	//    if (matchBallVel) {
-			    //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(0.5);
-			    //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-			    //     if (newVelCommand.length() > 4.0) {
-			    //       newVelCommand.scale(4.0 / newVelCommand.length());
-			    //     }
-			    //     command.x_vel = newVelCommand.x;
-			    //     command.y_vel = newVelCommand.y;
-			    // }
-
-	        pub.publish(command);
+	        command = *commandPtr;
 	    } else {
-	    	publishStopCommand();
+	    	command.x_vel = 0;
+	    	command.y_vel = 0;
+	    	command.w = 0;
 	    }
 
+	    // Set geneva state asap (never know how fast that ball be coming)
+	    command.geneva_state = geneva_state;
+
+        // For a real robot this starts the kicking on ball sensor. For grsim, the robot will continuously kick, giving similar results
+        if (startKicking) {
+        	command.kicker = true;
+        	command.kicker_vel = 6.5;
+        } else {
+        	command.kicker = false;
+        }
+
+    	// If the ball gets close, turn on the dribbler
+		double dribblerDist = 4.0;
+		if (shootAtGoal) {
+			dribblerDist = 0.0;
+		}
+		if (HasDouble("dribblerDist")) {
+			dribblerDist = GetDouble("dribblerDist");
+		}
+		command.dribbler = distanceToBall < dribblerDist;
+
+		auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+        pub.publish(command);
 
 	    return Status::Running;
 	}

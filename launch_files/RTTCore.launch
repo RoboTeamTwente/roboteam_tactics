@@ -3,7 +3,7 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
-	<arg name="our_color" default="yellow" />
+	<arg name="our_color" default="blue" />
 	<param name="our_side" type="str" value="right" />
 	<param name="our_color" type="str" value="$(arg our_color)" />
 

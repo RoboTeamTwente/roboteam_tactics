@@ -47,7 +47,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
 
             //DEFAULTS
-            ros::param::getCached("robot_output_target", robot_output_target);
+            ros::param::get("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
@@ -56,7 +56,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             } else if (robot_output_target == "serial") {
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = -0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = -0.1;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 2.0;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
@@ -74,11 +74,33 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             }
         }
 
+void GoToPos::Initialize() {
+    //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
+    if (GetBool("driveBackward")) {
+        ROBOT_ID = blackboard->GetInt("ROBOT_ID");
+        // Get the latest world state
+        roboteam_msgs::World world = LastWorld::get();
+        // Find the robot with the specified ID
+        boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(ROBOT_ID);
+        roboteam_msgs::WorldRobot me;
+        if (findBot) {
+            me = *findBot;
+        } else {
+            return;
+        }
+
+        backwardPos = Vector2(me.pos) + Vector2(-0.3,0).rotate(me.angle);
+    }
+}
 
 void GoToPos::sendStopCommand(uint id) {
-    roboteam_msgs::RobotCommand command = controller.getStopCommand(id);
+    roboteam_msgs::RobotCommand command;
+    command.id = ROBOT_ID;
+    command.x_vel = 0.0;
+    command.y_vel = 0.0;
+    command.w = 0.0;
+    command.dribbler = false;
 
-    // Get global robot command publisher, and publish the command
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
     pub.publish(command);
 }
@@ -216,7 +238,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
 
     drawer.setColor(0, 155, 155);
     drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
-    drawer.drawLine("avoidance" + std::to_string(ROBOT_ID),myPos,sumOfForces);
+    // drawer.drawLine("avoidance" + std::to_string(ROBOT_ID),myPos,sumOfForces);
 
     return sumOfForces;
 }
@@ -258,26 +280,20 @@ Vector2 GoToPos::avoidDefenseAreas(Vector2 myPos, Vector2 myVel, Vector2 targetP
 
 
 Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, Vector2 targetPos, Vector2 myVel) {
-    // Vector2 diff = ballPos - myPos;
-    // double theta = fabs(cleanAngle(diff.angle() - sumOfForces.angle()));
 
-    // if (theta < (0.5 * M_PI)) {
-    //     if (fabs(theta) < .00001) theta = 0.01;
-    //     // double force = theta / (0.5 * M_PI);
-    //     Vector2 projectedBall = ballPos.project(myPos, myPos + sumOfForces);
-    //     Vector2 ballForce = projectedBall - ballPos;
-    //     sumOfForces = sumOfForces + ballForce * 5;
-    // }
-
-    // roboteam_msgs::World world = LastWorld::get();
-    // Vector2 ballVel(world.ball.)
-
-    // The antenna is a vector starting at the robot position in the direction in which it is driving (scaled to the robot speed)
-    double lookingDistance = 1.0;
     Vector2 posError = targetPos - myPos;
 
-    Vector2 antenna = Vector2(lookingDistance, 0.0).rotate(posError.angle());
-    antenna = antenna.scale(myVel.length()*1.0); // magic scaling constant
+    // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
+    double minAntenna = 1.2; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.2);
+    // The antenna will not grow beyond its minimum value when moving backwards
+    if (myVel.dot(antenna)<0 ){
+        antenna = posError.stretchToLength(minAntenna);
+    }
+    // The antenna is never larger than the position error
+    if (posError.length() < antenna.length()) {
+            antenna = posError;
+    }
 
     sumOfForces = sumOfForces + getForceVectorFromRobot(myPos, ballPos, antenna, sumOfForces);
 
@@ -440,17 +456,14 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
 boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     ROBOT_ID = blackboard->GetInt("ROBOT_ID");
-    Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
     KEEPER_ID = blackboard->GetInt("KEEPER_ID");
-
-    if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
-        controller.setControlParam("pGainPosition", 3.5);
-    } else {
-        controller.setPresetControlParams();
-    }
+    Vector2 targetPos = Vector2(GetDouble("xGoal"), GetDouble("yGoal"));
+    
 
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
+    } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
+        controller.setControlParam("pGainPosition", 6.0);
     }
     if (HasDouble("iGainPosition")) {
         controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
@@ -495,6 +508,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myPos(me.pos);
     Vector2 myVel(me.vel);
 
+    //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
+    if (GetBool("driveBackward")) {
+        targetPos = backwardPos;
+    }
+
     // Determine angle goal and error
     double angleGoal;
     if (HasDouble("angleGoal")) {
@@ -517,7 +535,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     Vector2 posError = targetPos - myPos;;
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.08) {
+    if (posError.length() < successDist && fabs(angleError) < 0.03) {
         successCounter++;
         if (successCounter >= 3) {
             //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
@@ -559,7 +577,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     posError = targetPos - myPos;
 
     // TODO: TURNED OFF FOR TESTING:
-    if (posError.length() > 0.5) {
+    if (posError.length() > 0.25) {
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
     }
@@ -632,16 +650,16 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     } else {
         velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        velCommand = controller.limitVel(velCommand);
+        velCommand = controller.limitVel2(velCommand, angleError);
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
-        if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
-            angleGoal = cleanAngle(velCommand.angle() + M_PI);
+        if ( (HasBool("dontRotate") && GetBool("dontRotate"))) {
+            //
+        } else {
+            command.use_angle = true;
         }
-        double angleCommand = angleGoal*8; // make sure it fits in the angularvel package
-        command.w = angleCommand;//angularVelCommand;//angleCommand;
-        // command.kicker_vel = myAngle/M_PI*4 + 4; // TEMPORARY HACK by sending my angle through the kicker_vel channel
-        // command.kicker = true;
+        double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
+        command.w = angleCommand;
     }
 
     // Apply any max velocity that is set
@@ -649,13 +667,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
-
-    // WHY WAS THIS HERE?
-    // if (posError.length() >= 1.0 && fabs(angleError) >= 1.0) {
-    //     if (velCommand.length() >= 1.5) {
-    //         velCommand = velCommand.scale(1.5 / velCommand.length());
-    //     }
-    // }
 
     // fill the rest of command message
     command.id = ROBOT_ID;

@@ -1,0 +1,8 @@
+<launch>
+
+	<group ns="blue">
+	    <param name="keeper_id" type="int" value="0" />
+	    <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jim/SimpleDefStrat" output="screen" />
+	</group>
+
+</launch>

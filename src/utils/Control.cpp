@@ -40,16 +40,17 @@ Control::Control() : updateRateParam("role_iterations_per_second")
 RobotType Control::getRobotType() {
     std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
     if (ros::param::has(robotTypeKey)) {
-        std::string robotType;
-        ros::param::getCached("robot" + std::to_string(ROBOT_ID) + "/robotType", robotType);
+        std::string robotTypeString;
+        ros::param::get(robotTypeKey, robotTypeString);
+        ROS_INFO_STREAM_NAMED("control", "test " << robotTypeKey << ", type: " << robotTypeString);
 
-        if (robotType == "arduino") {
+        if (robotTypeString == "arduino") {
             return RobotType::ARDUINO;
-        } else if (robotType == "proto") {
+        } else if (robotTypeString == "proto") {
             return RobotType::PROTO;
-        } else if (robotType == "grsim") {
+        } else if (robotTypeString == "grsim") {
             return RobotType::GRSIM;
-        } else if (robotType == "") {
+        } else if (robotTypeString == "") {
             if (time_difference_milliseconds(lastRobotTypeError, now()).count() >= 1000) {
                 ROS_INFO_STREAM("Empty value for found for param \"" 
                         << robotTypeKey
@@ -62,7 +63,7 @@ RobotType Control::getRobotType() {
                 ROS_ERROR_STREAM("Unknown value found for param \"" 
                         << robotTypeKey 
                         << "\": \"" 
-                        << robotType
+                        << robotTypeString
                         << "\". Defaulting to RobotType::PROTO."
                         );
                 lastRobotTypeError = now();
@@ -88,22 +89,22 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
         
-        thresholdTarget = 0.07;
+        thresholdTarget = 0.1;
         minTarget = 0.30;
 
         robotType = RobotType::ARDUINO;
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 4.0;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.3; //prevteam: 0.5
+        dGainPosition = 0.6; //prevteam: 0.5
         pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
         pGainVelocity = 0.0;
-        maxSpeed = 5.0;
+        maxSpeed = 4.0;
         maxAngularVel = 20.0;
 
-        thresholdTarget = 0.02*2;
+        thresholdTarget = 0.08;
         minTarget = 0.30*2;
 
         robotType = RobotType::PROTO;
@@ -135,7 +136,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
 }
 
 void Control::setPresetControlParams() {
-    setPresetControlParams(getRobotType());
+    setPresetControlParams(robotType);
 }
 
 void Control::setPresetControlParams(
@@ -236,6 +237,9 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         posErrorI = Vector2(0.0, 0.0);
     }
 
+    if (myVel.length() < 0.05) { // myVel becomes unreliable at too low value
+        myVel = Vector2(0.0,0.0);
+    }
     // Control equation
     Vector2 velTarget = posError*pGainPosition + posErrorI*iGainPosition - myVel*dGainPosition; // should use derivative of error instead of myVel
 
@@ -349,23 +353,22 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    // This seems quite hacky REMOVED FOR NOW
-    // if (fabs(angularVelTarget) < 2.2) {
-    //     if (fabs(angularVelTarget) > 0.5) {
-    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-    //     }
-    // }
+    if (fabs(angularVelTarget) < 2.2) {
+        if (fabs(angularVelTarget) > 0.5) {
+            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+        }
+    }
 
     return angularVelTarget;
 }
 
 
-Vector2 Control::limitVel(Vector2 sumOfForces) {
-
+Vector2 Control::limitVel2(Vector2 sumOfForces, double angleError) {
+    double limit = fmin(maxSpeed, maxSpeed/fabs(angleError*2));
     double L = sumOfForces.length();
     // Limit the robot velocity to the maximum speed
-    if (L > maxSpeed && L > 0.0) {
-        sumOfForces = sumOfForces.scale(maxSpeed / L);
+    if (L > limit && L > 0.0) {
+        sumOfForces = sumOfForces.scale(limit / L);
     }
     return sumOfForces;
 }
@@ -375,8 +378,8 @@ Vector2 Control::limitVel(Vector2 sumOfForces, double angularVelTarget) {
     double L = sumOfForces.length();
     if (angularVelTarget >= 7.0) {
         // Limit the robot velocity to lower speed
-        if (L > 1.0) {
-            sumOfForces = sumOfForces.scale(1.0 / L);
+        if (L > 0.5) {
+            sumOfForces = sumOfForces.scale(0.5 / L);
         }
     } else {
     // Limit the robot velocity to the maximum speed
@@ -405,6 +408,7 @@ double Control::limitAngularVel(double angularVelTarget) {
 
 void Control::Initialize(int ROBOT_ID) {
     this->ROBOT_ID = ROBOT_ID;
+    robotType = getRobotType(); // Set robotType for global use
     lastRobotTypeError = now();
     lastPresetError = now();
 	setPresetControlParams();

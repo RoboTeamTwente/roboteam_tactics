@@ -48,8 +48,8 @@ private:
 	time_point start;
 	Vector2 bestPosition;
 	int counter;
-	//bool passIncoming;
-	//int counter2;
+	double initialBoxSize = 9.0;
+	Vector2 initialPos;
 
 	OpportunityFinder opportunityFinder;
 	GoToPos goToPos;

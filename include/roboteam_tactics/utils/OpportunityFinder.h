@@ -36,6 +36,7 @@ public:
 	double calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
 	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
+	std::pair<double, double> calcBestViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
 	std::pair<std::vector<double>, std::vector<double>> getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world);
 	double calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world);
 	double calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world);

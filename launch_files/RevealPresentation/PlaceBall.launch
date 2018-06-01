@@ -1,0 +1,7 @@
+<launch>
+        <arg name="x" default="-0.4" />
+        <arg name="y" default="0" />
+        <arg name="id" default="0" />
+	    <node name="placeYellow" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/BallPlacementAlt int:ROBOT_ID=$(arg id) double:xPlace=$(arg x) double:yPlace=$(arg y) double:aimAtBallplacement_x=$(arg x) double:aimAtBallplacement_y=$(arg y)" output="screen" />
+
+</launch>

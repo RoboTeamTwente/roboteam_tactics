@@ -32,7 +32,8 @@ bt::Node::Status IsRobotClosestToBall::Update() {
 		double t_ahead = GetDouble("secondsAhead");
 		Vector2 ballVel(world.ball.vel);
 		ballPos = ballPos + ballVel.scale(t_ahead);
-		robotClosestToBallPtr = predict_robot_closest_to_point(robots, ballPos, t_ahead);
+		// robotClosestToBallPtr = predict_robot_closest_to_point(robots, ballPos, t_ahead); //In practice not wise to also look at future robot pos
+		robotClosestToBallPtr = get_robot_closest_to_point(robots, ballPos);
 	} else {
 		robotClosestToBallPtr = get_robot_closest_to_point(robots, ballPos);
 	}

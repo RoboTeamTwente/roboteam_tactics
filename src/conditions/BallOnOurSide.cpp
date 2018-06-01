@@ -19,9 +19,6 @@ bt::Node::Status BallOnOurSide::Update() {
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ballPos(world.ball.pos);
 	
-    // std::string ourSide;
-    // ros::param::get("our_side", ourSide);
-    // if (ourSide == "left") {
     if (ballPos.x < 0) {
         if (HasBool("ourSide") && !GetBool("ourSide")) {
             return Status::Failure;
@@ -35,16 +32,7 @@ bt::Node::Status BallOnOurSide::Update() {
             return Status::Failure;
         }
     } 
-    // }
-    // else if (ourSide == "right") {
-    //     if (ballPos.x > 0) {
-    //         // ROS_INFO("BallOnOurSide true");
-    //         return Status::Success;
-    //     } else {
-    //         // ROS_INFO("BallOnOurSide false");
-    //         return Status::Failure;
-    //     }
-    // }
+    
     return Status::Invalid;
 }
 

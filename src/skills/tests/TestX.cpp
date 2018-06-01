@@ -321,7 +321,11 @@ How to use:
     ROS_INFO_STREAM_NAMED("TestX", "Updating at " << updateRate << "Hz");
     // ===
 
-    rtt::RobotDealer::setKeeper(0);
+    int keeper_id = 0;
+    if (ros::param::has("keeper_id")) {
+        ros::param::get("keeper_id", keeper_id);
+    }
+    rtt::RobotDealer::setKeeper(keeper_id);
 
 
     // === If we're testing a tree (Strategy / Role)
