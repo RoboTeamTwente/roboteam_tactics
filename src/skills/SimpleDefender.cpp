@@ -73,9 +73,9 @@ Vector2 SimpleDefender::computeDefensePointAbsolute(Vector2 targetFrom, Vector2 
     // Stretch vector to correct length
     targetPos.stretchToLength(distance);
     // Move vector to goalPos
-    distanceVector = distanceVector + targetFrom;
+    targetPos = targetPos + targetFrom;
 
-    return distanceVector;
+    return targetPos;
 }
 
 Vector2 SimpleDefender::getTargetFromPosition(){
