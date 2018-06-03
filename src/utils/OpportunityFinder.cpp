@@ -154,7 +154,7 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 			Vector2 ballToBot = botPos - ballPos;
 			//if (ballToBot.length() > 0.5) { // WIP: prevent taking into account the robot getting the ball. Maybe handle this in the fake world object at the start?
 				// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-				// WIP: TEST DISTANCE IS ANGLE NOW. MUST STILL ADEPT WEIGHTLIST TO THIS. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
+				// WIP: TEST DISTANCE IS ANGLE NOW. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
 				double testDistance = 1.0*fabs(cleanAngle( ballToBot.angle() - (testPosition - ballPos).angle() )); // + 1.0*(botPos - testPosition).length()
 				if (testDistance < shortestDistance) {
 					shortestDistance = testDistance;
@@ -262,18 +262,35 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 // Calculate the best angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
 std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
-	double bestViewOfGoal = 0.0;
-	int bestIndex = 0;
-	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
-	for (size_t i = 0; i < openAngles.second.size(); i++) {
-   		double viewOfGoal = openAngles.second.at(i) - openAngles.first.at(i);
-   		if (viewOfGoal > bestViewOfGoal) {
-   			bestViewOfGoal = viewOfGoal;
-   			bestIndex = i;
-   		}
-	}
 
-	return {openAngles.first.at(bestIndex), openAngles.second.at(bestIndex)};
+	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
+	if (openAngles.second.size() > 0) {
+		// determine best angle segment
+		double bestViewOfGoal = 0.0;
+		int bestIndex = 0;
+		for (size_t i = 0; i < openAngles.second.size(); i++) {
+	   		double viewOfGoal = openAngles.second.at(i) - openAngles.first.at(i);
+	   		if (viewOfGoal > bestViewOfGoal) {
+	   			bestViewOfGoal = viewOfGoal;
+	   			bestIndex = i;
+	   		}
+		}
+		// de-normalize best angle segment, such that it can be used to aim at
+		roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+		Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
+		double angleGoalSide1 = (goalSide1 - testPosition).angle();
+		double bestAngleStart, bestAngleEnd;
+		if (testPosition.x < targetPos.x) {
+			bestAngleStart = cleanAngle(angleGoalSide1 + openAngles.first.at(bestIndex));
+			bestAngleEnd = cleanAngle(angleGoalSide1 + openAngles.second.at(bestIndex));
+		} else {
+			bestAngleStart = cleanAngle(angleGoalSide1 - openAngles.first.at(bestIndex));
+			bestAngleEnd = cleanAngle(angleGoalSide1 - openAngles.second.at(bestIndex));
+		}
+		return {bestAngleStart, bestAngleEnd};
+	} else {
+		return {0, 0};
+	}
 }
 
 std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
@@ -289,7 +306,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 	std::vector<double> openAngles1;
 	std::vector<double> openAngles2;
 
-	// The goal angles are normalized (such that angle1 becomes 0 and angle 2 positive)..
+	// The goal angles are normalized (such that angle1 becomes 0 and angle 2 positive, to prevent any angle-wrap problems later on)
 	double goalAngle2 = fabs(cleanAngle(vecToGoalSide2.angle() - vecToGoalSide1.angle()));
 	// ..and placed in the two 'open angle vectors', representing the initial open angle
 	openAngles1.push_back(0);
@@ -341,7 +358,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 			} // scan over and update the open angles
 		} // if robot in goalCone
 	} // for each opp. robot
-	return {openAngles1,openAngles2}; // IMPROVEMENT: de-normalize angles again, for practical use.
+	return {openAngles1,openAngles2};
 }
 
 // Calculates the distance between the testPosition and the current robot
