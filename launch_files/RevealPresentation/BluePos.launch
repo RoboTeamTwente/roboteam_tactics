@@ -1,9 +1,0 @@
-<launch>
-
-	<group ns="blue">
-	    <arg name="cmdline" default="0" />
-	    <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/Presentation_SetPositionsStrat int:Presentation_SetPositions_A_formation=$(arg cmdline)" output="screen" />
-	    
-	</group>
-
-</launch>

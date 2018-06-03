@@ -106,7 +106,8 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 
 	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
-
+		publishStopCommand();
+		
 		if (GetBool("setSignal")) {
 		// Check if the robot actually expects to receive a pass
 		// If setSignal is not used, the rosparam robotClaimedBall will not be set to my ID (it shouldnt, at least)
@@ -429,7 +430,7 @@ bt::Node::Status ReceiveBall::Update() {
     // If the ball just stopped coming, success or failure will be returned based on the current distance to the ball
     	if(distanceToBall <= 0.4) {
 			RTT_DEBUGLN("ReceiveBall skill completed.");
-			publishStopCommand();
+			//publishStopCommand();
 			ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " succeeded because ball stopped coming and distanceToBall < 0.4");
 			return Status::Success;
     	} else if (!GetBool("defenderMode")) {

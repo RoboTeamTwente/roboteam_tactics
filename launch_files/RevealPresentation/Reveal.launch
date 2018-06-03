@@ -1,0 +1,11 @@
+<launch>
+
+<node pkg="roboteam_tactics" type="timed_roslaunch.sh" args="0.1 roboteam_tactics Formation.launch no:=2" name="formation2" output="screen" />
+
+<node pkg="roboteam_tactics" type="timed_roslaunch.sh" args="3 roboteam_tactics Formation.launch no:=3" name="formation3" output="screen" />
+
+<node pkg="roboteam_tactics" type="timed_roslaunch.sh" args="6 roboteam_tactics Formation.launch no:=4" name="formation4" output="screen" />
+
+<node pkg="roboteam_tactics" type="timed_roslaunch.sh" args="9 roboteam_tactics Formation.launch no:=5" name="formation5" output="screen" />
+
+</launch>

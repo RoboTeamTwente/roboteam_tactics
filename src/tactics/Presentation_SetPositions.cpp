@@ -61,15 +61,85 @@ namespace rtt {
 				positions.push_back(goalCenter + Vector2(-0.1, 1.5));
 				positions.push_back(goalCenter + Vector2(-0.1, 2.0));
 			}
-		} else if (formation == 1) {
+		} else if (formation == 1) { // behind triangle
 			if (blue_team) {
-				positions.push_back(Vector2(0.0, 0.0));
-				positions.push_back(Vector2(0.0, 0.0));
-				positions.push_back(Vector2(1.0, 0.0));
+				positions.push_back(goalCenter + Vector2(0.4, 0.0));
+				positions.push_back(goalCenter + Vector2(0.25, 0.25));
+				positions.push_back(goalCenter + Vector2(0.4, 0.25));
 			} else {
-				positions.push_back(Vector2(0.0, 0.0));
-				positions.push_back(Vector2(0.0, 0.0));
-				positions.push_back(Vector2(0.0, 0.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 0.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 0.25));
+				positions.push_back(goalCenter + Vector2(-0.4, 0.25));
+			}
+		} else if (formation == 2) { // escape triangle on both sides step 1
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.4, 0.0));
+				positions.push_back(goalCenter + Vector2(0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(0.4, 0.25));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.25, 0.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(-0.4, 0.25));
+			}
+		} else if (formation == 3) { // escape triangle on both sides step 2
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.4, 0.0));
+				positions.push_back(goalCenter + Vector2(0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(0.25, 1.5));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.25, 0.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 1.5));
+			}
+		} else if (formation == 4) { // escape triangle on both sides step 3
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.25, 1.0));
+				positions.push_back(goalCenter + Vector2(0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(0.25, 1.5));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.25, 1.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 2.0));
+				positions.push_back(goalCenter + Vector2(-0.25, 1.5));
+			}
+		} else if (formation == 5) { // drive forward
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(1.3, 1.0));
+				positions.push_back(goalCenter + Vector2(1.3, 2.0));
+				positions.push_back(goalCenter + Vector2(1.3, 1.5));
+			} else {
+				positions.push_back(goalCenter + Vector2(-1.3, 1.0));
+				positions.push_back(goalCenter + Vector2(-1.3, 2.0));
+				positions.push_back(goalCenter + Vector2(-1.3, 1.5));
+			}
+		} else if (formation == 6) { // blue keeper, yellow attacker, rest stationary
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.1, 1.0));
+				positions.push_back(goalCenter + Vector2(0.1, 1.5));
+				positions.push_back(goalCenter + Vector2(0.1, 0.0));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.1, 1.0));
+				positions.push_back(goalCenter + Vector2(-0.1, 1.5));
+				positions.push_back(goalCenter + Vector2(-1.5, 0.0));
+			}
+		} else if (formation == 7) { // blue keeper, 2 blue defenders in the way of shot, yellow behind ball
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.1, 0.0));
+				positions.push_back(Vector2(-0.2, 1.15));
+				positions.push_back(Vector2(-0.05, 1.1));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.1, 1.0));
+				positions.push_back(goalCenter + Vector2(-0.1, 1.5));
+				positions.push_back(Vector2(-0.2, -2.1));
+			}
+		} else if (formation == 8) { // blue keeper, 2 blue defenders in the way of shot and pass, yellow behind ball
+			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.1, 0.0));
+				positions.push_back(Vector2(-0.2, 1.15));
+				positions.push_back(Vector2(0.2, 1.1));
+			} else {
+				positions.push_back(goalCenter + Vector2(-0.1, 1.0));
+				positions.push_back(goalCenter + Vector2(-0.1, 1.5));
+				positions.push_back(Vector2(-0.2, -2.1));
 			}
 		}
 

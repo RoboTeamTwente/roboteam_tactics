@@ -1,0 +1,5 @@
+<launch>
+        <arg name="id" default="0" />
+	
+	<node name="receiveYellow" pkg="roboteam_tactics" type="TestX" args="ReceiveBall int:ROBOT_ID=$(arg id) bool:shootAtGoal=true" output="screen" />
+</launch>
