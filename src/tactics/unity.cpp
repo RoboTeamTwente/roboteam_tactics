@@ -155,6 +155,7 @@
 
 #include "Bob_ChipoffAtGoalPlay.cpp"
 #undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
 
 #include "PrepareKeeperPenaltyThem.cpp"
 #undef RTT_CURRENT_DEBUG_TAG

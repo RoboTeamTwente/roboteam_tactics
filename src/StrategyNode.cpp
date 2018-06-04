@@ -266,14 +266,10 @@ int main(int argc, char *argv[]) {
     }
 
     while (ros::ok()) {
-        ROS_DEBUG_NAMED("StrategyNode", "Spinning once...");
         ros::spinOnce();
-
-        ROS_DEBUG_NAMED("StrategyNode", "Updating tree...");
 
         bt::Node::Status status = strategy->Update();
 
-        ROS_DEBUG_NAMED("StrategyNode", "Checking status...");
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);
             ROS_DEBUG_STREAM_NAMED("StrategyNode", "Strategy result: " << statusStr.c_str() << "Shutting down...\n");

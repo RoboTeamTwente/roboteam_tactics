@@ -180,7 +180,7 @@ bt::Node::Status SimpleDefender::Update() {
     Vector2 defendPos;
 
     if (HasInt("defendRobot")) {
-        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "parameter 'defendRobot' can be replaced with 'targetTo'");
+//        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "parameter 'defendRobot' can be replaced with 'targetTo'");
         unsigned int defendRobot = GetInt("defendRobot");
         boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(defendRobot, false, world);
         roboteam_msgs::WorldRobot robot;
@@ -208,7 +208,7 @@ bt::Node::Status SimpleDefender::Update() {
         Vector2 targetToPosition = getTargetToPosition();
         targetPos = computeDefensePointAbsolute(targetFromPosition, targetToPosition, distanceFromGoalRatio);
     }else{
-        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Using old computeDefensePoint");
+//        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Using old computeDefensePoint");
         targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
     }
 
