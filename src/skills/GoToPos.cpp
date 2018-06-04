@@ -49,14 +49,16 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             //DEFAULTS
             ros::param::get("robot_output_target", robot_output_target);
             if (robot_output_target == "grsim") {
+                grsim = true;
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
                 avoidRobotsGain = 0.5;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
-            } else if (robot_output_target == "serial") {
+            } else {
+                grsim = false;
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = -0.1;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = 0.0;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
                 avoidRobotsGain = 2.0;
                 cushionGain = 0.5;
                 maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
@@ -462,7 +464,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
-    } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && robot_output_target == "serial") {
+    } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && !grsim) {
         controller.setControlParam("pGainPosition", 6.0);
     }
     if (HasDouble("iGainPosition")) {
@@ -482,6 +484,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
+    } else if (GetBool("lowSpeed")) {
+        if (grsim) {
+            controller.setControlParam("maxSpeed", 0.5);
+        } else {
+            controller.setControlParam("maxSpeed", 1.3);
+        }
     }
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
@@ -567,17 +575,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     static time_point prevTime = now();
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
     prevTime = now();
-    double max_diff = 4.0*timeDiff*0.001;
+    double max_diff = 2.0*timeDiff*0.001;
     static Vector2 prevTarget = myPos + Vector2(0.01,0);
     Vector2 targetDiff = targetPos - prevTarget;
     if (targetDiff.length() > max_diff) {
-        targetPos = (prevTarget + targetDiff.scale(max_diff));
+        targetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
     }
     prevTarget = targetPos;
     posError = targetPos - myPos;
 
-    // TODO: TURNED OFF FOR TESTING:
-    if (posError.length() > 0.25) {
+    // Turn towards goal when error is too far
+    if (posError.length() > 0.25 && !GetBool("dontRotate")) {
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
     }
@@ -636,7 +644,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // Different velocity commands for grsim and real robot
     roboteam_msgs::RobotCommand command;
     Vector2 velCommand;
-    if (robot_output_target == "grsim") {
+    if (grsim) {
 
         velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
         double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
@@ -654,10 +662,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
         if ( (HasBool("dontRotate") && GetBool("dontRotate"))) {
-            //
+                command.use_angle = false;
         } else {
-            command.use_angle = true;
+                command.use_angle = true;
         }
+        
         double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
         command.w = angleCommand;
     }

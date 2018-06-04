@@ -60,6 +60,8 @@ void Positioning::Initialize() {
     private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
     private_bb->SetDouble("xGoal", bestPosition.x);
     private_bb->SetDouble("yGoal", bestPosition.y);
+    private_bb->SetBool("stayAwayFromBall", true);
+    private_bb->SetBool("avoidBall", true);
 
     counter = 1;
     // counter2 = 0;

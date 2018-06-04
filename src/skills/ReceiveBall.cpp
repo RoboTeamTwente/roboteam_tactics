@@ -479,7 +479,7 @@ bt::Node::Status ReceiveBall::Update() {
 	    }
 
 	    // Set geneva state asap (never know how fast that ball be coming)
-	    command.geneva_state = geneva_state;
+	    //command.geneva_state = geneva_state; TODO: turned off because still unreliable
 
         // For a real robot this starts the kicking on ball sensor. For grsim, the robot will continuously kick, giving similar results
         if (startKicking) {

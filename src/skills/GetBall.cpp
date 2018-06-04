@@ -98,7 +98,7 @@ void GetBall::publishStopCommand() {
 	command.x_vel = 0.0;
 	command.y_vel = 0.0;
 	command.w = 0.0;
-	command.dribbler = false;
+	command.dribbler = true;
     command.geneva_state = 3;
 
 	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -447,13 +447,13 @@ bt::Node::Status GetBall::Update (){
         successDist = 0.12;
         successAngle = 0.10;
         successRobotAngle = 0.10;
-        distAwayFromBall = 0.28;
+        distAwayFromBall = 0.3;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
-        successDist = 0.115; //0.12
+        successDist = 0.11; //0.12
         successAngle = 0.10; //0.15
         successRobotAngle = 0.05;
-        distAwayFromBall = 0.28;
+        distAwayFromBall = 0.3;
         minDist = 0.08;
     }
     if (blackboard->HasDouble("distAwayFromBall")) {
@@ -492,6 +492,8 @@ bt::Node::Status GetBall::Update (){
             choseRobotToPassTo = true;
             ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
             ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff);
+        } else if (L_posDiff >= chooseDist) {
+            private_bb->SetBool("avoidBall", true);
         }
     }
 
@@ -545,21 +547,22 @@ bt::Node::Status GetBall::Update (){
     }
     Vector2 targetPos;
     if (fabs(angleDiff) > successAngle) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-successAngle)); //TODO: downscaling when i get closer - working on it
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*2-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", L_posDiff<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
     } else {
-        targetPos = ballPos;// + Vector2(-ballDist, 0.0).rotate(targetAngle);
+        targetPos = ballPos;// + Vector2(-0.04, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
     }
     // Hack for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
     if (vBall > 0.5) {
-        if (L_posDiff > 0.1) {
+        if (L_posDiff > 0.15) {
             double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*0.5;
             double max_ahead = 3.0;
-            if (vBall*L < max_ahead) {
-                targetPos = targetPos + ballVel.scale(L);
+            double ahead = L*(vBall-0.25);
+            if (ahead < max_ahead) {
+                targetPos = targetPos + ballVel.stretchToLength(ahead);
             } else {
                 targetPos = targetPos + ballVel.stretchToLength(max_ahead);
             }
@@ -571,7 +574,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
-        int ballCloseFrameCountTo = 2;
+        int ballCloseFrameCountTo = 3;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         } else if (dontDribble) {
@@ -636,8 +639,8 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", (L_posDiff > 0.3)); // shut off robot avoidance when close to target
     private_bb->SetDouble("successDist", 0.01); // make sure gotopos does not return success before getball returns success
-    if (blackboard->HasBool("enterDefenseAreas")) {
-        private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));
+    if (HasBool("enterDefenseAreas")) {
+        private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 
     if (blackboard->HasDouble("pGainPosition")) {
         private_bb->SetDouble("pGainPosition", blackboard->GetDouble("pGainPosition"));
