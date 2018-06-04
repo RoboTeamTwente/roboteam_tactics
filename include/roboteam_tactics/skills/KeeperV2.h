@@ -2,6 +2,7 @@
 
 #include "ros/ros.h"
 #include "roboteam_tactics/Parts.h"
+#include "roboteam_tactics/skills/ReceiveBall.h"
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Arc.h"
@@ -37,12 +38,14 @@ public:
     }
     std::string node_name() { return "KeeperV2"; }
 private:
-	uint ROBOT_ID;
+	ReceiveBall receiveBall;
+
 	Vector2 goalPos;
 	Vector2 circCenter;
 	Arc blockCircle;
 	double marginFromGoal;
 	double W;
+	double acceptableDeviation;
 
 	Draw drawer;
 

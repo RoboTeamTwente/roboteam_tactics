@@ -13,9 +13,9 @@ namespace rtt {
 RTT_REGISTER_SKILL(KeeperV2);
 
 KeeperV2::KeeperV2(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard) {}
+        : Skill(name, blackboard)
+        , receiveBall("", private_bb) {
 
-void KeeperV2::Initialize() {
     marginFromGoal = 0.08;
     if (HasDouble("marginFromGoal")) {
         marginFromGoal = GetDouble("marginFromGoal");
@@ -33,12 +33,22 @@ void KeeperV2::Initialize() {
     goalPos = LastWorld::get_our_goal_center();
     circCenter = Vector2(goalPos.x + circX + marginFromGoal, 0.0);
     blockCircle = Arc(circCenter, circR, circA-M_PI, M_PI-circA);
-    ROS_INFO_STREAM(circCenter.x << ", " << circCenter.y << ", " << circA);
+
 }
 
+void KeeperV2::Initialize() {
+}
+
+// Chooses a position such that both open goal angles are equal as seen from the defendPos
+// Then chooses the intersection between this line and an arc between the goal posts
 Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
 
-    std::pair<boost::optional<Vector2>, boost::optional<Vector2>> intersections = blockCircle.intersectionWithLine(goalPos,defendPos);
+    Vector2 u1 = (goalPos + Vector2(0.0, W/2) - defendPos).normalize();
+    Vector2 u2 = (goalPos + Vector2(0.0, -W/2) - defendPos).normalize();
+    double dist = (defendPos - goalPos).length();
+    Vector2 blockLineStart = defendPos + (u1 + u2).stretchToLength(dist);
+
+    std::pair<boost::optional<Vector2>, boost::optional<Vector2>> intersections = blockCircle.intersectionWithLine(blockLineStart,defendPos);
     
     Vector2 blockPos;
     if (intersections.first) {
@@ -50,32 +60,14 @@ Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
         blockPos = Vector2(goalPos.x + marginFromGoal, W/2*signum(defendPos.y));
     }
 
-    // if ((defendPos - goalPos).length() < (blockPos - goalPos).length()) {
-    //     blockPos = Vector2()
-    // }
-
-    return blockPos;
-}
-
-Vector2 KeeperV2::computeBlockPoint2(Vector2 defendPos) {
-    double a1 = (defendPos - Vector2(marginFromGoal, W/2) - goalPos).angle();
-    double a2 = (defendPos - Vector2(marginFromGoal, -W/2) - goalPos).angle();
-    double a_mean = a1 + cleanAngle(a2 - a1)/2;
-    double dist = (defendPos - goalPos).length();
-
-    Vector2 blockPos = defendPos - Vector2(dist/2, 0.0).rotate(a_mean);
-    if (fabs(blockPos.y) > W/2) {
-        Vector2 diff = blockPos - defendPos;
-        blockPos = defendPos + diff.scale((fabs(defendPos.y)-W/2) / fabs(diff.y));
+    // if defendPos is within the arc, choose position directly behind the defendPos
+    if ((defendPos - goalPos).length() - 0.08 < (blockPos - goalPos).length()) {
+        blockPos = defendPos + (goalPos - defendPos).stretchToLength(0.1);
     }
-    // double ratio = fabs(blockPos.y - defendPos.y)/(W/2);
-    // if (ratio > 1.0) {
-    //     blockPos = (blockPos-goalPos).scale(1/ratio) + goalPos;
-    // }
-    if (blockPos.x < marginFromGoal + goalPos.x) {
-        blockPos.x = marginFromGoal + goalPos.x;
-    }
-    // Vector2 blockPos(defendPos - blockVec);
+
+    Vector2 distVec = blockPos - defendPos;
+    acceptableDeviation = fmax(0.0, (u1.stretchToLength(distVec.length()) - distVec).length() - 0.05 );
+
     return blockPos;
 }
 
@@ -86,14 +78,27 @@ bt::Node::Status KeeperV2::Update() {
     if (ballPos.x < goalPos.x + marginFromGoal/2) {
         ballPos.x = goalPos.x + marginFromGoal/2;
     }
-    Vector2 blockPoint = computeBlockPoint2(ballPos);
+    Vector2 blockPoint = computeBlockPoint(ballPos);
 
     drawer.setColor(0, 0, 255);
     drawer.drawPoint("blockPoint", blockPoint);
     drawer.drawPoint("circCenter", circCenter);
     // drawer.drawArc("blockCircle",blockCircle);
     drawer.drawLine("linedenk", goalPos, ballPos - goalPos);
-//
+
+    private_bb->SetInt("ROBOT_ID", GetInt("ROBOT_ID"));
+    private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
+    private_bb->SetDouble("receiveBallAtX", blockPoint.x);
+    private_bb->SetDouble("receiveBallAtY", blockPoint.y);
+    private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
+    private_bb->SetDouble("marginDeviation", acceptableDeviation);
+    private_bb->SetBool("defenderMode", true);
+    private_bb->SetBool("setSignal", false);
+    private_bb->SetBool("enterDefenseAreas", true);
+
+    ROS_INFO_STREAM_NAMED("skills.KeeperV2", acceptableDeviation);
+
+    receiveBall.Tick();
     return Status::Running;
 }
 

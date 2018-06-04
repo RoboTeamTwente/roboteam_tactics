@@ -44,7 +44,6 @@ void GetBall::Initialize() {
     choseRobotToPassTo = false;
     ballClaimedByMe = false;
     hasTerminated = false;
-    // chip = false;
     // startTime = now();
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
@@ -474,8 +473,9 @@ bt::Node::Status GetBall::Update (){
 
 
     // Check whether I should shoot at goal
-    double viewOfGoal = opportunityFinder.calcViewOfGoal(ballPos, world);
-    bool canSeeGoal = viewOfGoal >= 0.2; 
+    std::pair<double, double> bestViewOfGoal = opportunityFinder.calcBestViewOfGoal(ballPos, world);
+    double openGoalAngle = cleanAngle(bestViewOfGoal.second - bestViewOfGoal.first);
+    bool canSeeGoal = fabs(openGoalAngle) >= 0.2;
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
     		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
@@ -497,17 +497,21 @@ bt::Node::Status GetBall::Update (){
         }
     }
 
-	/* If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball */
+      //---------------------------------------------------------------------------------------------------------------------------------//
+	 // If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball-//
+    //---------------------------------------------------------------------------------------------------------------------------------//
+
 	double targetAngle;
     // If we chose to shoot at goal
-    if (shootAtGoal) { //GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal
-        targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
+    if (shootAtGoal) {
+        // targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
+        targetAngle = cleanAngle(bestViewOfGoal.first + openGoalAngle/2); // center of the largest open goal angle
     }
     // If a robot was found to pass to
     else if (choseRobotToPassTo) { 
         if (bestID == -1) {
-        // could not find teammate to pass to, so WHAT SHOULD WE DO HERE?? FOR NOW ILL SET IT TO SHOOTATGOAL
-            targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+        // could not find teammate to pass to, so MAYBE CHIP/SHOOT TOWARDS EDGE OF THEIR DEFENSE AREA?
+            targetAngle = GetTargetAngle(ballPos + Vector2(1.2,0), "theirgoal", 0, false); // hacked ballpos for now to aim at edge of their defense area
             shootAtGoal = true;    
         } else {
         // aim at best teammate to pass to.
@@ -527,7 +531,7 @@ bt::Node::Status GetBall::Update (){
     else if (blackboard->HasDouble("targetAngle")) {
         targetAngle = blackboard->GetDouble("targetAngle");
     }
-    // Nothing given, shoot straight
+    // Nothing given, shoot/aim straight
     else {
         targetAngle = posDiff.angle();
     }
@@ -539,6 +543,9 @@ bt::Node::Status GetBall::Update (){
 	targetAngle = cleanAngle(targetAngle);
     double angleDiff = cleanAngle(targetAngle - posDiff.angle());
 
+      //---------------------------------------------------------------------//
+     //------------------- Getball motion is described here ----------------//
+    //---------------------------------------------------------------------//
     // Jelle's getBall motion variation:
     // TODO: TAKE FUTURE BALL, OR BALL VELOCITY INTO ACCOUNT - working on it, see below
     double ballDist = minDist + (distAwayFromBall - minDist) / (0.5*M_PI) * fabs(angleDiff);
@@ -569,7 +576,9 @@ bt::Node::Status GetBall::Update (){
             
         } 
     }
-
+      //---------------------------------------------------------------------//
+     //---------Status returning, and passing/shooting if enabled ----------//
+    //---------------------------------------------------------------------//
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
@@ -584,12 +593,12 @@ bt::Node::Status GetBall::Update (){
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
         // When I have not been close for long enough yet
             ballCloseFrameCount++;
-            //return Status::Running;
+            // leads to return Running after command has been published
         } else {
         // I have been close for long enough!
             bool chip = false;
             if (choseRobotToPassTo) {
-            // If I chose best teammate before, check best robot once more (at the first success count)
+            // If I chose best teammate before, check best robot once more
                 // struct PassOption contains int id, Vector2 pos and bool chip
                 PassOption passOption = choosePassOption(bestID, bestPos, ballPos, world, passThreshold);
                 chip = passOption.chip;

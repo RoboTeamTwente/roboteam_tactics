@@ -212,11 +212,12 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		Vector2 closestPoint = ballPos + (receiveBallAtPos - ballPos).project2(ballVel); //ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
 		ballIsComing = true;
 
-		if ((closestPoint - receiveBallAtPos).length() < acceptableDeviation) {
+		double deviation = (closestPoint - receiveBallAtPos).length();
+		if (deviation < acceptableDeviation + marginDeviation) {
 			interceptPos = closestPoint;
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
 			if (avoidBall) {
-				interceptPos = closestPoint + (receiveBallAtPos - closestPoint).normalize();
+				interceptPos = closestPoint + (closestPoint - receiveBallAtPos).normalize();
 			}
 		} else {
 			interceptPos = receiveBallAtPos;
@@ -225,7 +226,6 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		interceptPose.interceptPos = interceptPos;
 		interceptPose.interceptAngle = interceptAngle;
 	}
-
 	return interceptPose;
 }
 
@@ -282,6 +282,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 
 	interceptPose.interceptPos = interceptPos;
 	interceptPose.interceptAngle = (ballPosNow - interceptPos).angle();
+
 	return interceptPose;
 }
 
@@ -362,6 +363,11 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 	Vector2 interceptPos = interceptPose->interceptPos;
 	double interceptAngle = interceptPose->interceptAngle;
+
+	// new robots tend to accelerate slowly sideways, so this keeps defenders moving in a forward direction
+	if (GetBool("defenderMode")) {
+		interceptAngle += M_PI/2;
+	}
 
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
 	// and on whether the 'reflection angle' (angleDiff) is small enough
