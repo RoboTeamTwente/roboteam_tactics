@@ -53,7 +53,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DIRECT_FREE_THEM      , "rtt_anouk/PrepareDirectThem"s         } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::INDIRECT_FREE_US      , "rtt_jim/IndirectStrat"s         } ,
+        { RefState::INDIRECT_FREE_US      , "rtt_emiel/IndirectUsStrategy"s         } ,
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_anouk/PrepareDirectThem"s       } ,
