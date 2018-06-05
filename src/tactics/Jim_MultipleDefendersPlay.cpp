@@ -212,7 +212,6 @@ namespace rtt {
 
         }
         int numDangerousOpps = dangerousOpps.size();
-        std::cout << "numDangerousOpps = " << numDangerousOpps << "!!!!!" << std::endl;
 
         int newNumBallDefenders = std::min(numRobots, minBallDefenders); // start with a number of ball defenders
         int newNumRobotDefenders = std::min(numDangerousOpps, numRobots - newNumBallDefenders); // limit robot defenders to dangerous opps or to available robots
@@ -328,8 +327,6 @@ namespace rtt {
             rd.robot_id = ballDefenderID;
             activeRobots.push_back(ballDefenderID);
             bt::Blackboard bb;
-
-            std::cout << "angleOffset of robot [" << ballDefenderID << "] = " << angleOffsets.at(i) << std::endl;
 
             // Set the robot ID
             bb.SetInt("ROBOT_ID", ballDefenderID);
