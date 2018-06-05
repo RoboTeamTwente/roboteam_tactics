@@ -1,0 +1,8 @@
+<launch>
+        <arg name="dist" default="0.0" />
+	<param name="keeper_id" type="int" value="10" />
+	    <node name="generalAttackerYellow0" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/GeneralAttacker int:ROBOT_ID=0 double:waitAtDistance=$(arg dist)" output="screen" />
+	    <node name="generalAttackerYellow1" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/GeneralAttacker int:ROBOT_ID=1 double:waitAtDistance=$(arg dist)" output="screen" />
+	    <node name="generalAttackerYellow2" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/GeneralAttacker int:ROBOT_ID=2 double:waitAtDistance=$(arg dist)" output="screen" />
+	    <node name="generalAttackerYellow3" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/GeneralAttacker int:ROBOT_ID=3 double:waitAtDistance=$(arg dist)" output="screen" />
+</launch>

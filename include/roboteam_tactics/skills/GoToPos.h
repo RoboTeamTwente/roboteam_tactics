@@ -94,6 +94,7 @@ public:
 private:
     // output target: grsim or serial
     std::string robot_output_target;
+    bool grsim;
 
     // Obstacle avoidance parameters
     double avoidRobotsGain;
