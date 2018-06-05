@@ -30,45 +30,69 @@ namespace rtt {
 
 RTT_REGISTER_SKILL(GetBall);
 
-GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard)
-        , goToPos("", private_bb) {
+
+/*	Blackboard parameters used
+ *	Int  : ROBOT_ID
+ *	Bool : dribblerOff
+ *  Bool : unclaimPos
+ *	Bool : passToBestAttacker
+ *	Dbl  : kickerVel
+ *	Bool : chipOn
+ *	Bool : useBallClaiming
+ *	Dbl  : friction
+ *	Dbl  : acc
+ *	Bool : doNotPlayBackDefender
+ *	Bool : doNotPlayBackAttacker
+ *	Dbl  : distAwayFromBall
+ *	Dbl  : minDist
+ *	Dbl  : successAngle
+ *	Dbl  : successRobotAngle
+ *	Dbl  : successDist
+ *	Bool : dontShootAtGoal
+ *	Dbl  : chooseDist
+ *	Str  : aimAt
+ *	Dbl  : aimAtBallplacement_x
+ *	Dbl  : aimAtBallplacement_y
+ *	Int  : aimAtRobot
+ *	Bool : ourTeam
+ *	Dbl  : targetAngle
+ *	Bool : aimAwayFromTarget
+ *	Int	 : ballCloseFrameCount
+ *	Dbl  : pGainPosition
+ *	Dbl  : dGainPosition
+ *	Dbl  : pGainRotation
+ *	Int  : geneva
+ */
+
+GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPos("", private_bb) {
     ballClaimedByMe = false;
     startTime = now();
     ros::param::get("robot_output_target", robot_output_target);
 }
 
-void GetBall::Initialize() {
+void GetBall::Initialize(){
     robotID = blackboard->GetInt("ROBOT_ID");
-	ROS_INFO_STREAM_NAMED("skills.GetBall", "Initialize for robot: " << robotID);
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initialize for robot: " << robotID);
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
 
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
     ballClaimedByMe = false;
     hasTerminated = false;
-    // startTime = now();
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
     passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
 
+	// Reset the claimed position
     if (GetBool("unclaimPos")) {
-    // unclaim position
         ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
         ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
         ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ", Unclaiming pos because doing GetBall now");
     }
 
-    
+	deviation = 0.0;
 
-    // // RANDOM ANGLE SHOOTER (set deviation to 0 to not use this)
-        // if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
-        //     deviation = 0.30*(get_rand_int(2)*2-1);
-        //     ROS_INFO_STREAM("GetBall: " << deviation);
-        // } else {
-            deviation = 0.0;
-        // }
-
-    if (GetBool("passToBestAttacker")) {
+    if (GetBool("passToBestAttacker")){
         initializeOpportunityFinder();
     }
 }
@@ -329,7 +353,6 @@ double GetBall::computeArrivalTime(Vector2 location, int id) {
 
     return computeArrivalTime(location, botPos, botVel);
 }
-
 
 PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, roboteam_msgs::World world, double passThreshold) {
     // initialize my pass option

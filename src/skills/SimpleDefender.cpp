@@ -53,26 +53,24 @@ Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, dou
 }
 
 Vector2 SimpleDefender::computeDefensePointRatio(Vector2 targetFrom, Vector2 targetTo, double ratio){
-    // Get the position of our goal
-    Vector2 goalPos(LastWorld::get_our_goal_center());
-    // Get vector between defendPos and goalPos
+
+    // Get vector between targetFrom and targetTo
     Vector2 targetPos = targetTo - targetFrom;
     // Scale vector to ratio
     targetPos = targetPos.scale(ratio);
-    // Move vector to goalPos
+    // Move vector to targetFrom
     targetPos = targetPos + targetFrom;
 
     return targetPos;
 }
 
 Vector2 SimpleDefender::computeDefensePointAbsolute(Vector2 targetFrom, Vector2 targetTo, double distance){
-    // Get the position of our goal
-    Vector2 goalPos(LastWorld::get_our_goal_center());
-    // Get vector between defendPos and goalPos
+
+    // Get vector between targetFrom and targetTo
     Vector2 targetPos = targetTo - targetFrom;
     // Stretch vector to correct length
     targetPos.stretchToLength(distance);
-    // Move vector to goalPos
+    // Move vector to targetFrom
     targetPos = targetPos + targetFrom;
 
     return targetPos;

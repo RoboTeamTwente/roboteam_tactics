@@ -47,7 +47,7 @@ namespace rtt {
 		}
 
 		// ============================
-		// Initialize the normal Keeper
+		///Initialize the normal Keeper
 		// ============================
 		{
 			claim_robot(keeperID);
@@ -78,7 +78,7 @@ namespace rtt {
 		}
 
 		// =====================================
-		// Initialize positions / ball defenders
+		///Initialize positions / ball defenders
 		// =====================================
 		// Calculate which robot should take which position
 		std::vector<int> robotsToPositions = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, positions, world);
@@ -99,7 +99,7 @@ namespace rtt {
 
 
 		// ====================================
-		// Initialize robot defenders
+		///Initialize robot defenders
 		// ====================================
 		if(0 < robotsToDefend.size()) {
 			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
@@ -138,7 +138,7 @@ namespace rtt {
 
 
 		// ====================================
-		// Initialize intercept defenders
+		///Initialize intercept defenders
 		// ====================================
 		if(0 < robots.size()) {
 			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");

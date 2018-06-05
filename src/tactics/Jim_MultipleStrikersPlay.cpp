@@ -17,9 +17,7 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
-
-
-#define RTT_CURRENT_DEBUG_TAG Jim_MultipleStrikersPlay
+#define ROS_LOG_NAME "plays.Jim_MSP"
 
 namespace rtt {
 
@@ -39,7 +37,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
     // if (getAvailableRobots().size() < 1) {
     if (robots.size() < 1) {
-        RTT_DEBUG("Not enough robots, cannot initialize... \n");
+        ROS_DEBUG_NAMED(ROS_LOG_NAME, "Not enough robots, cannot initialize...");
         // TODO: Want to pass failure here as well!
         return;
     }
@@ -48,7 +46,7 @@ void Jim_MultipleStrikersPlay::Initialize() {
     Vector2 ballPos(world.ball.pos);
     
     int numStrikers = std::min((int) robots.size(), 2);    
-    RTT_DEBUGLN("Initializing numStrikers: %i", numStrikers);    
+    ROS_DEBUG_NAMED(ROS_LOG_NAME, "Initializing numStrikers: %i", numStrikers);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -64,7 +62,6 @@ void Jim_MultipleStrikersPlay::Initialize() {
     for (size_t i = 0; i < (size_t) numStrikers; i++) {
 
         int strikerID = strikerIDs.at(i);
-        // RTT_DEBUGLN("Initializing Striker %i", strikerID);
         delete_from_vector(robots, strikerID);
         claim_robot(strikerID);
 
@@ -103,37 +100,40 @@ void Jim_MultipleStrikersPlay::Initialize() {
 
 
 bt::Node::Status Jim_MultipleStrikersPlay::Update() {
-
-    bool allFailed = true;
-
-    if (tokens.size() == 0) {
-        allFailed = false;
-    }
-
-    if ((std::chrono::steady_clock::now() - lastTimeWeHadBall) >= std::chrono::milliseconds(2000)) {
-        return Status::Failure;
-    }
-
-    for (auto token : tokens) {
-        if (feedbacks.find(token) != feedbacks.end()) {
-            Status status = feedbacks.at(token);
-            if (status == bt::Node::Status::Success) {
-                RTT_DEBUGLN_TEAM("Strikers succeeded!");
-                return Status::Success;
-            }
-
-            allFailed &= status == bt::Node::Status::Failure;
-        } else {
-            allFailed = false;
-        }
-    }
-
-    if (allFailed) {
-        RTT_DEBUGLN_TEAM("Strikers failed!");
-        return Status::Failure;
-    }
-
     return Status::Running;
+
+//
+//    bool allFailed = true;
+//
+//    if (tokens.size() == 0) {
+//        allFailed = false;
+//    }
+//
+//    if ((std::chrono::steady_clock::now() - lastTimeWeHadBall) >= std::chrono::milliseconds(2000)) {
+//        ROS_DEBUG_NAMED(ROS_LOG_NAME, "Last time we had ball was 2 seconds ago... Returning Failure!");
+//        return Status::Failure;
+//    }
+//
+//    for (auto token : tokens) {
+//        if (feedbacks.find(token) != feedbacks.end()) {
+//            Status status = feedbacks.at(token);
+//            if (status == bt::Node::Status::Success) {
+//                ROS_DEBUG_NAMED(ROS_LOG_NAME, "Strikers succeeded!");
+//                return Status::Success;
+//            }
+//
+//            allFailed &= status == bt::Node::Status::Failure;
+//        } else {
+//            allFailed = false;
+//        }
+//    }
+//
+//    if (allFailed) {
+//        ROS_DEBUG_NAMED(ROS_LOG_NAME, "Strikers failed!");
+//        return Status::Failure;
+//    }
+//
+//    return Status::Running;
 }
 
 } // rtt
