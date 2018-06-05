@@ -64,15 +64,6 @@ void BallPlacementTest::publishStopCommand() {
 	pub.publish(command);
 }
 
-
-void BallPlacementTest::sendStopCommand(uint id) {
-	roboteam_msgs::RobotCommand command = controller.getStopCommand(id);
-
-	// Get global robot command publisher, and publish the command
-	auto &pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-	pub.publish(command);
-}
-
 bt::Node::Status BallPlacementTest::Update() {
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -91,6 +82,7 @@ bt::Node::Status BallPlacementTest::Update() {
 		robot = *findBot;
 	} else {
 		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Rrobot with ID " << robotID << " not found");
+		publishStopCommand();
 		return Status::Failure;
 	}
 
@@ -113,16 +105,14 @@ bt::Node::Status BallPlacementTest::Update() {
 
 	// to see if the robot lost the ball
 	Vector2 robotBallError = robotPos - ballPos;
-	if (robotBallError.length() > 0.5) {
+	if (robotBallError.length() > 0.5 && ball.visible) { //TODO: visible for few frames
 		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot " << robotID << " lost ball");
-		sendStopCommand(robotID);
-		failure = true;
-		succeeded = false;
+		publishStopCommand();
 		return Status::Failure;
 	}
 
 	// test if the ball is within the success distance for 5 frames. if so, return success
-	if (ballPosError.length() < 0.08) {
+	if (ballPosError.length() < 0.05) {
 
 		if (blackboard->GetInt("counter") < 0) {
 			int counterSafe = blackboard->GetInt("counter");
@@ -132,7 +122,7 @@ bt::Node::Status BallPlacementTest::Update() {
 			return Status::Running;
 		} else {
 			ROS_DEBUG_NAMED(ROS_LOG_NAME, "Ball placement succeeded!");
-			sendStopCommand(robotID);
+			publishStopCommand();
 			failure = false;
 			succeeded = true;
 			return Status::Success;
@@ -142,13 +132,15 @@ bt::Node::Status BallPlacementTest::Update() {
 	// Set the blackboard for GoToPos
 	private_bb->SetInt("ROBOT_ID", robotID);                            // sets robot id
 	private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));   // sets keeper id
-	private_bb->SetBool("dribbler", true);                              // turn on dribbler
-	private_bb->SetDouble("maxSpeed", 0.5);                             // sets maximum speed (which is low for ball placement)
-	private_bb->SetDouble("successDist", 0.08);                         // sets succes distance
+	// private_bb->SetBool("dribbler", true);                              // turn on dribbler
+	// private_bb->SetDouble("maxSpeed", 0.5);                             // sets maximum speed (which is low for ball placement)
+	private_bb->SetBool("lowSpeed", true);  
+	private_bb->SetDouble("successDist", 0.01);                         // sets succes distance
 	private_bb->SetDouble("xGoal", targetPos.x);                        // x location for ball placement
 	private_bb->SetDouble("yGoal", targetPos.y);                        // y location for ball placement
 	private_bb->SetDouble("angleGoal", targetAngle);                    // final goal for the angle of the robot
 	private_bb->SetBool("avoidRobots", false);                          // the robot does not have to avoid robots during ball placement
+	private_bb->SetBool("dontRotate", true); 
 
 	if (HasBool("enterDefenseAreas")) {
 		private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
@@ -161,6 +153,9 @@ bt::Node::Status BallPlacementTest::Update() {
 	if (HasDouble("pGainRotation")) {
 		private_bb->SetDouble("pGainRotation", GetDouble("pGainRotation"));
 	}
+	if (blackboard->HasDouble("maxSpeed")) {
+		private_bb->SetDouble("maxSpeed", blackboard->GetDouble("maxSpeed"));
+	}
 
 
 	// Get the velocity command from GoToPos
@@ -168,17 +163,16 @@ bt::Node::Status BallPlacementTest::Update() {
 	roboteam_msgs::RobotCommand command;
 	if (commandPtr) {
 		command = *commandPtr;
-		command.w = 0;          //this makes sure the robot will not turn during ball placement
-
-		// Get global robot command publisher, and publish the command
-		auto &pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
-		pub.publish(command);
-
-		return Status::Running;
 	} else {
-		publishStopCommand();
-		return Status::Running;
+		command.x_vel = 0.0;
+		command.y_vel = 0.0;
 	}
+	command.dribbler = true;
+	// Get global robot command publisher, and publish the command
+	auto &pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
+	pub.publish(command);
+
+    return Status::Running;
 }
 
 

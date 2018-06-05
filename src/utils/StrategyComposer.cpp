@@ -70,6 +70,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
+//        { RefState::DO_KICKOFF            , "rtt_jim/NormalPlay"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::DEFEND_PENALTY        , "rtt_emiel/PreparePenaltyThemStrategy"s  } ,
         { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,
