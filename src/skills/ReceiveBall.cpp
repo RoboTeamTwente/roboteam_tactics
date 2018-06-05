@@ -184,7 +184,12 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 
 	// Is ball coming towards me? (for determining failure/success)
 	Vector2 posdiff = myPos - ballPos;
-	double velThreshold = posdiff.length()/10; // ARBITRARY GUESS
+	double velThreshold;
+	if (ballIsComing) {
+		velThreshold = posdiff.length()/8; // ARBITRARY GUESS
+	} else {
+		velThreshold = posdiff.length()/4; // ARBITRARY GUESS
+	}
 	if (GetBool("defenderMode")) {
 		velThreshold = 0.1;
 	} else if (velThreshold < 0.1) {
