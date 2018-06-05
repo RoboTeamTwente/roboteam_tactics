@@ -150,7 +150,7 @@ add_executable(converter
     src/treegen/BTBuilder.cpp
     src/treegen/converter.cpp
     src/treegen/TreeChecker.cpp
-    )
+        include/roboteam_tactics/utils/RobotsToDefendFinder.h)
 add_dependencies(converter
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
