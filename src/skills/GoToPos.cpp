@@ -465,7 +465,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
     } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && !grsim) {
-        controller.setControlParam("pGainPosition", 6.0);
+        // controller.setControlParam("pGainPosition", 6.0); TODO: turned off for now
     }
     if (HasDouble("iGainPosition")) {
         controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
