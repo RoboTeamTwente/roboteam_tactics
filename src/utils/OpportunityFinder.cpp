@@ -20,8 +20,6 @@ OpportunityFinder::OpportunityFinder() {}
 
 void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::string target, int targetID) {
 
-	ROS_INFO_STREAM_NAMED("utils.OpportunityFinder", "Initialize");
-
 	std::string filePath = PASS_POINT_WEIGHTS_DIRECTORY.append(fileName);
 
 	std::vector<float> weightsVector;
@@ -609,10 +607,21 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 		// Get claimed positions, place them instead of those robot positions in our 'fake' world object
 		for (size_t i = 0; i < fakeWorld.us.size(); i++) {
 			double botClaimedX;
+
 			ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
+
+			if(!ros::param::has("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX")){
+//				ROS_WARN_STREAM_NAMED("OpportunityFinder", "Parameter not set! Still retrieving " << botClaimedX << " ...");
+				continue;
+			}
+
+
 			if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
 				double botClaimedY;
 				ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosY", botClaimedY);
+
+//				ROS_INFO_STREAM_NAMED("OpportunityFinder", "    Putting bot " << fakeWorld.us.at(i).id << " at position (" << botClaimedX << ", " << botClaimedY << ")");
+
 				fakeWorld.us.at(i).pos.x = float(botClaimedX);
 				fakeWorld.us.at(i).pos.y = float(botClaimedY);
 			}
@@ -627,7 +636,13 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 		world.us.erase(world.us.begin()+closestToBallIndex); 		// same goes for the real world to make sure both are the same size
 	}
 
-	
+	/// Print world used
+//	for(roboteam_msgs::WorldRobot bot : world.us){
+//		ROS_INFO_STREAM_NAMED("OpportunityFinder", "    Real Robot " << bot.id << " : (" << bot.pos.x << ", " << bot.pos.y << ")");
+//	}
+//	for(roboteam_msgs::WorldRobot bot : fakeWorld.us){
+//		ROS_INFO_STREAM_NAMED("OpportunityFinder", "    Fake Robot " << bot.id << " : (" << bot.pos.x << ", " << bot.pos.y << ")");
+//	}
 
     // For each of our robots, check score of their (claimed or real) position
     for (size_t i = 0; i < (world.us.size()); i++) {
