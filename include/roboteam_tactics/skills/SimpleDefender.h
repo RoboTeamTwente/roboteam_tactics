@@ -73,7 +73,8 @@ public:
     static Vector2 computeDefensePointAbsolute(Vector2 targetFrom, Vector2 targetTo, double distance);
     Vector2 getTargetFromPosition();
     Vector2 getTargetToPosition();
-	Status Update();
+	Status Update() override;
+	void Initialize() override;
 
     static VerificationMap required_params() {
         VerificationMap params;

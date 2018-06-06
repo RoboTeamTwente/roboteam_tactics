@@ -259,6 +259,7 @@ namespace rtt {
 			.setString("stayOnSide", "ourSide")
 			.setBool("avoidDefenseAreas"  , true)
 			.setBool("stayAwayFromBall", true)
+			.setBool("avoidBall"  , true)
 			.setBool("dontDriveToBall", true)
 			.setDouble("A_maxSpeed", 1.3)
 			.setString("targetFromType", "position")
@@ -309,6 +310,7 @@ namespace rtt {
 		// Set blackboard variables
 		ScopedBB(bb, "SimpleDefender_A")
 			.setBool("stayAwayFromBall", true)
+			.setBool("avoidBall", true)
 			.setBool("dontDriveToBall", true)
 			.setDouble("A_maxSpeed", 1.3)
 			.setString("targetToType", "object")

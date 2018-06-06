@@ -140,6 +140,10 @@ Vector2 SimpleDefender::getTargetToPosition(){
     ROS_WARN_STREAM_NAMED("SimpleDefender", "should not be here!");
 }
 
+void SimpleDefender::Initialize() {
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing SimpleDefender for robot " << blackboard->GetInt("ROBOT_ID"));
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
+}
 
 bt::Node::Status SimpleDefender::Update() {
 

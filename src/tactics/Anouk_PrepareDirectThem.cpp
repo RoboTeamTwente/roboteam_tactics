@@ -74,7 +74,7 @@ namespace rtt {
 
 		/// === Check if reinitialization is needed === ///
 		// Get the new robots that should be intercepted
-		std::vector<int> robotsToInterceptNew = RobotsToDefendFinder::GetRobotsToDefend(0.0, true);
+		std::vector<int> robotsToInterceptNew = RobotsToDefendFinder::GetRobotsToDefend(0.5, true);
 		// Get the new robots that should be defended
 		std::vector<int> robotsToDefendNew = RobotsToDefendFinder::GetRobotsToDefend(3.0, true);
 
@@ -109,10 +109,14 @@ namespace rtt {
 		robotsToDefend = robotsToDefendNew;
 		robotsToIntercept = robotsToInterceptNew;
 
-		// Print the robots that should be defended
+		// Print the robots that should be defended and intercepted
 		std::stringstream vectorStr;
-		std::copy(robotsToDefend.begin(), robotsToDefend.end(), std::ostream_iterator<int>(vectorStr, " "));
-		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend : " << vectorStr.str().c_str());
+		std::copy(robotsToDefend.begin(), robotsToDefend.end(), std::ostream_iterator<int>(vectorStr, ", "));
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend    : [" << vectorStr.str().c_str() << "]");
+		vectorStr.str("");  // https://stackoverflow.com/questions/20731/how-do-you-clear-a-stringstream-variable
+		vectorStr.clear();	// https://stackoverflow.com/questions/2848087/how-to-clear-stringstream
+		std::copy(robotsToIntercept.begin(), robotsToIntercept.end(), std::ostream_iterator<int>(vectorStr, ", "));
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to intercept : [" << vectorStr.str().c_str() << "]");
 
 		// Release all previously claimed robots
 		release_robots(get_claimed_robots());
@@ -129,8 +133,12 @@ namespace rtt {
 		robotsLeft -= numRobotDefenders;
 
 		// Number of ball interceptors
-		int numBallInterceptors = robotsLeft;
+		int numBallInterceptors = std::min(robotsLeft, (int)robotsToIntercept.size());
+		robotsLeft -= numBallInterceptors;
 
+		// Add the remaining robots to ball defenders
+		numBallDefenders += robotsLeft;
+		robotsLeft = 0;
 
 		// Get the last world
 		roboteam_msgs::World world = LastWorld::get();
@@ -142,7 +150,7 @@ namespace rtt {
 		double angleGoalToBall = -(ballPos - goalPos).angle();
 
 		// Calculate the positions of the ball defenders
-		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20, goalPos, angleGoalToBall, 1.8);
+		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20 * (numBallDefenders - 1), goalPos, angleGoalToBall, 1.8);
 
 		// Place the ball defenders and robot defender, also claims the robots
 		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
@@ -154,12 +162,16 @@ namespace rtt {
 	}
 
     void Anouk_PrepareDirectThem::Initialize() {
+		ROS_INFO_NAMED(ROS_LOG_NAME, "Initializing Anouk_PrepareDirectThem");
 
         // Check if this tree is used for the correct RefState, DIRECT_FREE_THEM or INDIRECT_FREE_THEM
         boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
         if (refState != RefState::DIRECT_FREE_THEM && refState != RefState::INDIRECT_FREE_THEM) {
             ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for DIRECT_FREE_THEM or INDIRECT_FREE_THEM");
         }
+		// Clear these vectors, to make sure that the role directives are actually initialized
+		robotsToDefend.clear();
+		robotsToIntercept.clear();
 
 		Anouk_PrepareDirectThem::init();
 

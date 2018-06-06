@@ -160,7 +160,7 @@ void Emiel_IndirectUsPlay::Initialize() {
 	/// === Initialize attackers === ///
 	int numAttackers = (int)robots.size();
 	// Get position in front of goal
-	Vector2 attackPos = LastWorld::get_their_goal_center();// + Vector2(1.5, 0.0);
+	Vector2 attackPos = LastWorld::get_their_goal_center();
 
 	// Get positions to attack
 	positions = RobotPatternGenerator::Circle(numAttackers, M_PI/2, 4, attackPos, M_PI, 0, 1);
