@@ -59,8 +59,8 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::INDIRECT_FREE_THEM    , "rtt_anouk/PrepareDirectThem"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
         { RefState::TIMEOUT_THEM          , "rtt_jim/TimeOutStrat"s           } ,
-        { RefState::GOAL_US               , "rtt_jim/DefensivePrepareStrat"s           } ,
-        { RefState::GOAL_THEM             , "rtt_jim/DefensivePrepareStrat"s           } ,
+        { RefState::GOAL_US               , "rtt_anouk/StopStrat"s           } ,
+        { RefState::GOAL_THEM             , "rtt_anouk/StopStrat"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_anouk/BallPlacement_Strat"s   } ,
         { RefState::BALL_PLACEMENT_THEM   , "rtt_anouk/BallPlacementThemStrat"s           } ,
 
