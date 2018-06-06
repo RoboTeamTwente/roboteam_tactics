@@ -116,9 +116,9 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         command.chipper = true;
         command.chipper_forced = true;
         if (robot_output_target == "grsim") {
-            command.chipper_vel = fmin(5.0, kickSpeed*1.3);
+            command.chipper_vel = fmin(5.0, kickSpeed);
         } else {
-            command.chipper_vel = fmin(8.0, kickSpeed*1.5); //TODO: TUNE
+            command.chipper_vel = fmin(8.0, kickSpeed);
         }
         
     } else {
@@ -181,12 +181,16 @@ void GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
     double passSpeed = 4.0;
     if (choseRobotToPassTo) {
         double passDist = (pos - ballPos).length();
-        double maxPassSpeed = computePassSpeed(passDist, 2.0, false); // fastest pass that my teammate can receive
-        // TODO: TEST THIS PART
-        double arrivalTime = computeArrivalTime(pos, id);
-        passSpeed = computePassSpeed(passDist, arrivalTime, true);
-        if (passSpeed > maxPassSpeed) {
-            passSpeed = maxPassSpeed;
+        if (!chip) {
+            double maxPassSpeed = computePassSpeed(passDist, 2.0, false); // fastest pass that my teammate can receive
+            // TODO: TEST THIS PART
+            double arrivalTime = computeArrivalTime(pos, id);
+            passSpeed = computePassSpeed(passDist, arrivalTime, true);
+            if (passSpeed > maxPassSpeed) {
+                passSpeed = maxPassSpeed;
+            }
+        } else {//TODO: TUNE. 0-> 5cm 1.5->40cm. 3-> 95cm (dribbler: 85cm). 4.5-> 150cm (dribbler: 125cm).
+            passSpeed = fmin(fmax((passDist-0.2)*2.0, 1.5),6.5);
         }
     }
 
@@ -451,7 +455,7 @@ bt::Node::Status GetBall::Update (){
     } else if (robot_output_target == "serial") {
         successDist = 0.11; //0.12
         successAngle = 0.10; //0.15
-        successRobotAngle = 0.05;
+        successRobotAngle = 0.03;
         distAwayFromBall = 0.3;
         minDist = 0.08;
     }
@@ -481,7 +485,7 @@ bt::Node::Status GetBall::Update (){
 
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
     if (!choseRobotToPassTo && GetBool("passToBestAttacker")) {
-        double chooseDist = 0.4;
+        double chooseDist = 1.0;
         if (blackboard->HasDouble("chooseDist")) {
             chooseDist = blackboard->GetDouble("chooseDist");
         }
@@ -553,10 +557,10 @@ bt::Node::Status GetBall::Update (){
         ballDist = distAwayFromBall;
     }
     Vector2 targetPos;
-    if (fabs(angleDiff) > successAngle) {
+    if (fabs(angleDiff) > successAngle || L_posDiff > 0.3) {
         double downScale = fmax(0,fmin(1,fabs(angleDiff)*2-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
-        private_bb->SetBool("dribbler", L_posDiff<0.2 && !dontDribble && fabs(angleDiff)<M_PI/3);
+        private_bb->SetBool("dribbler", false);
     } else {
         targetPos = ballPos;// + Vector2(-0.04, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !dontDribble);
@@ -567,7 +571,7 @@ bt::Node::Status GetBall::Update (){
         if (L_posDiff > 0.15) {
             double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*0.5;
             double max_ahead = 3.0;
-            double ahead = L*(vBall-0.25);
+            double ahead = L*(vBall-0.0);
             if (ahead < max_ahead) {
                 targetPos = targetPos + ballVel.stretchToLength(ahead);
             } else {
@@ -583,7 +587,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
         // matchBallVel = false;
-        int ballCloseFrameCountTo = 3;
+        int ballCloseFrameCountTo = 2;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         } else if (dontDribble) {
@@ -647,6 +651,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", (L_posDiff > 0.3)); // shut off robot avoidance when close to target
+    private_bb->SetBool("avoidBall", (L_posDiff > 0.5)); // shut off ball avoidance when close to target
     private_bb->SetDouble("successDist", 0.01); // make sure gotopos does not return success before getball returns success
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));

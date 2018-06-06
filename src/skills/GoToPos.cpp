@@ -465,7 +465,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("pGainPosition")) {
         controller.setControlParam("pGainPosition", GetDouble("pGainPosition"));
     } else if (HasBool("pGainLarger") && GetBool("pGainLarger") && !grsim) {
-        // controller.setControlParam("pGainPosition", 6.0); TODO: turned off for now
+        controller.setControlParam("pGainPosition", 6.5);
+        controller.setControlParam("dGainPosition", 1.3);
     }
     if (HasDouble("iGainPosition")) {
         controller.setControlParam("iGainPosition", GetDouble("iGainPosition"));
@@ -549,7 +550,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
     Vector2 posError = targetPos - myPos;;
     // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.03) {
+    if (posError.length() < successDist && fabs(angleError) < 0.01) {
         successCounter++;
         if (successCounter >= 3) {
             //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
@@ -590,10 +591,17 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     prevTarget = targetPos;
     posError = targetPos - myPos;
 
-    // Turn towards goal when error is too far
-    if (posError.length() > 0.25 && !GetBool("dontRotate")) {
+    // Turn towards goal when error is too large
+    static double posErrorRotationThreshold = 0.30;
+    if (posError.length() > posErrorRotationThreshold && !GetBool("dontRotate")) {
         angleGoal = posError.angle();
+        if (fabs(cleanAngle(angleGoal - myAngle)) > M_PI/2) {
+            angleGoal = cleanAngle(angleGoal + M_PI); // chooses either driving forward or backwards
+        }
         angleError = cleanAngle(angleGoal - myAngle);
+        posErrorRotationThreshold = 0.29;
+    } else {
+        posErrorRotationThreshold = 0.30;
     }
 
     // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)

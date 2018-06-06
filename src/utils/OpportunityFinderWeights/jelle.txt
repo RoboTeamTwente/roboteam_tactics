@@ -1,4 +1,4 @@
-distToGoalWeight 0.0
+distToGoalWeight 1.0
 distToGoalMin 1.2
 distToGoalMax 6.2
 viewOfGoalWeight 2.0
@@ -17,8 +17,8 @@ distToSelfWeight 0.1
 distToSelfMin 0.0
 distToSelfMax 1.0
 ballReflectionAngleWeight 1.0
-ballReflectionAngleMin 1.0
-ballReflectionAngleMax 1.9
+ballReflectionAngleMin 0.5
+ballReflectionAngleMax 1.5
 distOppToBallTrajWeight 2.0
 distOppToBallTrajMin 0.15
 distOppToBallTrajMax 0.5

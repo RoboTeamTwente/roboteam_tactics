@@ -369,11 +369,6 @@ bt::Node::Status ReceiveBall::Update() {
 	Vector2 interceptPos = interceptPose->interceptPos;
 	double interceptAngle = interceptPose->interceptAngle;
 
-	// new robots tend to accelerate slowly sideways, so this keeps defenders moving in a forward direction
-	if (GetBool("defenderMode")) {
-		interceptAngle += M_PI/2;
-	}
-
 	// Determine if we should shoot at goal, depending whether the shootAtGoal boolean is set, and on whether we can see the goal
 	// and on whether the 'reflection angle' (angleDiff) is small enough
 	bool shootAtGoal = false;
@@ -387,7 +382,7 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
 		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
-		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < M_PI/2 + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
+		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < 0.33*M_PI + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
 		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
 
@@ -395,16 +390,16 @@ bt::Node::Status ReceiveBall::Update() {
 	int geneva_state = 3; //default geneva drive to center position
 	if (shootAtGoal) {
 		// decide convenient geneva state
-		static double geneva_threshold = 0.3*M_PI;
+		static double geneva_threshold = 0.25*M_PI;
 		if (fabs(angleDiff) > geneva_threshold) {
-			geneva_state = (angleDiff<0) ? 1 : 5; // negative anglediff -> geneva to 20 degrees left, otherwise to 20 degrees right
-			geneva_threshold = 0.25*M_PI; // prevents rapid shifting of the geneva drive
+			geneva_state = (angleDiff<0) ? 5 : 1; // negative anglediff -> geneva to 20 degrees left, otherwise to 20 degrees right
+			geneva_threshold = 0.20*M_PI; // prevents rapid shifting of the geneva drive
 		} else {
 			geneva_state = 3;
-			geneva_threshold = 0.3*M_PI;
+			geneva_threshold = 0.25*M_PI;
 		}
 		// determine shooting angle and take a step back from the ball interception pos
-		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0) + (geneva_state-3)*10/180*M_PI;
+		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0) - (double)(geneva_state-3)*10/180*M_PI;
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
@@ -449,6 +444,16 @@ bt::Node::Status ReceiveBall::Update() {
 
 	} else {
 
+		double posErrorLength = (targetPos - myPos).length();
+		// new strategy because sideways acceleration is very slow for new robots
+		static double distToBallThreshold = 1.5;
+		if (!GetBool("claimedPos") && (GetBool("defenderMode") || distanceToBall > distToBallThreshold) && (!ballIsComing || posErrorLength > 0.29)) {
+			targetAngle = interceptAngle + M_PI/2;
+			distToBallThreshold = 1.4;
+		} else {
+			distToBallThreshold = 1.5;
+		}
+
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
@@ -472,11 +477,10 @@ bt::Node::Status ReceiveBall::Update() {
         if (blackboard->HasBool("enterDefenseAreas")) {
         	private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));
     	}
-    	private_bb->SetBool("avoidRobots", (targetPos - myPos).length() > 0.3); // shut off robot avoidance when close to target
+    	private_bb->SetBool("avoidRobots", posErrorLength > 0.3); // shut off robot avoidance when close to target
 		if (blackboard->HasBool("avoidRobots")) {
 			private_bb->SetBool("avoidRobots", blackboard->GetBool("avoidRobots"));
 		}
-
         
         roboteam_msgs::RobotCommand command;
         boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
@@ -490,7 +494,7 @@ bt::Node::Status ReceiveBall::Update() {
 	    }
 
 	    // Set geneva state asap (never know how fast that ball be coming)
-	    //command.geneva_state = geneva_state; TODO: turned off because still unreliable
+	    command.geneva_state = geneva_state;
 
         // For a real robot this starts the kicking on ball sensor. For grsim, the robot will continuously kick, giving similar results
         if (startKicking) {
