@@ -69,64 +69,70 @@ Vector2 SimpleDefender::computeDefensePointRatio(Vector2 targetFrom, Vector2 tar
 Vector2 SimpleDefender::getTargetFromPosition(){
     ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition");
     // for targetFrom, pak de Vector2 van de target
+    std::string type = "position"; // default to type position
     if(HasString("targetFromType")){
         // Get type
-        std::string type = GetString("targetFromType");
-        if(type == "position"){
-            double x = GetDouble("targetFromTypeX");
-            double y = GetDouble("targetFromTypeY");
-            ROS_INFO_STREAM_NAMED("SimpleDefender", " [" << x << " ," << y << "]");
+        type = GetString("targetFromType");
+    }
+    if(type == "position"){
+        double x = GetDouble("targetFromTypeX");
+        double y = GetDouble("targetFromTypeY");
+        ROS_INFO_STREAM_NAMED("SimpleDefender", " [" << x << " ," << y << "]");
 
-            return Vector2(x, y);
+        return Vector2(x, y);
+    }
+    if(type == "object"){
+        std::string obj = GetString("targetFromObj");
+        if(obj == "them" || obj == "us"){
+            int robotID = GetInt("targetFromRobotId");
+            if(obj == "them"){
+                return (Vector2)LastWorld::get().them.at(robotID).pos;
+            }
+            if(obj == "us"){
+                return (Vector2)LastWorld::get().us.at(robotID).pos;
+            }
         }
-
-        if(type == "object"){
-            std::string obj = GetString("targetFromObj");
-            if(obj == "them" || obj == "us"){
-                int robotID = GetInt("targetFromRobotId");
-                if(obj == "them"){
-                    return (Vector2)LastWorld::get().them.at(robotID).pos;
-                }
-                if(obj == "us"){
-                    return (Vector2)LastWorld::get().us.at(robotID).pos;
-                }
-            }
-            if(obj == "ball"){
-                return (Vector2)LastWorld::get().ball.pos;
-            }
+        if(obj == "ball"){
+            return (Vector2)LastWorld::get().ball.pos;
         }
     }
 
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "should not be here");
+    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition: should not be here, returning zero vector");
+    return Vector2(0.0,0.0);
 }
 
 Vector2 SimpleDefender::getTargetToPosition(){
     // for targetFrom, pak de Vector2 van de target
+    std::string type = "position"; // default to type position
     if(HasString("targetToType")){
         // Get type
-        std::string type = GetString("targetToType");
-        if(type == "position"){
-            double x = GetDouble("targetToTypeX");
-            double y = GetDouble("targetToTypeY");
-            return Vector2(x, y);
-        }
+        type = GetString("targetToType");
+    }
 
-        if(type == "object"){
-            std::string obj = GetString("targetToObj");
-            if(obj == "them" || obj == "us"){
-                int robotID = GetInt("targetToRobotId");
-                if(obj == "them"){
-                    return (Vector2)LastWorld::get().them.at(robotID).pos;
-                }
-                if(obj == "us"){
-                    return (Vector2)LastWorld::get().us.at(robotID).pos;
-                }
+    if(type == "position"){
+        double x = GetDouble("targetToTypeX");
+        double y = GetDouble("targetToTypeY");
+        return Vector2(x, y);
+    }
+
+    if(type == "object"){
+        std::string obj = GetString("targetToObj");
+        if(obj == "them" || obj == "us"){
+            int robotID = GetInt("targetToRobotId");
+            if(obj == "them"){
+                return (Vector2)LastWorld::get().them.at(robotID).pos;
             }
-            if(obj == "ball"){
-                return (Vector2)LastWorld::get().ball.pos;
+            if(obj == "us"){
+                return (Vector2)LastWorld::get().us.at(robotID).pos;
             }
+        }
+        if(obj == "ball"){
+            return (Vector2)LastWorld::get().ball.pos;
         }
     }
+
+    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetToPosition: should not be here, returning zero vector");
+    return Vector2(0.0,0.0);
 }
 
 

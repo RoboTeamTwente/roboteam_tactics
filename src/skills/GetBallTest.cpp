@@ -301,11 +301,6 @@ bt::Node::Status GetBallTest::Update (){
         successDist=GetDouble("successDist");
     }
 
-    bool matchBallVel = false;
-
-    if (fabs(angleDiff) > 0.5*M_PI) {
-        matchBallVel = true;
-    }
 
     double addBallSpeed = ballVel.length() * 0.2;
     if (addBallSpeed > 1.7) {
@@ -319,7 +314,6 @@ bt::Node::Status GetBallTest::Update (){
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
         private_bb->SetBool("dribbler", false);
-        matchBallVel = true;
 	} else {
         private_bb->SetBool("dribbler", true);
         std::cout << "dribbler on" << std::endl;
@@ -330,7 +324,6 @@ bt::Node::Status GetBallTest::Update (){
     // Return Success if we've been close to the ball for a certain number of frames
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if ((ballPos - robotPos).length() < successDist && fabs(angleError) < successAngle) {
-        // matchBallVel = false;
         int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
@@ -387,17 +380,6 @@ bt::Node::Status GetBallTest::Update (){
     roboteam_msgs::RobotCommand command;
     if (commandPtr) {
     	command = *commandPtr;
-
-        // Optional feature after testing: match the ball velocity for easy ball interception
-        // if (matchBallVel) {
-        //     Vector2 ballVelInRobotFrame = worldToRobotFrame(ballVel, robot.angle).scale(1.0);
-        //     Vector2 newVelCommand(command.x_vel + ballVelInRobotFrame.x, command.y_vel + ballVelInRobotFrame.y);
-        //     if (newVelCommand.length() > 4.0) {
-        //       newVelCommand.scale(4.0 / newVelCommand.length());
-        //     }
-        //     command.x_vel = newVelCommand.x;
-        //     command.y_vel = newVelCommand.y;    
-        // }
         
         // Get global robot command publisher, and publish the command
         auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();

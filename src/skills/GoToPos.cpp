@@ -494,6 +494,12 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
     }
+    if (HasDouble("thresholdTarget")) {
+        controller.setControlParam("thresholdTarget", GetDouble("thresholdTarget"));
+    }
+    if (HasDouble("minTarget")) {
+        controller.setControlParam("minTarget", GetDouble("minTarget"));
+    }
 
 
 
