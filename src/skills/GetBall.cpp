@@ -692,6 +692,12 @@ bt::Node::Status GetBall::Update (){
     if (blackboard->HasDouble("pGainRotation")) {
         private_bb->SetDouble("pGainRotation", blackboard->GetDouble("pGainRotation"));
     }
+    if (blackboard->HasDouble("thresholdTarget")) {
+        private_bb->SetDouble("thresholdTarget", blackboard->GetDouble("thresholdTarget"));
+    }
+    if (blackboard->HasDouble("minTarget")) {
+        private_bb->SetDouble("minTarget", blackboard->GetDouble("minTarget"));
+    }
     
 
     // Get the velocity command from GoToPos

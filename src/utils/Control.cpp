@@ -157,26 +157,32 @@ void Control::setControlParam(std::string paramName, double paramValue) {
     if (paramName == "pGainPosition") {
         this->pGainPosition = paramValue;
     }
-    if (paramName == "iGainPosition") {
+    else if (paramName == "iGainPosition") {
         this->iGainPosition = paramValue;
     }
-    if (paramName == "dGainPosition") {
+    else if (paramName == "dGainPosition") {
         this->dGainPosition = paramValue;
     }
-    if (paramName == "pGainRotation") {
+    else if (paramName == "pGainRotation") {
         this->pGainRotation = paramValue;
     }
-    if (paramName == "iGainRotation") {
+    else if (paramName == "iGainRotation") {
         this->iGainRotation = paramValue;
     }
-    if (paramName == "dGainRotation") {
+    else if (paramName == "dGainRotation") {
         this->dGainRotation = paramValue;
     }
-    if (paramName == "maxSpeed") {
+    else if (paramName == "maxSpeed") {
         this->maxSpeed = paramValue;
     }
-    if (paramName == "maxAngularVel") {
+    else if (paramName == "maxAngularVel") {
         this->maxAngularVel = paramValue;
+    }
+    else if (paramName == "thresholdTarget") {
+        this->thresholdTarget = thresholdTarget;
+    }
+    else if (paramName == "minTarget") {
+        this->minTarget = minTarget;
     }
 }
 
