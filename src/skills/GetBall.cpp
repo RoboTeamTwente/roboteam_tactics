@@ -98,6 +98,7 @@ void GetBall::Initialize(){
 }
 
 void GetBall::initializeOpportunityFinder() {
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Initializing OpportunityFinder...");
     // load the relevant weights list on which our teammates' positions will be judged, and specify the 'target' (see opportunityFinder)
     opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
 
@@ -130,9 +131,14 @@ void GetBall::publishStopCommand() {
 }
 
 void GetBall::publishKickCommand(double kickSpeed, bool chip){
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Publishing kick command...");
+
     if (blackboard->HasDouble("kickerVel")) {
         kickSpeed = blackboard->GetDouble("kickerVel");
     }
+
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Kick speed = " << kickSpeed);
+
     choseRobotToPassTo = false;
 
     roboteam_msgs::RobotCommand command;
@@ -516,7 +522,8 @@ bt::Node::Status GetBall::Update (){
             bestPos = bestTeammate.pos;
             choseRobotToPassTo = true;
             ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": Setting passToRobot to " << bestID);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff << ", bestPos: " << bestPos);
         } else if (L_posDiff >= chooseDist) {
             private_bb->SetBool("avoidBall", true);
         }

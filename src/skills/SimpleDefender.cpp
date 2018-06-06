@@ -77,7 +77,6 @@ Vector2 SimpleDefender::computeDefensePointAbsolute(Vector2 targetFrom, Vector2 
 }
 
 Vector2 SimpleDefender::getTargetFromPosition(){
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition");
     // for targetFrom, pak de Vector2 van de target
     if(HasString("targetFromType")){
         // Get type
@@ -85,8 +84,6 @@ Vector2 SimpleDefender::getTargetFromPosition(){
         if(type == "position"){
             double x = GetDouble("targetFromTypeX");
             double y = GetDouble("targetFromTypeY");
-            ROS_INFO_STREAM_NAMED("SimpleDefender", " [" << x << " ," << y << "]");
-
             return Vector2(x, y);
         }
 
@@ -106,7 +103,6 @@ Vector2 SimpleDefender::getTargetFromPosition(){
             }
         }
     }
-
     ROS_WARN_STREAM_NAMED("SimpleDefender", "should not be here!");
 }
 
@@ -210,7 +206,6 @@ bt::Node::Status SimpleDefender::Update() {
         Vector2 targetToPosition = getTargetToPosition();
         targetPos = computeDefensePointAbsolute(targetFromPosition, targetToPosition, distanceFromGoalRatio);
     }else{
-//        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Using old computeDefensePoint");
         targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
     }
 

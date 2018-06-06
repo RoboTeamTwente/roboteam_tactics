@@ -38,11 +38,11 @@ Control::Control() : updateRateParam("role_iterations_per_second")
         }
 
 RobotType Control::getRobotType() {
+
     std::string const robotTypeKey = "robot" + std::to_string(ROBOT_ID) + "/robotType";
     if (ros::param::has(robotTypeKey)) {
         std::string robotTypeString;
         ros::param::get(robotTypeKey, robotTypeString);
-        ROS_INFO_STREAM_NAMED("control", "test " << robotTypeKey << ", type: " << robotTypeString);
 
         if (robotTypeString == "arduino") {
             return RobotType::ARDUINO;

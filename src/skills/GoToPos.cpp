@@ -34,9 +34,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
 
         {
-            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "New GoToPos started for robot " << blackboard->GetInt("ROBOT_ID"));
-            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Blackboard : " << blackboard->toString());
-
             succeeded = false;
             failure = false;
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
