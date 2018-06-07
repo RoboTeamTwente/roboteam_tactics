@@ -119,13 +119,13 @@ namespace rtt {
 			}
 		} else if (formation == 6) { // blue keeper, yellow attacker, rest stationary
 			if (blue_team) {
+				positions.push_back(goalCenter + Vector2(0.1, 0.0));
 				positions.push_back(goalCenter + Vector2(0.1, 0.4*W));
 				positions.push_back(goalCenter + Vector2(0.1, 0.6*W));
-				positions.push_back(goalCenter + Vector2(0.1, 0.0));
 			} else {
+				positions.push_back(goalCenter + Vector2(-0.6*L, 0.0));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.4*W));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.6*W));
-				positions.push_back(goalCenter + Vector2(-0.6*L, 0.0));
 			}
 		} else if (formation == 7) { // blue keeper, 2 blue defenders in the way of shot, yellow behind ball
 			if (blue_team) {
@@ -133,9 +133,9 @@ namespace rtt {
 				positions.push_back(Vector2(-0.2, 1.15));
 				positions.push_back(Vector2(-0.05, 1.1));
 			} else {
+				positions.push_back(Vector2(-0.2, -2.1));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.4*W));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.6*W));
-				positions.push_back(Vector2(-0.2, -2.1));
 			}
 		} else if (formation == 8) { // blue keeper, 2 blue defenders in the way of shot and pass, yellow behind ball
 			if (blue_team) {
@@ -143,9 +143,9 @@ namespace rtt {
 				positions.push_back(Vector2(-0.2, 1.15));
 				positions.push_back(Vector2(0.2, 1.1));
 			} else {
+				positions.push_back(Vector2(-0.2, -2.1));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.4*W));
 				positions.push_back(goalCenter + Vector2(-0.1, 0.6*W));
-				positions.push_back(Vector2(-0.2, -2.1));
 			}
 		}
 
