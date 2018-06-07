@@ -49,7 +49,6 @@ bool ignoring_strategy_instructions = false;
 
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
-    ROS_INFO_NAMED(LOG_NAME, "[msgCallbackRef] refdata received!");
     //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
@@ -235,8 +234,8 @@ int main(int argc, char *argv[]) {
 
             ROS_INFO_STREAM_NAMED(LOG_NAME, "Tree finished. "
                     << "status=" << statusString
-                    << ", tree=" << currentTreeName.c_str()
-                    << ", token=" << currentToken);
+                    << ", tree=" << currentTreeName.c_str());
+//                    << ", token=" << currentToken);
 
             // Reset tree
             currentTree = nullptr;

@@ -183,10 +183,7 @@ int main(int argc, char *argv[]) {
             if (!rtt::LastRef::waitForFirstRefCommand()) {
                 return 0;
             }
-        }
-
-        /*
-        else {
+        } else {
             // Get all available trees
             namespace f = rtt::factories;
             auto& repo = f::getRepo<f::Factory<bt::BehaviorTree>>();
@@ -208,7 +205,7 @@ int main(int argc, char *argv[]) {
                 roboteam_msgs::Blackboard bb;
 
                 RTT_SEND_RQT_BT_TRACE(
-                        roboteam_msgs::BtDebugInfo::ID_STRATEGY_NODE, 
+                        roboteam_msgs::BtDebugInfo::ID_STRATEGY_NODE,
                         arguments[0],
                         roboteam_msgs::BtDebugInfo::TYPE_STRATEGY,
                         roboteam_msgs::BtStatus::STARTUP,
@@ -220,7 +217,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
         }
-        */
+
     } else {
         ROS_ERROR_NAMED("StrategyNode", "No strategy tree passed as argument. Aborting.");
         return 1;
@@ -262,11 +259,15 @@ int main(int argc, char *argv[]) {
     rtt::RobotDealer::setKeeper(0);
 
     ROS_DEBUG_NAMED("StrategyNode", "More than one robot found. Starting!");
-    
+
+    if(!strategy){
+        ROS_FATAL_NAMED("StrategyNode", "No strategy tree loaded! Terminating...");
+        exit(-1);
+    }
+
     while (ros::ok()) {
         ros::spinOnce();
 
-        //bt::Node::Status status =
         bt::Node::Status status = strategy->Update();
 
         if (status != bt::Node::Status::Running) {

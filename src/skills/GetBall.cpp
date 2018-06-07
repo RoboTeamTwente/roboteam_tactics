@@ -4,6 +4,7 @@
 #include "roboteam_tactics/skills/GetBall.h"
 #include "roboteam_tactics/conditions/IHaveBall.h"
 #include "roboteam_tactics/conditions/CanReachPoint.h"
+#include "roboteam_tactics/conditions/CanClaimBall.h"
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
@@ -23,55 +24,81 @@
 #include <boost/optional.hpp>
 
 #define RTT_CURRENT_DEBUG_TAG GetBall
+#define ROS_LOG_NAME "skills.GetBall"
 
 namespace rtt {
 
 RTT_REGISTER_SKILL(GetBall);
 
-GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard)
-        , goToPos("", private_bb) {
+
+/*	Blackboard parameters used
+ *	Int  : ROBOT_ID
+ *	Bool : dribblerOff
+ *  Bool : unclaimPos
+ *	Bool : passToBestAttacker
+ *	Dbl  : kickerVel
+ *	Bool : chipOn
+ *	Bool : useBallClaiming
+ *	Dbl  : friction
+ *	Dbl  : acc
+ *	Bool : doNotPlayBackDefender
+ *	Bool : doNotPlayBackAttacker
+ *	Dbl  : distAwayFromBall
+ *	Dbl  : minDist
+ *	Dbl  : successAngle
+ *	Dbl  : successRobotAngle
+ *	Dbl  : successDist
+ *	Bool : dontShootAtGoal
+ *	Dbl  : chooseDist
+ *	Str  : aimAt
+ *	Dbl  : aimAtBallplacement_x
+ *	Dbl  : aimAtBallplacement_y
+ *	Int  : aimAtRobot
+ *	Bool : ourTeam
+ *	Dbl  : targetAngle
+ *	Bool : aimAwayFromTarget
+ *	Int	 : ballCloseFrameCount
+ *	Dbl  : pGainPosition
+ *	Dbl  : dGainPosition
+ *	Dbl  : pGainRotation
+ *	Int  : geneva
+ */
+
+GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPos("", private_bb) {
     ballClaimedByMe = false;
     startTime = now();
     ros::param::get("robot_output_target", robot_output_target);
 }
 
-void GetBall::Initialize() {
+void GetBall::Initialize(){
     robotID = blackboard->GetInt("ROBOT_ID");
-	ROS_INFO_STREAM_NAMED("skills.GetBall", "Initialize for robot: " << robotID);
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initialize for robot: " << robotID);
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
 
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
     ballClaimedByMe = false;
     hasTerminated = false;
-    // startTime = now();
 
     dontDribble = (HasBool("dribblerOff") && GetBool("dribblerOff"));
     passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
 
+	// Reset the claimed position
     if (GetBool("unclaimPos")) {
-    // unclaim position
         ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", -0.0);
         ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", -0.0);
-        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", Unclaiming pos because doing GetBall now");
+        ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ", Unclaiming pos because doing GetBall now");
     }
 
-    
+	deviation = 0.0;
 
-    // // RANDOM ANGLE SHOOTER (set deviation to 0 to not use this)
-        // if ((GetString("aimAt")=="ourgoal" || GetString("aimAt")=="theirgoal") && GetBool("passOn")) {
-        //     deviation = 0.30*(get_rand_int(2)*2-1);
-        //     ROS_INFO_STREAM("GetBall: " << deviation);
-        // } else {
-            deviation = 0.0;
-        // }
-
-    if (GetBool("passToBestAttacker")) {
+    if (GetBool("passToBestAttacker")){
         initializeOpportunityFinder();
     }
 }
 
 void GetBall::initializeOpportunityFinder() {
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Initializing OpportunityFinder...");
     // load the relevant weights list on which our teammates' positions will be judged, and specify the 'target' (see opportunityFinder)
     opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
 
@@ -86,7 +113,6 @@ void GetBall::Terminate(bt::Node::Status s) {
         hasTerminated = true;
         ballCloseFrameCount = 0;
         choseRobotToPassTo = false;
-        ROS_INFO_STREAM_NAMED("skills.GetBall", "Terminating for robot " << robotID);
         releaseBall();
     }
 }
@@ -105,9 +131,14 @@ void GetBall::publishStopCommand() {
 }
 
 void GetBall::publishKickCommand(double kickSpeed, bool chip){
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Publishing kick command...");
+
     if (blackboard->HasDouble("kickerVel")) {
         kickSpeed = blackboard->GetDouble("kickerVel");
     }
+
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Kick speed = " << kickSpeed);
+
     choseRobotToPassTo = false;
 
     roboteam_msgs::RobotCommand command;
@@ -144,21 +175,21 @@ bool GetBall::claimBall() {
         ros::param::get("robotClaimedBall", robotClaimedBall);
 
         if (robotClaimedBall == robotID) {
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << ", I already claimed ball");
+            ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << ", I already claimed ball");
             ballClaimedByMe = true; 
             return true;
         } else if (robotClaimedBall == -1) {
-            //ros::param::set("robotClaimedBall", robotID); TODO: Remember why I turned this off again? Probably to prevent claiming the ball from the bot I want to pass to
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
+			//ros::param::set("robotClaimedBall", robotID); TODO: Remember why I turned this off again? Probably to prevent claiming the ball from the bot I want to pass to
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " claimed ball");
             ballClaimedByMe = true;
             return true; // if no-one claimed the ball -> I claim the ball
         } else {
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " cant claim the ball because " << robotClaimedBall << " already did");
+            ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " cant claim the ball because " << robotClaimedBall << " already did");
             return false;
         }
     } else { // if param had not been initialized, set it anyways
         ros::param::set("robotClaimedBall", robotID);
-        ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " claimed ball");
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " claimed ball");
         ballClaimedByMe = true;
         return true;
     }
@@ -168,7 +199,7 @@ void GetBall::releaseBall() {
     if (GetBool("useBallClaiming") && claimBall()) {
     // only release ball if I actually claimed it
         ros::param::set("robotClaimedBall", -1);
-        ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball and reset passToRobot");
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " released ball and reset passToRobot");
         // also reset passToRobot rosparam
         ros::param::set("passToRobot", -1);
     }
@@ -202,14 +233,14 @@ void GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
             // NOTE: this can be dangerous, so now only happens if the receiving robot actually communicates back.
             // If the robot communicates, I can assume it will reset its own ball claimage if he failed to receive it.
             ros::param::set("robotClaimedBall", id);
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " passed claim on the ball to robot " << id);
+            ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " passed claim on the ball to robot " << id);
         } else {
             ros::param::set("robotClaimedBall", -1);
-            ROS_WARN_STREAM_NAMED("skills.GetBall", robotID << " released ball, because teammate was not ready to receive" << id);
+            ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, robotID << " released ball, because teammate was not ready to receive" << id);
         }
     }
     ballClaimedByMe = false;
-    ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << " publishing kick command for passing towards robot " << bestID);
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " publishing kick command for passing towards robot " << bestID);
     publishKickCommand(passSpeed, chip);
     return;
 }
@@ -324,7 +355,7 @@ double GetBall::computeArrivalTime(Vector2 location, int id) {
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN_STREAM_NAMED("skills.GetBall", "Teammate with this ID not found, ID: " << id);
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Teammate with this ID not found, ID: " << id);
         return 0.0;
     }
     Vector2 botPos(robot.pos);
@@ -333,7 +364,6 @@ double GetBall::computeArrivalTime(Vector2 location, int id) {
     return computeArrivalTime(location, botPos, botVel);
 }
 
-
 PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, roboteam_msgs::World world, double passThreshold) {
     // initialize my pass option
     PassOption passOption;
@@ -341,7 +371,7 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
 
     // If I couldn't find a suitable player before, try again one last time
     if (passID == -1) {
-        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldn't find a suitable player before, try again one last time");
+        ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldn't find a suitable player before, try again one last time");
         BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
         if (bestTeammate.id != -1) {
             passID = bestTeammate.id;
@@ -353,13 +383,13 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
     // ... -> go through some alternatives. If theres no alternative, chip at goal.
     if (passID == -1 || opportunityFinder.calcDistOppToBallTraj(passPos, world) < passThreshold) {
     // pass line is crossed by opponent -> chip possible?
-        ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << passID);
+        ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << passID);
         double maxChipDist = 2.0;
         double minChipDist = 0.5;
         Vector2 passLine = passPos - ballPos;
         if (passID == -1 || passLine.length() < minChipDist || opportunityFinder.calcDistOppToBallTraj(passPos, world, maxChipDist) < passThreshold) {
         // chip not possible -> softpass to someone else?
-            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt do planned chip, checking for soft pass to another bot");
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt do planned chip, checking for soft pass to another bot");
             // First specify what leads to a soft pass being possible
             opportunityFinder.setMin("distToOpp", 1.0); // if opponent will be closer than this value, soft pass wont be viable
             opportunityFinder.setMax("distToOpp", 2.0); // make sure max value is still higher than newly chosen min value
@@ -368,29 +398,29 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
             initializeOpportunityFinder(); // reset parameters of our opportunity finder for future usage.
             if (bestTeammate.id == -1) {
             // found no (claimed) pos to which a soft pass would be smart -> consider direct pass
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a soft pass candidate, checking for direct pass to a bot");
+                ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt find a soft pass candidate, checking for direct pass to a bot");
                 BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(true, true, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
                 if (bestTeammate.id == -1) {
                 // found no good direct pass option -> direct chip to anyone? WIP. for now: chip towards goal. Better is probably chip towards edge defense area
-                    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " couldnt find a direct pass candidate, so chipping towards goal");
+                    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt find a direct pass candidate, so chipping towards goal");
                     passOption.chip = true;
                     passID = -1; // this leads to shooting at goal
                 } else {
                 // direct pass is possible
                     passID = bestTeammate.id;
                     passPos = bestTeammate.pos;
-                    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a direct pass option and chose robot " << passID);
+                    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " found a direct pass option and chose robot " << passID);
                 }
             } else {
             // soft pass is possible
                 passID = bestTeammate.id;
                 passPos = bestTeammate.pos;
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " found a soft pass option and chose robot " << passID);
+                ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " found a soft pass option and chose robot " << passID);
             }
         } else {
         // chip is possible -> keep this bestpos and chip!
             passOption.chip = true;
-            ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " will chip towards robot " << passID);
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " will chip towards robot " << passID);
         }
     }
     passOption.id = passID;
@@ -399,8 +429,9 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
 }
 
 bt::Node::Status GetBall::Update (){
+
     if (hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
-        Initialize();
+		Initialize();
     }
 
     if (blackboard->GetBool("useBallClaiming")) {
@@ -427,7 +458,7 @@ bt::Node::Status GetBall::Update (){
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN_STREAM_NAMED("skills.GetBall", "Robot with this ID not found, ID: " << robotID);
+        ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Robot with this ID not found, ID: " << robotID);
         return Status::Failure;
     }
 
@@ -495,7 +526,8 @@ bt::Node::Status GetBall::Update (){
             bestPos = bestTeammate.pos;
             choseRobotToPassTo = true;
             ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-            ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": Setting passToRobot to " << bestID);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff << ", bestPos: " << bestPos);
         } else if (L_posDiff >= chooseDist) {
             private_bb->SetBool("avoidBall", true);
         }
@@ -508,7 +540,7 @@ bt::Node::Status GetBall::Update (){
 	double targetAngle;
     // If we chose to shoot at goal
     if (shootAtGoal) {
-        // targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false); 
+        // targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
         targetAngle = cleanAngle(bestViewOfGoal.first + openGoalAngle/2); // center of the largest open goal angle
     }
     // If a robot was found to pass to
@@ -612,7 +644,7 @@ bt::Node::Status GetBall::Update (){
                 }
                 bestPos = passOption.pos;
                 ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball (possibly once more)
-                ROS_INFO_STREAM_NAMED("skills.GetBall", "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
+                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ", passToRobot rosparam set to: " << bestID);
                 if (bestID == -1) {
                     shootAtGoal = true;
                 }
@@ -620,7 +652,7 @@ bt::Node::Status GetBall::Update (){
 
             if (!GetBool("passOn")) {
             // if not shooting, im successful now
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " has ball so succeeded");
+                ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " has ball so succeeded");
                 publishStopCommand();
                 return Status::Success;
             } 
@@ -630,10 +662,10 @@ bt::Node::Status GetBall::Update (){
                 return Status::Success;
             } else {
             // Shooting hard
-                ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " shooting");
+                ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " shooting");
                 if (GetBool("passToBestAttacker")) {
                     ros::param::set("passToRobot", -1); // communicate that chosen robot will receive the ball (possibly once more)
-                    ROS_DEBUG_STREAM_NAMED("skills.GetBall", "robot " << robotID << " reset passToRobot rosparam to -1");
+                    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " reset passToRobot rosparam to -1");
                 }
                 publishKickCommand(6.5, false);
                 return Status::Success;
@@ -677,7 +709,7 @@ bt::Node::Status GetBall::Update (){
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
     roboteam_msgs::RobotCommand command;
     command.id = robotID;
-    
+
     if (commandPtr) {
         command = *commandPtr;
     } else {

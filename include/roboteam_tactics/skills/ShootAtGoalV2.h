@@ -30,6 +30,7 @@ class ShootAtGoalV2 : public Skill {
 public:
     ShootAtGoalV2(std::string name = "", bt::Blackboard::Ptr blackboard = nullptr);
     Status Update() override;
+	void Initialize() override;
     
 private:
     static constexpr double ACCEPTABLE_DEVIATION = .02; // rad

@@ -16,6 +16,7 @@
 #include "roboteam_tactics/utils/ScopedBB.h"
 
 #define RTT_CURRENT_DEBUG_TAG Bob_ChipoffAtGoalPlay
+#define ROS_LOG_NAME "plays.Bob_COAGPlay"
 
 namespace rtt {
 
@@ -28,12 +29,10 @@ Bob_ChipoffAtGoalPlay::Bob_ChipoffAtGoalPlay(std::string name, bt::Blackboard::P
 void Bob_ChipoffAtGoalPlay::Initialize() {
     failImmediately = false;
 
-    std::cout << "ChipoffAtGoalPlay!\n";
-
     std::vector<int> robots = getAvailableRobots();
 
     if (robots.size() < 1) {
-        RTT_DEBUGLN("Less than one robot detected; cannot use play!");
+        ROS_DEBUG_NAMED(ROS_LOG_NAME, "Less than one robot detected; cannot use play!");
         failImmediately = true;
         return;
     }
@@ -71,6 +70,8 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         // Create message
         taker.tree = "rtt_jim/KickOffTaker";
         taker.blackboard = bb.toMsg();
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, bb.toTestX());
+
 
         // Add random token and save it for later
         taker.token = unique_id::toMsg(unique_id::fromRandom());
@@ -86,10 +87,10 @@ bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
     auto feedbackIt = feedbacks.find(unique_id::fromMsg(taker.token));
     if (feedbackIt != feedbacks.end()) {
         if (feedbackIt->second == bt::Node::Status::Success) {
-            ROS_INFO("Bob_ChipoffAtGoalPlay return success");
+            ROS_INFO_NAMED(ROS_LOG_NAME, "Bob_ChipoffAtGoalPlay return success");
         }
         if (feedbackIt->second == bt::Node::Status::Failure) {
-            ROS_INFO("Bob_ChipoffAtGoalPlay return failure");
+            ROS_INFO_NAMED(ROS_LOG_NAME, "Bob_ChipoffAtGoalPlay return failure");
         }
         return feedbackIt->second;
     }

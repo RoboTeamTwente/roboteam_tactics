@@ -47,7 +47,7 @@ namespace rtt {
 		}
 
 		// ============================
-		// Initialize the normal Keeper
+		///Initialize the normal Keeper
 		// ============================
 		{
 			claim_robot(keeperID);
@@ -78,7 +78,7 @@ namespace rtt {
 		}
 
 		// =====================================
-		// Initialize positions / ball defenders
+		///Initialize positions / ball defenders
 		// =====================================
 		// Calculate which robot should take which position
 		std::vector<int> robotsToPositions = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, positions, world);
@@ -99,7 +99,7 @@ namespace rtt {
 
 
 		// ====================================
-		// Initialize robot defenders
+		///Initialize robot defenders
 		// ====================================
 		if(0 < robotsToDefend.size()) {
 			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
@@ -138,7 +138,7 @@ namespace rtt {
 
 
 		// ====================================
-		// Initialize intercept defenders
+		///Initialize intercept defenders
 		// ====================================
 		if(0 < robots.size()) {
 			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
@@ -214,8 +214,9 @@ namespace rtt {
 			.setDouble("yGoal"    , position.y)
 			.setBool("avoidRobots", true)
 			.setBool("avoidBall"  , true)
-			.setBool("enterDefenseAreas"  , true) //TODO: CHANGED TO TRUE FOR PRESENTATION
-			.setDouble("maxSpeed" , 3.0) //TODO: HIGHER FOR PRESENTATION
+			.setBool("stayAwayFromBall"  , true)
+			.setBool("avoidDefenseAreas"  , true)
+			.setDouble("maxSpeed" , 1.3)
 		;
 
 		/* Create message */
@@ -258,6 +259,7 @@ namespace rtt {
 			.setString("stayOnSide", "ourSide")
 			.setBool("avoidDefenseAreas"  , true)
 			.setBool("stayAwayFromBall", true)
+			.setBool("avoidBall"  , true)
 			.setBool("dontDriveToBall", true)
 			.setDouble("A_maxSpeed", 1.3)
 			.setString("targetFromType", "position")
@@ -308,6 +310,7 @@ namespace rtt {
 		// Set blackboard variables
 		ScopedBB(bb, "SimpleDefender_A")
 			.setBool("stayAwayFromBall", true)
+			.setBool("avoidBall", true)
 			.setBool("dontDriveToBall", true)
 			.setDouble("A_maxSpeed", 1.3)
 			.setString("targetToType", "object")

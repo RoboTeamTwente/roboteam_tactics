@@ -151,7 +151,7 @@ namespace bt {
         ss << std::endl;
 
         if(bools.size() > 0) {
-            ss << "  BOOLS";
+            ss << "  BOOLS  ";
             for (auto i : bools) {
                 ss << " | " << i.first << " = " << i.second;
             }
@@ -159,7 +159,7 @@ namespace bt {
         }
 
         if(ints.size() > 0) {
-            ss << "  INTS";
+            ss << "  INTS   ";
             for (auto i : ints) {
                 ss << " | " << i.first << " = " << i.second;
             }
@@ -167,7 +167,7 @@ namespace bt {
         }
 
         if(floats.size() > 0) {
-            ss << "  FLOATS";
+            ss << "  FLOATS ";
             for (auto i : floats) {
                 ss << " | " << i.first << " = " << i.second;
             }

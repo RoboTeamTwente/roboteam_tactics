@@ -24,6 +24,7 @@
 #include "roboteam_utils/Section.h"
 
 #define RTT_CURRENT_DEBUG_TAG GoToPos
+#define ROS_LOG_NAME "skills.GoToPos"
 
 namespace rtt {
 
@@ -33,9 +34,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
 
         {
-            ROS_DEBUG_STREAM_NAMED("GoToPos", "New GoToPos started for robot " << blackboard->GetInt("ROBOT_ID"));
-            ROS_DEBUG_STREAM_NAMED("GoToPos", "Blackboard : " << blackboard->toString());
-
             succeeded = false;
             failure = false;
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
@@ -77,7 +75,6 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         }
 
 void GoToPos::Initialize() {
-    //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
     if (GetBool("driveBackward")) {
         ROBOT_ID = blackboard->GetInt("ROBOT_ID");
         // Get the latest world state
@@ -513,7 +510,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (findBot) {
         me = *findBot;
     } else {
-        ROS_WARN_STREAM("GoToPos: robot with this ID not found, ID: " << ROBOT_ID);
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot with this ID not found, ID: " << ROBOT_ID);
         failure = true;
         succeeded = false;
         return boost::none;
@@ -548,20 +545,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         successDist = 0.05;
     }
 
-    Vector2 posError = targetPos - myPos;;
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.01) {
-        successCounter++;
-        if (successCounter >= 3) {
-            //sendStopCommand(ROBOT_ID);/////////////////////////////////////////////////////////////////////////////////
-            succeeded = true;
-            failure = false;
-            return boost::none;
-        }
-    } else {
-        successCounter = 0;
-    }
-
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
@@ -578,6 +561,21 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             targetPos = ballPos + diffVecNorm.scale(0.7);
         }
     }
+
+    Vector2 posError = targetPos - myPos;
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < successDist && fabs(angleError) < 0.01) {
+        successCounter++;
+        if (successCounter >= 3) {
+
+            succeeded = true;
+            failure = false;
+            return boost::none;
+        }
+    } else {
+        successCounter = 0;
+    }
+
     // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
     static time_point prevTime = now();
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
@@ -589,7 +587,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         targetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
     }
     prevTarget = targetPos;
-    posError = targetPos - myPos;
+
 
     // Turn towards goal when error is too large
     static double posErrorRotationThreshold = 0.30;
@@ -603,6 +601,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         posErrorRotationThreshold = 0.30;
     }
+
+
 
     // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
     // static time_point prevTime = now();
@@ -714,6 +714,7 @@ bt::Node::Status GoToPos::Update() {
         return Status::Running;
     } else {
         sendStopCommand(ROBOT_ID);
+
         if (succeeded) {
             return Status::Success;
         } else if (failure) {

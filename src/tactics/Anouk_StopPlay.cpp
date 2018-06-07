@@ -54,9 +54,7 @@ namespace rtt {
 
 		// Calculate the positions of the ball defenders
 		std::vector<Vector2> goalDefenderCoords = RobotPatternGenerator::Line(numGoalDefenders, 2, goalPos, 0, 1.2);
-
         std::vector<Vector2> ballDefenderCoords = RobotPatternGenerator::Line(numBallDefenders, 4, goalPos, 0, 3.8);
-
 
         // Put all positions into one array
         std::vector<Vector2> positions;
@@ -68,8 +66,6 @@ namespace rtt {
 		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
 		Emiel_Prepare::prepare(*refState, positions);
 
-		// Initialize the robots that are left
-
 
 	}
 
@@ -77,7 +73,7 @@ namespace rtt {
 
         // Check if this tree is used for the correct RefState, DIRECT_FREE_THEM or INDIRECT_FREE_THEM
         boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
-        if (refState != RefState::DIRECT_FREE_THEM && refState != RefState::INDIRECT_FREE_THEM) {
+        if (refState != RefState::STOP) {
             ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for STOP");
         }
 
@@ -85,16 +81,7 @@ namespace rtt {
 
     }
 
-	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// WATCH OUT! Update can return SUCCESS or FALSE, ONLY when the ball has moved!
-	// Returning SUCCESS or FALSE triggers RefState::NORMAL_PLAY, starting the match
-	///!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     bt::Node::Status Anouk_StopPlay::Update() {
-
-		Anouk_StopPlay::init();
-
-		if(Vector2(LastWorld::get().ball.vel).length() > 0.5)
-			return Status::Success;
 
 		return Status::Running;
 

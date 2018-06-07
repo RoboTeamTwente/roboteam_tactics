@@ -10,6 +10,7 @@
 #include "roboteam_utils/LastWorld.h"
 
 #include "roboteam_tactics/utils/RobotPatternGenerator.h"
+#include "roboteam_tactics/utils/RobotsToDefendFinder.h"
 
 #include <ros/ros.h>
 
@@ -22,60 +23,60 @@ namespace rtt {
     Anouk_PrepareDirectThem::Anouk_PrepareDirectThem(std::string name, bt::Blackboard::Ptr blackboard) : Emiel_Prepare(name, blackboard) {}
 
 
-    std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(double minDangerScore){
-
-        // Get the last world
-        roboteam_msgs::World world = LastWorld::get();
-
-        // Get the position of the ball
-        Vector2 ballPos(world.ball.pos);
-
-
-        // === Get their robot that is the closest to the ball === //
-        int oppKicker = -1; // Holds the kicker ID
-        double oppClosestDistance = 9999; // Holds the closest distance
-
-        for(size_t i = 0; i < world.them.size(); i++){
-            // Get the distance between the ball and the current opponent
-            double distanceToBall = (Vector2(world.them.at(i).pos) - ballPos).length();
-            // If this distance is closer than previous distances, store it
-            if(distanceToBall < oppClosestDistance ){
-                oppClosestDistance = distanceToBall;
-                oppKicker = i;
-            }
-        }
-
-        // === Find the most dangerous opponents, excluding the kicker ===
-        // Vector to hold the new robots to defend
-        std::vector<int> newRobotsToDefend;
-        // For each opponent in the world
-        for (size_t i = 0; i < world.dangerList.size(); i++) {
-            // Get the opponent
-            roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-            // If the robot is the kicker, ignore
-            if(opp.id == oppKicker)
-                continue;
-            // Get danger score of the robot
-            float dangerScore = world.dangerScores.at(i);
-
-            // If the danger score of the robot is too low, ignore it
-            if(dangerScore < minDangerScore)
-                continue;
-
-            // The robot should be defended
-            newRobotsToDefend.push_back(opp.id);
-        }
-
-        return newRobotsToDefend;
-    }
+//    std::vector<int> Anouk_PrepareDirectThem::GetRobotsToDefend(double minDangerScore){
+//
+//        // Get the last world
+//        roboteam_msgs::World world = LastWorld::get();
+//
+//        // Get the position of the ball
+//        Vector2 ballPos(world.ball.pos);
+//
+//
+//        // === Get their robot that is the closest to the ball === //
+//        int oppKicker = -1; // Holds the kicker ID
+//        double oppClosestDistance = 9999; // Holds the closest distance
+//
+//        for(size_t i = 0; i < world.them.size(); i++){
+//            // Get the distance between the ball and the current opponent
+//            double distanceToBall = (Vector2(world.them.at(i).pos) - ballPos).length();
+//            // If this distance is closer than previous distances, store it
+//            if(distanceToBall < oppClosestDistance ){
+//                oppClosestDistance = distanceToBall;
+//                oppKicker = i;
+//            }
+//        }
+//
+//        // === Find the most dangerous opponents, excluding the kicker ===
+//        // Vector to hold the new robots to defend
+//        std::vector<int> newRobotsToDefend;
+//        // For each opponent in the world
+//        for (size_t i = 0; i < world.dangerList.size(); i++) {
+//            // Get the opponent
+//            roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
+//            // If the robot is the kicker, ignore
+//            if(opp.id == oppKicker)
+//                continue;
+//            // Get danger score of the robot
+//            float dangerScore = world.dangerScores.at(i);
+//
+//            // If the danger score of the robot is too low, ignore it
+//            if(dangerScore < minDangerScore)
+//                continue;
+//
+//            // The robot should be defended
+//            newRobotsToDefend.push_back(opp.id);
+//        }
+//
+//        return newRobotsToDefend;
+//    }
 
 	void Anouk_PrepareDirectThem::init(){
 
 		/// === Check if reinitialization is needed === ///
 		// Get the new robots that should be intercepted
-		std::vector<int> robotsToInterceptNew = GetRobotsToDefend(0.0);
+		std::vector<int> robotsToInterceptNew = RobotsToDefendFinder::GetRobotsToDefend(0.5, true);
 		// Get the new robots that should be defended
-		std::vector<int> robotsToDefendNew = GetRobotsToDefend(3.0);
+		std::vector<int> robotsToDefendNew = RobotsToDefendFinder::GetRobotsToDefend(3.0, true);
 
 		bool shouldReinitialize = false;
 		// Check if the size of the vectors have changed
@@ -108,10 +109,14 @@ namespace rtt {
 		robotsToDefend = robotsToDefendNew;
 		robotsToIntercept = robotsToInterceptNew;
 
-		// Print the robots that should be defended
+		// Print the robots that should be defended and intercepted
 		std::stringstream vectorStr;
-		std::copy(robotsToDefend.begin(), robotsToDefend.end(), std::ostream_iterator<int>(vectorStr, " "));
-		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend : " << vectorStr.str().c_str());
+		std::copy(robotsToDefend.begin(), robotsToDefend.end(), std::ostream_iterator<int>(vectorStr, ", "));
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to defend    : [" << vectorStr.str().c_str() << "]");
+		vectorStr.str("");  // https://stackoverflow.com/questions/20731/how-do-you-clear-a-stringstream-variable
+		vectorStr.clear();	// https://stackoverflow.com/questions/2848087/how-to-clear-stringstream
+		std::copy(robotsToIntercept.begin(), robotsToIntercept.end(), std::ostream_iterator<int>(vectorStr, ", "));
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robots to intercept : [" << vectorStr.str().c_str() << "]");
 
 		// Release all previously claimed robots
 		release_robots(get_claimed_robots());
@@ -128,8 +133,12 @@ namespace rtt {
 		robotsLeft -= numRobotDefenders;
 
 		// Number of ball interceptors
-		int numBallInterceptors = robotsLeft;
+		int numBallInterceptors = std::min(robotsLeft, (int)robotsToIntercept.size());
+		robotsLeft -= numBallInterceptors;
 
+		// Add the remaining robots to ball defenders
+		numBallDefenders += robotsLeft;
+		robotsLeft = 0;
 
 		// Get the last world
 		roboteam_msgs::World world = LastWorld::get();
@@ -141,7 +150,7 @@ namespace rtt {
 		double angleGoalToBall = -(ballPos - goalPos).angle();
 
 		// Calculate the positions of the ball defenders
-		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20, goalPos, angleGoalToBall, 1.8);
+		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numBallDefenders, 0.20 * (numBallDefenders - 1), goalPos, angleGoalToBall, 1.8);
 
 		// Place the ball defenders and robot defender, also claims the robots
 		boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
@@ -153,12 +162,16 @@ namespace rtt {
 	}
 
     void Anouk_PrepareDirectThem::Initialize() {
+		ROS_INFO_NAMED(ROS_LOG_NAME, "Initializing Anouk_PrepareDirectThem");
 
         // Check if this tree is used for the correct RefState, DIRECT_FREE_THEM or INDIRECT_FREE_THEM
         boost::optional<rtt::RefState> refState = LastRef::getCurrentRefCommand();
         if (refState != RefState::DIRECT_FREE_THEM && refState != RefState::INDIRECT_FREE_THEM) {
             ROS_WARN_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for DIRECT_FREE_THEM or INDIRECT_FREE_THEM");
         }
+		// Clear these vectors, to make sure that the role directives are actually initialized
+		robotsToDefend.clear();
+		robotsToIntercept.clear();
 
 		Anouk_PrepareDirectThem::init();
 

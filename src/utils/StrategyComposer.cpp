@@ -53,14 +53,14 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         { RefState::DIRECT_FREE_THEM      , "rtt_anouk/PrepareDirectThem"s         } ,
 
         // rtt_ewoud/FreeKickTakeStrategy
-        { RefState::INDIRECT_FREE_US      , "rtt_jim/IndirectStrat"s         } ,
+        { RefState::INDIRECT_FREE_US      , "rtt_emiel/IndirectUsStrategy"s         } ,
 
         // FreeKickDefenceStrategy
         { RefState::INDIRECT_FREE_THEM    , "rtt_anouk/PrepareDirectThem"s       } ,
         { RefState::TIMEOUT_US            , "rtt_jim/TimeOutStrat"s              } ,
         { RefState::TIMEOUT_THEM          , "rtt_jim/TimeOutStrat"s           } ,
-        { RefState::GOAL_US               , "rtt_jim/DefensivePrepareStrat"s           } ,
-        { RefState::GOAL_THEM             , "rtt_jim/DefensivePrepareStrat"s           } ,
+        { RefState::GOAL_US               , "rtt_anouk/StopStrat"s           } ,
+        { RefState::GOAL_THEM             , "rtt_anouk/StopStrat"s           } ,
         { RefState::BALL_PLACEMENT_US     , "rtt_anouk/BallPlacement_Strat"s   } ,
         { RefState::BALL_PLACEMENT_THEM   , "rtt_anouk/BallPlacementThemStrat"s           } ,
 
@@ -70,6 +70,7 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
+//        { RefState::DO_KICKOFF            , "rtt_jim/NormalPlay"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::DEFEND_PENALTY        , "rtt_emiel/PreparePenaltyThemStrategy"s  } ,
         { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,

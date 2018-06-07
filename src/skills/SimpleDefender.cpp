@@ -53,88 +53,97 @@ Vector2 SimpleDefender::computeDefensePoint(Vector2 defendPos, bool ourSide, dou
 }
 
 Vector2 SimpleDefender::computeDefensePointRatio(Vector2 targetFrom, Vector2 targetTo, double ratio){
-    // Get the position of our goal
-    Vector2 goalPos(LastWorld::get_our_goal_center());
-    // Get vector between defendPos and goalPos
+
+    // Get vector between targetFrom and targetTo
     Vector2 targetPos = targetTo - targetFrom;
     // Scale vector to ratio
     targetPos = targetPos.scale(ratio);
-    // Move vector to goalPos
+    // Move vector to targetFrom
     targetPos = targetPos + targetFrom;
 
     return targetPos;
 }
 
+Vector2 SimpleDefender::computeDefensePointAbsolute(Vector2 targetFrom, Vector2 targetTo, double distance){
+
+    // Get vector between targetFrom and targetTo
+    Vector2 targetPos = targetTo - targetFrom;
+    // Stretch vector to correct length
+    targetPos.stretchToLength(distance);
+    // Move vector to targetFrom
+    targetPos = targetPos + targetFrom;
+
+    return targetPos;
+}
 
 Vector2 SimpleDefender::getTargetFromPosition(){
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition");
-    // for targetFrom, pak de Vector2 van de target
-    std::string type = "position"; // default to type position
-    if(HasString("targetFromType")){
-        // Get type
-        type = GetString("targetFromType");
-    }
-    if(type == "position"){
-        double x = GetDouble("targetFromTypeX");
-        double y = GetDouble("targetFromTypeY");
-        ROS_INFO_STREAM_NAMED("SimpleDefender", " [" << x << " ," << y << "]");
+	// for targetFrom, get its Vector2
+	if(HasString("targetFromType")){
+		// Get type
+		std::string type = GetString("targetFromType");
+		if(type == "position"){
+			double x = GetDouble("targetFromTypeX");
+			double y = GetDouble("targetFromTypeY");
+			return Vector2(x, y);
+		}
 
-        return Vector2(x, y);
-    }
-    if(type == "object"){
-        std::string obj = GetString("targetFromObj");
-        if(obj == "them" || obj == "us"){
-            int robotID = GetInt("targetFromRobotId");
-            if(obj == "them"){
-                return (Vector2)LastWorld::get().them.at(robotID).pos;
-            }
-            if(obj == "us"){
-                return (Vector2)LastWorld::get().us.at(robotID).pos;
-            }
-        }
-        if(obj == "ball"){
-            return (Vector2)LastWorld::get().ball.pos;
-        }
-    }
+		if(type == "object"){
+			std::string obj = GetString("targetFromObj");
+			if(obj == "them" || obj == "us"){
+				int robotID = GetInt("targetFromRobotId");
+				if(obj == "them"){
+					return (Vector2)LastWorld::get().them.at(robotID).pos;
+				}
+				if(obj == "us"){
+					return (Vector2)LastWorld::get().us.at(robotID).pos;
+				}
+			}
+			if(obj == "ball"){
+				return (Vector2)LastWorld::get().ball.pos;
+			}
+		}
+	}
 
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetFromPosition: should not be here, returning zero vector");
+    ROS_WARN_STREAM_NAMED("SimpleDefender", "getTargetFromPosition: should not be here, returning zero vector");
     return Vector2(0.0,0.0);
 }
 
 Vector2 SimpleDefender::getTargetToPosition(){
-    // for targetFrom, pak de Vector2 van de target
-    std::string type = "position"; // default to type position
-    if(HasString("targetToType")){
-        // Get type
-        type = GetString("targetToType");
-    }
+	// for targetTo, get its Vector2
+	if(HasString("targetToType")){
+		// Get type
+		std::string type = GetString("targetToType");
+		if(type == "position"){
+			double x = GetDouble("targetToTypeX");
+			double y = GetDouble("targetToTypeY");
+			return Vector2(x, y);
+		}
 
-    if(type == "position"){
-        double x = GetDouble("targetToTypeX");
-        double y = GetDouble("targetToTypeY");
-        return Vector2(x, y);
-    }
+		if(type == "object"){
+			std::string obj = GetString("targetToObj");
+			if(obj == "them" || obj == "us"){
+				int robotID = GetInt("targetToRobotId");
+				if(obj == "them"){
+					return (Vector2)LastWorld::get().them.at(robotID).pos;
+				}
+				if(obj == "us"){
+					return (Vector2)LastWorld::get().us.at(robotID).pos;
+				}
+			}
+			if(obj == "ball"){
+				return (Vector2)LastWorld::get().ball.pos;
+			}
+		}
+	}
 
-    if(type == "object"){
-        std::string obj = GetString("targetToObj");
-        if(obj == "them" || obj == "us"){
-            int robotID = GetInt("targetToRobotId");
-            if(obj == "them"){
-                return (Vector2)LastWorld::get().them.at(robotID).pos;
-            }
-            if(obj == "us"){
-                return (Vector2)LastWorld::get().us.at(robotID).pos;
-            }
-        }
-        if(obj == "ball"){
-            return (Vector2)LastWorld::get().ball.pos;
-        }
-    }
-
-    ROS_INFO_STREAM_NAMED("SimpleDefender", "getTargetToPosition: should not be here, returning zero vector");
+    ROS_WARN_STREAM_NAMED("SimpleDefender", "getTargetToPosition: should not be here, returning zero vector");
     return Vector2(0.0,0.0);
 }
 
+void SimpleDefender::Initialize() {
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing SimpleDefender for robot " << blackboard->GetInt("ROBOT_ID"));
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
+}
 
     bt::Node::Status SimpleDefender::Update() {
 
@@ -189,16 +198,21 @@ Vector2 SimpleDefender::getTargetToPosition(){
 
     double angleOffset = GetDouble("angleOffset");
     Vector2 targetPos;
+
     if(HasDouble("distanceFromGoalRatio")) {
         Vector2 targetFromPosition = getTargetFromPosition();
         Vector2 targetToPosition = getTargetToPosition();
         targetPos = computeDefensePointRatio(targetFromPosition, targetToPosition, distanceFromGoalRatio);
+    }else
+    if(HasDouble("distanceFromGoalAbsolute")){
+        Vector2 targetFromPosition = getTargetFromPosition();
+        Vector2 targetToPosition = getTargetToPosition();
+        targetPos = computeDefensePointAbsolute(targetFromPosition, targetToPosition, distanceFromGoalRatio);
     }else{
         targetPos = computeDefensePoint(defendPos, ourSide, distanceFromGoal, angleOffset);
     }
 
-//    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "targetPos: " << targetPos);
-
+    // put targetPos into GoToPos
     private_bb->SetInt("ROBOT_ID", robotID);
     private_bb->SetInt("KEEPER_ID", GetInt("KEEPER_ID"));
     private_bb->SetDouble("receiveBallAtX", targetPos.x);
