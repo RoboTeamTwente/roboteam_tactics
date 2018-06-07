@@ -92,13 +92,9 @@ private:
     double marginDeviation;
 
     GoToPos goToPos;
-    GetBall getBall;
     Draw drawer;
-    //Kick kick;
-    //IsRobotClosestToBall isRobotClosestToBall;
     bool startKicking;
     bool ballIsComing;
-    //bool readyHasBeenSet;
     bool hasTerminated;
 
     time_point startTime;
@@ -106,10 +102,6 @@ private:
     OpportunityFinder opportunityFinder;
     time_point prevComputedPoint;
     Vector2 receiveBallAtPos;
-
-    bt::Blackboard::Ptr getBallbb = std::make_shared<bt::Blackboard>();
-
-    //bool computedTargetPos;
     
 };
 

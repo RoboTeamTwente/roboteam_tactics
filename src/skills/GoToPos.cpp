@@ -57,9 +57,9 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 grsim = false;
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.0;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
-                avoidRobotsGain = 2.0;
-                cushionGain = 0.5;
-                maxDistToAntenna = 0.2; // no force is exerted when distToAntenna is larger than maxDistToAntenna
+                avoidRobotsGain = 1.0;
+                cushionGain = 2.0;
+                maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             }
 
             //PROCESS BLACKBOARD
@@ -134,15 +134,15 @@ Vector2 GoToPos::getForceVectorFromRobot(Vector2 myPos, Vector2 otherRobotPos, V
             if (distToAntenna > 0.10) {
                 scaleDown = scaleDown*(1-(distToAntenna-0.10)/(maxDistToAntenna-0.10));
             }
-            if (scaleDown > 0.7) { // prevent lockdown of robot by not allowing complete subtraction
-                scaleDown = 0.7;
-            }
+            scaleDown = fmin(0.8, scaleDown);
             force = force - dirForce.scale(scaleDown);
         }
 
     } else {
         force = Vector2(0,0);
     }
+
+
     return force;
 }
 
@@ -153,7 +153,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
     Vector2 posError = targetPos - myPos;
     // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
     double minAntenna = 1.2; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
-    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.2);
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.8);
     // The antenna will not grow beyond its minimum value when moving backwards
     if (myVel.dot(antenna)<0 ){
         antenna = posError.stretchToLength(minAntenna);
@@ -173,7 +173,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
         if (currentRobot.id != ROBOT_ID) {
             Vector2 otherRobotPos(currentRobot.pos);
             Vector2 otherRobotVel(currentRobot.vel);
-            double distToRobot = (otherRobotPos - myPos).length();
+            Vector2 relativePos = otherRobotPos - myPos;
+            double distToRobot = relativePos.length();
 
             Vector2 relativeVel = myVel - otherRobotVel;
             Vector2 relativeAntenna = antenna;
@@ -182,7 +183,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
                 relativeAntenna = antenna.rotate(rotation);
             }
 
-            if (distToRobot <= antenna.length() && relativeAntenna.dot(antenna) > 0) {
+            if (distToRobot <= antenna.length() && fabs(cleanAngle(relativePos.angle() - relativeAntenna.angle())) < 0.35*M_PI && relativeAntenna.dot(antenna) > 0) {
                 // Compute avoidance force and add to total
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna, sumOfForces);
                 sumOfForces = sumOfForces + forceVector;
@@ -191,7 +192,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
                 Vector2 cushionForce = crashVel.scale(cushionGain * (1-distToRobot/antenna.length()) );
                 //I will not respond to a negative crashVel or a crashVel not (or barely) caused by me
-                if (crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(otherRobotPos - myPos) < 0.1) {
+                if (crashVel.dot(relativePos) > 0 || myVel.dot(relativePos) < 0.1) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfForces = sumOfForces + cushionForce; // We add the cushion force to the total
@@ -206,7 +207,8 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
     for (size_t i = 0; i < world.them.size(); i++) {
             Vector2 otherRobotPos(world.them.at(i).pos);
             Vector2 otherRobotVel(world.them.at(i).vel);
-            double distToRobot = (otherRobotPos - myPos).length();
+            Vector2 relativePos = otherRobotPos - myPos;
+            double distToRobot = relativePos.length();
 
             Vector2 relativeVel = myVel - otherRobotVel;
             Vector2 relativeAntenna = antenna;
@@ -214,7 +216,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
                 relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
             }
 
-            if (distToRobot <= antenna.length() && relativeAntenna.dot(antenna) > 0) {
+            if (distToRobot <= antenna.length() && fabs(cleanAngle(relativePos.angle() - relativeAntenna.angle())) < 0.35*M_PI && relativeAntenna.dot(antenna) > 0) {
                 // Compute avoidance force and add to total
                 Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna, sumOfForces);
                 sumOfForces = sumOfForces + forceVector;
@@ -223,7 +225,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
                 Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
                 Vector2 cushionForce = crashVel.scale(cushionGain * (1-distToRobot/antenna.length()) );
                 //I will not respond to a negative crashVel or a crashVel not (or barely) caused by me
-                if (crashVel.dot(myPos - otherRobotPos) < 0 || myVel.dot(otherRobotPos - myPos) < 0.1) {
+                if (crashVel.dot(relativePos) > 0 || myVel.dot(relativePos) < 0.1) {
                     cushionForce = Vector2(0,0);
                 }
                 sumOfForces = sumOfForces + cushionForce; // We add the cushion force to the total
@@ -284,7 +286,7 @@ Vector2 GoToPos::avoidBall(Vector2 ballPos, Vector2 myPos, Vector2 sumOfForces, 
 
     // The antenna is a vector starting at the robot position in the direction in which it wants to go (scaled to the robot speed)
     double minAntenna = 1.2; // antenna has a minimal length, to make sure it still avoids when it starts from a standstill.
-    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.2);
+    Vector2 antenna = posError.stretchToLength(minAntenna + myVel.length()*0.8);
     // The antenna will not grow beyond its minimum value when moving backwards
     if (myVel.dot(antenna)<0 ){
         antenna = posError.stretchToLength(minAntenna);
@@ -582,12 +584,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     prevTime = now();
     double max_diff = 2.0*timeDiff*0.001;
     static Vector2 prevTarget = myPos + Vector2(0.01,0);
+    Vector2 smoothTargetPos = targetPos;
     Vector2 targetDiff = targetPos - prevTarget;
     if (targetDiff.length() > max_diff) {
-        targetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
+        smoothTargetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
     }
-    prevTarget = targetPos;
+    prevTarget = smoothTargetPos;
 
+    drawer.setColor(255, 50, 50);
+    drawer.drawPoint("smoothTargetPos", smoothTargetPos);
 
     // Turn towards goal when error is too large
     static double posErrorRotationThreshold = 0.30;
@@ -626,7 +631,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 sumOfForces(0.0, 0.0);
 
     // Position controller to steer the robot towards the target position
-    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
+    sumOfForces = sumOfForces + controller.positionController(myPos, smoothTargetPos, myVel);
 
     // Robot avoidance
     if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {

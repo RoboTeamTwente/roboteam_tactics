@@ -661,13 +661,15 @@ bt::Node::Status GetBall::Update (){
                 passBall(bestID, bestPos, ballPos, chip);
                 return Status::Success;
             } else {
-            // Shooting hard
+            // Shooting or chipping hard
                 ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " shooting");
                 if (GetBool("passToBestAttacker")) {
                     ros::param::set("passToRobot", -1); // communicate that chosen robot will receive the ball (possibly once more)
                     ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " reset passToRobot rosparam to -1");
+                    publishKickCommand(6.5, false); //TODO: chip or kick here?
+                } else {
+                    publishKickCommand(6.5, false);
                 }
-                publishKickCommand(6.5, false);
                 return Status::Success;
             }
         }
@@ -682,7 +684,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", (L_posDiff > 0.3)); // shut off robot avoidance when close to target
+    private_bb->SetBool("avoidRobots", (L_posDiff > 0.15)); // shut off robot avoidance when close to target
     private_bb->SetBool("avoidBall", (L_posDiff > 0.5)); // shut off ball avoidance when close to target
     private_bb->SetDouble("successDist", 0.01); // make sure gotopos does not return success before getball returns success
     if (HasBool("enterDefenseAreas")) {

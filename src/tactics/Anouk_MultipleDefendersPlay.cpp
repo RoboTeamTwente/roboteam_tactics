@@ -123,9 +123,7 @@ namespace rtt {
         int totalNumRobots = world.us.size();
 
         // We can use max 5 of all robots
-        if (numRobots >= (totalNumRobots - 1)) {
-            numRobots = totalNumRobots - 3;
-        }
+        numRobots = std::min(5, numRobots);
 
         // If less then one robot is available throw an error
         if (numRobots < 1) {
@@ -291,7 +289,7 @@ namespace rtt {
             bb.SetInt("KEEPER_ID", keeperID);
 
             // Create message
-            rd.tree = "rtt_jim/KeeperRole";
+            rd.tree = "rtt_jelle/KeeperV2";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later
@@ -437,9 +435,10 @@ namespace rtt {
         ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing " << numRobotDefenders << " Robot Defenders");
         for (int i = 0; i < numRobotDefenders; i++) {
 
+            Vector2 ourGoalPos = LastWorld::get_our_goal_center();
             roboteam_msgs::WorldRobot mostDangerousRobot = dangerousOpps.at(i);
             Vector2 mostDangerousRobotPos = Vector2(mostDangerousRobot.pos);
-            double defenseDistanceFromGoal = ((mostDangerousRobotPos.x + 6) * 0.9);
+            double defenseDistanceFromGoal = (mostDangerousRobotPos - ourGoalPos).length() * 0.9;
 
             // While there are robots available
             if(robots.size()>0){

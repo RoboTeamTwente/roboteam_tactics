@@ -43,8 +43,8 @@ void KeeperV2::Initialize() {
 // Then chooses the intersection between this line and an arc between the goal posts
 Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
 
-    Vector2 u1 = (goalPos + Vector2(0.0, W/2) - defendPos).normalize();
-    Vector2 u2 = (goalPos + Vector2(0.0, -W/2) - defendPos).normalize();
+    Vector2 u1 = (goalPos + Vector2(0.0, W/2) - defendPos).normalize(); // unit vector from defendpos to upper goal post
+    Vector2 u2 = (goalPos + Vector2(0.0, -W/2) - defendPos).normalize(); // unit vector from defendpos to lower goal post
     double dist = (defendPos - goalPos).length();
     Vector2 blockLineStart = defendPos + (u1 + u2).stretchToLength(dist);
 
@@ -54,7 +54,6 @@ Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
     if (intersections.first) {
         blockPos = *intersections.first;
     } else if (intersections.second) {
-        ROS_INFO_STREAM("second");
         blockPos = *intersections.second;
     } else {
         blockPos = Vector2(goalPos.x + marginFromGoal, W/2*signum(defendPos.y));
@@ -66,7 +65,7 @@ Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
     }
 
     Vector2 distVec = blockPos - defendPos;
-    acceptableDeviation = fmax(0.0, (u1.stretchToLength(distVec.length()) - distVec).length() - 0.05 );
+    acceptableDeviation = fmax(0.0, (u1.stretchToLength(distVec.length()) - distVec).length() );
 
     return blockPos;
 }
@@ -91,15 +90,13 @@ bt::Node::Status KeeperV2::Update() {
     private_bb->SetDouble("receiveBallAtX", blockPoint.x);
     private_bb->SetDouble("receiveBallAtY", blockPoint.y);
     private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
-    private_bb->SetDouble("marginDeviation", acceptableDeviation);
+    private_bb->SetDouble("marginDeviation", acceptableDeviation*2);
     private_bb->SetBool("defenderMode", true);
     private_bb->SetBool("setSignal", false);
     private_bb->SetBool("enterDefenseAreas", true);
+    private_bb->SetDouble("dribblerDist", 0.5);
 
-    ROS_INFO_STREAM_NAMED("skills.KeeperV2", acceptableDeviation);
-
-    receiveBall.Tick();
-    return Status::Running;
+    return receiveBall.Tick();
 }
 
 } // rtt

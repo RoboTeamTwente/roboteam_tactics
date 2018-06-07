@@ -32,9 +32,6 @@ RTT_REGISTER_SKILL(ReceiveBall);
 ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
         : Skill(name, blackboard)
         , goToPos("", private_bb)
-        , getBall("", blackboard)
-        // , kick("", blackboard)
-        // , isRobotClosestToBall("", blackboard)
         {
     hasBall = whichRobotHasBall();
     ros::param::get("robot_output_target", robot_output_target);
@@ -52,7 +49,6 @@ void ReceiveBall::Initialize() {
 	ballIsComing = false;
 	startKicking = false;
 
-	// readyHasBeenSet = false;
 	//	If we set readyToReceiveBall true, my teammate that passes the ball can give me the claim over the ball
 	//	(such that other robots wont interfere). If setSignal is enabled, I can be trusted in resetting claim if this skill terminates.
 	if (GetBool("setSignal")) {
@@ -411,13 +407,13 @@ bt::Node::Status ReceiveBall::Update() {
 	}
 
 
-	// If the ball hasnt been coming for a while and I'm closest to the ball, return failure.
+	// If the ball hasnt been coming for a while and I'm closest to the ball, or ball is in defense area, return failure.
 	if (!ballIsComing) {
 		int elapsedTime = time_difference_milliseconds(startTime, now()).count();
 		if (elapsedTime > 1000) {
 			startTime = now();
 			boost::optional<int> robotClosestToBallPtr = get_robot_closest_to_point(world.us, ballPos);
-			if (robotClosestToBallPtr && *robotClosestToBallPtr == robotID) {
+			if ((!GetBool("defenderMode") && robotClosestToBallPtr && *robotClosestToBallPtr == robotID) || (GetBool("defenderMode") && isWithinDefenseArea(true, ballPos, 0.1))) {
 				ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "robot " << robotID << " failed because im closest to a ball that hasnt been coming for a while");
 				return Status::Failure;
 			}
@@ -445,15 +441,24 @@ bt::Node::Status ReceiveBall::Update() {
 	} else {
 
 		double posErrorLength = (targetPos - myPos).length();
-		// new strategy because sideways acceleration is very slow for new robots
-		static double distToBallThreshold = 1.5;
-		if (!GetBool("claimedPos") && (GetBool("defenderMode") || distanceToBall > distToBallThreshold) && (!ballIsComing || posErrorLength > 0.29)) {
-			targetAngle = interceptAngle + M_PI/2;
-			distToBallThreshold = 1.4;
+		// new reception strategy because sideways acceleration is very slow for new robots
+		static double thresholdSwitch = 1.0;
+		double distToBallThresh, turningDist;
+		if (GetBool("defenderMode")) {
+			distToBallThresh = 0.3;
+			turningDist = 0.1;
 		} else {
-			distToBallThreshold = 1.5;
+			distToBallThresh = 1.5;
+			turningDist = 0.29;
+		}
+		if (!GetBool("claimedPos") && ((!ballIsComing && distanceToBall > thresholdSwitch*distToBallThresh) ||  (ballIsComing && posErrorLength > turningDist)) ) {
+			targetAngle = interceptAngle + M_PI/2;
+			thresholdSwitch = 0.95;
+		} else {
+			thresholdSwitch = 1.0;
 		}
 
+		// fill gotopos blackboard
         private_bb->SetInt("ROBOT_ID", robotID);
         private_bb->SetInt("KEEPER_ID", blackboard->GetInt("KEEPER_ID"));
         private_bb->SetDouble("xGoal", targetPos.x);
@@ -477,7 +482,7 @@ bt::Node::Status ReceiveBall::Update() {
         if (blackboard->HasBool("enterDefenseAreas")) {
         	private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));
     	}
-    	private_bb->SetBool("avoidRobots", posErrorLength > 0.3); // shut off robot avoidance when close to target
+    	private_bb->SetBool("avoidRobots", true); // posErrorLength > 0.3 // shut off robot avoidance when close to target (SHUT OFF FOR NOW, SEEMS DANGEROUS)
 		if (blackboard->HasBool("avoidRobots")) {
 			private_bb->SetBool("avoidRobots", blackboard->GetBool("avoidRobots"));
 		}
@@ -505,7 +510,7 @@ bt::Node::Status ReceiveBall::Update() {
         }
 
     	// If the ball gets close, turn on the dribbler
-		double dribblerDist = 4.0;
+		double dribblerDist = 2.0;
 		if (shootAtGoal) {
 			dribblerDist = 0.0;
 		}

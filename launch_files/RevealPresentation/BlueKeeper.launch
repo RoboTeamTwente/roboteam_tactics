@@ -1,0 +1,9 @@
+<launch>
+
+	<group ns="blue">
+	    <arg name="id" default="0" />
+
+	    <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jelle/KeeperV2 int:ROBOT_ID=$(arg id)" output="screen" />
+	</group>
+
+</launch>
