@@ -73,7 +73,9 @@ namespace rtt {
 		std::vector<Vector2> x_y_coords;
 
 		// Calculate the step between each robot. In this case, distance in meters
-		float step = circleAngle / (numRobots - 1);
+		float step = 0;
+		if(numRobots > 1)
+			step = circleAngle / (numRobots - 1);
 		// Calculate the offset of the 1st robot
 		float offset = -circleAngle / 2;
 
