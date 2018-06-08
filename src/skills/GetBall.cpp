@@ -384,8 +384,8 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
     if (passID == -1 || opportunityFinder.calcDistOppToBallTraj(passPos, world) < passThreshold) {
     // pass line is crossed by opponent -> chip possible?
         ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << passID);
-        double maxChipDist = 2.0;
-        double minChipDist = 0.5;
+        double maxChipDist = 1.3;
+        double minChipDist = 0.4;
         Vector2 passLine = passPos - ballPos;
         if (passID == -1 || passLine.length() < minChipDist || opportunityFinder.calcDistOppToBallTraj(passPos, world, maxChipDist) < passThreshold) {
         // chip not possible -> softpass to someone else?
@@ -512,7 +512,7 @@ bt::Node::Status GetBall::Update (){
     double openGoalAngle = cleanAngle(bestViewOfGoal.second - bestViewOfGoal.first);
     bool canSeeGoal = fabs(openGoalAngle) >= 0.2;
     bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
-    		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
+    		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal")) && !choseRobotToPassTo;
 
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
     if (!choseRobotToPassTo && GetBool("passToBestAttacker")) {
@@ -528,8 +528,6 @@ bt::Node::Status GetBall::Update (){
             ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
             ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": Setting passToRobot to " << bestID);
             ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ": (first time) passToRobot rosparam set to: " << bestID << ", posDiff: " << L_posDiff << ", bestPos: " << bestPos);
-        } else if (L_posDiff >= chooseDist) {
-            private_bb->SetBool("avoidBall", true);
         }
     }
 
@@ -685,6 +683,9 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", (L_posDiff > 0.15)); // shut off robot avoidance when close to target
+    if (GetBool("passToBestAttacker")) {
+        private_bb->SetBool("stayAwayFromBall", !choseRobotToPassTo); // when we haven't made a decision yet, it's better to not drive straight into the ball
+    }
     private_bb->SetBool("avoidBall", (L_posDiff > 0.5)); // shut off ball avoidance when close to target
     private_bb->SetDouble("successDist", 0.01); // make sure gotopos does not return success before getball returns success
     if (HasBool("enterDefenseAreas")) {

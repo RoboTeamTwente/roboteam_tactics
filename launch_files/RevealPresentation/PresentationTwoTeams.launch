@@ -4,7 +4,7 @@
 	<arg name="legacy_packets" default="false" />
 	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 
-    <param name="keeper_id" type="int" value="0" />
+    <param name="keeper_id" type="int" value="10" />
 	<param name="our_side" type="str" value="left" />
 	<param name="our_color" type="str" value="yellow" />
 
