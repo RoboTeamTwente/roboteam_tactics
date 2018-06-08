@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID false
+#define DRAW_PASS_POINT_GRID true
 
 namespace rtt {
 
@@ -73,6 +73,7 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 	this->target = target;
 	this->targetID = targetID;
 	targetPos = getTargetPos(target, targetID, true);
+	field = LastWorld::get_field();
 
 	isCloseToPosSet = false;
 }
@@ -122,7 +123,7 @@ void OpportunityFinder::setMax(std::string metric, double value) {
 
 
 // Calculates the distance between the closest opponent and the testPosition
-double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistToClosestOpp(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	if (world.them.size() == 0) {
 		return 1000.0;
@@ -140,7 +141,7 @@ double OpportunityFinder::calcDistToClosestOpp(Vector2 testPosition, roboteam_ms
 
 
 // Calculates the distance between the closest opponent and the testPosition
-double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	Vector2 ballPos(world.ball.pos);
 
@@ -165,7 +166,7 @@ double OpportunityFinder::calcDistToClosestTeammate(Vector2 testPosition, robote
 }
 
 // Calculates the distance of the closest opponent to the expected trajectory of the ball
-double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world, double chipMargin) {
+double OpportunityFinder::calcDistOppToBallTraj(const Vector2& testPosition, const roboteam_msgs::World& world, double chipMargin) {
 	Vector2 ballPos(world.ball.pos);
 	Vector2 ballTraj = testPosition - ballPos;
 
@@ -196,7 +197,7 @@ double OpportunityFinder::calcDistOppToBallTraj(Vector2 testPosition, roboteam_m
 
 
 // Calculates the distance of the closest opponent to the expected trajectory from testPosition to target
-double OpportunityFinder::calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistOppToTargetTraj(const Vector2& testPosition, const roboteam_msgs::World& world) {
 	Vector2 posToTargetTraj = targetPos - testPosition;
 
 	if (world.them.size() == 0) {
@@ -247,7 +248,7 @@ std::vector<Cone> OpportunityFinder::combineOverlappingRobots(std::vector<Cone> 
 
 // Calculate the total angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
-double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcViewOfGoal(const Vector2& testPosition, const roboteam_msgs::World& world) {
 	double viewOfGoal = 0.0;
 	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
 	for (size_t i = 0; i < openAngles.second.size(); i++) {
@@ -259,7 +260,7 @@ double OpportunityFinder::calcViewOfGoal(Vector2 testPosition, roboteam_msgs::Wo
 
 // Calculate the best angular view of the goal, seen from the testPosition. Robots of the opposing team that are blocking
 // the view, are taken into account
-std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(Vector2 testPosition, roboteam_msgs::World world) {
+std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	std::pair<std::vector<double>, std::vector<double>> openAngles = getOpenGoalAngles(testPosition, world);
 	if (openAngles.second.size() > 0) {
@@ -274,7 +275,7 @@ std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(Vector2 testPosi
 	   		}
 		}
 		// de-normalize best angle segment, such that it can be used to aim at
-		roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+		// const roboteam_msgs::GeometryFieldSize& field = LastWorld::get_field();
 		Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
 		double angleGoalSide1 = (goalSide1 - testPosition).angle();
 		double bestAngleStart, bestAngleEnd;
@@ -291,9 +292,10 @@ std::pair<double, double> OpportunityFinder::calcBestViewOfGoal(Vector2 testPosi
 	}
 }
 
-std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world) {
+std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGoalAngles(const Vector2& testPosition, const roboteam_msgs::World& world) {
 	// targetPos is one of the goals. IMPROVEMENT: Maybe add functionality that uses other views than only goal views (like view of dangerous positions)
-	roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+	// roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+	// const roboteam_msgs::GeometryFieldSize& field = LastWorld::get_field(); // using reference is more efficient (does this work?) currently using globally saved field
 
 	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
 	Vector2 goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
@@ -360,7 +362,7 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 }
 
 // Calculates the distance between the testPosition and the current robot
-double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcDistToSelf(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	if (isCloseToPosSet) {
 		return (testPosition - closeToPos).length();
@@ -379,7 +381,7 @@ double OpportunityFinder::calcDistToSelf(Vector2 testPosition, roboteam_msgs::Wo
 
 // Calculates the angle difference between the vector from the testPosition to the goal, and the vector from the testPosition to the ball
 // If this angle is low, it means that a robot standing on the testPosition can more easily shoot the ball at the goal directly after receiving the ball
-double OpportunityFinder::calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::calcBallReflectionAngle(const Vector2& testPosition, const roboteam_msgs::World& world) {
 	Vector2 ballPos(world.ball.pos);
 	double ballReflectionAngle = fabs(cleanAngle((targetPos-testPosition).angle() - (ballPos-testPosition).angle()));
 	return ballReflectionAngle;
@@ -391,19 +393,19 @@ void OpportunityFinder::setCloseToPos(Vector2 closeToPos) {
 }
 
 
-double OpportunityFinder::computeScore(Vector2 testPosition) {
+double OpportunityFinder::computeScore(const Vector2& testPosition) {
 	roboteam_msgs::World world = LastWorld::get();
 	return computeScore(testPosition, world);
 }
 // Computes the score of a testPosisiton (higher score = better position to pass the ball to), based on a set of weights
-double OpportunityFinder::computeScore(Vector2 testPosition, roboteam_msgs::World world) {
+double OpportunityFinder::computeScore(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	Vector2 ballPos(world.ball.pos);
 
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 2.0);
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.5);
 		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}
@@ -494,7 +496,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ballPos(world.ball.pos);
-	// time_point start = now();
+	time_point start = now();
 
 	int x_steps = 20;
 	int y_steps = 20;
@@ -573,8 +575,8 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	Vector2 bestPosition = opportunities.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 
-	// int timePassed = time_difference_milliseconds(start, now()).count();
-	//ROS_INFO_STREAM("robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	int timePassed = time_difference_milliseconds(start, now()).count();
+	ROS_INFO_STREAM_NAMED("OpportunityFinder", "robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// Info about best position
 	// ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));
@@ -608,13 +610,12 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 		for (size_t i = 0; i < fakeWorld.us.size(); i++) {
 			double botClaimedX;
 
-			ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
-
 			if(!ros::param::has("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX")){
 //				ROS_WARN_STREAM_NAMED("OpportunityFinder", "Parameter not set! Still retrieving " << botClaimedX << " ...");
 				continue;
 			}
 
+			ros::param::get("robot" + std::to_string(fakeWorld.us.at(i).id) + "/claimedPosX", botClaimedX);
 
 			if( !(botClaimedX == 0.0 && std::signbit(botClaimedX)) ) { // if not -0.0, bot actually claimed a position
 				double botClaimedY;

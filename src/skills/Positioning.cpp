@@ -54,6 +54,9 @@ void Positioning::Initialize() {
 
     // starting point
     bestPosition = opportunityFinder.computeBestOpportunity(initialPos,initialBoxSize,initialBoxSize);
+    // claim starting point
+    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosX", bestPosition.x);
+    ros::param::set("robot" + std::to_string(robotID) + "/claimedPosY", bestPosition.y);
 
     // pass first info to GoToPos blackboard already
     private_bb->SetInt("ROBOT_ID", robotID);

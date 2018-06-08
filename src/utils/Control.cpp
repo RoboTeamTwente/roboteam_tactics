@@ -96,7 +96,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
     } else if (newRobotType == RobotType::PROTO) {
         pGainPosition = 4.5;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
-        dGainPosition = 0.8; //prevteam: 0.5
+        dGainPosition = 0.75; //prevteam: 0.5
         pGainRotation = 10;
         iGainRotation = 0.0;//prevteam: 0.0
         dGainRotation = 0.0;
@@ -105,7 +105,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxAngularVel = 20.0;
 
         thresholdTarget = 0.05;
-        minTarget = 0.60;
+        minTarget = 0.55;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
@@ -243,7 +243,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         posErrorI = Vector2(0.0, 0.0);
     }
 
-    if (myVel.length() < 0.05) { // myVel becomes unreliable at too low value
+    if (myVel.length() < 0.4) { // disable derivative term for low velocity
         myVel = Vector2(0.0,0.0);
     }
     // Control equation

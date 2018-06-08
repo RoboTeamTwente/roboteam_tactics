@@ -267,7 +267,7 @@ namespace rtt {
             bb.SetInt("KEEPER_ID", keeperID);
 
             // Create message
-            rd.tree = "rtt_jim/KeeperRole";
+            rd.tree = "rtt_jim/KeeperV2";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later

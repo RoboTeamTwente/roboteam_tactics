@@ -30,20 +30,20 @@ public:
 	void setMin(std::string metric, double value);
 	void setMax(std::string metric, double value);
 
-	double calcDistToClosestOpp(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistToClosestTeammate(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistOppToBallTraj(Vector2 testPosition, roboteam_msgs::World world, double chipMargin=0.0);
-	double calcDistOppToTargetTraj(Vector2 testPosition, roboteam_msgs::World world);
+	double calcDistToClosestOpp(const Vector2& testPosition, const roboteam_msgs::World& world);
+	double calcDistToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world);
+	double calcDistOppToBallTraj(const Vector2& testPosition, const roboteam_msgs::World& world, double chipMargin=0.0);
+	double calcDistOppToTargetTraj(const Vector2& testPosition, const roboteam_msgs::World& world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
-	double calcViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
-	std::pair<double, double> calcBestViewOfGoal(Vector2 testPosition, roboteam_msgs::World world);
-	std::pair<std::vector<double>, std::vector<double>> getOpenGoalAngles(Vector2 testPosition, roboteam_msgs::World world);
-	double calcDistToSelf(Vector2 testPosition, roboteam_msgs::World world);
-	double calcBallReflectionAngle(Vector2 testPosition, roboteam_msgs::World world);
+	double calcViewOfGoal(const Vector2& testPosition, const roboteam_msgs::World& world);
+	std::pair<double, double> calcBestViewOfGoal(const Vector2& testPosition, const roboteam_msgs::World& world);
+	std::pair<std::vector<double>, std::vector<double>> getOpenGoalAngles(const Vector2& testPosition, const roboteam_msgs::World& world);
+	double calcDistToSelf(const Vector2& testPosition, const roboteam_msgs::World& world);
+	double calcBallReflectionAngle(const Vector2& testPosition, const roboteam_msgs::World& world);
 
 	void setCloseToPos(Vector2 closeToPos);
-	double computeScore(Vector2 testPosition);
-	double computeScore(Vector2 testPosition, roboteam_msgs::World world);
+	double computeScore(const Vector2& testPosition);
+	double computeScore(const Vector2& testPosition, const roboteam_msgs::World& world);
 	Vector2 computeBestOpportunity(Vector2 centerPoint, double boxLength, double boxWidth);
 	BestTeammate chooseBestTeammate(bool realScore=false, bool realPos=false, bool notBackwards=false, bool distFromTargetLimit=false, double limit=8.0);
 private:
@@ -87,6 +87,8 @@ private:
 
 	bool isCloseToPosSet;
 	Vector2 closeToPos;
+	
+	roboteam_msgs::GeometryFieldSize field;
 
 	Draw drawer;
 	std::vector<std::string> names;
