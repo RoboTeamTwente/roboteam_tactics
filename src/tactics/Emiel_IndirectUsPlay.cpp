@@ -167,7 +167,7 @@ void Emiel_IndirectUsPlay::Initialize() {
 	// Assign robots to positions
 	std::vector<int> attackers = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, positions, world);
 
-	for (size_t i = 0; i < numAttackers; i++) {
+	for (int i = 0; i < numAttackers; i++) {
 
 		int robotID = attackers.at(i);
 		delete_from_vector(robots, robotID);

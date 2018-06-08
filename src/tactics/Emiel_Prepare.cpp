@@ -117,7 +117,7 @@ namespace rtt {
 			std::vector<int> robotsToTheirRobots = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, oppPositions, world);
 
 			// For each robot to defend
-			for (int i = 0; i < robotsToTheirRobots.size(); i++) {
+			for (int i = 0; i < (int)robotsToTheirRobots.size(); i++) {
 
 				// ====================================
 				// Initialize simple defender
@@ -156,7 +156,7 @@ namespace rtt {
 			std::vector<int> robotsToTheirRobotsInt = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, oppPositionsInt, world);
 
 			// For each robot to defend
-			for (int i = 0; i < robotsToTheirRobotsInt.size(); i++) {
+			for (int i = 0; i < (int)robotsToTheirRobotsInt.size(); i++) {
 
 				// ====================================
 				// Initialize simple defender

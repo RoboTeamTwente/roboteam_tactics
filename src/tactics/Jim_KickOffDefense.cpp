@@ -57,7 +57,7 @@ void Jim_KickOffDefense::Initialize() {
 	// Get the world
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ourGoalPos = LastWorld::get_our_goal_center();
-	Vector2 ballPos = world.ball.pos;
+//	Vector2 ballPos = world.ball.pos;
 	std::vector<roboteam_msgs::WorldRobot> theirRobots = world.them;
 
 
@@ -150,7 +150,7 @@ void Jim_KickOffDefense::Initialize() {
 	std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
 	for (size_t i = 0; i < world.dangerList.size(); i++) {
 		roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-		double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+//		double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
 		{
 
 			bool addDangerousOpp = true;

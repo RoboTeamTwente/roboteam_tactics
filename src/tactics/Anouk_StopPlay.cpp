@@ -50,7 +50,6 @@ namespace rtt {
 		// Get the position of our goal
 		Vector2 goalPos(LastWorld::get_our_goal_center());
 
-		double angleGoalToBall = -(ballPos - goalPos).angle();
 
 		// Calculate the positions of the ball defenders
 		std::vector<Vector2> goalDefenderCoords = RobotPatternGenerator::Line(numGoalDefenders, 2, goalPos, 0, 1.2);

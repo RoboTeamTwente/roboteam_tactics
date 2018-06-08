@@ -14,16 +14,17 @@ class Anouk_MultipleDefendersPlay : public Tactic {
 
     public:
     Anouk_MultipleDefendersPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-    static boost::optional<int> getClosestDefender(std::vector<int> robots,
-    		roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
-    static std::vector<int> assignRobotsToPositions(std::vector<int> robots,
-    		std::vector<Vector2> points, roboteam_msgs::World& world);
+    static boost::optional<int> getClosestDefender(std::vector<int> robots,	roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
+    static std::vector<int> assignRobotsToPositions(std::vector<int> robots, std::vector<Vector2> points, roboteam_msgs::World& world);
+
+	boost::uuids::uuid init_robotDefender(int robotID, int opponentID);
+	boost::uuids::uuid init_ballDefender(int robotID, float angleOffset, Vector2 GoToPos_A_pos);
 
     void Initialize();
     Status Update();
 
     private:
-    bool reInitializeWhenNeeded(bool justCheck);
+    bool reInitializeWhenNeeded();
     // void reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps);
     // void reInitialize();
 
@@ -36,6 +37,8 @@ class Anouk_MultipleDefendersPlay : public Tactic {
     std::vector<roboteam_msgs::WorldRobot> dangerOrder;
     std::vector<roboteam_msgs::WorldRobot> prevDangerOrder;
 
+	std::vector<int> prevDangerousOpps;
+
     std::vector<int> activeRobots;
 
     int numBallDefenders;
@@ -45,6 +48,7 @@ class Anouk_MultipleDefendersPlay : public Tactic {
     Vector2 prevBallPos;
     double distBallToGoalThreshold;
 
+	bool weAreAttacking;
     bool weWereAttacking;
     int weAreAttackingCounter;
     int prevNumRobots;

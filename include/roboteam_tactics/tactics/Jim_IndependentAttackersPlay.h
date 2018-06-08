@@ -16,6 +16,8 @@ class Jim_IndependentAttackersPlay : public Tactic {
     Status Update();
     ros::NodeHandle n;
 
+	void reInitializeWhenNeeded();
+
     private:
     std::vector<boost::uuids::uuid> tokens;
     time_point start;
@@ -23,6 +25,8 @@ class Jim_IndependentAttackersPlay : public Tactic {
     time_point lastUpdate;
     time_point finishTime;
     time_point lastTimeWeHadBall;
+
+	std::vector<int> robotsClaimed;
 
     WeHaveBall weHaveBall;
 };
