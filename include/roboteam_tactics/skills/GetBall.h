@@ -119,7 +119,7 @@ private:
     void publishKickCommand(double kickVel, bool chip);
     bool claimBall();
     void releaseBall();
-    void passBall(int id, Vector2 pos, Vector2 ballPos, bool chip);
+    double passBall(int id, Vector2 pos, Vector2 ballPos, bool chip);
     Vector2 computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vector2 myPos);
     double computePassSpeed(double dist, double input, bool imposeTime);
     double computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel);
@@ -138,12 +138,13 @@ private:
     bool ballClaimedByMe;
     bool hasTerminated;
     double deviation;
-    //bool chip;
     double passThreshold;
     int ballCloseFrameCount = 0;
     int bestID;
     Vector2 bestPos;
-    double prevAngleCommand = 0;
+    bool startKicking;
+    bool startChipping;
+    double globalKickSpeed;
 };
 
 } // rtt

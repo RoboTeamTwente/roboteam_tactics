@@ -32,6 +32,7 @@ public:
 
 	double calcDistToClosestOpp(const Vector2& testPosition, const roboteam_msgs::World& world);
 	double calcDistToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world);
+	double calcAngleToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world);
 	double calcDistOppToBallTraj(const Vector2& testPosition, const roboteam_msgs::World& world, double chipMargin=0.0);
 	double calcDistOppToTargetTraj(const Vector2& testPosition, const roboteam_msgs::World& world);
 	std::vector<Cone> combineOverlappingRobots(std::vector<Cone> robotCones);
@@ -61,6 +62,9 @@ private:
 	double distToTeammateWeight;
 	double distToTeammateMin;
 	double distToTeammateMax;
+	double angleToTeammateWeight;
+	double angleToTeammateMin;
+	double angleToTeammateMax;
 	double distToBallWeight;
 	double distToBallMin;
 	double distToBallMax;
@@ -84,6 +88,7 @@ private:
 	std::string target;
 	int targetID;
 	Vector2 targetPos;
+	bool goalIsCrossArea;
 
 	bool isCloseToPosSet;
 	Vector2 closeToPos;

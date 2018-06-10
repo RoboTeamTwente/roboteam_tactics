@@ -26,29 +26,23 @@ void Positioning::Initialize() {
     ROS_INFO_STREAM_NAMED("skills.Positioning", "Initialize for robot: " << robotID);
     roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 
-    // passIncoming = false;
-    int type = 0;
-    if (HasInt("type")) {
-        type = GetInt("type");
+    int profile = 0;
+    if (HasInt("profile")) {
+        profile = GetInt("profile");
     }
-    if (type == 0) {
-    // Attacker
+    if (profile == 0) {
+    // Striker
         opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
          // starting point is opponents half of the field
         initialBoxSize = field.field_width;
         initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
-    } else if (type == 1) {
-    // Assister/passer
-    // WIP: To which robot should be passed? check at every scan which robot?
-        // Check which robot:
-        
-
-        // opportunityFinder.Initialize("assister.txt", robotID, "robot", 0);
-    } else if (type == 2){
-        // // Attacker
-        // opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
-        // // starting point is opponents half of the field
-        // bestPosition = opportunityFinder.computeBestOpportunity(Vector2(-3.0,0.0),6.0,9.0);
+    } else if (profile == 1) {
+    // Winger
+        opportunityFinder.Initialize("winger.txt", robotID, "crossArea", 0);
+         // starting point is opponents half of the field
+        initialBoxSize = field.field_width;
+        initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
+    } else if (profile == 2){
 
     }
 
@@ -67,7 +61,6 @@ void Positioning::Initialize() {
     private_bb->SetBool("avoidBall", true);
 
     counter = 1;
-    // counter2 = 0;
 }
 
 void Positioning::Terminate(bt::Node::Status s) {
@@ -94,8 +87,7 @@ bt::Node::Status Positioning::Update() {
     
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 1000) { // WIP: extra check for zero or very low score on current claimed pos?
-
+    if (elapsedTime.count() >= 1000) {
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
         Vector2 myPos = getTargetPos("robot", robotID, true);

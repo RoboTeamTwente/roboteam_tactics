@@ -631,7 +631,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (posError.length() < successDist && fabs(angleError) < 0.01) {
         successCounter++;
         if (successCounter >= 3) {
-
             succeeded = true;
             failure = false;
             return boost::none;
@@ -645,7 +644,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
     prevTime = now();
     double max_diff = 2.0*timeDiff*0.001;
-    static Vector2 prevTarget = myPos + Vector2(0.01,0);
+    static Vector2 prevTarget = myPos + Vector2(0.001,0);
     Vector2 smoothTargetPos = targetPos;
     Vector2 targetDiff = targetPos - prevTarget;
     if (targetDiff.length() > max_diff) {
@@ -668,8 +667,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     } else {
         posErrorRotationThreshold = 0.30;
     }
-
-
 
     // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
     // static time_point prevTime = now();
@@ -700,11 +697,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         // AvoidRobots defaults to true if not set
     } else {
         sumOfForces = avoidRobots(myPos, myVel, targetPos, sumOfForces);
-        // TODO: IS THE FOLLOWING NECESSARY? MIGHT BE BETTER WITHOUT
-        // if (sumOfForces.length() >= 1.5) {
-        //     angleGoal = sumOfForces.angle();
-        //     angleError = cleanAngle(angleGoal - myAngle);
-        // }
     }
 
     // Ball avoidance
