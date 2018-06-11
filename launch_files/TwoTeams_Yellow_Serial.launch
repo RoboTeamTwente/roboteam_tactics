@@ -1,0 +1,49 @@
+<launch>
+	<group ns="yellow">
+		<arg name="legacy_packets" default="false" />
+		<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+
+		<param name="our_side" type="str" value="right" />
+		<param name="our_color" type="str" value="yellow" />
+
+		<param name="robot0/robotType" type="str" value="grsim" />
+		<param name="robot1/robotType" type="str" value="grsim" />
+		<param name="robot2/robotType" type="str" value="grsim" />
+		<param name="robot3/robotType" type="str" value="grsim" />
+		<param name="robot4/robotType" type="str" value="grsim" />
+		<param name="robot5/robotType" type="str" value="grsim" />
+		<param name="robot6/robotType" type="str" value="grsim" />
+		<param name="robot7/robotType" type="str" value="grsim" />
+
+		<param name="robot0/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot1/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot2/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot3/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot4/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot5/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot6/readyToReceiveBall" type="bool" value="false" />
+		<param name="robot7/readyToReceiveBall" type="bool" value="false" />
+
+		<param name="robotClaimedBall" type="int" value="-1" />
+	 
+		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
+		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
+		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen"/>
+
+		<param name="role_iterations_per_second" type="int" value="30" />
+		<param name="num_role_nodes" type="int" value="8" />
+		<param name="normalize_field" type="bool" value="true" />
+		<param name="robot_output_target" type="str" value="serial" />
+
+		<node name="robot0" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot1" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot2" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot3" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot4" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot5" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot6" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+		<node name="robot7" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+
+		<node name="strategy" pkg="roboteam_tactics" type="StrategyNode" args="mainStrategy" output="screen" />
+	</group>
+</launch>

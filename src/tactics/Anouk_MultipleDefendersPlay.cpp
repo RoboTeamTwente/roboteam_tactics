@@ -108,7 +108,7 @@ namespace rtt {
 
 
 
-    bool Anouk_MultipleDefendersPlay::reInitializeWhenNeeded() {
+    bool Anouk_MultipleDefendersPlay::reInitializeWhenNeeded(bool forceInitialize) {
 
         // Save some values
         roboteam_msgs::World world = LastWorld::get();
@@ -232,9 +232,10 @@ namespace rtt {
             shouldReset = true;
         }
 
-        // If we don't have to reset, then stop here.
-        if(!shouldReset)
-            return false;
+        // If we need to reinitialize regardless, don't return anything
+        if(!forceInitialize)
+			// Return if we have to reset or not
+			return shouldReset;
 
 
 
@@ -245,7 +246,15 @@ namespace rtt {
         prevDangerousOpps = dangerousOpps;
 
         // First, release all the previously claimed robots
-        RobotDealer::release_robots(activeRobots);
+        release_robots(activeRobots);	// Only here from initialize function? activeRobots should always be empty?
+
+		// Dirty hack. Just release all the robots
+//		std::vector<int> allRobots;
+//		for(const roboteam_msgs::WorldRobot& robot : world.us){
+//			allRobots.push_back(robot.id);
+//		}
+//		release_robots(allRobots);
+
         // Empty the vector that holds our claimed robots
         activeRobots.clear();
         // Get all the robots that we could use
@@ -267,7 +276,7 @@ namespace rtt {
             bb.SetInt("KEEPER_ID", keeperID);
 
             // Create message
-            rd.tree = "rtt_jim/KeeperV2";
+            rd.tree = "rtt_jelle/KeeperV2";
             rd.blackboard = bb.toMsg();
 
             // Add random token and save it for later
@@ -364,7 +373,8 @@ namespace rtt {
 
         ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, (int)getAvailableRobots().size() << " robots left for the offense");
 
-        return true;
+
+        return false;
 
 
 
@@ -432,13 +442,22 @@ namespace rtt {
         weAreAttackingCounter = 0;
         weWereAttacking = false;
         weAreAttacking = false;
-        reInitializeWhenNeeded();
+
+		// Force a reinitialization
+        reInitializeWhenNeeded(true);
+
         return;
     }
 
     bt::Node::Status Anouk_MultipleDefendersPlay::Update() {
 
-        reInitializeWhenNeeded();
+		bool shouldReInitialize = reInitializeWhenNeeded(false);
+
+		// We should reinitialize everything
+        if(shouldReInitialize){
+			return Status::Failure;
+		}
+
         return Status::Running;
     }
 

@@ -24,7 +24,7 @@ class Anouk_MultipleDefendersPlay : public Tactic {
     Status Update();
 
     private:
-    bool reInitializeWhenNeeded();
+    bool reInitializeWhenNeeded(bool forceInitialize);
     // void reInitialize(int newNumBallDefenders, int newNumRobotDefenders, std::vector<roboteam_msgs::WorldRobot> dangerousOpps);
     // void reInitialize();
 

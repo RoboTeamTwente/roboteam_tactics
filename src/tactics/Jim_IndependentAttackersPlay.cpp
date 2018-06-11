@@ -32,6 +32,8 @@ Jim_IndependentAttackersPlay::Jim_IndependentAttackersPlay(std::string name, bt:
 
 
 void Jim_IndependentAttackersPlay::Initialize() {
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing...");
+
     tokens.clear();
 
 	// Release any previously claimed robots
@@ -123,7 +125,7 @@ void Jim_IndependentAttackersPlay::Initialize() {
 			return;
 
 		// There are robots available! Release all the robots we previously claimed, and then claim all available robots again.
-		RobotDealer::release_robots(robotsClaimed);
+		release_robots(robotsClaimed);
         robotsClaimed.clear();
         robotsAvailable = getAvailableRobots();
 

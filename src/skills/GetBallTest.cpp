@@ -233,7 +233,7 @@ bt::Node::Status GetBallTest::Update (){
 
     if (GetBool("aimAwayFromTarget")) {
         targetAngle = targetAngle + M_PI;
-        std::cout << "face away from target" << std::endl;
+//        std::cout << "face away from target" << std::endl;
     }
 
 
@@ -316,7 +316,7 @@ bt::Node::Status GetBallTest::Update (){
         private_bb->SetBool("dribbler", false);
 	} else {
         private_bb->SetBool("dribbler", true);
-        std::cout << "dribbler on" << std::endl;
+//        std::cout << "dribbler on" << std::endl;
 		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
 	}
     
