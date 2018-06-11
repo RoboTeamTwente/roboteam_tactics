@@ -92,7 +92,8 @@ public:
 
     boost::optional<roboteam_msgs::RobotCommand> getVelCommand();
 
-    Status Update();
+    Status Update() override;
+    void Initialize() override;
 
     static VerificationMap required_params() {
         VerificationMap params;

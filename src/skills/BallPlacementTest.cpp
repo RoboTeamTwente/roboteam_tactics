@@ -34,15 +34,17 @@ namespace rtt {
 
 RTT_REGISTER_SKILL(BallPlacementTest);
 
-BallPlacementTest::BallPlacementTest(std::string name, bt::Blackboard::Ptr blackboard)
-		: Skill(name, blackboard), goToPosObj("", private_bb) {
+BallPlacementTest::BallPlacementTest(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPosObj("", private_bb) {
 
 	succeeded = false;
 	failure = false;
 	ros::NodeHandle n;
-	myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
-	myVelTopic = n.advertise<roboteam_msgs::WorldRobot>("myVelTopic", 1000);
-	myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
+
+	// Emiel : Never seen anything listen to this. Can just listen to world_state instead
+//	myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
+//	myVelTopic = n.advertise<roboteam_msgs::WorldRobot>("myVelTopic", 1000);
+//	myTargetPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myTargetPosTopic", 1000);
+
 	controller.Initialize(blackboard->GetInt("ROBOT_ID"));
 
 	safetyMarginGoalAreas = 0.2;
@@ -64,6 +66,12 @@ void BallPlacementTest::publishStopCommand() {
 	pub.publish(command);
 }
 
+void BallPlacementTest::Initialize() {
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initialize");
+	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
+
+}
+
 bt::Node::Status BallPlacementTest::Update() {
 
 	roboteam_msgs::World world = LastWorld::get();
@@ -81,7 +89,7 @@ bt::Node::Status BallPlacementTest::Update() {
 	if (findBot) {
 		robot = *findBot;
 	} else {
-		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Rrobot with ID " << robotID << " not found");
+		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot with ID " << robotID << " not found");
 		publishStopCommand();
 		return Status::Failure;
 	}
@@ -127,7 +135,11 @@ bt::Node::Status BallPlacementTest::Update() {
 			succeeded = true;
 			return Status::Success;
 		}
+	}else{
+		ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Ball not yet at correct position : " << ballPosError.length() << "m");
 	}
+
+	ROS_INFO_STREAM_THROTTLE_NAMED(0.25, ROS_LOG_NAME, "targetPos=" << targetPos);
 
 	// Set the blackboard for GoToPos
 	private_bb->SetInt("ROBOT_ID", robotID);                            // sets robot id
