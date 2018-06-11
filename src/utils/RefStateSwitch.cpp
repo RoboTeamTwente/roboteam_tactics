@@ -41,7 +41,7 @@ namespace rtt {
         unsigned botCount = world.us.size();
         // If the amount of bots changed
         if (botCount != lastKnownBotCount) {
-            ROS_DEBUG_STREAM_NAMED("RefStateSwitch", "Botcount changed from " << lastKnownBotCount << " to " << botCount);
+            ROS_INFO_STREAM_NAMED("RefStateSwitch", "Botcount changed from " << lastKnownBotCount << " to " << botCount);
             // Update lastKnownBotCount
             lastKnownBotCount = world.us.size();
             // Get the current strategy tree
