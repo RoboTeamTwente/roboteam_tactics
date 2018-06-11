@@ -37,7 +37,6 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
     opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
-    //computedTargetPos = false;
 
 }
 
@@ -103,28 +102,25 @@ void ReceiveBall::Terminate(bt::Node::Status s) {
 	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
 		hasTerminated = true;
 		publishStopCommand();
-		
+
 		if (GetBool("setSignal")) {
 		// Check if the robot actually expects to receive a pass
 		// If setSignal is not used, the rosparam robotClaimedBall will not be set to my ID (it shouldnt, at least)
-
+		// setSignal refers to the setting of the 'readyToReceiveBall' rosparam
 			int robotClaimedBall;
 		    ros::param::get("robotClaimedBall", robotClaimedBall);
 		    if (robotClaimedBall == robotID) {
 		    	ros::param::set("robotClaimedBall", -1);
         		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " released ball");
 		    }
-
 			ros::param::set("robot" + std::to_string(robotID) + "/readyToReceiveBall", false); // reset readyToReceiveBall
+
 			int passToParam;
 		    ros::param::get("passToRobot", passToParam);
 		    if (passToParam == robotID) {
 		        ros::param::set("passToRobot", -1);
-		        ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Terminate for " << robotID << ", resetting passToRobot and readyToReceiveBall");
-		    } else {
-		    	ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Terminate for " << robotID << ", resetting readyToReceiveBall");
-		    }
-
+		        ROS_INFO_STREAM_NAMED("skills.ReceiveBall", robotID << ", resetting passToRobot to -1 due to Terminate (passToRobot was set to my id)");
+		    }	
 		}
 	}
 
@@ -209,13 +205,17 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		interceptPose.interceptPos = receiveBallAtPos;
 		interceptPose.interceptAngle = (ballPos - receiveBallAtPos).angle();
 	} else {
-		// Vector2 ballTrajectory = ballVel.stretchToLength(10.0);
-		Vector2 closestPoint = ballPos + (receiveBallAtPos - ballPos).project2(ballVel); //ballTrajectory.closestPointOnVector(ballPos, receiveBallAtPos);
+		Vector2 closestPoint = ballPos + (receiveBallAtPos - ballPos).project2(ballVel);
 		ballIsComing = true;
 
 		double deviation = (closestPoint - receiveBallAtPos).length();
 		if (deviation < acceptableDeviation + marginDeviation) {
-			interceptPos = closestPoint;
+			if (deviation < acceptableDeviation) {
+				interceptPos = closestPoint;
+			} else {
+				interceptPos = receiveBallAtPos + (closestPoint - receiveBallAtPos).stretchToLength(acceptableDeviation);
+			}
+
 			interceptAngle = cleanAngle(ballVel.angle() + M_PI);
 			if (avoidBall) {
 				interceptPos = closestPoint + (closestPoint - receiveBallAtPos).normalize();
@@ -270,9 +270,7 @@ boost::optional<InterceptPose> ReceiveBall::deduceInterceptPosFromRobot() {
 	// If the computed closest point is within range, go stand there. Otherwise wait at the specified receiveBallAt... position
 	if (GetBool("defenderMode") && deviation > 0.001 && deviation < acceptableDeviation + marginDeviation) {
 		// if the deviation is within the margin region, it should remain at acceptableDeviation until it exceeds the margin
-		if (deviation > acceptableDeviation) {
-			deviation = acceptableDeviation;
-		}
+		deviation = fmin(deviation, acceptableDeviation);
 		if (avoidBall) {
 			deviation = deviation - 1;
 		}

@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID true
+#define DRAW_PASS_POINT_GRID false
 
 namespace rtt {
 
@@ -46,23 +46,26 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 		distToTeammateWeight = weightsVector.at(9);
 		distToTeammateMin = weightsVector.at(10);
 		distToTeammateMax = weightsVector.at(11);
-		distToBallWeight = weightsVector.at(12);
-		distToBallMin = weightsVector.at(13);
-		distToBallMax = weightsVector.at(14);
-		distToSelfWeight = weightsVector.at(15);
-		distToSelfMin = weightsVector.at(16);
-		distToSelfMax = weightsVector.at(17);
-		ballReflectionAngleWeight = weightsVector.at(18);
-		ballReflectionAngleMin = weightsVector.at(19);
-		ballReflectionAngleMax = weightsVector.at(20);
-		distOppToBallTrajWeight = weightsVector.at(21);
-		distOppToBallTrajMin = weightsVector.at(22);
-		distOppToBallTrajMax = weightsVector.at(23);
-		distOppToTargetTrajWeight = weightsVector.at(24);
-		distOppToTargetTrajMin = weightsVector.at(25);
-		distOppToTargetTrajMax = weightsVector.at(26);
+		angleToTeammateWeight = weightsVector.at(12);
+		angleToTeammateMin = weightsVector.at(13);
+		angleToTeammateMax = weightsVector.at(14);
+		distToBallWeight = weightsVector.at(15);
+		distToBallMin = weightsVector.at(16);
+		distToBallMax = weightsVector.at(17);
+		distToSelfWeight = weightsVector.at(18);
+		distToSelfMin = weightsVector.at(19);
+		distToSelfMax = weightsVector.at(20);
+		ballReflectionAngleWeight = weightsVector.at(21);
+		ballReflectionAngleMin = weightsVector.at(22);
+		ballReflectionAngleMax = weightsVector.at(23);
+		distOppToBallTrajWeight = weightsVector.at(24);
+		distOppToBallTrajMin = weightsVector.at(25);
+		distOppToBallTrajMax = weightsVector.at(26);
+		distOppToTargetTrajWeight = weightsVector.at(27);
+		distOppToTargetTrajMin = weightsVector.at(28);
+		distOppToTargetTrajMax = weightsVector.at(29);
 		// calculate totalWeight for normalization in computeScore
-		totalWeight = viewOfGoalWeight + distToOppWeight + distToTeammateWeight
+		totalWeight = viewOfGoalWeight + distToOppWeight + distToTeammateWeight + angleToTeammateWeight
 					+ distToBallWeight + distToSelfWeight + ballReflectionAngleWeight
 					+ distOppToBallTrajWeight + distOppToTargetTrajWeight + distToGoalWeight + 0.0001;
 	} else {
@@ -72,8 +75,15 @@ void OpportunityFinder::Initialize(std::string fileName, int ROBOT_ID, std::stri
 	this->ROBOT_ID = ROBOT_ID;
 	this->target = target;
 	this->targetID = targetID;
-	targetPos = getTargetPos(target, targetID, true);
+
 	field = LastWorld::get_field();
+	if (target == "crossArea") {
+		targetPos = getTargetPos("theirpenaltyline", 0, true);
+		goalIsCrossArea = true;
+	} else {
+		goalIsCrossArea = false;
+		targetPos = getTargetPos(target, targetID, true);
+	}
 
 	isCloseToPosSet = false;
 }
@@ -84,6 +94,8 @@ void OpportunityFinder::setWeight(std::string metric, double value) {
 		distToOppWeight = value;
 	} else if (metric == "distToTeammate") {
 		distToTeammateWeight = value;
+	} else if (metric == "angleToTeammate") {
+		angleToTeammateWeight = value;
 	} else if (metric == "distToSelf") {
 		distToSelfWeight = value;
 	} else if (metric == "distOppToBallTraj") {
@@ -98,6 +110,8 @@ void OpportunityFinder::setMin(std::string metric, double value) {
 		distToOppMin = value;
 	} else if (metric == "distToTeammate") {
 		distToTeammateMin = value;
+	} else if (metric == "angleToTeammate") {
+		angleToTeammateMin = value;
 	} else if (metric == "distToSelf") {
 		distToSelfMax = value;
 	} else if (metric == "distOppToBallTraj") {
@@ -112,6 +126,8 @@ void OpportunityFinder::setMax(std::string metric, double value) {
 		distToOppWeight = value;
 	} else if (metric == "distToTeammate") {
 		distToTeammateWeight = value;
+	} else if (metric == "angleToTeammate") {
+		angleToTeammateMax = value;
 	} else if (metric == "distToSelf") {
 		distToSelfWeight = value;
 	} else if (metric == "distOppToBallTraj") {
@@ -140,25 +156,38 @@ double OpportunityFinder::calcDistToClosestOpp(const Vector2& testPosition, cons
 }
 
 
-// Calculates the distance between the closest opponent and the testPosition
+// Calculates the distance between the closest teammate and the testPosition
 double OpportunityFinder::calcDistToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world) {
 
 	Vector2 ballPos(world.ball.pos);
 
-	double shortestDistance = 1000;//(Vector2(world.us.at(0).pos) - testPosition).length();
+	double shortestDistance = 1000;
 	for (size_t i = 0; i < world.us.size(); i++) {
-
 		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
 			Vector2 botPos(world.us.at(i).pos);
-			Vector2 ballToBot = botPos - ballPos;
-			//if (ballToBot.length() > 0.5) { // WIP: prevent taking into account the robot getting the ball. Maybe handle this in the fake world object at the start?
-				// double testDistance = (Vector2(world.us.at(i).pos) - testPosition).length();
-				// WIP: TEST DISTANCE IS ANGLE NOW. SHOULD PROBZ MAKE NEW METRIC FOR THIS..
-				double testDistance = 1.0*fabs(cleanAngle( ballToBot.angle() - (testPosition - ballPos).angle() )); // + 1.0*(botPos - testPosition).length()
-				if (testDistance < shortestDistance) {
-					shortestDistance = testDistance;
-				}
-			//}
+			double testDistance = (botPos - testPosition).length();
+			if (testDistance < shortestDistance) {
+				shortestDistance = testDistance;
+			}
+		}
+	}
+
+	return shortestDistance;
+}
+
+// Calculates the angle wrt the ball between the closest teammate and the testPosition
+double OpportunityFinder::calcAngleToClosestTeammate(const Vector2& testPosition, const roboteam_msgs::World& world) {
+
+	Vector2 ballPos(world.ball.pos);
+
+	double shortestDistance = 1000;
+	for (size_t i = 0; i < world.us.size(); i++) {
+		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
+			Vector2 botPos(world.us.at(i).pos);
+			double testDistance = fabs(cleanAngle( (botPos - ballPos).angle() - (testPosition - ballPos).angle() ));
+			if (testDistance < shortestDistance) {
+				shortestDistance = testDistance;
+			}
 		}
 	}
 
@@ -296,9 +325,15 @@ std::pair<std::vector<double>, std::vector<double>> OpportunityFinder::getOpenGo
 	// targetPos is one of the goals. IMPROVEMENT: Maybe add functionality that uses other views than only goal views (like view of dangerous positions)
 	// roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
 	// const roboteam_msgs::GeometryFieldSize& field = LastWorld::get_field(); // using reference is more efficient (does this work?) currently using globally saved field
-
-	Vector2 goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
-	Vector2 goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
+	Vector2 goalSide1, goalSide2;
+	if (goalIsCrossArea) { // goal is considered to be a certain 'cross area' for wingers to aim at
+		goalSide1 = targetPos + Vector2(-0.6, 0.0);
+		goalSide2 = targetPos + Vector2(1.0, 0.0);
+	} else { // regular situation
+		goalSide1 = targetPos + Vector2(0, -field.goal_width/2+0.023); // 0.023 = ball radius
+		goalSide2 = targetPos + Vector2(0, field.goal_width/2-0.023);
+	}
+	
 	Vector2 vecToGoalSide1 = goalSide1 - testPosition;
 	Vector2 vecToGoalSide2 = goalSide2 - testPosition;
 
@@ -459,12 +494,20 @@ double OpportunityFinder::computeScore(const Vector2& testPosition, const robote
 		score += smoothStep(distToTeammate)*distToTeammateWeight;
 	}
 
+	if (angleToTeammateWeight>0.0) {
+		double angleToTeammate = calcAngleToClosestTeammate(testPosition, world);
+		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		angleToTeammate = (angleToTeammate-angleToTeammateMin)/(angleToTeammateMax-angleToTeammateMin);
+		// Add score to total score
+		score += smoothStep(angleToTeammate)*angleToTeammateWeight;
+	}
+
 	if (distToBallWeight>0.0) {
 		double distToBall = (testPosition - ballPos).length();
-		// Normalize such that 0 corresponds to worst and 1 to best possible score
+		// Normalize such that 0 corresponds to best and 1 to worst possible score
 		distToBall = (distToBall-distToBallMin)/(distToBallMax-distToBallMin);
 		// Add score to total score
-		score += smoothStep(distToBall)*distToBallWeight;
+		score += smoothStep(1-distToBall)*distToBallWeight;
 	}
 
 	if (distToSelfWeight>0.0) {

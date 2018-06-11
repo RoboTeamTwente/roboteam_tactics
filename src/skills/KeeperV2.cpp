@@ -65,7 +65,7 @@ Vector2 KeeperV2::computeBlockPoint(Vector2 defendPos) {
     }
 
     Vector2 distVec = blockPos - defendPos;
-    acceptableDeviation = fmax(0.0, (u1.stretchToLength(distVec.length()) - distVec).length() );
+    acceptableDeviation = fmax(0.0, (u1.stretchToLength(distVec.length()) - distVec).length() - 0.05 );
 
     return blockPos;
 }
@@ -90,7 +90,7 @@ bt::Node::Status KeeperV2::Update() {
     private_bb->SetDouble("receiveBallAtX", blockPoint.x);
     private_bb->SetDouble("receiveBallAtY", blockPoint.y);
     private_bb->SetDouble("acceptableDeviation", acceptableDeviation);
-    private_bb->SetDouble("marginDeviation", acceptableDeviation*2);
+    private_bb->SetDouble("marginDeviation", acceptableDeviation);
     private_bb->SetBool("defenderMode", true);
     private_bb->SetBool("setSignal", false);
     private_bb->SetBool("enterDefenseAreas", true);
