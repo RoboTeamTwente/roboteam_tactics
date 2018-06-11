@@ -1,13 +1,13 @@
 <launch>
-	<group ns="yellow">
+	<group ns="blue">
 		<arg name="legacy_packets" default="false" />
-		<arg name="output_device" default="/dev/serial/by-id/usb-STMicroelectronics_Basestation_078-if00" />
+		<arg name="output_device" default="/dev/serial/by-id/usb-STMicroelectronics_Basestation_080-if00" />
 
 		<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
 		<param name="output_device" type="string" value="$(arg output_device)" />
 
-		<param name="our_side" type="str" value="right" />
-		<param name="our_color" type="str" value="yellow" />
+		<param name="our_side" type="str" value="left" />
+		<param name="our_color" type="str" value="blue" />
 
 		<param name="robot0/robotType" type="str" value="grsim" />
 		<param name="robot1/robotType" type="str" value="grsim" />
@@ -31,7 +31,7 @@
 	 
 		<node pkg="roboteam_world" type="filtered_world" name="world" output="screen" />
 		<node pkg="roboteam_vision" type="roboteam_vision" name="vision" output="screen"/>
-		<node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen"/>
+        <node pkg="roboteam_robothub" type="roboteam_robothub" name="robothub" output="screen"/>
 
 		<param name="role_iterations_per_second" type="int" value="30" />
 		<param name="num_role_nodes" type="int" value="8" />
