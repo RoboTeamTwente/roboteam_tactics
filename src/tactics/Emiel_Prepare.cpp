@@ -63,8 +63,11 @@ namespace rtt {
 
 			if(refState == RefState::PREPARE_PENALTY_THEM || refState == RefState::DEFEND_PENALTY)
 				rd.tree = "rtt_anouk/PenaltyKeeperRole";
-			else
+			else {
 				rd.tree = "rtt_jim/DefenderRoleStop";
+				// Default distance is 2 meters as of writing. The dribbler doesn't need to be turned on except when in NORMAL_PLAY or when instructed to do so
+				bb.SetDouble("dribblerDist", 0.1);
+			}
 
 			rd.blackboard = bb.toMsg();
 
