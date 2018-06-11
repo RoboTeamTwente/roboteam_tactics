@@ -36,6 +36,7 @@
 #include "roboteam_tactics/utils/CrashHandler.h"
 
 #define RTT_CURRENT_DEBUG_TAG StrategyNode
+#define ROS_LOG_NAME "StrategyNode"
 
 namespace {
 
@@ -71,13 +72,13 @@ public:
     static milliseconds const MSG_INTERVAL;
 
     StrategyDebugInfo() {
-        ROS_INFO_NAMED("StrategyNode", "New instance");
+        ROS_INFO_NAMED(ROS_LOG_NAME, "New instance");
 
         ros::NodeHandle n;
 
         strategyInfoPub = n.advertise<roboteam_msgs::StrategyDebugInfo>("strategy_debug_info", 10);
 
-        ROS_INFO_NAMED("StrategyNode", "Publishing on strategy_debug_info");
+        ROS_INFO_NAMED(ROS_LOG_NAME, "Publishing on strategy_debug_info");
     }
 
 
@@ -148,22 +149,22 @@ int main(int argc, char *argv[]) {
         &feedbackCallback
         );
 
-    ROS_INFO_STREAM_NAMED("StrategyNode", "Initializing StrategyNode " << ros::this_node::getName());
-    ROS_INFO_NAMED("StrategyNode", "Subscribed to 'role_feedback'");
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing StrategyNode " << ros::this_node::getName());
+    ROS_INFO_NAMED(ROS_LOG_NAME, "Subscribed to 'role_feedback'");
     // Construct the global role directive publisher & bt debug publisher if needed
     rtt::GlobalPublisher<roboteam_msgs::RoleDirective> globalRoleDirectivePublisher(rtt::TOPIC_ROLE_DIRECTIVE);
     CREATE_GLOBAL_RQT_BT_TRACE_PUBLISHER;
     
     // Creates the callbacks and removes them at the end
     rtt::WorldAndGeomCallbackCreator cb;
-    ROS_INFO_NAMED("StrategyNode", "Waiting for first world & geom message...");
+    ROS_INFO_NAMED(ROS_LOG_NAME, "Waiting for first world & geom message...");
     rtt::LastWorld::wait_for_first_messages();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
     // Subscribe to referee
     ros::Subscriber ref_sub = n.subscribe<roboteam_msgs::RefereeData>("vision_refbox", 1000, refereeCallback);
-    ROS_INFO_NAMED("StrategyNode", "Subscribed to 'vision_refbox'");
+    ROS_INFO_NAMED(ROS_LOG_NAME, "Subscribed to 'vision_refbox'");
 
     StrategyDebugInfo stratDebugInfo;
 
@@ -174,9 +175,9 @@ int main(int argc, char *argv[]) {
         if (arguments[0] == "mainStrategy") {
             strategy = rtt::StrategyComposer::getMainStrategy();
 
-            ROS_INFO_STREAM_NAMED("StrategyNode", "mainStrategy: " << strategy);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "mainStrategy: " << strategy);
             if (!strategy) {
-                ROS_ERROR_NAMED("StrategyNode", "There was an error initializing the main strategy tree (StrategyComposer). Aborting.");
+                ROS_ERROR_NAMED(ROS_LOG_NAME, "There was an error initializing the main strategy tree (StrategyComposer). Aborting.");
                 return 1;
             }
 
@@ -213,13 +214,13 @@ int main(int argc, char *argv[]) {
                         );
 
             } else {
-                ROS_ERROR_NAMED("StrategyNode", "\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
+                ROS_ERROR_NAMED(ROS_LOG_NAME, "\"%s\" is not a strategy tree. Aborting.", arguments[0].c_str());
                 return 1;
             }
         }
 
     } else {
-        ROS_ERROR_NAMED("StrategyNode", "No strategy tree passed as argument. Aborting.");
+        ROS_ERROR_NAMED(ROS_LOG_NAME, "No strategy tree passed as argument. Aborting.");
         return 1;
     }
 
@@ -228,11 +229,11 @@ int main(int argc, char *argv[]) {
         int numNodes;
         rtt::get_PARAM_NUM_ROLE_NODES(numNodes);
 
-        ROS_DEBUG_NAMED("StrategyNode", "Waiting for %i robot nodes to come online", numNodes);
+        ROS_DEBUG_NAMED(ROS_LOG_NAME, "Waiting for %i robot nodes to come online", numNodes);
        
         auto directivePub = n.advertise<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE, 100);
         while ((int) directivePub.getNumSubscribers() < numNodes) {
-            ROS_DEBUG_NAMED("StrategyNode", "Current num subsribers: %i", (int) directivePub.getNumSubscribers());
+            ROS_DEBUG_NAMED(ROS_LOG_NAME, "Current num subsribers: %i", (int) directivePub.getNumSubscribers());
             ros::spinOnce();
             rate.sleep();
 
@@ -243,14 +244,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    ROS_DEBUG_NAMED("StrategyNode", "Found role nodes. Waiting for more than 0 robots to appear...");
+    ROS_DEBUG_NAMED(ROS_LOG_NAME, "Found role nodes. Waiting for more than 0 robots to appear...");
 
     while (rtt::LastWorld::get().us.size() == 0) {
         ros::spinOnce();
         rate.sleep();
 
         if (!ros::ok()) {
-            ROS_DEBUG_NAMED("StrategyNode", "Interrupt received, exiting...");
+            ROS_DEBUG_NAMED(ROS_LOG_NAME, "Interrupt received, exiting...");
             return 0;
         }
     }
@@ -258,10 +259,10 @@ int main(int argc, char *argv[]) {
     // This is overwritten as soon as the first RefereeCommand comes in, which has the actual keeper robot ID in it.
     rtt::RobotDealer::setKeeper(0);
 
-    ROS_DEBUG_NAMED("StrategyNode", "More than one robot found. Starting!");
+    ROS_DEBUG_NAMED(ROS_LOG_NAME, "More than one robot found. Starting!");
 
     if(!strategy){
-        ROS_FATAL_NAMED("StrategyNode", "No strategy tree loaded! Terminating...");
+        ROS_FATAL_NAMED(ROS_LOG_NAME, "No strategy tree loaded! Terminating...");
         exit(-1);
     }
 
@@ -272,7 +273,7 @@ int main(int argc, char *argv[]) {
 
         if (status != bt::Node::Status::Running) {
             auto statusStr = bt::statusToString(status);
-            ROS_DEBUG_STREAM_NAMED("StrategyNode", "Strategy result: " << statusStr.c_str() << "Shutting down...\n");
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Strategy result: " << statusStr.c_str() << "Shutting down...\n");
             break;
         }
         rate.sleep();
