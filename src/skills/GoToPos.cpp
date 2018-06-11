@@ -30,10 +30,8 @@ namespace rtt {
 
 RTT_REGISTER_SKILL(GoToPos);
 
-GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
-        : Skill(name, blackboard)
-
-        {
+GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard) {
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Constructor");
             succeeded = false;
             failure = false;
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
@@ -75,6 +73,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         }
 
 void GoToPos::Initialize() {
+//    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Initialize");
     if (GetBool("driveBackward")) {
         ROBOT_ID = blackboard->GetInt("ROBOT_ID");
         // Get the latest world state
@@ -562,6 +561,29 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             targetPos = ballPos + diffVecNorm.scale(0.7);
         }
     }
+
+
+
+    Vector2 posError = targetPos - myPos;
+    // If we are close enough to our target position and target orientation, then stop the robot and return success
+    if (posError.length() < successDist && fabs(angleError) < 0.03) {
+        successCounter++;
+        if (successCounter >= 3) {
+
+            succeeded = true;
+            failure = false;
+
+            ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Goal reached!");
+            return boost::none;
+        }
+    } else {
+        ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, ROBOT_ID << " : Distance from goal : " << posError.length());
+        successCounter = 0;
+    }
+
+
+
+
     // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
     static time_point prevTime = now();
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
@@ -576,19 +598,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
 
-    Vector2 posError = targetPos - myPos;
-    // If we are close enough to our target position and target orientation, then stop the robot and return success
-    if (posError.length() < successDist && fabs(angleError) < 0.03) {
-        successCounter++;
-        if (successCounter >= 3) {
 
-            succeeded = true;
-            failure = false;
-            return boost::none;
-        }
-    } else {
-        successCounter = 0;
-    }
 
 
     // Turn towards goal when error is too far
