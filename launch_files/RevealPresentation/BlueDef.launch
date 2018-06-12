@@ -1,7 +1,6 @@
 <launch>
 
 	<group ns="blue">
-	    <param name="keeper_id" type="int" value="11" />
 	    <node name="strategyBlue" pkg="roboteam_tactics" type="TestX" args="rtt_jim/NormalPlay" output="screen" />
 	</group>
 
