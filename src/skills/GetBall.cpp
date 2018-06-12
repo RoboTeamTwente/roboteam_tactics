@@ -145,6 +145,7 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
     command.id = robotID;
     if (chip || GetBool("chipOn")) {
         command.chipper_forced = true;
+        command.chipper = true;
         if (robot_output_target == "grsim") {
             command.chipper_vel = fmin(5.0, kickSpeed);
         } else {
@@ -479,9 +480,9 @@ bt::Node::Status GetBall::Update (){
         distAwayFromBall = 0.3;
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
-        successDist = 0.11; //0.12
+        successDist = 0.125; //0.12
         successAngle = 0.10; //0.15
-        successRobotAngle = 0.03;
+        successRobotAngle = 0.05;
         distAwayFromBall = 0.3;
         minDist = 0.08;
     }
@@ -593,7 +594,7 @@ bt::Node::Status GetBall::Update (){
     }
     Vector2 targetPos;
     if (fabs(angleDiff) > successAngle || L_posDiff > 0.3) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*2-successAngle)); //TODO: downscaling when i get closer - working on it
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-0.2-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", false);
     } else {
@@ -622,7 +623,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
 
-        int ballCloseFrameCountTo = 2;
+        int ballCloseFrameCountTo = 6;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }
@@ -700,7 +701,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("angleGoal", targetAngle);
     private_bb->SetBool("avoidRobots", (L_posDiff > 0.3)); // shut off robot avoidance when close to target
     private_bb->SetBool("avoidBall", (fabs(angleDiff) > 0.5*M_PI)); // use ball avoidance as extra safety measure for when robot is still on the other side of the ball
-    private_bb->SetDouble("successDist", 0.005); // make sure gotopos does not return success before getball returns success
+    private_bb->SetDouble("successDist", 0.001); // make sure gotopos does not return success before getball returns success
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     } 

@@ -98,7 +98,7 @@
 	    <param name="output_device" type="string" value="/dev/serial/by-id/usb-STMicroelectronics_Basestation_080-if00" />
         <param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
         
-		<param name="keeper_id" type="int" value="0" />
+		<param name="keeper_id" type="int" value="1" />
 		<param name="our_side" type="str" value="right" />
 		<param name="our_color" type="str" value="blue" />
 

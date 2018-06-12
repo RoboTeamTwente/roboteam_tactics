@@ -105,7 +105,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxAngularVel = 20.0;
 
         thresholdTarget = 0.05;
-        minTarget = 0.55;
+        minTarget = 0.50;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
@@ -243,7 +243,7 @@ Vector2 Control::positionController(Vector2 myPos, Vector2 targetPos, Vector2 my
         posErrorI = Vector2(0.0, 0.0);
     }
 
-    if (myVel.length() < 0.4) { // disable derivative term for low velocity
+    if (myVel.length() < 0.5) { // disable derivative term for low velocity
         myVel = Vector2(0.0,0.0);
     }
     // Control equation
