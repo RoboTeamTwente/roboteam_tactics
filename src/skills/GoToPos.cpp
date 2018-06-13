@@ -31,7 +31,7 @@ namespace rtt {
 RTT_REGISTER_SKILL(GoToPos);
 
 GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard) {
-            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Constructor");
+//            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Constructor");
             succeeded = false;
             failure = false;
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
@@ -573,11 +573,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
             succeeded = true;
             failure = false;
 
-            ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Goal reached!");
+//            ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Goal reached!");
             return boost::none;
         }
     } else {
-        ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, ROBOT_ID << " : Distance from goal : " << posError.length());
+//        ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, ROBOT_ID << " : Distance from goal : " << posError.length());
         successCounter = 0;
     }
 
