@@ -18,5 +18,9 @@ namespace rtt {
 	private:
 		std::vector<boost::uuids::uuid> tokens;
 
+		boost::optional<boost::uuids::uuid> kickerToken;
+		boost::optional<int> kickerID;
+		long int timeKickerCompleted;
+
 	};
 } // namespace rtt

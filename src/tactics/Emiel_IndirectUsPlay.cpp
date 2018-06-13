@@ -17,6 +17,12 @@ void Emiel_IndirectUsPlay::Initialize() {
 
 	// Clear all the feedback tokens
 	tokens.clear();
+	kickerToken = boost::none;
+	kickerID = boost::none;
+	timeKickerCompleted = 0;
+
+	// Release any previously claimed robots
+	release_robots(get_claimed_robots());
 
 	// Get the default roledirective publisher
 	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
@@ -93,6 +99,10 @@ void Emiel_IndirectUsPlay::Initialize() {
 		boost::uuids::uuid token = unique_id::fromRandom();
 		tokens.push_back(token);
 		rd.token = unique_id::toMsg(token);
+
+		// Set variables used for checking updates
+		kickerToken = token;
+		kickerID = ballGetterID;
 
 		// Send to rolenode
 		pub.publish(rd);
@@ -207,7 +217,53 @@ void Emiel_IndirectUsPlay::Initialize() {
 
 bt::Node::Status Emiel_IndirectUsPlay::Update() {
 
-	// Wait for the ball to move...
+	/* Check if the kicker has taken the shot successfully */
+	if (kickerToken && feedbacks.find(*kickerToken) != feedbacks.end()) {
+
+		Status roleStatus = feedbacks.at(*kickerToken);
+		if(roleStatus != Status::Success){
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Kicker returned status " << describe_status(roleStatus) << "... Reinitializing");
+			Initialize();
+			return Status::Running;
+		}
+
+		// If the time hasn't been initialized yet
+		if(timeKickerCompleted == 0){
+			// Set time
+			timeKickerCompleted = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		}
+
+		// Get a reference to the last world
+		const roboteam_msgs::World& world = LastWorld::get();
+		// Check if the robot actually exists in the real world. Can't hurt to check
+		boost::optional<roboteam_msgs::WorldRobot> robot = getWorldBot(*kickerID, true, world);
+		// If the robot doesn't exist
+		if(!robot){
+			ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Kicker finished. Could not find kicker with id " << *kickerID);
+		}else
+		// If it does exist
+		{
+			// Get the velocity and distance of the ball relative to the kicker
+			double relativeVelocity = (Vector2((*robot).vel) - Vector2(world.ball.vel)).length();
+			double relativeDistance = (Vector2((*robot).pos) - Vector2(world.ball.pos)).length();
+			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Kicker finished. From robot" << *kickerID << ": velocity=" << relativeVelocity << ", distance=" << relativeDistance);
+
+			// If the ball moves fast enough, or is far away enough from the kicker, the shot was succesful.
+			if(0.5 < relativeVelocity || 0.5 < relativeDistance){
+				ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Play Finished! From robot" << *kickerID << ": velocity=" << relativeVelocity << ", distance=" << relativeDistance);
+				return Status::Success;
+			}else{
+				// Get the current time
+				long int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				// If two seconds have passed since the keeper completed its role, we can assume that it failed for some reason
+				if(4000 < now - timeKickerCompleted){
+					ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Kicker timed out! Kicking ball probably failed... Reinitializing");
+					Initialize();
+					return Status::Running;
+				}
+			}
+		}
+	}
 
 	return Status::Running;
 
