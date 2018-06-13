@@ -375,7 +375,7 @@ bt::Node::Status ReceiveBall::Update() {
 			lastNotComingBall = ballPos;
 		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
-		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
+		angleDiff = cleanAngle( ((lastNotComingBall - receiveBallAtPos).angle() - (LastWorld::get_their_goal_center() - receiveBallAtPos).angle()) );
 		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < 0.33*M_PI + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
 		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
@@ -397,7 +397,7 @@ bt::Node::Status ReceiveBall::Update() {
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
-		startKicking = true;
+		startKicking = fabs(cleanAngle(robot.angle - targetAngle)) < 0.2; // extra safety: I shouldnt shoot if I did not manage to reach the right angle in time
 	} else {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;
