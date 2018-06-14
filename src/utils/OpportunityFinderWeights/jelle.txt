@@ -16,8 +16,8 @@ angleToTeammateMax 0.3
 distToBallWeight 0.5
 distToBallMin 3.0
 distToBallMax 6.0
-distToSelfWeight 1.0
-distToSelfMin 0.0
+distToSelfWeight 0.5
+distToSelfMin 0.2
 distToSelfMax 2.0
 ballReflectionAngleWeight 1.0
 ballReflectionAngleMin 0.5

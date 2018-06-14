@@ -153,6 +153,7 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         }
         
     } else {
+        command.kicker = true;
         command.kicker_forced = true;
         command.kicker_vel = kickSpeed;
     }
@@ -474,7 +475,7 @@ bt::Node::Status GetBall::Update (){
     double minDist;
     double successRobotAngle;
     if (robot_output_target == "grsim") {
-        successDist = 0.12;
+        successDist = 0.13;
         successAngle = 0.10;
         successRobotAngle = 0.05;
         distAwayFromBall = 0.3;

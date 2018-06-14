@@ -498,7 +498,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
 
@@ -543,8 +542,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         successDist = 0.05;
     }
 
-
-
     // Check the input position
     if (targetPos == prevTargetPos) {
         targetPos = prevTargetPos;
@@ -562,17 +559,13 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         }
     }
 
-
-
     Vector2 posError = targetPos - myPos;
     // If we are close enough to our target position and target orientation, then stop the robot and return success
     if (posError.length() < successDist && fabs(angleError) < 0.03) {
         successCounter++;
         if (successCounter >= 3) {
-
             succeeded = true;
             failure = false;
-
 //            ROS_DEBUG_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Goal reached!");
             return boost::none;
         }
@@ -582,45 +575,23 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-
-
     // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
-    static time_point prevTime = now();
-    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
-    prevTime = now();
-    double max_diff = 2.0*timeDiff*0.001;
-    static Vector2 prevTarget = myPos + Vector2(0.01,0);
-    Vector2 targetDiff = targetPos - prevTarget;
-    if (targetDiff.length() > max_diff) {
-        targetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
-    }
-    prevTarget = targetPos;
-
-
-
-
-
+    // static time_point prevTime = now();
+    // int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    // prevTime = now();
+    // double max_diff = 2.0*timeDiff*0.001;
+    // static Vector2 prevTarget = myPos + Vector2(0.01,0);
+    // Vector2 targetDiff = targetPos - prevTarget;
+    // if (targetDiff.length() > max_diff) {
+    //     targetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
+    // }
+    // prevTarget = targetPos;
 
     // Turn towards goal when error is too far
     if (posError.length() > 0.25 && !GetBool("dontRotate")) {
         angleGoal = posError.angle();
         angleError = cleanAngle(angleGoal - myAngle);
     }
-
-
-
-    // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
-    // static time_point prevTime = now();
-    // int timeDiff = time_difference_milliseconds(prevTime, now()).count();
-    // prevTime = now();
-    // double max_diff = 10.0*timeDiff*0.001;
-    // static Vector2 prevCommand;
-    // Vector2 commandDiff = sumOfForces - prevCommand;
-    // if (commandDiff.length() > max_diff) {
-    //     sumOfForces = (prevCommand + commandDiff.scale(max_diff));
-    // }
-    // prevCommand = sumOfForces;
-    //////////
 
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
@@ -655,10 +626,19 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     }
 
-    // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
-    drawer.setColor(0, 0, 0);
+
+    // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
+    static time_point prevTime = now();
+    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    prevTime = now();
+    double max_diff = 10.0*timeDiff*0.001;
+    static Vector2 prevCommand;
+    Vector2 commandDiff = sumOfForces - prevCommand;
+    if (commandDiff.length() > max_diff) {
+        sumOfForces = (prevCommand + commandDiff.stretchToLength(max_diff));
+    }
+    prevCommand = sumOfForces;
+    //////////
 
     // Different velocity commands for grsim and real robot
     roboteam_msgs::RobotCommand command;
@@ -667,7 +647,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
         velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
         double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        velCommand = controller.limitVel2(velCommand, angleError);          // Limit linear velocity
         angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
         
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
@@ -695,6 +675,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
+
+    // Draw the target velocity vector in rqt-view (in red, oooh)
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, velCommand.scale(0.5));
+    drawer.setColor(0, 0, 0);
 
     // fill the rest of command message
     command.id = ROBOT_ID;
