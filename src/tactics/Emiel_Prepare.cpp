@@ -63,8 +63,11 @@ namespace rtt {
 
 			if(refState == RefState::PREPARE_PENALTY_THEM || refState == RefState::DEFEND_PENALTY)
 				rd.tree = "rtt_anouk/PenaltyKeeperRole";
-			else
+			else {
 				rd.tree = "rtt_jim/DefenderRoleStop";
+				// Default distance is 2 meters as of writing. The dribbler doesn't need to be turned on except when in NORMAL_PLAY or when instructed to do so
+				bb.SetDouble("dribblerDist", 0.1);
+			}
 
 			rd.blackboard = bb.toMsg();
 
@@ -117,7 +120,7 @@ namespace rtt {
 			std::vector<int> robotsToTheirRobots = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, oppPositions, world);
 
 			// For each robot to defend
-			for (int i = 0; i < robotsToTheirRobots.size(); i++) {
+			for (int i = 0; i < (int)robotsToTheirRobots.size(); i++) {
 
 				// ====================================
 				// Initialize simple defender
@@ -156,7 +159,7 @@ namespace rtt {
 			std::vector<int> robotsToTheirRobotsInt = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, oppPositionsInt, world);
 
 			// For each robot to defend
-			for (int i = 0; i < robotsToTheirRobotsInt.size(); i++) {
+			for (int i = 0; i < (int)robotsToTheirRobotsInt.size(); i++) {
 
 				// ====================================
 				// Initialize simple defender

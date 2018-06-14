@@ -145,7 +145,7 @@ void SimpleDefender::Initialize() {
     ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
 }
 
-    bt::Node::Status SimpleDefender::Update() {
+bt::Node::Status SimpleDefender::Update() {
 
     // Get the last world information and some blackboard info
     roboteam_msgs::World world = LastWorld::get();
@@ -161,6 +161,7 @@ void SimpleDefender::Initialize() {
     double distanceFromGoalRatio = 0.5;
     double acceptableDeviation = 0.8;
     double dribblerDist = 2.0;
+	double angleOffset = 0.0;
 
     if (HasDouble("distanceFromGoal")) {
         distanceFromGoal = GetDouble("distanceFromGoal");
@@ -174,7 +175,9 @@ void SimpleDefender::Initialize() {
     if (HasDouble("dribblerDist")) {
         dribblerDist = GetDouble("dribblerDist");
     }
-
+	if(HasDouble("angleOffset")){
+		angleOffset = GetDouble("angleOffset");
+	}
 
     // DistanceFromGoal
     // DistanceFromGoalAmorousAdventure
@@ -196,9 +199,7 @@ void SimpleDefender::Initialize() {
         defendPos = Vector2(world.ball.pos);
     }
 
-    double angleOffset = GetDouble("angleOffset");
-    Vector2 targetPos;
-
+	Vector2 targetPos;
     if(HasDouble("distanceFromGoalRatio")) {
         Vector2 targetFromPosition = getTargetFromPosition();
         Vector2 targetToPosition = getTargetToPosition();

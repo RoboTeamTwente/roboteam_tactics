@@ -291,8 +291,7 @@ bt::Node::Status Anouk_BallPlacementUsPlay::Update() {
 				currentState = PlayStates::STOP_BALL_SPINNING;
 				// Return running
 				return Status::Running;
-			}
-
+			}else
 			if(currentState == PlayStates::MOVING_PLACER){
 				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Placer has moved");
 				// Reset token

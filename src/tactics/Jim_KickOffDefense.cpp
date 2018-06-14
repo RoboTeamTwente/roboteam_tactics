@@ -13,6 +13,7 @@
 #include "roboteam_tactics/utils/utils.h"
 #include "roboteam_tactics/utils/FeedbackCollector.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/RefLookup.h"
 #include "roboteam_tactics/utils/debug_print.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
@@ -51,12 +52,12 @@ void Jim_KickOffDefense::Initialize() {
 		ROS_INFO_NAMED(ROS_LOG_NAME, "Preparing kickoff for them");
 	}
 
-	bool kickoffForUs = refState == RefState::PREPARE_KICKOFF_US;
+	bool kickoffForUs = getExtendedState() == RefState::DO_KICKOFF;
 
 	// Get the world
 	roboteam_msgs::World world = LastWorld::get();
 	Vector2 ourGoalPos = LastWorld::get_our_goal_center();
-	Vector2 ballPos = world.ball.pos;
+//	Vector2 ballPos = world.ball.pos;
 	std::vector<roboteam_msgs::WorldRobot> theirRobots = world.them;
 
 
@@ -98,6 +99,10 @@ void Jim_KickOffDefense::Initialize() {
 	// =========================
 	// Initialize the Kickoff-taker if needed
 	// =========================
+
+	ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "kickoffForUs=" << (kickoffForUs ? "True" : "False"));
+	ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "refState=" << refStateToString(*refState).c_str());
+
 	if(kickoffForUs){
 		int kickerID = robots.at(0);
 		delete_from_vector(robots, kickerID);
@@ -145,7 +150,7 @@ void Jim_KickOffDefense::Initialize() {
 	std::vector<roboteam_msgs::WorldRobot> dangerousOpps;
 	for (size_t i = 0; i < world.dangerList.size(); i++) {
 		roboteam_msgs::WorldRobot opp = world.dangerList.at(i);
-		double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
+//		double angleDiffBall = fabs(cleanAngle((Vector2(opp.pos) - ourGoalPos).angle() - (ballPos - ourGoalPos).angle()));
 		{
 
 			bool addDangerousOpp = true;
@@ -258,7 +263,10 @@ void Jim_KickOffDefense::Initialize() {
 		float circleRadius = 1.5;
 		float circleFromGoal = 4.5;
 
-		float angleStep = angleTotal / (numBallDefenders - 1);
+		float angleStep = 0;
+		if(numBallDefenders > 1)
+			angleStep = angleTotal / (numBallDefenders - 1);
+
 		float angleOffset = -(numBallDefenders - 1) * angleStep / 2;
 
 		for (int i = 0; i < numBallDefenders; i++) {

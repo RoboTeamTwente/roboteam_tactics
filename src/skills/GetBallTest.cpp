@@ -26,7 +26,7 @@
 #include <string>
 #include <boost/optional.hpp>
 
-#define RTT_CURRENT_DEBUG_TAG GetBallTest
+#define ROS_LOG_NAME "skills.GetBallTest"
 
 namespace rtt {
 
@@ -113,6 +113,10 @@ void GetBallTest::releaseBall() {
 }
 
 void GetBallTest::Initialize() {
+
+    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Initializing");
+    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
+
     ballCloseFrameCount = 0;
     finalStage = false;
     countFinalMessages = 0;
@@ -123,28 +127,27 @@ void GetBallTest::Initialize() {
 
 bt::Node::Status GetBallTest::Update (){
 
-	roboteam_msgs::World world = LastWorld::get();
+	const roboteam_msgs::World& world = LastWorld::get();
 	robotID = blackboard->GetInt("ROBOT_ID");
     
-
 	// Wait for the first world message
-	while (world.us.size() == 0) {
+	if(world.us.size() == 0) {
 		return Status::Running;
 	}
-
 
 	// Find the robot with the specified ID
     boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
     roboteam_msgs::WorldRobot robot;
+
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN_STREAM("GetBallTest: robot with this ID not found, ID: " << robotID);
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot with this ID not found, ID: " << robotID);
         return Status::Failure;
     }  
 
 	// Store some info about the world state
-	roboteam_msgs::WorldBall ball = world.ball;
+	const roboteam_msgs::WorldBall& ball = world.ball;
 	Vector2 ballPos(ball.pos);
 	Vector2 ballVel(ball.vel);
 	Vector2 robotPos(robot.pos);
@@ -155,8 +158,7 @@ bt::Node::Status GetBallTest::Update (){
 
     double viewOfGoal = opportunityFinder.calcViewOfGoal(robotPos, world);
     bool canSeeGoal = viewOfGoal >= 0.1; 
-    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal
-    		&& !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
+    bool shootAtGoal = GetBool("passToBestAttacker") && canSeeGoal && !(HasBool("dontShootAtGoal") && GetBool("dontShootAtGoal"));
 
 
     boost::optional<int> maxScoreID = boost::none;
@@ -200,40 +202,25 @@ bt::Node::Status GetBallTest::Update (){
 	// If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball
     if (GetBool("passToBestAttacker") && !choseRobotToPassTo && shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
-        std::cout << "-> 1" << std::endl;
     } else if (choseRobotToPassTo) {
         targetAngle = GetTargetAngle(ballPos, "robot", passToRobot, true);
-        std::cout << "-> 2" << std::endl;
     } else if (HasString("aimAt")) {
         if (GetString("aimAt") == "ballplacement") {
-            //std::cout << "-> 3 face towards ballplacement" << std::endl;
-//            Vector2 const ballplacement = LastRef::get().designated_position;
-//            std::cout << "command code: " << LastRef::getState().RefState << std::endl;
-//            std::cout << "ballplacement -> x: " << LastRef::get().designated_position.x << ", y: " << LastRef::get().designated_position.y << std::endl;
             Vector2 ballplacement = Vector2(GetDouble("aimAtBallplacement_x"), GetDouble("aimAtBallplacement_y"));
-            //std::cout << "ballplacement -> x: " << ballplacement.x << ", y: " << ballplacement.y << std::endl;
-
             targetAngle = (ballplacement-ballPos).angle();
-        }
-        else {
-            std::cout << "-> 4" << std::endl;
-        targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"),
-                                     GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
+        }else {
+            targetAngle = GetTargetAngle(ballPos, GetString("aimAt"), GetInt("aimAtRobot"), GetBool("ourTeam")); // in roboteam_tactics/utils/utils.cpp
         }
     } else if (HasDouble("targetAngle")) {
         targetAngle = GetDouble("targetAngle");
-        std::cout << "-> 5" << std::endl;
     } else if (shootAtGoal) {
         targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
-        std::cout << "-> 6" << std::endl;
     } else {
         targetAngle = posDiff.angle();
-        std::cout << "-> 7" << std::endl;
     }
 
     if (GetBool("aimAwayFromTarget")) {
         targetAngle = targetAngle + M_PI;
-        std::cout << "face away from target" << std::endl;
     }
 
 
@@ -277,14 +264,6 @@ bt::Node::Status GetBallTest::Update (){
     }
     
 
-    // if (GetBool("beAggressive", false)) {
-    // 	successDist = 0.11 ;
-    //     successAngle = 0.15; 
-    //     getBallDist = 0.0;
-    //     distAwayFromBall = 0.2;  roboteam_msgs::World world = LastWorld::get();
-    //     // private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
-    // }
-
     if (HasDouble("distAwayFromBall")) {
         distAwayFromBall = GetDouble("distAwayFromBall");
     }
@@ -302,7 +281,7 @@ bt::Node::Status GetBallTest::Update (){
     }
 
 
-    double addBallSpeed = ballVel.length() * 0.2;
+    double addBallSpeed = ballVel.length() * 0.2; // Emiel : What if the ball moves towards the robot? Does the robot accelerate even though the ball is coming towards it?
     if (addBallSpeed > 1.7) {
         addBallSpeed = 1.7;
     }
@@ -314,10 +293,12 @@ bt::Node::Status GetBallTest::Update (){
 	if (posDiff.length() > (distAwayFromBall + 0.3) || fabs(angleDiff) > (successAngle)) { // TUNE THIS STUFF FOR FINAL ROBOT
 		targetPos = ballPos + Vector2(distAwayFromBall, 0.0).rotate(cleanAngle(intermediateAngle + M_PI));
         private_bb->SetBool("dribbler", false);
+        ROS_INFO_STREAM_THROTTLE_NAMED(0.25, ROS_LOG_NAME, "Too far away or angle too large. No dribbler. Distance=" << posDiff.length() << ", angle="<<fabs(angleDiff));
+
 	} else {
         private_bb->SetBool("dribbler", true);
-        std::cout << "dribbler on" << std::endl;
-		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06        
+		targetPos = ballPos + Vector2(getBallDist, 0.0).rotate(cleanAngle(intermediateAngle + M_PI)); // For arduinobot: 0.06
+        ROS_INFO_STREAM_THROTTLE_NAMED(0.25, ROS_LOG_NAME, "Distance and angle in range. Dribbler on!");
 	}
     
 
@@ -330,6 +311,7 @@ bt::Node::Status GetBallTest::Update (){
         }
         
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
+            ROS_INFO_STREAM_COND_NAMED(ballCloseFrameCount == 0, ROS_LOG_NAME, "Starting the frame count!");
             ballCloseFrameCount++;
             return Status::Running;
         } else {
@@ -347,6 +329,7 @@ bt::Node::Status GetBallTest::Update (){
             else {
                 choseRobotToPassTo = false;
                 releaseBall();
+                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Close enough to ball! Finished");
                 return Status::Success;
             }
 
@@ -366,8 +349,7 @@ bt::Node::Status GetBallTest::Update (){
     private_bb->SetBool("avoidRobots", true);
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
-    } 
-    
+    }
     if (HasDouble("pGainPosition")) {
         private_bb->SetDouble("pGainPosition", GetDouble("pGainPosition"));
     } 

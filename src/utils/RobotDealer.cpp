@@ -10,6 +10,7 @@
 #include "boost/interprocess/sync/scoped_lock.hpp"
 
 #define RTT_CURRENT_DEBUG_TAG RobotDealer
+#define ROS_LOG_NAME "RobotDealer"
 
 namespace rtt {
 
@@ -63,7 +64,7 @@ bool RobotDealer::get_keeper_available() {
 bool RobotDealer::claim_robot(int id) {
 	LOCK_THIS_FUNCTION
 
-    RTT_DEBUGLN("claim_robot with id: %i",id);
+    ROS_DEBUG_NAMED(ROS_LOG_NAME, "claim_robot with id: %i",id);
     if (id == keeper) {
         if (!keeper_available) {
             ROS_ERROR("Keeper already taken! ID: %i", keeper);
@@ -92,7 +93,7 @@ bool RobotDealer::claim_robot(int id) {
 bool RobotDealer::release_robot(int id) {
 	LOCK_THIS_FUNCTION
     // RTT_DEBUGLN("Releasing robot %i", id);
-    ROS_DEBUG("RobotDealer Releasing robot %i", id);
+    ROS_DEBUG_NAMED(ROS_LOG_NAME, "Releasing robot %i", id);
 
     removeRobotFromOwnerList(id);
 
@@ -112,7 +113,7 @@ bool RobotDealer::release_robot(int id) {
     // }
 
     if (taken_robots.find(id) == taken_robots.end()) {
-    	ROS_ERROR("Tried to release an unclaimed robot: %d!", id);
+        ROS_ERROR_NAMED(ROS_LOG_NAME, "Tried to release an unclaimed robot: %d!", id);
     	return false;
     }
 
@@ -212,3 +213,5 @@ void RobotDealer::halt_override() {
 }
 
 } // rtt
+
+#undef ROS_LOG_NAME
