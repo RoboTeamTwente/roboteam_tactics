@@ -178,27 +178,35 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	Vector2 posdiff = myPos - ballPos;
 	double velThreshold;
 	if (ballIsComing) {
-		velThreshold = posdiff.length()/8; // ARBITRARY GUESS
+		velThreshold = 0.5;//posdiff.length()/8; // ARBITRARY GUESS
 	} else {
-		velThreshold = posdiff.length()/4; // ARBITRARY GUESS
+		velThreshold = 0.8;//posdiff.length()/4; // ARBITRARY GUESS
 	}
 	if (GetBool("defenderMode")) {
 		velThreshold = 0.1;
 	} else if (velThreshold < 0.1) {
 		velThreshold = 0.1;
 	}
+
+	static int slowBallCounter = 0;
 	if (ballVel.dot(posdiff.normalize()) < velThreshold) { // if the velocity in my direction is too low
-		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
-			int robotClaimedBall;
-		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
-		    if (robotClaimedBall == robotID) { // if a pass is noted to myself, I assume the ball is coming.
-		    	ballIsComing = true;
-	    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
-		    }
-		} else {
-			ballIsComing = false;
+		slowBallCounter++;
+		if (slowBallCounter > 3) {
+			if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
+				int robotClaimedBall;
+			    ros::param::getCached("robotClaimedBall", robotClaimedBall);
+			    if (robotClaimedBall == robotID) { // if a pass is noted to myself, I assume the ball is coming.
+			    	ballIsComing = true;
+		    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
+			    }
+			} else {
+				ballIsComing = false;
+			}
 		}
-	}//--------------------------
+	} else {
+		slowBallCounter = 0;
+	}
+	//--------------------------
 
 	// Actual determining of the interceptPose
 	if (ballVel.length() < 0.1 || ballVel.dot(posdiff.normalize()) < velThreshold) { // ball not coming towards me.

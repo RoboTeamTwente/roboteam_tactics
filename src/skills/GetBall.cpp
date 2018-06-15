@@ -606,9 +606,9 @@ bt::Node::Status GetBall::Update (){
     double vBall = ballVel.length();
     if (vBall > 0.5) {
         if (L_posDiff > 0.15) {
-            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*0.5;
+            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.0;
             double max_ahead = 3.0;
-            double ahead = L*(vBall-0.0);
+            double ahead = L*(vBall);
             if (ahead < max_ahead) {
                 targetPos = targetPos + ballVel.stretchToLength(ahead);
             } else {

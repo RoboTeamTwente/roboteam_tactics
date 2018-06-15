@@ -114,7 +114,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         dGainPosition = 0.0;
         pGainRotation = 2.5;
         iGainRotation = 0.0;
-        dGainRotation = 0.2;
+        dGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
 
@@ -352,11 +352,11 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    if (fabs(angularVelTarget) < 2.2) {
-        if (fabs(angularVelTarget) > 0.5) {
-            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-        }
-    }
+    // if (fabs(angularVelTarget) < 2.2) {
+    //     if (fabs(angularVelTarget) > 0.5) {
+    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+    //     }
+    // }
 
     return angularVelTarget;
 }
