@@ -42,7 +42,7 @@ std::string currentTreeName;
 
 uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
-std::string LOG_NAME = "RoleNode";
+std::string ROS_LOG_NAME = "RoleNode";
 
 
 bool ignoring_strategy_instructions = false;
@@ -70,14 +70,14 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         return;
     }
 
-    ROS_INFO_STREAM_NAMED(LOG_NAME, "Directive received : " << msg->tree.c_str());
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Directive received : " << msg->tree.c_str());
 
     ros::NodeHandle n;
 
     if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
         reset_tree();
 
-        ROS_WARN_NAMED(LOG_NAME, "Received stop command");
+        ROS_WARN_NAMED(ROS_LOG_NAME, "Received stop command");
 
         // Stop the robot in its tracks
         pub.publish(rtt::stop_command(ROBOT_ID));
@@ -102,11 +102,11 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bb->fromMsg(msg->blackboard);
 
     if (!bb->HasInt("ROBOT_ID")) {
-        ROS_ERROR_NAMED(LOG_NAME, "RoleDirective received without ROBOT_ID");
+        ROS_ERROR_NAMED(ROS_LOG_NAME, "RoleDirective received without ROBOT_ID");
     }
 
     if (!bb->HasInt("KEEPER_ID")) {
-        ROS_ERROR_NAMED(LOG_NAME, "RoleDirective received without KEEPER_ID");
+        ROS_ERROR_NAMED(ROS_LOG_NAME, "RoleDirective received without KEEPER_ID");
     }
 
     {   // Emiel: Not sure why this scope is here
@@ -115,7 +115,7 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
         currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
 
         if (!currentTree)  {
-            ROS_ERROR_STREAM_NAMED(LOG_NAME, "Tree name is neither tree nor skill: " << msg->tree.c_str());
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Tree name is neither tree nor skill: " << msg->tree.c_str());
             return;
         }
     }
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
     ros::init(argc, argv, "RoleNode", ros::init_options::AnonymousName);
     ros::NodeHandle n;
 
-    ROS_DEBUG_STREAM_NAMED(LOG_NAME, "New RoleNode instance, name=" << ros::this_node::getName());
+    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "New RoleNode instance, name=" << ros::this_node::getName());
 
 
 
@@ -140,9 +140,9 @@ int main(int argc, char *argv[]) {
         ROBOT_ID = std::stoi(robotIDStr);                                       // Convert to int
         std::string our_team = "no_color";
         ros::param::get("our_color", our_team);
-        LOG_NAME = LOG_NAME + "." + our_team + "." + robotIDStr;                // Set logging name from RoleNode to RoleNode.our_color.ROBOT_ID
+        ROS_LOG_NAME = ROS_LOG_NAME + "." + our_team + "." + robotIDStr;                // Set logging name from RoleNode to RoleNode.our_color.ROBOT_ID
     } catch (...) {
-        ROS_ERROR_STREAM_NAMED(LOG_NAME, "Could not parse Robot ID from node name " << name.c_str() << "! Aborting");
+        ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Could not parse Robot ID from node name " << name.c_str() << "! Aborting");
         return 1;
     }
     // ====================== //
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
     int iterationsPerSecond = 60;
     rtt::get_PARAM_ITERATIONS_PER_SECOND(iterationsPerSecond);
     ros::Rate sleeprate(iterationsPerSecond);
-    ROS_INFO_STREAM_NAMED(LOG_NAME, "New RoleNode #" << ROBOT_ID << " at " << iterationsPerSecond << "Hz");
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "New RoleNode #" << ROBOT_ID << " at " << iterationsPerSecond << "Hz");
 
 
 
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
                 statusString = "Failure";
             }
 
-            ROS_INFO_STREAM_NAMED(LOG_NAME, "Tree finished. "
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Tree finished. "
                     << "status=" << statusString
                     << ", tree=" << currentTreeName.c_str());
 //                    << ", token=" << currentToken);
@@ -249,7 +249,11 @@ int main(int argc, char *argv[]) {
         if ((steady_clock::now() - start) > milliseconds(5000)) {
             start = steady_clock::now();
 
-            ROS_INFO_STREAM_NAMED(LOG_NAME, "Actual Hz = " << (iters / 5.0));
+            // ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Actual Hz = " << (iters / 5.0));
+            // If the actual roleHz is lower than 80%, throw a warning
+            if(iterationsPerSecond * 0.8 < (iters/5.0)){
+                ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters * 5.0) << "/" << iterationsPerSecond);
+            }
 
             iters = 0;
         }

@@ -1,6 +1,7 @@
 #include <limits>
 
 #include <ros/param.h>
+#include <ros/ros.h>
 
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_msgs/FieldCircularArc.h"
@@ -18,6 +19,7 @@
 
 
 #define RTT_CURRENT_DEBUG_TAG DistanceXToY
+#define ROS_LOG_NAME "DistanceXToY"
 
 namespace rtt {
 
@@ -145,6 +147,7 @@ Vector2 distPointToLine(FieldLineSegment line, Vector2 point, double safetyMargi
 
 
 Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMargin) {
+    
     FieldLineSegment line;
     FieldLineSegment top_line;
     FieldLineSegment bottom_line;
@@ -203,6 +206,7 @@ Vector2 getDistToDefenseArea(bool ourDefenseArea, Vector2 point, double safetyMa
     //     shortestDistance = distToBottomArc;
     // }
 
+    // ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "ourDefenseArea=" << ourDefenseArea << ", \tpoint=" << point << ", \tsafetyMargin=" << safetyMargin <<", \tshortestDistance=" << shortestDistance << ", \tlength: " << shortestDistance.length());
     return shortestDistance;
 }
 
@@ -269,7 +273,6 @@ double getDistToDefenseArea2(bool ourDefenseArea, Vector2 point) {
     //     }
     // }
 
-    
     return shortestDistance;
 }
 

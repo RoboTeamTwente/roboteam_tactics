@@ -58,7 +58,7 @@ namespace rtt {
 
     }
 
-    std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots, std::vector<Vector2> points, roboteam_msgs::World& world) {
+    std::vector<int> Jim_MultipleDefendersPlay::assignRobotsToPositions(std::vector<int> robots, std::vector<Vector2> points, const roboteam_msgs::World& world) {
         // If the number of points is larger than the number of robots, choose the first points to drive to
         if (points.size() > robots.size()) {
             points.resize(robots.size());

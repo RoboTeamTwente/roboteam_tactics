@@ -14,10 +14,8 @@ class Jim_MultipleDefendersPlay : public Tactic {
 
     public:
     Jim_MultipleDefendersPlay(std::string name, bt::Blackboard::Ptr blackboard = nullptr);
-    static boost::optional<int> getClosestDefender(std::vector<int> robots,
-    		roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
-    static std::vector<int> assignRobotsToPositions(std::vector<int> robots,
-    		std::vector<Vector2> points, roboteam_msgs::World& world);
+    static boost::optional<int> getClosestDefender(std::vector<int> robots, roboteam_msgs::World& world, Vector2 dangerPos, double angleOffset);
+    static std::vector<int> assignRobotsToPositions(std::vector<int> robots, std::vector<Vector2> points, const roboteam_msgs::World& world);
 
     void Initialize();
     Status Update();

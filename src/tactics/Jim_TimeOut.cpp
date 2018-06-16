@@ -18,6 +18,7 @@
 #include "unique_id/unique_id.h" 
 
 #define RTT_CURRENT_DEBUG_TAG Jim_TimeOut
+#define ROS_LOG_NAME "plays.Jim_Timeout"
 
 namespace rtt {
 
@@ -32,18 +33,18 @@ Jim_TimeOut::Jim_TimeOut(std::string name, bt::Blackboard::Ptr blackboard)
 void Jim_TimeOut::Initialize() {   
     tokens.clear();
 
-    RTT_DEBUG("Initializing Jim_TimeOut \n");
-
     if (getAvailableRobots().size() < 1) {
-        RTT_DEBUG("No robots available, cannot initialize... \n");
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "No robots available, cannot initialize...");
         //TODO: Want to pass failure here as well!
         return;
     }
     
-    roboteam_msgs::World world = LastWorld::get();
+    // Get the world, the robots, and the keeper
+    const roboteam_msgs::World& world = LastWorld::get();
     std::vector<int> robots = getAvailableRobots();
     int keeper = RobotDealer::get_keeper();
-    // robots.push_back(keeper);
+
+    // The location where the keeper should be 
     Vector2 keeperPos(LastWorld::get_our_goal_center().x + 0.5, 0.0);
 
     double distanceBetweenRobots = 0.3;
@@ -152,7 +153,6 @@ bt::Node::Status Jim_TimeOut::Update() {
     }
 
     if (allSucceeded) {
-        RTT_DEBUGLN("Jim_TimeOut succeeded!");
         return Status::Success;
     }
 
