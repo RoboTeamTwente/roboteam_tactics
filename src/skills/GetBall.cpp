@@ -62,6 +62,7 @@ RTT_REGISTER_SKILL(GetBall);
  *	Dbl  : dGainPosition
  *	Dbl  : pGainRotation
  *	Int  : geneva
+ *	Bool : passOn
  */
 
 #define scoreThreshold 25.0
@@ -158,6 +159,7 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         }
         
     } else {
+        command.kicker = true;
         command.kicker_forced = true;
         command.kicker_vel = kickSpeed;
     }

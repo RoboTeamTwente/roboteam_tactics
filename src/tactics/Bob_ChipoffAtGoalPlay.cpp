@@ -15,16 +15,13 @@
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/ScopedBB.h"
 
-#define RTT_CURRENT_DEBUG_TAG Bob_ChipoffAtGoalPlay
 #define ROS_LOG_NAME "plays.Bob_COAGPlay"
 
 namespace rtt {
 
 RTT_REGISTER_TACTIC(Bob_ChipoffAtGoalPlay);
 
-Bob_ChipoffAtGoalPlay::Bob_ChipoffAtGoalPlay(std::string name, bt::Blackboard::Ptr blackboard)
-        : Tactic(name, blackboard) 
-        {}
+Bob_ChipoffAtGoalPlay::Bob_ChipoffAtGoalPlay(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard) {}
 
 void Bob_ChipoffAtGoalPlay::Initialize() {
     failImmediately = false;
@@ -60,6 +57,7 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", taker.robot_id);
         bb.SetInt("KEEPER_ID", keeperID);
+        bb.SetBool("GetBall_A_chipOn", true);
 
         // ScopedBB(bb, "GetBall_")
         //     .setString("aimAt", "theirgoal")
