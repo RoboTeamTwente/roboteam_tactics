@@ -90,6 +90,7 @@ private:
 	int targetID;
 	Vector2 targetPos;
 	bool goalIsCrossArea;
+	int closestTeammateToBall;
 
 	bool isCloseToPosSet;
 	Vector2 closeToPos;

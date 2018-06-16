@@ -144,6 +144,10 @@ Vector2 getTargetPos(std::string target, int theirID, bool target_our_team) {
         roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
         return Vector2(field.left_penalty_line.begin.x, 0);
     }
+    if (target == "centertheirhalf") {
+        roboteam_msgs::GeometryFieldSize field = LastWorld::get_field();
+        return Vector2(field.field_length/4, 0);
+    }
     if (target == "robot") {
 
         boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(theirID, target_our_team, w);

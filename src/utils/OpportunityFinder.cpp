@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID false
+#define DRAW_PASS_POINT_GRID true
 
 namespace rtt {
 
@@ -182,7 +182,7 @@ double OpportunityFinder::calcAngleToClosestTeammate(const Vector2& testPosition
 
 	double shortestDistance = 1000;
 	for (size_t i = 0; i < world.us.size(); i++) {
-		if (world.us.at(i).id!=ROBOT_ID){ // I should not check my own position
+		if (world.us.at(i).id != ROBOT_ID && world.us.at(i).id != closestTeammateToBall){ // I should not check my own position nor the closest teammate to ball
 			Vector2 botPos(world.us.at(i).pos);
 			double testDistance = fabs(cleanAngle( (botPos - ballPos).angle() - (testPosition - ballPos).angle() ));
 			if (testDistance < shortestDistance) {
@@ -440,7 +440,7 @@ double OpportunityFinder::computeScore(const Vector2& testPosition, const robote
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.5);
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.2);
 		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}
@@ -469,8 +469,8 @@ double OpportunityFinder::computeScore(const Vector2& testPosition, const robote
 		score += smoothStep(distOppToTargetTraj)*distOppToTargetTrajWeight;
 	}
 
-	if (distToGoalWeight>0.0) { // IMPROVEMENT: Distance from goal line, instead of goal center point?
-		double distToGoal = (testPosition - targetPos).length();
+	if (distToGoalWeight>0.0) {
+		double distToGoal = fabs(testPosition.x - targetPos.x);
 		// Normalize such that 0 corresponds to best and 1 to worst possible score
 		distToGoal = (distToGoal-distToGoalMin)/(distToGoalMax-distToGoalMin);
 		// Add score to total score
@@ -546,7 +546,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 
 	// Generate a fake world object which for our robots contains claimed positions where applicable...
     // ...and does not include our robot closest to ball
-	size_t closestToBallIndex = 0;
+	int closestToBallId = 0;
 	double closestToBallDist = 1000;
 	for (size_t i = 0; i < world.us.size(); i++) {
 		// check whether current bot claimed a position
@@ -562,10 +562,11 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 		double distToBall = (ballPos - Vector2(world.us.at(i).pos)).length();
 		if (distToBall < closestToBallDist) {
 			closestToBallDist = distToBall;
-			closestToBallIndex = i;
+			closestToBallId = world.us.at(i).id;
 		}
 	}
-	world.us.erase(world.us.begin()+closestToBallIndex); // remove robot closest to ball from our fake world object
+	closestTeammateToBall = closestToBallId;
+	//world.us.erase(world.us.begin()+closestToBallIndex); // remove robot closest to ball from our fake world object
 
 
 	// loop through each point in the grid
@@ -645,7 +646,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
     // ...and does not include our robot closest to ball
 	roboteam_msgs::World fakeWorld = world;
 
-	size_t closestToBallIndex = 0;
+	size_t closestToBallId = 0;
 	double closestToBallDist = 1000;
 
 	if (!realScore || !realPos) {
@@ -673,11 +674,12 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 			double distToBall = (ballPos - Vector2(fakeWorld.us.at(i).pos)).length();
 			if (distToBall < closestToBallDist) {
 				closestToBallDist = distToBall;
-				closestToBallIndex = i;
+				closestToBallId = world.us.at(i).id;
 			}
 		}
-		fakeWorld.us.erase(fakeWorld.us.begin()+closestToBallIndex); // delete robot closest to ball from the fake world
-		world.us.erase(world.us.begin()+closestToBallIndex); 		// same goes for the real world to make sure both are the same size
+		closestTeammateToBall = closestToBallId;
+		//fakeWorld.us.erase(fakeWorld.us.begin()+closestToBallIndex); // delete robot closest to ball from the fake world
+		//world.us.erase(world.us.begin()+closestToBallIndex); 		// same goes for the real world to make sure both are the same size
 	}
 
 	/// Print world used

@@ -50,13 +50,13 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
                 grsim = true;
                 safetyMarginGoalAreas = 0.1;
                 marginOutsideField = 0.3;
-                avoidRobotsGain = 1.2;
-                cushionGain = 0.8;
+                avoidRobotsGain = 1.0;
+                cushionGain = 1.0;
                 maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
             } else {
                 grsim = false;
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = 0.0;//-0.08; //ALTERED CURRENTLY FOR THE DEMOFIELD, NORMALLY: 0.3
+                marginOutsideField = 0.3;
                 avoidRobotsGain = 1.0;
                 cushionGain = 1.5;
                 maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
@@ -564,7 +564,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
 
 
-
     // Get the latest world state
     roboteam_msgs::World world = LastWorld::get();
 
@@ -639,21 +638,21 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         successCounter = 0;
     }
 
-    // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
-    static time_point prevTime = now();
-    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
-    prevTime = now();
-    double max_diff = 2.0*timeDiff*0.001;
-    static Vector2 prevTarget = myPos + Vector2(0.001,0);
-    Vector2 smoothTargetPos = targetPos;
-    Vector2 targetDiff = targetPos - prevTarget;
-    if (targetDiff.length() > max_diff) {
-        smoothTargetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
-    }
-    prevTarget = smoothTargetPos;
+    // // Limit the targetpos derivative (to apply a smoother command to the robot, which it can handle better)
+    // static time_point prevTime = now();
+    // int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    // prevTime = now();
+    // double max_diff = 2.0*timeDiff*0.001;
+    // static Vector2 prevTarget = myPos + Vector2(0.001,0);
+    // Vector2 smoothTargetPos = targetPos;
+    // Vector2 targetDiff = targetPos - prevTarget;
+    // if (targetDiff.length() > max_diff) {
+    //     smoothTargetPos = (prevTarget + targetDiff.stretchToLength(max_diff));
+    // }
+    // prevTarget = smoothTargetPos;
 
-    drawer.setColor(255, 50, 50);
-    drawer.drawPoint("smoothTargetPos", smoothTargetPos);
+    // drawer.setColor(255, 50, 50);
+    // drawer.drawPoint("smoothTargetPos", smoothTargetPos);
 
     // Turn towards goal when error is too large
     static double posErrorRotationThreshold = 0.30;
@@ -668,19 +667,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         posErrorRotationThreshold = 0.30;
     }
 
-    // // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
-    // static time_point prevTime = now();
-    // int timeDiff = time_difference_milliseconds(prevTime, now()).count();
-    // prevTime = now();
-    // double max_diff = 10.0*timeDiff*0.001;
-    // static Vector2 prevCommand;
-    // Vector2 commandDiff = sumOfForces - prevCommand;
-    // if (commandDiff.length() > max_diff) {
-    //     sumOfForces = (prevCommand + commandDiff.scale(max_diff));
-    // }
-    // prevCommand = sumOfForces;
-    //////////
-
     // Draw the line towards the target position
     drawer.setColor(0, 100, 100);
     drawer.drawLine("posError_" + std::to_string(ROBOT_ID), myPos, posError);
@@ -690,7 +676,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 sumOfForces(0.0, 0.0);
 
     // Position controller to steer the robot towards the target position
-    sumOfForces = sumOfForces + controller.positionController(myPos, smoothTargetPos, myVel);
+    sumOfForces = sumOfForces + controller.positionController(myPos, targetPos, myVel);
 
     // Robot avoidance
     if (HasBool("avoidRobots") && !GetBool("avoidRobots")) {
@@ -709,10 +695,19 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         sumOfForces = avoidDefenseAreas(myPos, myVel, targetPos, sumOfForces);
     }
 
-    // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
-    drawer.setColor(0, 0, 0);
+
+    // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
+    static time_point prevTime = now();
+    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    prevTime = now();
+    double max_diff = 10.0*timeDiff*0.001;
+    static Vector2 prevCommand;
+    Vector2 commandDiff = sumOfForces - prevCommand;
+    if (commandDiff.length() > max_diff) {
+        sumOfForces = (prevCommand + commandDiff.stretchToLength(max_diff));
+    }
+    prevCommand = sumOfForces;
+    //////////
 
     // Different velocity commands for grsim and real robot
     roboteam_msgs::RobotCommand command;
@@ -721,7 +716,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
         velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
         double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        velCommand = controller.limitVel(velCommand, angularVelCommand);    // Limit linear velocity
+        velCommand = controller.limitVel2(velCommand, angleError);          // Limit linear velocity
         angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
         
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
@@ -749,6 +744,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
+
+    // Draw the target velocity vector in rqt-view (in red, oooh)
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, velCommand.scale(0.5));
+    drawer.setColor(0, 0, 0);
 
     // fill the rest of command message
     command.id = ROBOT_ID;

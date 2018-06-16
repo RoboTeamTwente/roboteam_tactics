@@ -36,7 +36,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
     ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    opportunityFinder.Initialize("striker.txt", robotID, "theirgoal", 0);
 
 }
 
@@ -178,27 +178,35 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 	Vector2 posdiff = myPos - ballPos;
 	double velThreshold;
 	if (ballIsComing) {
-		velThreshold = posdiff.length()/8; // ARBITRARY GUESS
+		velThreshold = 0.5;//posdiff.length()/8; // ARBITRARY GUESS
 	} else {
-		velThreshold = posdiff.length()/4; // ARBITRARY GUESS
+		velThreshold = 0.8;//posdiff.length()/4; // ARBITRARY GUESS
 	}
 	if (GetBool("defenderMode")) {
 		velThreshold = 0.1;
 	} else if (velThreshold < 0.1) {
 		velThreshold = 0.1;
 	}
+
+	static int slowBallCounter = 0;
 	if (ballVel.dot(posdiff.normalize()) < velThreshold) { // if the velocity in my direction is too low
-		if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
-			int robotClaimedBall;
-		    ros::param::getCached("robotClaimedBall", robotClaimedBall);
-		    if (robotClaimedBall == robotID) { // if a pass is noted to myself, I assume the ball is coming.
-		    	ballIsComing = true;
-	    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
-		    }
-		} else {
-			ballIsComing = false;
+		slowBallCounter++;
+		if (slowBallCounter > 3) {
+			if(!ballIsComing && !GetBool("defenderMode") && GetBool("setSignal")) {
+				int robotClaimedBall;
+			    ros::param::getCached("robotClaimedBall", robotClaimedBall);
+			    if (robotClaimedBall == robotID) { // if a pass is noted to myself, I assume the ball is coming.
+			    	ballIsComing = true;
+		    		ROS_DEBUG_STREAM_NAMED("skills.ReceiveBall", robotID << " noted a pass to himself, and no teammate has ball, so assumes ball is coming");
+			    }
+			} else {
+				ballIsComing = false;
+			}
 		}
-	}//--------------------------
+	} else {
+		slowBallCounter = 0;
+	}
+	//--------------------------
 
 	// Actual determining of the interceptPose
 	if (ballVel.length() < 0.1 || ballVel.dot(posdiff.normalize()) < velThreshold) { // ball not coming towards me.
@@ -375,7 +383,7 @@ bt::Node::Status ReceiveBall::Update() {
 			lastNotComingBall = ballPos;
 		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
-		angleDiff = cleanAngle( ((lastNotComingBall - myPos).angle() - (LastWorld::get_their_goal_center() - myPos).angle()) );
+		angleDiff = cleanAngle( ((lastNotComingBall - receiveBallAtPos).angle() - (LastWorld::get_their_goal_center() - receiveBallAtPos).angle()) );
 		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < 0.33*M_PI + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
 		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
@@ -397,7 +405,7 @@ bt::Node::Status ReceiveBall::Update() {
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
-		startKicking = true;
+		startKicking = fabs(cleanAngle(robot.angle - targetAngle)) < 0.2; // extra safety: I shouldnt shoot if I did not manage to reach the right angle in time
 	} else {
 		targetPos = interceptPos;
 		targetAngle = interceptAngle;

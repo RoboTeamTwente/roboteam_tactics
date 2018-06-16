@@ -97,23 +97,24 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainPosition = 4.5;//3.0
         iGainPosition = 0.0;//prevteam: 0.0 //kantoor:0.3 //DL: 0.2
         dGainPosition = 0.75; //prevteam: 0.5
-        pGainRotation = 10;
-        iGainRotation = 0.0;//prevteam: 0.0
-        dGainRotation = 0.0;
+        pGainRotation = 10; // rotation control is now on robot
+        iGainRotation = 0.0;// rotation control is now on robot
+        dGainRotation = 0.0;// rotation control is now on robot
         pGainVelocity = 0.0;
         maxSpeed = 5.0;
         maxAngularVel = 20.0;
 
-        thresholdTarget = 0.05;
-        minTarget = 0.50;
+        thresholdTarget = 0.03;
+        minTarget = 0.55;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {
         pGainPosition = 2.0; //2.0
         iGainPosition = 0.0;
         dGainPosition = 0.0;
-        pGainRotation = 2.0;
+        pGainRotation = 2.5;
         iGainRotation = 0.0;
+        dGainRotation = 0.0;
         maxSpeed = 2.0;
         maxAngularVel = 10.0;
 
@@ -279,13 +280,6 @@ Vector2 Control::velocityController(Vector2 myVelRobotFrame, Vector2 velTarget) 
 // Proportional rotation controller
 double Control::rotationController(double myAngle, double angleGoal, Vector2 posError) {
 
-    bool forceAngle = false;
-
-
-    if (posError.length() > 1.0 && !forceAngle) {
-        angleGoal = posError.angle();
-    }
-
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
@@ -325,11 +319,6 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 // Proportional rotation controller
 double Control::rotationController(double myAngle, double angleGoal, Vector2 posError, double myAngularVel) {
 
-    bool forceAngle = false;
-
-    if (posError.length() > 1.0 && !forceAngle) {
-        angleGoal = posError.angle();
-    }
     double angleError = angleGoal - myAngle;
     angleError = cleanAngle(angleError);
     // ROS_INFO_STREAM("targetAngle: " << angleGoal << " myAngle: " << myAngle << " angleError: " << angleError);
@@ -352,18 +341,22 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
         // angleErrorI = 0;
     // }
 
-    if (fabs(angleError) < 0.1*M_PI) {
+    if (fabs(angleError) < 0.1) {
         angleErrorI = 0.0;
+    }
+
+    if (fabs(myAngularVel) < 0.1) {
+        myAngularVel = 0.0;
     }
 
     // Control equation
     double angularVelTarget = angleError * pGainRotation + angleErrorI * iGainRotation - myAngularVel * dGainRotation;
 
-    if (fabs(angularVelTarget) < 2.2) {
-        if (fabs(angularVelTarget) > 0.5) {
-            angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
-        }
-    }
+    // if (fabs(angularVelTarget) < 2.2) {
+    //     if (fabs(angularVelTarget) > 0.5) {
+    //         angularVelTarget = angularVelTarget / fabs(angularVelTarget) * 2.2;
+    //     }
+    // }
 
     return angularVelTarget;
 }

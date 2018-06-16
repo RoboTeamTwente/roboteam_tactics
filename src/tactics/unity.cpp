@@ -216,6 +216,10 @@
 #undef RTT_CURRENT_DEBUG_TAG
 #undef ROS_LOG_NAME
 
+#include "Jelle_IndependentAttackersPlay.cpp"
+#undef RTT_CURRENT_DEBUG_TAG
+#undef ROS_LOG_NAME
+
 #include "Emiel_PrepareKickoffUs.cpp"
 #undef ROS_LOG_NAME
 

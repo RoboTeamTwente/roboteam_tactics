@@ -61,7 +61,7 @@ set(BUILD_PRACTICE_TESTS TRUE)
 
 # Interesting debug feedback features
 set(ENABLE_BT_TRACE TRUE)
-set(ENABLE_DEBUG_GRAPHICS TRUE)
+set(ENABLE_DEBUG_GRAPHICS FALSE)
 
 # Build machine learning components
 set(BUILD_LEARNING FALSE)
