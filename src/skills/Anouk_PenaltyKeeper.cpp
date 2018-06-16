@@ -29,7 +29,7 @@ void Anouk_PenaltyKeeper::publishStopCommand(int robotID) {
 
 Vector2 Anouk_PenaltyKeeper::calculateKeeperPosition(){
     // Get the last world
-    roboteam_msgs::World world = LastWorld::get();
+    const roboteam_msgs::World& world = LastWorld::get();
     // Get the position of the ball
     Vector2 ballPos(world.ball.pos);
     // Get the position of the ball
@@ -81,7 +81,7 @@ bt::Node::Status Anouk_PenaltyKeeper::Update() {
     // Pass the position to GoToPos
     private_bb->SetDouble("xGoal", keeperPos.x);
     private_bb->SetDouble("yGoal", keeperPos.y);
-    private_bb->SetDouble("angleGoal", 0);
+    private_bb->SetDouble("angleGoal", 0.5 * M_PI);
 
     // Get the RobotCommand for the keeper and publish it
     boost::optional<roboteam_msgs::RobotCommand> commandPtr = goToPos.getVelCommand();
