@@ -396,7 +396,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
     // if (ROBOT_ID != KEEPER_ID) {
     if (!(HasBool("enterDefenseAreas") && GetBool("enterDefenseAreas"))) {
         // If the target position is in our defense area, then subtract the vector difference between the defense area and the target position
-        if (isWithinDefenseArea(true, newTargetPos, safetyMarginGoalAreas)) {
+        if (ROBOT_ID != KEEPER_ID && isWithinDefenseArea(true, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToOurDefenseArea = getDistToDefenseArea(true, newTargetPos, safetyMarginGoalAreas);
             drawer.setColor(50, 50, 50);
             drawer.drawLine("defAreaLine", newTargetPos, distToOurDefenseArea);
@@ -404,7 +404,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
         }
 
         // If the target position is in their defense area, then subtract the vector difference between the defense area and the target position
-        if (ROBOT_ID != KEEPER_ID && isWithinDefenseArea(false, newTargetPos, safetyMarginGoalAreas)) {
+        if (isWithinDefenseArea(false, newTargetPos, safetyMarginGoalAreas)) {
             Vector2 distToTheirDefenseArea = getDistToDefenseArea(false, newTargetPos, safetyMarginGoalAreas);
             drawer.setColor(50, 50, 100);
             drawer.drawLine("defTheirAreaLine", newTargetPos, distToTheirDefenseArea);
