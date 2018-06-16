@@ -32,7 +32,7 @@ void Positioning::Initialize() {
     }
     if (profile == 0) {
     // Striker
-        opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+        opportunityFinder.Initialize("striker.txt", robotID, "theirgoal", 0);
          // starting point is opponents half of the field
         initialBoxSize = field.field_width;
         initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
@@ -43,7 +43,11 @@ void Positioning::Initialize() {
         initialBoxSize = field.field_width;
         initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
     } else if (profile == 2){
-
+    // Midfielder
+        opportunityFinder.Initialize("midfielder.txt", robotID, "theirgoal", 0);
+         // starting point is opponents half of the field
+        initialBoxSize = field.field_width;
+        initialPos = Vector2(0.0,0.0);
     }
 
     // starting point
@@ -87,11 +91,17 @@ bt::Node::Status Positioning::Update() {
     
     auto elapsedTime = time_difference_milliseconds(start, now());
     // best position is computed once every x milliseconds
-    if (elapsedTime.count() >= 1000) {
+    if (elapsedTime.count() >= 800) {
+        // I will wait at a set distance from the best position it computed, otherwise the opponent can react, making the position less good.
+        // This waiting position is then in a direction such that the best position will not be blocked from the ball or goal by the opponent as a reaction.
+        double waitAtDist = 0.0;
+        if (HasDouble("waitAtDistance")) {
+            waitAtDist = GetDouble("waitAtDistance");
+        }
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
         Vector2 myPos = getTargetPos("robot", robotID, true);
-        double boxSize = (bestPosition - myPos).length() + 1.0; 
+        double boxSize = fmax(((bestPosition - myPos).length() - waitAtDist)*1.5 + 2.5, 2.5); 
 
         bool dontGoToPos = false;
         if (counter>5) {
@@ -108,12 +118,7 @@ bt::Node::Status Positioning::Update() {
         bestPosition = opportunityFinder.computeBestOpportunity(bestPosition,boxSize,boxSize);
 
         if(!dontGoToPos) {
-            // I will wait at a set distance from the best position it computed, otherwise the opponent can react, making the position less good.
-            // This waiting position is then in a direction such that the best position will not be blocked from the ball or goal by the opponent as a reaction.
-            double waitAtDist = 0.0;
-            if (HasDouble("waitAtDistance")) {
-                waitAtDist = GetDouble("waitAtDistance");
-            }
+            
             double targetAngle = getBallGoalHalfwayAngle(bestPosition);
             Vector2 posOffset = Vector2(-waitAtDist,0).rotate(targetAngle);
 

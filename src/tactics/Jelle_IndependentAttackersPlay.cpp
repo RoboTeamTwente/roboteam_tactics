@@ -42,8 +42,8 @@ void Jelle_IndependentAttackersPlay::Initialize() {
     roboteam_msgs::World world = LastWorld::get();
     Vector2 ballPos(world.ball.pos);
 
-    // Max 5 attackers
-    int numAttackers = std::min((int) robots.size(), 5);
+    // Max 6 attackers
+    int numAttackers = std::min((int) robots.size(), 6);
     ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing Jelle_IndependentAttackersPlay numAttackers: " << numAttackers);
 
     // Get the default roledirective publisher
@@ -67,11 +67,13 @@ void Jelle_IndependentAttackersPlay::Initialize() {
         bb.SetInt("ROBOT_ID", attackerID);
         bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
-        // if i is even, we give the attacker a striker profile, if odd we give it a winger profile.
-        if (i % 2 == 0) {
+        // priority of profiles: striker - winger - midfielder - striker - winger - midfielder
+        if (i % 3 == 0) {
             bb.SetInt("profile", 0); // striker profile
-        } else {
+        } else if ((i-1) % 3 == 0) {
             bb.SetInt("profile", 1); // winger profile
+        } else {
+            bb.SetInt("profile", 2); // midfielder profile
         }
 
         // Create message

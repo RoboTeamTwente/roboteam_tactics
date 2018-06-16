@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID false
+#define DRAW_PASS_POINT_GRID true
 
 namespace rtt {
 
@@ -440,7 +440,7 @@ double OpportunityFinder::computeScore(const Vector2& testPosition, const robote
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.5);
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.2);
 		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}

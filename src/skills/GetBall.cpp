@@ -99,12 +99,13 @@ void GetBall::Initialize(){
 void GetBall::initializeOpportunityFinder() {
     ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Initializing OpportunityFinder...");
     // load the relevant weights list on which our teammates' positions will be judged, and specify the 'target' (see opportunityFinder)
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    opportunityFinder.Initialize("striker.txt", robotID, "theirgoal", 0);
 
     // the following custom changes apply for when choosing a teammate to pass to.
     opportunityFinder.setWeight("distToTeammate", 0.0);  // not relevant for passing, only for positioning
     opportunityFinder.setWeight("angleToTeammate", 0.0);  // not relevant for passing, only for positioning
     opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
+    opportunityFinder.setWeight("distToBall", 1.0); 
     opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // how strict to be on whether pass will fail
 }
 
@@ -212,14 +213,17 @@ double GetBall::passBall(int id, Vector2 pos, Vector2 ballPos, bool chip) {
         double passDist = (pos - ballPos).length();
         if (!chip) {
             double maxPassSpeed = computePassSpeed(passDist, 2.0, false); // fastest pass that my teammate can receive
-            // TODO: TEST THIS PART
             double arrivalTime = computeArrivalTime(pos, id);
             passSpeed = computePassSpeed(passDist, arrivalTime, true);
+            // TODO: TEST THIS PART: is my teammate actually receiving the ball at the specified speed/time
+            
             if (passSpeed > maxPassSpeed) {
                 passSpeed = maxPassSpeed;
             }
         } else {//TODO: TUNE. 0-> 5cm 1.5->40cm. 3-> 95cm (dribbler on: 85cm). 4.5-> 150cm (dribbler on: 125cm).
-            passSpeed = fmin(fmax((passDist-0.2)*2.0, 1.5),6.5);
+            passSpeed = 8.0;// always chip maximally, to ensure the ball goes over the opponent. 
+            //TODO: maybe needs a calculation taking into account dist to the opponent that blocks the ball as well
+            //OLD: fmin(fmax((passDist-0.2)*2.0, 1.5),6.5);
         }
     }
 

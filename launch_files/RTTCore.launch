@@ -6,7 +6,7 @@
 	<arg name="our_color" default="yellow" />
 	<param name="our_side" type="str" value="left" />
 	<param name="our_color" type="str" value="$(arg our_color)" />
-	<param name="keeper_id" type="int" value="5" />
+	<param name="keeper_id" type="int" value="0" />
 
 	<arg name="robot_output_target" default="serial" />
 	<arg name="robot_type" default="proto" />

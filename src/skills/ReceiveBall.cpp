@@ -36,7 +36,7 @@ ReceiveBall::ReceiveBall(std::string name, bt::Blackboard::Ptr blackboard)
     hasBall = whichRobotHasBall();
     ros::param::get("robot_output_target", robot_output_target);
     prevComputedPoint = now();
-    opportunityFinder.Initialize("jelle.txt", robotID, "theirgoal", 0);
+    opportunityFinder.Initialize("striker.txt", robotID, "theirgoal", 0);
 
 }
 
