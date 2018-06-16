@@ -62,6 +62,7 @@ RTT_REGISTER_SKILL(GetBall);
  *	Dbl  : dGainPosition
  *	Dbl  : pGainRotation
  *	Int  : geneva
+ *	Bool : passOn
  */
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPos("", private_bb) {
@@ -153,6 +154,7 @@ void GetBall::publishKickCommand(double kickSpeed, bool chip){
         }
         
     } else {
+        command.kicker = true;
         command.kicker_forced = true;
         command.kicker_vel = kickSpeed;
     }
