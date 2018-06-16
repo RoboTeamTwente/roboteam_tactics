@@ -52,7 +52,10 @@ void Jelle_IndependentAttackersPlay::Initialize() {
     // Print the robots that will be attackers
     std::stringstream vectorStr;
     std::copy(robots.begin(), robots.end(), std::ostream_iterator<int>(vectorStr, ", "));
-    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Attackers: [" << vectorStr.str().c_str() << "]");   
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Attackers: [" << vectorStr.str().c_str() << "]");  
+
+    // priority of profiles: striker - midfielder - winger - midfielder - striker - winger
+    int profiles[6] = {0, 2, 1, 2, 0, 1};
 
     for (size_t i = 0; i < (size_t) numAttackers; i++) {
 
@@ -66,14 +69,8 @@ void Jelle_IndependentAttackersPlay::Initialize() {
         // Set the robot ID
         bb.SetInt("ROBOT_ID", attackerID);
         bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
-
-        // priority of profiles: striker - winger - midfielder - striker - winger - midfielder
-        if (i % 3 == 0) {
-            bb.SetInt("profile", 0); // striker profile
-        } else if ((i-1) % 3 == 0) {
-            bb.SetInt("profile", 1); // winger profile
-        } else {
-            bb.SetInt("profile", 2); // midfielder profile
+        if (i < 6) {
+            bb.SetInt("Positioning_A_profile", profiles[i]);
         }
 
         // Create message

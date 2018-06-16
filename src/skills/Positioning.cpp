@@ -44,7 +44,7 @@ void Positioning::Initialize() {
         initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
     } else if (profile == 2){
     // Midfielder
-        opportunityFinder.Initialize("midfielder.txt", robotID, "theirgoal", 0);
+        opportunityFinder.Initialize("midfielder.txt", robotID, "centertheirhalf", 0);
          // starting point is opponents half of the field
         initialBoxSize = field.field_width;
         initialPos = Vector2(0.0,0.0);
@@ -101,7 +101,7 @@ bt::Node::Status Positioning::Update() {
         // Determine boxSize: the size of the area scan for best position
         // This boxSize scales down as I get closer to my previously determined best position
         Vector2 myPos = getTargetPos("robot", robotID, true);
-        double boxSize = fmax(((bestPosition - myPos).length() - waitAtDist)*1.5 + 2.5, 2.5); 
+        double boxSize = fmax(((bestPosition - myPos).length() - waitAtDist)*3.0 + 2.5, 2.5); 
 
         bool dontGoToPos = false;
         if (counter>5) {
@@ -119,7 +119,13 @@ bt::Node::Status Positioning::Update() {
 
         if(!dontGoToPos) {
             
-            double targetAngle = getBallGoalHalfwayAngle(bestPosition);
+            // double targetAngle = getBallGoalHalfwayAngle(bestPosition);
+            roboteam_msgs::World world = LastWorld::get();
+            Vector2 ballPos(world.ball.pos);
+            double angleToGoal = (LastWorld::get_their_goal_center() - bestPosition).angle();    // Angle from bestPos to their goal
+            double angleToBall = (ballPos - bestPosition).angle();                               // Angle from bestPos to the ball
+            double targetAngle = angleToGoal + M_PI/2 * signum(cleanAngle(angleToBall - angleToGoal));
+
             Vector2 posOffset = Vector2(-waitAtDist,0).rotate(targetAngle);
 
             // pass new position setpoint to GoToPos blackboard
