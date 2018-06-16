@@ -86,6 +86,7 @@ void GetBall::Initialize(){
     globalKickSpeed = 0.0;
     isStrafing = false;
     strafingPos = boost::none;
+    bestScore = 0;
     genevaState = 3;
 
 	// Reset the claimed position
@@ -372,11 +373,12 @@ double GetBall::computeArrivalTime(Vector2 location, int id) {
     return computeArrivalTime(location, botPos, botVel);
 }
 
-PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, roboteam_msgs::World world, double passThreshold) {
+PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, const roboteam_msgs::World& world, double passThreshold) {
+
     // initialize my pass option
     PassOption passOption;
     passOption.chip = false;
-    float passScore;
+    float passScore = bestScore;
 
     // If I couldn't find a suitable player before, try again one last time
     if (passID == -1) {
@@ -432,6 +434,7 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
         } else {
         // chip is possible -> keep this bestpos and chip!
             passOption.chip = true;
+            passScore = scoreThreshold + 1;
             ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " will chip towards robot " << passID);
         }
     }
@@ -676,9 +679,7 @@ bt::Node::Status GetBall::Update (){
                 if (passOption.id != bestID) {
                     bestID = passOption.id;
                     ros::param::set("passToRobot", bestID); // communicate that chosen robot will receive the ball
-                    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME,
-                                          "robot " << robotID << ", last check: passToRobot rosparam set to " << bestID
-                                                   << " instead");
+                    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << ", last check: passToRobot rosparam set to " << bestID << " instead");
                     return Status::Running; // for getting a new target angle
                 }
 

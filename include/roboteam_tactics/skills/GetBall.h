@@ -124,7 +124,7 @@ private:
     double computePassSpeed(double dist, double input, bool imposeTime);
     double computeArrivalTime(Vector2 location, Vector2 botPos, Vector2 botVel);
     double computeArrivalTime(Vector2 location, int id);
-    PassOption choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, roboteam_msgs::World world, double passThreshold);
+    PassOption choosePassOption(int passID, Vector2 passPos, Vector2 ballPos, const roboteam_msgs::World& world, double passThreshold);
     
     int robotID;
     std::string robot_output_target = "";
@@ -142,7 +142,7 @@ private:
     int ballCloseFrameCount = 0;
     int bestID;
     Vector2 bestPos;
-    float bestScore;
+    float bestScore = 0;
     bool startKicking;
     bool startChipping;
     double globalKickSpeed;
