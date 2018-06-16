@@ -251,8 +251,8 @@ int main(int argc, char *argv[]) {
 
             // ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Actual Hz = " << (iters / 5.0));
             // If the actual roleHz is lower than 80%, throw a warning
-            if(iterationsPerSecond * 0.8 < (iters/5.0)){
-                ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters * 5.0) << "/" << iterationsPerSecond);
+            if((iters/5.0) < iterationsPerSecond * 0.8){
+                ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters / 5.0) << "/" << iterationsPerSecond);
             }
 
             iters = 0;
