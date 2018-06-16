@@ -33,8 +33,10 @@ namespace rtt {
 		std::vector<int> robots = getAvailableRobots();
 		// All but one robot
 		int numRobots = robots.size() - 1;
-		// Calculate positions for ballDefenders
-		std::vector<Vector2> positions = RobotPatternGenerator::Circle(numRobots, M_PI, 4.3, Vector2(0, 0), M_PI, 0, -0.2);
+        // == Calculate positions for ballDefenders == //
+        // Get the radius of the circle
+        float radius = LastWorld::get_field().field_width * 0.45;
+		std::vector<Vector2> positions = RobotPatternGenerator::Circle(numRobots, M_PI, radius, Vector2(0, 0), M_PI, 0, -0.2);
 		// Add the kicker position
 		positions.push_back(Vector2(-0.5, 0));
 

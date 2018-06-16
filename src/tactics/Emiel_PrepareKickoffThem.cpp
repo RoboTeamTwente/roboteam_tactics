@@ -44,14 +44,7 @@ namespace rtt {
 		// Number of ball defenders
 		int numSideDefenders = robotsLeft;
 
-
-//		// Number of robot defenders
-//		int numRobotDefenders = std::min(robotsLeft, (int)robotsToDefend.size());
-//		robotsLeft -= numRobotDefenders;
-//
-//		// Number of ball interceptors
-//		int numBallInterceptors = robotsLeft;
-
+		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "numBallDefendersGoal=" << numBallDefendersGoal << ", numBallDefenders="<<numBallDefenders << ", numSideDefenders="<<numSideDefenders);
 
 		// Get the last world
 		roboteam_msgs::World world = LastWorld::get();
@@ -70,7 +63,8 @@ namespace rtt {
 		std::vector<Vector2> ballDefenderCoords = RobotPatternGenerator::Line(numBallDefenders, 1.0, goalPos, angleGoalToBall, 4.0);
 
 		// Calculate the positions of the side robots
-		std::vector<Vector2> sideDefenderCoords = RobotPatternGenerator::Line(numSideDefenders, 8.0, Vector2(0, 0), 0, -1.0);
+        float lineWidth = LastWorld::get_field().field_width * 0.9;
+		std::vector<Vector2> sideDefenderCoords = RobotPatternGenerator::Line(numSideDefenders, lineWidth, Vector2(0, 0), 0, -1.0);
 
 		// Put all positions into one array
 		std::vector<Vector2> positions;
