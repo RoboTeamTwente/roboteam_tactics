@@ -728,6 +728,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
     BestTeammate bestTeammate;
     bestTeammate.id = bestID;
     bestTeammate.pos = bestPos;
+	bestTeammate.score = maxScore;
 
     if (maxScore > 0) {
         ROS_DEBUG_STREAM_NAMED("jelle_test1", "robot " << ROBOT_ID << " used OpportunityFinder to choose " << bestID <<" as best teammate to pass to, with score: " << maxScore);

@@ -142,9 +142,14 @@ private:
     int ballCloseFrameCount = 0;
     int bestID;
     Vector2 bestPos;
+    float bestScore;
     bool startKicking;
     bool startChipping;
     double globalKickSpeed;
+    int genevaState = 3;
+
+    boost::optional<Vector2> strafingPos;
+    bool isStrafing = false;
 };
 
 } // rtt

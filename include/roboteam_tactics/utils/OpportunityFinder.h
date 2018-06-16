@@ -18,6 +18,7 @@ namespace rtt {
 struct BestTeammate {
     Vector2 pos;
     int id;
+	float score;
 };
 
 class OpportunityFinder {
