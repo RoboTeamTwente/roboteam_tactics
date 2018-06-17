@@ -401,7 +401,7 @@ bt::Node::Status ReceiveBall::Update() {
 			geneva_threshold = 0.25*M_PI;
 		}
 		// determine shooting angle and take a step back from the ball interception pos
-		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (angleDiff / 4.0) - (double)(geneva_state-3)*10/180*M_PI;
+		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (0.25*angleDiff) - (double)(geneva_state-3)*10/180*M_PI;
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;

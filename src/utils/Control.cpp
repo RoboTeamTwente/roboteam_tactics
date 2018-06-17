@@ -105,7 +105,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         maxAngularVel = 20.0;
 
         thresholdTarget = 0.03;
-        minTarget = 0.55;
+        minTarget = 0.7;
 
         robotType = RobotType::PROTO;
     } else if (newRobotType == RobotType::GRSIM) {

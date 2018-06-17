@@ -65,7 +65,7 @@ RTT_REGISTER_SKILL(GetBall);
  *	Bool : passOn
  */
 
-#define scoreThreshold 25.0
+#define scoreThreshold 15.0
 
 GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name, blackboard), goToPos("", private_bb) {
     ballClaimedByMe = false;
@@ -82,7 +82,7 @@ void GetBall::Initialize(){
     choseRobotToPassTo = false;
     ballClaimedByMe = false;
     hasTerminated = false;
-    passThreshold = 0.2;    // minimal dist of opp to pass line for pass to be possible
+    passThreshold = 0.3;    // minimal dist of opp to pass line for pass to be possible
     globalKickSpeed = 0.0;
     isStrafing = false;
     strafingPos = boost::none;
@@ -113,6 +113,7 @@ void GetBall::initializeOpportunityFinder() {
     opportunityFinder.setWeight("angleToTeammate", 0.0);  // not relevant for passing, only for positioning
     opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
     opportunityFinder.setWeight("distToBall", 1.0); 
+    opportunityFinder.setWeight("viewOfGoal", 1.0);
     opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // how strict to be on whether pass will fail
 }
 
@@ -504,7 +505,7 @@ bt::Node::Status GetBall::Update (){
         minDist = 0.06;
     } else if (robot_output_target == "serial") {
         successDist = 0.125; //0.12
-        successAngle = 0.10; //0.15
+        successAngle = 0.15; //0.15
         successRobotAngle = 0.05;
         distAwayFromBall = 0.3;
         minDist = 0.08;
