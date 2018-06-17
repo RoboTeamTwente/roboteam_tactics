@@ -106,15 +106,17 @@ void GetBall::Initialize(){
 void GetBall::initializeOpportunityFinder() {
     ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->GetInt("ROBOT_ID") << " : Initializing OpportunityFinder...");
     // load the relevant weights list on which our teammates' positions will be judged, and specify the 'target' (see opportunityFinder)
-    opportunityFinder.Initialize("striker.txt", robotID, "theirgoal", 0);
+    opportunityFinder.Initialize("pass.txt", robotID, "theirgoal", 0);
 
     // the following custom changes apply for when choosing a teammate to pass to.
-    opportunityFinder.setWeight("distToTeammate", 0.0);  // not relevant for passing, only for positioning
-    opportunityFinder.setWeight("angleToTeammate", 0.0);  // not relevant for passing, only for positioning
-    opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
-    opportunityFinder.setWeight("distToBall", 1.0); 
-    opportunityFinder.setWeight("viewOfGoal", 1.0);
+    // opportunityFinder.setWeight("distToTeammate", 0.0);  // not relevant for passing, only for positioning
+    // opportunityFinder.setWeight("angleToTeammate", 0.0);  // not relevant for passing, only for positioning
+    // opportunityFinder.setWeight("distToSelf", 0.0);      // not relevant for passing, only for positioning
+    // opportunityFinder.setWeight("distToBall", 1.0); 
+    // opportunityFinder.setWeight("viewOfGoal", 1.0);
+    // opportunityFinder.setWeight("distOppToBallTraj", 2.0);
     opportunityFinder.setMin("distOppToBallTraj", passThreshold);  // how strict to be on whether pass will fail
+    opportunityFinder.setMax("distOppToBallTraj", passThreshold*3);
 }
 
 void GetBall::Terminate(bt::Node::Status s) {
@@ -295,7 +297,7 @@ Vector2 GetBall::computeBallInterception(Vector2 ballPos, Vector2 ballVel, Vecto
 }
 
 double GetBall::computePassSpeed(double dist, double input, bool imposeTime) {
-    double a = 0.3; // friction constant. assumes velocity decreases linearly over time
+    double a = 0.4; // friction constant. assumes velocity decreases linearly over time
     if (HasDouble("friction")) {
         a = GetDouble("friction");
     } else if (robot_output_target == "grsim") {
@@ -397,8 +399,8 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
     if (passID == -1 || opportunityFinder.calcDistOppToBallTraj(passPos, world) < passThreshold) {
     // pass line is crossed by opponent -> chip possible?
         ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt do planned pass anymore, checking for chip to " << passID);
-        double maxChipDist = 1.3;
-        double minChipDist = 0.4;
+        double maxChipDist = 1.0;
+        double minChipDist = 0.3;
         Vector2 passLine = passPos - ballPos;
         if (passID == -1 || passLine.length() < minChipDist || opportunityFinder.calcDistOppToBallTraj(passPos, world, maxChipDist) < passThreshold) {
         // chip not possible -> softpass to someone else?
@@ -661,7 +663,7 @@ bt::Node::Status GetBall::Update (){
     double angleError = cleanAngle(robot.angle - targetAngle);
 	if (L_posDiff < successDist && fabs(angleError) < successRobotAngle && fabs(angleDiff) < successAngle) {
 
-        int ballCloseFrameCountTo = 6;
+        int ballCloseFrameCountTo = 10;
         if(HasInt("ballCloseFrameCount")){
             ballCloseFrameCountTo = GetInt("ballCloseFrameCount");
         }

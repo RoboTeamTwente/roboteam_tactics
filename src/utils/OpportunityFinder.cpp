@@ -440,7 +440,7 @@ double OpportunityFinder::computeScore(const Vector2& testPosition, const robote
 	double score = 0.0;	// score will not go below 0
 
 	if (distOppToBallTrajWeight>0.0) { // PRIORITY: ZERO SCORE IN THIS METRIC DIRECTLY LEADS TO OVERALL ZERO SCORE
-		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.2);
+		double distOppToBallTraj = calcDistOppToBallTraj(testPosition, world, 1.0);
 		if (distOppToBallTraj < distOppToBallTrajMin) {
 			return 0.0;
 		}

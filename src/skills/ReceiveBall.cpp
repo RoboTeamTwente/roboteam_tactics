@@ -455,7 +455,7 @@ bt::Node::Status ReceiveBall::Update() {
 			turningDist = 0.1;
 		} else {
 			distToBallThresh = 1.5;
-			turningDist = 0.29;
+			turningDist = 0.24;//0.29;
 		}
 		if (!GetBool("claimedPos") && ((!ballIsComing && distanceToBall > thresholdSwitch*distToBallThresh) ||  (ballIsComing && posErrorLength > turningDist)) ) {
 			targetAngle = interceptAngle + M_PI/2;

@@ -23,7 +23,7 @@ ballReflectionAngleWeight 0.0
 ballReflectionAngleMin 0.5
 ballReflectionAngleMax 1.3
 distOppToBallTrajWeight 1.0
-distOppToBallTrajMin 0.0
+distOppToBallTrajMin 0.15
 distOppToBallTrajMax 1.0
 distOppToTargetTrajWeight 0.0
 distOppToTargetTrajMin 0.1
