@@ -236,7 +236,7 @@ namespace rtt {
 			.setBool("avoidBall"  , true)
 			.setBool("stayAwayFromBall"  , true)
 			.setBool("avoidDefenseAreas"  , true)
-			.setDouble("maxSpeed", 2)
+			.setDouble("maxSpeed", 2.0)
 		;
 
 		/* Create message */
@@ -281,7 +281,7 @@ namespace rtt {
 			.setBool("stayAwayFromBall", true)
 			.setBool("avoidBall"  , true)
 			.setBool("dontDriveToBall", true)
-			.setDouble("A_maxSpeed", 1.3)
+			.setDouble("A_maxSpeed", 2.0)
 			.setString("targetFromType", "position")
 			.setDouble("targetFromTypeX", -6.0)
 			.setDouble("targetFromTypeY", 0.0)
@@ -332,7 +332,7 @@ namespace rtt {
 			.setBool("stayAwayFromBall", true)
 			.setBool("avoidBall", true)
 			.setBool("dontDriveToBall", true)
-			.setDouble("A_maxSpeed", 1.3)
+			.setDouble("A_maxSpeed", 2.0)
 			.setString("targetToType", "object")
 			.setString("targetToObj", "ball")
 			.setString("targetFromType", "object")
