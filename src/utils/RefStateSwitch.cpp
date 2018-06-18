@@ -34,7 +34,7 @@ namespace rtt {
             return Status::Running;
         }
 
-        auto world = rtt::LastWorld::get();
+        const roboteam_msgs::World& world = rtt::LastWorld::get();
 
         // === If the number of robots change, restart the current strategy === //
         // Get the number of bots in the world
@@ -87,6 +87,14 @@ namespace rtt {
         }
 
 
+        // Check if the keeper changed
+        const roboteam_msgs::RefereeData& refData = LastRef::get();
+        if(refData.us.goalie != lastKnownKeeper){
+            ROS_WARN_STREAM_NAMED("RefStateSwitch", "Keeper ID changed from " << lastKnownKeeper << " to " << refData.us.goalie);
+            lastKnownKeeper = refData.us.goalie;
+            getCurrentChild()->Terminate(getCurrentChild()->getStatus());
+            needToInitialize = true;
+        }
 
         // If the current strategy tree needs to be re-initialized
         if (needToInitialize) {

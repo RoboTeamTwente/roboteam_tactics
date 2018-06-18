@@ -39,6 +39,7 @@ private:
     bool needToInitialize;
     bool startedNewStrategy;
     unsigned lastKnownBotCount;
+    int lastKnownKeeper = 0;
     // bool runningImplicitNormalStartRefCommand;
     
     std::map<RefState, Node::Ptr> refStateStrategies;
