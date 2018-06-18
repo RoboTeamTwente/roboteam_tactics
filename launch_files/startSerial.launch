@@ -1,0 +1,69 @@
+<launch>
+
+	<arg name="legacy_packets" default="false" />
+	<param name="use_legacy_packets" type="boolean" value="$(arg legacy_packets)" />
+
+	<param name="our_side" type="str" value="left" />
+	<param name="our_color" type="str" value="blue" />
+
+	<param name="keeper_id" type="int" value="0" />
+
+	<param name="robot0/robotType"  type="str" value="grsim" />
+	<param name="robot1/robotType"  type="str" value="grsim" />
+	<param name="robot2/robotType"  type="str" value="grsim" />
+	<param name="robot3/robotType"  type="str" value="grsim" />
+	<param name="robot4/robotType"  type="str" value="grsim" />
+	<param name="robot5/robotType"  type="str" value="grsim" />
+	<param name="robot6/robotType"  type="str" value="grsim" />
+	<param name="robot7/robotType"  type="str" value="grsim" />
+	<param name="robot8/robotType"  type="str" value="grsim" />
+	<param name="robot9/robotType"  type="str" value="grsim" />
+	<param name="robot10/robotType" type="str" value="grsim" />
+	<param name="robot11/robotType" type="str" value="grsim" />
+	<param name="robot12/robotType" type="str" value="grsim" />
+	<param name="robot13/robotType" type="str" value="grsim" />
+	<param name="robot14/robotType" type="str" value="grsim" />
+	<param name="robot15/robotType" type="str" value="grsim" />
+
+	<param name="robot0/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot1/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot2/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot3/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot4/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot5/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot6/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot7/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot8/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot9/readyToReceiveBall"  type="bool" value="false" />
+	<param name="robot10/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot11/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot12/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot13/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot14/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot15/readyToReceiveBall" type="bool" value="false" />
+
+	<param name="robotClaimedBall" type="int" value="-1" />
+	 
+	<param name="role_iterations_per_second" type="int" value="30" />
+	<param name="num_role_nodes" type="int" value="8" />
+	<param name="normalize_field" type="bool" value="true" />
+	<param name="robot_output_target" type="str" value="serial" />
+
+	<node name="robot0"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot1"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot2"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot3"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot4"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot5"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot6"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot7"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot8"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot9"  pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot10" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot11" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot12" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot13" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot14" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+	<node name="robot15" pkg="roboteam_tactics" type="RoleNode" output="screen" />
+
+</launch>
