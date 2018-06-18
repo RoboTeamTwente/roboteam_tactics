@@ -28,7 +28,7 @@ void Anouk_BallPlacementThemPlay::Initialize() {
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
 	// Get all available robots
-    auto robots = getAvailableRobots();
+    std::vector<int> robots = getAvailableRobots();
 
 	// Get the positions where the ball is, and where it should go
     Vector2 const endPos = LastRef::get().designated_position;
@@ -46,8 +46,16 @@ void Anouk_BallPlacementThemPlay::Initialize() {
 	// Get the last world
 	roboteam_msgs::World world = LastWorld::get();
     // For each robot
-    for(auto robot : robots){
-		Vector2 pos(world.us.at(robot).pos);
+    for(int robot : robots){
+		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(robot, true, world);
+		if(!bot) {
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Trying to find bot that doesn't exist! bot=" << robot);
+			continue;
+		}
+		Vector2 pos(bot->pos);
+
+//		Vector2 pos(world.us.at(robot).pos);
+
 		// Get distance between the robot and the path of the ball
 		double distanceToLine = distanceFromPointToLine(ballPos, endPos, pos);
 
