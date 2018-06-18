@@ -550,7 +550,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
-//        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "maxSpeed set to : " << GetDouble("maxSpeed"));
+       // ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "maxSpeed set to : " << GetDouble("maxSpeed"));
     } else if (GetBool("lowSpeed")) {
         if (grsim) {
             controller.setControlParam("maxSpeed", 0.5);

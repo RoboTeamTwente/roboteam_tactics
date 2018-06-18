@@ -100,6 +100,7 @@ void ReceiveBall::Initialize() {
 void ReceiveBall::Terminate(bt::Node::Status s) {
 
 	if (!hasTerminated) { // Temporary hack, because terminate is not always called at the right moments
+		ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "Terminate for robot: " << robotID);
 		hasTerminated = true;
 		publishStopCommand();
 
@@ -339,7 +340,7 @@ bt::Node::Status ReceiveBall::Update() {
     if (findBot) {
         robot = *findBot;
     } else {
-        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot");
+        ROS_WARN_STREAM_NAMED("skills.ReceiveBall", "ReceiveBall could not find robot (during update)");
         return Status::Failure;
     }
 	Vector2 myPos(robot.pos);
@@ -482,8 +483,8 @@ bt::Node::Status ReceiveBall::Update() {
         if (blackboard->HasBool("stayAwayFromBall") && blackboard->GetBool("stayAwayFromBall")) {
         	private_bb->SetBool("stayAwayFromBall", true);
         }
-        if (HasDouble("maxSpeed")) {
-        	private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+        if (blackboard->HasDouble("maxSpeed")) {
+        	private_bb->SetDouble("maxSpeed", blackboard->GetDouble("maxSpeed"));
         }
         if (blackboard->HasBool("enterDefenseAreas")) {
         	private_bb->SetBool("enterDefenseAreas", blackboard->GetBool("enterDefenseAreas"));

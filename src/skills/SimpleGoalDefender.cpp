@@ -144,8 +144,8 @@ bt::Node::Status SimpleGoalDefender::Update() {
     if (HasBool("stayAwayFromBall") && GetBool("stayAwayFromBall")) {
         private_bb->SetBool("stayAwayFromBall", true);
     }
-    if (HasDouble("maxSpeed")) {
-        private_bb->SetDouble("maxSpeed", GetDouble("maxSpeed"));
+    if (blackboard->HasDouble("maxSpeed")) {
+        private_bb->SetDouble("maxSpeed", blackboard->GetDouble("maxSpeed"));
     }
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
