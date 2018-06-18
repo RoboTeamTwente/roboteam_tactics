@@ -27,7 +27,6 @@ namespace rtt {
 		/// === Start the reinitialization === //
 		ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Reinitializing...");
 
-
 		// Release all previously claimed robots
 		release_robots(get_claimed_robots());
 		// Get all the available robots
