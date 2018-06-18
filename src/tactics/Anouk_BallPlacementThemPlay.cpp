@@ -54,8 +54,6 @@ void Anouk_BallPlacementThemPlay::Initialize() {
 		}
 		Vector2 pos(bot->pos);
 
-//		Vector2 pos(world.us.at(robot).pos);
-
 		// Get distance between the robot and the path of the ball
 		double distanceToLine = distanceFromPointToLine(ballPos, endPos, pos);
 
