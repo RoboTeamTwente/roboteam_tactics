@@ -12,7 +12,7 @@
 
 #define RTT_CURRENT_DEBUG_TAG OpportunityFinder
 #define PASS_POINT_WEIGHTS_DIRECTORY ros::package::getPath("roboteam_tactics").append("/src/utils/OpportunityFinderWeights/")
-#define DRAW_PASS_POINT_GRID true
+#define DRAW_PASS_POINT_GRID false
 
 namespace rtt {
 

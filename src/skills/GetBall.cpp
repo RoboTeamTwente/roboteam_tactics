@@ -501,12 +501,12 @@ bt::Node::Status GetBall::Update (){
     double successRobotAngle;
     if (robot_output_target == "grsim") {
         successDist = 0.13;
-        successAngle = 0.10;
+        successAngle = 0.15;
         successRobotAngle = 0.05;
         distAwayFromBall = 0.3;
-        minDist = 0.06;
+        minDist = 0.08;
     } else if (robot_output_target == "serial") {
-        successDist = 0.125; //0.12
+        successDist = 0.14; //0.12
         successAngle = 0.15; //0.15
         successRobotAngle = 0.05;
         distAwayFromBall = 0.3;
@@ -634,7 +634,7 @@ bt::Node::Status GetBall::Update (){
         ballDist = distAwayFromBall;
     }
     if (fabs(angleDiff) > successAngle || L_posDiff > 0.3) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-0.2-successAngle)); //TODO: downscaling when i get closer - working on it
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-0.1-successAngle)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", false);
     } else {
@@ -643,18 +643,18 @@ bt::Node::Status GetBall::Update (){
     }
     // Hack for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
-    if (vBall > 0.5) {
-        if (L_posDiff > 0.15) {
-            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.0;
-            double max_ahead = 3.0;
-            double ahead = L*(vBall);
+    if (vBall > 0.2 && ballVel.dot(posDiff) < 0) {
+        // if (L_posDiff > 0.15) {
+            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*1.8;
+            double max_ahead = 5.0;
+            double ahead = L*(vBall-0.1);
             if (ahead < max_ahead) {
                 targetPos = targetPos + ballVel.stretchToLength(ahead);
             } else {
                 targetPos = targetPos + ballVel.stretchToLength(max_ahead);
             }
 
-        }
+        // }
     }
       //---------------------------------------------------------------------//
      //---------Status returning, and passing/shooting if enabled ----------//
@@ -778,8 +778,8 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetDouble("xGoal", targetPos.x);
     private_bb->SetDouble("yGoal", targetPos.y);
     private_bb->SetDouble("angleGoal", targetAngle);
-    private_bb->SetBool("avoidRobots", (L_posDiff > 0.3)); // shut off robot avoidance when close to target
-    private_bb->SetBool("avoidBall", (fabs(angleDiff) > 0.5*M_PI)); // use ball avoidance as extra safety measure for when robot is still on the other side of the ball
+    private_bb->SetBool("avoidRobots", (L_posDiff > 0.4)); // shut off robot avoidance when close to target
+    // private_bb->SetBool("avoidBall", (fabs(angleDiff) > 0.5*M_PI)); // use ball avoidance as extra safety measure for when robot is still on the other side of the ball
     private_bb->SetDouble("successDist", 0.001); // make sure gotopos does not return success before getball returns success
     private_bb->SetBool("dontRotate", isStrafing);
     if (HasBool("enterDefenseAreas")) {

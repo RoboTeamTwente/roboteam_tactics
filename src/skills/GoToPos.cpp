@@ -37,7 +37,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             succeeded = false;
             failure = false;
             controller.Initialize(blackboard->GetInt("ROBOT_ID"));
-
+            
             // Debug info
             ros::NodeHandle n;
             myPosTopic = n.advertise<roboteam_msgs::WorldRobot>("myPosTopic", 1000);
@@ -75,6 +75,10 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
         }
 
 void GoToPos::Initialize() {
+    succeeded = false;
+    failure = false;
+    controller.Initialize(blackboard->GetInt("ROBOT_ID"));
+
     if (GetBool("driveBackward")) {
         ROBOT_ID = blackboard->GetInt("ROBOT_ID");
         // Get the latest world state
@@ -553,8 +557,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
         } else {
             controller.setControlParam("maxSpeed", 1.3);
         }
-    }else{
-        controller.setControlParam("maxSpeed", 5);
     }
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));

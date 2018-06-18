@@ -1,5 +1,5 @@
-distToGoalWeight 1.0
-distToGoalMin 3.0
+distToGoalWeight 2.0
+distToGoalMin 0.0
 distToGoalMax 6.0
 viewOfGoalWeight 1.0
 viewOfGoalMin 0.0

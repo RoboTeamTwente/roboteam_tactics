@@ -44,7 +44,7 @@
 
 	<param name="robotClaimedBall" type="int" value="-1" />
 	 
-	<param name="role_iterations_per_second" type="int" value="30" />
+	<param name="role_iterations_per_second" type="int" value="60" />
 	<param name="num_role_nodes" type="int" value="8" />
 	<param name="normalize_field" type="bool" value="true" />
 	<param name="robot_output_target" type="str" value="serial" />

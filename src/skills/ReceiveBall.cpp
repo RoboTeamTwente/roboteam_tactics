@@ -384,7 +384,7 @@ bt::Node::Status ReceiveBall::Update() {
 		}
 		double viewOfGoal = opportunityFinder.calcViewOfGoal(receiveBallAtPos, world); // chosen reception pos is used to assess view of goal
 		angleDiff = cleanAngle( ((lastNotComingBall - receiveBallAtPos).angle() - (LastWorld::get_their_goal_center() - receiveBallAtPos).angle()) );
-		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < 0.33*M_PI + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
+		shootAtGoal = (viewOfGoal > 0.1 && fabs(angleDiff) < 0.40*M_PI + 20/180*M_PI); // geneva drive allows 20 degrees larger anglediff
 		// ROS_INFO_STREAM_NAMED("skills.ReceiveBall", "viewOfGoal: " << viewOfGoal << ", angleDiff: " << angleDiff << ", shootAtGoal: " << shootAtGoal << ", theirgoal: " << LastWorld::get_their_goal_center());
 	}
 
@@ -401,7 +401,7 @@ bt::Node::Status ReceiveBall::Update() {
 			geneva_threshold = 0.25*M_PI;
 		}
 		// determine shooting angle and take a step back from the ball interception pos
-		targetAngle = (LastWorld::get_their_goal_center() - myPos).angle() + (0.25*angleDiff) - (double)(geneva_state-3)*10/180*M_PI;
+		targetAngle = (LastWorld::get_their_goal_center() - receiveBallAtPos).angle() + (0.25*angleDiff) - (double)(geneva_state-3)*5/180*M_PI;
 		Vector2 robotRadius(0.095, 0.0);
 		robotRadius = robotRadius.rotate(targetAngle);
 		targetPos = interceptPos - robotRadius;
@@ -516,7 +516,7 @@ bt::Node::Status ReceiveBall::Update() {
         }
 
     	// If the ball gets close, turn on the dribbler
-		double dribblerDist = 2.0;
+		double dribblerDist = 4.0;
 		if (shootAtGoal) {
 			dribblerDist = 0.0;
 		}
