@@ -33,6 +33,10 @@ Control::Control() : updateRateParam("role_iterations_per_second")
             iGainRotation = 0.0;
             dGainRotation = 0.0;
             pGainVelocity = 0.0;
+
+            if(maxSpeed != 0.0){
+                ROS_INFO_STREAM_NAMED("Control", "[updateRateParam] settings maxSpeed to 0.0");
+            }
             maxSpeed = 0.0;
             maxAngularVel = 0.0;
         }
@@ -85,6 +89,9 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainPosition = 0.0;
         pGainRotation = 2.0;
         iGainRotation = 0.0;
+        if(maxSpeed != 3.0){
+            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 3.0 - ARDUINO");
+        }
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
         dGainPosition = 0.0;
@@ -101,6 +108,10 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;// rotation control is now on robot
         dGainRotation = 0.0;// rotation control is now on robot
         pGainVelocity = 0.0;
+
+        if(maxSpeed != 5.0){
+            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 5.0 - PROTO");
+        }
         maxSpeed = 5.0;
         maxAngularVel = 20.0;
 
@@ -115,7 +126,10 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 2.5;
         iGainRotation = 0.0;
         dGainRotation = 0.0;
-        maxSpeed = 2.0;
+        if(maxSpeed != 2.1){
+            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 2.1 - GRSIM");
+        }
+        maxSpeed = 2.1;
         maxAngularVel = 10.0;
 
         thresholdTarget = 0.03;
@@ -151,7 +165,11 @@ void Control::setPresetControlParams(
 	this->pGainPosition = pGainPosition;
 	this->pGainRotation = pGainRotation;
 	this->maxAngularVel = maxAngularVel;
-	this->maxSpeed = maxSpeed;
+	if(this->maxSpeed != maxSpeed){
+        ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] Setting maxSpeed to " << maxSpeed);
+    }
+    this->maxSpeed = maxSpeed;
+
 }
 
 void Control::setControlParam(std::string paramName, double paramValue) {
@@ -174,6 +192,9 @@ void Control::setControlParam(std::string paramName, double paramValue) {
         this->dGainRotation = paramValue;
     }
     else if (paramName == "maxSpeed") {
+        if(this->maxSpeed != paramValue){
+            ROS_INFO_STREAM_NAMED("Control", "[setControlParam] Settings maxSpeed to " << paramValue);
+        }
         this->maxSpeed = paramValue;
     }
     else if (paramName == "maxAngularVel") {
@@ -363,6 +384,7 @@ double Control::rotationController(double myAngle, double angleGoal, Vector2 pos
 
 
 Vector2 Control::limitVel2(Vector2 sumOfForces, double angleError) {
+
     double limit = fmin(maxSpeed, maxSpeed/fabs(angleError*2));
     double L = sumOfForces.length();
     // Limit the robot velocity to the maximum speed
