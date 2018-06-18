@@ -546,12 +546,15 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     }
     if (HasDouble("maxSpeed")) {
         controller.setControlParam("maxSpeed", GetDouble("maxSpeed"));
+//        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "maxSpeed set to : " << GetDouble("maxSpeed"));
     } else if (GetBool("lowSpeed")) {
         if (grsim) {
             controller.setControlParam("maxSpeed", 0.5);
         } else {
             controller.setControlParam("maxSpeed", 1.3);
         }
+    }else{
+        controller.setControlParam("maxSpeed", 5);
     }
     if (HasDouble("maxAngularVel")) {
         controller.setControlParam("maxAngularVel", GetDouble("maxAngularVel"));
@@ -700,7 +703,7 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     static time_point prevTime = now();
     int timeDiff = time_difference_milliseconds(prevTime, now()).count();
     prevTime = now();
-    double max_diff = 10.0*timeDiff*0.001;
+    double max_diff = 20.0*timeDiff*0.001;
     static Vector2 prevCommand;
     Vector2 commandDiff = sumOfForces - prevCommand;
     if (commandDiff.length() > max_diff) {
