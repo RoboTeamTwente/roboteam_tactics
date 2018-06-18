@@ -12,6 +12,8 @@
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
 
+#define ROS_LOG_NAME "Emiel_Prepare"
+
 namespace rtt {
 
 	Emiel_Prepare::Emiel_Prepare(std::string name, bt::Blackboard::Ptr blackboard) : Tactic(name, blackboard){}
@@ -32,6 +34,8 @@ namespace rtt {
 		auto &pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 		// Get the Keeper ID, which is needed in all blackboards
 		int keeperID = RobotDealer::get_keeper();
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "keeperID=" << keeperID);
+
 		// Get all the available robots
 		std::vector<int> robots = getAvailableRobots();
 		// Get the world
@@ -40,10 +44,10 @@ namespace rtt {
 		tokens.clear();
 
 		if (robots.size() < positions.size()) {
-			ROS_WARN_STREAM_NAMED("Emiel_Prepare", "Not enough robots to fill positions! : #positions: " << positions.size() + ", robots : " << robots.size());
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Not enough robots to fill positions! : #positions: " << positions.size() + ", robots : " << robots.size());
 		}
 		if (robots.size() - positions.size() < robotsToDefend.size()) {
-			ROS_WARN_STREAM_NAMED("Emiel_Prepare", "Not enough robots to defend opponents! : #opponents: " << robotsToDefend.size() + ", robots : " << (robots.size() - positions.size()));
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Not enough robots to defend opponents! : #opponents: " << robotsToDefend.size() + ", robots : " << (robots.size() - positions.size()));
 		}
 
 		// ============================
@@ -86,7 +90,6 @@ namespace rtt {
 		// Calculate which robot should take which position
 		std::vector<int> robotsToPositions = Jim_MultipleDefendersPlay::assignRobotsToPositions(robots, positions, world);
 		// For each robot
-//		ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to positions to defend...");
 		for (size_t i = 0; i < robotsToPositions.size(); i++) {
 			// Get its ID
 			int robotID = robotsToPositions.at(i);
@@ -96,7 +99,7 @@ namespace rtt {
 			// Initialize the ball defender
 			boost::uuids::uuid token = init_ballDefender(robotID, positions.at(i));
 			tokens.push_back(token);
-//			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Claimed robot " << robotID << " for position " << positions.at(i));
+//			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Claimed robot " << robotID << " for position " << positions.at(i));
 		}
 
 
@@ -105,7 +108,7 @@ namespace rtt {
 		///Initialize robot defenders
 		// ====================================
 		if(0 < robotsToDefend.size()) {
-			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
+			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Mapping our robots to their robots...");
 
 			// Get the positions of all robots to defend
 			std::vector<Vector2> oppPositions;
@@ -135,7 +138,7 @@ namespace rtt {
 
 				boost::uuids::uuid token = init_robotDefender(robotID, robotsToDefend.at(i));
 				tokens.push_back(token);
-				ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Robot " << robotID << " defends opponent " << robotsToDefend.at(i));
+				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot " << robotID << " defends opponent " << robotsToDefend.at(i));
 			}
 		}
 
@@ -144,7 +147,7 @@ namespace rtt {
 		///Initialize intercept defenders
 		// ====================================
 		if(0 < robots.size()) {
-			ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Mapping our robots to their robots...");
+			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Mapping our robots to their robots...");
 
 			// Get the positions of all robots to defend
 			std::vector<Vector2> oppPositionsInt;
@@ -174,7 +177,7 @@ namespace rtt {
 
 				boost::uuids::uuid token = init_interceptDefender(robotIDInt, robotsToIntercept.at(i));
 				tokens.push_back(token);
-				ROS_INFO_STREAM_NAMED("Emiel_Prepare", "Robot " << robotIDInt << " intercepts opponent " << robotsToIntercept.at(i));
+				ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot " << robotIDInt << " intercepts opponent " << robotsToIntercept.at(i));
 			}
 		}
 
@@ -219,7 +222,7 @@ namespace rtt {
 			.setBool("avoidBall"  , true)
 			.setBool("stayAwayFromBall"  , true)
 			.setBool("avoidDefenseAreas"  , true)
-			.setDouble("maxSpeed" , 1.3)
+			.setDouble("maxSpeed", 2)
 		;
 
 		/* Create message */
