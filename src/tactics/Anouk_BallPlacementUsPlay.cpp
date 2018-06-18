@@ -105,7 +105,13 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 	roboteam_msgs::World world = LastWorld::get();
     // For each robot
     for(auto robot : robots){
-		Vector2 pos(world.us.at(robot).pos);
+		boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(robot, true, world);
+		if(!bot) {
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Trying to find bot that doesn't exist! bot=" << robot);
+			continue;
+		}
+		Vector2 pos(bot->pos);
+
 		// Get distance between the robot and the path of the ball
 		double distanceToLine = distanceFromPointToLine(ballPos, endPos, pos);
 
