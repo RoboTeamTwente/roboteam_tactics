@@ -111,10 +111,17 @@ namespace rtt {
 			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Mapping our robots to their robots...");
 
 			// Get the positions of all robots to defend
+			ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Get the positions of all robots to defend");
 			std::vector<Vector2> oppPositions;
 			for (int oppId : robotsToDefend) {
+				ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "    Opponent with id " << oppId << ", vector length : " << (int)world.them.size());
 				// Get the position of the robot
-				Vector2 oppPos(world.them.at(oppId).pos);
+				boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(oppId, false, world);
+				if(!bot) {
+					ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Trying to defend bot that doesn't exist! oppID=" << oppId);
+					continue;
+				}
+				Vector2 oppPos(bot->pos);
 				// Store the position in the array
 				oppPositions.push_back(oppPos);
 			}
@@ -150,12 +157,19 @@ namespace rtt {
 			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Mapping our robots to their robots...");
 
 			// Get the positions of all robots to defend
+			ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Get the positions of all robots to defend");
 			std::vector<Vector2> oppPositionsInt;
-			for (int oppIdInt : robotsToIntercept) {
+			for (int oppId : robotsToIntercept) {
+				ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "    Opponent with id " << oppId << ", vector length : " << (int)world.them.size());
 				// Get the position of the robot
-				Vector2 oppPosInt(world.them.at(oppIdInt).pos);
+				boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(oppId, false, world);
+				if(!bot) {
+					ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Trying to defend bot that doesn't exist! oppID=" << oppId);
+					continue;
+				}
+				Vector2 oppPos(bot->pos);
 				// Store the position in the array
-				oppPositionsInt.push_back(oppPosInt);
+				oppPositionsInt.push_back(oppPos);
 			}
 
 			// Map the positions of the robots to defend to our robots
