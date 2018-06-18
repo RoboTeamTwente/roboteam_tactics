@@ -509,7 +509,7 @@ std::vector<TeamRobot> getAllTeamBots(const roboteam_msgs::World& world) {
 }
 
 boost::optional<roboteam_msgs::WorldRobot> getWorldBot(unsigned int id, bool ourTeam, const roboteam_msgs::World& world) {
-    std::vector<roboteam_msgs::WorldRobot> bots = ourTeam ? world.us : world.them;
+    const std::vector<roboteam_msgs::WorldRobot>& bots = ourTeam ? world.us : world.them;
     for (const auto& bot : bots) {
         if (bot.id == id) {
             return boost::optional<roboteam_msgs::WorldRobot>(bot);

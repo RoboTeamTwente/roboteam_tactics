@@ -304,18 +304,27 @@ namespace rtt {
         if(0 < dangerousOpps.size()) {
 
             // Get the positions of all robots to defend
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Get the positions of all robots to defend");
             std::vector<Vector2> oppPositions;
             for (int oppId : dangerousOpps) {
+                ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "    Opponent with id " << oppId << ", vector length : " << (int)world.them.size());
                 // Get the position of the robot
-                Vector2 oppPos(world.them.at(oppId).pos);
+                boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(oppId, false, world);
+                if(!bot) {
+                    ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Trying to defend bot that doesn't exist! oppID=" << oppId);
+                    continue;
+                }
+                Vector2 oppPos(bot->pos);
                 // Store the position in the array
                 oppPositions.push_back(oppPos);
             }
 
             // Map the positions of the robots to defend to our robots
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Map the positions of the robots to defend to our robots");
             std::vector<int> robotsToTheirRobots = Anouk_MultipleDefendersPlay::assignRobotsToPositions(robots, oppPositions, world);
 
             // For each robot to defend
+            ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "For each robot to defend");
             for (int i = 0; i < (int)robotsToTheirRobots.size(); i++) {
 
                 // Get our robot that should defend it

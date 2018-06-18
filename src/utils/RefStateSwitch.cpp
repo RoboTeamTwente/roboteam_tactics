@@ -118,7 +118,22 @@ namespace rtt {
         }
 
         // Run the strategy tree
-        bt::Node::Status currentStatus = getCurrentChild()->Update();
+        bt::Node::Status currentStatus = Status::Invalid;
+        try{
+            currentStatus = getCurrentChild()->Update();
+        }catch(const std::out_of_range& e){
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", "Exception caught!");
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", e.what());
+        }catch (const std::exception& e) {
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", "Exception caught!");
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", e.what());
+        } catch (const std::string& e) {
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", "Exception caught!");
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", e.c_str());
+        } catch (...) {
+            ROS_ERROR_STREAM_NAMED("RefStateSwitch", "General exception caught!");
+        }
+
 
 		// If the current tree is finished, set needToInitialize and finishedOnce
         if (currentStatus == Status::Failure || currentStatus == Status::Success) {
