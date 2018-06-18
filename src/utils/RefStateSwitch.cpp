@@ -92,6 +92,7 @@ namespace rtt {
         if(refData.us.goalie != lastKnownKeeper){
             ROS_WARN_STREAM_NAMED("RefStateSwitch", "Keeper ID changed from " << lastKnownKeeper << " to " << refData.us.goalie);
             lastKnownKeeper = refData.us.goalie;
+            rtt::RobotDealer::setKeeper(lastKnownKeeper); // This is also done in StrategyNode, but its needs to be done before this Terminate call
             getCurrentChild()->Terminate(getCurrentChild()->getStatus());
             needToInitialize = true;
         }
