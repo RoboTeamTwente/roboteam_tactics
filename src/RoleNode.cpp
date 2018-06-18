@@ -197,8 +197,23 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // Update the tree, get its status
-        bt::Node::Status status = currentTree->Update();
+        // Run the strategy tree
+        bt::Node::Status status = bt::Node::Status::Invalid;
+        try{
+            status = currentTree->Update();
+        }catch(const std::out_of_range& e){
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.what());
+        }catch (const std::exception& e) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.what());
+        } catch (const std::string& e) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.c_str());
+        } catch (...) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "General exception caught!");
+        }
+
 
         // If the tree is not running anymore
         if (status == bt::Node::Status::Success
