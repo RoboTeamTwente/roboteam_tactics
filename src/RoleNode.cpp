@@ -246,9 +246,13 @@ int main(int argc, char *argv[]) {
             start = steady_clock::now();
 
             // ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Actual Hz = " << (iters / 5.0));
-            // If the actual roleHz is lower than 80%, throw a warning
-            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Role changes per second = " << round(nRolesReceived / 5.0));
 
+            // If there are a lot of role directives coming in, throw a warning. What is a lot though? one every 0.5 seconds?
+            if(10 <= nRolesReceived/5.0) {
+                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Role directives per second = " << round(nRolesReceived / 5.0));
+            }
+
+            // If the actual roleHz is lower than 80%, throw a warning
             if((iters/5.0) < iterationsPerSecond * 0.8){
                 ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters / 5.0) << "/" << iterationsPerSecond);
             }
