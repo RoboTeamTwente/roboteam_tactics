@@ -592,7 +592,8 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     static double posErrorRotationThreshold = 0.45;
     if (posError.length() > posErrorRotationThreshold && !GetBool("dontRotate")) {
         angleGoal = posError.angle();
-        if (fabs(cleanAngle(angleGoal - myAngle)) > M_PI/2) {
+        bool backwards = fabs(cleanAngle(angleGoal - myAngle)) > M_PI/2 && !GetBool("notBackwards");
+        if (backwards) {
             angleGoal = cleanAngle(angleGoal + M_PI); // chooses either driving forward or backwards
         }
         angleError = cleanAngle(angleGoal - myAngle);

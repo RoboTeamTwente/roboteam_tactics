@@ -642,20 +642,20 @@ bt::Node::Status GetBall::Update (){
         targetPos = ballPos + Vector2(0.02, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !GetBool("dribblerOff") && !GetBool("useBallSensor"));
     }
-    // Hack for better ball interception when ball has velocity //TODO: IMPROVE THIS
+    // Code for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
-    if (vBall > 0.15 && ballVel.dot(posDiff) < 0) {
-        // if (L_posDiff > 0.15) {
-            double L = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()))*2.0;
+    // ball velocity should be large enough to make its direction reliable (same goes for the posdiff)
+    if (vBall > 0.15) {
+        // double angleFromInterception = fabs(cleanAngle(posDiff.angle()+M_PI - ballVel.angle()));
+        if (L_posDiff > 0.5 || fabs(angleDiff) > 0.15) {
             double max_ahead = 5.0;
-            double ahead = L*vBall*1.5;
-            if (ahead < max_ahead) {
-                targetPos = targetPos + ballVel.stretchToLength(ahead);
-            } else {
-                targetPos = targetPos + ballVel.stretchToLength(max_ahead);
+            // double ahead = fmin( max_ahead, angleFromInterception*vBall*3.0 );
+            Vector2 ahead = ballVel.scale(fabs(angleDiff)*1.0);
+            if (ahead.length() > max_ahead) {
+                ahead = ahead.stretchToLength(max_ahead);
             }
-
-        // }
+            targetPos = targetPos + ahead;//ballVel.stretchToLength(ahead);
+        }
     }
       //---------------------------------------------------------------------//
      //---------Status returning, and passing/shooting if enabled ----------//
@@ -782,6 +782,7 @@ bt::Node::Status GetBall::Update (){
     private_bb->SetBool("avoidRobots", (L_posDiff > 0.4)); // shut off robot avoidance when close to target
     private_bb->SetDouble("successDist", 0.001); // make sure gotopos does not return success before getball returns success
     private_bb->SetBool("dontRotate", isStrafing);
+    private_bb->SetBool("notBackwards", fabs(angleDiff) < 0.25*M_PI);
     if (HasBool("enterDefenseAreas")) {
         private_bb->SetBool("enterDefenseAreas", GetBool("enterDefenseAreas"));
     }
