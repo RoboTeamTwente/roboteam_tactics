@@ -39,7 +39,6 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
         ////////////////////////////////////////////////////
 
         { RefState::HALT                  , "rtt_dennis/HaltStrategy"s           } ,
-//        { RefState::STOP                  , "rtt_jim/DefensivePrepareStrat"s           } ,
         { RefState::STOP                  , "rtt_anouk/StopStrat"s           } ,
         { RefState::PREPARE_KICKOFF_US    , "rtt_emiel/PrepareKickoffUsStrategy"s    } ,
         { RefState::PREPARE_KICKOFF_THEM  , "rtt_emiel/PrepareKickoffThemStrategy"s    } ,
@@ -70,7 +69,6 @@ const std::map<RefState, b::optional<std::string>> StrategyComposer::MAPPING = {
 
         // rtt_bob/KickoffWithRunStrategy
         { RefState::DO_KICKOFF            , "rtt_bob/KickoffWithChipStrategy"s   } ,
-//        { RefState::DO_KICKOFF            , "rtt_jim/NormalPlay"s   } ,
         { RefState::DEFEND_KICKOFF        , "rtt_jim/KickOffDefenseStrat"s       } ,
         { RefState::DEFEND_PENALTY        , "rtt_emiel/PreparePenaltyThemStrategy"s  } ,
         { RefState::DO_PENALTY            , "rtt_jim/TakePenalty"s               } ,

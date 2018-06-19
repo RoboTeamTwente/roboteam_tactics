@@ -571,7 +571,12 @@ bool isWithinField(Vector2 point) {
 // Calculates the distance between the testPosition and a robot
     double calcDistGoalToRobot(int robot, roboteam_msgs::World world) {
         Vector2 goalPos = LastWorld::get_their_goal_center();
-        Vector2 robotPos = Vector2(world.us.at(robot).pos);
+        Vector2 robotPos(9999, 9999);
+        try {
+            robotPos = Vector2(world.us.at(robot).pos);
+        }catch(const std::out_of_range& ex){
+            ROS_WARN_STREAM_NAMED("utils.cpp", "Out of range exception in calcDistGoalToRobot! " << ex.what());
+        }
 
         double distGoalToRobot = (robotPos - goalPos).length();
 
