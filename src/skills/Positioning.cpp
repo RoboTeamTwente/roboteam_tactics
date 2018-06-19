@@ -44,7 +44,7 @@ void Positioning::Initialize() {
         initialPos = Vector2(field.field_length/2 - initialBoxSize/2,0.0);
     } else if (profile == 2){
     // Midfielder
-        opportunityFinder.Initialize("midfielder.txt", robotID, "centertheirhalf", 0);
+        opportunityFinder.Initialize("midfielder.txt", robotID, "fieldcenter", 0);
          // starting point is opponents half of the field
         initialBoxSize = field.field_width;
         initialPos = Vector2(0.0,0.0);

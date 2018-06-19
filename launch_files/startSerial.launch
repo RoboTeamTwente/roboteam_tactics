@@ -8,22 +8,22 @@
 
 	<param name="keeper_id" type="int" value="0" />
 
-	<param name="robot0/robotType"  type="str" value="serial" />
-	<param name="robot1/robotType"  type="str" value="serial" />
-	<param name="robot2/robotType"  type="str" value="serial" />
-	<param name="robot3/robotType"  type="str" value="serial" />
-	<param name="robot4/robotType"  type="str" value="serial" />
-	<param name="robot5/robotType"  type="str" value="serial" />
-	<param name="robot6/robotType"  type="str" value="serial" />
-	<param name="robot7/robotType"  type="str" value="serial" />
-	<param name="robot8/robotType"  type="str" value="serial" />
-	<param name="robot9/robotType"  type="str" value="serial" />
-	<param name="robot10/robotType" type="str" value="serial" />
-	<param name="robot11/robotType" type="str" value="serial" />
-	<param name="robot12/robotType" type="str" value="serial" />
-	<param name="robot13/robotType" type="str" value="serial" />
-	<param name="robot14/robotType" type="str" value="serial" />
-	<param name="robot15/robotType" type="str" value="serial" />
+	<param name="robot0/robotType"  type="str" value="proto" />
+	<param name="robot1/robotType"  type="str" value="proto" />
+	<param name="robot2/robotType"  type="str" value="proto" />
+	<param name="robot3/robotType"  type="str" value="proto" />
+	<param name="robot4/robotType"  type="str" value="proto" />
+	<param name="robot5/robotType"  type="str" value="proto" />
+	<param name="robot6/robotType"  type="str" value="proto" />
+	<param name="robot7/robotType"  type="str" value="proto" />
+	<param name="robot8/robotType"  type="str" value="proto" />
+	<param name="robot9/robotType"  type="str" value="proto" />
+	<param name="robot10/robotType" type="str" value="proto" />
+	<param name="robot11/robotType" type="str" value="proto" />
+	<param name="robot12/robotType" type="str" value="proto" />
+	<param name="robot13/robotType" type="str" value="proto" />
+	<param name="robot14/robotType" type="str" value="proto" />
+	<param name="robot15/robotType" type="str" value="proto" />
 
 	<param name="robot0/readyToReceiveBall"  type="bool" value="false" />
 	<param name="robot1/readyToReceiveBall"  type="bool" value="false" />

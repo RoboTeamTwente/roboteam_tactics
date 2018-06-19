@@ -233,78 +233,7 @@ Vector2 GoToPos::avoidRobots(Vector2 myPos, Vector2 myVel, Vector2 targetPos, Ve
         drawer.drawLine("cushionForce"+std::to_string(i),otherRobotPos,cushionForce.scale(0.5));
         drawer.setColor(155, 155, 155);
         drawer.drawPoint("relativeAntenna"+std::to_string(i),myPos+relativeAntenna);
-        // }
     }
-
-
-
-    // for (auto const currentRobot : world.us) {
-    //     if (currentRobot.id != ROBOT_ID) {
-    //         Vector2 otherRobotPos(currentRobot.pos);
-    //         Vector2 otherRobotVel(currentRobot.vel);
-    //         Vector2 relativePos = otherRobotPos - myPos;
-    //         double distToRobot = relativePos.length();
-
-    //         Vector2 relativeVel = myVel - otherRobotVel;
-    //         Vector2 relativeAntenna = antenna;
-    //         if (relativeVel.length()>0.2 && myVel.length()>0.1) {
-    //             double rotation = cleanAngle(relativeVel.angle() - myVel.angle());
-    //             relativeAntenna = antenna.rotate(rotation);
-    //         }
-
-    //         if (distToRobot <= antenna.length() && fabs(cleanAngle(relativePos.angle() - relativeAntenna.angle())) < 0.35*M_PI && relativeAntenna.dot(antenna) > 0) {
-    //             // Compute avoidance force and add to total
-    //             Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna, sumOfForces);
-    //             sumOfForces = sumOfForces + forceVector;
-    //             // Determine the crash velocity (velocity at which the robots would crash into eachother)..
-    //             // ..and determine the 'cushion force' to damp out this crash velocity.
-    //             Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
-    //             Vector2 cushionForce = crashVel.scale(cushionGain * (1-distToRobot/antenna.length()) );
-    //             //I will not respond to a negative crashVel or a crashVel not (or barely) caused by me
-    //             if (crashVel.dot(relativePos) > 0 || myVel.dot(relativePos) < 0.1) {
-    //                 cushionForce = Vector2(0,0);
-    //             }
-    //             sumOfForces = sumOfForces + cushionForce; // We add the cushion force to the total
-    //             // draw both forces in rqt
-    //             drawer.setColor(0, 0, 255);
-    //             drawer.drawLine("avoidForce" + std::to_string(currentRobot.id),otherRobotPos,forceVector.scale(0.5));
-    //             drawer.setColor(255, 0, 255);
-    //             drawer.drawLine("cushionForce" + std::to_string(currentRobot.id),otherRobotPos,cushionForce.scale(0.5));
-    //         }
-    //     }
-    // }
-    // for (size_t i = 0; i < world.them.size(); i++) {
-    //         Vector2 otherRobotPos(world.them.at(i).pos);
-    //         Vector2 otherRobotVel(world.them.at(i).vel);
-    //         Vector2 relativePos = otherRobotPos - myPos;
-    //         double distToRobot = relativePos.length();
-
-    //         Vector2 relativeVel = myVel - otherRobotVel;
-    //         Vector2 relativeAntenna = antenna;
-    //         if (relativeVel.length()>0.2 && myVel.length()>0.1) {
-    //             relativeAntenna = antenna.rotate(relativeVel.angle()-myVel.angle());
-    //         }
-
-    //         if (distToRobot <= antenna.length() && fabs(cleanAngle(relativePos.angle() - relativeAntenna.angle())) < 0.35*M_PI && relativeAntenna.dot(antenna) > 0) {
-    //             // Compute avoidance force and add to total
-    //             Vector2 forceVector = getForceVectorFromRobot(myPos, otherRobotPos, relativeAntenna, sumOfForces);
-    //             sumOfForces = sumOfForces + forceVector;
-    //             // Determine the crash velocity (velocity at which the robots would crash into eachother)..
-    //             // ..and determine the 'cushion force' to damp out this crash velocity.
-    //             Vector2 crashVel = (otherRobotVel - myVel).project2(myPos - otherRobotPos);
-    //             Vector2 cushionForce = crashVel.scale(cushionGain * (1-distToRobot/antenna.length()) );
-    //             //I will not respond to a negative crashVel or a crashVel not (or barely) caused by me
-    //             if (crashVel.dot(relativePos) > 0 || myVel.dot(relativePos) < 0.1) {
-    //                 cushionForce = Vector2(0,0);
-    //             }
-    //             sumOfForces = sumOfForces + cushionForce; // We add the cushion force to the total
-    //             // draw both forces in rqt
-    //             drawer.setColor(0, 0, 255);
-    //             drawer.drawLine("avoidForceThem" + std::to_string(world.them.at(i).id),otherRobotPos,forceVector.scale(0.5));
-    //             drawer.setColor(255, 0, 255);
-    //             drawer.drawLine("cushionForceThem" + std::to_string(world.them.at(i).id),otherRobotPos,cushionForce.scale(0.5));
-    //         }
-    // }
 
     drawer.setColor(0, 155, 155);
     drawer.drawPoint("antenna" + std::to_string(ROBOT_ID),myPos+antenna);
@@ -660,16 +589,16 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     // drawer.drawPoint("smoothTargetPos", smoothTargetPos);
 
     // Turn towards goal when error is too large
-    static double posErrorRotationThreshold = 0.30;
+    static double posErrorRotationThreshold = 0.45;
     if (posError.length() > posErrorRotationThreshold && !GetBool("dontRotate")) {
         angleGoal = posError.angle();
         if (fabs(cleanAngle(angleGoal - myAngle)) > M_PI/2) {
             angleGoal = cleanAngle(angleGoal + M_PI); // chooses either driving forward or backwards
         }
         angleError = cleanAngle(angleGoal - myAngle);
-        posErrorRotationThreshold = 0.29;
+        posErrorRotationThreshold = 0.4;
     } else {
-        posErrorRotationThreshold = 0.30;
+        posErrorRotationThreshold = 0.45;
     }
 
     // Draw the line towards the target position
@@ -714,6 +643,11 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     prevCommand = sumOfForces;
     //////////
 
+    // Draw the target velocity vector in rqt-view (in red, oooh)
+    drawer.setColor(255, 0, 0);
+    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, sumOfForces.scale(0.5));
+    drawer.setColor(0, 0, 0);
+
     // Different velocity commands for grsim and real robot
     roboteam_msgs::RobotCommand command;
     Vector2 velCommand;
@@ -749,11 +683,6 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     if (velCommand.length() > maxVel) {
     	velCommand = velCommand.stretchToLength(maxVel);
     }
-
-    // Draw the target velocity vector in rqt-view (in red, oooh)
-    drawer.setColor(255, 0, 0);
-    drawer.drawLine("velTarget" + std::to_string(ROBOT_ID), myPos, velCommand.scale(0.5));
-    drawer.setColor(0, 0, 0);
 
     // fill the rest of command message
     command.id = ROBOT_ID;

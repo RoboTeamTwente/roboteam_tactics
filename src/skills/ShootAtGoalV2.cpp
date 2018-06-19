@@ -32,8 +32,9 @@ void ShootAtGoalV2::Initialize(){
 
 bt::Node::Status ShootAtGoalV2::Update() {
 	// Get the last world
-    const roboteam_msgs::World world = LastWorld::get();
-	// === Get the ID of the kicker ===
+    const roboteam_msgs::World& world = LastWorld::get();
+
+    // === Get the ID of the kicker ===
     int robotID = blackboard->GetInt("ROBOT_ID");
     roboteam_msgs::WorldRobot bot;
     boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(robotID);
@@ -75,11 +76,11 @@ bt::Node::Status ShootAtGoalV2::Update() {
 
     }
 
-
 	isKicking = true;
 
-	private_bb->SetDouble("SAGV2_GetBall_targetAngle", targetAngle);
-    private_bb->SetDouble("targetAngle", targetAngle);
+	private_bb->SetDouble("SAGV2_GetBall_targetAngle", 0);
+    private_bb->SetDouble("targetAngle", 0);
+    private_bb->SetInt("geneva", 5);
 
 	ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "ROBOT_ID=" << blackboard->GetInt("ROBOT_ID") << ", Robot=" << bot.id << ", Kicking=" << (isKicking ? "Yes" : "No") << ", Target=" << target);
 //	ROS_INFO_STREAM_NAMED("ShootAtGoalv2", "Current blackboard: " << blackboard->toString().c_str());

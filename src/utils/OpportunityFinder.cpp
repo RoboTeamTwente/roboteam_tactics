@@ -4,6 +4,7 @@
 #include "roboteam_utils/Math.h"
 #include "roboteam_tactics/conditions/IsInDefenseArea.h"
 #include "roboteam_tactics/utils/debug_print.h"
+#include "roboteam_tactics/utils/RobotDealer.h"
 #include "ros/package.h"
 
 #include <iostream>
@@ -692,7 +693,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 
     // For each of our robots, check score of their (claimed or real) position
     for (size_t i = 0; i < (world.us.size()); i++) {
-        if (world.us.at(i).id != ROBOT_ID) { // dont choose myself
+        if (world.us.at(i).id != ROBOT_ID && (int) world.us.at(i).id != RobotDealer::get_keeper()) { // dont choose myself or the keeper
         	Vector2 botPos;
         	if (realPos) {
         		botPos = Vector2(world.us.at(i).pos);

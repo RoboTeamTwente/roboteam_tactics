@@ -26,102 +26,75 @@
 #include "roboteam_tactics/utils/BtDebug.h"
 #include "roboteam_tactics/utils/CrashHandler.h"
 
-namespace {
-
-    std::string const RED_BOLD_COLOR = "\e[1;31m";
-    std::string const END_COLOR = "\e[0m";
-
-} // anonymous namespace
-
-#define RTT_CURRENT_DEBUG_TAG RoleNode
-
 ros::Publisher pub;
 ros::Publisher feedbackPub;
 bt::Node::Ptr currentTree;
-std::string currentTreeName;
+std::string currentTreeName = "No tree";
 
-uuid_msgs::UniqueID currentToken;
 int ROBOT_ID;
+uuid_msgs::UniqueID currentToken;
+int nRolesReceived = 0;
+
 std::string ROS_LOG_NAME = "RoleNode";
 
-
-bool ignoring_strategy_instructions = false;
-
+// Stores the latest refdata
 void msgCallbackRef(const roboteam_msgs::RefereeDataConstPtr& refdata) {
     rtt::LastRef::set(*refdata);
-    //ROS_INFO("set ref, timestamp: %d",refdata->packet_timestamp);
 }
 
 void reset_tree() {
     currentToken = uuid_msgs::UniqueID();
     currentTree = nullptr;
+    currentTreeName = "No tree";
 }
 
+/**
+ * Handles Role Directive messages. Loads ROBOT_ID and KEEPER_ID, blackboard, and validates tree. Ignores messages for other robots
+ * @param msg The RoleDirective received
+ */
 void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
 
-    std::string name = ros::this_node::getName();
-    // Some control statements to regulate starting and stopping of rolenodes
-    if (msg->robot_id == roboteam_msgs::RoleDirective::ALL_ROBOTS) {
-        // Continue
-    } else if (msg->robot_id == ROBOT_ID) {
-        // Also continue;
-    } else {
-        // Message is not for us!
+    // Ignore any message that is not meant for this robot
+    if (msg->robot_id != ROBOT_ID)
+        return;
+
+    // If this robot received the stop command, reset the tree and stop the robot
+    if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
+        // Reset the tree
+        reset_tree();
+        // Stop the robot in its tracks
+        pub.publish(rtt::stop_command(ROBOT_ID));
+        ROS_WARN_NAMED(ROS_LOG_NAME, "Received stop command");
         return;
     }
 
     ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Directive received : " << msg->tree.c_str());
+    nRolesReceived++;
 
-    ros::NodeHandle n;
-
-    if (msg->tree == roboteam_msgs::RoleDirective::STOP_EXECUTING_TREE) {
-        reset_tree();
-
-        ROS_WARN_NAMED(ROS_LOG_NAME, "Received stop command");
-
-        // Stop the robot in its tracks
-        pub.publish(rtt::stop_command(ROBOT_ID));
-
-        return;
-    } else if (msg->tree == roboteam_msgs::RoleDirective::IGNORE_STRATEGY_INSTRUCTIONS) {
-        reset_tree();
-        ignoring_strategy_instructions = true;
-
-        return;
-    } else if (msg->tree == roboteam_msgs::RoleDirective::STOP_IGNORING_STRATEGY_INSTRUCTIONS) {
-        ignoring_strategy_instructions = false;
-
-        return;
-    }
-
-    if (ignoring_strategy_instructions) {
-        return;
-    }
-
+    // Get the blackboard from the role directive
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
 
+    // Check for robot ID
     if (!bb->HasInt("ROBOT_ID")) {
         ROS_ERROR_NAMED(ROS_LOG_NAME, "RoleDirective received without ROBOT_ID");
     }
-
+    // Check for keeper ID
     if (!bb->HasInt("KEEPER_ID")) {
         ROS_ERROR_NAMED(ROS_LOG_NAME, "RoleDirective received without KEEPER_ID");
     }
 
-    {   // Emiel: Not sure why this scope is here
-//        ros::NodeHandle n;    // Emiel: not sure why this is here
-        currentTreeName = msg->tree;
-        currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
+    currentTreeName = msg->tree;
+    currentTree = rtt::generate_rtt_node<>(msg->tree, "", bb);
 
-        if (!currentTree)  {
-            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Tree name is neither tree nor skill: " << msg->tree.c_str());
-            return;
-        }
+    if (!currentTree)  {
+        ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Tree name is neither tree nor skill: " << msg->tree.c_str());
+        return;
     }
+
     currentToken = msg->token;
 
-    RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
+//    RTT_SEND_RQT_BT_TRACE(ROBOT_ID, msg->tree, roboteam_msgs::BtDebugInfo::TYPE_ROLE, roboteam_msgs::BtStatus::STARTUP, bb->toMsg());
 }
 
 int main(int argc, char *argv[]) {
@@ -130,8 +103,6 @@ int main(int argc, char *argv[]) {
     ros::NodeHandle n;
 
     ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "New RoleNode instance, name=" << ros::this_node::getName());
-
-
 
     // ====== ROBOT_ID ====== //
     std::string name = ros::this_node::getName();                               // Get name of Node
@@ -185,6 +156,8 @@ int main(int argc, char *argv[]) {
     steady_clock::time_point start = steady_clock::now();
     int iters = 0;
 
+
+    // ================ MAIN LOOP ================ //
     while (ros::ok()) {
 
         // Process all received messages
@@ -197,8 +170,36 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        // Update the tree, get its status
-        bt::Node::Status status = currentTree->Update();
+        // If the RoleNode has not yet received a world, continue
+        if(!rtt::LastWorld::have_received_first_world()){
+            continue;
+        }
+
+        // Check if the RoleNode exists in the world. If not, continue
+        const roboteam_msgs::World& world = rtt::LastWorld::get();
+        if(!rtt::getWorldBot(ROBOT_ID, true, world)){
+            // If the robot doesn't exist in the world, but does have a tree, something is wrong
+            ROS_WARN_STREAM_DELAYED_THROTTLE_NAMED(1, ROS_LOG_NAME, "Robot " << ROBOT_ID << " has a tree, but doesn't exist in the world! Tree=" << currentTreeName);
+            continue;
+        }
+
+        // Run the strategy tree
+        bt::Node::Status status = bt::Node::Status::Invalid;
+        try{
+            status = currentTree->Update();
+        }catch(const std::out_of_range& e){
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.what());
+        }catch (const std::exception& e) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.what());
+        } catch (const std::string& e) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "Exception caught!");
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, e.c_str());
+        } catch (...) {
+            ROS_ERROR_STREAM_NAMED(ROS_LOG_NAME, "General exception caught!");
+        }
+
 
         // If the tree is not running anymore
         if (status == bt::Node::Status::Success
@@ -212,8 +213,6 @@ int main(int argc, char *argv[]) {
 
             // Create a blackboard
             roboteam_msgs::Blackboard bb;
-
-            // TODO: Maybe implement bt rqt feedback here as well?
 
             std::string statusString = "";
             if (status == bt::Node::Status::Success) {
@@ -232,13 +231,10 @@ int main(int argc, char *argv[]) {
                 statusString = "Failure";
             }
 
-            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Tree finished. "
-                    << "status=" << statusString
-                    << ", tree=" << currentTreeName.c_str());
-//                    << ", token=" << currentToken);
+            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Tree finished. " << "status=" << statusString << ", tree=" << currentTreeName.c_str());
 
             // Reset tree
-            currentTree = nullptr;
+            reset_tree();
 
             // Stop the robot in its tracks
             pub.publish(rtt::stop_command(ROBOT_ID));
@@ -250,11 +246,18 @@ int main(int argc, char *argv[]) {
             start = steady_clock::now();
 
             // ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Actual Hz = " << (iters / 5.0));
+
+            // If there are a lot of role directives coming in, throw a warning. What is a lot though? one every 0.5 seconds?
+            if(10 <= nRolesReceived/5.0) {
+                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Role directives per second = " << round(nRolesReceived / 5.0));
+            }
+
             // If the actual roleHz is lower than 80%, throw a warning
             if((iters/5.0) < iterationsPerSecond * 0.8){
                 ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters / 5.0) << "/" << iterationsPerSecond);
             }
 
+            nRolesReceived = 0;
             iters = 0;
         }
     }

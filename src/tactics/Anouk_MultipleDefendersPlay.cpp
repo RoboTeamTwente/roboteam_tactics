@@ -502,12 +502,20 @@ namespace rtt {
             .setString("targetToObj", "them")
             .setInt("targetToRobotId", opponentID)
             .setDouble("distanceFromGoalRatio", 0.9)
-            ;
+        ;
+
+        //----------improvement defenders----------
+        bb.SetBool("GetBall_B_aimAwayFromTarget", true);
+        bb.SetString("GetBall_B_aimAt", "ourgoal");
+        bb.SetBool("GetBall_D_aimAwayFromTarget", true);
+        bb.SetString("GetBall_D_aimAt", "ourgoal");
+        //----------improvement defenders----------
+
 
         /* Create message */
         roboteam_msgs::RoleDirective rd;
         rd.robot_id = robotID;
-        rd.tree = "rtt_jim/DefenderRoleStop";
+        rd.tree = "rtt_jim/DefenderRoleGetBall";
         rd.blackboard = bb.toMsg();
 
         // Add random token and save it for later
