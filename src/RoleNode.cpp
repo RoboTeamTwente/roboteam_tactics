@@ -253,6 +253,7 @@ int main(int argc, char *argv[]) {
                 ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "RoleHz is low! " << round(iters / 5.0) << "/" << iterationsPerSecond);
             }
 
+            nRolesReceived = 0;
             iters = 0;
         }
     }
