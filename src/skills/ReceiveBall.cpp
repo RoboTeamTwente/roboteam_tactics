@@ -454,7 +454,7 @@ bt::Node::Status ReceiveBall::Update() {
 		double distToBallThresh, turningDist;
 		if (GetBool("defenderMode")) {
 			distToBallThresh = 0.1;
-			turningDist = 0.15;
+			turningDist = 0.05;
 		} else {
 			distToBallThresh = 1.5;
 			turningDist = 0.24;//0.29;
