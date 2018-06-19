@@ -80,6 +80,7 @@ bt::Node::Status ShootAtGoalV2::Update() {
 
 	private_bb->SetDouble("SAGV2_GetBall_targetAngle", 0);
     private_bb->SetDouble("targetAngle", 0);
+    private_bb->SetInt("SAGV2_GetBall_geneva", 5);
     private_bb->SetInt("geneva", 5);
 
 	ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "ROBOT_ID=" << blackboard->GetInt("ROBOT_ID") << ", Robot=" << bot.id << ", Kicking=" << (isKicking ? "Yes" : "No") << ", Target=" << target);
