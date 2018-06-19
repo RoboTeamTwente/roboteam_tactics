@@ -4,6 +4,7 @@
 #include <random>
 #include <limits>
 #include <cmath>
+#include <sstream>
 
 #include "unique_id/unique_id.h"
 #include "roboteam_msgs/RoleDirective.h"
@@ -185,24 +186,6 @@ namespace rtt {
             }
         }
 
-//        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "opponentHasBall : " << (opponentHasBall ? "Yes" : "No") << ", weHaveBall : " << (weHaveBall ? "Yes" : "No") << ", Attacking : " << (weAreAttacking ? "Yes" : "No"));
-
-        /* === Draw box around field === */
-//        if(weAreAttacking) drawer.setColor(0, 0, 255);
-//        else               drawer.setColor(255, 0, 0);
-//
-//        Vector2 topleft(-6, 4.5);
-//        Vector2 bottomright(6, -4.5);
-//
-//        drawer.drawLine("topleft_to_topright",       topleft, Vector2(12,0));
-//        drawer.drawLine("topleft_to_bottomleft",     topleft, Vector2(0, -9));
-//
-//        drawer.drawLine("bottomright_to_bottomleft", bottomright, Vector2(-12,0));
-//        drawer.drawLine("bottomright_to_topright",   bottomright, Vector2(0, 9));
-//
-//        drawer.setColor(0, 0, 0);
-        /* === End of draw box === */
-
         // === Set the minimumDangerScore based on attacking or defending === //
         float minimumDangerScore;
         if(weAreAttacking){
@@ -215,8 +198,6 @@ namespace rtt {
         // === Find the number of dangerous opponents === //
         // TODO : Implement a threshold that prevents robots from continously switching between dangerous and not-dangerous
         std::vector<int> dangerousOpps = RobotsToDefendFinder::GetRobotsToDefend(minimumDangerScore, false);
-
-//        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Number of dangerous opponents=" << (int)dangerousOpps.size());
 
         // === If the number of dangerous opponents have changed, reset === //
         double shouldReset = false;
@@ -241,19 +222,17 @@ namespace rtt {
 
 
         /// ======================== WE HAVE TO RESET, BECAUSE THE NUMBER OF DANGEROUS OPPONENTS CHANGED! ======================== ///
-        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Resetting! Number of dangerous opponents changed from " << prevDangerousOpps.size() << " to " << dangerousOpps.size());
+//        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Resetting! Number of dangerous opponents changed from " << prevDangerousOpps.size() << " to " << dangerousOpps.size());
+
+        // Stringstream used to create a one-line description of all that happens below
+        std::stringstream statusString;
+        statusString << "Reset | " << prevDangerousOpps.size() << " -> " << dangerousOpps.size() << " | ";
+
         // Store the dangerous opponents for the next iteration
         prevDangerousOpps = dangerousOpps;
 
         // First, release all the previously claimed robots
         release_robots(activeRobots);	// Only here from initialize function? activeRobots should always be empty?
-
-		// Dirty hack. Just release all the robots
-//		std::vector<int> allRobots;
-//		for(const roboteam_msgs::WorldRobot& robot : world.us){
-//			allRobots.push_back(robot.id);
-//		}
-//		release_robots(allRobots);
 
         // Empty the vector that holds our claimed robots
         activeRobots.clear();
@@ -285,8 +264,10 @@ namespace rtt {
             rd.token = unique_id::toMsg(token);
 
             // Send to rolenode
-            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << keeperID << " is now the keeper");
             pub.publish(rd);
+
+//            ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << keeperID << " is now the keeper");
+            statusString << keeperID << "=K ";
         }
 
 
@@ -336,7 +317,9 @@ namespace rtt {
                 boost::uuids::uuid token = init_robotDefender(robotID, dangerousOpps.at(i));
                 activeRobots.push_back(robotID);
                 tokens.push_back(token);
-                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends opponent " << dangerousOpps.at(i));
+
+//                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends opponent " << dangerousOpps.at(i));
+                statusString << robotID << "=" << dangerousOpps.at(i) << " ";
             }
         }
 
@@ -376,12 +359,15 @@ namespace rtt {
                 boost::uuids::uuid token = init_ballDefender(robotID, angleOffsets.at(i), GoToPos_A_positions.at(i));
                 activeRobots.push_back(robotID);
                 tokens.push_back(token);
-                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends the ball");
+
+//                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends the ball");
+                statusString << robotID << "=B ";
             }
         }
 
-        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, (int)getAvailableRobots().size() << " robots left for the offense");
-
+//        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, (int)getAvailableRobots().size() << " robots left for the offense");
+        statusString << " | " << (int)getAvailableRobots().size() << " left over";
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, statusString.str());
 
         return false;
 
@@ -439,7 +425,7 @@ namespace rtt {
 
     void Anouk_MultipleDefendersPlay::Initialize() {
 
-        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing...");
+//        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing...");
 
         prevDangerousOpps.clear();
         activeRobots.clear();

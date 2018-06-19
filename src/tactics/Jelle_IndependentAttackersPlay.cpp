@@ -28,7 +28,10 @@ Jelle_IndependentAttackersPlay::Jelle_IndependentAttackersPlay(std::string name,
 
 
 void Jelle_IndependentAttackersPlay::Initialize() {
-    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing...");
+
+    // Stringstream used to create a one-line description of all that happens below
+    std::stringstream statusString;
+    statusString << "Reset | ";
 
     tokens.clear();
 
@@ -44,15 +47,15 @@ void Jelle_IndependentAttackersPlay::Initialize() {
 
     // Max 6 attackers
     int numAttackers = std::min((int) robots.size(), 6);
-    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing Jelle_IndependentAttackersPlay numAttackers: " << numAttackers);
+//    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initializing Jelle_IndependentAttackersPlay numAttackers: " << numAttackers);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 
     // Print the robots that will be attackers
-    std::stringstream vectorStr;
-    std::copy(robots.begin(), robots.end(), std::ostream_iterator<int>(vectorStr, ", "));
-    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Attackers: [" << vectorStr.str().c_str() << "]");  
+//    std::stringstream vectorStr;
+//    std::copy(robots.begin(), robots.end(), std::ostream_iterator<int>(vectorStr, ", "));
+//    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Attackers: [" << vectorStr.str().c_str() << "]");
 
     // priority of profiles: striker - midfielder - winger - midfielder - striker - winger
     int profiles[6] = {0, 2, 1, 2, 0, 1};
@@ -84,7 +87,11 @@ void Jelle_IndependentAttackersPlay::Initialize() {
 
         // Send to rolenode
         pub.publish(rd);
+
+        statusString << attackerID << "=" << profiles[i] << " ";
     }
+
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, statusString.str());
 
 }
 
