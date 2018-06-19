@@ -82,6 +82,12 @@ void Bob_ChipoffAtGoalPlay::Initialize() {
 bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
     if (failImmediately) return Status::Failure;
 
+    // Wait for the ball to move away from (0, 0)
+    Vector2 ballpos(LastWorld::get().ball.pos);
+    Vector2 ballvel(LastWorld::get().ball.vel);
+    bool ballMoved = ballpos.length() > 0.5 || ballvel.length() > 0.5;
+
+    // Check if the kickoff taker has finished its tree
     auto feedbackIt = feedbacks.find(unique_id::fromMsg(taker.token));
     if (feedbackIt != feedbacks.end()) {
         if (feedbackIt->second == bt::Node::Status::Success) {
@@ -90,10 +96,17 @@ bt::Node::Status Bob_ChipoffAtGoalPlay::Update() {
         if (feedbackIt->second == bt::Node::Status::Failure) {
             ROS_INFO_NAMED(ROS_LOG_NAME, "Bob_ChipoffAtGoalPlay return failure");
         }
-        return feedbackIt->second;
+
+        // If its finished but the ball hasn't moved, try again
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Kickoff taker is finished, but ball hasn't moved.. Trying again");
+        Initialize();
+        return bt::Node::Status::Running;
+    }else
+    // If the ball moved but the kickoff taker hasn't finished yet, return success anyway
+    if(ballMoved){
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Ball has moved but kickoff taker hasn't finished yet. Returning SUCCESS regardless");
+        return bt::Node::Status::Success;
     }
-
-
 
     return bt::Node::Status::Running;
 }
