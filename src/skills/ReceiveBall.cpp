@@ -184,8 +184,9 @@ InterceptPose ReceiveBall::deduceInterceptPosFromBall(Vector2 ballPos, Vector2 b
 		velThreshold = 0.8;//posdiff.length()/4; // ARBITRARY GUESS
 	}
 	if (GetBool("defenderMode")) {
-		velThreshold = 0.1;
-	} else if (velThreshold < 0.1) {
+		velThreshold = posdiff.length()/4;
+	}
+	if (velThreshold < 0.1) {
 		velThreshold = 0.1;
 	}
 
@@ -452,13 +453,13 @@ bt::Node::Status ReceiveBall::Update() {
 		static double thresholdSwitch = 1.0;
 		double distToBallThresh, turningDist;
 		if (GetBool("defenderMode")) {
-			distToBallThresh = 0.3;
-			turningDist = 0.1;
+			distToBallThresh = 0.1;
+			turningDist = 0.15;
 		} else {
 			distToBallThresh = 1.5;
 			turningDist = 0.24;//0.29;
 		}
-		if (!GetBool("claimedPos") && ((!ballIsComing && distanceToBall > thresholdSwitch*distToBallThresh) ||  (ballIsComing && posErrorLength > turningDist)) ) {
+		if (!GetBool("claimedPos") && ((!ballIsComing && distanceToBall > thresholdSwitch*distToBallThresh) ||  (ballIsComing && posErrorLength > turningDist*thresholdSwitch)) ) {
 			targetAngle = interceptAngle + M_PI/2;
 			thresholdSwitch = 0.95;
 		} else {
@@ -524,7 +525,8 @@ bt::Node::Status ReceiveBall::Update() {
 		if (HasDouble("dribblerDist")) {
 			dribblerDist = GetDouble("dribblerDist");
 		}
-		command.dribbler = distanceToBall < dribblerDist;
+		// TODO: turned off dribbling for receive ball
+		// command.dribbler = distanceToBall < dribblerDist && !GetBool("defenderMode");
 
 		auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
         pub.publish(command);

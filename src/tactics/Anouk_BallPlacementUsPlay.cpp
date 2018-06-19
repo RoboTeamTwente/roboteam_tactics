@@ -74,7 +74,8 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 		bb.SetInt("ROBOT_ID", *ROBOT_ID);
 		bb.SetInt("KEEPER_ID", RobotDealer::get_keeper());
 
-		ScopedBB(bb, "GetBallTest_A")
+		// ScopedBB(bb, "GetBallTest_A")
+		ScopedBB(bb, "GetBall_A")
 			.setString("aimAt", "ballplacement")
 			.setBool("enterDefenseAreas", true)
 			.setBool("aimAwayFromTarget", true)
@@ -89,7 +90,8 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 
 		roboteam_msgs::RoleDirective rd;
 		rd.robot_id = *ROBOT_ID;
-		rd.tree = "rtt_anouk/BallPlacementTree";
+		// rd.tree = "rtt_anouk/BallPlacementTree";
+		rd.tree = "rtt_jelle/BallPlacementAlt";
 		rd.blackboard = bb.toMsg();
 
 		// Store token of placer
@@ -170,8 +172,17 @@ void Anouk_BallPlacementUsPlay::Initialize() {
 
 void Anouk_BallPlacementUsPlay::movePlacerAwayFromBall(){
 
+	// Find the robot with the specified ID
+    boost::optional<roboteam_msgs::WorldRobot> findBot = getWorldBot(placerID);
+    roboteam_msgs::WorldRobot me;
+    if (findBot) {
+        me = *findBot;
+    } else {
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Robot with this ID not found, ID: " << placerID);
+    }
 	// Get current position of the robot
-	Vector2 const pos = LastWorld::get().us.at(placerID).pos;
+	Vector2 const pos = Vector2(me.pos);
+
 	Vector2 const ballPos = LastWorld::get().ball.pos;
 
 	Vector2 ballToUs = pos - ballPos;
@@ -269,8 +280,8 @@ bt::Node::Status Anouk_BallPlacementUsPlay::Update() {
 
 	if(currentState == PlayStates::STOP_BALL_SPINNING){
 		long int now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-		// Wait for two seconds, to make sure the ball has stopped spinning
-		if(2000 < (now - timeBallPlaced)){
+		// Wait for one seconds, to make sure the ball has stopped spinning
+		if(1000 < (now - timeBallPlaced)){
 			ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Ball has stopped spinning");
 			// Change state to moving the placer
 			currentState = PlayStates::MOVING_PLACER;

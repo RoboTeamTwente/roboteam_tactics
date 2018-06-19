@@ -20,6 +20,7 @@
 	<param name="robot7/robotType" type="string" value="$(arg robot_type)" />
 	<param name="robot8/robotType" type="string" value="$(arg robot_type)" />
 	<param name="robot9/robotType" type="string" value="$(arg robot_type)" />
+	<param name="robot10/robotType" type="string" value="$(arg robot_type)" />
 
 	<param name="robot0/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot1/readyToReceiveBall" type="bool" value="false" />
@@ -31,6 +32,7 @@
 	<param name="robot7/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot8/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot9/readyToReceiveBall" type="bool" value="false" />
+	<param name="robot10/readyToReceiveBall" type="bool" value="false" />
 
 	<param name="robot0/claimedPosX" type="double" value="-0.0" />
 	<param name="robot0/claimedPosY" type="double" value="-0.0" />
@@ -52,6 +54,8 @@
 	<param name="robot8/claimedPosY" type="double" value="-0.0" />
 	<param name="robot9/claimedPosX" type="double" value="-0.0" />
 	<param name="robot9/claimedPosY" type="double" value="-0.0" />
+	<param name="robot10/claimedPosX" type="double" value="-0.0" />
+	<param name="robot10/claimedPosY" type="double" value="-0.0" />
 
 	<param name="robotClaimedBall" type="int" value="-1" />
 	<param name="passToRobot" type="int" value="-1" />
@@ -103,6 +107,10 @@
 	</include>
 	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
 		<arg name="name" value="robot9"/>
+		<arg name="outputToScreen" value="true"/>
+	</include>
+	<include file="$(find roboteam_tactics)/launch_files/SafeRoleNode.launch">
+		<arg name="name" value="robot10"/>
 		<arg name="outputToScreen" value="true"/>
 	</include>
 
