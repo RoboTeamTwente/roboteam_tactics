@@ -35,7 +35,7 @@ Control::Control() : updateRateParam("role_iterations_per_second")
             pGainVelocity = 0.0;
 
             if(maxSpeed != 0.0){
-                ROS_INFO_STREAM_NAMED("Control", "[updateRateParam] settings maxSpeed to 0.0");
+                //ROS_INFO_STREAM_NAMED("Control", "[updateRateParam] settings maxSpeed to 0.0");
             }
             maxSpeed = 0.0;
             maxAngularVel = 0.0;
@@ -90,7 +90,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainRotation = 2.0;
         iGainRotation = 0.0;
         if(maxSpeed != 3.0){
-            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 3.0 - ARDUINO");
+            //ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 3.0 - ARDUINO");
         }
         maxSpeed = 3.0; 
         maxAngularVel = 10.0;
@@ -110,7 +110,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         pGainVelocity = 0.0;
 
         if(maxSpeed != 5.0){
-            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 5.0 - PROTO");
+            //ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 5.0 - PROTO");
         }
         maxSpeed = 5.0;
         maxAngularVel = 20.0;
@@ -127,7 +127,7 @@ void Control::setPresetControlParams(RobotType newRobotType) {
         iGainRotation = 0.0;
         dGainRotation = 0.0;
         if(maxSpeed != 2.1){
-            ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 2.1 - GRSIM");
+            //ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] settings maxSpeed to 2.1 - GRSIM");
         }
         maxSpeed = 2.1;
         maxAngularVel = 10.0;
@@ -166,7 +166,7 @@ void Control::setPresetControlParams(
 	this->pGainRotation = pGainRotation;
 	this->maxAngularVel = maxAngularVel;
 	if(this->maxSpeed != maxSpeed){
-        ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] Setting maxSpeed to " << maxSpeed);
+        //ROS_INFO_STREAM_NAMED("Control", "[setPresetControlParams] Setting maxSpeed to " << maxSpeed);
     }
     this->maxSpeed = maxSpeed;
 
@@ -193,7 +193,7 @@ void Control::setControlParam(std::string paramName, double paramValue) {
     }
     else if (paramName == "maxSpeed") {
         if(this->maxSpeed != paramValue){
-            ROS_INFO_STREAM_NAMED("Control", "[setControlParam] Settings maxSpeed to " << paramValue);
+            //ROS_INFO_STREAM_NAMED("Control", "[setControlParam] Settings maxSpeed to " << paramValue);
         }
         this->maxSpeed = paramValue;
     }
