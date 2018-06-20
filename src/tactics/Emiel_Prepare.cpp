@@ -34,7 +34,6 @@ namespace rtt {
 		auto &pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();
 		// Get the Keeper ID, which is needed in all blackboards
 		int keeperID = RobotDealer::get_keeper();
-        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "keeperID=" << keeperID);
 
 		// Get all the available robots
 		std::vector<int> robots = getAvailableRobots();

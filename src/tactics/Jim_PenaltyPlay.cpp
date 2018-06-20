@@ -42,9 +42,12 @@ void Jim_PenaltyPlay::Initialize() {
     auto penaltyTakerID = get_robot_closest_to_point(robots, world, ballPos);
 
     if (!penaltyTakerID) {
+        ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "No robot available to take the penalty!");
         success = false;
     	return;
     }
+
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Robot chosen for penalty: " << *penaltyTakerID);
 
     // Get the default roledirective publisher
     auto& pub = rtt::GlobalPublisher<roboteam_msgs::RoleDirective>::get_publisher();

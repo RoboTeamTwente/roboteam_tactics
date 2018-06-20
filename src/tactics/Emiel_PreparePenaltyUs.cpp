@@ -5,9 +5,11 @@
 
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_msgs/WorldRobot.h"
 
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/LastWorld.h"
+
 
 #include "roboteam_tactics/utils/RobotPatternGenerator.h"
 
@@ -34,7 +36,8 @@ namespace rtt {
 		// Holds positions
 		std::vector<Vector2> positions;
 		// Add kicker
-		positions.push_back(Vector2(4.3, 0));
+		Vector2 kickerPos = (Vector2)LastWorld::get().ball.pos - Vector2(0.5, 0);
+		positions.push_back(kickerPos);
 
 		// All but one robot
 		int numRobots = robots.size() - 1;
@@ -46,8 +49,10 @@ namespace rtt {
 		// Calculate positions for defenders and attackers
 		/* Creates a line of 2? robots, 1 meter wide, 2 meters in front of our goal center */
 		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numDefenders, 1, LastWorld::get_our_goal_center(), 0, 2);
-		/* Creates a circle of 5? robots, covering M_PI/2 rad, in a circle with radius 3, around their goal center, with a M_PI rad phase shift */
-		std::vector<Vector2> attackerCoords = RobotPatternGenerator::Circle(numAttackers, M_PI/2, 3, LastWorld::get_their_goal_center(), M_PI, 0, 0);
+		/* Creates a line of 5? robots, 7.2? meter wide, 3 meters in front of their goal center */
+		float lineLength = LastWorld::get_field().field_width * 0.8;
+		std::vector<Vector2> attackerCoords = RobotPatternGenerator::Line(numAttackers, lineLength, LastWorld::get_their_goal_center(), 0, -3);
+
 
 		// Put all positions into one array
 		positions.insert(std::end(positions), std::begin(defenderCoords), std::end(defenderCoords));

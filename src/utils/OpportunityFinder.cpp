@@ -621,7 +621,7 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 	// std::string winningPointName = names.at(distance(scores.begin(), max_element(scores.begin(), scores.end())));
 
 	int timePassed = time_difference_milliseconds(start, now()).count();
-	ROS_INFO_STREAM_NAMED("OpportunityFinder", "robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
+	ROS_DEBUG_STREAM_NAMED("OpportunityFinder", "robot: " << ROBOT_ID << " OppFinder took: " << timePassed << " ms");
 
 	// Info about best position
 	// ROS_INFO_STREAM("viewOfGoal: " << calcViewOfGoal(bestPosition, world));

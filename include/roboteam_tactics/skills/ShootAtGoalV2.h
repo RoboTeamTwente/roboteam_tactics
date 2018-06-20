@@ -37,6 +37,7 @@ private:
     static constexpr double KICK_VEL = 7.5; // .5 m/s safety margin
     GoalPartition partition;
     std::unique_ptr<GetBall> aimer;
+	int geneva = 3;
 };
 
 }

@@ -27,6 +27,7 @@ void ShootAtGoalV2::Initialize(){
 		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Warning : " << ROS_LOG_NAME << " is specifically designed for RefState::DO_PENALTY");
 	}
 
+    geneva = 3;
 
 }
 
@@ -80,7 +81,15 @@ bt::Node::Status ShootAtGoalV2::Update() {
 
 	private_bb->SetDouble("SAGV2_GetBall_targetAngle", 0);
     private_bb->SetDouble("targetAngle", 0);
-    private_bb->SetInt("geneva", 5);
+
+    // Turn the geneva drive to a random location
+    if(geneva == 3){
+        geneva = (rand() < 0.5) ? 1 : 5;
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Setting geneva drive to " << geneva);
+    }
+
+    private_bb->SetInt("geneva", geneva);
+    private_bb->SetInt("SAGV2_GetBall_geneva", geneva);
 
 	ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "ROBOT_ID=" << blackboard->GetInt("ROBOT_ID") << ", Robot=" << bot.id << ", Kicking=" << (isKicking ? "Yes" : "No") << ", Target=" << target);
 //	ROS_INFO_STREAM_NAMED("ShootAtGoalv2", "Current blackboard: " << blackboard->toString().c_str());

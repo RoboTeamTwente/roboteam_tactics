@@ -75,8 +75,8 @@ GetBall::GetBall(std::string name, bt::Blackboard::Ptr blackboard) : Skill(name,
 
 void GetBall::Initialize(){
     robotID = blackboard->GetInt("ROBOT_ID");
-	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Initialize for robot: " << robotID);
-	ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
+//	ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "Initialize for robot: " << robotID);
+//    ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, blackboard->toString().c_str());
 
     ballCloseFrameCount = 0;
     choseRobotToPassTo = false;
