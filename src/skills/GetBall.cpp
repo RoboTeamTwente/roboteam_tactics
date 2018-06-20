@@ -533,7 +533,7 @@ bt::Node::Status GetBall::Update (){
         successDist = blackboard->GetDouble("successDist");
     } else if (useBallSensor) {
         successDist = 0.2;
-        successAngle = 0.2;
+        successAngle = 0.15;
         successRobotAngle = 0.2;
     }
 
@@ -549,12 +549,12 @@ bt::Node::Status GetBall::Update (){
     // Check whether I should shoot at goal
     std::pair<double, double> bestViewOfGoal = opportunityFinder.calcBestViewOfGoal(ballPos, world);
     double openGoalAngle = cleanAngle(bestViewOfGoal.second - bestViewOfGoal.first);
-    static double shootingThres = 0.2;
+    static double shootingThres = 0.15;
     bool canSeeGoal = fabs(openGoalAngle) >= shootingThres;
     if (canSeeGoal && L_posDiff < 0.3) {
-        shootingThres = 0.1; // prevent rapid switching between shooting at goal and passing
+        shootingThres = 0.05; // prevent rapid switching between shooting at goal and passing
     } else {
-        shootingThres = 0.2;
+        shootingThres = 0.15;
     }
     bool shootAtGoal = GetBool("passToBestAttacker") && !GetBool("dontShootAtGoal") && canSeeGoal;
 
@@ -597,9 +597,13 @@ bt::Node::Status GetBall::Update (){
     else if (choseRobotToPassTo) { 
         if (bestID == -1) {
             // could not find teammate to pass to, so aim at goal in the hope we will be able to shoot at it
-            targetAngle = 0.2*M_PI*signum(ballPos.y);//GetTargetAngle(ballPos, "shootawaysafe", 0, false);
-            panicShot = true;
-            //shootAtGoal = true;
+            if (ballPos.x < 0) {
+                targetAngle = 0.2*M_PI*signum(ballPos.y);//GetTargetAngle(ballPos, "shootawaysafe", 0, false);
+                panicShot = true;
+            } else {
+                targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
+                shootAtGoal = true;
+            }
         } else {
         // aim at best teammate to pass to.
             targetAngle = (bestPos - ballPos).angle();
@@ -643,13 +647,19 @@ bt::Node::Status GetBall::Update (){
         ballDist = distAwayFromBall;
     }
     if (fabs(angleDiff) > successAngle || L_posDiff > 0.3) {
-        double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-0.2)); //TODO: downscaling when i get closer - working on it
+        double offset = 0.2;
+        double mult = 4;
+        if (useBallSensor) {
+            offset = 0.0;
+            mult = 2;
+        }
+        double downScale = fmax(0,fmin(1,fabs(angleDiff)*mult-offset)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
         private_bb->SetBool("dribbler", (!GetBool("dribblerOff") && !useBallSensor && fabs(angleDiff) < M_PI) && L_posDiff < 0.5);
     } else {
         double driveThroughBall = 0.02;
         if (useBallSensor) {
-            driveThroughBall = 0.2;
+            driveThroughBall = 0.1;
         }
         targetPos = ballPos + Vector2(driveThroughBall, 0.0).rotate(targetAngle);
         private_bb->SetBool("dribbler", !GetBool("dribblerOff") && !useBallSensor);
@@ -662,7 +672,7 @@ bt::Node::Status GetBall::Update (){
         if (L_posDiff > 0.5 || fabs(angleDiff) > 0.15) {
             double max_ahead = 5.0;
             // double ahead = fmin( max_ahead, angleFromInterception*vBall*3.0 );
-            Vector2 ahead = ballVel.scale(fabs(angleDiff)*1.0);
+            Vector2 ahead = ballVel.scale(fabs(angleDiff)*0.5);
             if (ahead.length() > max_ahead) {
                 ahead = ahead.stretchToLength(max_ahead);
             }
@@ -816,7 +826,7 @@ bt::Node::Status GetBall::Update (){
     if (blackboard->HasBool("avoidBall")) {
         private_bb->SetBool("avoidBall", blackboard->GetBool("avoidBall"));
     } else {
-        private_bb->SetBool("avoidBall", (L_posDiff > 0.5)); // use ball avoidance as extra safety measure for when robot is still on the other side of the ball
+        private_bb->SetBool("avoidBall", (L_posDiff > 0.5) || (L_posDiff > 0.3 && fabs(angleDiff) < 0.25*M_PI)); // use ball avoidance as extra safety measure for when robot is still on the other side of the ball
     }
     if (blackboard->HasDouble("pGainPosition")) {
         private_bb->SetDouble("pGainPosition", blackboard->GetDouble("pGainPosition"));

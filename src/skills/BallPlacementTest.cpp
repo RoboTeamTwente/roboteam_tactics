@@ -135,11 +135,9 @@ bt::Node::Status BallPlacementTest::Update() {
 			succeeded = true;
 			return Status::Success;
 		}
-	}else{
-		ROS_INFO_STREAM_THROTTLE_NAMED(1, ROS_LOG_NAME, "Ball not yet at correct position : " << ballPosError.length() << "m");
 	}
 
-	ROS_INFO_STREAM_THROTTLE_NAMED(0.25, ROS_LOG_NAME, "targetPos=" << targetPos);
+	ROS_INFO_STREAM_THROTTLE_NAMED(0.25, ROS_LOG_NAME, "targetPos=" << targetPos << ", ballPos=" << ballPos << ", error=" << ballPosError.length() << "m");
 
 	// Set the blackboard for GoToPos
 	private_bb->SetInt("ROBOT_ID", robotID);                            // sets robot id
