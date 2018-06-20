@@ -638,6 +638,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
 
 	// initialize max score and corresponding ID and position
 	roboteam_msgs::World world = LastWorld::get();
+	Vector2 ourGoalPos = LastWorld::get_our_goal_center();
    	double maxScore = 0;
    	int bestID = -1;
    	Vector2 bestPos(0,0);
@@ -705,7 +706,7 @@ BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos,
         	// if notBackwards true, robots too far from target will be skipped
         		continue;
         	}
-        	if (distFromTargetLimit && (targetPos - botPos).length() > limit) {
+        	if (distFromTargetLimit && (ourGoalPos - botPos).length() < limit) {
         	// if distFromTargetLimit true, robots too far from target will be skipped
         		continue;
         	}

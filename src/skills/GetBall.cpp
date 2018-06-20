@@ -84,6 +84,8 @@ void GetBall::Initialize(){
     hasTerminated = false;
     passThreshold = 0.3;    // minimal dist of opp to pass line for pass to be possible
     globalKickSpeed = 0.0;
+    startKicking = false;
+    startChipping = false;
     isStrafing = false;
     strafingPos = boost::none;
     bestScore = 0;
@@ -101,6 +103,9 @@ void GetBall::Initialize(){
     if (GetBool("passToBestAttacker")){
         initializeOpportunityFinder();
     }
+
+    // Determine if we should use the ball sensor for kicking
+    useBallSensor = (GetBool("useBallSensor")); // TODO: add rosparam to indicate if ball sensor is operational
 }
 
 void GetBall::initializeOpportunityFinder() {
@@ -386,7 +391,7 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
     // If I couldn't find a suitable player before, try again one last time
     if (passID == -1) {
         ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldn't find a suitable player before, try again one last time");
-        BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+        BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"), 6.0);
         if (bestTeammate.id != -1) {
             passID = bestTeammate.id;
             passPos = bestTeammate.pos;
@@ -409,12 +414,12 @@ PassOption GetBall::choosePassOption(int passID, Vector2 passPos, Vector2 ballPo
             opportunityFinder.setMin("distToOpp", 0.5); // if opponent will be closer than this value, soft pass wont be viable
             opportunityFinder.setMax("distToOpp", 1.0); // make sure max value is still higher than newly chosen min value
             // Find best teammate for a soft pass
-            BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+            BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"), 6.0);
             initializeOpportunityFinder(); // reset parameters of our opportunity finder for future usage.
             if (bestTeammate.id == -1) {
             // found no (claimed) pos to which a soft pass would be smart -> consider direct pass
                 ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt find a soft pass candidate, checking for direct pass to a bot");
-                BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(true, true, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+                BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(true, true, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"), 6.0);
                 if (bestTeammate.id == -1) {
                 // found no good direct pass option -> direct chip to anyone? WIP. for now: chip towards goal. Better is probably chip towards edge defense area
                     ROS_DEBUG_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " couldnt find a direct pass candidate, so shooting towards goal");
@@ -526,9 +531,10 @@ bt::Node::Status GetBall::Update (){
     }
     if (blackboard->HasDouble("successDist")) {
         successDist = blackboard->GetDouble("successDist");
-    } else if (GetBool("useBallSensor")) {
+    } else if (useBallSensor) {
         successDist = 0.2;
         successAngle = 0.2;
+        successRobotAngle = 0.2;
     }
 
     if (isStrafing) {
@@ -555,13 +561,13 @@ bt::Node::Status GetBall::Update (){
     // If we should pass on to the best available attacker, choose this robot using opportunityfinder, based on the weightlist chosen in the initialization
     if (GetBool("passToBestAttacker")) {
         static time_point lastChoosingTime = now();
-        if (!choseRobotToPassTo || (L_posDiff > 0.2 && time_difference_milliseconds(lastChoosingTime, now()).count() > 1000)) { // my passing choice will be reconsidered every second
+        if (!choseRobotToPassTo || (L_posDiff > 0.4 && time_difference_milliseconds(lastChoosingTime, now()).count() > 1000)) { // my passing choice will be reconsidered every second
             double chooseDist = 1.0;
             if (HasDouble("chooseDist")) {
                 chooseDist = GetDouble("chooseDist");
             }
             if (L_posDiff < chooseDist && !shootAtGoal && !isStrafing) {
-                BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"));
+                BestTeammate bestTeammate = opportunityFinder.chooseBestTeammate(false, false, GetBool("doNotPlayBackDefender"), GetBool("doNotPlayBackAttacker"), 6.0);
                 bestID = bestTeammate.id;
                 bestPos = bestTeammate.pos;
                 bestScore = bestTeammate.score;
@@ -579,19 +585,21 @@ bt::Node::Status GetBall::Update (){
       //---------------------------------------------------------------------------------------------------------------------------------//
 	 // If we need to face a certain direction directly after we got the ball, it is specified here. Else we just face towards the ball //
     //---------------------------------------------------------------------------------------------------------------------------------//
-
+    bool panicShot = false;
 	double targetAngle;
     // If we chose to shoot at goal
     if (shootAtGoal) {
         targetAngle = cleanAngle(bestViewOfGoal.first + openGoalAngle/2); // center of the largest open goal angle
         isStrafing = false;
+        strafingPos = boost::none;
     }
     // If a robot was found to pass to
     else if (choseRobotToPassTo) { 
         if (bestID == -1) {
             // could not find teammate to pass to, so aim at goal in the hope we will be able to shoot at it
-            targetAngle = GetTargetAngle(ballPos, "theirgoal", 0, false);
-//            shootAtGoal = true;
+            targetAngle = 0.2*M_PI*signum(ballPos.y);//GetTargetAngle(ballPos, "shootawaysafe", 0, false);
+            panicShot = true;
+            //shootAtGoal = true;
         } else {
         // aim at best teammate to pass to.
             targetAngle = (bestPos - ballPos).angle();
@@ -637,10 +645,14 @@ bt::Node::Status GetBall::Update (){
     if (fabs(angleDiff) > successAngle || L_posDiff > 0.3) {
         double downScale = fmax(0,fmin(1,fabs(angleDiff)*4-0.2)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
-        private_bb->SetBool("dribbler", (!GetBool("dribblerOff") && !GetBool("useBallSensor") && fabs(angleDiff) < M_PI) && L_posDiff < 0.5);
+        private_bb->SetBool("dribbler", (!GetBool("dribblerOff") && !useBallSensor && fabs(angleDiff) < M_PI) && L_posDiff < 0.5);
     } else {
-        targetPos = ballPos + Vector2(0.02, 0.0).rotate(targetAngle);
-        private_bb->SetBool("dribbler", !GetBool("dribblerOff") && !GetBool("useBallSensor"));
+        double driveThroughBall = 0.02;
+        if (useBallSensor) {
+            driveThroughBall = 0.2;
+        }
+        targetPos = ballPos + Vector2(driveThroughBall, 0.0).rotate(targetAngle);
+        private_bb->SetBool("dribbler", !GetBool("dribblerOff") && !useBallSensor);
     }
     // Code for better ball interception when ball has velocity //TODO: IMPROVE THIS
     double vBall = ballVel.length();
@@ -671,9 +683,9 @@ bt::Node::Status GetBall::Update (){
         if (ballCloseFrameCount < ballCloseFrameCountTo) {
         // When I have not been close for long enough yet
             ballCloseFrameCount++;
-        } else if (!startKicking && !startChipping) {
+        } else if ( (!startKicking && !startChipping) || isStrafing) {
             bool chip = false;
-            if (choseRobotToPassTo && !shootAtGoal && !isStrafing) {
+            if (choseRobotToPassTo && !shootAtGoal && !isStrafing && !panicShot) {
                 // If I chose best teammate before, check if it is still a good idea
                 // struct PassOption contains int id, Vector2 pos and bool chip
                 PassOption passOption = choosePassOption(bestID, bestPos, ballPos, world, passThreshold);
@@ -690,7 +702,17 @@ bt::Node::Status GetBall::Update (){
                 if (bestID == -1) {
                     // still can't find a robot to pass to, so going to plan B..
                     // There is no robot we can shoot to, and we can't shoot at the goal, so we might as well strafe to the left (or right)
-                    isStrafing = true;
+                    if (GetBool("useStrafing")) {
+                        isStrafing = true;
+                    } else {
+                        if (angleError < 0.3*M_PI) {
+                            panicShot = true;
+                        } else {
+                            return Status::Running; // this should result in shooting at goal (or easiest corner?)
+                        }
+                        
+                    }
+                    
                 }
             }
 
@@ -702,7 +724,7 @@ bt::Node::Status GetBall::Update (){
                 ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "robot " << robotID << " has ball so succeeded");
                 publishStopCommand();
                 return Status::Success;
-            } else if (!shootAtGoal && bestID != -1 &&
+            } else if (!shootAtGoal && bestID != -1 && !panicShot && 
                        (choseRobotToPassTo || (GetString("aimAt") == "robot" && GetBool("ourTeam")))) {
                 // Passing to robot
                 // passBall also performs communication of pass and claim on the ball. It's important that this only happens once.
@@ -723,7 +745,7 @@ bt::Node::Status GetBall::Update (){
 
             // For using ball sensor to kick, the plan is to keep sending kick command (not forced) while driving towards the ball.
             // Then if we detect a shot, we will return success and if necessary communicate a pass.
-            if (GetBool("useBallSensor")) {
+            if (useBallSensor) {
                 if (chip) {
                     startChipping = true;
                 } else {
@@ -754,6 +776,11 @@ bt::Node::Status GetBall::Update (){
                 }
                 targetPos = *strafingPos;
                 forcedKick = ((targetPos - robotPos).length() < 0.2);
+            }
+
+            if (panicShot) {
+                Vector2 passPos = ballPos + Vector2(1.5, 0.0).rotate(targetAngle);
+                chip = (opportunityFinder.calcDistOppToBallTraj(passPos, world) < 0.2);
             }
 
             // publish forced kick if necessary, followed by returning success
@@ -821,10 +848,20 @@ bt::Node::Status GetBall::Update (){
         command.w = 0;
     }
 
-    if (GetBool("useBallSensor")) {
+    if (useBallSensor && !isStrafing) {
         command.kicker = startKicking;
         command.chipper = startChipping;
         command.kicker_vel = globalKickSpeed;
+    }
+
+    // returning success for when using ball sensor: after 1 sec of driving towards ball
+    static time_point lastBallSensorTime = now();
+    if (startKicking || startChipping) {
+        if (time_difference_milliseconds(lastBallSensorTime, now()).count() > 1000) {
+            return Status::Success;
+        }
+    } else {
+        lastBallSensorTime = now();
     }
 
     if (HasInt("geneva") && L_posDiff < 0.5) { // only set geneva state when close enough

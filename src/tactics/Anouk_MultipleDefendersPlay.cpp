@@ -509,6 +509,10 @@ namespace rtt {
         bb.SetString("GetBall_B_aimAt", "ourgoal");
         bb.SetBool("GetBall_D_aimAwayFromTarget", true);
         bb.SetString("GetBall_D_aimAt", "ourgoal");
+        bb.SetBool("GetBall_A_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_B_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_C_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_D_doNotPlayBackAttacker", true);
         //----------improvement defenders----------
 
 
@@ -584,6 +588,10 @@ namespace rtt {
         bb.SetString("GetBall_B_aimAt", "ourgoal");
         bb.SetBool("GetBall_D_aimAwayFromTarget", true);
         bb.SetString("GetBall_D_aimAt", "ourgoal");
+        bb.SetBool("GetBall_A_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_B_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_C_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_D_doNotPlayBackAttacker", true);
         //----------improvement defenders----------
 
         /* === SimpleDefender === */

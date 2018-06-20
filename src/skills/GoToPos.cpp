@@ -77,7 +77,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
 void GoToPos::Initialize() {
     succeeded = false;
     failure = false;
-    controller.Initialize(blackboard->GetInt("ROBOT_ID"));
+    controller.setPresetControlParams();
 
     if (GetBool("driveBackward")) {
         ROBOT_ID = blackboard->GetInt("ROBOT_ID");
@@ -656,24 +656,29 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
         velCommand = worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
         double angularVelCommand = controller.rotationController(myAngle, angleGoal, posError, myAngularVel); // Rotation controller
-        velCommand = controller.limitVel2(velCommand, angleError);          // Limit linear velocity
-        angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
-        
+
         if ( HasBool("dontRotate") && GetBool("dontRotate") ) {
             command.w = 0;
+            angleError = 0;
         } else {
             command.w = angularVelCommand;
         }
+
+        velCommand = controller.limitVel2(velCommand, angleError);          // Limit linear velocity
+        angularVelCommand = controller.limitAngularVel(angularVelCommand);  // Limit angular velocity
+
     } else {
-        velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
-        velCommand = controller.limitVel2(velCommand, angleError);
         // // The rotation of linear velocity to robot frame happens on the robot itself now
         // // Also, the robot has its own rotation controller now. Make sure this is enabled on the robot
         if ( (HasBool("dontRotate") && GetBool("dontRotate"))) {
                 command.use_angle = false;
+                angleError = 0;
         } else {
                 command.use_angle = true;
         }
+
+        velCommand = sumOfForces; //worldToRobotFrame(sumOfForces, myAngle);   // Rotate the commands from world frame to robot frame
+        velCommand = controller.limitVel2(velCommand, angleError);
         
         double angleCommand = angleGoal*16; // make sure it fits in the angularvel package
         command.w = angleCommand;
