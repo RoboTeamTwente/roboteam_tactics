@@ -271,7 +271,6 @@ namespace rtt {
         }
 
 
-
         /// Decide how many robots we want as robotDefenders, ballInterceptors, and ballDefenders ///
         int numAvailable = robots.size();
         // Put a robot on each dangerous opponent
@@ -280,6 +279,48 @@ namespace rtt {
         // Put 2 robots in the wall
         int numBallDefenders = std::min(numAvailable, 2);
         numAvailable = robots.size() - numRobotDefenders - numBallDefenders;
+
+
+        /// Put the ballDefenders in the wall ///
+        if(0 < numBallDefenders){
+            // === Get the angle offsets === //
+            std::vector<float> angleOffsets;
+            float step   = weAreAttacking ? 0.3 : 0.2;    // difference between each robot
+            float offset = 0;
+            if(1 < numBallDefenders)
+                offset = -(numBallDefenders-1) * step/2;
+            for(int i = 0; i < numBallDefenders; i++){
+                angleOffsets.push_back(offset + i * step);
+            }
+
+            // Calculate where the robots have to be positioned, and assign the robots in optimal fashion
+            std::vector<Vector2> ballDefendersPositions;
+            for (int i = 0; i < numBallDefenders; i++) {
+                ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 2.0, angleOffsets.at(i)));
+            }
+            std::vector<int> ballDefenders = assignRobotsToPositions(robots, ballDefendersPositions, world);
+
+            // Init ballDefenders
+            std::vector<Vector2> GoToPos_A_positions;
+            GoToPos_A_positions.push_back(Vector2(-4.5, 1.2));
+            GoToPos_A_positions.push_back(Vector2(-4.5, -1.2));
+            ROS_ERROR_STREAM_COND_NAMED(2 < numBallDefenders, ROS_LOG_NAME, "More ballDefenders than GoToPos_A_positions");
+
+            for(int i = 0; i < numBallDefenders; i++){
+                // Remove ID from vectors
+                int robotID = ballDefenders.at(i);
+
+                delete_from_vector(robots, robotID);
+                claim_robot(robotID);
+                boost::uuids::uuid token = init_ballDefender(robotID, angleOffsets.at(i), GoToPos_A_positions.at(i));
+                activeRobots.push_back(robotID);
+                tokens.push_back(token);
+
+//                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends the ball");
+                statusString << robotID << "=B ";
+            }
+        }
+
 
         /// Figure out which robotDefender should defend which opponent, and initialize them ///
         if(0 < dangerousOpps.size()) {
@@ -323,47 +364,6 @@ namespace rtt {
             }
         }
 
-
-
-        /// Put the ballDefenders in the wall ///
-        if(0 < numBallDefenders){
-            // === Get the angle offsets === //
-            std::vector<float> angleOffsets;
-            float step   = weAreAttacking ? 0.3 : 0.2;    // difference between each robot
-            float offset = 0;
-            if(1 < numBallDefenders)
-                offset = -(numBallDefenders-1) * step/2;
-            for(int i = 0; i < numBallDefenders; i++){
-                angleOffsets.push_back(offset + i * step);
-            }
-
-            // Calculate where the robots have to be positioned, and assign the robots in optimal fashion
-            std::vector<Vector2> ballDefendersPositions;
-            for (int i = 0; i < numBallDefenders; i++) {
-                ballDefendersPositions.push_back(SimpleDefender::computeDefensePoint(world.ball.pos, true, 2.0, angleOffsets.at(i)));
-            }
-            std::vector<int> ballDefenders = assignRobotsToPositions(robots, ballDefendersPositions, world);
-
-            // Init ballDefenders
-            std::vector<Vector2> GoToPos_A_positions;
-            GoToPos_A_positions.push_back(Vector2(-4.5, 1.2));
-            GoToPos_A_positions.push_back(Vector2(-4.5, -1.2));
-            ROS_ERROR_STREAM_COND_NAMED(2 < numBallDefenders, ROS_LOG_NAME, "More ballDefenders than GoToPos_A_positions");
-
-            for(int i = 0; i < numBallDefenders; i++){
-                // Remove ID from vectors
-                int robotID = ballDefenders.at(i);
-
-                delete_from_vector(robots, robotID);
-                claim_robot(robotID);
-                boost::uuids::uuid token = init_ballDefender(robotID, angleOffsets.at(i), GoToPos_A_positions.at(i));
-                activeRobots.push_back(robotID);
-                tokens.push_back(token);
-
-//                ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "    Robot " << robotID << " defends the ball");
-                statusString << robotID << "=B ";
-            }
-        }
 
 //        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, (int)getAvailableRobots().size() << " robots left for the offense");
         statusString << " | " << (int)getAvailableRobots().size() << " left over";
