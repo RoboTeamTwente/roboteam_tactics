@@ -15,6 +15,7 @@ class Jim_PenaltyPlay : public Tactic {
     void ReleaseAllBots();
     Status Update();
     ros::NodeHandle n;
+    void initShootout();
 
     private:
     std::vector<boost::uuids::uuid> tokens;
@@ -22,6 +23,9 @@ class Jim_PenaltyPlay : public Tactic {
     time_point successTime;
     bool success;
     int activeRobot;
+
+    boost::optional<boost::uuids::uuid> kickerToken = boost::none;
+    bool inShootout = false;
 };
 
 }

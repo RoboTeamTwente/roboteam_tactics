@@ -23,13 +23,21 @@ namespace rtt {
 
 	void Emiel_PreparePenaltyThem::Initialize(){
 
-
+		// Get the latest world
+		const roboteam_msgs::World& world = LastWorld::get();
 
 		// Check if this tree is used for the correct RefState, PREPARE_PENALTY_THEM
-		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot!
+		// TODO Get the current refState not from LastRef, but from the RefStateSwitch. RefStateSwitch can correctly return DEFEND_PENALTY, LastRef cannot! Function = getExtentedState();
 		refState = LastRef::getCurrentRefCommand();
 		if(refState != RefState::PREPARE_PENALTY_THEM && refState != RefState::NORMAL_START){
 			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Watch out! This strategy is specifically designed for PREPARE_PENALTY_THEM or DEFEND_PENALTY. Current : " << rtt::refStateToString(*refState));
+		}
+
+		// Check if ball is on their side, which would mean shootout
+		if(world.ball.pos.x > 0){
+			ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "PENALTY SHOOTOUT DETECTED! Initializing defense");
+			Emiel_PreparePenaltyThem::initShootout();
+			return;
 		}
 
 		// Get all the available robots
@@ -76,5 +84,25 @@ namespace rtt {
 		ROS_WARN_STREAM_NAMED(ROS_LOG_NAME, "Should not be here! " << rtt::refStateToString(*refState));
 		return Status::Failure;
 	}
+
+
+
+
+
+
+void Emiel_PreparePenaltyThem::initShootout(){
+
+	// Get all the available robots
+	std::vector<int> robots = getAvailableRobots();
+	int numRobots = robots.size();
+
+	// Calculate positions for defenders and attackers
+	std::vector<Vector2> positions = RobotPatternGenerator::Line(numRobots , 1, Vector2(5.5, 4), 0, 0);
+
+	// Initialize positions
+	Emiel_Prepare::prepare(RefState::DEFEND_PENALTY, positions);
+
+}
+
 
 }
