@@ -139,7 +139,7 @@ void GetBall::publishStopCommand() {
 	command.x_vel = 0.0;
 	command.y_vel = 0.0;
 	command.w = 0.0;
-	command.dribbler = !GetBool("dribblerOff");
+	command.dribbler = !GetBool("dribblerOff") && !useBallSensor;
     command.geneva_state = 3;
 
 	auto& pub = rtt::GlobalPublisher<roboteam_msgs::RobotCommand>::get_publisher();
@@ -655,7 +655,7 @@ bt::Node::Status GetBall::Update (){
         }
         double downScale = fmax(0,fmin(1,fabs(angleDiff)*mult-offset)); //TODO: downscaling when i get closer - working on it
         targetPos = ballPos + Vector2(-ballDist,0).rotate( posDiff.angle() + signum(angleDiff) * acos(minDist / ballDist) * downScale );
-        private_bb->SetBool("dribbler", (!GetBool("dribblerOff") && !useBallSensor && fabs(angleDiff) < M_PI) && L_posDiff < 0.5);
+        private_bb->SetBool("dribbler", !GetBool("dribblerOff") && !useBallSensor && fabs(angleDiff) < M_PI && L_posDiff < 0.5);
     } else {
         double driveThroughBall = 0.02;
         if (useBallSensor) {
