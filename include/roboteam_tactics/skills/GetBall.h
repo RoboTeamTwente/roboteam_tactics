@@ -147,6 +147,7 @@ private:
     bool startChipping;
     double globalKickSpeed;
     int genevaState = 3;
+    bool useBallSensor = false;
 
     boost::optional<Vector2> strafingPos;
     bool isStrafing = false;
