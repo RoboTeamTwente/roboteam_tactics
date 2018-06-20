@@ -22,7 +22,7 @@ CanInterceptBallDuel::CanInterceptBallDuel(std::string name, bt::Blackboard::Ptr
 
 
 bt::Node::Status CanInterceptBallDuel::Update() {
-	roboteam_msgs::World world = LastWorld::get();
+	const roboteam_msgs::World& world = LastWorld::get();
 
     // Get ID of closest robot to ball
     robotID = GetInt("me", blackboard->GetInt("ROBOT_ID"));
@@ -45,7 +45,14 @@ bt::Node::Status CanInterceptBallDuel::Update() {
 
     // Get ID of closest opponent to ball and its position
     int oppID = getClosestOppToPoint(ballPos, world);
-    Vector2 oppPos = LastWorld::get().them.at(oppID).pos;
+    boost::optional<roboteam_msgs::WorldRobot> bot = getWorldBot(oppID, false, world);
+    
+    if(!bot){
+        ROS_WARN_STREAM("Trying to defend bot that doesn't exist! : " << oppID);
+        return Status::Failure;
+    }
+
+    Vector2 oppPos = (Vector2)bot->pos;
 
     // Find vector from robot to ball and opponent to ball
     Vector2 ballToRobot = (ballPos - robotPos);
@@ -54,9 +61,6 @@ bt::Node::Status CanInterceptBallDuel::Update() {
     // Calculate angle between upper two vectors
     double angleRobotOpp = (ballToRobot.angle() - ballToOpp.angle());
 
-
-
-	
     // If opponent robot is in front of the ball the condition returns Failure, else the condition returns Success
     if (angleRobotOpp < -2.5 || angleRobotOpp > 2.5 ){
         return Status::Failure;

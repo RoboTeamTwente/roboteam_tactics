@@ -75,6 +75,8 @@ void roleDirectiveCallback(const roboteam_msgs::RoleDirectiveConstPtr &msg) {
     bt::Blackboard::Ptr bb = std::make_shared<bt::Blackboard>();
     bb->fromMsg(msg->blackboard);
 
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Blackboard received : " << bb->toString().c_str());
+
     // Check for robot ID
     if (!bb->HasInt("ROBOT_ID")) {
         ROS_ERROR_NAMED(ROS_LOG_NAME, "RoleDirective received without ROBOT_ID");

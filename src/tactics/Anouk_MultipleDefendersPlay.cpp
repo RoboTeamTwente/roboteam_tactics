@@ -499,6 +499,10 @@ namespace rtt {
         bb.SetBool("GetBall_B_doNotPlayBackAttacker", true);
         bb.SetBool("GetBall_C_doNotPlayBackAttacker", true);
         bb.SetBool("GetBall_D_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_A_useBallSensor", true);
+        bb.SetBool("GetBall_B_useBallSensor", true);
+        bb.SetBool("GetBall_C_useBallSensor", true);
+        bb.SetBool("GetBall_D_useBallSensor", true);
         //----------improvement defenders----------
 
 
@@ -578,6 +582,10 @@ namespace rtt {
         bb.SetBool("GetBall_B_doNotPlayBackAttacker", true);
         bb.SetBool("GetBall_C_doNotPlayBackAttacker", true);
         bb.SetBool("GetBall_D_doNotPlayBackAttacker", true);
+        bb.SetBool("GetBall_A_useBallSensor", true);
+        bb.SetBool("GetBall_B_useBallSensor", true);
+        bb.SetBool("GetBall_C_useBallSensor", true);
+        bb.SetBool("GetBall_D_useBallSensor", true);
         //----------improvement defenders----------
 
         /* === SimpleDefender === */
