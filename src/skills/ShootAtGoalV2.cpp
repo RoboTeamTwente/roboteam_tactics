@@ -84,8 +84,8 @@ bt::Node::Status ShootAtGoalV2::Update() {
 
     // Turn the geneva drive to a random location
     if(geneva == 3){
-        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Setting geneva drive to " << geneva);
         geneva = (rand() < 0.5) ? 1 : 5;
+        ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Setting geneva drive to " << geneva);
     }
 
     private_bb->SetInt("geneva", geneva);
