@@ -636,6 +636,11 @@ Vector2 OpportunityFinder::computeBestOpportunity(Vector2 centerPoint, double bo
 
 BestTeammate OpportunityFinder::chooseBestTeammate(bool realScore, bool realPos, bool notBackwards, bool distFromTargetLimit, double limit) {
 
+	// TODO HACK TO NOT PLAY BACK TO DEFENDER
+	notBackwards = true;
+	// TODO HACK TO NOT PASS TOO CLOSE TO OUR GOAL
+	distFromTargetLimit = true;
+
 	// initialize max score and corresponding ID and position
 	roboteam_msgs::World world = LastWorld::get();
    	double maxScore = 0;
