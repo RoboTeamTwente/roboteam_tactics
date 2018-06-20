@@ -306,7 +306,7 @@ Vector2 GoToPos::checkTargetPos(Vector2 targetPos, Vector2 myPos) {
 
     double newMargin = marginOutsideField;
     // In and around the goal the robot cannot cross the backline.
-    if (fabs(yGoal) < (field.goal_width/2 + 0.2)) {
+    if (fabs(yGoal) < (field.goal_width/2 + 1.0)) {
         newMargin = -0.1;
     }
     if (fabs(yGoal) < (field.goal_width / 2)) {
