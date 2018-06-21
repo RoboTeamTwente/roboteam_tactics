@@ -47,9 +47,13 @@ namespace rtt {
 		// Number of attackers that should go to the front
 		int numAttackers = std::max((int)robots.size()-numDefenders, 0);
 
-		// Calculate positions for defenders and attackers
-		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numDefenders, 5, Vector2(-3, 0), 0, 0);
-		std::vector<Vector2> attackerCoords = RobotPatternGenerator::Line(numAttackers, 6, Vector2(3, 0), 0, 0);
+		// === Calculate positions for defenders and attackers === //
+        // Robots should be placed behind a line parallel to the goal line and 400 mm behind the penalty mark. Penalty mark : B=1m, A=1.2m
+        Vector2 linePosition = (Vector2)LastWorld::get_our_goal_center() + Vector2(1.2 + 0.4 + 0.2, 0); // Penalty mark A + 400mm + 200mm padding
+        float lineWidth = LastWorld::get_field().field_width * 0.8;
+
+		std::vector<Vector2> defenderCoords = RobotPatternGenerator::Line(numDefenders, lineWidth, linePosition, 0, 0);
+		std::vector<Vector2> attackerCoords = RobotPatternGenerator::Line(numAttackers, lineWidth, Vector2(0, 0), 0, 0);
 
 		// Put all positions into one array
 		std::vector<Vector2> positions;
