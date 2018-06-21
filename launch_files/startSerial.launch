@@ -41,10 +41,35 @@
 	<param name="robot13/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot14/readyToReceiveBall" type="bool" value="false" />
 	<param name="robot15/readyToReceiveBall" type="bool" value="false" />
+	
+	<param name="robot0/claimedPosX" type="double" value="-0.0" />
+	<param name="robot0/claimedPosY" type="double" value="-0.0" />
+	<param name="robot1/claimedPosX" type="double" value="-0.0" />
+	<param name="robot1/claimedPosY" type="double" value="-0.0" />
+	<param name="robot2/claimedPosX" type="double" value="-0.0" />
+	<param name="robot2/claimedPosY" type="double" value="-0.0" />
+	<param name="robot3/claimedPosX" type="double" value="-0.0" />
+	<param name="robot3/claimedPosY" type="double" value="-0.0" />
+	<param name="robot4/claimedPosX" type="double" value="-0.0" />
+	<param name="robot4/claimedPosY" type="double" value="-0.0" />
+	<param name="robot5/claimedPosX" type="double" value="-0.0" />
+	<param name="robot5/claimedPosY" type="double" value="-0.0" />
+	<param name="robot6/claimedPosX" type="double" value="-0.0" />
+	<param name="robot6/claimedPosY" type="double" value="-0.0" />
+	<param name="robot7/claimedPosX" type="double" value="-0.0" />
+	<param name="robot7/claimedPosY" type="double" value="-0.0" />
+	<param name="robot8/claimedPosX" type="double" value="-0.0" />
+	<param name="robot8/claimedPosY" type="double" value="-0.0" />
+	<param name="robot9/claimedPosX" type="double" value="-0.0" />
+	<param name="robot9/claimedPosY" type="double" value="-0.0" />
+	<param name="robot10/claimedPosX" type="double" value="-0.0" />
+	<param name="robot10/claimedPosY" type="double" value="-0.0" />
+	<param name="robot11/claimedPosX" type="double" value="-0.0" />
+	<param name="robot11/claimedPosY" type="double" value="-0.0" />
 
 	<param name="robotClaimedBall" type="int" value="-1" />
 	 
-	<param name="role_iterations_per_second" type="int" value="50" />
+	<param name="role_iterations_per_second" type="int" value="30" />
 	<param name="num_role_nodes" type="int" value="8" />
 	<param name="normalize_field" type="bool" value="true" />
 	<param name="robot_output_target" type="str" value="serial" />
