@@ -15,6 +15,8 @@ namespace rtt {
 
 		ros::NodeHandle nh;
 
+		void initShootout();
+
 	private:
 		std::vector<boost::uuids::uuid> tokens;
 		boost::optional<rtt::RefState> refState;
