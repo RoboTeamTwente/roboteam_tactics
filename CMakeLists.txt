@@ -1,3 +1,5 @@
+MESSAGE("[/] starting...")
+
 cmake_minimum_required(VERSION 2.8.3)
 project(roboteam_tactics)
 
@@ -143,6 +145,7 @@ include_directories(
   include
 )
 
+MESSAGE("[/] Adding subdirectory ./src")
 add_subdirectory(src)
 
 # Executable that can convert behavior3 json to C++ functions
@@ -190,38 +193,46 @@ endif (BUILD_TESTX)
 # I left the stamp stuff commented because I might use it in the next
 # week or so. I'm not sure if the current approach works consistently enough.
 
-set(alltrees_output_file
-    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
-    )
+#MESSAGE("[/] Generating alltrees")
+#
+#set(alltrees_output_file
+#    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+#    )
+#
+#add_custom_command(
+#    OUTPUT
+#        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+#        ${alltrees_output_file}
+#    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh ${MEM_PRINCIPLE_FLAG}
+#    DEPENDS
+#        ${JSON_FILES}
+#        converter
+#        ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
+#    WORKING_DIRECTORY
+#        ${PROJECT_SOURCE_DIR}
+#    COMMENT
+#        "Generating C++ from JSON files"
+#    )
+#add_custom_target(generate_json_t
+#    ALL
+#    DEPENDS
+#        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+#        ${alltrees_output_file}
+#    )
+#
+## Generated files from json trees
+#set(GENERATED_FILES
+#    ${GENERATED_FILES}
+#    ${PROJECT_SOURCE_DIR}/include/roboteam_tactics/generated/alltrees.h
+#    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+#    ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
+#    )
 
-add_custom_command(
-    OUTPUT
-        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
-        ${alltrees_output_file}
-    COMMAND ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh ${MEM_PRINCIPLE_FLAG}
-    DEPENDS
-        ${JSON_FILES}
-        converter
-        ${PROJECT_SOURCE_DIR}/scripts/generate_cpp_from_json.sh
-    WORKING_DIRECTORY 
-        ${PROJECT_SOURCE_DIR}
-    COMMENT 
-        "Generating C++ from JSON files"
-    )
-add_custom_target(generate_json_t
-    ALL
-    DEPENDS
-        # ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
-        ${alltrees_output_file}
-    )
 
-# Generated files from json trees
-set(GENERATED_FILES
-    ${GENERATED_FILES}
-    ${PROJECT_SOURCE_DIR}/include/roboteam_tactics/generated/alltrees.h
-    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
-    ${PROJECT_SOURCE_DIR}/generated/generate_cpp_from_json.stamp
-    )
+
+
+
+MESSAGE("[/] Iterating over JSON_PROJECTS")
 
 foreach(json_project ${JSON_PROJECTS})
 
@@ -273,6 +284,11 @@ foreach(json_project ${JSON_PROJECTS})
 
 endforeach(json_project)
 
+MESSAGE(${BLUE_TEXT} "Files generated "${RESET_TEXT})
+foreach (generated_file ${GENERATED_FILES})
+    MESSAGE("  " ${generated_file})
+endforeach ()
+
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${GENERATED_FILES})
 
 #############################
@@ -317,7 +333,7 @@ if (BUILD_ROBOTNODE)
     add_dependencies(RoleNode
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
-        generate_json_t
+#        generate_json_t
         )
     target_link_libraries(RoleNode
         ${catkin_LIBRARIES}
@@ -343,7 +359,7 @@ if (BUILD_STRATEGYNODE)
     add_dependencies(StrategyNode
         ${${PROJECT_NAME}_EXPORTED_TARGETS}
         ${catkin_EXPORTED_TARGETS}
-        generate_json_t
+#        generate_json_t
         )
     target_link_libraries(StrategyNode
         ${catkin_LIBRARIES}
