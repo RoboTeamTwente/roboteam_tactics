@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <iostream>
-#include <random>
-#include <string>
-#include <vector>
+//#include <random>
+//#include <string>
+//#include <vector>
 #include <chrono>
 
 #include "ros/ros.h"
 #include "std_msgs/Empty.h"
 #include "unique_id/unique_id.h"
-
+//
 #include "roboteam_msgs/GeometryData.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/RoleFeedback.h"
@@ -19,11 +19,10 @@
 #include "roboteam_utils/constants.h"
 #include "roboteam_msgs/StrategyDebugInfo.h"
 
-#include "roboteam_tactics/utils/RobotDealer.h"
+//#include "roboteam_tactics/utils/RobotDealer.h"
 #include "roboteam_tactics/Parts.h"
 #include "roboteam_tactics/bt.hpp"
-#include "roboteam_tactics/generated/alltrees.h"
-#include "roboteam_tactics/generated/qualification_trees.h"
+//#include "roboteam_tactics/generated/alltrees.h"
 #include "roboteam_tactics/treegen/LeafRegister.h"
 #include "roboteam_tactics/utils/StrategyComposer.h"
 #include "roboteam_tactics/utils/BtDebug.h"
@@ -158,7 +157,7 @@ int main(int argc, char *argv[]) {
     // Creates the callbacks and removes them at the end
     rtt::WorldAndGeomCallbackCreator cb;
     ROS_INFO_NAMED(ROS_LOG_NAME, "Waiting for first world & geom message...");
-    rtt::LastWorld::wait_for_first_messages();
+   rtt::LastWorld::wait_for_first_messages();
 
     std::vector<std::string> arguments(argv + 1, argv + argc);
 
@@ -191,7 +190,7 @@ int main(int argc, char *argv[]) {
             // If the given name exists...
 
 
-
+            std::cout << "[StrategyNode] Printing all repos.." << std::endl;
             for (const auto& entry : repo) {
                 std::cout << "\t- " << entry.first << "\n";
             }
@@ -223,6 +222,8 @@ int main(int argc, char *argv[]) {
         ROS_ERROR_NAMED(ROS_LOG_NAME, "No strategy tree passed as argument. Aborting.");
         return 1;
     }
+
+    ROS_INFO_STREAM_NAMED(ROS_LOG_NAME, "Strategy set!");
 
     // Wait for all the role nodes to come online if a param was set
     if (rtt::has_PARAM_NUM_ROLE_NODES()) {

@@ -47,10 +47,10 @@ rtt::Vector2 convertPosition(rtt::Pos const & pos) {
 rtt::Vector2 createPosition(double width_percentage, double length_percentage) {
     auto geom = rtt::LastWorld::get_field();
     if( 0 > width_percentage || width_percentage > 100) {
-        ROS_ERROR("Invalid width percentage (%x) in FindPath", width_percentage);
+        ROS_ERROR_STREAM("Invalid width percentage " << width_percentage << " in FindPath");
     }
     if( 0 > length_percentage || length_percentage > 100) {
-        ROS_ERROR("Invalid length percentage (%x) in FindPath", length_percentage);
+        ROS_ERROR_STREAM("Invalid length percentage " << length_percentage << " in FindPath");
     }
     return {
             length_percentage * geom.field_length,
