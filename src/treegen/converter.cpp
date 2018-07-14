@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> namespaces = split(folder, '/');
 
+    // === Read input file === //
     std::string input;
     boost::optional<std::string> inputFile;
 
@@ -148,6 +149,7 @@ int main(int argc, char** argv) {
     } else {
         heading = "File error (stdin): ";
     }
+    // ====================== //
 
     nlohmann::json info = nlohmann::json::parse(input);
 
@@ -163,6 +165,11 @@ int main(int argc, char** argv) {
 
         return 1;
     }
+
+    if(isProject)
+        std::cout << "[converter] Project " << namespaces.at(namespaces.size() - 1) << std::endl;
+    if(isTree)
+        std::cout << "[converter] Tree " << namespaces.at(namespaces.size() - 1) << std::endl;
 
     nlohmann::json allTrees = nlohmann::json::array();
 
@@ -194,8 +201,7 @@ int main(int argc, char** argv) {
     }
 
     if (doImpl) {
-        // Function implementation 
-        
+        // Function implementation
         std::stringstream ss;
         for (auto& jsonTree : allTrees) {
 
@@ -261,10 +267,10 @@ int main(int argc, char** argv) {
             auto outputFile = getCmdOption(args, "-o");
             std::ofstream ofs(outputFile.c_str(), mode);
             ofs << ss.str();
+            std::cout << "[converter] " << namespaces.at(namespaces.size() - 1).c_str() << " -- " << outputFile.c_str() << std::endl;
         }
     } else if (doDecl) {
         // Function definition
-        
         std::stringstream ss;
 
         std::string namespacesConcat = "";
@@ -334,6 +340,7 @@ int main(int argc, char** argv) {
             auto outputFile = getCmdOption(args, "-o");
             std::ofstream ofs(outputFile.c_str(), mode);
             ofs << ss.str();
+            std::cout << "[converter] " << namespaces.at(namespaces.size() - 1).c_str() << " -- " << outputFile.c_str() << std::endl;
         }
     }
 

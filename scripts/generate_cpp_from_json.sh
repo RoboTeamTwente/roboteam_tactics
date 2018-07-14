@@ -46,15 +46,17 @@ printf "$headerPreamble" >> $treeHeader
 
 # Generate declarations and implementations for the behavior trees
 # And append them to the sourc and header files
-for filepath in src/trees/json/*.json; do
-    # Generate implementations
-    rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt $1 || { exit 1; }
-    printf "\n" >> $treeSource
 
-    # Generated header declarations
-    rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt $1 || { exit 1; }
-    printf "\n" >> $treeHeader
-done
+# for filepath in src/trees/json/*.json; do
+#     # Generate implementations
+#     echo "[generate_cpp_from_json.sh] Running converter for ${filepath}"
+#     rosrun roboteam_tactics converter -impl -a -i "$filepath" -o "$treeSource" -namespace rtt $1 || { exit 1; }
+#     printf "\n" >> $treeSource
+
+#     # Generated header declarations
+#     rosrun roboteam_tactics converter -decl -a -i "$filepath" -o "$treeHeader" -namespace rtt $1 || { exit 1; }
+#     printf "\n" >> $treeHeader
+# done
 
 # mkdir -p generated
 # touch generated/generate_cpp_from_json.stamp

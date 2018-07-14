@@ -50,6 +50,7 @@ printf "$headerPreamble" >> $projectHeader
 # Generate declarations and implementations for the behavior trees
 # And append them to the sourc and header files
 # The { exit 1; } makes sure the script exits with one if it fails
+echo "[generate_cpp_from_json_project.sh] Running converter for" $projectPath
 rosrun roboteam_tactics converter $2 -impl -i "$projectPath" -o "$projectSource" -namespace rtt -f $projectName -a || { exit 1; }
 
 rosrun roboteam_tactics converter $2 -decl -i "$projectPath" -o "$projectHeader" -namespace rtt -f $projectName -a || { exit 1; }

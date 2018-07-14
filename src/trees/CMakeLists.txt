@@ -1,4 +1,3 @@
-add_subdirectory(json)
 add_subdirectory(projects)
 
 foreach(json_project ${JSON_PROJECTS})
@@ -20,7 +19,7 @@ foreach(json_project ${JSON_PROJECTS})
 endforeach(json_project)
 
 add_library(alltrees OBJECT
-    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
+#    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
     ${project_sources}
     )
 add_dependencies(alltrees
