@@ -42,8 +42,9 @@ include(${QT_USE_FILE})
 # code produced strange segfaults), so that's why we
 # fixed it here to get a clear error when the version
 # changes.
+# Pepijn: works for me so far, removing EXACT
 find_package(Boost
-    1.58.0 EXACT
+    1.58.0
     REQUIRED
     COMPONENTS
         filesystem

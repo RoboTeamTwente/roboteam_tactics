@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <vector>
 #include "roboteam_utils/Vector2.h"
 #include "roboteam_utils/Section.h"

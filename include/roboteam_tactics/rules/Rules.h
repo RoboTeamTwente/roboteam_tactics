@@ -18,7 +18,7 @@ public:
     /**
      * \brief Returns the RefState this RefRule is for
      */
-    virtual constexpr RefState getState() const = 0;
+    virtual RefState getState() const = 0;
     
     /**
      * \brief Checks whether a robot can move at all
