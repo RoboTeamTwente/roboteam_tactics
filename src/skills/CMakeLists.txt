@@ -37,6 +37,9 @@ set(SKILL_SOURCES
 add_library(skills OBJECT
     ${SKILL_SOURCES}
     )
+
+set_property(TARGET skills PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_dependencies(skills
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}

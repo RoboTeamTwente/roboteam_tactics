@@ -51,6 +51,8 @@ std::string Node::node_name() {
     return "<ERROR>"; 
 }
 
+std::string Node::status_desc;
+
 void Node::append_status(std::string fmt, ...) {
     char buf[1024];
     va_list varargs;

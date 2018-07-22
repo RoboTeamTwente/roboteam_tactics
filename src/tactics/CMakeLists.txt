@@ -11,6 +11,9 @@ set(TACTIC_SOURCES
 add_library(tactics OBJECT
     ${TACTIC_SOURCES}
     )
+
+set_property(TARGET tactics PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_dependencies(tactics
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}

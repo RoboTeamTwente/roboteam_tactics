@@ -20,6 +20,9 @@ add_library(utils OBJECT
 
     RobotPatternGenerator.cpp
         RobotsToDefendFinder.cpp)
+
+set_property(TARGET utils PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_dependencies(utils
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}

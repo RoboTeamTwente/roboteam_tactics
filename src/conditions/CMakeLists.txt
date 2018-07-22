@@ -36,6 +36,9 @@ add_custom_target(CONDITION_SOURCES_TARGET
 add_library(conditions OBJECT
     ${CONDITION_SOURCES}
     )
+
+set_property(TARGET conditions PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 add_dependencies(conditions
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}

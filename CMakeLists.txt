@@ -57,6 +57,9 @@ find_package(Boost
 # Only enable this one if you're just testing one skill
 set(BUILD_TESTX TRUE)
 
+# Build a library with all the skills
+set(BUILD_LIBSKILL TRUE)
+
 # Enable these if you're also testing strategies
 set(BUILD_STRATEGYNODE TRUE)
 set(BUILD_ROBOTNODE TRUE)
@@ -185,6 +188,22 @@ if (BUILD_TESTX)
         )
 
 endif (BUILD_TESTX)
+
+if (BUILD_LIBSKILL)
+
+  add_library(Skill
+        $<TARGET_OBJECTS:treegen>
+        $<TARGET_OBJECTS:tactics>
+        $<TARGET_OBJECTS:utils>
+        $<TARGET_OBJECTS:skills>
+        $<TARGET_OBJECTS:conditions>
+        )
+  add_dependencies(Skill 
+        ${${PROJECT_NAME}_EXPORTED_TARGETS}
+        ${catkin_EXPORTED_TARGETS}
+        )
+
+endif (BUILD_LIBSKILL)
 
 ############################################################
 #### Stupid stuff to get the json files to be converted ####
