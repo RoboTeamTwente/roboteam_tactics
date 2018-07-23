@@ -3,6 +3,7 @@
 #include "roboteam_msgs/RobotCommand.h"
 #include "roboteam_msgs/RoleDirective.h"
 #include "roboteam_msgs/World.h"
+#include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/LastWorld.h"
 #include "NodeWrapper.hpp"
 
@@ -31,6 +32,11 @@ extern "C" {
     void SetWorld(int len, char* data) {
         auto world = DecodeMsg<roboteam_msgs::World>(len, data);
         rtt::LastWorld::set(world);
+    }
+
+    void SetField(int len, char* data) {
+        auto field = DecodeMsg<roboteam_msgs::GeometryFieldSize>(len, data);
+        rtt::LastWorld::set_field(field);
     }
 
     CNode* NodeNew(char* className, char* nodeName, int len, char* bbdata) {

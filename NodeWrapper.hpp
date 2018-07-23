@@ -17,6 +17,7 @@ extern "C" {
     void RosShutdown();
 
     void SetWorld(int len, char* data);
+    void SetField(int len, char* data);
 
     CNode* NodeNew(char* className, char* nodeName, int len, char* bbdata);
     void NodeRelease(CNode* t);

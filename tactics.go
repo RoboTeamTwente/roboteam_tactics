@@ -15,6 +15,7 @@ package main
 import "C"
 
 import (
+  "os"
   "fmt"
   "bytes"
   "unsafe"
@@ -83,7 +84,24 @@ func (n *_Ctype_struct_CNode) Status() bt.Status {
   }
 }
 
-func callback(msg *roboteam_msgs.World) {
+func init() {
+  // Composite nodes
+  bt.NodeTypeRegister["GoToPos"] = func(root bt.ProjectNode, nodes map[string]bt.ProjectNode)bt.Node {
+    return NewCNode("GoToPos", root.Name, root.Properties)
+  }
+}
+
+func GeomCallback(msg *roboteam_msgs.GeometryData) {
+  var buf bytes.Buffer
+  msg.Field.Serialize(&buf)
+  buflen := buf.Len()
+	//fmt.Printf("Received: %d\n", buflen)
+  str := C.CString(buf.String())
+  defer C.free(unsafe.Pointer(str))
+  C.SetField(C.int(buflen), str)
+}
+
+func worldCallback(msg *roboteam_msgs.World) {
   var buf bytes.Buffer
   msg.Serialize(&buf)
   buflen := buf.Len()
@@ -92,25 +110,36 @@ func callback(msg *roboteam_msgs.World) {
   defer C.free(unsafe.Pointer(str))
   C.SetWorld(C.int(buflen), str)
 
-  status := bt.Tick(cnode)
-  fmt.Println(status)
+  bt.Tick(btNode)
+  //fmt.Println(status)
 }
 
-var cnode *_Ctype_struct_CNode
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
+
+var btNode bt.Node
 
 func main() {
   fmt.Println("Starting")
 	node := ros.NewNode("/amazing_go")
 	defer node.Shutdown()
 	//node.Logger().SetSeverity(ros.LogLevelDebug)
-	node.NewSubscriber("/world_state", roboteam_msgs.MsgWorld, callback)
+	node.NewSubscriber("/world_state", roboteam_msgs.MsgWorld, worldCallback)
+	node.NewSubscriber("/vision_geometry", roboteam_msgs.MsgGeometryData, GeomCallback)
   C.RosInit()
-  props := map[string]interface{}{
-    "xGoal": -3.0,
-    "yGoal": -3.0,
-  }
-  cnode = NewCNode("GoToPos", "MyNode", props);
-  for cnode.Status() != bt.Success {
+
+  f, err := os.Open("/home/pepijn/code/roboteam/workspace/src/roboteam_tactics/src/trees/projects/rtt_pepijn.b3")
+  check(err)
+  defer f.Close()
+  pr, err := bt.ReadProject(f)
+  check(err)
+  trees := bt.MakeTrees(pr)
+  btNode = trees[0]
+
+  for btNode.Status() != bt.Success {
     node.SpinOnce()
   }
 }
