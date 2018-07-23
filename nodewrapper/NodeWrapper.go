@@ -1,15 +1,5 @@
 package nodewrapper
-// #cgo CFLAGS: -I/home/pepijn/code/roboteam/ros_catkin_ws/install_isolated/include/
-// #cgo CFLAGS: -I/home/pepijn/code/roboteam/workspace/devel/include
-// #cgo CFLAGS: -I/home/pepijn/code/roboteam/workspace/src/roboteam_utils/include
-// #cgo CFLAGS: -I/home/pepijn/code/roboteam/workspace/src/roboteam_tactics/include
-// #cgo CXXFLAGS: -I/home/pepijn/code/roboteam/ros_catkin_ws/install_isolated/include/
-// #cgo CXXFLAGS: -I/home/pepijn/code/roboteam/workspace/devel/include
-// #cgo CXXFLAGS: -I/home/pepijn/code/roboteam/workspace/src/roboteam_utils/include
-// #cgo CXXFLAGS: -I/home/pepijn/code/roboteam/workspace/src/roboteam_tactics/include
-// #cgo LDFLAGS: -L/home/pepijn/code/roboteam/workspace/devel/lib
-// #cgo LDFLAGS: -L/home/pepijn/code/roboteam/ros_catkin_ws/install_isolated/lib
-// #cgo LDFLAGS: -lSkill -lbt -lroboteam_utils -lroscpp -lroscpp_serialization -lroslib
+// #cgo pkg-config: roboteam_tactics roboteam_utils roboteam_msgs roscpp roslib
 // #include "NodeWrapper.hpp"
 // #include <stdlib.h>
 import "C"
