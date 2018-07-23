@@ -142,6 +142,8 @@ catkin_package(
         include
     LIBRARIES
         roboteam_tactics_analysis
+	Skill
+	bt
 )
 
 include_directories(
