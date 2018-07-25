@@ -5,6 +5,7 @@
 #include "roboteam_msgs/World.h"
 #include "roboteam_msgs/GeometryFieldSize.h"
 #include "roboteam_utils/LastWorld.h"
+#include "roboteam_utils/LastRef.h"
 #include "NodeWrapper.hpp"
 
 template <class MsgType>
@@ -37,6 +38,11 @@ extern "C" {
     void SetField(int len, char* data) {
         auto field = DecodeMsg<roboteam_msgs::GeometryFieldSize>(len, data);
         rtt::LastWorld::set_field(field);
+    }
+
+    void SetRef(int len, char* data) {
+        auto refdata = DecodeMsg<roboteam_msgs::RefereeData>(len, data);
+        rtt::LastRef::set(refdata);
     }
 
     CNode* NodeNew(char* className, char* nodeName, int len, char* bbdata) {

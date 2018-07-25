@@ -51,15 +51,19 @@ func (n *_Ctype_struct_CNode) Initiate() {
   C.NodeInitiate(n)
 }
 
-func (n *_Ctype_struct_CNode) Update() {
+func (n *_Ctype_struct_CNode) Update(state interface {}, messages []interface {}) []interface {} {
+  // TODO pass world state here
+  // maybe capture ROS messages?
+  // DEFINITELY set up blackboard correctly
   C.NodeUpdate(n)
+  return messages
 }
 
 func (n *_Ctype_struct_CNode) Terminate() {
   C.NodeTerminate(n)
 }
 
-func (n *_Ctype_struct_CNode) Status() bt.Status {
+func (n *_Ctype_struct_CNode) GetStatus() bt.Status {
   switch C.NodeStatus(n) {
   case 1:
     return bt.Success
@@ -199,4 +203,14 @@ func SetField(msg *roboteam_msgs.GeometryData) {
   str := C.CString(buf.String())
   defer C.free(unsafe.Pointer(str))
   C.SetField(C.int(buflen), str)
+}
+
+func SetRef(msg *roboteam_msgs.RefereeData) {
+  var buf bytes.Buffer
+  msg.Serialize(&buf)
+  buflen := buf.Len()
+	//fmt.Printf("Received: %d\n", buflen)
+  str := C.CString(buf.String())
+  defer C.free(unsafe.Pointer(str))
+  C.SetRef(C.int(buflen), str)
 }

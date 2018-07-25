@@ -1,0 +1,1427 @@
+{
+  "name": "rtt_pepijn",
+  "description": "",
+  "data": {
+    "version": "0.3.0",
+    "scope": "project",
+    "selectedTree": "e842489f-ff16-4aa8-9374-46f39cb0a15a",
+    "trees": [
+      {
+        "version": "0.3.0",
+        "scope": "tree",
+        "id": "e842489f-ff16-4aa8-9374-46f39cb0a15a",
+        "title": "BackAndForth",
+        "description": "",
+        "root": "a51b0fa3-0a4b-404d-9297-144f4b88e2e2",
+        "properties": {},
+        "nodes": {
+          "9cf60ed4-0927-46f0-a95d-7c43e3f749ca": {
+            "id": "9cf60ed4-0927-46f0-a95d-7c43e3f749ca",
+            "name": "MemSequence",
+            "title": "MemSequence",
+            "description": "",
+            "properties": {},
+            "display": {
+              "x": 468,
+              "y": 24
+            },
+            "children": [
+              "bf342ba5-c210-49e7-aeb5-fd2edd0fa37a",
+              "773fe6b1-377b-44fb-a268-546eb3f1427d"
+            ]
+          },
+          "773fe6b1-377b-44fb-a268-546eb3f1427d": {
+            "id": "773fe6b1-377b-44fb-a268-546eb3f1427d",
+            "name": "GoToPos",
+            "title": "GoToNeg",
+            "description": "",
+            "properties": {
+              "yGoal": -3,
+              "xGoal": -3
+            },
+            "display": {
+              "x": 708,
+              "y": 48
+            }
+          },
+          "bf342ba5-c210-49e7-aeb5-fd2edd0fa37a": {
+            "id": "bf342ba5-c210-49e7-aeb5-fd2edd0fa37a",
+            "name": "GoToPos",
+            "title": "GoToPos",
+            "description": "",
+            "properties": {
+              "yGoal": 3,
+              "xGoal": 3
+            },
+            "display": {
+              "x": 696,
+              "y": -24
+            }
+          },
+          "4f9bf4cd-39cf-4013-8026-7264d2a8c1b2": {
+            "id": "4f9bf4cd-39cf-4013-8026-7264d2a8c1b2",
+            "name": "Repeat",
+            "title": "Repeat <limit>x",
+            "description": "",
+            "properties": {
+              "limit": 2
+            },
+            "display": {
+              "x": 312,
+              "y": 24
+            },
+            "child": "9cf60ed4-0927-46f0-a95d-7c43e3f749ca"
+          },
+          "454877ef-677c-4f69-8814-79d07f7d560e": {
+            "id": "454877ef-677c-4f69-8814-79d07f7d560e",
+            "name": "Freeze",
+            "title": "Freeze",
+            "description": "",
+            "properties": {},
+            "display": {
+              "x": 372,
+              "y": 180
+            }
+          },
+          "a51b0fa3-0a4b-404d-9297-144f4b88e2e2": {
+            "id": "a51b0fa3-0a4b-404d-9297-144f4b88e2e2",
+            "name": "Sequence",
+            "title": "Sequence",
+            "description": "",
+            "properties": {},
+            "display": {
+              "x": 192,
+              "y": 108
+            },
+            "children": [
+              "4f9bf4cd-39cf-4013-8026-7264d2a8c1b2",
+              "454877ef-677c-4f69-8814-79d07f7d560e"
+            ]
+          }
+        },
+        "display": {
+          "camera_x": 500,
+          "camera_y": 400,
+          "camera_z": 1,
+          "x": 36,
+          "y": 108
+        }
+      }
+    ],
+    "custom_nodes": [
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "GoToPos",
+        "category": "action",
+        "title": "GoToPos",
+        "description": null,
+        "properties": {
+          "yGoal": 3,
+          "xGoal": 3
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Repeat",
+        "category": "decorator",
+        "title": "Repeat",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "GetBall",
+        "category": "action",
+        "title": "GetBall_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SimpleDefender",
+        "category": "action",
+        "title": "SimpleDefender_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Push",
+        "category": "action",
+        "title": "Push_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Sleep",
+        "category": "action",
+        "title": "Sleep_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "GetBallTest",
+        "category": "action",
+        "title": "GetBallTest_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallPlacementTest",
+        "category": "action",
+        "title": "BallPlacementTest_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jelle_DemoPlay",
+        "category": "action",
+        "title": "Jelle_DemoPlay_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_IndependentAttackersPlay",
+        "category": "action",
+        "title": "Jim_IndependentAttackersPlay_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Freeze",
+        "category": "action",
+        "title": "Freeze_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jelle_DemoPlayOnlyKeeper",
+        "category": "action",
+        "title": "Jelle_DemoPlayOnlyKeeper_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Positioning",
+        "category": "action",
+        "title": "Positioning_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BasicAttackTactic",
+        "category": "action",
+        "title": "BasicAttackTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_PenaltyPlay",
+        "category": "action",
+        "title": "Jim_PenaltyPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BasicDefenseTactic",
+        "category": "action",
+        "title": "BasicDefenseTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TwoAttackersTactic",
+        "category": "action",
+        "title": "TwoAttackersTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "AttackerTactic",
+        "category": "action",
+        "title": "AttackerTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KeepPositionPlay",
+        "category": "action",
+        "title": "KeepPositionPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ThrowinPlay",
+        "category": "action",
+        "title": "ThrowinPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "GoToSideTactic",
+        "category": "action",
+        "title": "GoToSideTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "FormationPlay",
+        "category": "action",
+        "title": "FormationPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "rtt_bob/BestTactic",
+        "category": "action",
+        "title": "rtt_bob/BestTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "rtt_bob/NaiveGetBallWithSupportPlay",
+        "category": "action",
+        "title": "rtt_bob/NaiveGetBallWithSupportPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "rtt_bob/SingleKeeperPlay",
+        "category": "action",
+        "title": "rtt_bob/SingleKeeperPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "rtt_bob/old/WeirdTactic",
+        "category": "action",
+        "title": "rtt_bob/old/WeirdTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "rtt_bob/WorstTactic",
+        "category": "action",
+        "title": "rtt_bob/WorstTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_IndirectGetBallPlay",
+        "category": "action",
+        "title": "Jim_IndirectGetBallPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Emiel_test1",
+        "category": "action",
+        "title": "Emiel_test1",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PassToTactic",
+        "category": "action",
+        "title": "PassToTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "FreeKickDefenceTactic",
+        "category": "action",
+        "title": "FreeKickDefenceTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SoloAttacker2Tactic",
+        "category": "action",
+        "title": "SoloAttacker2Tactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CounterPlay",
+        "category": "action",
+        "title": "CounterPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Bob_ChipoffAtGoalPlay",
+        "category": "action",
+        "title": "Bob_ChipoffAtGoalPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_StandReadyPlay",
+        "category": "action",
+        "title": "Jim_StandReadyPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SoloDefenderTactic",
+        "category": "action",
+        "title": "SoloDefenderTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PenaltyThemPlay",
+        "category": "action",
+        "title": "PenaltyThemPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallPlacementUsPlay",
+        "category": "action",
+        "title": "BallPlacementUsPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PenaltyUsPlay",
+        "category": "action",
+        "title": "PenaltyUsPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "OneTwoTactic",
+        "category": "action",
+        "title": "OneTwoTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "DemoTactic",
+        "category": "action",
+        "title": "DemoTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PrepareKickoffUsTactic",
+        "category": "action",
+        "title": "PrepareKickoffUsTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KickoffUsTactic",
+        "category": "action",
+        "title": "KickoffUsTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TwirlPlay",
+        "category": "action",
+        "title": "TwirlPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SecondaryKeeperTactic",
+        "category": "action",
+        "title": "SecondaryKeeperTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "InterceptorsTactic",
+        "category": "action",
+        "title": "InterceptorsTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Bob_KickoffWithRunPlay",
+        "category": "action",
+        "title": "Bob_KickoffWithRunPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PrepareKeeperPenaltyThem",
+        "category": "action",
+        "title": "PrepareKeeperPenaltyThem",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KickoffDefensePlay",
+        "category": "action",
+        "title": "KickoffDefensePlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "StarAttackTactic",
+        "category": "action",
+        "title": "StarAttackTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "HaltTactic",
+        "category": "action",
+        "title": "HaltTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "StopPlay",
+        "category": "action",
+        "title": "StopPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Anouk_BallPlacementUsPlay",
+        "category": "action",
+        "title": "Anouk_BallPlacementUsPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_KickOffDefense",
+        "category": "action",
+        "title": "Jim_KickOffDefense",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TargetPracticeTactic",
+        "category": "action",
+        "title": "TargetPracticeTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TwoAttackersCoolTactic",
+        "category": "action",
+        "title": "TwoAttackersCoolTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "StandByTactic",
+        "category": "action",
+        "title": "StandByTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "WanderTactic",
+        "category": "action",
+        "title": "WanderTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BasicKeeperTactic",
+        "category": "action",
+        "title": "BasicKeeperTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SoloAttackerTactic",
+        "category": "action",
+        "title": "SoloAttackerTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_MultipleDefendersPlay",
+        "category": "action",
+        "title": "Jim_MultipleDefendersPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TwoVTwoDefenseTactic",
+        "category": "action",
+        "title": "TwoVTwoDefenseTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_TimeOut",
+        "category": "action",
+        "title": "Jim_TimeOut",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_GetBallPlay",
+        "category": "action",
+        "title": "Jim_GetBallPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_MultipleStrikersPlay",
+        "category": "action",
+        "title": "Jim_MultipleStrikersPlay",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Qualification1v1Tactic",
+        "category": "action",
+        "title": "Qualification1v1Tactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "AimAt",
+        "category": "action",
+        "title": "AimAt",
+        "description": null,
+        "properties": {
+          "At": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "AimAtSafe",
+        "category": "action",
+        "title": "AimAtSafe",
+        "description": null,
+        "properties": {
+          "At": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Approach",
+        "category": "action",
+        "title": "Approach",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallPlacement",
+        "category": "action",
+        "title": "BallPlacement",
+        "description": null,
+        "properties": {
+          "xGoal": "",
+          "yGoal": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallPlacementTest_oldversion",
+        "category": "action",
+        "title": "BallPlacementTest_oldversion",
+        "description": null,
+        "properties": {
+          "xGoal": "",
+          "yGoal": "",
+          "ballPlacement": "",
+          "dribbler": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BlockGoal",
+        "category": "action",
+        "title": "BlockGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Block",
+        "category": "action",
+        "title": "Block",
+        "description": null,
+        "properties": {
+          "TGT_ID": "",
+          "BLOCK_ID": "",
+          "block_x": "",
+          "block_y": "",
+          "block_type": "",
+          "block_arg": "",
+          "invert_direction": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Chip",
+        "category": "action",
+        "title": "Chip",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "DebugTrace",
+        "category": "action",
+        "title": "DebugTrace",
+        "description": null,
+        "properties": {
+          "ms": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "DefendGoalarea",
+        "category": "action",
+        "title": "DefendGoalarea",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "DefendPenalty",
+        "category": "action",
+        "title": "DefendPenalty",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Dribble",
+        "category": "action",
+        "title": "Dribble",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Evade",
+        "category": "action",
+        "title": "Evade",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "FindPath",
+        "category": "action",
+        "title": "FindPath",
+        "description": null,
+        "properties": {
+          "ms": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "FollowPath",
+        "category": "action",
+        "title": "FollowPath",
+        "description": null,
+        "properties": {
+          "xgoal": "",
+          "ygoal": "",
+          "wgoal": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Geneva",
+        "category": "action",
+        "title": "Geneva",
+        "description": null,
+        "properties": {
+          "genevaState": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "GenevaKick",
+        "category": "action",
+        "title": "GenevaKick",
+        "description": null,
+        "properties": {
+          "genevaState": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Harass",
+        "category": "action",
+        "title": "Harass",
+        "description": null,
+        "properties": {
+          "TGT_ID": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KeeperBlock",
+        "category": "action",
+        "title": "KeeperBlock",
+        "description": null,
+        "properties": {
+          "keeper": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KeeperV2",
+        "category": "action",
+        "title": "KeeperV2",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KeepPosition",
+        "category": "action",
+        "title": "KeepPosition",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Kick",
+        "category": "action",
+        "title": "Kick",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "KickPenalty",
+        "category": "action",
+        "title": "KickPenalty",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "MirrorOpponent",
+        "category": "action",
+        "title": "MirrorOpponent",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "NaiveBlockGoal",
+        "category": "action",
+        "title": "NaiveBlockGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ParamSet",
+        "category": "action",
+        "title": "ParamSet",
+        "description": null,
+        "properties": {
+          "signal": "",
+          "value": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "QualKeeper",
+        "category": "action",
+        "title": "QualKeeper",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "RandomDrive",
+        "category": "action",
+        "title": "RandomDrive",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "RotateAroundPoint",
+        "category": "action",
+        "title": "RotateAroundPoint",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SecondaryKeeper",
+        "category": "action",
+        "title": "SecondaryKeeper",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SelectStarAttackShooter",
+        "category": "action",
+        "title": "SelectStarAttackShooter",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ShootAtGoal",
+        "category": "action",
+        "title": "ShootAtGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ShootAtGoalV2",
+        "category": "action",
+        "title": "ShootAtGoalV2",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ShootAway",
+        "category": "action",
+        "title": "ShootAway",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "StandFree",
+        "category": "action",
+        "title": "StandFree",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Twirl",
+        "category": "action",
+        "title": "Twirl",
+        "description": null,
+        "properties": {
+          "repeat": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Wander",
+        "category": "action",
+        "title": "Wander",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "AimingAtOpponent",
+        "category": "condition",
+        "title": "AimingAtOpponent",
+        "description": null,
+        "properties": {
+          "me": "",
+          "x_coor": "",
+          "y_coor": "",
+          "check_move": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallOnOurSide",
+        "category": "condition",
+        "title": "BallOnOurSide",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "BallOnTheirSide",
+        "category": "condition",
+        "title": "BallOnTheirSide",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanClaimBall",
+        "category": "condition",
+        "title": "CanClaimBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanInterceptBall",
+        "category": "condition",
+        "title": "CanInterceptBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanKeeperMove",
+        "category": "condition",
+        "title": "CanKeeperMove",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanPassSafely",
+        "category": "condition",
+        "title": "CanPassSafely",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanReachPoint",
+        "category": "condition",
+        "title": "CanReachPoint",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanSeePoint",
+        "category": "condition",
+        "title": "CanSeePoint",
+        "description": null,
+        "properties": {
+          "me": "",
+          "x_coor": "",
+          "y_coor": "",
+          "check_move": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanSeeRobot",
+        "category": "condition",
+        "title": "CanSeeRobot",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanSeeTheirGoal",
+        "category": "condition",
+        "title": "CanSeeTheirGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "DistanceXToY",
+        "category": "condition",
+        "title": "DistanceXToY",
+        "description": null,
+        "properties": {
+          "distance": "",
+          "mode": "",
+          "X": "",
+          "Y": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IHaveBall",
+        "category": "condition",
+        "title": "IHaveBall",
+        "description": null,
+        "properties": {
+          "me": "",
+          "our_team": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsBallInGoal",
+        "category": "condition",
+        "title": "IsBallInGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsBallMovingTowardsGoal",
+        "category": "condition",
+        "title": "IsBallMovingTowardsGoal",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsBallMovingTowardsRobot",
+        "category": "condition",
+        "title": "IsBallMovingTowardsRobot",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsRefCommand",
+        "category": "condition",
+        "title": "IsRefCommand",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsRefStage",
+        "category": "condition",
+        "title": "IsRefStage",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsRobotClosestToBall",
+        "category": "condition",
+        "title": "IsRobotClosestToBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ParamCheck",
+        "category": "condition",
+        "title": "ParamCheck",
+        "description": null,
+        "properties": {
+          "signal": "",
+          "mode": "",
+          "value": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TeamHasBall",
+        "category": "condition",
+        "title": "TeamHasBall",
+        "description": null,
+        "properties": {
+          "our_team": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "TheyHaveBall",
+        "category": "condition",
+        "title": "TheyHaveBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "WeHaveBall",
+        "category": "condition",
+        "title": "WeHaveBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ParallelTactic",
+        "category": "composite",
+        "title": "ParallelTactic",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ParallelSequence",
+        "category": "composite",
+        "title": "ParallelSequence",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "SuccederDec",
+        "category": "decorator",
+        "title": "SuccederDec",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "FailerDec",
+        "category": "decrator",
+        "title": "FailerDec",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "PassToMe",
+        "category": "condition",
+        "title": "PassToMe_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "ReceiveBall",
+        "category": "action",
+        "title": "ReceiveBall",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jim_MultipleDefendersPlayOld",
+        "category": "action",
+        "title": "Jim_MultipleDefendersPlayOld",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "CanInterceptBallDuel",
+        "category": "condition",
+        "title": "CanInterceptBallDuel",
+        "description": null,
+        "properties": {
+          "me": ""
+        }
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsInDefenseArea",
+        "category": "condition",
+        "title": "IsInDefenseArea",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "IsInZone",
+        "category": "condition",
+        "title": "IsInZone",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Presentation_SetPositions",
+        "category": "action",
+        "title": "Presentation_SetPositions_A",
+        "description": null,
+        "properties": {}
+      },
+      {
+        "version": "0.3.0",
+        "scope": "node",
+        "name": "Jelle_IndependentAttackersPlay",
+        "category": "action",
+        "title": "Jelle_IndependentAttackersPlay_A",
+        "description": null,
+        "properties": {}
+      }
+    ]
+  },
+  "path": "/home/pepijn/code/roboteam/workspace/src/roboteam_tactics/src/trees/projects/rtt_pepijn.b3"
+}
