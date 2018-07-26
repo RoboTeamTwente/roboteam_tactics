@@ -193,14 +193,22 @@ func init() {
   }
   for _, name := range nodeNames {
     myName := name
-    bt.NodeTypeRegister[myName] = func(root bt.ProjectNode, nodes map[string]bt.ProjectNode)(n bt.Node, err error) {
+    bt.NodeTypeRegister[myName] = func(root bt.ProjectNode, nodes map[string]bt.ProjectNode, props map[string]interface{})(n bt.Node, err error) {
       defer func() {
         cerr := recover()
         if cerr != nil {
           err = errors.New("C++ freaked out. Fuck C++")
         }
       }()
-      return NewCNode(myName, root.Title, root.Properties), nil
+      // merge the "blackboards"
+      myProps := make(map[string]interface{})
+      for prop, val := range root.Properties {
+        myProps[prop] = val
+      }
+      for prop, val := range props {
+        myProps[prop] = val
+      }
+      return NewCNode(myName, root.Title, myProps), nil
     }
   }
 }

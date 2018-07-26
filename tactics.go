@@ -36,6 +36,8 @@ type Universe struct {
   World *roboteam_msgs.World
   Field *roboteam_msgs.GeometryData
   Ref   *roboteam_msgs.RefereeData
+  // Hack to pass Blackboard around
+  Props map[string]interface{}
 }
 
 func universeCollector(interval time.Duration, uniChan chan<- Universe) {
@@ -61,6 +63,7 @@ type Role struct {
   TickChan chan Universe
   Id int
   Tree string
+  Token [16]uint8
   Props map[string]interface{}
 }
 
@@ -86,7 +89,7 @@ func roleDirectiveCallback(msg *roboteam_msgs.RoleDirective) {
   roleChan <- msg
 }
 
-func roleNode(universeChan <-chan Universe) {
+func roleNode(pub ros.Publisher, universeChan <-chan Universe) {
   roles := make(map[int32]Role)
   completion := make(chan int)
   for {
@@ -101,7 +104,7 @@ func roleNode(universeChan <-chan Universe) {
       role.Tree = roleMsg.Tree
       role.Id = int(roleMsg.RobotId)
       role.TickChan = make(chan Universe)
-      // TODO pass token
+      role.Token = roleMsg.Token.UUID
       roles[roleMsg.RobotId] = role
       go roleRunner(role, completion)
     case universe := <-universeChan:
@@ -115,8 +118,12 @@ func roleNode(universeChan <-chan Universe) {
     case robotId := <-completion:
       role := roles[int32(robotId)]
       log.Println("Role done", role.Tree)
-      // TODO send feedback
       delete(roles, int32(robotId))
+      // send feedback
+      var fb roboteam_msgs.RoleFeedback
+      fb.Token.UUID = role.Token
+      fb.Status = 0 // Success TODO
+      pub.Publish(&fb)
     }
   }
 }
@@ -128,7 +135,7 @@ func roleRunner(role Role, completion chan<- int) {
     log.Printf("Tree not found: %s", role.Tree)
     return
   }
-  tree, err := bt.MakeNode(projectTree.Root, projectTree.Nodes)
+  tree, err := bt.MakeNode(projectTree.Root, projectTree.Nodes, role.Props)
   if err != nil {
     log.Println(err)
     return
@@ -177,9 +184,11 @@ func main() {
 	node.NewSubscriber("/vision_refbox", roboteam_msgs.MsgRefereeData, refCallback)
   node.NewSubscriber("/role_directive", roboteam_msgs.MsgRoleDirective, roleDirectiveCallback)
 
+  pub := node.NewPublisher("/role_feedback", roboteam_msgs.MsgRoleFeedback)
+
   universeChan := make(chan Universe)
-  go universeCollector(time.Second, universeChan)
-  go roleNode(universeChan)
+  go universeCollector(time.Second/30, universeChan)
+  go roleNode(pub, universeChan)
 
   node.Spin()
 }

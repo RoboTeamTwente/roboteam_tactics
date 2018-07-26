@@ -20,7 +20,7 @@ extern "C" {
 
     void RosInit() {
         int argc = 0;
-        ros::init(argc, NULL, "test");
+        ros::init(argc, NULL, "CppSlave");
 
         new rtt::GlobalPublisher<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS);
         new rtt::GlobalPublisher<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE);
