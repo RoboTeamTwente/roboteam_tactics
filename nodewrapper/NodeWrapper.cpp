@@ -24,6 +24,7 @@ extern "C" {
 
         new rtt::GlobalPublisher<roboteam_msgs::RobotCommand>(rtt::TOPIC_COMMANDS);
         new rtt::GlobalPublisher<roboteam_msgs::RoleDirective>(rtt::TOPIC_ROLE_DIRECTIVE);
+        new rtt::GlobalPublisher<roboteam_msgs::BtDebugInfo>("bt_debug_info", 1000);
     }
 
     void RosShutdown() {

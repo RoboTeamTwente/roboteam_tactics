@@ -92,18 +92,17 @@ func roleNode(universeChan <-chan Universe) {
   for {
     select {
     case roleMsg := <-roleChan:
+      log.Println("Got role", roleMsg.Tree)
       role, ok := roles[roleMsg.RobotId]
       if ok {
         close(role.TickChan)
-      } else {
-        role = Role{}
-        roles[roleMsg.RobotId] = role
       }
       role.Props = blackboardToMap(&roleMsg.Blackboard)
       role.Tree = roleMsg.Tree
       role.Id = int(roleMsg.RobotId)
       role.TickChan = make(chan Universe)
       // TODO pass token
+      roles[roleMsg.RobotId] = role
       go roleRunner(role, completion)
     case universe := <-universeChan:
       for _, role := range roles {
@@ -115,7 +114,7 @@ func roleNode(universeChan <-chan Universe) {
       }
     case robotId := <-completion:
       role := roles[int32(robotId)]
-      close(role.TickChan)
+      log.Println("Role done", role.Tree)
       // TODO send feedback
       delete(roles, int32(robotId))
     }
@@ -123,17 +122,26 @@ func roleNode(universeChan <-chan Universe) {
 }
 
 func roleRunner(role Role, completion chan<- int) {
-  tree := trees[role.Tree]
+  defer func () { completion <- role.Id }()
+  projectTree, ok := trees[role.Tree]
+  if !ok {
+    log.Printf("Tree not found: %s", role.Tree)
+    return
+  }
+  tree, err := bt.MakeNode(projectTree.Root, projectTree.Nodes)
+  if err != nil {
+    log.Println(err)
+    return
+  }
+  defer tree.Terminate()
   for universe := range role.TickChan {
-    fmt.Println(role.Tree, role.Id)
+    log.Println(role.Tree, role.Id)
     status, _ := bt.Tick(tree, universe, nil)
     // TODO send messages
     if status != bt.Running {
       break
     }
   }
-  tree.Terminate()
-  completion <- role.Id
 }
 
 func check(e error) {
@@ -142,7 +150,7 @@ func check(e error) {
     }
 }
 
-var trees = make(map[string]bt.Node)
+var trees = make(map[string]bt.ProjectTree)
 
 func init() {
   files, err := filepath.Glob("trees/*.b3")
@@ -154,23 +162,23 @@ func init() {
     defer f.Close()
     pr, err := bt.ReadProject(f)
     check(err)
-    bt.MakeTrees(pr, trees)
+    for _, tree := range pr.Data.Trees {
+      trees[fmt.Sprintf("%s/%s", pr.Name, tree.Title)] = tree
+    }
   }
 }
-
-var btNode bt.Node
 
 func main() {
   fmt.Println("Starting")
 	node := ros.NewNode("/amazing_go")
 	defer node.Shutdown()
-	//node.Logger().SetSeverity(ros.LogLevelDebug)
 	node.NewSubscriber("/world_state", roboteam_msgs.MsgWorld, worldCallback)
-	node.NewSubscriber("/vision_geometry", roboteam_msgs.MsgGeometryData, nw.SetField)
-	node.NewSubscriber("/vision_refbox", roboteam_msgs.MsgRefereeData, nw.SetRef)
+	node.NewSubscriber("/vision_geometry", roboteam_msgs.MsgGeometryData, fieldCallback)
+	node.NewSubscriber("/vision_refbox", roboteam_msgs.MsgRefereeData, refCallback)
+  node.NewSubscriber("/role_directive", roboteam_msgs.MsgRoleDirective, roleDirectiveCallback)
 
   universeChan := make(chan Universe)
-  go universeCollector(1/60*time.Second, universeChan)
+  go universeCollector(time.Second, universeChan)
   go roleNode(universeChan)
 
   node.Spin()

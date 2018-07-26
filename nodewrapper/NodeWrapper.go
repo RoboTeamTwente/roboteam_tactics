@@ -8,9 +8,13 @@ import (
   "fmt"
   "bytes"
   "unsafe"
+  "errors"
+  "sync"
   "roboteam_msgs"
   bt "behaviortree"
 )
+
+var GlobalCrapLock = new(sync.Mutex)
 
 func toBlackboard(props map[string]interface{}) *roboteam_msgs.Blackboard {
   bb := new(roboteam_msgs.Blackboard)
@@ -44,10 +48,14 @@ func NewCNode(className string, nodeName string, props map[string]interface{}) *
   str := C.CString(buf.String())
   defer C.free(unsafe.Pointer(str))
 
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   return C.NodeNew(CClassName, CNodeName, C.int(buflen), str);
 }
 
 func (n *_Ctype_struct_CNode) Initiate() {
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.NodeInitiate(n)
 }
 
@@ -55,15 +63,21 @@ func (n *_Ctype_struct_CNode) Update(state interface {}, messages []interface {}
   // TODO pass world state here
   // maybe capture ROS messages?
   // DEFINITELY set up blackboard correctly
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.NodeUpdate(n)
   return messages
 }
 
 func (n *_Ctype_struct_CNode) Terminate() {
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.NodeTerminate(n)
 }
 
 func (n *_Ctype_struct_CNode) GetStatus() bt.Status {
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   switch C.NodeStatus(n) {
   case 1:
     return bt.Success
@@ -179,8 +193,14 @@ func init() {
   }
   for _, name := range nodeNames {
     myName := name
-    bt.NodeTypeRegister[myName] = func(root bt.ProjectNode, nodes map[string]bt.ProjectNode)bt.Node {
-      return NewCNode(myName, root.Title, root.Properties)
+    bt.NodeTypeRegister[myName] = func(root bt.ProjectNode, nodes map[string]bt.ProjectNode)(n bt.Node, err error) {
+      defer func() {
+        cerr := recover()
+        if cerr != nil {
+          err = errors.New("C++ freaked out. Fuck C++")
+        }
+      }()
+      return NewCNode(myName, root.Title, root.Properties), nil
     }
   }
 }
@@ -192,6 +212,8 @@ func SetWorld(msg *roboteam_msgs.World) {
 	//fmt.Printf("Received: %d\n", buflen)
   str := C.CString(buf.String())
   defer C.free(unsafe.Pointer(str))
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.SetWorld(C.int(buflen), str)
 }
 
@@ -202,6 +224,8 @@ func SetField(msg *roboteam_msgs.GeometryData) {
 	//fmt.Printf("Received: %d\n", buflen)
   str := C.CString(buf.String())
   defer C.free(unsafe.Pointer(str))
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.SetField(C.int(buflen), str)
 }
 
@@ -212,5 +236,7 @@ func SetRef(msg *roboteam_msgs.RefereeData) {
 	//fmt.Printf("Received: %d\n", buflen)
   str := C.CString(buf.String())
   defer C.free(unsafe.Pointer(str))
+  GlobalCrapLock.Lock()
+  defer GlobalCrapLock.Unlock()
   C.SetRef(C.int(buflen), str)
 }
