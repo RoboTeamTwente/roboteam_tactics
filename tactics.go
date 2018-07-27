@@ -36,8 +36,6 @@ type Universe struct {
   World *roboteam_msgs.World
   Field *roboteam_msgs.GeometryData
   Ref   *roboteam_msgs.RefereeData
-  // Hack to pass Blackboard around
-  Props map[string]interface{}
 }
 
 func universeCollector(interval time.Duration, uniChan chan<- Universe) {
@@ -97,9 +95,15 @@ func roleNode(pub ros.Publisher, universeChan <-chan Universe) {
     case roleMsg := <-roleChan:
       log.Println("Got role", roleMsg.Tree)
       role, ok := roles[roleMsg.RobotId]
-      if ok {
+      if ok { // stop current role
         close(role.TickChan)
       }
+      if roleMsg.Tree == "stop executing tree"{
+        delete(roles, roleMsg.RobotId)
+        log.Println("Stoping", roleMsg.RobotId)
+        continue
+      }
+      role = Role{}
       role.Props = blackboardToMap(&roleMsg.Blackboard)
       role.Tree = roleMsg.Tree
       role.Id = int(roleMsg.RobotId)
@@ -111,7 +115,7 @@ func roleNode(pub ros.Publisher, universeChan <-chan Universe) {
       for _, role := range roles {
         select {
         case role.TickChan <- universe:
-        default:
+        case <-time.After(time.Second):
           log.Printf("Role %s did not respond to tick", role.Tree)
         }
       }
@@ -142,7 +146,7 @@ func roleRunner(role Role, completion chan<- int) {
   }
   defer tree.Terminate()
   for universe := range role.TickChan {
-    log.Println(role.Tree, role.Id)
+    //log.Println(role.Tree, role.Id)
     status, _ := bt.Tick(tree, universe, nil)
     // TODO send messages
     if status != bt.Running {
@@ -187,7 +191,7 @@ func main() {
   pub := node.NewPublisher("/role_feedback", roboteam_msgs.MsgRoleFeedback)
 
   universeChan := make(chan Universe)
-  go universeCollector(time.Second/30, universeChan)
+  go universeCollector(time.Second/60, universeChan)
   go roleNode(pub, universeChan)
 
   node.Spin()
