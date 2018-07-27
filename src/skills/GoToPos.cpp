@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <thread>
 #include <cctype>
 #include <ros/ros.h>
 
@@ -518,9 +519,9 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
     Vector2 myVel(me.vel);
 
     //TODO: temporary hack for use in rtt_jelle/BallPlacementAlt
-    if (GetBool("driveBackward")) {
-        targetPos = backwardPos;
-    }
+    //if (GetBool("driveBackward")) {
+    //    targetPos = backwardPos;
+    //}
 
     // Determine angle goal and error
     double angleGoal;
@@ -632,16 +633,16 @@ boost::optional<roboteam_msgs::RobotCommand> GoToPos::getVelCommand() {
 
 
     // Limit the command derivative (to apply a smoother command to the robot, which it can handle better)
-    static time_point prevTime = now();
-    int timeDiff = time_difference_milliseconds(prevTime, now()).count();
-    prevTime = now();
-    double max_diff = 20.0*timeDiff*0.001;
-    static Vector2 prevCommand;
-    Vector2 commandDiff = sumOfForces - prevCommand;
-    if (commandDiff.length() > max_diff) {
-        sumOfForces = (prevCommand + commandDiff.stretchToLength(max_diff));
-    }
-    prevCommand = sumOfForces;
+    //static time_point prevTime = now();
+    //int timeDiff = time_difference_milliseconds(prevTime, now()).count();
+    //prevTime = now();
+    //double max_diff = 20.0*timeDiff*0.001;
+    //static Vector2 prevCommand;
+    //Vector2 commandDiff = sumOfForces - prevCommand;
+    //if (commandDiff.length() > max_diff) {
+    //    sumOfForces = (prevCommand + commandDiff.stretchToLength(max_diff));
+    //}
+    //prevCommand = sumOfForces;
     //////////
 
     // Draw the target velocity vector in rqt-view (in red, oooh)
