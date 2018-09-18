@@ -105,7 +105,7 @@ void GetBall::Initialize(){
     }
 
     // Determine if we should use the ball sensor for kicking
-    useBallSensor = (GetBool("useBallSensor")); // TODO: add rosparam to indicate if ball sensor is operational
+    useBallSensor = false;//(GetBool("useBallSensor")); // TODO: add rosparam to indicate if ball sensor is operational
 }
 
 void GetBall::initializeOpportunityFinder() {

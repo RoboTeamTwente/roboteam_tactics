@@ -56,7 +56,7 @@ GoToPos::GoToPos(std::string name, bt::Blackboard::Ptr blackboard)
             } else {
                 grsim = false;
                 safetyMarginGoalAreas = 0.1;
-                marginOutsideField = 0.15;
+                marginOutsideField = -0.1;
                 avoidRobotsGain = 1.0;
                 cushionGain = 1.5;
                 maxDistToAntenna = 0.3; // no force is exerted when distToAntenna is larger than maxDistToAntenna
