@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 # This part actually makes sure the network interface
 # of Qt4 is included! So while rqt uses Qt5, for our
 # networking purposes we use Qt4.
+set(DESIRED_QT_VERSION  4)
 set(QT_USE_QTNETWORK TRUE)
 find_package(Qt REQUIRED)
 include(${QT_USE_FILE})
@@ -285,7 +286,7 @@ foreach(json_project ${JSON_PROJECTS})
 
 endforeach(json_project)
 
-MESSAGE(${BLUE_TEXT} "Files generated "${RESET_TEXT})
+MESSAGE(${BLUE_TEXT} "Files generated" ${RESET_TEXT})
 foreach (generated_file ${GENERATED_FILES})
     MESSAGE("  " ${generated_file})
 endforeach ()

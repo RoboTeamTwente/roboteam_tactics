@@ -22,6 +22,7 @@ add_library(alltrees OBJECT
 #    ${PROJECT_SOURCE_DIR}/src/trees/alltrees.cpp
     ${project_sources}
     )
+
 add_dependencies(alltrees
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
     ${catkin_EXPORTED_TARGETS}
