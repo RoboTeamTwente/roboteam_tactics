@@ -42,13 +42,16 @@ namespace rtt {
 			// Calculate the y-position
 			float x = distanceFromCentre;
 			float y = offset + i * step;
+			std::cout<<"Old - x: "<<x<<" - y: "<<y<<std::endl;
 			// Rotate according to angleToCentre
 			float _x = x * cos(angleToCentre)  + y * sin(angleToCentre);
 			float _y = -x * sin(angleToCentre) + y * cos(angleToCentre);
+			std::cout<<"New - x: "<<_x<<" - y: "<<_y<<std::endl;
 			// Create Vector2
 			Vector2 coords(_x, _y);
 			// Add centre
 			coords = coords + centre;
+			std::cout<<coords<<std::endl;
 			// Store coordinates
 			x_y_coords.push_back(coords);
 		}
