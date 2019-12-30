@@ -1,3 +1,6 @@
+> :warning: **This repository is deprecated**: This repository is not supported anymore and is replaced by roboteam_ai.
+
+
 # RoboTeam Tactics
 Secret smart package!!
 
